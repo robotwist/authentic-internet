@@ -1,8 +1,9 @@
 const express = require("express");
 const Artifact = require("../models/Artifact");
+
 const router = express.Router();
 
-// CREATE Artifact
+// Create Artifact
 router.post("/", async (req, res) => {
   try {
     const newArtifact = new Artifact(req.body);
@@ -13,7 +14,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET all Artifacts
+// Get All Artifacts
 router.get("/", async (req, res) => {
   try {
     const artifacts = await Artifact.find();

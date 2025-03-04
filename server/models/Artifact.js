@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const ArtifactSchema = new mongoose.Schema({
   creator: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  content: String,
+  content: { type: String, required: true },
   type: { type: String, enum: ["text", "pixel", "code"], required: true },
   location: { x: Number, y: Number, scene: String },
   createdAt: { type: Date, default: Date.now },
