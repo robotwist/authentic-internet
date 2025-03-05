@@ -1,0 +1,25 @@
+.artifact {
+    position: absolute;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.3s ease-in-out;
+    background: #252525; /* Muted grey */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .artifact:hover {
+    background: #37474f; /* Muted blue-grey */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Initially hide text, reveal on hover */
+  .artifact-content {
+    color: rgba(224, 224, 224, 0.4); /* Faded text */
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .artifact:hover .artifact-content {
+    color: #ffffff; /* Full contrast */
+  }
+  

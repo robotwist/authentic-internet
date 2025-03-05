@@ -12,12 +12,17 @@ const GameWorld = () => {
   const [accessGranted, setAccessGranted] = useState(false);
 
   // Fetch artifacts from the database
-  useEffect(() => {
-    const loadArtifacts = async () => {
+  const loadArtifacts = async () => {
+    try {
       const data = await fetchArtifacts();
+      console.log("🔍 Loaded Artifacts:", data); // Debugging line
       setArtifacts(data);
-    };
+    } catch (error) {
+      console.error("❌ Error fetching artifacts:", error);
+    }
+  };
 
+  useEffect(() => {
     loadArtifacts();
   }, []);
 
@@ -49,7 +54,7 @@ const GameWorld = () => {
   }, []);
 
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "green", position: "relative" }}>
+    <div style={{ width: "100vw", height: "100vh", background: "#linear-gradient(to bottom, #1e1e1e, #2a2a2a)", position: "relative" }}>
       {/* Secret Area Access Message */}
       {accessGranted ? (
         <div>🚀 Secret Friend Zone is Open!</div>
@@ -70,7 +75,7 @@ const GameWorld = () => {
         <ArtifactForm
           position={formPosition}
           onClose={() => setShowForm(false)}
-          refreshArtifacts={() => setArtifacts([...artifacts])}
+          refreshArtifacts={loadArtifacts} // ✅ Corrected: Now properly refreshes from the backend
         />
       )}
     </div>

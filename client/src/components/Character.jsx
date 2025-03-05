@@ -38,7 +38,8 @@ const Character = () => {
         left: position.x,
         width: "32px",
         height: "32px",
-        backgroundColor: "red",
+        backgroundColor: "#90caf9",
+        boxShadow: "0 4px 10px rgba(144, 202, 249, 0.3)",
         transition: "top 0.1s, left 0.1s",
       }}
     />
