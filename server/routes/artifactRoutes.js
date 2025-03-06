@@ -1,54 +1,70 @@
 const express = require("express");
+const router = express.Router();
 const Artifact = require("../models/Artifact");
 
-const router = express.Router();
-
-// Create Artifact with Visibility Options
-router.post("/", async (req, res) => {
-  try {
-    const { content, type, visibility, unlockMethod, unlockKey, location } = req.body;
-
-    const newArtifact = new Artifact({
-      content,
-      type,
-      visibility: visibility || "open",
-      unlockMethod: unlockMethod || "none",
-      unlockKey: unlockKey || null,
-      location: {
-        x: location?.x || 0,
-        y: location?.y || 0,
-        scene: location?.scene || "Overworld",
-        latitude: location?.latitude || null,
-        longitude: location?.longitude || null
-      },
-    });
-
-    await newArtifact.save();
-    res.status(201).json(newArtifact);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Fetch Artifacts (Filter based on Visibility)
+// 📌 GET all artifacts
 router.get("/", async (req, res) => {
   try {
     const artifacts = await Artifact.find();
-
-    // Filter artifacts: show 'open', hide 'hidden' unless unlocked, and lock 'locked'
-    const visibleArtifacts = artifacts.map(artifact => {
-      if (artifact.visibility === "hidden") {
-        return { ...artifact._doc, content: "[Hidden Artifact]" };
-      }
-      if (artifact.visibility === "locked") {
-        return { ...artifact._doc, content: "[Locked Artifact]" };
-      }
-      return artifact;
-    });
-
-    res.json(visibleArtifacts);
+    res.json(artifacts);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+// 📌 POST new artifact
+router.post("/", async (req, res) => {
+  try {
+    console.log("POST /api/artifacts called:", req.body); // Debugging log
+
+    // Check if required fields are present
+    if (!req.body.content || !req.body.location) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const newArtifact = new Artifact(req.body);
+    await newArtifact.save();
+    res.status(201).json(newArtifact);
+  } catch (error) {
+    console.error("Error creating artifact:", error);
+    res.status(500).json({ error: "Could not create artifact" });
+  }
+});
+
+// 📌 GET single artifact by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+    if (!artifact) return res.status(404).json({ error: "Artifact not found" });
+    res.json(artifact);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// 📌 PUT (Unlock artifact)
+router.put("/:id/unlock", async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+    if (!artifact) return res.status(404).json({ error: "Artifact not found" });
+
+    artifact.visibility = "open";
+    await artifact.save();
+    res.json({ success: true, message: "Artifact unlocked!" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// 📌 DELETE an artifact
+router.delete("/:id", async (req, res) => {
+  try {
+    const deletedArtifact = await Artifact.findByIdAndDelete(req.params.id);
+    if (!deletedArtifact) return res.status(404).json({ error: "Artifact not found" });
+    res.json({ success: true, message: "Artifact deleted!" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 module.exports = router;
