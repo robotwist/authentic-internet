@@ -1,87 +1,33 @@
 import React, { useState } from "react";
-import axios from "axios";
+import API from "../api/api";
 
 const ArtifactForm = ({ position, onClose, refreshArtifacts }) => {
-  const [content, setContent] = useState("");
-  const [visibility, setVisibility] = useState("open");
-  const [unlockMethod, setUnlockMethod] = useState("none");
-  const [unlockKey, setUnlockKey] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
+  const [artifactData, setArtifactData] = useState({ name: "", description: "" });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setArtifactData((prevData) => ({ ...prevData, [name]: value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const newArtifact = {
-        content,
-        type: "text",
-        visibility,
-        unlockMethod,
-        unlockKey: unlockMethod !== "none" ? unlockKey : null,  // Only store key if needed
-        location: {
-          x: position.x,
-          y: position.y,
-          scene: "Overworld",
-          latitude: latitude || null,
-          longitude: longitude || null,
-        },
-      };
-
-      await axios.post("http://localhost:5000/api/artifacts", newArtifact);
+      const response = await API.post("/artifacts", artifactData);
+      alert("Artifact created!");
       refreshArtifacts();
       onClose();
     } catch (error) {
-      console.error("Error saving artifact:", error);
+      console.error("Error creating artifact:", error);
+      alert("You need to be logged in to create artifacts.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <textarea
-        placeholder="Enter artifact content..."
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        required
-      />
-      <label>Visibility:</label>
-      <select value={visibility} onChange={(e) => setVisibility(e.target.value)}>
-        <option value="open">Open (Visible to all)</option>
-        <option value="hidden">Hidden (Must be discovered)</option>
-        <option value="locked">Locked (Requires a key)</option>
-      </select>
-
-      {visibility === "locked" && (
-        <>
-          <label>Unlock Method:</label>
-          <select value={unlockMethod} onChange={(e) => setUnlockMethod(e.target.value)}>
-            <option value="password">Password</option>
-            <option value="location">Visit Location</option>
-            <option value="puzzle">Solve a Puzzle</option>
-          </select>
-          <input
-            type="text"
-            placeholder="Enter unlock key"
-            value={unlockKey}
-            onChange={(e) => setUnlockKey(e.target.value)}
-            required
-          />
-        </>
-      )}
-
-      <input
-        type="text"
-        placeholder="Latitude (optional)"
-        value={latitude}
-        onChange={(e) => setLatitude(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Longitude (optional)"
-        value={longitude}
-        onChange={(e) => setLongitude(e.target.value)}
-      />
-
-      <button type="submit">Save Artifact</button>
+    <form style={{ position: "absolute", top: position.y, left: position.x }} onSubmit={handleSubmit}>
+      <input type="text" name="name" value={artifactData.name} onChange={handleChange} placeholder="Name" required />
+      <input type="text" name="description" value={artifactData.description} onChange={handleChange} placeholder="Description" required />
+      <button type="submit">Create Artifact</button>
+      <button type="button" onClick={onClose}>Close</button>
     </form>
   );
 };

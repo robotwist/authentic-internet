@@ -1,23 +1,60 @@
 /* Reset styles */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* ✅ Reset Styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Inter", sans-serif;
+  font-family: "Press Start 2P", sans-serif; /* 🎮 Retro Pixel Font */
 }
 
-/* Background & layout */
+/* ✅ Body Styling */
 body {
-  background-color: #121212; /* Deep dark grey */
-  color: #e0e0e0; /* Soft contrast text */
-  overflow: hidden; /* No scrolling */
+  background-color: #0e0e0e; /* Even deeper black for contrast */
+  color: #e0e0e0; /* Soft grey text */
+  overflow: hidden;
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.1); /* Subtle retro effect */
+  image-rendering: pixelated; /* Ensures crisp pixel art */
 }
 
-/* Centering the app */
+/* ✅ Root Layout */
 #root {
   width: 100vw;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: url("/assets/background-pattern.png") repeat;
+}
+
+/* ✅ Buttons & Inputs */
+button {
+  background: linear-gradient(145deg, #1e1e1e, #262626);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  background: linear-gradient(145deg, #292929, #323232);
+  transform: scale(1.05);
+}
+
+/* ✅ Inputs */
+input {
+  background: #222;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.5);
 }

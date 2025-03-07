@@ -1,54 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import "./Artifact.css";
 
-const Artifact = ({ artifact, onUnlock }) => {
-  const { content, location, type, visibility, unlockMethod, unlockKey } = artifact;
-  const [isRevealed, setIsRevealed] = useState(visibility === "open");
-  const [isAttemptingUnlock, setIsAttemptingUnlock] = useState(false);
-  const [userAnswer, setUserAnswer] = useState("");
-
-  const handleClick = () => {
-    if (visibility === "open") {
-      setIsRevealed(!isRevealed);
-    } else if (visibility === "locked") {
-      setIsAttemptingUnlock(true);
-    }
-  };
-
-  const handleUnlock = () => {
-    if (userAnswer.toLowerCase() === unlockKey.toLowerCase()) {
-      setIsRevealed(true);
-      setIsAttemptingUnlock(false);
-      onUnlock(artifact._id); // Tell the server it's unlocked
-    }
-  };
+const Artifact = ({ artifact }) => {
+  if (!artifact) return null;
 
   return (
     <div
-      className={`artifact artifact-${type}`}
-      style={{ left: `${location.x}px`, top: `${location.y}px` }}
-      onClick={handleClick}
+      className="artifact"
+      style={{ left: `${artifact.location.x}px`, top: `${artifact.location.y}px`, position: "absolute" }}
     >
-      <span className="artifact-icon">📜</span> {/* This icon changes per type */}
-
-      {isRevealed && (
-        <div className="artifact-content">
-          {content}
-        </div>
-      )}
-
-      {isAttemptingUnlock && (
-        <div className="artifact-unlock">
-          <p>🔒 {artifact.riddle}</p>
-          <input
-            type="text"
-            placeholder="Enter answer..."
-            value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
-          />
-          <button onClick={handleUnlock}>Unlock</button>
-        </div>
-      )}
+      🏺 {artifact.content}
     </div>
   );
 };

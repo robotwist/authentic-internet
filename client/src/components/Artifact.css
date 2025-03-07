@@ -1,25 +1,58 @@
 .artifact {
-    position: absolute;
-    padding: 8px;
-    border-radius: 6px;
-    transition: all 0.3s ease-in-out;
-    background: #252525; /* Muted grey */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  .artifact:hover {
-    background: #37474f; /* Muted blue-grey */
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  /* Initially hide text, reveal on hover */
-  .artifact-content {
-    color: rgba(224, 224, 224, 0.4); /* Faded text */
-    transition: color 0.3s ease-in-out;
-  }
-  
-  .artifact:hover .artifact-content {
-    color: #ffffff; /* Full contrast */
-  }
-  
+  position: absolute;
+  padding: 6px;
+  border-radius: 2px;
+  background: #1b1b1b; /* Darker grey for depth */
+  border: 2px solid #9e9e9e; /* Pixel-art style outline */
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.3); /* Subtle glow effect */
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+  font-family: "Press Start 2P", sans-serif; /* Classic pixel-font */
+}
+
+.artifact:hover {
+  background: #2c2c2c; /* Slightly brighter grey */
+  border: 2px solid #ffffff;
+  transform: scale(1.05);
+  filter: drop-shadow(0px 0px 4px rgba(255, 255, 100, 0.8)); /* Glow effect */
+}
+
+/* CRT Flicker Effect */
+@keyframes crtFlicker {
+  0% { opacity: 0.85; }
+  50% { opacity: 1; }
+  100% { opacity: 0.9; }
+}
+
+.artifact:hover::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: rgba(255, 255, 255, 0.05);
+  animation: crtFlicker 0.1s infinite alternate;
+}
+
+/* Text Reveal with Retro Scanline Effect */
+.artifact-content {
+  color: rgba(224, 224, 224, 0.2);
+  transition: color 0.3s ease-in-out;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.artifact:hover .artifact-content {
+  color: #ffffff;
+}
+
+/* Unlock Effect - Golden Glow */
+.unlock-effect {
+  animation: flickerGold 0.5s infinite alternate;
+  color: gold;
+}
+
+@keyframes flickerGold {
+  0% { text-shadow: 0px 0px 5px rgba(255, 215, 0, 0.8); }
+  100% { text-shadow: 0px 0px 10px rgba(255, 215, 0, 1); }
+}
