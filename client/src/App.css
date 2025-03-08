@@ -21,4 +21,20 @@ h1, h2 {
 
 /* Buttons */
 button {
-  background: #37474f; /* Muted blue-grey
+  background: #37474f; /* Muted blue-grey */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #455a64; /* Slightly lighter blue-grey */
+}

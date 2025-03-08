@@ -1,16 +1,20 @@
 import React from "react";
 import "./Artifact.css";
 
-const Artifact = ({ artifact }) => {
+const Artifact = ({ artifact, visible }) => {
   if (!artifact) return null;
 
+  const { location = { x: 0, y: 0 }, content = "No content available" } = artifact;
+
   return (
-    <div
-      className="artifact"
-      style={{ left: `${artifact.location.x}px`, top: `${artifact.location.y}px`, position: "absolute" }}
-    >
-      🏺 {artifact.content}
-    </div>
+    visible && (
+      <div
+        className="artifact"
+        style={{ left: `${location.x}px`, top: `${location.y}px`, position: "absolute" }}
+      >
+        🏺 {content}
+      </div>
+    )
   );
 };
 

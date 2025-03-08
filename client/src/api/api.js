@@ -5,18 +5,15 @@ const API = axios.create({
 });
 
 // 🔹 ATTACH TOKEN TO API REQUESTS
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    console.log("Current Token Before Request:", token);
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 // 🔹 LOGIN FUNCTION
 export const loginUser = async (username, password) => {
   try {

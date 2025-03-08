@@ -4,11 +4,13 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./components/NotFound";
+import Home from "./components/Home";
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route
@@ -19,7 +21,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<Login />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

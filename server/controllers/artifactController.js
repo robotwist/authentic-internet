@@ -3,22 +3,27 @@ import Artifact from "../models/Artifact.js";
 // ✅ Create an artifact
 export const createArtifact = async (req, res) => {
   try {
-    const { content, type, location, visibility, unlockMethod, unlockKey } = req.body;
+    const { content, location } = req.body;
+    const user = req.user._id;
+
+    console.log("Incoming request data:", req.body);
+    console.log("User ID:", user);
+
+    if (!content || !location || !location.x || !location.y) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
     const newArtifact = new Artifact({
       content,
-      type,
       location,
-      visibility,
-      unlockMethod,
-      unlockKey,
-      user: req.user.id, // ✅ Ensure artifact is linked to user
+      user,
     });
 
     await newArtifact.save();
     res.status(201).json(newArtifact);
   } catch (error) {
     console.error("Error creating artifact:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 };
 

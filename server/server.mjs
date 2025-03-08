@@ -1,17 +1,15 @@
-import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import connectDB from "./config/db.js"; // Make sure your db file is a .js module
-
-// Import Routes
+import dotenv from "dotenv";
+import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import artifactRoutes from "./routes/artifactRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
-// Initialize Express App
+dotenv.config();
+
 const app = express();
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());

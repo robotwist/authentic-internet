@@ -1,54 +1,28 @@
 import React, { useState, useEffect } from "react";
 
-const Character = () => {
-  const [position, setPosition] = useState({ x: 100, y: 100 });
+const TILE_SIZE = 64; // Each tile is 32x32 pixels
+const WORLD_WIDTH = 64 * TILE_SIZE;
+const WORLD_HEIGHT = 64 * TILE_SIZE;
+const VIEWPORT_WIDTH = 8 * TILE_SIZE;
+const VIEWPORT_HEIGHT = 8 * TILE_SIZE;
 
-  const handleKeyDown = (event) => {
-    const speed = 8;
-    setPosition((prev) => {
-      let newX = prev.x;
-      let newY = prev.y;
-
-      switch (event.key) {
-        case "ArrowUp":
-        case "w":
-          newY = Math.max(prev.y - speed, 0);
-          break;
-        case "ArrowDown":
-        case "s":
-          newY = Math.min(prev.y + speed, 736); // Adjust to map size
-          break;
-        case "ArrowLeft":
-        case "a":
-          newX = Math.max(prev.x - speed, 0);
-          break;
-        case "ArrowRight":
-        case "d":
-          newX = Math.min(prev.x + speed, 992); // Adjust to map size
-          break;
-        default:
-          break;
-      }
-      return { x: newX, y: newY };
-    });
-  };
+const Character = ({ position }) => {
+  const [characterPosition, setCharacterPosition] = useState(position);
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+    setCharacterPosition(position);
+  }, [position]);
 
   return (
-    <img
-      src="/assets/nkdman_frame_0.png"
-      alt="Character"
+    <div
       style={{
         position: "absolute",
-        top: position.y,
-        left: position.x,
-        width: "32px",
-        height: "32px",
-        transition: "top 0.1s, left 0.1s",
+        left: `${characterPosition.x}px`,
+        top: `${characterPosition.y}px`,
+        width: `${TILE_SIZE}px`,
+        height: `${TILE_SIZE}px`,
+        backgroundImage: "url('../assets/character.png')",
+        backgroundSize: "cover",
       }}
     />
   );

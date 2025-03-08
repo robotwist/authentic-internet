@@ -4,10 +4,10 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-  "start": "node server.mjs",
-  "dev": "nodemon server.mjs",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+    "start": "node server.mjs",
+    "dev": "nodemon server.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import API from "../api/api";
 
 const ArtifactForm = ({ position, onClose, refreshArtifacts }) => {
-  const [artifactData, setArtifactData] = useState({ name: "", description: "" });
+  const [artifactData, setArtifactData] = useState({ content: "", location: position });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,8 +24,7 @@ const ArtifactForm = ({ position, onClose, refreshArtifacts }) => {
 
   return (
     <form style={{ position: "absolute", top: position.y, left: position.x }} onSubmit={handleSubmit}>
-      <input type="text" name="name" value={artifactData.name} onChange={handleChange} placeholder="Name" required />
-      <input type="text" name="description" value={artifactData.description} onChange={handleChange} placeholder="Description" required />
+      <input type="text" name="content" value={artifactData.content} onChange={handleChange} placeholder="Content" required />
       <button type="submit">Create Artifact</button>
       <button type="button" onClick={onClose}>Close</button>
     </form>

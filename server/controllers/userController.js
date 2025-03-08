@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import authenticateToken from "../middleware/authMiddleware.js";
 
 // ✅ Add a friend (Authenticated Request)
 export const addFriend = async (req, res) => {
@@ -32,15 +33,41 @@ export const addFriend = async (req, res) => {
 };
 
 // ✅ Check if the user has at least 1 friend
-export const checkUserAccess = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId);
-    if (!user) return res.status(404).json({ message: "User not found." });
+export const checkUserAccess = [
+  authenticateToken,
+  async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId) {
+        return res.status(401).json({ message: "Unauthorized - No valid user." });
+      }
 
-    const accessGranted = user.friends.length > 0;
+      const user = await User.findById(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      const accessGranted = user.friends.length > 0;
+      return res.json({ accessGranted });
+    } catch (error) {
+      console.error("❌ Error checking access:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+];
+
+// ✅ Get user access
+export const getUserAccess = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Example logic to check access
+    const accessGranted = user.friends.length > 0; // Assuming user has a friends array
     res.json({ accessGranted });
   } catch (error) {
-    console.error("Error checking access:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error checking user access:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

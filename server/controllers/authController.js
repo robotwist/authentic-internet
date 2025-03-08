@@ -23,7 +23,7 @@ export const register = async (req, res) => {
     await newUser.save();
 
     // Generate JWT Token
-    const token = jwt.sign({ userId: newUser._id }, secretKey, { expiresIn: "1h" });
+    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
     res.status(201).json({ token, user: { id: newUser._id, username: newUser.username } });
   } catch (error) {
@@ -36,20 +36,25 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const normalizedUsername = username.toLowerCase(); // Normalize username
+    const user = await User.findOne({ username });
 
-    const user = await User.findOne({ username: normalizedUsername });
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user) {
+      console.error("❌ User not found:", username);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT Token
-    const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: "1h" });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.error("❌ Password mismatch for user:", username);
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // ✅ Generate JWT Token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     res.json({ token, user: { id: user._id, username: user.username } });
   } catch (error) {
-    console.error("Error during login:", error);
+    console.error("❌ Error during login:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

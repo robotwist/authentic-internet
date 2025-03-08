@@ -1,37 +1,40 @@
 .game-container {
-  position: relative;
   width: 100vw;
   height: 100vh;
-  overflow: hidden; /* Prevent unwanted scrolling */
+  background: url("../assets/world-map.webp") no-repeat center center;
+  background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #121212;
-}
-
-.game-map {
-  position: relative;
-  width: 1024px; /* Adjust for retro RPG scale */
-  height: 768px;
-  background-color: black;
   overflow: hidden;
-  border: 2px solid #444;
+  position: relative;
 }
 
-.map-image {
+.viewport {
   width: 100vw;
   height: 100vh;
-  object-fit: cover;
   position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 0;
-  image-rendering: pixelated; /* Keep that retro feel */
+  overflow: hidden;
 }
 
-/* Ensure smooth character movement */
-.character {
+.game-world {
+  width: 2048px; /* 64 tiles * 32px */
+  height: 2048px; /* 64 tiles * 32px */
+  position: relative;
+}
+
+.artifact {
   position: absolute;
   width: 32px;
   height: 32px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid white;
+}
+
+.character {
+  width: 32px;
+  height: 32px;
+  background: url("../assets/character.png") no-repeat;
+  background-size: cover;
+  position: absolute;
 }
