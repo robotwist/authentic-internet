@@ -3,14 +3,11 @@ import "./Inventory.css";
 
 const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, character }) => {
   const handleUseArtifact = (artifact) => {
-    // Implement the logic to use the artifact
     console.log(`Using artifact: ${artifact.name}`);
     alert(`You used the artifact: ${artifact.name}`);
     
-    // Gain 1 experience point
     onGainExperience(1);
 
-    // Update the artifact with a comment and increase its value
     const updatedArtifact = {
       ...artifact,
       comment: "Used by a previous adventurer",

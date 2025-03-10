@@ -27,6 +27,37 @@
   height: 64px;
   background-color: rgba(255, 255, 255, 0.2);
   border: 1px solid white;
+
+}
+
+.tile {
+  width: 64px;
+  height: 64px;
+  position: absolute;
+  background-size: cover;
+}
+.grass {
+  background: url("../assets/tiles/grass.webp") no-repeat center center;
+  background-size: cover;
+  box-shadow: 0 0 10px rgba(1, 37, 1, 0.5);
+}
+
+.wall {
+  background: url("../assets/tiles/wall.webp") no-repeat center center;
+  background-size: cover;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.water {
+  background: url("../assets/tiles/water.webp") no-repeat center center;
+  background-size: cover;
+  box-shadow: 0 0 10px rgba(2, 2, 171, 0.5);
+}
+
+.sand {
+  background: url("../assets/tiles/sand.png") no-repeat center center;
+  background-size: cover;
+  box-shadow: 0 0 10px rgba(167, 167, 19, 0.5);
 }
 
 .character {
@@ -35,29 +66,19 @@
   background: url("../assets/character.png") no-repeat;
   background-size: cover;
   position: absolute;
+  .character {
+    filter: contrast(2) drop-shadow(0 0 4px rgba(255, 255, 255, 0.9));
+  }  
+}
+.character.idle {
+  animation: idleGlow 1s infinite alternate;
 }
 
-.tile {
-  width: 64px;
-  height: 64px;
-  position: absolute;
-}
-
-.grass {
-  background: url("../assets/tiles/grass.webp") no-repeat center center;
-  background-size: cover;
-}
-
-.wall {
-  background: url("../assets/tiles/wall.webp") no-repeat center center;
-  background-size: cover;
-}
-
-.water {
-  background: url("../assets/tiles/water.webp") no-repeat center center;
-  background-size: cover;
-}
-.sand {
-  background: url("../assets/tiles/sand.png") no-repeat center center;
-  background-size: cover;
+@keyframes idleGlow {
+  0% {
+    filter: contrast(2) drop-shadow(0 0 2px rgba(255, 255, 100, 0.3));
+  }
+  100% {
+    filter: contrast(2) drop-shadow(0 0 5px rgba(255, 255, 100, 0.8));
+  }
 }

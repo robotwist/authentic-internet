@@ -27,7 +27,7 @@ const MAPS = [
     name: "Overworld",
     data: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [1, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -68,12 +68,11 @@ const MAPS = [
     artifacts: [{ id: 3, name: "Golden Idol", x: 4, y: 6, exp: 20, visible: true }],
   },
 ];
-
-// walkable (0 = grass)
 const isWalkable = (x, y, map) => {
   const row = Math.floor(y / TILE_SIZE);
   const col = Math.floor(x / TILE_SIZE);
-  return map?.[row]?.[col] === 0;
+  const tile = map?.[row]?.[col];
+  return tile === 0 || tile === 3;
 };
 
 const GameWorld = () => {
@@ -88,6 +87,19 @@ const GameWorld = () => {
     level: 1,
     experience: 0,
   });
+
+  useEffect(() => {
+    if (character.experience >= character.level * 10) {
+      setCharacter(prevChar => ({
+        ...prevChar,
+        level: prevChar.level + 1,
+        experience: prevChar.experience - (prevChar.level * 10)
+      }));
+      alert("You have leveled up mighty warrior! You now have 2 adoring fans.");
+    }
+  }, [character.experience, character.level]);
+  
+
   const [viewport, setViewport] = useState({ x: 0, y: 0 });
   const [showInventory, setShowInventory] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -105,7 +117,6 @@ const GameWorld = () => {
     }
   }, []);
 
-  // Listen for key presses
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -123,7 +134,6 @@ const GameWorld = () => {
     }
   }, [characterPosition, currentMapIndex]);
 
-  // Key controls
   const handleKeyDown = (event) => {
     const speed = TILE_SIZE;
     let newPosition = { ...characterPosition };
