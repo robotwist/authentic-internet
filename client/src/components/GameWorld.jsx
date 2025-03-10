@@ -12,17 +12,29 @@ import "./Artifact.css";
 import "./Inventory.css";
 
 const TILE_SIZE = 64;
-const MAP_ROWS = 200;  
-const MAP_COLS = 200;  
+const MAP_ROWS = 200;
+const MAP_COLS = 200;
 
 // Tile Classes
 const TILE_TYPES = {
-  0: "grass", // Walkable tile
-  1: "wall",  // No-walk tile
-  2: "water", // No-walk tile
-  3: "sand",  // walkable tile
+  0: "grass",
+  1: "wall",
+  2: "water",
+  3: "sand",
 };
 
+// const generateLargeMap = () => {
+//   const map = [];
+//   for (let i = 0; i < MAP_ROWS; i++) {
+//     const row = [];
+//     for (let j = 0; j < MAP_COLS; j++) {
+//       const tileType = Math.random() < 0.1 ? 1 : Math.random() < 0.05 ? 2 : 0;
+//       row.push(tileType);
+//     }
+//     map.push(row);
+//   }
+//   return map;
+// };
 
 const MAPS = [
   {
@@ -70,11 +82,11 @@ const MAPS = [
     artifacts: [{ id: 3, name: "Golden Idol", x: 4, y: 6, exp: 20, visible: true }],
   },
 ];
+
 const isWalkable = (x, y, map) => {
   const row = Math.floor(y / TILE_SIZE);
   const col = Math.floor(x / TILE_SIZE);
-  const tile = map?.[row]?.[col];
-  return tile === 0 || tile === 3;
+  return map?.[row]?.[col] === 0;
 };
 
 const GameWorld = () => {
@@ -100,7 +112,6 @@ const GameWorld = () => {
       alert("You have leveled up mighty warrior! You now have 2 adoring fans.");
     }
   }, [character.experience, character.level]);
-  
 
   const [viewport, setViewport] = useState({ x: 0, y: 0 });
   const [showInventory, setShowInventory] = useState(false);
@@ -108,10 +119,8 @@ const GameWorld = () => {
   const [formPosition, setFormPosition] = useState({ x: 0, y: 0 });
   const [visibleArtifact, setVisibleArtifact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
- 
   const [artifacts, setArtifacts] = useState(MAPS[currentMapIndex].artifacts);
 
-  // Check login
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -120,86 +129,84 @@ const GameWorld = () => {
   }, []);
 
   useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+        return;
+      }
+
+      const speed = TILE_SIZE;
+      let newPosition = { ...characterPosition };
+
+      switch (event.key) {
+        case "ArrowUp":
+        case "w":
+          if (isWalkable(newPosition.x, newPosition.y - speed, MAPS[currentMapIndex].data)) {
+            newPosition.y -= speed;
+          }
+          break;
+        case "ArrowDown":
+        case "s":
+          if (isWalkable(newPosition.x, newPosition.y + speed, MAPS[currentMapIndex].data)) {
+            newPosition.y += speed;
+          }
+          break;
+        case "ArrowLeft":
+        case "a":
+          if (characterPosition.x - speed < 0 && currentMapIndex > 0) {
+            setCurrentMapIndex((prev) => prev - 1);
+            newPosition.x = (MAP_COLS - 1) * TILE_SIZE;
+          } else if (isWalkable(newPosition.x - speed, newPosition.y, MAPS[currentMapIndex].data)) {
+            newPosition.x -= speed;
+          }
+          break;
+        case "ArrowRight":
+        case "d":
+          if (characterPosition.x + speed >= MAP_COLS * TILE_SIZE && currentMapIndex < MAPS.length - 1) {
+            setCurrentMapIndex((prev) => prev + 1);
+            newPosition.x = 0;
+          } else if (isWalkable(newPosition.x + speed, newPosition.y, MAPS[currentMapIndex].data)) {
+            newPosition.x += speed;
+          }
+          break;
+        case "e":
+          if (visibleArtifact) {
+            handleArtifactPickup();
+          } else {
+            if (isLoggedIn) {
+              setFormPosition({ x: newPosition.x, y: newPosition.y });
+              setShowForm(true);
+            } else {
+              alert("You need to be logged in to create artifacts.");
+            }
+          }
+          return;
+        case "i":
+          setShowInventory(!showInventory);
+          return;
+        default:
+          return;
+      }
+
+      setCharacterPosition(newPosition);
+      adjustViewport(newPosition);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [characterPosition, currentMapIndex, isLoggedIn, visibleArtifact]);
 
-  
   useEffect(() => {
-    const collided = MAPS[currentMapIndex].artifacts.find(
-      (art) => art.x === characterPosition.x / TILE_SIZE && art.y === characterPosition.y / TILE_SIZE
+    const collidedArtifact = MAPS[currentMapIndex].artifacts.find(
+      (artifact) => artifact.x === characterPosition.x / TILE_SIZE && artifact.y === characterPosition.y / TILE_SIZE
     );
-    if (collided) {
-      setVisibleArtifact(collided);
+
+    if (collidedArtifact) {
+      setVisibleArtifact(collidedArtifact);
     } else {
       setVisibleArtifact(null);
     }
   }, [characterPosition, currentMapIndex]);
 
-  const handleKeyDown = (event) => {
-    const speed = TILE_SIZE;
-    let newPosition = { ...characterPosition };
-
-    switch (event.key) {
-      case "ArrowUp":
-      case "w":
-        if (isWalkable(newPosition.x, newPosition.y - speed, MAPS[currentMapIndex].data)) {
-          newPosition.y -= speed;
-        }
-        break;
-      case "ArrowDown":
-      case "s":
-        if (isWalkable(newPosition.x, newPosition.y + speed, MAPS[currentMapIndex].data)) {
-          newPosition.y += speed;
-        }
-        break;
-      case "ArrowLeft":
-      case "a":
-        // Move to the previous map if at the left edge
-        if (characterPosition.x - speed < 0 && currentMapIndex > 0) {
-          setCurrentMapIndex((prev) => prev - 1);
-          newPosition.x = (MAP_COLS - 1) * TILE_SIZE;
-        } else if (isWalkable(newPosition.x - speed, newPosition.y, MAPS[currentMapIndex].data)) {
-          newPosition.x -= speed;
-        }
-        break;
-      case "ArrowRight":
-      case "d":
-        // Move to the next map if at the right edge
-        if (characterPosition.x + speed >= MAP_COLS * TILE_SIZE && currentMapIndex < MAPS.length - 1) {
-          setCurrentMapIndex((prev) => prev + 1);
-          newPosition.x = 0;
-        } else if (isWalkable(newPosition.x + speed, newPosition.y, MAPS[currentMapIndex].data)) {
-          newPosition.x += speed;
-        }
-        break;
-      case "e":
-        // If there's a visible artifact, pick it up
-        if (visibleArtifact) {
-          handleArtifactPickup();
-        } else {
-          // Otherwise, try to open the artifact form if logged in
-          if (isLoggedIn) {
-            setFormPosition({ x: newPosition.x, y: newPosition.y });
-            setShowForm(true);
-          } else {
-            alert("You need to be logged in to create artifacts.");
-          }
-        }
-        return; // stop here
-      case "i":
-        // Toggle inventory
-        setShowInventory(!showInventory);
-        return;
-      default:
-        return;
-    }
-
-    setCharacterPosition(newPosition);
-    adjustViewport(newPosition);
-  };
-
-  // Center the viewport around the character (within map bounds)
   const adjustViewport = (pos) => {
     setViewport({
       x: Math.max(
@@ -213,33 +220,26 @@ const GameWorld = () => {
     });
   };
 
-  // Picking up an artifact at the character's position
   const handleArtifactPickup = () => {
     const currentMap = MAPS[currentMapIndex];
     const artifact = currentMap.artifacts.find(
       (a) => a.x === characterPosition.x / TILE_SIZE && a.y === characterPosition.y / TILE_SIZE
     );
     if (artifact) {
-      // Add to inventory
       setInventory((prev) => [...prev, artifact]);
-      // Gain experience
       setCharacter((prev) => ({
         ...prev,
         experience: prev.experience + artifact.exp,
       }));
-      // Remove from map
       MAPS[currentMapIndex].artifacts = currentMap.artifacts.filter(
         (a) => a.id !== artifact.id
       );
-      // Update local artifacts state
       setArtifacts([...MAPS[currentMapIndex].artifacts]);
       setVisibleArtifact(null);
     }
   };
 
-  // Refresh artifacts after creating a new one
   const refreshArtifacts = () => {
-    // If you have an API call, do it here; otherwise just read from MAPS
     setArtifacts([...MAPS[currentMapIndex].artifacts]);
   };
 
@@ -262,16 +262,15 @@ const GameWorld = () => {
     <div className="game-container">
       <div className="viewport" style={{ width: "100%", height: "100%" }}>
         <div className="game-world">
-          {/* Render the tile-based map */}
-          {MAPS[currentMapIndex].data.map((row, rowIndex) =>
-            row.map((tile, colIndex) => (
+          {MAPS[currentMapIndex].data.slice(viewport.y / TILE_SIZE, (viewport.y + 12 * TILE_SIZE) / TILE_SIZE).map((row, rowIndex) =>
+            row.slice(viewport.x / TILE_SIZE, (viewport.x + 16 * TILE_SIZE) / TILE_SIZE).map((tile, colIndex) => (
               <div
                 key={`${rowIndex}-${colIndex}`}
                 className={`tile ${TILE_TYPES[tile]}`}
                 style={{
                   position: "absolute",
-                  top: rowIndex * TILE_SIZE - viewport.y,
-                  left: colIndex * TILE_SIZE - viewport.x,
+                  top: (rowIndex + viewport.y / TILE_SIZE) * TILE_SIZE - viewport.y,
+                  left: (colIndex + viewport.x / TILE_SIZE) * TILE_SIZE - viewport.x,
                   width: TILE_SIZE,
                   height: TILE_SIZE,
                 }}
@@ -279,10 +278,8 @@ const GameWorld = () => {
             ))
           )}
 
-          {/* Character */}
           <Character position={characterPosition} />
 
-          {/* Artifacts */}
           <ErrorBoundary>
             {artifacts.map(
               (artifact) =>
@@ -298,7 +295,6 @@ const GameWorld = () => {
         </div>
       </div>
 
-      {/* Artifact Form (Press 'E' if no visible artifact) */}
       {showForm && (
         <ArtifactForm
           position={formPosition}
@@ -307,7 +303,6 @@ const GameWorld = () => {
         />
       )}
 
-      {/* Inventory (Press 'I') */}
       {showInventory && (
         <Inventory
           artifacts={inventory}
