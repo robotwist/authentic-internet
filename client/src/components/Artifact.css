@@ -1,12 +1,18 @@
 .artifact {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  background: url("/assets/artifact.png") no-repeat center;
+  width: 32px;
+  height: 32px;
   background-size: cover;
-  transition: transform 0.2s ease-in-out;
+  image-rendering: pixelated; /* Ensures crisp pixels */
 }
 
+.artifact.ancient-sword {
+  background-image: url("../assets/ancient_sword.png");
+}
+
+.artifact.mystic-orb {
+  background-image: url("../assets/mystic_orb.png");
+}
 .artifact:hover {
   transform: scale(1.2);
   filter: brightness(1.5);

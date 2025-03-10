@@ -1,8 +1,6 @@
 .game-container {
   width: 100vw;
   height: 100vh;
-  background: url("../assets/world-map.webp") no-repeat center center;
-  background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -18,23 +16,48 @@
 }
 
 .game-world {
-  width: 2048px; /* 64 tiles * 32px */
-  height: 2048px; /* 64 tiles * 32px */
+  width: 640px; /* 10 tiles * 64px */
+  height: 640px; /* 10 tiles * 64px */
   position: relative;
 }
 
 .artifact {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 64px;
+  height: 64px;
   background-color: rgba(255, 255, 255, 0.2);
   border: 1px solid white;
 }
 
 .character {
-  width: 32px;
-  height: 32px;
+  width: 64px;
+  height: 64px;
   background: url("../assets/character.png") no-repeat;
   background-size: cover;
   position: absolute;
+}
+
+.tile {
+  width: 64px;
+  height: 64px;
+  position: absolute;
+}
+
+.grass {
+  background: url("../assets/tiles/grass.webp") no-repeat center center;
+  background-size: cover;
+}
+
+.wall {
+  background: url("../assets/tiles/wall.webp") no-repeat center center;
+  background-size: cover;
+}
+
+.water {
+  background: url("../assets/tiles/water.webp") no-repeat center center;
+  background-size: cover;
+}
+.sand {
+  background: url("../assets/tiles/sand.png") no-repeat center center;
+  background-size: cover;
 }

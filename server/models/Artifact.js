@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 
 const ArtifactSchema = new mongoose.Schema(
   {
-    content: { type: String, required: true, trim: true }, // ✅ Ensures content is required & removes leading/trailing spaces
+    content: { type: String, required: true, trim: true },
     location: {
       x: { type: Number, required: true },
       y: { type: Number, required: true },
-      scene: { type: String, default: "Overworld" }, // ✅ Defaults to "Overworld" if scene isn't provided
+      scene: { type: String, default: "Overworld" }, 
     },
     visibility: {
       type: String,
@@ -21,14 +21,13 @@ const ArtifactSchema = new mongoose.Schema(
     unlockKey: { type: String, default: null },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // ✅ Links to a User
+      ref: "User",
       required: true,
     },
   },
   { timestamps: true }
 );
 
-// ✅ Indexing for better performance on frequently queried fields
 ArtifactSchema.index({ location: 1 });
 ArtifactSchema.index({ user: 1 });
 

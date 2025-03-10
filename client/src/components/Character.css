@@ -18,13 +18,16 @@
 .character.walking {
   animation: characterMove 0.4s infinite alternate ease-in-out;
 }
-
-/* Idle State - Subtle Pulse */
+/* Idle State - Stronger Pulse Effect */
 .character.idle {
-  animation: idleGlow .5s infinite alternate ease-in-out;
+  animation: idleGlow 0.8s infinite alternate ease-in-out;
 }
 
 @keyframes idleGlow {
-  0% { filter: brightness(1); }
-  100% { filter: brightness(1.2); }
+  0% { 
+    filter: brightness(1) drop-shadow(0px 0px 3px rgba(255, 255, 100, 0.5)); 
+  }
+  100% { 
+    filter: brightness(1.5) drop-shadow(0px 0px 8px rgba(255, 255, 100, 0.8)); 
+  }
 }

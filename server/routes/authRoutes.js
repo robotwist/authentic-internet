@@ -4,7 +4,6 @@ import { register, login } from "../controllers/authController.js";
 
 const router = express.Router();
 
-// ✅ Register Route (with Validation)
 router.post(
   "/register",
   [
@@ -18,7 +17,7 @@ router.post(
     }
 
     try {
-      await register(req, res); // Call controller method
+      await register(req, res); 
     } catch (error) {
       console.error("Error in register route:", error);
       res.status(500).json({ error: error.message });
@@ -26,10 +25,9 @@ router.post(
   }
 );
 
-// ✅ Login Route
 router.post("/login", async (req, res) => {
   try {
-    await login(req, res); // Call controller method
+    await login(req, res); 
   } catch (error) {
     console.error("Error in login route:", error);
     res.status(500).json({ error: error.message });

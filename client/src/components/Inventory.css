@@ -2,13 +2,15 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 0;
+  bottom: 0;
+  width: 150%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   z-index: 1000;
 }
 
@@ -20,6 +22,7 @@
   max-width: 600px;
   text-align: center;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  margin-right: 100px;
 }
 
 .inventory-header {
@@ -47,7 +50,7 @@
 }
 
 .character-info {
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 }
 
 .character-info img {
