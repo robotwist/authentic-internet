@@ -59,26 +59,3 @@
   background-size: cover;
   box-shadow: 0 0 10px rgba(167, 167, 19, 0.5);
 }
-
-.character {
-  width: 64px;
-  height: 64px;
-  background: url("../assets/character.png") no-repeat;
-  background-size: cover;
-  position: absolute;
-  .character {
-    filter: contrast(2) drop-shadow(0 0 4px rgba(255, 255, 255, 0.9));
-  }  
-}
-.character.idle {
-  animation: idleGlow 1s infinite alternate;
-}
-
-@keyframes idleGlow {
-  0% {
-    filter: contrast(2) drop-shadow(0 0 2px rgba(255, 255, 100, 0.3));
-  }
-  100% {
-    filter: contrast(2) drop-shadow(0 0 5px rgba(255, 255, 100, 0.8));
-  }
-}

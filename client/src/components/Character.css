@@ -10,9 +10,9 @@
 
 /* Walking Animation Effect */
 @keyframes characterMove {
-  0% { transform: translateY(4px); }
+  0% { transform: translateY(28px); }
   50% { transform: translateY(-8px); }
-  100% { transform: translateY(4px); }
+  100% { transform: translateY(400px); }
 }
 
 .character.walking {

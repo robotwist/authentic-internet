@@ -7,17 +7,19 @@ import Inventory from "./Inventory";
 import ErrorBoundary from "./ErrorBoundary";
 import API from "../api/api";
 import "./GameWorld.css";
+import "./Character.css";
+import "./Artifact.css";
+import "./Inventory.css";
 
-// Tile Constants
 const TILE_SIZE = 64;
-const MAP_ROWS = 1000;  // Increased rows
-const MAP_COLS = 1000;  // Increased columns
+const MAP_ROWS = 200;  
+const MAP_COLS = 200;  
 
 // Tile Classes
 const TILE_TYPES = {
   0: "grass", // Walkable tile
-  1: "wall",  // Non-walkable tile
-  2: "water", // Non-walkable tile
+  1: "wall",  // No-walk tile
+  2: "water", // No-walk tile
   3: "sand",  // walkable tile
 };
 

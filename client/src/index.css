@@ -1,7 +1,6 @@
 /* Reset styles */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-/* ✅ Reset Styles */
 * {
   margin: 0;
   padding: 0;
@@ -9,7 +8,6 @@
   font-family: "Press Start 2P", sans-serif; /* 🎮 Retro Pixel Font */
 }
 
-/* ✅ Body Styling */
 body {
   background-color: #0e0e0e; /* Even deeper black for contrast */
   color: #e0e0e0; /* Soft grey text */
@@ -18,7 +16,7 @@ body {
   image-rendering: pixelated; /* Ensures crisp pixel art */
 }
 
-/* ✅ Root Layout */
+
 #root {
   width: 100vw;
   height: 100vh;
