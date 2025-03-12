@@ -15,7 +15,7 @@
 .inventory-container {
   background-color: #333;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 20px;
   width: 90%;
   height: 90%;
   max-width: 1200px;
@@ -69,6 +69,7 @@
   margin: 0;
   flex-grow: 1;
   overflow-y: auto;
+  max-height: 60vh; /* Adjust the height to make it larger */
 }
 
 .inventory-list li {

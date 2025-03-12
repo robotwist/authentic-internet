@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import "./Inventory.css";
 
 const fictionalUsers = [
-  { id: 1, name: "User1" },
-  { id: 2, name: "User2" },
-  { id: 3, name: "User3" },
-  { id: 4, name: "User4" },
-  { id: 5, name: "User5" },
+  { id: 1, name: "Socrates" },
+  { id: 2, name: "Plato" },
+  { id: 3, name: "Aristotle" },
+  { id: 4, name: "Ernest" },
+  { id: 5, name: "Spicoli" },
 ];
 
 const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, character }) => {
@@ -16,7 +16,7 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, cha
 
   const handleUseArtifact = (artifact) => {
     console.log(`You have wielded the hallowed artifact: ${artifact.name}`);
-    alert(`Your prowess hase increased my implementing the mystical artifact: ${artifact.name}`);
+    alert(`Your prowess has increased by implementing the mystical artifact: ${artifact.name}`);
     
     onGainExperience(1);
 
@@ -61,6 +61,11 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, cha
     setSelectedArtifact(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove the stored token
+    window.location.reload(); // Refresh page to reflect logout
+  };
+
   return (
     <div
       style={{
@@ -101,6 +106,7 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, cha
           }}
         >
           <h2>🎒 Inventory</h2>
+          <button onClick={handleLogout} className="logout-button">Log Out</button>
           <button
             onClick={onClose}
             style={{
@@ -126,8 +132,8 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, cha
             src={character.avatar}
             alt="Character Avatar"
             style={{
-              width: "100px",
-              height: "100px",
+              width: "150px",
+              height: "80px",
               borderRadius: "50%",
               marginRight: "10px",
             }}
@@ -156,14 +162,14 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, cha
                   alignItems: "center",
                   justifyContent: "space-between",
                   backgroundColor: "#444",
-                  padding: "10px",
-                  borderRadius: "5px",
+                  padding: "1px",
+                  borderRadius: "10px",
                   marginBottom: "10px",
                 }}
               >
                 <img
-                  src={artifact.icon}
-                  alt={artifact.iconDescription}
+                  src={artifact.icon || "/assets/default-artifact.png"}
+                  alt={artifact.iconDescription || "Artifact"}
                   style={{
                     width: "50px",
                     height: "50px",
@@ -180,10 +186,10 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, cha
                       backgroundColor: "#4caf50",
                       color: "white",
                       border: "none",
-                      padding: "10px",
+                      padding: "5px",
                       borderRadius: "5px",
                       cursor: "pointer",
-                      marginRight: "10px",
+                      marginRight: "15px",
                     }}
                   >
                     Use Artifact
@@ -194,7 +200,7 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, cha
                       backgroundColor: "#4caf50",
                       color: "white",
                       border: "none",
-                      padding: "10px",
+                      padding: "5px",
                       borderRadius: "5px",
                       cursor: "pointer",
                       marginRight: "10px",
@@ -208,7 +214,7 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, cha
                       backgroundColor: "#ff4d4d",
                       color: "white",
                       border: "none",
-                      padding: "10px",
+                      padding: "5px",
                       borderRadius: "5px",
                       cursor: "pointer",
                     }}
@@ -278,7 +284,7 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, cha
             placeholder="Enter your message"
             style={{
               width: "100%",
-              height: "100px",
+              height: "70px",
               marginBottom: "10px",
             }}
           />

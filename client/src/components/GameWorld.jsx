@@ -21,20 +21,8 @@ const TILE_TYPES = {
   1: "wall",
   2: "water",
   3: "sand",
+  4: "dungeon",
 };
-
-// const generateLargeMap = () => {
-//   const map = [];
-//   for (let i = 0; i < MAP_ROWS; i++) {
-//     const row = [];
-//     for (let j = 0; j < MAP_COLS; j++) {
-//       const tileType = Math.random() < 0.1 ? 1 : Math.random() < 0.05 ? 2 : 0;
-//       row.push(tileType);
-//     }
-//     map.push(row);
-//   }
-//   return map;
-// };
 
 const MAPS = [
   {
@@ -42,7 +30,7 @@ const MAPS = [
     data: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -69,7 +57,7 @@ const MAPS = [
     name: "Desert",
     data: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [3, 3, 3, 3, 0, 0, 0, 0, 0, 1],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [0, 0, 1, 1, 1, 1, 1, 1, 0, 1],
       [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
       [1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
@@ -80,6 +68,22 @@ const MAPS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     artifacts: [{ id: 3, name: "Golden Idol", x: 4, y: 6, exp: 20, visible: true }],
+  },
+  {
+    name: "Dungeon",
+    data: [
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 4, 0, 4],
+      [4, 4, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    ],
+    artifacts: [{ id: 4, name: "Dungeon Key", x: 5, y: 5, exp: 25, visible: true }],
   },
 ];
 
@@ -104,10 +108,10 @@ const GameWorld = () => {
 
   useEffect(() => {
     if (character.experience >= character.level * 10) {
-      setCharacter(prevChar => ({
+      setCharacter((prevChar) => ({
         ...prevChar,
         level: prevChar.level + 1,
-        experience: prevChar.experience - (prevChar.level * 10)
+        experience: prevChar.experience - prevChar.level * 10,
       }));
       alert("You have leveled up mighty warrior! You now have 2 adoring fans.");
     }

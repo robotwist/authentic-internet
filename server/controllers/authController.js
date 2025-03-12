@@ -23,7 +23,7 @@ export const register = async (req, res) => {
     await newUser.save();
 
     // Generate JWT Token
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
+    const token = jwt.sign({ userId: newUser._id }, secretKey, { expiresIn: "24h" });
 
     res.status(201).json({ token, user: { id: newUser._id, username: newUser.username } });
   } catch (error) {
@@ -36,7 +36,8 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const normalizedUsername = username.toLowerCase(); // Normalize username
+    const user = await User.findOne({ username: normalizedUsername });
 
     if (!user) {
       console.error("❌ User not found:", username);
@@ -50,7 +51,7 @@ export const login = async (req, res) => {
     }
 
     // ✅ Generate JWT Token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: "1h" });
 
     res.json({ token, user: { id: user._id, username: user.username } });
   } catch (error) {

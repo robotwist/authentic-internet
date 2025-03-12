@@ -27,6 +27,9 @@
   height: 64px;
   background-color: rgba(255, 255, 255, 0.2);
   border: 1px solid white;
+  background: url('../assets/artifact.webp') no-repeat center center;
+  background-size: cover;
+  image-rendering: pixelated;
 
 }
 
@@ -37,7 +40,7 @@
   background-size: cover;
 }
 .grass {
-  background: url("../assets/tiles/grass.webp") no-repeat center center;
+  background: url("../assets/tiles/piskel_grass.png") no-repeat center center;
   background-size: cover;
   box-shadow: 0 0 10px rgba(1, 37, 1, 0.5);
 }

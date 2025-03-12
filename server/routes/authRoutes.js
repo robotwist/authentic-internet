@@ -4,6 +4,7 @@ import { register, login } from "../controllers/authController.js";
 
 const router = express.Router();
 
+// 📌 1️⃣ POST /api/auth/register (Register a new user)
 router.post(
   "/register",
   [
@@ -25,13 +26,26 @@ router.post(
   }
 );
 
-router.post("/login", async (req, res) => {
-  try {
-    await login(req, res); 
-  } catch (error) {
-    console.error("Error in login route:", error);
-    res.status(500).json({ error: error.message });
+// 📌 2️⃣ POST /api/auth/login (Login an existing user)
+router.post(
+  "/login",
+  [
+    body("username").notEmpty().withMessage("Username is required"),
+    body("password").notEmpty().withMessage("Password is required"),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      await login(req, res); 
+    } catch (error) {
+      console.error("Error in login route:", error);
+      res.status(500).json({ error: error.message });
+    }
   }
-});
+);
 
 export default router;

@@ -5,7 +5,11 @@ import defaultArtifactImage from "/assets/artifact.webp"; // Ensure you have a d
 import swordImage from "/assets/ancient_sword.png"; // Specific image for the sword
 import orbImage from "/assets/mystic_orb.png"; // Specific image for the orb
 
+const TILE_SIZE = 64;
+
 const Artifact = ({ artifact, visible }) => {
+  if (!visible) return null;
+
   let artifactImage;
 
   // Use specific images for known artifacts

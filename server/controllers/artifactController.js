@@ -3,7 +3,7 @@ import Artifact from "../models/Artifact.js";
 // ✅ Create an artifact
 export const createArtifact = async (req, res) => {
   try {
-    const { content, location } = req.body;
+    const { content, location, riddle, answer } = req.body;
     const user = req.user._id;
 
     console.log("Incoming request data:", req.body);
@@ -16,6 +16,8 @@ export const createArtifact = async (req, res) => {
     const newArtifact = new Artifact({
       content,
       location,
+      riddle,
+      answer,
       user,
     });
 

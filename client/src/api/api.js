@@ -42,12 +42,15 @@ export const registerUser = async (username, password) => {
 // 🔹 FETCH ARTIFACTS
 export const fetchArtifacts = async () => {
   try {
-    const response = await API.get("/artifacts");
+    const response = await API.get("/artifacts");  // ✅ Ensure the correct endpoint
+    console.log("Fetched Artifacts:", response.data);  // ✅ Debugging
     return response.data;
   } catch (error) {
-    handleError(error);
+    console.error("Error fetching artifacts:", error);
+    return [];  // ✅ Return empty array to prevent crashes
   }
 };
+
 
 // 🔹 CREATE ARTIFACT FUNCTION
 export const createArtifact = async (artifactData) => {
