@@ -1,6 +1,7 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
 import { register, login } from "../controllers/authController.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -47,5 +48,22 @@ router.post(
     }
   }
 );
+
+// 📌 3️⃣ POST /api/auth/refresh (Refresh Token)
+router.post("/refresh", (req, res) => {
+  const authHeader = req.header("Authorization");
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ message: "Access Denied - No token provided" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
+    const newToken = jwt.sign({ userId: decoded.userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    res.json({ token: newToken });
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    res.status(500).json({ message: "Failed to refresh token" });
+  }
+});
 
 export default router;

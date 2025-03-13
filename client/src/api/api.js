@@ -4,32 +4,33 @@ const API = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
-// 🔹 ATTACH TOKEN TO API REQUESTS
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
-// 🔹 LOGIN FUNCTION
+// 🔹 Attach Token to Requests
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+/* ────────────────────────────────
+   🔹 AUTHENTICATION ENDPOINTS
+──────────────────────────────── */
+// 📌 Login User
 export const loginUser = async (username, password) => {
   try {
     const response = await API.post("/auth/login", { username, password });
-
-    // Store JWT token in localStorage
     localStorage.setItem("token", response.data.token);
-    console.log("Token stored:", response.data.token); // Debugging token storage
-
     return response.data;
   } catch (error) {
     handleError(error);
   }
 };
 
-// 🔹 REGISTER FUNCTION
+// 📌 Register User
 export const registerUser = async (username, password) => {
   try {
     const response = await API.post("/auth/register", { username, password });
@@ -39,20 +40,21 @@ export const registerUser = async (username, password) => {
   }
 };
 
-// 🔹 FETCH ARTIFACTS
+/* ────────────────────────────────
+   🔹 ARTIFACT ENDPOINTS (CRUD)
+──────────────────────────────── */
+// 📌 Fetch All Artifacts
 export const fetchArtifacts = async () => {
   try {
-    const response = await API.get("/artifacts");  // ✅ Ensure the correct endpoint
-    console.log("Fetched Artifacts:", response.data);  // ✅ Debugging
+    const response = await API.get("/artifacts");
     return response.data;
   } catch (error) {
     console.error("Error fetching artifacts:", error);
-    return [];  // ✅ Return empty array to prevent crashes
+    return [];
   }
 };
 
-
-// 🔹 CREATE ARTIFACT FUNCTION
+// 📌 Create an Artifact
 export const createArtifact = async (artifactData) => {
   try {
     const response = await API.post("/artifacts", artifactData);
@@ -62,17 +64,18 @@ export const createArtifact = async (artifactData) => {
   }
 };
 
-// 🔹 UNLOCK ARTIFACT FUNCTION
-export const unlockArtifact = async (artifactId) => {
+// 📌 Update an Artifact
+export const updateArtifact = async (artifactId, updatedData) => {
   try {
-    const response = await API.put(`/artifacts/${artifactId}/unlock`);
+    const response = await API.put(`/artifacts/${artifactId}`, updatedData);
     return response.data;
   } catch (error) {
-    handleError(error);
+    console.error("Error updating artifact:", error);
+    throw error;
   }
 };
 
-// 🔹 DELETE ARTIFACT FUNCTION
+// 📌 Delete an Artifact
 export const deleteArtifact = async (artifactId) => {
   try {
     const response = await API.delete(`/artifacts/${artifactId}`);
@@ -82,40 +85,89 @@ export const deleteArtifact = async (artifactId) => {
   }
 };
 
-// 🔹 CHECK USER ACCESS
-export const checkUserAccess = async () => {
+// 📌 Unlock an Artifact (Solve Riddle)
+export const unlockArtifact = async (artifactId, answer) => {
   try {
-    const response = await API.get("/users/me/access");
+    const response = await API.post(`/artifacts/unlock/${artifactId}`, { answer });
     return response.data;
   } catch (error) {
-    handleError(error);
+    console.error("Error unlocking artifact:", error);
+    return null;
   }
 };
 
-// 🔹 ADD FRIEND FUNCTION
-export const addFriend = async (userId, friendId) => {
+/* ────────────────────────────────
+   🔹 ARTIFACT MESSAGING
+──────────────────────────────── */
+// 📌 Fetch Message from Artifact
+export const fetchMessage = async (artifactId) => {
   try {
-    const response = await API.post(`/users/${userId}/add-friend`, { friendId });
+    const response = await API.get(`/artifacts/${artifactId}/message`);
     return response.data;
   } catch (error) {
-    handleError(error);
+    console.error("Error fetching message:", error);
+    return null;
   }
 };
 
-// 🔹 ERROR HANDLING FUNCTION
-const handleError = (error) => {
-  if (error.response) {
-    // Server responded with a status other than 200 range
-    console.error("Backend error:", error.response.data);
-    throw error.response.data;
-  } else if (error.request) {
-    // Request was made but no response received
-    console.error("Network error:", error.request);
-    throw new Error("Network error, please try again later.");
-  } else {
-    // Something else happened
-    console.error("Error:", error.message);
-    throw new Error(error.message);
+// 📌 Update Message in Artifact
+export const updateMessage = async (artifactId, messageText) => {
+  try {
+    const response = await API.put(`/artifacts/${artifactId}/message`, { messageText });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating message:", error);
+    return null;
+  }
+};
+
+
+export const deleteArtifactMessage = async (artifactId) => {
+  try {
+    const response = await API.delete(`/artifacts/${artifactId}/message`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting artifact message:", error);
+    return null;
+  }
+};
+
+
+/* ────────────────────────────────
+   🔹 MESSAGING SYSTEM (CRUD)
+──────────────────────────────── */
+export const sendMessage = async (recipient, content, artifactId = null) => {
+  try {
+    console.log("Sending message payload:", { recipient, content, artifactId });
+
+    const response = await API.post("/messages", { recipient, content, artifactId });
+    console.log("API response from sendMessage:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error sending message:", error.response ? error.response.data : error);
+    return null;
+  }
+};
+
+// 📌 Fetch User Messages
+export const fetchMessages = async () => {
+  try {
+    const response = await API.get("/messages");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    return [];
+  }
+};
+
+// 📌 Delete a Message
+export const deleteMessage = async (messageId) => {
+  try {
+    const response = await API.delete(`/messages/${messageId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    return null;
   }
 };
 

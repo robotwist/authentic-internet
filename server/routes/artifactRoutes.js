@@ -4,28 +4,10 @@ import authenticateToken from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// 📌 1️⃣ GET /api/artifacts (Fetch All Artifacts)
-router.get("/", async (req, res) => {
-  try {
-    const artifacts = await Artifact.find({});
-    if (!artifacts || artifacts.length === 0) {
-      return res.status(404).json({ message: "No artifacts found." });
-    }
-    res.json(artifacts);
-  } catch (error) {
-    console.error("Error fetching artifacts:", error);
-    res.status(500).json({ error: "Failed to fetch artifacts." });
-  }
-});
-
-// 📌 2️⃣ POST /api/artifacts (Leave an Artifact)
 router.post("/", authenticateToken, async (req, res) => {
   try {
-    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location } = req.body;
-    if (!name || !content || !area || !location || !location.x || !location.y) {
-      return res.status(400).json({ error: "Name, content, area, and location are required." });
-    }
-    
+    const { name, description, content, riddle, unlockAnswer, area, isExclusive, messageText, unlockCondition } = req.body;
+
     const newArtifact = new Artifact({
       name,
       description,
@@ -34,23 +16,38 @@ router.post("/", authenticateToken, async (req, res) => {
       unlockAnswer,
       area,
       isExclusive,
-      location,
       creator: req.user.userId,
+      type: "artifact",
+      messageText: messageText || "", // ✅ Message created with artifact
+      sender: req.user.userId,
+      recipient: null,
+      unlockCondition,
     });
 
     await newArtifact.save();
-    res.status(201).json({ message: "Artifact created successfully!", artifact: newArtifact });
+    res.json({ message: "Artifact created successfully!", artifact: newArtifact });
   } catch (error) {
     console.error("Error creating artifact:", error);
     res.status(500).json({ error: "Failed to create artifact." });
   }
 });
 
-// 📌 3️⃣ GET /api/artifacts/:id (Fetch Single Artifact by ID)
+/** 📌 2️⃣ FETCH ALL ARTIFACTS */
+router.get("/", async (req, res) => {
+  try {
+    const artifacts = await Artifact.find({ type: "artifact" });
+    res.json(artifacts);
+  } catch (error) {
+    console.error("Error fetching artifacts:", error);
+    res.status(500).json({ error: "Failed to fetch artifacts." });
+  }
+});
+
+/** 📌 3️⃣ FETCH A SINGLE ARTIFACT BY ID */
 router.get("/:id", async (req, res) => {
   try {
     const artifact = await Artifact.findById(req.params.id);
-    if (!artifact) {
+    if (!artifact || artifact.type !== "artifact") {
       return res.status(404).json({ error: "Artifact not found." });
     }
     res.json(artifact);
@@ -60,13 +57,18 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// 📌 4️⃣ PUT /api/artifacts/:id (Update an Artifact)
 router.put("/:id", authenticateToken, async (req, res) => {
   try {
-    const updatedArtifact = await Artifact.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedArtifact) {
+    const updatedArtifact = await Artifact.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedArtifact || updatedArtifact.type !== "artifact") {
       return res.status(404).json({ error: "Artifact not found." });
     }
+
     res.json({ message: "Artifact updated successfully!", artifact: updatedArtifact });
   } catch (error) {
     console.error("Error updating artifact:", error);
@@ -74,13 +76,64 @@ router.put("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// 📌 5️⃣ DELETE /api/artifacts/:id (Delete an Artifact)
+router.get("/:id/message", authenticateToken, async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+
+    if (!artifact) {
+      return res.status(404).json({ error: "Artifact not found." });
+    }
+
+    res.json({ messageText: artifact.messageText });
+  } catch (error) {
+    console.error("Error fetching message:", error);
+    res.status(500).json({ error: "Failed to fetch message." });
+  }
+});
+router.put("/:id/message", authenticateToken, async (req, res) => {
+  try {
+    const { messageText } = req.body;
+    const artifact = await Artifact.findById(req.params.id);
+
+    if (!artifact || artifact.type !== "artifact") {
+      return res.status(404).json({ error: "Artifact not found or not an artifact type." });
+    }
+
+    artifact.messageText = messageText;
+    await artifact.save();
+    
+    res.json({ message: "Message updated successfully!", artifact });
+  } catch (error) {
+    console.error("Error updating message:", error);
+    res.status(500).json({ error: "Failed to update message." });
+  }
+});
+
+router.delete("/:id/message", authenticateToken, async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+
+    if (!artifact) {
+      return res.status(404).json({ error: "Artifact not found." });
+    }
+
+    artifact.messageText = "";
+    await artifact.save();
+    
+    res.json({ message: "Message deleted successfully!", artifact });
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    res.status(500).json({ error: "Failed to delete message." });
+  }
+});
+
 router.delete("/:id", authenticateToken, async (req, res) => {
   try {
     const deletedArtifact = await Artifact.findByIdAndDelete(req.params.id);
-    if (!deletedArtifact) {
+    if (!deletedArtifact || deletedArtifact.type !== "artifact") {
       return res.status(404).json({ error: "Artifact not found." });
     }
+
     res.json({ message: "Artifact deleted successfully!" });
   } catch (error) {
     console.error("Error deleting artifact:", error);
@@ -88,17 +141,15 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// 📌 6️⃣ POST /api/artifacts/unlock/:id (Solve Riddle to Claim)
+/** 📌 6️⃣ SOLVE RIDDLE TO UNLOCK ARTIFACT */
 router.post("/unlock/:id", authenticateToken, async (req, res) => {
   try {
     const artifact = await Artifact.findById(req.params.id);
-    if (!artifact) return res.status(404).json({ error: "Artifact not found." });
-
-    if (!artifact.riddle || !artifact.unlockAnswer) {
-      return res.status(400).json({ error: "This artifact does not require unlocking." });
+    if (!artifact || artifact.type !== "artifact") {
+      return res.status(404).json({ error: "Artifact not found." });
     }
 
-    if (artifact.unlockAnswer.toLowerCase() !== req.body.answer.toLowerCase()) {
+    if (!artifact.unlockAnswer || artifact.unlockAnswer.toLowerCase() !== req.body.answer.toLowerCase()) {
       return res.status(400).json({ error: "Incorrect answer. Try again!" });
     }
 

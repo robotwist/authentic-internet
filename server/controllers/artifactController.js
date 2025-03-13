@@ -3,22 +3,26 @@ import Artifact from "../models/Artifact.js";
 // ✅ Create an artifact
 export const createArtifact = async (req, res) => {
   try {
-    const { content, location, riddle, answer } = req.body;
+    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location } = req.body;
     const user = req.user._id;
 
     console.log("Incoming request data:", req.body);
     console.log("User ID:", user);
 
-    if (!content || !location || !location.x || !location.y) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!name || !content || !area || !location || !location.x || !location.y) {
+      return res.status(400).json({ message: "Name, content, area, and location are required." });
     }
 
     const newArtifact = new Artifact({
+      name,
+      description,
       content,
-      location,
       riddle,
-      answer,
-      user,
+      unlockAnswer,
+      area,
+      isExclusive,
+      location,
+      creator: user,
     });
 
     await newArtifact.save();

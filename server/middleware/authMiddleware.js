@@ -14,6 +14,10 @@ const authenticateToken = (req, res, next) => {
     console.log("Decoded User:", req.user); // ✅ DEBUG
     next();
   } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      console.error("JWT Verification Failed: Token Expired");
+      return res.status(401).json({ message: "Token expired" });
+    }
     console.error("JWT Verification Failed:", error);
     res.status(403).json({ message: "Invalid Token" });
   }

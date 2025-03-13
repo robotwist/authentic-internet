@@ -5,16 +5,17 @@ import session from "express-session";
 import connectMongo from "connect-mongo";
 import connectDB from "./config/db.js";
 const { default: Artifact } = await import("./models/Artifact.js");
+import messageRoutes from "./routes/messageRoutes.js";
 
 
 dotenv.config();
 
 const app = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// 🔹 Use MongoDB for Session Storage (No Redis)
 app.use(
   session({
     store: connectMongo.create({ mongoUrl: process.env.MONGO_URI }),
@@ -37,6 +38,7 @@ const startServer = async () => {
     app.use("/api/auth", authRoutes.default);
     app.use("/api/artifacts", artifactRoutes.default);
     app.use("/api/users", userRoutes.default);
+    app.use("/api/messages", messageRoutes);
 
     app.get("/", (req, res) => {
       res.send("✅ API is working! Use /api/artifacts or /api/users");

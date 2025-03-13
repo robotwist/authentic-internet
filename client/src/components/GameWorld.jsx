@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Character from "./Character";
 import Artifact from "./Artifact";
-import ArtifactForm from "./ArtifactForm";
+import ArtifactCreation from "./ArtifactCreation"; // Updated import
 import Inventory from "./Inventory";
 import ErrorBoundary from "./ErrorBoundary";
 import API from "../api/api";
@@ -300,7 +300,7 @@ const GameWorld = () => {
       </div>
 
       {showForm && (
-        <ArtifactForm
+        <ArtifactCreation
           position={formPosition}
           onClose={() => setShowForm(false)}
           refreshArtifacts={refreshArtifacts}
