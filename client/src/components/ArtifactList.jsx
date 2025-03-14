@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import API from "../api/api"; // Centralized API calls
+import "./ArtifactList.css"; // Import the new CSS file
 
 const ArtifactList = () => {
   const [artifacts, setArtifacts] = useState([]);
   const [unlockedArtifacts, setUnlockedArtifacts] = useState({});
   const [passwordInputs, setPasswordInputs] = useState({});
 
-  // Fetch Artifacts
+  
   useEffect(() => {
     const fetchArtifacts = async () => {
       try {
@@ -20,17 +21,17 @@ const ArtifactList = () => {
     fetchArtifacts();
   }, []);
 
-  // Unlock a Hidden Artifact
+ 
   const unlockArtifact = (id) => {
     setUnlockedArtifacts((prev) => ({ ...prev, [id]: true }));
   };
 
-  // Handle Password Input Changes
+  
   const handlePasswordInput = (e, id) => {
     setPasswordInputs({ ...passwordInputs, [id]: e.target.value });
   };
 
-  // Submit Password to Unlock a Locked Artifact
+ 
   const submitPassword = (id, correctPassword) => {
     if (passwordInputs[id]?.trim().toLowerCase() === correctPassword?.trim().toLowerCase()) {
       setUnlockedArtifacts((prev) => ({ ...prev, [id]: true }));
@@ -41,20 +42,11 @@ const ArtifactList = () => {
   };
 
   return (
-    <div style={{ padding: "20px", background: "#1e1e1e", color: "#fff", borderRadius: "8px" }}>
+    <div className="artifact-list-container">
       <h2>📜 Artifacts</h2>
-      <ul style={{ listStyle: "none", padding: 0 }}>
+      <ul className="artifact-list">
         {artifacts.map((artifact) => (
-          <li
-            key={artifact._id}
-            style={{
-              marginBottom: "12px",
-              padding: "10px",
-              background: "#292929",
-              borderRadius: "6px",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-            }}
-          >
+          <li key={artifact._id} className="artifact-item">
             <strong>
               {artifact.visibility === "hidden" && !unlockedArtifacts[artifact._id]
                 ? "🔍 [Hidden Artifact]"
@@ -63,64 +55,35 @@ const ArtifactList = () => {
                 : `📜 ${artifact.name || "Unnamed Artifact"}`}
             </strong>
 
-            {/* Unlock Button for Hidden Artifacts */}
+         
             {artifact.visibility === "hidden" && !unlockedArtifacts[artifact._id] && (
-              <button
-                onClick={() => unlockArtifact(artifact._id)}
-                style={{
-                  marginLeft: "8px",
-                  padding: "5px",
-                  background: "#007bff",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
-              >
+              <button onClick={() => unlockArtifact(artifact._id)} className="unlock-button">
                 🔓 Unlock
               </button>
             )}
 
-            {/* Password Input for Locked Artifacts */}
             {artifact.visibility === "locked" && !unlockedArtifacts[artifact._id] && (
-              <div style={{ marginTop: "8px" }}>
+              <div className="password-container">
                 <input
                   type="password"
                   placeholder="Enter password"
                   value={passwordInputs[artifact._id] || ""}
                   onChange={(e) => handlePasswordInput(e, artifact._id)}
-                  style={{
-                    padding: "6px",
-                    marginRight: "6px",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                  }}
+                  className="password-input"
                 />
-                <button
-                  onClick={() => submitPassword(artifact._id, artifact.unlockKey)}
-                  style={{
-                    padding: "5px",
-                    background: "#28a745",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                  }}
-                >
+                <button onClick={() => submitPassword(artifact._id, artifact.unlockAnswer)} className="submit-button">
                   🔑 Submit
                 </button>
               </div>
             )}
 
-            {/* Display Artifact Content if Unlocked */}
             {unlockedArtifacts[artifact._id] && (
-              <p style={{ marginTop: "8px", color: "#bbb" }}>{artifact.content}</p>
+              <p className="artifact-content">{artifact.content}</p>
             )}
 
-            {/* Display GPS Coordinates if Available */}
-            {artifact.location?.latitude && artifact.location?.longitude && (
-              <p style={{ marginTop: "8px", color: "#aaa" }}>
-                🌍 Location: {artifact.location.latitude}, {artifact.location.longitude}
+            {artifact.location?.x !== undefined && artifact.location?.y !== undefined && (
+              <p className="artifact-location">
+                🌍 Location: {artifact.location.x}, {artifact.location.y}
               </p>
             )}
           </li>

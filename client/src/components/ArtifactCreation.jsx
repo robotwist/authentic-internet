@@ -1,6 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import API from "../api/api"; // Centralized API calls
 import "./ArtifactCreation.css";
-import { createArtifact } from "../api/api";  // ✅ Ensure this is imported
 
 const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
   const [artifactData, setArtifactData] = useState({
@@ -25,17 +25,26 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Submitting artifact data:", artifactData); // ✅ Debugging
+    // Basic validation
+    if (!artifactData.name || !artifactData.description || !artifactData.content) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    console.log("🛠️ Submitting Artifact:", artifactData);
 
     try {
-      const response = await createArtifact(artifactData);
-      console.log("Artifact created successfully:", response);
+      const response = await API.post("/artifacts", artifactData);
 
-      alert("Artifact created!");
-      refreshArtifacts(); // ✅ Update artifact list
-      onClose(); // ✅ Close form
+      if (response && response.data) {
+        console.log("Artifact created successfully:", response.data);
+        refreshArtifacts(); // Update artifact list
+        onClose(); // Close the form
+      } else {
+        alert("❌ Failed to create artifact.");
+      }
     } catch (error) {
-      console.error("Error placing artifact:", error);
+      console.error("Error creating artifact:", error);
       alert("Failed to create artifact. Check console for details.");
     }
   };
@@ -44,55 +53,57 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
     <div className="artifact-creation-overlay">
       <div className="artifact-creation-container">
         <h2>Create an Artifact</h2>
-        <input
-          name="name"
-          value={artifactData.name}
-          onChange={handleChange}
-          placeholder="Artifact name"
-          required
-        />
-        <input
-          name="description"
-          value={artifactData.description}
-          onChange={handleChange}
-          placeholder="Artifact description"
-          required
-        />
-        <input
-          name="content"
-          value={artifactData.content}
-          onChange={handleChange}
-          placeholder="Artifact content"
-          required
-        />
-        <input
-          name="riddle"
-          value={artifactData.riddle}
-          onChange={handleChange}
-          placeholder="Riddle (Optional)"
-        />
-        <input
-          name="unlockAnswer"
-          value={artifactData.unlockAnswer}
-          onChange={handleChange}
-          placeholder="Answer (If Riddle)"
-        />
-        <select name="area" value={artifactData.area} onChange={handleChange}>
-          <option value="Overworld">Overworld</option>
-          <option value="Desert">Desert</option>
-          <option value="Dungeon">Dungeon</option>
-        </select>
-        <label>
-          Exclusive:
+        <form onSubmit={handleSubmit}>
           <input
-            name="isExclusive"
-            type="checkbox"
-            checked={artifactData.isExclusive}
+            name="name"
+            value={artifactData.name}
             onChange={handleChange}
+            placeholder="Artifact name"
+            required
           />
-        </label>
-        <button onClick={handleSubmit}>Place Artifact</button>
-        <button onClick={onClose}>Cancel</button>
+          <input
+            name="description"
+            value={artifactData.description}
+            onChange={handleChange}
+            placeholder="Artifact description"
+            required
+          />
+          <input
+            name="content"
+            value={artifactData.content}
+            onChange={handleChange}
+            placeholder="Artifact content"
+            required
+          />
+          <input
+            name="riddle"
+            value={artifactData.riddle}
+            onChange={handleChange}
+            placeholder="Riddle (Optional)"
+          />
+          <input
+            name="unlockAnswer"
+            value={artifactData.unlockAnswer}
+            onChange={handleChange}
+            placeholder="Answer (If Riddle)"
+          />
+          <select name="area" value={artifactData.area} onChange={handleChange}>
+            <option value="Overworld">Overworld</option>
+            <option value="Desert">Desert</option>
+            <option value="Dungeon">Dungeon</option>
+          </select>
+          <label>
+            Exclusive:
+            <input
+              name="isExclusive"
+              type="checkbox"
+              checked={artifactData.isExclusive}
+              onChange={handleChange}
+            />
+          </label>
+          <button type="submit">Place Artifact</button>
+          <button type="button" onClick={onClose}>Cancel</button>
+        </form>
       </div>
     </div>
   );

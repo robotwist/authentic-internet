@@ -4,6 +4,9 @@ import authenticateToken from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+/* ────────────────────────────────
+   🔹 CREATE ARTIFACT (WITH MESSAGE)
+──────────────────────────────── */
 router.post("/", authenticateToken, async (req, res) => {
   try {
     const { name, description, content, riddle, unlockAnswer, area, isExclusive, messageText, unlockCondition } = req.body;
@@ -18,24 +21,26 @@ router.post("/", authenticateToken, async (req, res) => {
       isExclusive,
       creator: req.user.userId,
       type: "artifact",
-      messageText: messageText || "", // ✅ Message created with artifact
+      messageText: messageText || "", // ✅ Default to empty string if no message
       sender: req.user.userId,
       recipient: null,
       unlockCondition,
     });
 
     await newArtifact.save();
-    res.json({ message: "Artifact created successfully!", artifact: newArtifact });
+    res.status(201).json({ message: "Artifact created successfully!", artifact: newArtifact });
   } catch (error) {
     console.error("Error creating artifact:", error);
     res.status(500).json({ error: "Failed to create artifact." });
   }
 });
 
-/** 📌 2️⃣ FETCH ALL ARTIFACTS */
+/* ────────────────────────────────
+   🔹 FETCH ALL ARTIFACTS
+──────────────────────────────── */
 router.get("/", async (req, res) => {
   try {
-    const artifacts = await Artifact.find({ type: "artifact" });
+    const artifacts = await Artifact.find({ type: "artifact" }).populate("creator");
     res.json(artifacts);
   } catch (error) {
     console.error("Error fetching artifacts:", error);
@@ -43,10 +48,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-/** 📌 3️⃣ FETCH A SINGLE ARTIFACT BY ID */
+/* ────────────────────────────────
+   🔹 FETCH A SINGLE ARTIFACT BY ID
+──────────────────────────────── */
 router.get("/:id", async (req, res) => {
   try {
-    const artifact = await Artifact.findById(req.params.id);
+    const artifact = await Artifact.findById(req.params.id).populate("creator");
     if (!artifact || artifact.type !== "artifact") {
       return res.status(404).json({ error: "Artifact not found." });
     }
@@ -57,6 +64,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/* ────────────────────────────────
+   🔹 UPDATE ARTIFACT (EDIT PROPERTIES)
+──────────────────────────────── */
 router.put("/:id", authenticateToken, async (req, res) => {
   try {
     const updatedArtifact = await Artifact.findByIdAndUpdate(
@@ -76,9 +86,17 @@ router.put("/:id", authenticateToken, async (req, res) => {
   }
 });
 
+/* ────────────────────────────────
+   🔹 FETCH MESSAGE FROM ARTIFACT
+──────────────────────────────── */
 router.get("/:id/message", authenticateToken, async (req, res) => {
   try {
-    const artifact = await Artifact.findById(req.params.id);
+    const { id } = req.params;
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ error: "Invalid artifact ID format." });
+    }
+
+    const artifact = await Artifact.findById(id);
 
     if (!artifact) {
       return res.status(404).json({ error: "Artifact not found." });
@@ -90,18 +108,22 @@ router.get("/:id/message", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch message." });
   }
 });
+
+/* ────────────────────────────────
+   🔹 UPDATE MESSAGE IN ARTIFACT
+──────────────────────────────── */
 router.put("/:id/message", authenticateToken, async (req, res) => {
   try {
     const { messageText } = req.body;
     const artifact = await Artifact.findById(req.params.id);
 
-    if (!artifact || artifact.type !== "artifact") {
-      return res.status(404).json({ error: "Artifact not found or not an artifact type." });
+    if (!artifact) {
+      return res.status(404).json({ error: "Artifact not found." });
     }
 
     artifact.messageText = messageText;
     await artifact.save();
-    
+
     res.json({ message: "Message updated successfully!", artifact });
   } catch (error) {
     console.error("Error updating message:", error);
@@ -109,6 +131,9 @@ router.put("/:id/message", authenticateToken, async (req, res) => {
   }
 });
 
+/* ────────────────────────────────
+   🔹 DELETE MESSAGE FROM ARTIFACT
+──────────────────────────────── */
 router.delete("/:id/message", authenticateToken, async (req, res) => {
   try {
     const artifact = await Artifact.findById(req.params.id);
@@ -119,7 +144,7 @@ router.delete("/:id/message", authenticateToken, async (req, res) => {
 
     artifact.messageText = "";
     await artifact.save();
-    
+
     res.json({ message: "Message deleted successfully!", artifact });
   } catch (error) {
     console.error("Error deleting message:", error);
@@ -127,6 +152,9 @@ router.delete("/:id/message", authenticateToken, async (req, res) => {
   }
 });
 
+/* ────────────────────────────────
+   🔹 DELETE ARTIFACT
+──────────────────────────────── */
 router.delete("/:id", authenticateToken, async (req, res) => {
   try {
     const deletedArtifact = await Artifact.findByIdAndDelete(req.params.id);
@@ -141,7 +169,9 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-/** 📌 6️⃣ SOLVE RIDDLE TO UNLOCK ARTIFACT */
+/* ────────────────────────────────
+   🔹 SOLVE RIDDLE TO UNLOCK ARTIFACT
+──────────────────────────────── */
 router.post("/unlock/:id", authenticateToken, async (req, res) => {
   try {
     const artifact = await Artifact.findById(req.params.id);

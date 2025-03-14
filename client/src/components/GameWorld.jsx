@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { fetchArtifacts, createArtifact, updateCharacter } from "../api/api"; // Import fetch and create artifacts
 import Character from "./Character";
 import Artifact from "./Artifact";
 import ArtifactCreation from "./ArtifactCreation"; // Updated import
@@ -10,10 +10,11 @@ import "./GameWorld.css";
 import "./Character.css";
 import "./Artifact.css";
 import "./Inventory.css";
+import { v4 as uuidv4 } from 'uuid';
 
 const TILE_SIZE = 64;
-const MAP_ROWS = 200;
-const MAP_COLS = 200;
+const MAP_ROWS = 20;
+const MAP_COLS = 20;
 
 // Tile Classes
 const TILE_TYPES = {
@@ -22,14 +23,92 @@ const TILE_TYPES = {
   2: "water",
   3: "sand",
   4: "dungeon",
+  5: "portal",
+};
+
+const isWalkable = (x, y, map) => {
+  const row = Math.floor(y / TILE_SIZE);
+  const col = Math.floor(x / TILE_SIZE);
+  return map?.[row]?.[col] === 0 || map?.[row]?.[col] === 5 || map?.[row]?.[col] === 3; 
 };
 
 const MAPS = [
   {
     name: "Overworld",
     data: [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 0, 0, 0, 0, 0, 5, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ],
+    artifacts: [
+      { _id: uuidv4(), name: "Ancient Sword", description: "A sword from ancient times", content: "This is an ancient sword.", x: 3, y: 2, exp: 10, visible: true, area: "Overworld" },
+      { _id: uuidv4(),
+        name: "Mystic Orb",
+        description: "A glowing orb filled with swirling energy.",
+        content: "It hums with an ancient power.",
+        riddle: "What has roots as nobody sees, is taller than trees?",
+        unlockAnswer: "mountain",
+        area: "Overworld",
+        isExclusive: false,
+        creator: uuidv4(), 
+        type: "artifact",
+        messageText: "",
+        sender: null,
+        recipient: null,
+        isRead: false,
+        unlockCondition: "Solve the riddle.",
+        location: { x: 4, y: 4 } 
+      },
+    ],
+  },
+  {
+    name: "Overworld 2",
+    data: [
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ],
+    artifacts: [
+      // Similar artifacts structure as Overworld 1
+    ],
+  },
+  {
+    name: "Overworld 3",
+    data: [
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -49,12 +128,12 @@ const MAPS = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ],
     artifacts: [
-      { id: 1, name: "Ancient Sword", x: 3, y: 2, exp: 10, visible: true },
-      { id: 2, name: "Mystic Orb", x: 7, y: 5, exp: 15, visible: true },
+      // Similar artifacts structure as Overworld 1
     ],
   },
+  // Desert Maps
   {
-    name: "Desert",
+    name: "Desert 1",
     data: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -64,13 +143,50 @@ const MAPS = [
       [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
       [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 1, 1, 1, 1, 1, 5, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ],
+    artifacts: [{ _id: 3, name: "Golden Idol", description: "A golden idol", content: "This is a golden idol.", x: 4, y: 6, exp: 20, visible: true, area: "Desert" }],
+  },
+  {
+    name: "Desert 2",
+    data: [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+      [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+      [1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 5, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
-    artifacts: [{ id: 3, name: "Golden Idol", x: 4, y: 6, exp: 20, visible: true }],
+    artifacts: [
+      // Similar artifacts structure as Desert 1
+    ],
   },
   {
-    name: "Dungeon",
+    name: "Desert 3",
+    data: [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [0, 0, 1, 1, 5, 1, 1, 1, 0, 1],
+      [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+      [1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ],
+    artifacts: [
+      // Similar artifacts structure as Desert 1
+    ],
+  },
+  // Dungeon Maps
+  {
+    name: "Dungeon 1",
     data: [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
@@ -83,23 +199,75 @@ const MAPS = [
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
     ],
-    artifacts: [{ id: 4, name: "Dungeon Key", x: 5, y: 5, exp: 25, visible: true }],
+    artifacts: [{ _id: 4, name: "Dungeon Key", description: "A key to the dungeon", content: "This is a dungeon key.", x: 5, y: 5, exp: 25, visible: true, area: "Dungeon" }],
+  },
+  {
+    name: "Dungeon 2",
+    data: [
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 4, 4, 5, 4, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 4, 0, 4],
+      [4, 4, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    ],
+    artifacts: [
+      // Similar artifacts structure as Dungeon 1
+    ],
+  },
+  {
+    name: "Dungeon 3",
+    data: [
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 4, 0, 4],
+      [4, 4, 4, 4, 5, 4, 4, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    ],
+    artifacts: [
+      // Similar artifacts structure as Dungeon 1
+    ],
   },
 ];
 
-const isWalkable = (x, y, map) => {
-  const row = Math.floor(y / TILE_SIZE);
-  const col = Math.floor(x / TILE_SIZE);
-  return map?.[row]?.[col] === 0;
-};
-
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
-  const [inventory, setInventory] = useState([]);
+  
+  const [inventory, setInventory] = useState([
+    {
+      _id: uuidv4(),
+      name: "Mystic Orb",
+      description: "A glowing orb filled with swirling energy.",
+      content: "It hums with an ancient power.",
+      riddle: "What has roots as nobody sees, is taller than trees?",
+      unlockAnswer: "mountain",
+      area: "Overworld",
+      isExclusive: false,
+      creator: uuidv4(),
+      type: "artifact",
+      messageText: "",
+      sender: null,
+      recipient: null,
+      isRead: false,
+      unlockCondition: "Solve the riddle.",
+      location: { x: 4, y: 4 }
+    }
+  ]);
+
   const [characterPosition, setCharacterPosition] = useState({
-    x: 4 * TILE_SIZE,
-    y: 4 * TILE_SIZE,
+    x: 0,
+    y: 0,
   });
+  
   const [character, setCharacter] = useState({
     name: "Adventurer",
     level: 1,
@@ -123,7 +291,16 @@ const GameWorld = () => {
   const [formPosition, setFormPosition] = useState({ x: 0, y: 0 });
   const [visibleArtifact, setVisibleArtifact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [artifacts, setArtifacts] = useState(MAPS[currentMapIndex].artifacts);
+  const [artifacts, setArtifacts] = useState([]);
+
+  useEffect(() => {
+    fetchArtifacts()
+      .then((data) => {
+        console.log("📦 Loaded Artifacts:", data);  // ✅ Debug log
+        setArtifacts(data);
+      })
+      .catch((error) => console.error("❌ Error fetching artifacts:", error));
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -137,10 +314,10 @@ const GameWorld = () => {
       if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
         return;
       }
-
+    
       const speed = TILE_SIZE;
       let newPosition = { ...characterPosition };
-
+    
       switch (event.key) {
         case "ArrowUp":
         case "w":
@@ -172,29 +349,37 @@ const GameWorld = () => {
             newPosition.x += speed;
           }
           break;
-        case "e":
-          if (visibleArtifact) {
-            handleArtifactPickup();
-          } else {
-            if (isLoggedIn) {
-              setFormPosition({ x: newPosition.x, y: newPosition.y });
-              setShowForm(true);
+          
+          case "e":
+            if (visibleArtifact) {
+              handleArtifactPickup(); // ✅ Move to "P" instead
             } else {
-              alert("You need to be logged in to create artifacts.");
+              if (isLoggedIn) {
+                setFormPosition({ x: newPosition.x, y: newPosition.y });
+                setShowForm(true);
+              } else {
+                alert("You need to be logged in to create artifacts.");
+              }
             }
-          }
-          return;
-        case "i":
-          setShowInventory(!showInventory);
-          return;
-        default:
-          return;
-      }
+            return;
+          
+          // 🔹 "P" PICKS UP ARTIFACTS
+          case "p":
+            handleArtifactPickup();
+            return;
+      
+          // 🔹 "I" OPENS INVENTORY
+          case "i":
+            setShowInventory(!showInventory);
+            return;
+      
+          default:
+            return;
+        }
 
       setCharacterPosition(newPosition);
       adjustViewport(newPosition);
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [characterPosition, currentMapIndex, isLoggedIn, visibleArtifact]);
@@ -211,6 +396,18 @@ const GameWorld = () => {
     }
   }, [characterPosition, currentMapIndex]);
 
+  useEffect(() => {
+    const row = Math.floor(characterPosition.y / TILE_SIZE);
+    const col = Math.floor(characterPosition.x / TILE_SIZE);
+    if (MAPS[currentMapIndex].data[row][col] === 5) {
+      // Handle portal transition
+      if (currentMapIndex < MAPS.length - 1) {
+        setCurrentMapIndex((prev) => prev + 1);
+        setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE }); // Reset position
+      }
+    }
+  }, [characterPosition, currentMapIndex]);
+
   const adjustViewport = (pos) => {
     setViewport({
       x: Math.max(
@@ -223,77 +420,165 @@ const GameWorld = () => {
       ),
     });
   };
-
-  const handleArtifactPickup = () => {
-    const currentMap = MAPS[currentMapIndex];
-    const artifact = currentMap.artifacts.find(
-      (a) => a.x === characterPosition.x / TILE_SIZE && a.y === characterPosition.y / TILE_SIZE
-    );
-    if (artifact) {
-      setInventory((prev) => [...prev, artifact]);
-      setCharacter((prev) => ({
-        ...prev,
-        experience: prev.experience + artifact.exp,
-      }));
-      MAPS[currentMapIndex].artifacts = currentMap.artifacts.filter(
-        (a) => a.id !== artifact.id
-      );
-      setArtifacts([...MAPS[currentMapIndex].artifacts]);
-      setVisibleArtifact(null);
+  
+  const handleCreateArtifact = (name, description, messageText) => {
+    if (!isLoggedIn) {
+      alert("You need to be logged in to create artifacts.");
+      return;
+    }
+  
+    const newArtifact = {
+      name,
+      description,
+      messageText,
+      location: { x: characterPosition.x / TILE_SIZE, y: characterPosition.y / TILE_SIZE }, // ✅ Store as object
+      creator: user._id,
+      visible: true,
+    };
+  
+    console.log("✨ Creating artifact at:", newArtifact.location);
+  
+    createArtifact(newArtifact)
+      .then((data) => {
+        console.log("✅ Artifact Created:", data);
+        updateArtifactsState(data); // ✅ Uses helper function to update artifacts
+      })
+      .catch((error) => console.error("❌ Error creating artifact:", error));
+  };
+  
+  // 🔄 **Helper Function for Updating Artifacts State**
+  const updateArtifactsState = (newArtifact) => {
+    setArtifacts((prev) => [...prev, newArtifact]);
+  };
+  
+  const refreshArtifacts = async () => {
+    try {
+      const updatedArtifacts = await fetchArtifacts();
+      setArtifacts(updatedArtifacts);
+    } catch (error) {
+      console.error("❌ Error refreshing artifacts:", error);
     }
   };
-
-  const refreshArtifacts = () => {
-    setArtifacts([...MAPS[currentMapIndex].artifacts]);
+  
+  // 🔄 **Helper Function for Finding Artifact**
+  const findArtifactAtLocation = (x, y) => {
+    return artifacts.find((a) => a?.location?.x === x && a?.location?.y === y);
   };
-
+  
+  // 🎒 **Pickup Artifact**
+  const handleArtifactPickup = () => {
+    if (!characterPosition) {
+      console.error("🚨 Character position is undefined!");
+      return;
+    }
+  
+    const { x, y } = {
+      x: characterPosition.x / TILE_SIZE,
+      y: characterPosition.y / TILE_SIZE,
+    };
+  
+    console.log("📍 Checking for artifact at:", { x, y });
+  
+    const artifact = findArtifactAtLocation(x, y);
+  
+    if (artifact) {
+      console.log("✅ Picking Up Artifact:", artifact);
+      setInventory((prev) => [...prev, artifact]); // Add to inventory
+      handleGainExperience(artifact.exp || 0); // Gain XP
+      removeArtifactFromMap(artifact._id); // Remove from map
+    } else {
+      console.warn("⚠️ No artifact found at this location.");
+    }
+  };
+  
+  // 🔄 **Helper Function to Remove Artifact From Map**
+  const removeArtifactFromMap = (artifactId) => {
+    setArtifacts((prev) => prev.filter((a) => a._id !== artifactId));
+  };
+  
+  // 🔄 **Update Artifact in Inventory**
   const handleUpdateArtifact = (updatedArtifact) => {
-    setInventory((prevInventory) =>
-      prevInventory.map((artifact) =>
-        artifact.id === updatedArtifact.id ? updatedArtifact : artifact
-      )
-    );
+    if (!updatedArtifact || !updatedArtifact._id) {
+      console.error("🚨 Invalid artifact update: Missing _id!", updatedArtifact);
+      return;
+    }
+  
+    setInventory((prevInventory) => {
+      const exists = prevInventory.some((artifact) => artifact._id === updatedArtifact._id);
+      if (!exists) {
+        console.warn("⚠️ Artifact not found in inventory:", updatedArtifact._id);
+      } else {
+        console.log("🔄 Updating artifact in inventory:", updatedArtifact);
+      }
+  
+      return prevInventory.map((artifact) =>
+        artifact._id === updatedArtifact._id ? updatedArtifact : artifact
+      );
+    });
   };
-
-  const handleGainExperience = (points) => {
-    setCharacter((prev) => ({
-      ...prev,
-      experience: prev.experience + points,
-    }));
+  
+  // 🔄 **Gain Experience**
+  const handleGainExperience = async (points) => {
+    setCharacter((prev) => {
+      const updatedCharacter = { ...prev, experience: prev.experience + points };
+  
+      updateCharacter(updatedCharacter)
+        .then(() => console.log("✅ XP Updated on Backend"))
+        .catch((err) => console.error("❌ Failed to update XP:", err));
+  
+      return updatedCharacter;
+    });
   };
-
+  
+  
+  // ✅ **Debug: Log Loaded Artifacts**
+  console.log("📦 Loaded Artifacts:", artifacts);
+  artifacts.forEach((a) => console.log(`Artifact: ${a.name} at (${a.location?.x}, ${a.location?.y})`));
+  
   return (
     <div className="game-container">
       <div className="viewport" style={{ width: "100%", height: "100%" }}>
         <div className="game-world">
-          {MAPS[currentMapIndex].data.slice(viewport.y / TILE_SIZE, (viewport.y + 12 * TILE_SIZE) / TILE_SIZE).map((row, rowIndex) =>
-            row.slice(viewport.x / TILE_SIZE, (viewport.x + 16 * TILE_SIZE) / TILE_SIZE).map((tile, colIndex) => (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                className={`tile ${TILE_TYPES[tile]}`}
-                style={{
-                  position: "absolute",
-                  top: (rowIndex + viewport.y / TILE_SIZE) * TILE_SIZE - viewport.y,
-                  left: (colIndex + viewport.x / TILE_SIZE) * TILE_SIZE - viewport.x,
-                  width: TILE_SIZE,
-                  height: TILE_SIZE,
-                }}
-              />
-            ))
-          )}
+          {MAPS[currentMapIndex].data
+            .slice(viewport.y / TILE_SIZE, (viewport.y + 12 * TILE_SIZE) / TILE_SIZE)
+            .map((row, rowIndex) =>
+              row
+                .slice(viewport.x / TILE_SIZE, (viewport.x + 16 * TILE_SIZE) / TILE_SIZE)
+                .map((tile, colIndex) => (
+                  <div
+                    key={`tile-${rowIndex}-${colIndex}`}
+                    className={`tile ${TILE_TYPES[tile]}`}
+                    style={{
+                      position: "absolute",
+                      top: (rowIndex + viewport.y / TILE_SIZE) * TILE_SIZE - viewport.y,
+                      left: (colIndex + viewport.x / TILE_SIZE) * TILE_SIZE - viewport.x,
+                      width: TILE_SIZE,
+                      height: TILE_SIZE,
+                    }}
+                  />
+                ))
+            )}
 
           <Character position={characterPosition} />
 
           <ErrorBoundary>
-            {artifacts.map(
-              (artifact) =>
-                artifact.visible && (
-                  <Artifact
-                    key={artifact.id}
-                    artifact={artifact}
-                    visible={artifact === visibleArtifact}
-                  />
-                )
+            {artifacts.map((artifact) =>
+              artifact.visible ? (
+                <Artifact
+                  key={`artifact-${artifact._id}`}
+                  src={artifact.image}
+                  artifact={artifact}
+                  visible={artifact._id === visibleArtifact?._id}
+                  style={{
+                    position: "absolute",
+                    left: `${artifact.location.x * TILE_SIZE}px`,
+                    top: `${artifact.location.y * TILE_SIZE}px`,
+                    width: TILE_SIZE,
+                    height: TILE_SIZE,
+                    zIndex: 10
+                  }}
+                />
+              ) : null
             )}
           </ErrorBoundary>
         </div>
@@ -308,13 +593,13 @@ const GameWorld = () => {
       )}
 
       {showInventory && (
-        <Inventory
+        <Inventory 
           artifacts={inventory}
           onClose={() => setShowInventory(false)}
           onUpdateArtifact={handleUpdateArtifact}
           onGainExperience={handleGainExperience}
-          character={character}
-        />
+          refreshArtifacts={refreshArtifacts}
+        />      
       )}
     </div>
   );

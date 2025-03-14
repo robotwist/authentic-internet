@@ -1,0 +1,59 @@
+.artifact-list-container {
+  padding: 20px;
+  background: #1e1e1e;
+  color: #fff;
+  border-radius: 8px;
+}
+
+.artifact-list {
+  list-style: none;
+  padding: 0;
+}
+
+.artifact-item {
+  margin-bottom: 12px;
+  padding: 10px;
+  background: #292929;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.unlock-button {
+  margin-left: 8px;
+  padding: 5px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.password-container {
+  margin-top: 8px;
+}
+
+.password-input {
+  padding: 6px;
+  margin-right: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.submit-button {
+  padding: 5px;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.artifact-content {
+  margin-top: 8px;
+  color: #bbb;
+}
+
+.artifact-location {
+  margin-top: 8px;
+  color: #aaa;
+}

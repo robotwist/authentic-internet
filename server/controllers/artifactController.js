@@ -1,13 +1,10 @@
 import Artifact from "../models/Artifact.js";
 
-// ✅ Create an artifact
+// Create an artifact
 export const createArtifact = async (req, res) => {
   try {
     const { name, description, content, riddle, unlockAnswer, area, isExclusive, location } = req.body;
     const user = req.user._id;
-
-    console.log("Incoming request data:", req.body);
-    console.log("User ID:", user);
 
     if (!name || !content || !area || !location || !location.x || !location.y) {
       return res.status(400).json({ message: "Name, content, area, and location are required." });
@@ -21,7 +18,7 @@ export const createArtifact = async (req, res) => {
       unlockAnswer,
       area,
       isExclusive,
-      location,
+      location: { x: req.body.location.x, y: req.body.location.y } ,
       creator: user,
     });
 
@@ -33,10 +30,9 @@ export const createArtifact = async (req, res) => {
   }
 };
 
-// ✅ Get all artifacts
 export const getArtifacts = async (req, res) => {
   try {
-    const artifacts = await Artifact.find();
+    const artifacts = await Artifact.find().populate('creator', 'username');
     res.json(artifacts);
   } catch (error) {
     console.error("Error fetching artifacts:", error);
@@ -44,10 +40,26 @@ export const getArtifacts = async (req, res) => {
   }
 };
 
-// ✅ Update an artifact
+export const getArtifactById = async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id).populate('creator', 'username');
+    if (!artifact) return res.status(404).json({ message: "Artifact not found" });
+    res.json(artifact);
+  } catch (error) {
+    console.error("Error fetching artifact:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Update an artifact
 export const updateArtifact = async (req, res) => {
   try {
-    const updatedArtifact = await Artifact.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedArtifact = await Artifact.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      { new: true, runValidators: true }
+    ).populate('creator', 'username');
+    
     if (!updatedArtifact) return res.status(404).json({ message: "Artifact not found" });
     res.json(updatedArtifact);
   } catch (error) {
@@ -56,21 +68,29 @@ export const updateArtifact = async (req, res) => {
   }
 };
 
-// ✅ Unlock an artifact (for hidden items)
+// Unlock an artifact (for hidden items)
 export const unlockArtifact = async (req, res) => {
   try {
+    const { answer } = req.body;
     const artifact = await Artifact.findById(req.params.id);
+    
     if (!artifact) return res.status(404).json({ error: "Artifact not found" });
+    
+    // Check if answer is correct if provided
+    if (artifact.unlockAnswer && answer !== artifact.unlockAnswer) {
+      return res.status(400).json({ error: "Incorrect answer" });
+    }
 
     artifact.visibility = "open";
     await artifact.save();
     res.json({ success: true, message: "Artifact unlocked!" });
   } catch (error) {
+    console.error("Error unlocking artifact:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-// ✅ Delete an artifact
+// Delete an artifact
 export const deleteArtifact = async (req, res) => {
   try {
     const deletedArtifact = await Artifact.findByIdAndDelete(req.params.id);
@@ -78,6 +98,18 @@ export const deleteArtifact = async (req, res) => {
     res.json({ message: "Artifact deleted successfully" });
   } catch (error) {
     console.error("Error deleting artifact:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Get artifacts by area
+export const getArtifactsByArea = async (req, res) => {
+  try {
+    const { area } = req.params;
+    const artifacts = await Artifact.find({ area }).populate('creator', 'username');
+    res.json(artifacts);
+  } catch (error) {
+    console.error("Error fetching artifacts by area:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

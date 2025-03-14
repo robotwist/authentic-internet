@@ -12,7 +12,6 @@ const Artifact = ({ artifact, visible }) => {
 
   let artifactImage;
 
-  // Use specific images for known artifacts
   switch (artifact.name) {
     case "Ancient Sword":
       artifactImage = swordImage;
@@ -26,15 +25,14 @@ const Artifact = ({ artifact, visible }) => {
 
   const artifactStyle = {
     position: "absolute",
-    top: artifact.y * 64,
-    left: artifact.x * 64,
-    width: 64,
-    height: 64,
+    top: (artifact.y || 0) * TILE_SIZE, // Added default value to prevent NaN
+    left: (artifact.x || 0) * TILE_SIZE, // Added default value to prevent NaN
+    width: TILE_SIZE,
+    height: TILE_SIZE,
     backgroundImage: `url(${artifactImage})`,
     backgroundSize: "cover",
     border: visible ? "2px solid yellow" : "none",
   };
-
   return <div className="artifact" style={artifactStyle}></div>;
 };
 
