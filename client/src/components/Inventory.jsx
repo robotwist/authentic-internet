@@ -82,6 +82,8 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
               placeholder="Enter your message"
             />
             <button onClick={handleSendMessage}>Send Message</button>
+            <button onClick={handleSaveMessage}>Save Message</button>
+            <button onClick={() => handleDeleteMessage(selectedArtifact._id)}>Delete Message</button>
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../api/api";
+import API, { fetchCharacter } from "../api/api"; // Import API as default export
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -17,6 +17,19 @@ const Login = () => {
       console.log("✅ Login Success:", response.data);
 
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user)); // Ensure user object is stored correctly
+
+      // Debugging log to check user object
+      console.log("User object:", response.data.user);
+
+      // ✅ Fetch character after login
+      const userId = response.data.user.id; // frontend Use 'id' instead of '_id'
+      if (!userId) {
+        throw new Error("User ID is undefined");
+      }
+      const characterData = await fetchCharacter(userId);
+      localStorage.setItem("character", JSON.stringify(characterData));
+
       alert("Login successful!");
       navigate("/game");
     } catch (err) {
@@ -26,31 +39,12 @@ const Login = () => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh", backgroundColor: "#f0f0f0" }}>
-      <h2>Login</h2>
+    <form onSubmit={handleLogin}>
+      <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" />
+      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
+      <button type="submit">Login</button>
       {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", width: "300px", padding: "20px", backgroundColor: "#fff", borderRadius: "8px", boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)" }}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-          style={{ marginBottom: "10px", padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ marginBottom: "10px", padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }}
-        />
-        <button type="submit" style={{ padding: "10px", borderRadius: "4px", border: "none", backgroundColor: "#4caf50", color: "#fff", cursor: "pointer" }}>
-          Login
-        </button>
-      </form>
-    </div>
+    </form>
   );
 };
 

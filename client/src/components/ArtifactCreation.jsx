@@ -9,7 +9,7 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
     content: "",
     riddle: "",
     unlockAnswer: "",
-    area: "Overworld",  // Default area
+    area: "Overworld", // Default area
     isExclusive: false,
     location: { x: position.x / 64, y: position.y / 64 }, // Set location
   });

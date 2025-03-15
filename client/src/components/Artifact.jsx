@@ -33,6 +33,7 @@ const Artifact = ({ artifact, visible }) => {
     backgroundSize: "cover",
     border: visible ? "2px solid yellow" : "none",
   };
+
   return <div className="artifact" style={artifactStyle}></div>;
 };
 

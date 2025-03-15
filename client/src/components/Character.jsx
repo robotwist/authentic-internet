@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const TILE_SIZE = 64; // Each tile is 32x32 pixels
-const WORLD_WIDTH = 64 * TILE_SIZE;
-const WORLD_HEIGHT = 64 * TILE_SIZE;
-const VIEWPORT_WIDTH = 8 * TILE_SIZE;
-const VIEWPORT_HEIGHT = 8 * TILE_SIZE;
+const TILE_SIZE = 64; // Each tile is 64x64 pixels
 
 const Character = ({ position }) => {
   const [characterPosition, setCharacterPosition] = useState(position);

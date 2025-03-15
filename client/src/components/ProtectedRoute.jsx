@@ -5,7 +5,6 @@ const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
-    // Simulate a brief authentication check delay
     const token = localStorage.getItem("token");
     setTimeout(() => {
       setIsAuthenticated(!!token); // Convert token existence to boolean

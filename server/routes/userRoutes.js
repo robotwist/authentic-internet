@@ -8,14 +8,19 @@ const router = express.Router();
 // 📌 Add Friend (🔐 Requires Authentication)
 router.post("/:id/add-friend", authenticateToken, async (req, res) => {
   try {
-    if (req.user.userId !== req.params.id) {
+    const { id } = req.params;
+    const { friendId } = req.body;
+
+    if (req.user.userId !== id) {
       return res.status(403).json({ message: "You can only modify your own friend list" });
     }
 
-    const user = await User.findById(req.params.id);
-    const friend = await User.findById(req.body.friendId);
+    const user = await User.findById(id);
+    const friend = await User.findById(friendId);
 
-    if (!user || !friend) return res.status(404).json({ message: "User not found" });
+    if (!user || !friend) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     // Prevent duplicate friends
     if (user.friends.includes(friend._id)) {
@@ -45,6 +50,7 @@ router.get("/me", authenticateToken, async (req, res) => {
     }
 
     res.json({
+      id: user._id,
       username: user.username,
       avatar: user.avatar,
       friends: user.friends,
@@ -55,11 +61,25 @@ router.get("/me", authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);
-    res.status(500).json({ message: "Server error", error });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
 // 📌 Check User Access (🔐 Requires Authentication)
 router.get("/me/access", authenticateToken, getUserAccess);
+
+// 📌 Get Character by ID (🔐 Requires Authentication)
+router.get("/:id", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
 
 export default router;

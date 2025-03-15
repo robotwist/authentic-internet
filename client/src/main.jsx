@@ -4,7 +4,9 @@ import "./index.css";
 import App from "./App.jsx";
 import ErrorBoundary from "./components/ErrorBoundary"; // Global error handling
 
-createRoot(document.getElementById("root")).render(
+const rootElement = document.getElementById("root");
+
+createRoot(rootElement).render(
   <StrictMode>
     <ErrorBoundary>
       <App />

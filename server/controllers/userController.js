@@ -47,10 +47,10 @@ export const checkUserAccess = [
       }
 
       const accessGranted = user.friends.length > 0;
-      return res.json({ accessGranted });
+      res.json({ accessGranted });
     } catch (error) {
-      console.error("❌ Error checking access:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
+      console.error("Error checking user access:", error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
   }
 ];
@@ -58,7 +58,7 @@ export const checkUserAccess = [
 // ✅ Get user access
 export const getUserAccess = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

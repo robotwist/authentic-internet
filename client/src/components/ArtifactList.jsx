@@ -7,7 +7,6 @@ const ArtifactList = () => {
   const [unlockedArtifacts, setUnlockedArtifacts] = useState({});
   const [passwordInputs, setPasswordInputs] = useState({});
 
-  
   useEffect(() => {
     const fetchArtifacts = async () => {
       try {
@@ -21,17 +20,14 @@ const ArtifactList = () => {
     fetchArtifacts();
   }, []);
 
- 
   const unlockArtifact = (id) => {
     setUnlockedArtifacts((prev) => ({ ...prev, [id]: true }));
   };
 
-  
   const handlePasswordInput = (e, id) => {
     setPasswordInputs({ ...passwordInputs, [id]: e.target.value });
   };
 
- 
   const submitPassword = (id, correctPassword) => {
     if (passwordInputs[id]?.trim().toLowerCase() === correctPassword?.trim().toLowerCase()) {
       setUnlockedArtifacts((prev) => ({ ...prev, [id]: true }));
@@ -55,7 +51,6 @@ const ArtifactList = () => {
                 : `📜 ${artifact.name || "Unnamed Artifact"}`}
             </strong>
 
-         
             {artifact.visibility === "hidden" && !unlockedArtifacts[artifact._id] && (
               <button onClick={() => unlockArtifact(artifact._id)} className="unlock-button">
                 🔓 Unlock

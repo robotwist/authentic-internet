@@ -16,7 +16,6 @@ body {
   image-rendering: pixelated; /* Ensures crisp pixel art */
 }
 
-
 #root {
   width: 100vw;
   height: 100vh;

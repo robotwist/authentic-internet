@@ -4,9 +4,6 @@ import dotenv from "dotenv";
 import session from "express-session";
 import connectMongo from "connect-mongo";
 import connectDB from "./config/db.js";
-const { default: Artifact } = await import("./models/Artifact.js");
-import messageRoutes from "./routes/messageRoutes.js";
-
 
 dotenv.config();
 
@@ -34,11 +31,12 @@ const startServer = async () => {
     const authRoutes = await import("./routes/authRoutes.js");
     const artifactRoutes = await import("./routes/artifactRoutes.js");
     const userRoutes = await import("./routes/userRoutes.js");
+    const messageRoutes = await import("./routes/messageRoutes.js");
 
     app.use("/api/auth", authRoutes.default);
     app.use("/api/artifacts", artifactRoutes.default);
     app.use("/api/users", userRoutes.default);
-    app.use("/api/messages", messageRoutes);
+    app.use("/api/messages", messageRoutes.default);
 
     app.get("/", (req, res) => {
       res.send("✅ API is working! Use /api/artifacts or /api/users");

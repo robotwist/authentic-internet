@@ -6,11 +6,7 @@ import { sendMessage, fetchMessage } from "../controllers/messageController.js";
 
 const router = express.Router();
 
-router.post("/", authenticateToken, sendMessage);
-router.get("/", authenticateToken, fetchMessage);
-
-
-/** 📌 1️⃣ CREATE A MESSAGE (Tied to an Artifact) */
+// 📌 1️⃣ CREATE A MESSAGE (Tied to an Artifact)
 router.post("/", authenticateToken, async (req, res) => {
   try {
     const { recipient, content, artifactId } = req.body;
@@ -27,14 +23,14 @@ router.post("/", authenticateToken, async (req, res) => {
     });
 
     await newMessage.save();
-    res.json({ message: "Message sent successfully!", newMessage });
+    res.status(201).json({ message: "Message sent successfully!", newMessage });
   } catch (error) {
     console.error("Error sending message:", error);
     res.status(500).json({ error: "Failed to send message." });
   }
 });
 
-/** 📌 2️⃣ GET ALL MESSAGES FOR A USER */
+// 📌 2️⃣ GET ALL MESSAGES FOR A USER
 router.get("/", authenticateToken, async (req, res) => {
   try {
     const messages = await Message.find({ recipient: req.user.userId }).populate("artifact");
@@ -45,7 +41,7 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
-/** 📌 3️⃣ UPDATE A MESSAGE */
+// 📌 3️⃣ UPDATE A MESSAGE
 router.put("/:id", authenticateToken, async (req, res) => {
   try {
     const { content } = req.body;
@@ -69,7 +65,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-/** 📌 4️⃣ DELETE A MESSAGE */
+// 📌 4️⃣ DELETE A MESSAGE
 router.delete("/:id", authenticateToken, async (req, res) => {
   try {
     const message = await Message.findById(req.params.id);
@@ -90,7 +86,7 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-/** 📌 5️⃣ FETCH A MESSAGE ATTACHED TO AN ARTIFACT */
+// 📌 5️⃣ FETCH A MESSAGE ATTACHED TO AN ARTIFACT
 router.get("/artifact/:artifactId", authenticateToken, async (req, res) => {
   try {
     const artifact = await Artifact.findById(req.params.artifactId).populate("message");
