@@ -9,7 +9,11 @@ const router = express.Router();
 ──────────────────────────────── */
 router.post("/", authenticateToken, async (req, res) => {
   try {
-    const { name, description, content, riddle, unlockAnswer, area, isExclusive, messageText, unlockCondition } = req.body;
+    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location } = req.body;
+
+    if (!name || !description || !content || !area || !location) {
+      return res.status(400).json({ error: "All required fields must be provided." });
+    }
 
     const newArtifact = new Artifact({
       name,
@@ -19,12 +23,8 @@ router.post("/", authenticateToken, async (req, res) => {
       unlockAnswer,
       area,
       isExclusive,
+      location,
       creator: req.user.userId,
-      type: "artifact",
-      messageText: messageText || "", // ✅ Default to empty string if no message
-      sender: req.user.userId,
-      recipient: null,
-      unlockCondition,
     });
 
     await newArtifact.save();
@@ -92,17 +92,24 @@ router.put("/:id", authenticateToken, async (req, res) => {
 router.get("/:id/message", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ error: "Invalid artifact ID format." });
-    }
+    console.log("Fetching message for artifact ID:", id);
+    
+    // Try to find the artifact in the database
+    let artifact = await Artifact.findOne({
+      $or: [
+        { _id: id.match(/^[0-9a-fA-F]{24}$/) ? id : null },
+        { id: id }
+      ]
+    });
 
-    const artifact = await Artifact.findById(id);
-
+    // If not found in database, check if it's a map artifact
     if (!artifact) {
-      return res.status(404).json({ error: "Artifact not found." });
+      // Return empty message for map artifacts
+      return res.json({ messageText: "" });
     }
 
-    res.json({ messageText: artifact.messageText });
+    console.log("Found artifact:", artifact);
+    res.json({ messageText: artifact.messageText || "" });
   } catch (error) {
     console.error("Error fetching message:", error);
     res.status(500).json({ error: "Failed to fetch message." });
@@ -115,15 +122,34 @@ router.get("/:id/message", authenticateToken, async (req, res) => {
 router.put("/:id/message", authenticateToken, async (req, res) => {
   try {
     const { messageText } = req.body;
-    const artifact = await Artifact.findById(req.params.id);
+    const { id } = req.params;
+    console.log("Updating message for artifact ID:", id);
+    console.log("Message text:", messageText);
+    
+    // Try to find the artifact in the database
+    let artifact = await Artifact.findOne({
+      $or: [
+        { _id: id.match(/^[0-9a-fA-F]{24}$/) ? id : null },
+        { id: id }
+      ]
+    });
 
+    // If not found in database, create a new artifact
     if (!artifact) {
-      return res.status(404).json({ error: "Artifact not found." });
+      artifact = new Artifact({
+        id: id,
+        messageText: messageText,
+        type: "artifact",
+        name: "Map Artifact",
+        area: "world",
+        location: { x: 0, y: 0 }
+      });
+    } else {
+      artifact.messageText = messageText;
     }
 
-    artifact.messageText = messageText;
     await artifact.save();
-
+    console.log("Saved artifact:", artifact);
     res.json({ message: "Message updated successfully!", artifact });
   } catch (error) {
     console.error("Error updating message:", error);
@@ -136,15 +162,25 @@ router.put("/:id/message", authenticateToken, async (req, res) => {
 ──────────────────────────────── */
 router.delete("/:id/message", authenticateToken, async (req, res) => {
   try {
-    const artifact = await Artifact.findById(req.params.id);
+    const { id } = req.params;
+    console.log("Deleting message for artifact ID:", id);
+    
+    // Try to find the artifact in the database
+    let artifact = await Artifact.findOne({
+      $or: [
+        { _id: id.match(/^[0-9a-fA-F]{24}$/) ? id : null },
+        { id: id }
+      ]
+    });
 
+    // If not found in database, return success (nothing to delete)
     if (!artifact) {
-      return res.status(404).json({ error: "Artifact not found." });
+      return res.json({ message: "Message deleted successfully!" });
     }
 
     artifact.messageText = "";
     await artifact.save();
-
+    console.log("Cleared message from artifact:", artifact);
     res.json({ message: "Message deleted successfully!", artifact });
   } catch (error) {
     console.error("Error deleting message:", error);

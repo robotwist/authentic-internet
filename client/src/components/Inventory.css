@@ -1,34 +1,66 @@
 /* 🎒 Full-Screen Inventory Overlay */
 .inventory-overlay {
-  position: fixed;  /* Stays on top of everything */
+  position: fixed;
   top: 0;
-  left: 10;
-  right: 10;
-  bottom: 10;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent dark overlay */
-  color: white;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 9999; /* 🔥 Ensures it's above the game world */
+  align-items: center;
+  z-index: 1000;
 }
 
 /* 📦 Inventory Box */
 .inventory-container {
-  background-color: #333;
-  padding: 20px;
+  background-color: #1a1a1a;
   border-radius: 10px;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  width: 80%;
+  max-width: 800px;
+  height: 80vh;
+  max-height: 800px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  position: relative;
-  z-index: 10000; /* 🔥 Ensure it sits ABOVE tiles */
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Header */
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: #2a2a2a;
+  border-bottom: 2px solid #333;
+}
+
+.inventory-header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.close-button:hover {
+  color: #ff4444;
+}
+
+/* Content */
+.inventory-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
 /* 🧑 Character Section */
@@ -47,69 +79,280 @@
 
 /* 📜 Artifact List */
 .artifact-list {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  border-right: 1px solid #333;
+}
+
+.artifact-list h3 {
+  color: #4a90e2;
+  margin-bottom: 1rem;
+}
+
+.empty-message {
+  color: #666;
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.artifact-list ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  flex-grow: 1;
-  overflow-y: auto;
 }
 
 .artifact-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #444;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
-
-/* ⚔️ Artifact Buttons */
-.artifact-buttons button {
-  margin-right: 5px;
-  padding: 5px 10px;
-  border-radius: 5px;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  padding: 1rem;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.use-button { background-color: #4caf50; color: white; }
-.edit-button { background-color: #2196f3; color: white; }
-.delete-button { background-color: #ff4d4d; color: white; }
+.artifact-item:hover {
+  background-color: #333;
+  transform: translateX(5px);
+}
+
+.artifact-item.selected {
+  background-color: #3a3a3a;
+  border-left: 4px solid #4a90e2;
+}
+
+.artifact-info h4 {
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+}
+
+.artifact-info p {
+  color: #999;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.artifact-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.artifact-actions button {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.artifact-actions button:hover {
+  background-color: #357abd;
+}
 
 /* 📝 Message Editor */
+.message-editor {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #2a2a2a;
+}
+
+.editor-header {
+  margin-bottom: 1rem;
+}
+
+.editor-header h3 {
+  color: #4a90e2;
+  margin-bottom: 0.5rem;
+}
+
+.editor-info {
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.save-status {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.save-status.saving {
+  background-color: #2c3e50;
+  color: #3498db;
+}
+
+.save-status.success {
+  background-color: #27ae60;
+  color: white;
+}
+
+.save-status.error {
+  background-color: #c0392b;
+  color: white;
+}
+
 .message-editor textarea {
-  width: 100%;
-  height: 100px;
-  margin-bottom: 20px;
+  flex: 1;
+  min-height: 200px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  resize: none;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
-.save-button { background-color: #4caf50; color: white; }
-.cancel-button { background-color: #ff4d4d; color: white; }
-
-/* 💬 Message Form */
-.message-form {
-  margin-top: 20px;
+.message-editor textarea:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
-.message-form textarea {
-  width: 100%;
-  height: 70px;
-  margin-bottom: 10px;
+.editor-actions {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
 }
 
-.user-select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
+.editor-actions button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-.send-button {
+.editor-actions .save-button {
   background-color: #4caf50;
   color: white;
-  padding: 10px;
-  border-radius: 5px;
+}
+
+.editor-actions .save-button:hover {
+  background-color: #388e3c;
+  transform: translateY(-1px);
+}
+
+.editor-actions .delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.editor-actions .delete-button:hover {
+  background-color: #d32f2f;
+  transform: translateY(-1px);
+}
+
+.editor-actions .cancel-button {
+  background-color: #666;
+  color: white;
+}
+
+.editor-actions .cancel-button:hover {
+  background-color: #555;
+  transform: translateY(-1px);
+}
+
+.editor-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.editor-actions button:disabled:hover {
+  transform: none;
+  background-color: inherit;
+}
+
+/* Drop Confirmation */
+.drop-confirmation {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-confirmation h3 {
+  color: #4a90e2;
+  margin-bottom: 1rem;
+}
+
+.drop-confirmation p {
+  color: #999;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Button Groups */
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.button-group button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #388e3c;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #d32f2f;
+}
+
+.cancel-button {
+  background-color: #666;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #555;
+}
+
+.confirm-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.confirm-button:hover {
+  background-color: #388e3c;
 }
 
 /* 🏁 Fix Z-Index Issues */

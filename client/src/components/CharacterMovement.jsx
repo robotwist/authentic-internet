@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { TILE_SIZE, MAP_COLS, MAPS } from "./Constants";
+import { TILE_SIZE, MAP_COLS, MAPS, isWalkable } from "./Constants";
 
 const useCharacterMovement = (characterPosition, setCharacterPosition, currentMapIndex, setCurrentMapIndex, isLoggedIn, visibleArtifact, handleArtifactPickup, setShowForm, setFormPosition, setShowInventory, adjustViewport) => {
   useEffect(() => {

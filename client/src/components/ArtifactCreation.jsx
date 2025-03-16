@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import API from "../api/api"; // Centralized API calls
+import API from "../api/api";
 import "./ArtifactCreation.css";
 
 const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
@@ -9,9 +9,9 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
     content: "",
     riddle: "",
     unlockAnswer: "",
-    area: "Overworld", // Default area
+    area: "Overworld",
     isExclusive: false,
-    location: { x: position.x / 64, y: position.y / 64 }, // Set location
+    location: { x: position.x / 64, y: position.y / 64 },
   });
 
   const handleChange = (e) => {
@@ -25,7 +25,6 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
     if (!artifactData.name || !artifactData.description || !artifactData.content) {
       alert("Please fill in all required fields.");
       return;
@@ -38,8 +37,8 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
 
       if (response && response.data) {
         console.log("Artifact created successfully:", response.data);
-        refreshArtifacts(); // Update artifact list
-        onClose(); // Close the form
+        refreshArtifacts();
+        onClose();
       } else {
         alert("❌ Failed to create artifact.");
       }

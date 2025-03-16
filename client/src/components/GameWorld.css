@@ -1,36 +1,80 @@
 .game-container {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
   position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
 }
 
 .viewport {
-  width: 100vw;
-  height: 100vh;
   position: absolute;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
 .game-world {
-  width: 640px; /* 10 tiles * 64px */
-  height: 640px; /* 10 tiles * 64px */
   position: relative;
+  width: 1280px;
+  height: 1280px;
+  transform: translate(
+    calc(-1 * var(--viewport-x, 0px)),
+    calc(-1 * var(--viewport-y, 0px))
+  );
+  transition: transform 0.1s ease;
+}
+
+.game-world.paused {
+  filter: blur(3px) brightness(0.7);
+}
+
+.small-map {
+  width: 640px;
+  height: 640px;
+}
+
+.small-map .game-world {
+  width: 640px;
+  height: 640px;
 }
 
 .artifact {
   position: absolute;
   width: 64px;
   height: 64px;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  cursor: pointer;
+  z-index: 100;
   background-color: rgba(255, 255, 255, 0.2);
   border: 1px solid white;
   background: url('../assets/artifact.webp') no-repeat center center;
   background-size: cover;
   image-rendering: pixelated;
+}
 
+.artifact:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.artifact.weapon {
+  filter: drop-shadow(0 0 5px #ff4444);
+}
+
+.artifact.scroll {
+  filter: drop-shadow(0 0 5px #44ff44);
+}
+
+.artifact.relic {
+  filter: drop-shadow(0 0 5px #4444ff);
+}
+
+.artifact.key {
+  filter: drop-shadow(0 0 5px #ffff44);
+}
+
+.artifact.container {
+  filter: drop-shadow(0 0 5px #ff44ff);
 }
 
 .tile {
@@ -61,4 +105,224 @@
   background: url("../assets/tiles/sand.png") no-repeat center center;
   background-size: cover;
   box-shadow: 0 0 10px rgba(167, 167, 19, 0.5);
+}
+
+.dungeon {
+  background: url("../assets/tiles/dungeon.webp") no-repeat center center;
+  background-size: cover;
+  box-shadow: 0 0 10px  rgba(255, 255, 255, 0.5);
+}
+
+/* Portal Transition Effects */
+.portal-transition {
+  animation: portalSpin 1s ease-in-out;
+}
+
+@keyframes portalSpin {
+  0% {
+    transform: scale(1) rotate(0deg);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    filter: brightness(2);
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    filter: brightness(1);
+  }
+}
+
+.portal-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10001;
+  animation: portalFlash 1s ease-in-out;
+}
+
+@keyframes portalFlash {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.8; }
+}
+
+/* Pause Menu */
+.pause-menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.pause-menu h2 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.pause-menu button {
+  display: block;
+  width: 200px;
+  margin: 1rem auto;
+  padding: 0.8rem;
+  background: #4a90e2;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.pause-menu button:hover {
+  background: #357abd;
+}
+
+.edit-menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.95);
+  padding: 2rem;
+  border-radius: 10px;
+  color: white;
+  z-index: 1000;
+  min-width: 300px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.edit-menu h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #4a90e2;
+}
+
+.edit-menu textarea {
+  width: 100%;
+  min-height: 100px;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 5px;
+  color: white;
+  resize: vertical;
+}
+
+.edit-menu input {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 5px;
+  color: white;
+}
+
+.edit-menu button {
+  margin: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background: #4a90e2;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.edit-menu button:last-child {
+  background: #666;
+}
+
+.edit-menu button:hover {
+  background: #357abd;
+}
+
+.edit-menu button:last-child:hover {
+  background: #555;
+}
+
+.error-message {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 0, 0, 0.9);
+  padding: 1rem 2rem;
+  border-radius: 5px;
+  color: white;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: slideUp 0.3s ease;
+}
+
+.error-message button {
+  padding: 0.3rem 0.8rem;
+  background: transparent;
+  border: 1px solid white;
+  border-radius: 3px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.error-message button:hover {
+  background: white;
+  color: red;
+}
+
+.loading-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  padding: 2rem;
+  border-radius: 10px;
+  color: white;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading-spinner::after {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4a90e2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }

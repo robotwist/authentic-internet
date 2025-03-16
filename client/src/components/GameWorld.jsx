@@ -4,7 +4,8 @@ import {
   fetchArtifacts,
   createArtifact,
   fetchCharacter,
-  updateCharacter
+  updateCharacter,
+  updateArtifact
 } from "../api/api";
 import Character from "./Character";
 import Artifact from "./Artifact";
@@ -13,13 +14,14 @@ import Inventory from "./Inventory";
 import ErrorBoundary from "./ErrorBoundary";
 import Map from "./Map";
 import useCharacterMovement from "./CharacterMovement";
-import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS } from "./Constants";
+import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS, isWalkable, canInteract, getInteractionResult, isNearConditionMet } from "./Constants";
 import "./GameWorld.css";
 import "./Character.css";
 import "./Artifact.css";
 import "./Inventory.css";
+import { saveGameState, loadGameState, mergeArtifacts, createUserArtifact } from '../utils/gameState';
 
-const GameWorld = () => {
+const GameWorld = ({ mapIndex, onMapChange }) => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
   const [inventory, setInventory] = useState([]);
   const [characterPosition, setCharacterPosition] = useState({ x: 0, y: 0 });
@@ -31,6 +33,18 @@ const GameWorld = () => {
   const [visibleArtifact, setVisibleArtifact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [artifacts, setArtifacts] = useState([]);
+  const [mapArtifacts, setMapArtifacts] = useState(MAPS.map(map => [...map.artifacts]));
+  const [pickedUpArtifacts] = useState(new Set());
+  const [isPortalTransition, setIsPortalTransition] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [userArtifacts, setUserArtifacts] = useState([]);
+  const [modifiedArtifacts, setModifiedArtifacts] = useState([]);
+  const [exp, setExp] = useState(0);
+  const [selectedArtifact, setSelectedArtifact] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({});
 
   useEffect(() => {
     fetchArtifacts()
@@ -92,7 +106,7 @@ const GameWorld = () => {
   }, [character?.experience, character?.level]);
 
   const adjustViewport = (pos) => {
-    setViewport({
+    const newViewport = {
       x: Math.max(
         0,
         Math.min(pos.x - 8 * TILE_SIZE, MAP_COLS * TILE_SIZE - 16 * TILE_SIZE)
@@ -101,32 +115,72 @@ const GameWorld = () => {
         0,
         Math.min(pos.y - 6 * TILE_SIZE, MAP_ROWS * TILE_SIZE - 12 * TILE_SIZE)
       ),
-    });
+    };
+    setViewport(newViewport);
+    
+    // Update CSS variables for viewport position
+    const gameWorld = document.querySelector('.game-world');
+    if (gameWorld) {
+      gameWorld.style.setProperty('--viewport-x', `${newViewport.x}px`);
+      gameWorld.style.setProperty('--viewport-y', `${newViewport.y}px`);
+    }
   };
 
-  const handleCreateArtifact = (name, description, messageText) => {
+  const handlePortalTransition = () => {
+    setIsPortalTransition(true);
+    const portalSound = new Audio('/assets/sounds/portal.mp3');
+    portalSound.play().catch(err => console.warn('Audio not supported:', err));
+
+    setTimeout(() => {
+      if (currentMapIndex < MAPS.length - 1) {
+        setCurrentMapIndex((prev) => prev + 1);
+        setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
+      }
+      setTimeout(() => setIsPortalTransition(false), 500);
+    }, 1000);
+  };
+
+  const handleCreateArtifact = async (artifactData) => {
     if (!isLoggedIn) {
-      alert("You need to be logged in to create artifacts.");
+      setError("You need to be logged in to create artifacts.");
       return;
     }
 
-    const newArtifact = {
-      name,
-      description,
-      messageText,
-      location: { x: characterPosition.x / TILE_SIZE, y: characterPosition.y / TILE_SIZE },
-      creator: uuidv4(),
-      visible: true,
-    };
+    setIsLoading(true);
+    setError(null);
 
-    console.log("✨ Creating artifact at:", newArtifact.location);
+    try {
+      // Create the artifact data with proper structure
+      const newArtifact = {
+        ...artifactData,
+        location: { 
+          x: Math.floor(characterPosition.x / TILE_SIZE), 
+          y: Math.floor(characterPosition.y / TILE_SIZE) 
+        },
+        creator: uuidv4(),
+        visible: true,
+      };
 
-    createArtifact(newArtifact)
-      .then((data) => {
-        console.log("✅ Artifact Created:", data);
-        updateArtifactsState(data);
-      })
-      .catch((error) => console.error("❌ Error creating artifact:", error));
+      // First create in backend
+      const savedArtifact = await createArtifact(newArtifact);
+      
+      // Then create local user artifact
+      const userArtifact = createUserArtifact({
+        ...newArtifact,
+        _id: savedArtifact._id // Keep track of backend ID
+      });
+
+      // Update both states
+      updateArtifactsState(savedArtifact);
+      setUserArtifacts(prev => [...prev, userArtifact]);
+
+      console.log("✨ Created artifact:", savedArtifact);
+    } catch (error) {
+      setError(`Failed to create artifact: ${error.message}`);
+      console.error("❌ Error creating artifact:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const updateArtifactsState = (newArtifact) => {
@@ -143,7 +197,22 @@ const GameWorld = () => {
   };
 
   const findArtifactAtLocation = (x, y) => {
-    return artifacts.find((a) => a?.location?.x === x && a?.location?.y === y);
+    // Check database artifacts
+    const dbArtifact = artifacts.find((a) => a?.location?.x === x && a?.location?.y === y);
+    if (dbArtifact) return dbArtifact;
+
+    // Check map artifacts from state
+    const mapArtifact = mapArtifacts[currentMapIndex]?.find(
+      (a) => a?.location?.x === x && a?.location?.y === y
+    );
+    if (mapArtifact) return mapArtifact;
+
+    // Check user artifacts
+    const userArtifact = userArtifacts.find(
+      (a) => a?.location?.x === x && a?.location?.y === y && a.area === MAPS[currentMapIndex].name
+    );
+    
+    return userArtifact;
   };
 
   const handleArtifactPickup = () => {
@@ -153,46 +222,81 @@ const GameWorld = () => {
     }
 
     const { x, y } = {
-      x: characterPosition.x / TILE_SIZE,
-      y: characterPosition.y / TILE_SIZE,
+      x: Math.floor(characterPosition.x / TILE_SIZE),
+      y: Math.floor(characterPosition.y / TILE_SIZE),
     };
 
     console.log("📍 Checking for artifact at:", { x, y });
 
     const artifact = findArtifactAtLocation(x, y);
 
-    if (artifact) {
-      console.log("✅ Picking Up Artifact:", artifact);
-      setInventory((prev) => [...prev, artifact]);
-      handleGainExperience(artifact.exp || 0);
-      removeArtifactFromMap(artifact.id);
-    } else {
+    if (!artifact) {
       console.warn("⚠️ No artifact found at this location.");
+      return;
+    }
+
+    const artifactId = artifact.id || artifact._id;
+    if (pickedUpArtifacts.has(artifactId)) {
+      console.warn("⚠️ Artifact already picked up:", artifact.name);
+      return;
+    }
+
+    console.log("✅ Picking Up Artifact:", artifact);
+    setInventory((prev) => [...prev, artifact]);
+    handleGainExperience(artifact.exp || 0);
+    pickedUpArtifacts.add(artifactId);
+    
+    // Remove from appropriate array based on artifact type
+    if (artifact._id) {
+      removeArtifactFromMap(artifact._id);
+    } else if (artifact.id) {
+      // Remove from map artifacts state
+      setMapArtifacts(prevMapArtifacts => {
+        const newMapArtifacts = [...prevMapArtifacts];
+        newMapArtifacts[currentMapIndex] = newMapArtifacts[currentMapIndex].filter(
+          a => a.id !== artifact.id
+        );
+        return newMapArtifacts;
+      });
     }
   };
 
   const removeArtifactFromMap = (artifactId) => {
-    setArtifacts((prev) => prev.filter((a) => a.id !== artifactId));
+    setArtifacts((prev) => prev.filter((a) => a._id !== artifactId));
   };
 
-  const handleUpdateArtifact = (updatedArtifact) => {
-    if (!updatedArtifact || !updatedArtifact.id) {
-      console.error("🚨 Invalid artifact update: Missing id!", updatedArtifact);
+  const handleUpdateArtifact = async (artifactId, updates) => {
+    if (!artifactId) {
+      setError("Invalid artifact: Missing ID");
       return;
     }
 
-    setInventory((prevInventory) => {
-      const exists = prevInventory.some((artifact) => artifact.id === updatedArtifact.id);
-      if (!exists) {
-        console.warn("⚠️ Artifact not found in inventory:", updatedArtifact.id);
-      } else {
-        console.log("🔄 Updating artifact in inventory:", updatedArtifact);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await updateArtifact(artifactId, updates);
+      
+      setArtifacts(prevArtifacts => {
+        const updatedArtifacts = prevArtifacts.map(artifact => 
+          artifact._id === artifactId ? { ...artifact, ...updates } : artifact
+        );
+        return updatedArtifacts;
+      });
+
+      if (updates.status === 'dropped') {
+        setInventory(prevInventory => 
+          prevInventory.filter(artifact => artifact._id !== artifactId)
+        );
       }
 
-      return prevInventory.map((artifact) =>
-        artifact.id === updatedArtifact.id ? updatedArtifact : artifact
-      );
-    });
+      await refreshArtifacts();
+    } catch (error) {
+      setError(`Failed to update artifact: ${error.message}`);
+      console.error("❌ Error updating artifact:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGainExperience = async (points) => {
@@ -214,53 +318,211 @@ const GameWorld = () => {
   useCharacterMovement(characterPosition, setCharacterPosition, currentMapIndex, setCurrentMapIndex, isLoggedIn, visibleArtifact, handleArtifactPickup, setShowForm, setFormPosition, setShowInventory, adjustViewport);
 
   useEffect(() => {
-    const collidedArtifact = MAPS[currentMapIndex].artifacts.find(
-      (artifact) => artifact.location && artifact.location.x === characterPosition.x / TILE_SIZE && artifact.location.y === characterPosition.y / TILE_SIZE
+    const currentX = characterPosition.x / TILE_SIZE;
+    const currentY = characterPosition.y / TILE_SIZE;
+
+    const collidedMapArtifact = MAPS[currentMapIndex].artifacts.find(
+      (artifact) => artifact.location && 
+                   artifact.location.x === currentX && 
+                   artifact.location.y === currentY
     );
 
-    if (collidedArtifact) {
-      setVisibleArtifact(collidedArtifact);
+    const collidedDbArtifact = artifacts.find(
+      (artifact) => artifact.location && 
+                   artifact.location.x === currentX && 
+                   artifact.location.y === currentY
+    );
+
+    if (collidedDbArtifact) {
+      setVisibleArtifact(collidedDbArtifact);
+    } else if (collidedMapArtifact) {
+      setVisibleArtifact(collidedMapArtifact);
     } else {
       setVisibleArtifact(null);
     }
-  }, [characterPosition, currentMapIndex]);
+  }, [characterPosition, currentMapIndex, artifacts]);
 
   useEffect(() => {
     const row = Math.floor(characterPosition.y / TILE_SIZE);
     const col = Math.floor(characterPosition.x / TILE_SIZE);
-    if (MAPS[currentMapIndex].data[row][col] === 5) {
-      if (currentMapIndex < MAPS.length - 1) {
-        setCurrentMapIndex((prev) => prev + 1);
-        setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
-      }
+    if (MAPS[currentMapIndex].data[row][col] === 5 && !isPortalTransition) {
+      handlePortalTransition();
     }
   }, [characterPosition, currentMapIndex]);
 
+  const handlePauseGame = () => {
+    setIsPaused(prev => !prev);
+  };
+
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'Escape') {
+        handlePauseGame();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  // Determine map size class
+  const mapSizeClass = MAPS[currentMapIndex].width === 10 ? 'small-map' : '';
+
+  // Load saved game on mount
+  useEffect(() => {
+    const savedState = loadGameState();
+    if (savedState) {
+      setCharacterPosition(savedState.characterPosition);
+      setCurrentMapIndex(savedState.currentMapIndex);
+      setInventory(savedState.inventory);
+      setUserArtifacts(savedState.userArtifacts);
+      setModifiedArtifacts(savedState.modifiedArtifacts);
+      setExp(savedState.exp);
+    }
+  }, []);
+
+  const handleSaveGame = () => {
+    const success = saveGameState({
+      characterPosition,
+      currentMapIndex,
+      inventory,
+      userArtifacts,
+      modifiedArtifacts,
+      exp
+    });
+
+    if (success) {
+      alert('Game saved successfully!');
+    } else {
+      alert('Failed to save game. Please try again.');
+    }
+    setIsPaused(false);
+  };
+
+  const handleLoadGame = () => {
+    const savedState = loadGameState();
+    if (savedState) {
+      setCharacterPosition(savedState.characterPosition);
+      setCurrentMapIndex(savedState.currentMapIndex);
+      setInventory(savedState.inventory);
+      setUserArtifacts(savedState.userArtifacts);
+      setModifiedArtifacts(savedState.modifiedArtifacts);
+      setExp(savedState.exp);
+      alert('Game loaded successfully!');
+    } else {
+      alert('No saved game found or failed to load.');
+    }
+    setIsPaused(false);
+  };
+
+  const handleArtifactInteraction = (artifact1, artifact2) => {
+    if (canInteract(artifact1, artifact2)) {
+      const result = getInteractionResult(artifact1, artifact2);
+      if (result) {
+        // Remove the original artifacts
+        setInventory(prev => prev.filter(a => 
+          a.id !== artifact1.id && a.id !== artifact2.id
+        ));
+
+        // Create the new combined artifact
+        const combinedArtifact = createUserArtifact({
+          name: result,
+          description: `Created by combining ${artifact1.name} and ${artifact2.name}`,
+          type: artifact1.type,
+          properties: {
+            ...artifact1.properties,
+            ...artifact2.properties
+          }
+        });
+
+        setUserArtifacts(prev => [...prev, combinedArtifact]);
+        setInventory(prev => [...prev, combinedArtifact]);
+        setExp(prev => prev + 10); // Bonus exp for combining artifacts
+      }
+    }
+  };
+
+  const handleEditArtifact = (artifact) => {
+    setSelectedArtifact(artifact);
+    setEditForm({
+      description: artifact.description,
+      content: artifact.content,
+      properties: { ...artifact.properties }
+    });
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!selectedArtifact) return;
+
+    handleUpdateArtifact(selectedArtifact.id, editForm);
+    setIsEditing(false);
+    setSelectedArtifact(null);
+    setEditForm({});
+  };
+
+  // Get all artifacts for the current map
+  const currentArtifacts = mergeArtifacts(
+    mapArtifacts[currentMapIndex] || [],
+    userArtifacts.filter(a => a.area === MAPS[currentMapIndex].name),
+    modifiedArtifacts
+  );
+
+  console.log('Current Map Artifacts:', {
+    mapArtifacts: mapArtifacts[currentMapIndex] || [],
+    userArtifacts: userArtifacts.filter(a => a.area === MAPS[currentMapIndex].name),
+    modifiedArtifacts,
+    merged: currentArtifacts
+  });
+
   return (
-    <div className="game-container">
-      <div className="viewport" style={{ width: "100%", height: "100%" }}>
-        <div className="game-world">
+    <div className={`game-container ${isPortalTransition ? 'portal-transition' : ''} ${mapSizeClass}`}>
+      {isPortalTransition && <div className="portal-flash" />}
+      
+      {isPaused && (
+        <div className="pause-menu">
+          <h2>Game Paused</h2>
+          <button onClick={handlePauseGame}>Resume</button>
+          <button onClick={handleSaveGame}>Save Game</button>
+          <button onClick={handleLoadGame}>Load Game</button>
+        </div>
+      )}
+
+      {error && (
+        <div className="error-message">
+          <span>{error}</span>
+          <button onClick={() => setError(null)}>&times;</button>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="loading-spinner">
+          Loading...
+        </div>
+      )}
+
+      <div className="viewport">
+        <div 
+          className="game-world"
+          style={{
+            '--viewport-x': `${viewport.x}px`,
+            '--viewport-y': `${viewport.y}px`,
+          }}
+        >
           <Map mapData={MAPS[currentMapIndex].data} viewport={viewport} />
           <Character position={characterPosition} />
           <ErrorBoundary>
-            {MAPS[currentMapIndex].artifacts.map((artifact) =>
-              artifact.visible && artifact.location ? (
+            {currentArtifacts.map((artifact) => {
+              console.log('Rendering artifact:', artifact);
+              return (
                 <Artifact
-                  key={`artifact-${artifact.id}`}
-                  src={artifact.image}
+                  key={artifact.id || artifact._id}
                   artifact={artifact}
-                  visible={artifact.id === visibleArtifact?.id}
-                  style={{
-                    position: "absolute",
-                    left: `${artifact.location.x * TILE_SIZE}px`,
-                    top: `${artifact.location.y * TILE_SIZE}px`,
-                    width: TILE_SIZE,
-                    height: TILE_SIZE,
-                    zIndex: 10000
-                  }}
+                  visible={true}
+                  onInteract={() => handleEditArtifact(artifact)}
                 />
-              ) : null
-            )}
+              );
+            })}
           </ErrorBoundary>
         </div>
       </div>
@@ -280,7 +542,52 @@ const GameWorld = () => {
           onUpdateArtifact={handleUpdateArtifact}
           onGainExperience={handleGainExperience}
           refreshArtifacts={refreshArtifacts}
+          characterPosition={characterPosition}
         />      
+      )}
+
+      {isEditing && (
+        <div className="edit-menu">
+          <h3>Edit {selectedArtifact?.name}</h3>
+          {selectedArtifact?.userModifiable?.description && (
+            <textarea
+              value={editForm.description}
+              onChange={e => setEditForm(prev => ({
+                ...prev,
+                description: e.target.value
+              }))}
+            />
+          )}
+          {selectedArtifact?.userModifiable?.content && (
+            <textarea
+              value={editForm.content}
+              onChange={e => setEditForm(prev => ({
+                ...prev,
+                content: e.target.value
+              }))}
+            />
+          )}
+          {selectedArtifact?.userModifiable?.properties?.map(prop => (
+            <input
+              key={prop}
+              type="number"
+              value={editForm.properties[prop]}
+              onChange={e => setEditForm(prev => ({
+                ...prev,
+                properties: {
+                  ...prev.properties,
+                  [prop]: Number(e.target.value)
+                }
+              }))}
+            />
+          ))}
+          <button onClick={handleSaveEdit}>Save Changes</button>
+          <button onClick={() => {
+            setIsEditing(false);
+            setSelectedArtifact(null);
+            setEditForm({});
+          }}>Cancel</button>
+        </div>
       )}
     </div>
   );

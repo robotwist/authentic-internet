@@ -70,11 +70,11 @@ export const updateCharacter = async (updatedCharacter) => {
 export const fetchArtifacts = async () => {
   try {
     const response = await API.get("/artifacts");
+    console.log("Fetched artifacts:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching artifacts:", error);
-    handleError(error);
-    return [];
+    throw error;
   }
 };
 
@@ -91,10 +91,11 @@ export const createArtifact = async (artifactData) => {
 export const updateArtifact = async (artifactId, updatedData) => {
   try {
     const response = await API.put(`/artifacts/${artifactId}`, updatedData);
+    console.log("Updated artifact:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error updating artifact:", error);
-    handleError(error);
+    throw error;
   }
 };
 
@@ -126,10 +127,10 @@ export const sendMessage = async (recipient, content, artifactId = null) => {
 export const fetchMessage = async (artifactId) => {
   try {
     const response = await API.get(`/artifacts/${artifactId}/message`);
+    console.log("Fetched message:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching message:", error);
-    handleError(error);
     return null;
   }
 };
@@ -148,21 +149,22 @@ export const fetchMessages = async () => {
 export const updateMessage = async (artifactId, messageText) => {
   try {
     const response = await API.put(`/artifacts/${artifactId}/message`, { messageText });
+    console.log("Updated message:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error updating message:", error);
-    handleError(error);
-    return null;
+    throw error;
   }
 };
 
-export const deleteMessage = async (messageId) => {
+export const deleteMessage = async (artifactId) => {
   try {
-    const response = await API.delete(`/messages/${messageId}`);
+    const response = await API.delete(`/artifacts/${artifactId}/message`);
+    console.log("Deleted message:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error deleting message:", error);
-    handleError(error);
+    throw error;
   }
 };
 

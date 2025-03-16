@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import Artifact from "../models/Artifact.js";
+
+const defaultCreator = new mongoose.Types.ObjectId("65f2a3d1234567890abcdef1");
 
 const artifacts = [
   {
@@ -11,11 +12,15 @@ const artifacts = [
     unlockAnswer: "Ancient Sword",
     area: "Overworld",
     isExclusive: false,
-    creator: new mongoose.Types.ObjectId(), // Replace with actual user ID
+    image: "/assets/ancient_sword.png",
+    creator: defaultCreator,
     location: { x: 3, y: 2 },
     type: "artifact",
+    messageText: "",
     exp: 10,
     visible: true,
+    status: "world",
+    unlockCondition: "Answer the riddle correctly"
   },
   {
     _id: new mongoose.Types.ObjectId(),
@@ -26,11 +31,15 @@ const artifacts = [
     unlockAnswer: "Mystic Orb",
     area: "Overworld",
     isExclusive: false,
-    creator: new mongoose.Types.ObjectId(), // Replace with actual user ID
+    image: "/assets/mystic_orb.png",
+    creator: defaultCreator,
     location: { x: 7, y: 5 },
     type: "artifact",
+    messageText: "",
     exp: 15,
     visible: true,
+    status: "world",
+    unlockCondition: "Answer the riddle correctly"
   },
   {
     _id: new mongoose.Types.ObjectId(),
@@ -41,11 +50,15 @@ const artifacts = [
     unlockAnswer: "Golden Idol",
     area: "Desert",
     isExclusive: false,
-    creator: new mongoose.Types.ObjectId(), // Replace with actual user ID
+    image: "/assets/golden_idol.png",
+    creator: defaultCreator,
     location: { x: 4, y: 6 },
     type: "artifact",
+    messageText: "",
     exp: 20,
     visible: true,
+    status: "world",
+    unlockCondition: "Answer the riddle correctly"
   },
   {
     _id: new mongoose.Types.ObjectId(),
@@ -56,29 +69,15 @@ const artifacts = [
     unlockAnswer: "Dungeon Key",
     area: "Dungeon",
     isExclusive: false,
-    creator: new mongoose.Types.ObjectId(), // Replace with actual user ID
+    image: "/assets/dungeon_key.png",
+    creator: defaultCreator,
     location: { x: 5, y: 5 },
     type: "artifact",
+    messageText: "",
     exp: 25,
     visible: true,
-  },
-  {
-    _id: new mongoose.Types.ObjectId(),
-    name: "Mystic Orb",
-    description: "A glowing orb filled with swirling energy.",
-    content: "It hums with an ancient power.",
-    riddle: "What has roots as nobody sees, is taller than trees?",
-    unlockAnswer: "mountain",
-    area: "Overworld",
-    isExclusive: false,
-    creator: new mongoose.Types.ObjectId("65f2a3d1234567890abcdef1"), 
-    type: "artifact",
-    messageText: "",
-    sender: null,
-    recipient: null,
-    isRead: false,
-    unlockCondition: "Solve the riddle.",
-    location: { x: Math.floor(Math.random() * 10), y: Math.floor(Math.random() * 10) } // ✅ Ensure location
+    status: "world",
+    unlockCondition: "Answer the riddle correctly"
   },
   {
     _id: new mongoose.Types.ObjectId(),
@@ -89,14 +88,15 @@ const artifacts = [
     unlockAnswer: "echo",
     area: "Overworld",
     isExclusive: true,
-    creator: new mongoose.Types.ObjectId("65f2a3d1234567890abcdef2"),
+    image: "/assets/enchanted_mirror.png",
+    creator: defaultCreator,
     type: "artifact",
     messageText: "The mirror speaks: 'Beware the shadows in the glade.'",
-    sender: null,
-    recipient: null,
-    isRead: false,
-    unlockCondition: "Answer the riddle correctly.",
-    location: { x: Math.floor(Math.random() * 10), y: Math.floor(Math.random() * 10) } // ✅ Ensure location
+    location: { x: 8, y: 3 },
+    exp: 30,
+    visible: true,
+    status: "world",
+    unlockCondition: "Answer the riddle correctly"
   }
 ];
 
