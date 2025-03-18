@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Scroll Background -->
+  <path d="M15 20C15 20 20 15 32 15C44 15 49 20 49 20L49 44C49 44 44 49 32 49C20 49 15 44 15 44Z" fill="#f4e4bc" stroke="#d4c4a0" stroke-width="1"/>
+  
+  <!-- Left Roll -->
+  <path d="M15 20C15 20 12 25 12 32C12 39 15 44 15 44C15 44 18 39 18 32C18 25 15 20 15 20Z" fill="#e4d4ac"/>
+  
+  <!-- Right Roll -->
+  <path d="M49 20C49 20 52 25 52 32C52 39 49 44 49 44C49 44 46 39 46 32C46 25 49 20 49 20Z" fill="#e4d4ac"/>
+  
+  <!-- Text Lines -->
+  <line x1="22" y1="25" x2="42" y2="25" stroke="#8b4513" stroke-width="1"/>
+  <line x1="22" y1="32" x2="42" y2="32" stroke="#8b4513" stroke-width="1"/>
+  <line x1="22" y1="39" x2="42" y2="39" stroke="#8b4513" stroke-width="1"/>
+</svg> 

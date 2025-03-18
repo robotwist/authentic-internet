@@ -2,56 +2,164 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  color: white;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
-.artifact-creation-container {
-  background-color: #333;
-  padding: 20px;
-  border-radius: 20px;
+.artifact-creation-form {
   width: 90%;
-  height: 90%;
-  max-width: 1200px;
+  max-width: 500px;
+  background-color: #242424;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  padding: 1.5rem;
+  color: #fff;
+}
+
+.artifact-creation-form h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #3498db;
   text-align: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #ccc;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.quote-buttons {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.artifact-creation-container input,
-.artifact-creation-container select {
-  margin-bottom: 10px;
+.quote-btn {
+  background-color: #2c3e50;
+  color: #ecf0f1;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.quote-btn:hover:not(:disabled) {
+  background-color: #34495e;
+}
+
+.quote-btn:disabled {
+  background-color: #7f8c8d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.error-message {
+  background-color: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
   padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
 }
 
-.artifact-creation-container button {
-  background-color: #4caf50;
+.success-message {
+  background-color: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #3498db;
   color: white;
   border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-right: 10px;
 }
 
-.artifact-creation-container button:hover {
-  background-color: #45a049;
+.form-actions button[type="submit"]:hover:not(:disabled) {
+  background-color: #2980b9;
 }
 
-.artifact-creation-container button:last-child {
-  background-color: #ff4d4d;
+.form-actions button[type="submit"]:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
 }
 
-.artifact-creation-container button:last-child:hover {
-  background-color: #ff1a1a;
+.form-actions button[type="button"] {
+  background-color: transparent;
+  color: #ccc;
+  border: 1px solid #555;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .artifact-creation-form {
+    width: 95%;
+    padding: 1rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
 }

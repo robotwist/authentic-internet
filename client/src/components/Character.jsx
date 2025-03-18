@@ -1,27 +1,62 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { TILE_SIZE } from './Constants';
+import './Character.css';
 
-const TILE_SIZE = 64; // Each tile is 64x64 pixels
+const Character = ({ x, y, exp = 0, level = 1, movementDirection = null, avatar = null }) => {
+  // Calculate the bubble size based on experience
+  const bubbleSize = Math.min(1.5, 1 + (exp / 1000)); // Max size is 1.5x
+  const [isNKDMan, setIsNKDMan] = useState(true);
+  const [customAvatar, setCustomAvatar] = useState(null);
 
-const Character = ({ position }) => {
-  const [characterPosition, setCharacterPosition] = useState(position);
-
+  // Check if user has a custom avatar
   useEffect(() => {
-    setCharacterPosition(position);
-  }, [position]);
+    if (avatar && avatar !== "https://api.dicebear.com/7.x/pixel-art/svg?seed=unknown") {
+      setCustomAvatar(avatar);
+      setIsNKDMan(false);
+    }
+  }, [avatar]);
 
   return (
     <div
+      className={`character-container ${movementDirection ? `moving-${movementDirection}` : ''} ${isNKDMan ? 'nkd-man' : ''}`}
+      data-level={level}
       style={{
-        position: "absolute",
-        left: `${characterPosition.x}px`,
-        top: `${characterPosition.y}px`,
+        position: 'absolute',
+        left: `${x}px`,
+        top: `${y}px`,
         width: `${TILE_SIZE}px`,
         height: `${TILE_SIZE}px`,
-        backgroundImage: "url('../assets/character.png')",
-        backgroundSize: "cover",
+        transform: `scale(${bubbleSize})`,
+        transition: 'transform 0.3s ease-out'
       }}
-    />
+    >
+      <div className="blue-bubble"></div>
+      <div 
+        className="character-sprite"
+        style={customAvatar ? {
+          backgroundImage: `url('${customAvatar}')`,
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center'
+        } : {}}
+      ></div>
+      {exp > 0 && (
+        <div className="exp-indicator">
+          Level {level}
+        </div>
+      )}
+    </div>
   );
+};
+
+Character.propTypes = {
+  x: PropTypes.number.isRequired,
+  y: PropTypes.number.isRequired,
+  exp: PropTypes.number,
+  level: PropTypes.number,
+  movementDirection: PropTypes.oneOf([null, 'up', 'down', 'left', 'right']),
+  avatar: PropTypes.string
 };
 
 export default Character;

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="quote-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a90e2" />
+      <stop offset="100%" stop-color="#1a5fb4" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+      <feOffset dx="0" dy="2" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Quote Background -->
+  <rect x="15" y="20" width="70" height="60" rx="5" ry="5" fill="url(#quote-gradient)" filter="url(#shadow)" />
+  
+  <!-- Quote Marks -->
+  <path d="M30,35 L25,50 L35,50 L30,65 M50,35 L45,50 L55,50 L50,65" stroke="#ffffff" stroke-width="3" fill="none" />
+  
+  <!-- Quote Lines -->
+  <line x1="65" y1="40" x2="75" y2="40" stroke="#ffffff" stroke-width="2" />
+  <line x1="65" y1="50" x2="75" y2="50" stroke="#ffffff" stroke-width="2" />
+  <line x1="65" y1="60" x2="75" y2="60" stroke="#ffffff" stroke-width="2" />
+</svg> 

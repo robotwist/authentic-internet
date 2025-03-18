@@ -1,0 +1,74 @@
+.tile {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: all 0.2s ease-in-out;
+}
+
+.tile.grass {
+  background-image: url('/assets/tiles/grass.png');
+}
+
+.tile.wall {
+  background-image: url('/assets/tiles/wall.png');
+}
+
+.tile.water {
+  background-image: url('/assets/tiles/water.png');
+}
+
+.tile.sand {
+  background-image: url('/assets/tiles/sand.png');
+}
+
+.tile.dungeon {
+  background-image: url('/assets/tiles/dungeon.png');
+}
+
+.tile.portal {
+  background-image: url('/assets/tiles/portal.png');
+  animation: portalPulse 2s infinite;
+}
+
+@keyframes portalPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Hover effects */
+.tile:hover {
+  transform: scale(1.05);
+  z-index: 1;
+}
+
+/* Special effects for different tile types */
+.tile.water {
+  animation: waterFlow 3s infinite linear;
+}
+
+@keyframes waterFlow {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 100% center;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .tile {
+    width: 48px;
+    height: 48px;
+  }
+} 

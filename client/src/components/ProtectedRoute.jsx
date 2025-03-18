@@ -1,21 +1,31 @@
-import { Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+export const ProtectedRoute = ({ children }) => {
+  const { user, loading, error } = useAuth();
+  const location = useLocation();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setTimeout(() => {
-      setIsAuthenticated(!!token); // Convert token existence to boolean
-    }, 500);
-  }, []);
-
-  if (isAuthenticated === null) {
-    return <p style={{ textAlign: "center", color: "#fff" }}>🔍 Checking authentication...</p>;
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
+  if (error) {
+    return (
+      <div className="error-message">
+        {error}
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
 
-export default ProtectedRoute;
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+};

@@ -10,6 +10,13 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       minlength: [3, "Username must be at least 3 characters long"],
     },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
     password: {
       type: String,
       required: [true, "Password is required"],
@@ -27,6 +34,10 @@ const UserSchema = new mongoose.Schema(
     inventory: [{ type: mongoose.Schema.Types.ObjectId, ref: "Artifact" }], // ✅ Artifacts Found
     messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }], // ✅ Persistent Messages
     createdAt: { type: Date, default: Date.now }, // ✅ Keeps timestamps for history
+    isActive: {
+      type: Boolean,
+      default: true
+    }
   },
   { timestamps: true }
 );
@@ -34,9 +45,14 @@ const UserSchema = new mongoose.Schema(
 // 🔹 Hash Password Before Saving
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+  
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // 🔹 Password Comparison Method
