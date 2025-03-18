@@ -11,14 +11,14 @@
 # Proxy API requests to the backend on Heroku
 [[redirects]]
   from = "/api/*"
-  to = "https://authentic-internet-api.herokuapp.com/api/:splat"
+  to = "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com/api/:splat"
   status = 200
   force = true
   headers = {X-From = "Netlify"}
 
 # Environment variables
 [context.production.environment]
-  VITE_API_URL = "https://authentic-internet-api.herokuapp.com"
+  VITE_API_URL = "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com"
 
 [context.deploy-preview.environment]
-  VITE_API_URL = "https://authentic-internet-api.herokuapp.com" 
+  VITE_API_URL = "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com" 
