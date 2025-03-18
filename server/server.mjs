@@ -159,9 +159,13 @@ app.use((err, req, res, next) => {
 
 const startServer = async () => {
   try {
-    // Connect to MongoDB
-    await connectDB();
-    console.log("✅ MongoDB Connected Successfully");
+    // Connect to MongoDB but don't crash if it fails
+    const dbConnected = await connectDB();
+    if (dbConnected) {
+      console.log("✅ MongoDB Connected Successfully");
+    } else {
+      console.log("⚠️ Running without MongoDB connection");
+    }
 
     // Start server
     const PORT = process.env.PORT || 5000;
