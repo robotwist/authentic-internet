@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="skin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5d0a9" />
+      <stop offset="100%" stop-color="#d2a679" />
+    </linearGradient>
+    <linearGradient id="hair" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6d4c41" />
+      <stop offset="100%" stop-color="#4e342e" />
+    </linearGradient>
+    <linearGradient id="beard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6d4c41" />
+      <stop offset="100%" stop-color="#4e342e" />
+    </linearGradient>
+    <linearGradient id="clothes" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7986cb" />
+      <stop offset="100%" stop-color="#3f51b5" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="32" cy="32" r="30" fill="#f5f5dc" stroke="#daa520" stroke-width="2" />
+  
+  <!-- Body -->
+  <rect x="22" y="35" width="20" height="25" rx="2" fill="url(#clothes)" />
+  
+  <!-- Head -->
+  <circle cx="32" cy="25" r="12" fill="url(#skin)" />
+  
+  <!-- Hair -->
+  <path d="M20,25 C20,18 25,13 32,13 C39,13 44,18 44,25 C44,27 43,29 42,30 C41,28 40,27 38,27 C38,24 36,22 34,22 C32,22 30,24 30,27 C28,27 26,28 25,30 C24,29 23,27 23,25 C23,23 22,22 20,25 Z" fill="url(#hair)" />
+  
+  <!-- Beard -->
+  <path d="M26,28 C26,32 28,36 32,36 C36,36 38,32 38,28 C38,30 36,33 32,33 C28,33 26,30 26,28 Z" fill="url(#beard)" />
+  
+  <!-- Eyes -->
+  <ellipse cx="28" cy="24" rx="1.5" ry="1" fill="#3e2723" />
+  <ellipse cx="36" cy="24" rx="1.5" ry="1" fill="#3e2723" />
+  
+  <!-- Nose -->
+  <path d="M32,25 L32,28 C32,29 33,30 34,29" fill="none" stroke="#d2a679" stroke-width="1" />
+  
+  <!-- Mouth -->
+  <path d="M29,30 C30,31 34,31 35,30" fill="none" stroke="#a1887f" stroke-width="1" />
+  
+  <!-- Sculptor's Tools -->
+  <rect x="18" y="45" width="28" height="2" fill="#8d6e63" />
+  <path d="M20,45 L20,40 L22,40 L22,45 Z" fill="#8d6e63" />
+  <path d="M44,45 L44,40 L42,40 L42,45 Z" fill="#8d6e63" />
+  
+  <!-- Chisel -->
+  <rect x="30" y="38" width="8" height="2" rx="1" fill="#b0bec5" transform="rotate(45, 34, 39)" />
+  
+  <!-- Palette -->
+  <path d="M24,38 C22,38 20,40 22,42 C24,44 26,42 26,40 C26,39 25,38 24,38 Z" fill="#795548" />
+  <circle cx="23" cy="39" r="1" fill="#f44336" />
+  <circle cx="25" cy="40" r="1" fill="#2196f3" />
+  <circle cx="24" cy="41" r="1" fill="#ffeb3b" />
+</svg> 

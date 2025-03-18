@@ -6,6 +6,144 @@
   background-size: cover;
   image-rendering: pixelated; /* Ensures crisp pixels */
   transition: transform 0.1s ease-in-out;
+  animation: float 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.character-container {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  z-index: 10;
+}
+
+.character-sprite {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 2;
+  image-rendering: pixelated;
+  animation: float 2s ease-in-out infinite;
+}
+
+/* NKD Man specific styles */
+.nkd-man .character-sprite {
+  background-image: url('/assets/nkd-man.png') !important;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  image-rendering: pixelated;
+  animation: nkd-float 2s ease-in-out infinite;
+}
+
+.blue-bubble {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(74, 144, 226, 0.3) 0%, rgba(74, 144, 226, 0) 70%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.exp-indicator {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffd700;
+  color: #000;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 10px;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+@keyframes nkd-float {
+  0%, 100% {
+    transform: translateY(0) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+}
+
+/* NKD Man movement animations */
+.nkd-man.moving-up .character-sprite {
+  animation: nkd-bounce-up 0.4s infinite;
+}
+
+.nkd-man.moving-down .character-sprite {
+  animation: nkd-bounce-down 0.4s infinite;
+}
+
+.nkd-man.moving-left .character-sprite {
+  animation: nkd-bounce-left 0.4s infinite;
+}
+
+.nkd-man.moving-right .character-sprite {
+  animation: nkd-bounce-right 0.4s infinite;
+}
+
+/* Custom avatar animations */
+.moving-up .character-sprite:not(.nkd-man .character-sprite) {
+  animation: bounce-up 0.4s infinite;
+}
+
+.moving-down .character-sprite:not(.nkd-man .character-sprite) {
+  animation: bounce-down 0.4s infinite;
+}
+
+.moving-left .character-sprite:not(.nkd-man .character-sprite) {
+  animation: bounce-left 0.4s infinite;
+}
+
+.moving-right .character-sprite:not(.nkd-man .character-sprite) {
+  animation: bounce-right 0.4s infinite;
+}
+
+@keyframes bounce-up {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+@keyframes bounce-left {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-4px); }
+}
+
+@keyframes bounce-right {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+
+@keyframes nkd-bounce-up {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.05); }
+}
+
+@keyframes nkd-bounce-down {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(6px) scale(1.05); }
+}
+
+@keyframes nkd-bounce-left {
+  0%, 100% { transform: translateX(0) rotate(-5deg); }
+  50% { transform: translateX(-6px) rotate(0deg); }
+}
+
+@keyframes nkd-bounce-right {
+  0%, 100% { transform: translateX(0) rotate(5deg); }
+  50% { transform: translateX(6px) rotate(0deg); }
 }
 
 /* Walking Animation Effect */
@@ -18,6 +156,7 @@
 .character.walking {
   animation: characterMove 0.4s infinite alternate ease-in-out;
 }
+
 /* Idle State - Stronger Pulse Effect */
 .character.idle {
   animation: idleGlow 0.8s infinite alternate ease-in-out;
@@ -30,4 +169,31 @@
   100% { 
     filter: brightness(1.5) drop-shadow(0px 0px 8px rgba(255, 255, 100, 0.8)); 
   }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Experience level effects */
+.nkd-man[data-level="2"] .blue-bubble {
+  box-shadow: 0 0 10px 5px rgba(74, 144, 226, 0.5);
+}
+
+.nkd-man[data-level="3"] .blue-bubble {
+  box-shadow: 0 0 15px 8px rgba(74, 144, 226, 0.6);
+}
+
+.nkd-man[data-level="4"] .blue-bubble {
+  box-shadow: 0 0 20px 10px rgba(74, 144, 226, 0.7);
+}
+
+.nkd-man[data-level="5"] .blue-bubble {
+  background: radial-gradient(circle, rgba(74, 144, 226, 0.5) 0%, rgba(74, 144, 226, 0) 70%);
+  box-shadow: 0 0 25px 12px rgba(74, 144, 226, 0.8);
 }

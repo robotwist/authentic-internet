@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang='en' dir='ltr'>
+<head>
+<meta charset='utf-8' />
+<title>Aikiframework</title><link rel="icon" href="/assets/images/favicon-custom.ico" type="image/x-icon" /><meta name="viewport" content="initial-scale=1" />
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="/rss/latest.xml" />
+<script>
+if (!('remove' in Element.prototype)) {
+    Element.prototype.remove = function() {
+        if (this.parentNode) {
+            this.parentNode.removeChild(this);
+        }
+    };
+}
+</script>
+<link rel="stylesheet" type="text/css" href="/assets/css/fontlibrary.css?17" />
+
+</head>
+
+<body>
+<div id="head" >
+
+<!-- The Beginning of a Record -->
+<div itemscope itemtype="http://schema.org/WebSite">
+    <meta itemprop="url" content="https://fontlibrary.org/"/>
+    <meta itemprop="description" content="Font Library is ALL fonts. Free Downloads, High Quality Support."/>
+<a href="https://fontlibrary.org/en"><div id="logo"></div></a>
+
+<ul class="secondary">
+          
+    <li class="first"><a class="" href="https://fontlibrary.org/en/up">Sign up</a></li>
+          
+    <li class="heading"><a class="" href="https://fontlibrary.org/en/in?rl=en&r0=error_404&r1=">Sign in</a></li>
+
+          
+<li id="lang" class="lang">
+  <form action='/index.php' name="lang" method="get" >
+  <select id="lang-select" name="pretty">
+  <option value="/en/error_404" selected >English</option>
+  <option value="/de/error_404"  >Deutsch</option>
+  <option value="/es/error_404"  >Español</option>
+  <option value="/fr/error_404"  >Français</option>
+  <option value="/it/error_404"  >Italiano</option>
+  <option value="/pl/error_404"  >Polski</option>
+  <option value="/pt/error_404"  >Português</option>
+  <option value="/ru/error_404"  >Русский</option>
+  <option value="/th/error_404"  >อักษรไทย</option>
+  </select>
+      <input class="lang-button" type="submit" value="Go"/>
+  </form>
+</li>
+    
+<script>
+document.forms["lang"].querySelector('.lang-button').remove();
+const langSelect = document.querySelector('#lang-select');
+function handleLangSelect(e) { document.forms["lang"].submit(); }
+langSelect.addEventListener('change', handleLangSelect);
+</script>
+          
+          <li class="search">
+              <form itemprop="potentialAction" itemscope itemtype="http://schema.org/SearchAction" id="search" class="search-box" name="search" enctype="multipart/form-data" method="get" action="https://fontlibrary.org/en/search?query=">
+                  <meta itemprop="target" content="https://fontlibrary.org/en/search?query={query}"/>
+                  <input itemprop="query-input" id="query" type="text" placeholder="Search..." name="query"/>
+                  <input class="search-button" type="submit" value="Search"/>
+              </form>
+          </li>
+          
+
+      </ul>
+
+<div id="head-wrapper">
+    
+    <ul class = "primary nav">
+        <li id="oflb-logo">
+            <a href="https://fontlibrary.org/en">
+                <h1>Font Library</h1>
+            </a>
+        </li>
+        <li class="catalogue"><a class="" href="https://fontlibrary.org/en/catalogue">Fonts</a></li>
+        <li class="guidebook"><a class="" href="https://fontlibrary.org/en/guidebook">Guidebook</a></li>
+          
+    </ul>
+    
+</div>
+</div>
+
+<!-- The End of a Record -->
+
+</div><div id="leaderboard-ad" >
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OFLB - Leaderboard -->
+<ins class="adsbygoogle"
+     style="display:block; margin: 10px auto;"
+     data-ad-client="ca-pub-0352842915813820"
+     data-ad-format="horizontal"
+     data-ad-slot="5049268447"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div><div id="error_404" >
+<h1>404 Page Not Found</h1><p>Please visit <a href="https://fontlibrary.org/">Home page</a> so you may find what you are looking for.</p>
+</div><div id="textblock" >
+
+<div id="body" >
+
+<div id="leaderboard-ad" >
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OFLB - Leaderboard -->
+<ins class="adsbygoogle"
+     style="display:block; margin: 10px auto;"
+     data-ad-client="ca-pub-0352842915813820"
+     data-ad-format="horizontal"
+     data-ad-slot="5049268447"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div><div id="content-page-title" >
+<h2>error_404</h2>
+
+</div><div id="content" >
+
+<div id="error_404" >
+<h1>404 Page Not Found</h1><p>Please visit <a href="https://fontlibrary.org/">Home page</a> so you may find what you are looking for.</p>
+</div>
+</div><div id="information" >
+
+
+</div>
+</div>
+</div><div id="content-page-title" >
+<h2>error_404</h2>
+
+</div><div id="body" >
+
+<div id="leaderboard-ad" >
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- OFLB - Leaderboard -->
+<ins class="adsbygoogle"
+     style="display:block; margin: 10px auto;"
+     data-ad-client="ca-pub-0352842915813820"
+     data-ad-format="horizontal"
+     data-ad-slot="5049268447"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div><div id="content-page-title" >
+<h2>error_404</h2>
+
+</div><div id="content" >
+
+<div id="error_404" >
+<h1>404 Page Not Found</h1><p>Please visit <a href="https://fontlibrary.org/">Home page</a> so you may find what you are looking for.</p>
+</div>
+</div><div id="information" >
+
+
+</div>
+</div><div id="content" >
+
+<div id="error_404" >
+<h1>404 Page Not Found</h1><p>Please visit <a href="https://fontlibrary.org/">Home page</a> so you may find what you are looking for.</p>
+</div>
+</div><div id="foot" >
+<p class="logo"><a href="/">Font Library</a></p><h3 style="text-align:center;">For questions, please email <a href="mailto:support@fontlibrary.org">support@fontlibrary.org</a></h3><br /><ul class="primary"><li><a href="/catalogue">Catalogue</a></li><li><a href="/guidebook">Guidebook</a></li><li><a href="/credits">Credits</a></li><li><a href="/terms">Terms of Service</a></li></ul><ul class="secondary"><li>Hosted by <a href="https://fabricatorz.org">Fabricatorz Foundation</a>.</li><li>Donate to <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X43VZXLXGPMGE&source=url">Support Development</a>.</li></ul>
+</div><div id="information" >
+
+
+</div>
+</body></html>

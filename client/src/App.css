@@ -8,7 +8,7 @@
   width: 100vw;
   background: #121212; /* Deep dark grey */
   color: #e0e0e0; /* Soft contrast text */
-  font-family: "Inter", sans-serif;
+  font-family: var(--primary-font);
   text-align: center;
 }
 

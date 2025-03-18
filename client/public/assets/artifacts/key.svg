@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Key Head -->
+  <circle cx="32" cy="24" r="8" fill="#ffd700" stroke="#daa520" stroke-width="2"/>
+  
+  <!-- Key Ring -->
+  <circle cx="32" cy="24" r="4" fill="none" stroke="#daa520" stroke-width="2"/>
+  
+  <!-- Key Shaft -->
+  <rect x="30" y="32" width="4" height="20" fill="#ffd700" stroke="#daa520" stroke-width="1"/>
+  
+  <!-- Key Teeth -->
+  <path d="M30 44L26 44L26 48" fill="none" stroke="#daa520" stroke-width="2"/>
+  <path d="M30 48L26 48L26 52" fill="none" stroke="#daa520" stroke-width="2"/>
+  
+  <!-- Decorative Elements -->
+  <circle cx="32" cy="24" r="2" fill="#daa520"/>
+</svg> 

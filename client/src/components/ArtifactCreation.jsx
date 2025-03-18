@@ -1,111 +1,247 @@
 import React, { useState } from "react";
-import API from "../api/api";
+import PropTypes from "prop-types";
+import { createArtifact } from "../api/api";
+import { 
+  getRandomQuote, 
+  getRandomShakespeareQuote, 
+  getQuoteForArtifact, 
+  getZenQuote,
+  getTodayQuote
+} from "../api/externalApis";
 import "./ArtifactCreation.css";
 
 const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
-  const [artifactData, setArtifactData] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     description: "",
-    content: "",
-    riddle: "",
-    unlockAnswer: "",
-    area: "Overworld",
-    isExclusive: false,
-    location: { x: position.x / 64, y: position.y / 64 },
+    messageText: "",
+    content: ""
   });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setArtifactData((prevData) => ({
-      ...prevData,
-      [name]: type === "checkbox" ? checked : value,
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
     }));
+    setError(""); // Clear error when user types
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!artifactData.name || !artifactData.description || !artifactData.content) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-
-    console.log("🛠️ Submitting Artifact:", artifactData);
+    setIsSubmitting(true);
+    setError("");
 
     try {
-      const response = await API.post("/artifacts", artifactData);
-
-      if (response && response.data) {
-        console.log("Artifact created successfully:", response.data);
-        refreshArtifacts();
-        onClose();
-      } else {
-        alert("❌ Failed to create artifact.");
+      if (!formData.name || !formData.description) {
+        throw new Error("Name and description are required");
       }
-    } catch (error) {
-      console.error("Error creating artifact:", error);
-      alert("Failed to create artifact. Check console for details.");
+
+      // Always set content to description if empty to meet server requirements
+      const updatedFormData = {
+        ...formData,
+        content: formData.content || formData.description, // Ensure content is filled
+        location: {
+          x: parseFloat(position.x) || 0,
+          y: parseFloat(position.y) || 0
+        },
+        exp: 10,
+        visible: true,
+        status: "dropped",
+        type: "artifact",
+        area: "Overworld" // Default area
+      };
+
+      // Make sure we meet server requirements
+      if (!updatedFormData.content) {
+        throw new Error("Content is required");
+      }
+
+      console.log("Submitting artifact data:", updatedFormData);
+      const response = await createArtifact(updatedFormData);
+      console.log("Artifact created:", response);
+      
+      setSuccess("Artifact created successfully!");
+      
+      // Refresh artifacts to update the game world
+      await refreshArtifacts();
+      
+      // Close form after a short delay to allow user to see success message
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+      
+    } catch (err) {
+      setError(err.message || "Failed to create artifact");
+      console.error("Error creating artifact:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Get a random quote for the artifact content
+  const generateRandomQuote = async (source = 'general') => {
+    setIsLoadingQuote(true);
+    setError("");
+    
+    try {
+      let quoteData;
+      
+      switch(source) {
+        case 'shakespeare':
+          quoteData = await getRandomShakespeareQuote();
+          break;
+        case 'zen':
+          quoteData = await getZenQuote();
+          break;
+        case 'today':
+          quoteData = await getTodayQuote();
+          break;
+        case 'themed':
+          // Use the artifact name or description as a theme
+          const theme = formData.name || "wisdom";
+          quoteData = await getQuoteForArtifact(theme);
+          break;
+        default:
+          // General random quote
+          quoteData = await getRandomQuote();
+          break;
+      }
+      
+      // Update the content field with the quote
+      setFormData(prev => ({
+        ...prev,
+        content: `"${quoteData.text}" - ${quoteData.source}`
+      }));
+      
+    } catch (err) {
+      setError("Failed to generate quote. Try again or enter content manually.");
+      console.error("Error generating quote:", err);
+    } finally {
+      setIsLoadingQuote(false);
     }
   };
 
   return (
     <div className="artifact-creation-overlay">
-      <div className="artifact-creation-container">
-        <h2>Create an Artifact</h2>
+      <div className="artifact-creation-form">
+        <h2>Create New Artifact</h2>
+        {error && <div className="error-message">{error}</div>}
+        {success && <div className="success-message">{success}</div>}
         <form onSubmit={handleSubmit}>
-          <input
-            name="name"
-            value={artifactData.name}
-            onChange={handleChange}
-            placeholder="Artifact name"
-            required
-          />
-          <input
-            name="description"
-            value={artifactData.description}
-            onChange={handleChange}
-            placeholder="Artifact description"
-            required
-          />
-          <input
-            name="content"
-            value={artifactData.content}
-            onChange={handleChange}
-            placeholder="Artifact content"
-            required
-          />
-          <input
-            name="riddle"
-            value={artifactData.riddle}
-            onChange={handleChange}
-            placeholder="Riddle (Optional)"
-          />
-          <input
-            name="unlockAnswer"
-            value={artifactData.unlockAnswer}
-            onChange={handleChange}
-            placeholder="Answer (If Riddle)"
-          />
-          <select name="area" value={artifactData.area} onChange={handleChange}>
-            <option value="Overworld">Overworld</option>
-            <option value="Desert">Desert</option>
-            <option value="Dungeon">Dungeon</option>
-          </select>
-          <label>
-            Exclusive:
+          <div className="form-group">
+            <label htmlFor="name">Name:</label>
             <input
-              name="isExclusive"
-              type="checkbox"
-              checked={artifactData.isExclusive}
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
               onChange={handleChange}
+              maxLength={50}
+              required
             />
-          </label>
-          <button type="submit">Place Artifact</button>
-          <button type="button" onClick={onClose}>Cancel</button>
+          </div>
+          <div className="form-group">
+            <label htmlFor="description">Description:</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              maxLength={200}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="content">Content:</label>
+            <textarea
+              id="content"
+              name="content"
+              value={formData.content}
+              onChange={handleChange}
+              maxLength={500}
+              placeholder="Enter detailed content (will use description if left empty)"
+            />
+            <div className="quote-buttons">
+              <button 
+                type="button" 
+                onClick={() => generateRandomQuote()}
+                disabled={isLoadingQuote}
+                className="quote-btn"
+              >
+                {isLoadingQuote ? "Loading..." : "Random Quote"}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => generateRandomQuote('shakespeare')}
+                disabled={isLoadingQuote}
+                className="quote-btn"
+              >
+                {isLoadingQuote ? "Loading..." : "Shakespeare"}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => generateRandomQuote('zen')}
+                disabled={isLoadingQuote}
+                className="quote-btn"
+              >
+                {isLoadingQuote ? "Loading..." : "Zen Quote"}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => generateRandomQuote('today')}
+                disabled={isLoadingQuote}
+                className="quote-btn"
+              >
+                {isLoadingQuote ? "Loading..." : "Today's Quote"}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => generateRandomQuote('themed')}
+                disabled={isLoadingQuote || !formData.name}
+                className="quote-btn"
+                title={!formData.name ? "Enter a name first for a themed quote" : ""}
+              >
+                {isLoadingQuote ? "Loading..." : "Themed Quote"}
+              </button>
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="messageText">Message (optional):</label>
+            <textarea
+              id="messageText"
+              name="messageText"
+              value={formData.messageText}
+              onChange={handleChange}
+              maxLength={500}
+            />
+          </div>
+          <div className="form-actions">
+            <button 
+              type="submit" 
+              disabled={isSubmitting || !formData.name || !formData.description}
+            >
+              {isSubmitting ? "Creating..." : "Create Artifact"}
+            </button>
+            <button type="button" onClick={onClose}>Cancel</button>
+          </div>
         </form>
       </div>
     </div>
   );
+};
+
+ArtifactCreation.propTypes = {
+  position: PropTypes.shape({
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
+  refreshArtifacts: PropTypes.func.isRequired
 };
 
 export default ArtifactCreation;

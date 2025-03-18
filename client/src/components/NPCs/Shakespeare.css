@@ -1,0 +1,65 @@
+.shakespeare {
+  background-color: #f5e9d0;
+  border: 2px solid #8b4513;
+}
+
+.shakespeare-emoji {
+  font-size: 24px;
+}
+
+.shakespeare-title {
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  color: #8b4513;
+}
+
+.quote-preview {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #f8f4e5;
+  border: 1px solid #8b4513;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  font-size: 12px;
+  max-width: 200px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shakespeare:hover .quote-preview {
+  display: block;
+}
+
+.save-quote-btn {
+  background: #d4b88f;
+  border: 1px solid #8b4513;
+  border-radius: 3px;
+  color: #4b2503;
+  cursor: pointer;
+  font-size: 10px;
+  margin-top: 5px;
+  padding: 2px 5px;
+  transition: background-color 0.3s;
+}
+
+.save-quote-btn:hover {
+  background: #e6d2b3;
+}
+
+.save-quote-btn.saved {
+  background: #c1e1c1;
+  color: #2e5a2e;
+}
+
+.quote-text-preview {
+  font-size: 11px;
+  margin-bottom: 5px;
+  color: #4b2503;
+} 

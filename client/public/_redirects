@@ -1,0 +1,7 @@
+# Netlify redirects file
+
+# Handle client-side routing
+/*    /index.html   200
+
+# Proxy API requests (fallback in case netlify.toml doesn't work)
+/api/*  https://authentic-internet-api.onrender.com/api/:splat  200 

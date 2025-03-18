@@ -1,0 +1,79 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.layout-content {
+  flex: 1;
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.layout-header {
+  background-color: #2a2a2a;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.layout-footer {
+  background-color: #2a2a2a;
+  padding: 1rem 2rem;
+  margin-top: auto;
+}
+
+.layout-sidebar {
+  width: 250px;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+  height: fit-content;
+}
+
+.layout-main {
+  flex: 1;
+  min-width: 0; /* Prevents flex item from overflowing */
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .layout-content {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .layout-sidebar {
+    width: 100%;
+  }
+}
+
+/* Layout variations */
+.layout.centered .layout-content {
+  justify-content: center;
+  align-items: center;
+}
+
+.layout.full-width .layout-content {
+  max-width: none;
+  padding: 0;
+}
+
+.layout.no-padding .layout-content {
+  padding: 0;
+}
+
+/* Dark theme adjustments */
+.layout-header,
+.layout-footer,
+.layout-sidebar {
+  background-color: rgba(42, 42, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+} 

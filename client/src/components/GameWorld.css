@@ -1,13 +1,13 @@
 .game-container {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   background: #000;
 }
 
 .viewport {
-  position: absolute;
+  position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -15,17 +15,37 @@
 
 .game-world {
   position: relative;
-  width: 1280px;
-  height: 1280px;
-  transform: translate(
-    calc(-1 * var(--viewport-x, 0px)),
-    calc(-1 * var(--viewport-y, 0px))
-  );
-  transition: transform 0.1s ease;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease-out;
 }
 
 .game-world.paused {
   filter: blur(3px) brightness(0.7);
+}
+
+.game-world.transitioning {
+  animation: portalTransition 1s ease-in-out;
+  transform-origin: center center;
+}
+
+@keyframes portalTransition {
+  0% {
+    transform: rotate(0deg) scale(1);
+    filter: brightness(1) blur(0);
+  }
+  25% {
+    transform: rotate(180deg) scale(0.8);
+    filter: brightness(1.5) blur(2px);
+  }
+  75% {
+    transform: rotate(540deg) scale(0.6);
+    filter: brightness(2) blur(4px);
+  }
+  100% {
+    transform: rotate(720deg) scale(1);
+    filter: brightness(1) blur(0);
+  }
 }
 
 .small-map {
@@ -44,7 +64,8 @@
   height: 64px;
   transition: transform 0.3s ease, filter 0.3s ease;
   cursor: pointer;
-  z-index: 100;
+  z-index: 1200;
+  pointer-events: all;
   background-color: rgba(255, 255, 255, 0.2);
   border: 1px solid white;
   background: url('../assets/artifact.webp') no-repeat center center;
@@ -139,16 +160,25 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: white;
-  opacity: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
+  z-index: 2000;
   pointer-events: none;
-  z-index: 10001;
   animation: portalFlash 1s ease-in-out;
 }
 
 @keyframes portalFlash {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 0.8; }
+  0% { 
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(1);
+  }
 }
 
 /* Pause Menu */
@@ -325,4 +355,64 @@
     transform: translate(-50%, 0);
     opacity: 1;
   }
+}
+
+.map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.character {
+  position: absolute;
+  z-index: 1500;
+  pointer-events: none;
+}
+
+.npc {
+  position: absolute;
+  z-index: 1300;
+  pointer-events: all;
+}
+
+.quotes-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(139, 69, 19, 0.8);
+  color: #ffd700;
+  border: 2px solid #ffd700;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.9em;
+  font-family: var(--game-font);
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.2s ease;
+}
+
+.quotes-button:hover {
+  background: rgba(139, 69, 19, 1);
+  transform: scale(1.05);
+}
+
+.quotes-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.controls-hint {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: var(--primary-font);
+  z-index: 100;
+  opacity: 1;
+  transition: opacity 1s ease-out;
 }

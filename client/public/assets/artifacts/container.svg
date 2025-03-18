@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Chest Base -->
+  <path d="M15 25L49 25L49 49L15 49Z" fill="#8b4513" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Chest Lid -->
+  <path d="M12 25L32 15L52 25" fill="#8b4513" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Lock -->
+  <rect x="30" y="32" width="4" height="6" fill="#ffd700" stroke="#daa520" stroke-width="1"/>
+  <circle cx="32" cy="30" r="2" fill="#ffd700" stroke="#daa520" stroke-width="1"/>
+  
+  <!-- Decorative Bands -->
+  <line x1="15" y1="35" x2="49" y2="35" stroke="#654321" stroke-width="2"/>
+  <line x1="20" y1="25" x2="20" y2="49" stroke="#654321" stroke-width="2"/>
+  <line x1="44" y1="25" x2="44" y2="49" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Highlights -->
+  <line x1="17" y1="27" x2="47" y2="27" stroke="#ba8759" stroke-width="1"/>
+  <line x1="22" y1="37" x2="42" y2="37" stroke="#ba8759" stroke-width="1"/>
+</svg> 

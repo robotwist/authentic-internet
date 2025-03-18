@@ -1,50 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   fetchArtifacts,
   createArtifact,
   fetchCharacter,
-  updateCharacter,
-  updateArtifact
+  updateCharacter
 } from "../api/api";
 import Character from "./Character";
 import Artifact from "./Artifact";
 import ArtifactCreation from "./ArtifactCreation";
 import Inventory from "./Inventory";
+import SavedQuotes from "./SavedQuotes";
 import ErrorBoundary from "./ErrorBoundary";
 import Map from "./Map";
-import useCharacterMovement from "./CharacterMovement";
-import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS, isWalkable, canInteract, getInteractionResult, isNearConditionMet } from "./Constants";
+import { useCharacterMovement } from "./CharacterMovement";
+import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS } from "./Constants";
 import "./GameWorld.css";
 import "./Character.css";
 import "./Artifact.css";
 import "./Inventory.css";
-import { saveGameState, loadGameState, mergeArtifacts, createUserArtifact } from '../utils/gameState';
+import NPC from "./NPC";
+import TouchControls from './TouchControls';
 
-const GameWorld = ({ mapIndex, onMapChange }) => {
+const MOVEMENT_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+
+const GameWorld = ({ 
+  mapData, 
+  artifacts: initialArtifacts = [], 
+  npcs = [], 
+  character: initialCharacter = {
+    position: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
+    exp: 0,
+    level: 1
+  }
+}) => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
   const [inventory, setInventory] = useState([]);
-  const [characterPosition, setCharacterPosition] = useState({ x: 0, y: 0 });
-  const [character, setCharacter] = useState(null);
+  const [characterPosition, setCharacterPosition] = useState(initialCharacter.position);
+  const [character, setCharacter] = useState(initialCharacter);
   const [viewport, setViewport] = useState({ x: 0, y: 0 });
   const [showInventory, setShowInventory] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formPosition, setFormPosition] = useState({ x: 0, y: 0 });
   const [visibleArtifact, setVisibleArtifact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [artifacts, setArtifacts] = useState([]);
-  const [mapArtifacts, setMapArtifacts] = useState(MAPS.map(map => [...map.artifacts]));
-  const [pickedUpArtifacts] = useState(new Set());
-  const [isPortalTransition, setIsPortalTransition] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const [userArtifacts, setUserArtifacts] = useState([]);
-  const [modifiedArtifacts, setModifiedArtifacts] = useState([]);
-  const [exp, setExp] = useState(0);
-  const [selectedArtifact, setSelectedArtifact] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({});
+  const [artifacts, setArtifacts] = useState(initialArtifacts);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showPortalFlash, setShowPortalFlash] = useState(false);
+  const [pickedUpArtifacts, setPickedUpArtifacts] = useState([]);
+  const [exp, setExp] = useState(initialCharacter.exp || 0);
+  const [movementDirection, setMovementDirection] = useState(null);
+  const [isInDialog, setIsInDialog] = useState(false);
+  const [isInMenu, setIsInMenu] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [currentNPC, setCurrentNPC] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [showSavedQuotes, setShowSavedQuotes] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     fetchArtifacts()
@@ -67,20 +79,43 @@ const GameWorld = ({ mapIndex, onMapChange }) => {
       try {
         const storedUser = JSON.parse(localStorage.getItem("user"));
         if (!storedUser || !storedUser.id) {
-          console.warn("🚨 No user found in localStorage. Cannot fetch character.");
+          console.warn("🚨 No user found in localStorage. Using default character.");
           return;
         }
 
         const characterData = await fetchCharacter(storedUser.id);
-        console.log("✅ Character Loaded:", characterData);
-        setCharacter(characterData);
+        if (!characterData) {
+          console.warn("🚨 No character data received. Using default character.");
+          return;
+        }
+
+        // Ensure character data has all required fields
+        const validatedCharacter = {
+          ...characterData,
+          position: characterData.position || { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
+          exp: characterData.exp || 0,
+          level: characterData.level || 1
+        };
+
+        console.log("✅ Character Loaded:", validatedCharacter);
+        setCharacter(validatedCharacter);
+        setCharacterPosition(validatedCharacter.position);
       } catch (err) {
         console.error("❌ Failed to load character:", err);
+        // Keep using default character state
       }
     };
 
     loadCharacter();
   }, []);
+
+  // Validate character position when it changes
+  useEffect(() => {
+    if (!characterPosition || typeof characterPosition.x !== 'number' || typeof characterPosition.y !== 'number') {
+      console.warn("🚨 Invalid character position detected. Resetting to default position.");
+      setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
+    }
+  }, [characterPosition]);
 
   useEffect(() => {
     if (character && character.experience >= character.level * 10) {
@@ -106,81 +141,56 @@ const GameWorld = ({ mapIndex, onMapChange }) => {
   }, [character?.experience, character?.level]);
 
   const adjustViewport = (pos) => {
-    const newViewport = {
-      x: Math.max(
-        0,
-        Math.min(pos.x - 8 * TILE_SIZE, MAP_COLS * TILE_SIZE - 16 * TILE_SIZE)
-      ),
-      y: Math.max(
-        0,
-        Math.min(pos.y - 6 * TILE_SIZE, MAP_ROWS * TILE_SIZE - 12 * TILE_SIZE)
-      ),
-    };
-    setViewport(newViewport);
-    
-    // Update CSS variables for viewport position
-    const gameWorld = document.querySelector('.game-world');
-    if (gameWorld) {
-      gameWorld.style.setProperty('--viewport-x', `${newViewport.x}px`);
-      gameWorld.style.setProperty('--viewport-y', `${newViewport.y}px`);
-    }
+    const viewportWidth = 12 * TILE_SIZE;
+    const viewportHeight = 12 * TILE_SIZE;
+    const mapWidth = MAP_COLS * TILE_SIZE;
+    const mapHeight = MAP_ROWS * TILE_SIZE;
+
+    // Center the viewport on the character
+    let newViewportX = pos.x - (viewportWidth / 2);
+    let newViewportY = pos.y - (viewportHeight / 2);
+
+    // Clamp viewport to map boundaries
+    newViewportX = Math.max(0, Math.min(newViewportX, mapWidth - viewportWidth));
+    newViewportY = Math.max(0, Math.min(newViewportY, mapHeight - viewportHeight));
+
+    setViewport({
+      x: newViewportX,
+      y: newViewportY
+    });
   };
 
-  const handlePortalTransition = () => {
-    setIsPortalTransition(true);
-    const portalSound = new Audio('/assets/sounds/portal.mp3');
-    portalSound.play().catch(err => console.warn('Audio not supported:', err));
-
-    setTimeout(() => {
-      if (currentMapIndex < MAPS.length - 1) {
-        setCurrentMapIndex((prev) => prev + 1);
-        setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
-      }
-      setTimeout(() => setIsPortalTransition(false), 500);
-    }, 1000);
-  };
-
-  const handleCreateArtifact = async (artifactData) => {
+  const handleCreateArtifact = (name, description, messageText) => {
     if (!isLoggedIn) {
-      setError("You need to be logged in to create artifacts.");
+      alert("You need to be logged in to create artifacts.");
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    const newArtifact = {
+      name,
+      description,
+      messageText,
+      location: { x: characterPosition.x / TILE_SIZE, y: characterPosition.y / TILE_SIZE },
+      area: currentMap?.name || "Overworld",
+      visible: true,
+      status: "dropped",
+      type: "artifact"
+    };
 
-    try {
-      // Create the artifact data with proper structure
-      const newArtifact = {
-        ...artifactData,
-        location: { 
-          x: Math.floor(characterPosition.x / TILE_SIZE), 
-          y: Math.floor(characterPosition.y / TILE_SIZE) 
-        },
-        creator: uuidv4(),
-        visible: true,
-      };
+    console.log("✨ Creating artifact at:", newArtifact.location);
 
-      // First create in backend
-      const savedArtifact = await createArtifact(newArtifact);
-      
-      // Then create local user artifact
-      const userArtifact = createUserArtifact({
-        ...newArtifact,
-        _id: savedArtifact._id // Keep track of backend ID
+    createArtifact(newArtifact)
+      .then((data) => {
+        console.log("✅ Artifact Created:", data);
+        updateArtifactsState(data);
+        // Refresh artifacts to ensure we have the latest data
+        refreshArtifacts();
+        setShowForm(false); // Close the form after successful creation
+      })
+      .catch((error) => {
+        console.error("❌ Error creating artifact:", error);
+        alert("Failed to create artifact. Please try again.");
       });
-
-      // Update both states
-      updateArtifactsState(savedArtifact);
-      setUserArtifacts(prev => [...prev, userArtifact]);
-
-      console.log("✨ Created artifact:", savedArtifact);
-    } catch (error) {
-      setError(`Failed to create artifact: ${error.message}`);
-      console.error("❌ Error creating artifact:", error);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const updateArtifactsState = (newArtifact) => {
@@ -197,339 +207,593 @@ const GameWorld = ({ mapIndex, onMapChange }) => {
   };
 
   const findArtifactAtLocation = (x, y) => {
-    // Check database artifacts
-    const dbArtifact = artifacts.find((a) => a?.location?.x === x && a?.location?.y === y);
-    if (dbArtifact) return dbArtifact;
-
-    // Check map artifacts from state
-    const mapArtifact = mapArtifacts[currentMapIndex]?.find(
-      (a) => a?.location?.x === x && a?.location?.y === y
+    // First check artifacts from the current map
+    const mapArtifact = MAPS[currentMapIndex].artifacts.find(
+      (a) => a.location && a.location.x === x && a.location.y === y
     );
     if (mapArtifact) return mapArtifact;
 
-    // Check user artifacts
-    const userArtifact = userArtifacts.find(
-      (a) => a?.location?.x === x && a?.location?.y === y && a.area === MAPS[currentMapIndex].name
+    // Then check user-created artifacts
+    return artifacts.find(
+      (a) => a.location && a.location.x === x && a.location.y === y && a.visible
     );
+  };
+
+  const handleArtifactPickup = (artifact) => {
+    if (!artifact) return;
     
-    return userArtifact;
-  };
+    console.log("🎒 Picking up artifact:", artifact);
 
-  const handleArtifactPickup = () => {
-    if (!characterPosition) {
-      console.error("🚨 Character position is undefined!");
-      return;
-    }
-
-    const { x, y } = {
-      x: Math.floor(characterPosition.x / TILE_SIZE),
-      y: Math.floor(characterPosition.y / TILE_SIZE),
-    };
-
-    console.log("📍 Checking for artifact at:", { x, y });
-
-    const artifact = findArtifactAtLocation(x, y);
-
-    if (!artifact) {
-      console.warn("⚠️ No artifact found at this location.");
-      return;
-    }
-
-    const artifactId = artifact.id || artifact._id;
-    if (pickedUpArtifacts.has(artifactId)) {
-      console.warn("⚠️ Artifact already picked up:", artifact.name);
-      return;
-    }
-
-    console.log("✅ Picking Up Artifact:", artifact);
-    setInventory((prev) => [...prev, artifact]);
-    handleGainExperience(artifact.exp || 0);
-    pickedUpArtifacts.add(artifactId);
+    // Add artifact to inventory
+    setInventory(prev => [...prev, artifact]);
     
-    // Remove from appropriate array based on artifact type
-    if (artifact._id) {
-      removeArtifactFromMap(artifact._id);
-    } else if (artifact.id) {
-      // Remove from map artifacts state
-      setMapArtifacts(prevMapArtifacts => {
-        const newMapArtifacts = [...prevMapArtifacts];
-        newMapArtifacts[currentMapIndex] = newMapArtifacts[currentMapIndex].filter(
-          a => a.id !== artifact.id
-        );
-        return newMapArtifacts;
-      });
-    }
-  };
-
-  const removeArtifactFromMap = (artifactId) => {
-    setArtifacts((prev) => prev.filter((a) => a._id !== artifactId));
-  };
-
-  const handleUpdateArtifact = async (artifactId, updates) => {
-    if (!artifactId) {
-      setError("Invalid artifact: Missing ID");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await updateArtifact(artifactId, updates);
+    // Remove from pickedUpArtifacts if it's there
+    setPickedUpArtifacts(prev => prev.filter(a => a.id !== artifact.id));
+    
+    // Remove artifact from world
+    setArtifacts(prev => prev.filter(a => a.id !== artifact.id));
+    
+    // Add experience
+    if (artifact.exp) {
+      const newExp = exp + artifact.exp;
+      setExp(newExp);
       
-      setArtifacts(prevArtifacts => {
-        const updatedArtifacts = prevArtifacts.map(artifact => 
-          artifact._id === artifactId ? { ...artifact, ...updates } : artifact
-        );
-        return updatedArtifacts;
-      });
+      // Update character state
+      setCharacter(prev => ({
+        ...prev,
+        exp: newExp
+      }));
+    }
 
-      if (updates.status === 'dropped') {
-        setInventory(prevInventory => 
-          prevInventory.filter(artifact => artifact._id !== artifactId)
-        );
+    // Play pickup sound
+    const pickupSound = new Audio('/assets/sounds/pickup.mp3');
+    pickupSound.volume = 0.3;
+    pickupSound.play().catch(console.error);
+
+    // Show pickup notification
+    if (window.showNotification) {
+      window.showNotification(`Picked up ${artifact.name}`, 'success');
+    }
+
+    // Save game state
+    const gameState = {
+      characterPosition,
+      currentMapIndex,
+      inventory: [...inventory, artifact],
+      exp,
+      pickedUpArtifacts: pickedUpArtifacts.filter(a => a.id !== artifact.id)
+    };
+    localStorage.setItem('gameState', JSON.stringify(gameState));
+  };
+
+  // Load saved game state on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('gameState');
+    if (savedState) {
+      const { inventory: savedInventory, exp: savedExp } = JSON.parse(savedState);
+      if (savedInventory) setInventory(savedInventory);
+      if (savedExp) setExp(savedExp);
+    }
+  }, []);
+
+  const handleKeyDown = (e) => {
+    // Prevent game actions if typing in an input field, textarea, or if a dialog or chat is open
+    if (e.target.tagName.toLowerCase() === 'input' || 
+        e.target.tagName.toLowerCase() === 'textarea' || 
+        dialogOpen || isInDialog || isInMenu) {
+      
+      // Only allow Escape key to close dialogs
+      if (e.key === 'Escape') {
+        setIsInDialog(false);
+        setIsInMenu(false);
+      }
+      return;
+    }
+
+    const key = e.key.toLowerCase();
+    
+    // Handle movement keys
+    if (MOVEMENT_KEYS.includes(key)) {
+      e.preventDefault();
+      const newPosition = { ...characterPosition };
+      
+      switch(key) {
+        case 'w':
+        case 'arrowup':
+          newPosition.y -= TILE_SIZE;
+          setMovementDirection('up');
+          break;
+        case 's':
+        case 'arrowdown':
+          newPosition.y += TILE_SIZE;
+          setMovementDirection('down');
+          break;
+        case 'a':
+        case 'arrowleft':
+          newPosition.x -= TILE_SIZE;
+          setMovementDirection('left');
+          break;
+        case 'd':
+        case 'arrowright':
+          newPosition.x += TILE_SIZE;
+          setMovementDirection('right');
+          break;
+        default:
+          break;
       }
 
-      await refreshArtifacts();
-    } catch (error) {
-      setError(`Failed to update artifact: ${error.message}`);
-      console.error("❌ Error updating artifact:", error);
-    } finally {
-      setIsLoading(false);
+      if (isValidMove(newPosition)) {
+        setCharacterPosition(newPosition);
+        adjustViewport(newPosition);
+      }
+      return;
+    }
+
+    // Handle action keys
+    switch(key) {
+      // Disabling T and E keyboard shortcuts as requested
+      // case 't':
+      // case 'e':
+      //   e.preventDefault();
+      //   const nearbyNPC = npcs.find(npc => {
+      //     const dx = (characterPosition.x - npc.position.x * TILE_SIZE);
+      //     const dy = (characterPosition.y - npc.position.y * TILE_SIZE);
+      //     const distance = Math.sqrt(dx * dx + dy * dy);
+      //     return distance <= TILE_SIZE * 3;
+      //   });
+        
+      //   if (nearbyNPC) {
+      //     setCurrentNPC(nearbyNPC);
+      //     setIsInDialog(true);
+      //     // Play dialog sound
+      //     const dialogSound = new Audio('/assets/sounds/dialog.mp3');
+      //     dialogSound.volume = 0.2;
+      //     dialogSound.play().catch(console.error);
+      //   }
+      //   break;
+      
+      case 'escape':
+        if (isInDialog) {
+          setIsInDialog(false);
+          setCurrentNPC(null);
+        }
+        break;
+        
+      case 'p':
+        e.preventDefault();
+        const artifactAtLocation = findArtifactAtLocation(
+          Math.floor(characterPosition.x / TILE_SIZE),
+          Math.floor(characterPosition.y / TILE_SIZE)
+        );
+        if (artifactAtLocation) {
+          handleArtifactPickup(artifactAtLocation);
+        }
+        break;
+      case 'i':
+        e.preventDefault();
+        setIsInMenu(true);
+        setShowInventory(prev => !prev);
+        break;
+      case 'c':
+        e.preventDefault();
+        if (isLoggedIn) {
+          setIsInMenu(true);
+          setShowForm(true);
+          setFormPosition({ 
+            x: Math.floor(characterPosition.x / TILE_SIZE), 
+            y: Math.floor(characterPosition.y / TILE_SIZE) 
+          });
+        }
+        break;
+      case 'q':
+        e.preventDefault();
+        setShowSavedQuotes(true);
+        break;
+      default:
+        break;
     }
   };
 
-  const handleGainExperience = async (points) => {
-    setCharacter((prev) => {
-      if (!prev.id) {
-        console.error("🚨 Character ID is missing!", prev);
-        return prev;
-      }
+  const handleKeyUp = (e) => {
+    const key = e.key.toLowerCase();
+    if (MOVEMENT_KEYS.includes(key)) {
+      setMovementDirection(null);
+    }
+  };
 
-      const updatedCharacter = { ...prev, experience: prev.experience + points };
-      updateCharacter(updatedCharacter)
-        .then(() => console.log("✅ XP Updated on Backend"))
-        .catch((err) => console.error("❌ Failed to update XP:", err));
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [characterPosition]);
 
-      return updatedCharacter;
-    });
+  // Calculate experience level based on exp
+  const getLevel = (exp) => {
+    if (exp >= 1000) return 5;
+    if (exp >= 750) return 4;
+    if (exp >= 500) return 3;
+    if (exp >= 250) return 2;
+    return 1;
   };
 
   useCharacterMovement(characterPosition, setCharacterPosition, currentMapIndex, setCurrentMapIndex, isLoggedIn, visibleArtifact, handleArtifactPickup, setShowForm, setFormPosition, setShowInventory, adjustViewport);
 
   useEffect(() => {
-    const currentX = characterPosition.x / TILE_SIZE;
-    const currentY = characterPosition.y / TILE_SIZE;
+    const { x, y } = {
+      x: Math.floor(characterPosition.x / TILE_SIZE),
+      y: Math.floor(characterPosition.y / TILE_SIZE),
+    };
 
-    const collidedMapArtifact = MAPS[currentMapIndex].artifacts.find(
-      (artifact) => artifact.location && 
-                   artifact.location.x === currentX && 
-                   artifact.location.y === currentY
+    // Check both map artifacts and user-created artifacts
+    const mapArtifact = MAPS[currentMapIndex].artifacts.find(
+      (artifact) => artifact.visible && artifact.location && 
+      artifact.location.x === x && artifact.location.y === y
     );
 
-    const collidedDbArtifact = artifacts.find(
-      (artifact) => artifact.location && 
-                   artifact.location.x === currentX && 
-                   artifact.location.y === currentY
+    const userArtifact = artifacts.find(
+      (artifact) => artifact.visible && artifact.location &&
+      artifact.location.x === x && artifact.location.y === y
     );
 
-    if (collidedDbArtifact) {
-      setVisibleArtifact(collidedDbArtifact);
-    } else if (collidedMapArtifact) {
-      setVisibleArtifact(collidedMapArtifact);
-    } else {
-      setVisibleArtifact(null);
-    }
+    setVisibleArtifact(mapArtifact || userArtifact || null);
   }, [characterPosition, currentMapIndex, artifacts]);
 
   useEffect(() => {
     const row = Math.floor(characterPosition.y / TILE_SIZE);
     const col = Math.floor(characterPosition.x / TILE_SIZE);
-    if (MAPS[currentMapIndex].data[row][col] === 5 && !isPortalTransition) {
-      handlePortalTransition();
+    if (MAPS[currentMapIndex].data[row][col] === 5) {
+      if (currentMapIndex < MAPS.length - 1) {
+        // Start transition effects
+        setIsTransitioning(true);
+        setShowPortalFlash(true);
+        
+        // First phase of transition
+        setTimeout(() => {
+          setCurrentMapIndex((prev) => prev + 1);
+          setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
+          
+          // Second phase - remove effects
+          setTimeout(() => {
+            setIsTransitioning(false);
+            setShowPortalFlash(false);
+          }, 1000);
+        }, 500);
+      } else if (currentMapIndex === MAPS.length - 1) {
+        // This is the final dungeon portal
+        setIsTransitioning(true);
+        setShowPortalFlash(true);
+        
+        // Update character to mark final dungeon as completed
+        if (character && character.id) {
+          const updatedCharacter = {
+            ...character,
+            completedMaps: [...(character.completedMaps || []), 'final-dungeon'],
+            achievements: [...(character.achievements || []), 'final-dungeon-completed'],
+            exp: (character.exp || 0) + 500 // Bonus experience for completing the final dungeon
+          };
+          
+          // Save to database
+          updateCharacter(updatedCharacter)
+            .then(() => {
+              setCharacter(updatedCharacter);
+              console.log("Final dungeon completion saved!");
+              
+              // Show completion message
+              setTimeout(() => {
+                alert("Congratulations! You've completed the final dungeon and unlocked the NKD Man Chrome Extension! Visit your profile to customize your avatar.");
+                
+                // Return to first map
+                setCurrentMapIndex(0);
+                setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
+                setIsTransitioning(false);
+                setShowPortalFlash(false);
+              }, 1500);
+            })
+            .catch(err => console.error("❌ Failed to save dungeon completion:", err));
+        }
+      }
     }
   }, [characterPosition, currentMapIndex]);
 
-  const handlePauseGame = () => {
-    setIsPaused(prev => !prev);
+  // Add isValidMove function that was missing
+  const isValidMove = (newPosition) => {
+    // Ensure position is within map bounds
+    const row = Math.floor(newPosition.y / TILE_SIZE);
+    const col = Math.floor(newPosition.x / TILE_SIZE);
+    
+    if (row < 0 || row >= MAP_ROWS || col < 0 || col >= MAP_COLS) {
+      return false;
+    }
+
+    // Check if the new position is a walkable tile (not a wall)
+    const tileType = MAPS[currentMapIndex].data[row][col];
+    return tileType !== 1; // Assuming 1 represents walls
   };
 
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.key === 'Escape') {
-        handlePauseGame();
-      }
-    };
+  // Add handleExp function
+  const handleExp = (amount) => {
+    setExp(prev => prev + amount);
+    setCharacter(prev => ({
+      ...prev,
+      exp: (prev.exp || 0) + amount
+    }));
+  };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+  // Add useEffect for controls fade-out
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowControls(false);
+    }, 30000); // 30 seconds
+
+    return () => clearTimeout(timer);
   }, []);
 
-  // Determine map size class
-  const mapSizeClass = MAPS[currentMapIndex].width === 10 ? 'small-map' : '';
-
-  // Load saved game on mount
-  useEffect(() => {
-    const savedState = loadGameState();
-    if (savedState) {
-      setCharacterPosition(savedState.characterPosition);
-      setCurrentMapIndex(savedState.currentMapIndex);
-      setInventory(savedState.inventory);
-      setUserArtifacts(savedState.userArtifacts);
-      setModifiedArtifacts(savedState.modifiedArtifacts);
-      setExp(savedState.exp);
-    }
-  }, []);
-
-  const handleSaveGame = () => {
-    const success = saveGameState({
-      characterPosition,
-      currentMapIndex,
-      inventory,
-      userArtifacts,
-      modifiedArtifacts,
-      exp
-    });
-
-    if (success) {
-      alert('Game saved successfully!');
-    } else {
-      alert('Failed to save game. Please try again.');
-    }
-    setIsPaused(false);
-  };
-
-  const handleLoadGame = () => {
-    const savedState = loadGameState();
-    if (savedState) {
-      setCharacterPosition(savedState.characterPosition);
-      setCurrentMapIndex(savedState.currentMapIndex);
-      setInventory(savedState.inventory);
-      setUserArtifacts(savedState.userArtifacts);
-      setModifiedArtifacts(savedState.modifiedArtifacts);
-      setExp(savedState.exp);
-      alert('Game loaded successfully!');
-    } else {
-      alert('No saved game found or failed to load.');
-    }
-    setIsPaused(false);
-  };
-
-  const handleArtifactInteraction = (artifact1, artifact2) => {
-    if (canInteract(artifact1, artifact2)) {
-      const result = getInteractionResult(artifact1, artifact2);
-      if (result) {
-        // Remove the original artifacts
-        setInventory(prev => prev.filter(a => 
-          a.id !== artifact1.id && a.id !== artifact2.id
-        ));
-
-        // Create the new combined artifact
-        const combinedArtifact = createUserArtifact({
-          name: result,
-          description: `Created by combining ${artifact1.name} and ${artifact2.name}`,
-          type: artifact1.type,
-          properties: {
-            ...artifact1.properties,
-            ...artifact2.properties
-          }
-        });
-
-        setUserArtifacts(prev => [...prev, combinedArtifact]);
-        setInventory(prev => [...prev, combinedArtifact]);
-        setExp(prev => prev + 10); // Bonus exp for combining artifacts
-      }
-    }
-  };
-
-  const handleEditArtifact = (artifact) => {
-    setSelectedArtifact(artifact);
-    setEditForm({
-      description: artifact.description,
-      content: artifact.content,
-      properties: { ...artifact.properties }
-    });
-    setIsEditing(true);
-  };
-
-  const handleSaveEdit = () => {
-    if (!selectedArtifact) return;
-
-    handleUpdateArtifact(selectedArtifact.id, editForm);
-    setIsEditing(false);
-    setSelectedArtifact(null);
-    setEditForm({});
-  };
-
-  // Get all artifacts for the current map
-  const currentArtifacts = mergeArtifacts(
-    mapArtifacts[currentMapIndex] || [],
-    userArtifacts.filter(a => a.area === MAPS[currentMapIndex].name),
-    modifiedArtifacts
-  );
-
-  console.log('Current Map Artifacts:', {
-    mapArtifacts: mapArtifacts[currentMapIndex] || [],
-    userArtifacts: userArtifacts.filter(a => a.area === MAPS[currentMapIndex].name),
-    modifiedArtifacts,
-    merged: currentArtifacts
-  });
-
-  return (
-    <div className={`game-container ${isPortalTransition ? 'portal-transition' : ''} ${mapSizeClass}`}>
-      {isPortalTransition && <div className="portal-flash" />}
-      
-      {isPaused && (
-        <div className="pause-menu">
-          <h2>Game Paused</h2>
-          <button onClick={handlePauseGame}>Resume</button>
-          <button onClick={handleSaveGame}>Save Game</button>
-          <button onClick={handleLoadGame}>Load Game</button>
-        </div>
-      )}
-
-      {error && (
-        <div className="error-message">
-          <span>{error}</span>
-          <button onClick={() => setError(null)}>&times;</button>
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="loading-spinner">
-          Loading...
-        </div>
-      )}
-
-      <div className="viewport">
-        <div 
-          className="game-world"
+  const renderArtifacts = () => {
+    return artifacts
+      .filter(artifact => artifact.visible)
+      .map(artifact => (
+        <div
+          key={artifact.id}
+          className="artifact"
           style={{
-            '--viewport-x': `${viewport.x}px`,
-            '--viewport-y': `${viewport.y}px`,
+            position: 'absolute',
+            left: `${artifact.location.x * TILE_SIZE}px`,
+            top: `${artifact.location.y * TILE_SIZE}px`,
+            width: `${TILE_SIZE}px`,
+            height: `${TILE_SIZE}px`,
+            backgroundImage: `url('/assets/artifacts/${artifact.type.toLowerCase()}.svg')`,
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            zIndex: 4
           }}
         >
-          <Map mapData={MAPS[currentMapIndex].data} viewport={viewport} />
-          <Character position={characterPosition} />
+          <div className="artifact-tooltip">
+            {artifact.name}
+          </div>
+        </div>
+      ));
+  };
+
+  const handleDeleteQuote = (index) => {
+    if (!character || !character.savedQuotes) return;
+    
+    const updatedQuotes = [...character.savedQuotes];
+    updatedQuotes.splice(index, 1);
+    
+    const updatedCharacter = {
+      ...character,
+      savedQuotes: updatedQuotes
+    };
+    
+    setCharacter(updatedCharacter);
+    
+    // Update in database if needed
+    if (updatedCharacter.id) {
+      updateCharacter(updatedCharacter)
+        .then(() => console.log("✅ Quote deleted from character profile"))
+        .catch(err => console.error("❌ Failed to delete quote:", err));
+    }
+  };
+
+  // Add event listeners for UI events from Navbar
+  useEffect(() => {
+    // Function to handle inventory toggle event
+    const handleShowInventory = () => {
+      setIsInMenu(true);
+      setShowInventory(true);
+    };
+    
+    // Function to handle create artifact event
+    const handleShowCreateArtifact = () => {
+      if (isLoggedIn) {
+        setIsInMenu(true);
+        setShowForm(true);
+        setFormPosition({ 
+          x: Math.floor(characterPosition.x / TILE_SIZE), 
+          y: Math.floor(characterPosition.y / TILE_SIZE) 
+        });
+      } else {
+        alert("You need to be logged in to create artifacts.");
+      }
+    };
+    
+    // Function to handle quotes event
+    const handleShowQuotes = () => {
+      setShowSavedQuotes(true);
+    };
+    
+    // Add event listeners
+    window.addEventListener('showInventory', handleShowInventory);
+    window.addEventListener('showCreateArtifact', handleShowCreateArtifact);
+    window.addEventListener('showQuotes', handleShowQuotes);
+    
+    // Clean up listeners on unmount
+    return () => {
+      window.removeEventListener('showInventory', handleShowInventory);
+      window.removeEventListener('showCreateArtifact', handleShowCreateArtifact);
+      window.removeEventListener('showQuotes', handleShowQuotes);
+    };
+  }, [characterPosition, isLoggedIn]);
+
+  // Handle touch controls movement
+  const handleTouchMove = (direction) => {
+    const newPosition = { ...characterPosition };
+      
+    switch(direction) {
+      case 'up':
+        newPosition.y -= TILE_SIZE;
+        setMovementDirection('up');
+        break;
+      case 'down':
+        newPosition.y += TILE_SIZE;
+        setMovementDirection('down');
+        break;
+      case 'left':
+        newPosition.x -= TILE_SIZE;
+        setMovementDirection('left');
+        break;
+      case 'right':
+        newPosition.x += TILE_SIZE;
+        setMovementDirection('right');
+        break;
+      default:
+        break;
+    }
+
+    if (isValidMove(newPosition)) {
+      setCharacterPosition(newPosition);
+      adjustViewport(newPosition);
+    }
+  };
+
+  // Event listener for artifact pickup button
+  useEffect(() => {
+    const handleArtifactPickupEvent = () => {
+      // Check if the character is standing on an artifact
+      const characterTileX = Math.floor(characterPosition.x / TILE_SIZE);
+      const characterTileY = Math.floor(characterPosition.y / TILE_SIZE);
+      
+      const artifact = findArtifactAtLocation(characterTileX, characterTileY);
+      if (artifact) {
+        handleArtifactPickup(artifact);
+      }
+    };
+    
+    window.addEventListener('artifactPickup', handleArtifactPickupEvent);
+    
+    return () => window.removeEventListener('artifactPickup', handleArtifactPickupEvent);
+  }, [characterPosition, artifacts]);
+
+  // Check for mobile/tablet devices and resize events
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return (
+    <div className="game-container" style={{ 
+      width: '100%', 
+      maxWidth: '768px', 
+      height: isMobile ? 'calc(100vh - 60px)' : '768px', 
+      overflow: 'hidden',
+      margin: '0 auto'
+    }}>
+      {showControls && (
+        <div className="controls-hint" style={{
+          position: 'absolute',
+          top: '10px',
+          left: '10px',
+          background: 'rgba(0, 0, 0, 0.7)',
+          color: 'white',
+          padding: '10px',
+          borderRadius: '5px',
+          fontSize: '14px',
+          zIndex: 100,
+          opacity: 1,
+          transition: 'opacity 1s ease-out'
+        }}>
+          <div>🎮 Controls:</div>
+          <div>Arrow Keys / D-Pad - Move Character</div>
+          <div>Click on NPCs - Talk to Characters</div>
+          <div>Top Navigation Bar - Access Menus</div>
+          <div>Use "Quotes" Button - View Saved Quotes</div>
+          <div>P Button - Pick Up Artifact (when standing on it)</div>
+          <div>Esc - Close Dialogs</div>
+        </div>
+      )}
+      <div className="viewport" style={{ 
+        width: '100%', 
+        height: '100%', 
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div className={`game-world ${isTransitioning ? 'transitioning' : ''}`} style={{
+          transform: `translate(${-viewport.x}px, ${-viewport.y}px)`,
+          position: 'absolute',
+          width: `${MAP_COLS * TILE_SIZE}px`,
+          height: `${MAP_ROWS * TILE_SIZE}px`
+        }}>
+          <Map mapData={MAPS[currentMapIndex].data} />
+          <Character
+            x={characterPosition.x}
+            y={characterPosition.y}
+            exp={character.exp}
+            level={getLevel(character.exp)}
+            movementDirection={movementDirection}
+            avatar={character.avatar}
+          />
           <ErrorBoundary>
-            {currentArtifacts.map((artifact) => {
-              console.log('Rendering artifact:', artifact);
-              return (
+            {/* Render NPCs */}
+            {MAPS[currentMapIndex].npcs?.map((npc) => (
+              <NPC
+                key={`npc-${npc.id}`}
+                npc={npc}
+                position={npc.position}
+                characterPosition={characterPosition}
+                mapData={MAPS[currentMapIndex].data}
+                character={character}
+                onUpdateCharacter={(updatedCharacter) => {
+                  setCharacter(updatedCharacter);
+                  // Save to backend if needed
+                  if (updatedCharacter.id) {
+                    updateCharacter(updatedCharacter)
+                      .catch(err => console.error("Failed to update character:", err));
+                  }
+                }}
+                onDialogStateChange={(isOpen) => {
+                  setDialogOpen(isOpen);
+                }}
+              />
+            ))}
+            {/* Render map artifacts */}
+            {MAPS[currentMapIndex].artifacts.map((artifact) =>
+              artifact.visible ? (
                 <Artifact
-                  key={artifact.id || artifact._id}
-                  artifact={artifact}
+                  key={`map-artifact-${artifact.id}`}
+                  artifact={{
+                    ...artifact,
+                    location: {
+                      x: artifact.location?.x || 0,
+                      y: artifact.location?.y || 0
+                    }
+                  }}
+                  characterPosition={characterPosition}
                   visible={true}
-                  onInteract={() => handleEditArtifact(artifact)}
                 />
-              );
-            })}
+              ) : null
+            )}
+            {/* Render user-created artifacts */}
+            {artifacts.map((artifact) =>
+              artifact.visible ? (
+                <Artifact
+                  key={`user-artifact-${artifact.id || artifact._id}`}
+                  artifact={{
+                    ...artifact,
+                    location: {
+                      x: artifact.location?.x || 0,
+                      y: artifact.location?.y || 0
+                    }
+                  }}
+                  characterPosition={characterPosition}
+                  visible={true}
+                />
+              ) : null
+            )}
           </ErrorBoundary>
         </div>
       </div>
 
       {showForm && (
         <ArtifactCreation
-          position={formPosition}
+          position={characterPosition}
           onClose={() => setShowForm(false)}
           refreshArtifacts={refreshArtifacts}
         />
@@ -539,56 +803,35 @@ const GameWorld = ({ mapIndex, onMapChange }) => {
         <Inventory 
           artifacts={inventory}
           onClose={() => setShowInventory(false)}
-          onUpdateArtifact={handleUpdateArtifact}
-          onGainExperience={handleGainExperience}
+          onUpdateArtifact={handleArtifactPickup}
+          onGainExperience={handleExp}
           refreshArtifacts={refreshArtifacts}
           characterPosition={characterPosition}
         />      
       )}
 
-      {isEditing && (
-        <div className="edit-menu">
-          <h3>Edit {selectedArtifact?.name}</h3>
-          {selectedArtifact?.userModifiable?.description && (
-            <textarea
-              value={editForm.description}
-              onChange={e => setEditForm(prev => ({
-                ...prev,
-                description: e.target.value
-              }))}
-            />
-          )}
-          {selectedArtifact?.userModifiable?.content && (
-            <textarea
-              value={editForm.content}
-              onChange={e => setEditForm(prev => ({
-                ...prev,
-                content: e.target.value
-              }))}
-            />
-          )}
-          {selectedArtifact?.userModifiable?.properties?.map(prop => (
-            <input
-              key={prop}
-              type="number"
-              value={editForm.properties[prop]}
-              onChange={e => setEditForm(prev => ({
-                ...prev,
-                properties: {
-                  ...prev.properties,
-                  [prop]: Number(e.target.value)
-                }
-              }))}
-            />
-          ))}
-          <button onClick={handleSaveEdit}>Save Changes</button>
-          <button onClick={() => {
-            setIsEditing(false);
-            setSelectedArtifact(null);
-            setEditForm({});
-          }}>Cancel</button>
-        </div>
+      {showPortalFlash && <div className="portal-flash" />}
+
+      {/* Quotes button */}
+      <button 
+        className="quotes-button"
+        onClick={() => setShowSavedQuotes(true)}
+        disabled={dialogOpen}
+      >
+        📜 Quotes
+      </button>
+
+      {/* Saved Quotes Modal */}
+      {showSavedQuotes && (
+        <SavedQuotes 
+          quotes={character?.savedQuotes || []}
+          onClose={() => setShowSavedQuotes(false)}
+          onDeleteQuote={handleDeleteQuote}
+        />
       )}
+
+      {/* Add TouchControls component */}
+      <TouchControls onMove={handleTouchMove} />
     </div>
   );
 };
