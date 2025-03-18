@@ -133,3 +133,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Folger Shakespeare Library API for authentic Shakespeare quotes
 - Historical sources for Ada Lovelace and Lord Byron content 
+## Project Structure
+
+This project is organized with:
+- Frontend code in the `/client` directory
+- Backend code in the `/server` directory
+
+Do not add server files to the root directory.
