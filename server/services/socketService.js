@@ -12,15 +12,19 @@ const activeConnections = new Map();
 // Initialize Socket.io server
 let io;
 
+// This module provides WebSocket functionality using Socket.io
+// for real-time communication features in the application.
+// Added a rebuild trigger comment to ensure proper deployment.
+
 /**
  * Initialize the WebSocket service with an HTTP server
- * @param {Object} server - HTTP server instance
+ * @param {http.Server} server - The HTTP server to attach Socket.io to
  */
 export const initSocketService = (server) => {
   io = new Server(server, {
     cors: {
       origin: process.env.NODE_ENV === 'development' 
-        ? ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'] 
+        ? ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'] 
         : [process.env.CLIENT_URL],
       methods: ['GET', 'POST'],
       credentials: true
