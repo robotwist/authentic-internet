@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "main": "server.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node server.mjs",
     "dev": "nodemon server.mjs",
