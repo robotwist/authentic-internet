@@ -1,0 +1,315 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-03-18T22:10:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_root",
+      "parentId": "wrk_authentic_internet",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}",
+      "name": "Root (Health Check)",
+      "description": "Check if the API is running",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "_type": "request"
+    },
+    {
+      "_id": "wrk_authentic_internet",
+      "parentId": null,
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "name": "Authentic Internet API",
+      "description": "API endpoints for the Authentic Internet application",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "req_health",
+      "parentId": "wrk_authentic_internet",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/health",
+      "name": "Health Check",
+      "description": "Check if the API is running",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "_type": "request"
+    },
+    {
+      "_id": "req_register",
+      "parentId": "fld_auth",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/api/auth/register",
+      "name": "Register",
+      "description": "Register a new user",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"username\": \"testuser\",\n\t\"email\": \"test@example.com\",\n\t\"password\": \"Password123!\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "_type": "request"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "wrk_authentic_internet",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "name": "Authentication",
+      "description": "Authentication endpoints",
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_login",
+      "parentId": "fld_auth",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/api/auth/login",
+      "name": "Login",
+      "description": "Log in with credentials",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"identifier\": \"test@example.com\",\n\t\"password\": \"Password123!\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "_type": "request"
+    },
+    {
+      "_id": "req_profile",
+      "parentId": "fld_users",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/api/users/profile",
+      "name": "Get Profile",
+      "description": "Get the user's profile",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ token }}"
+      },
+      "_type": "request"
+    },
+    {
+      "_id": "fld_users",
+      "parentId": "wrk_authentic_internet",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "name": "Users",
+      "description": "User-related endpoints",
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_update_profile",
+      "parentId": "fld_users",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/api/users/profile",
+      "name": "Update Profile",
+      "description": "Update the user's profile",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"username\": \"updatedname\",\n\t\"bio\": \"This is my updated bio\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ token }}"
+      },
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_artifacts",
+      "parentId": "fld_artifacts",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/api/artifacts",
+      "name": "Get All Artifacts",
+      "description": "Get all artifacts",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ token }}"
+      },
+      "_type": "request"
+    },
+    {
+      "_id": "fld_artifacts",
+      "parentId": "wrk_authentic_internet",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "name": "Artifacts",
+      "description": "Artifact-related endpoints",
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_get_artifact",
+      "parentId": "fld_artifacts",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/api/artifacts/1",
+      "name": "Get Artifact by ID",
+      "description": "Get a single artifact by ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ token }}"
+      },
+      "_type": "request"
+    },
+    {
+      "_id": "req_create_artifact",
+      "parentId": "fld_artifacts",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/api/artifacts",
+      "name": "Create Artifact",
+      "description": "Create a new artifact",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"name\": \"New Artifact\",\n\t\"description\": \"This is a new artifact\",\n\t\"type\": \"document\",\n\t\"content\": \"Lorem ipsum dolor sit amet\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ token }}"
+      },
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_worlds",
+      "parentId": "fld_worlds",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/api/worlds",
+      "name": "Get All Worlds",
+      "description": "Get all worlds",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ token }}"
+      },
+      "_type": "request"
+    },
+    {
+      "_id": "fld_worlds",
+      "parentId": "wrk_authentic_internet",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "name": "Worlds",
+      "description": "World-related endpoints",
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_get_npcs",
+      "parentId": "fld_npcs",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "url": "{{ base_url }}/api/npcs",
+      "name": "Get All NPCs",
+      "description": "Get all NPCs",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ token }}"
+      },
+      "_type": "request"
+    },
+    {
+      "_id": "fld_npcs",
+      "parentId": "wrk_authentic_internet",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "name": "NPCs",
+      "description": "NPC-related endpoints",
+      "_type": "request_group"
+    },
+    {
+      "_id": "env_base",
+      "parentId": "wrk_authentic_internet",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com",
+        "token": ""
+      },
+      "_type": "environment"
+    },
+    {
+      "_id": "env_development",
+      "parentId": "env_base",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "name": "Development",
+      "data": {
+        "base_url": "http://localhost:5001"
+      },
+      "_type": "environment"
+    },
+    {
+      "_id": "env_production",
+      "parentId": "env_base",
+      "modified": 1616413013006,
+      "created": 1616413013006,
+      "name": "Production",
+      "data": {
+        "base_url": "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com"
+      },
+      "_type": "environment"
+    }
+  ]
+} 
