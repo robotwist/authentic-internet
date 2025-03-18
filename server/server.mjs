@@ -59,7 +59,10 @@ app.use((err, req, res, next) => {
 // Session configuration
 app.use(
   session({
-    store: connectMongo.create({ mongoUrl: process.env.MONGO_URI }),
+    store: connectMongo.create({ 
+      mongoUrl: process.env.MONGO_URI,
+      ttl: 14 * 24 * 60 * 60 // 14 days
+    }),
     secret: process.env.SESSION_SECRET || "supersecretkey",
     resave: false,
     saveUninitialized: false,
