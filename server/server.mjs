@@ -57,22 +57,56 @@ app.use((err, req, res, next) => {
 });
 
 // Session configuration
-app.use(
-  session({
-    store: connectMongo.create({ 
-      mongoUrl: process.env.MONGO_URI,
-      ttl: 14 * 24 * 60 * 60 // 14 days
-    }),
-    secret: process.env.SESSION_SECRET || "supersecretkey",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true, 
-      maxAge: 24 * 60 * 60 * 1000 
-    },
-  })
-);
+try {
+  if (process.env.MONGO_URI) {
+    app.use(
+      session({
+        store: connectMongo.create({ 
+          mongoUrl: process.env.MONGO_URI,
+          ttl: 14 * 24 * 60 * 60 // 14 days
+        }),
+        secret: process.env.SESSION_SECRET || "supersecretkey",
+        resave: false,
+        saveUninitialized: false,
+        cookie: { 
+          secure: process.env.NODE_ENV === 'production',
+          httpOnly: true, 
+          maxAge: 24 * 60 * 60 * 1000 
+        },
+      })
+    );
+    console.log("✅ MongoDB Session Store Connected Successfully");
+  } else {
+    console.log("⚠️ No MONGO_URI provided, using memory sessions");
+    app.use(
+      session({
+        secret: process.env.SESSION_SECRET || "supersecretkey",
+        resave: false,
+        saveUninitialized: false,
+        cookie: { 
+          secure: process.env.NODE_ENV === 'production',
+          httpOnly: true, 
+          maxAge: 24 * 60 * 60 * 1000 
+        },
+      })
+    );
+  }
+} catch (error) {
+  console.error("❌ Failed to connect to MongoDB Session Store:", error);
+  // Fallback to memory sessions
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || "supersecretkey",
+      resave: false,
+      saveUninitialized: false,
+      cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true, 
+        maxAge: 24 * 60 * 60 * 1000 
+      },
+    })
+  );
+}
 
 // Routes
 app.use("/api/auth", authRoutes);
