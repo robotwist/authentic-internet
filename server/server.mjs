@@ -12,7 +12,8 @@ import userRoutes from "./routes/userRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import worldRoutes from "./routes/worlds.js";
 import npcRoutes from "./routes/npcs.js";
-import { initSocketService } from "./services/socketService.js";
+// Temporarily commenting out WebSocket import to fix deployment
+// import { initSocketService } from "./services/socketService.js";
 
 dotenv.config();
 
@@ -132,8 +133,8 @@ app.use("/api/npcs", npcRoutes);
 app.get("/api/socket-test", (req, res) => {
   res.status(200).json({
     status: "ok",
-    message: "WebSocket endpoint is running",
-    instructions: "Connect to this server using Socket.io client with 'ws://' or 'wss://' protocol"
+    message: "WebSocket endpoint is running, but WebSockets are temporarily disabled",
+    instructions: "WebSockets will be re-enabled soon"
   });
 });
 
@@ -156,8 +157,8 @@ const startServer = async () => {
       console.log("⚠️ Running without MongoDB connection");
     }
 
-    // Initialize WebSocket service
-    initSocketService(server);
+    // Temporarily disable WebSocket initialization
+    // initSocketService(server);
     
     // Start server
     const PORT = process.env.PORT || 5000;
@@ -165,7 +166,7 @@ const startServer = async () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
       console.log(`🔑 JWT Secret: ${process.env.JWT_SECRET ? 'Configured' : 'Not configured'}`);
-      console.log(`🔌 WebSockets: Enabled`);
+      console.log(`🔌 WebSockets: Disabled (temporarily)`);
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error);
