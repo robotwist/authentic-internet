@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import session from "express-session";
 import connectMongo from "connect-mongo";
+import http from "http";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import artifactRoutes from "./routes/artifactRoutes.js";
@@ -11,10 +12,12 @@ import userRoutes from "./routes/userRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import worldRoutes from "./routes/worlds.js";
 import npcRoutes from "./routes/npcs.js";
+import { initSocketService } from "./services/socketService.js";
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 
 // Middleware
 app.use(express.json());
@@ -108,43 +111,29 @@ try {
   );
 }
 
+// Route for health check
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    timestamp: new Date(),
+    environment: process.env.NODE_ENV
+  });
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/artifacts", artifactRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/artifacts", artifactRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/worlds", worldRoutes);
 app.use("/api/npcs", npcRoutes);
 
-// Health check routes
-app.get("/health", (req, res) => {
-  res.json({ 
+// WebSocket route for testing
+app.get("/api/socket-test", (req, res) => {
+  res.status(200).json({
     status: "ok",
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
-  });
-});
-
-app.get("/api/health", (req, res) => {
-  res.json({ 
-    status: "ok",
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
-  });
-});
-
-// Root route
-app.get("/", (req, res) => {
-  res.json({
-    message: "✅ API is working!",
-    endpoints: {
-      auth: "/api/auth",
-      artifacts: "/api/artifacts",
-      users: "/api/users",
-      messages: "/api/messages",
-      worlds: "/api/worlds",
-      npcs: "/api/npcs"
-    }
+    message: "WebSocket endpoint is running",
+    instructions: "Connect to this server using Socket.io client with 'ws://' or 'wss://' protocol"
   });
 });
 
@@ -167,12 +156,16 @@ const startServer = async () => {
       console.log("⚠️ Running without MongoDB connection");
     }
 
+    // Initialize WebSocket service
+    initSocketService(server);
+    
     // Start server
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
       console.log(`🔑 JWT Secret: ${process.env.JWT_SECRET ? 'Configured' : 'Not configured'}`);
+      console.log(`🔌 WebSockets: Enabled`);
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error);
