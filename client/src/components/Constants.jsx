@@ -18,10 +18,10 @@ export const isWalkable = (x, y, map) => {
   const row = Math.floor(y / TILE_SIZE);
   const col = Math.floor(x / TILE_SIZE);
   
-  // Only grass (0), portal (5), and sand (3) are walkable
-  // Water (2), walls (1), and dungeon (4) are not walkable
+  // Only grass (0), portal (5), sand (3), and dungeon (4) are walkable
+  // Water (2) and walls (1) are not walkable
   const tile = map?.[row]?.[col];
-  return tile === 0 || tile === 5 || tile === 3;
+  return tile === 0 || tile === 5 || tile === 3 || tile === 4;
 };
 
 export const ARTIFACT_TYPES = {
