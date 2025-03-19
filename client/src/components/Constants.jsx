@@ -37,14 +37,14 @@ export const isWalkable = (x, y, map, character = null) => {
   // Debug output
   console.log(`Checking walkability at (${col},${row}): tile type ${tile}`);
   
-  // If this is for Jesus, allow walking on water
+  // If this is for Jesus, allow walking on water and dungeon
   if (character === 'jesus') {
-    return tile === 0 || tile === 5 || tile === 3 || tile === 4 || tile === 2; // Jesus can walk on water (2)
+    return tile === 0 || tile === 5 || tile === 3 || tile === 4 || tile === 2; // Jesus can walk on water (2) and dungeon (4)
   }
   
-  // For everyone else: Only grass (0), portal (5), sand (3), and dungeon (4) are walkable
-  // Water (2) and walls (1) are not walkable
-  return tile === 0 || tile === 5 || tile === 3 || tile === 4;
+  // For everyone else: Only grass (0), portal (5), and sand (3) are walkable
+  // Water (2), walls (1), and dungeon (4) are not walkable
+  return tile === 0 || tile === 5 || tile === 3;
 };
 
 export const ARTIFACT_TYPES = {
@@ -1066,6 +1066,33 @@ export const MAPS = [
       }
     ]
   },
+  {
+    name: "Hemingway's Battleground",
+    data: [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+      [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+      [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    ],
+    artifacts: [],
+    enemies: [
+      { id: 'enemy1', type: 'soldier', position: { x: 10, y: 8 } },
+      { id: 'enemy2', type: 'soldier', position: { x: 15, y: 8 } },
+      { id: 'enemy3', type: 'soldier', position: { x: 20, y: 8 } },
+      { id: 'enemy4', type: 'soldier', position: { x: 25, y: 6 } },
+      { id: 'enemy5', type: 'soldier', position: { x: 30, y: 8 } },
+      { id: 'boss', type: 'boss', position: { x: 35, y: 7 } }
+    ]
+  }
 ];
 
 // Add helper functions for artifact interactions
