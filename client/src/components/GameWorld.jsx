@@ -645,16 +645,19 @@ const GameWorld = ({
     
     // Function to handle create artifact event
     const handleShowCreateArtifact = () => {
-      if (isLoggedIn) {
-        setIsInMenu(true);
-        setShowForm(true);
-        setFormPosition({ 
-          x: Math.floor(characterPosition.x / TILE_SIZE), 
-          y: Math.floor(characterPosition.y / TILE_SIZE) 
-        });
-      } else {
-        alert("You need to be logged in to create artifacts.");
+      // Check if user is logged in
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You need to be logged in to create artifacts. Please log in first.");
+        return;
       }
+      
+      setIsInMenu(true);
+      setShowForm(true);
+      setFormPosition({ 
+        x: Math.floor(characterPosition.x / TILE_SIZE), 
+        y: Math.floor(characterPosition.y / TILE_SIZE) 
+      });
     };
     
     // Function to handle quotes event
@@ -662,18 +665,22 @@ const GameWorld = ({
       setShowSavedQuotes(true);
     };
     
-    // Add event listeners
+    // Add event listeners with correct event names from Navbar
     window.addEventListener('showInventory', handleShowInventory);
     window.addEventListener('showCreateArtifact', handleShowCreateArtifact);
     window.addEventListener('showQuotes', handleShowQuotes);
+    
+    // Additional debug logging
+    console.log("✅ Event listeners added for UI interactions");
     
     // Clean up listeners on unmount
     return () => {
       window.removeEventListener('showInventory', handleShowInventory);
       window.removeEventListener('showCreateArtifact', handleShowCreateArtifact);
       window.removeEventListener('showQuotes', handleShowQuotes);
+      console.log("✅ Event listeners removed");
     };
-  }, [characterPosition, isLoggedIn]);
+  }, [characterPosition]);
 
   // Handle touch controls movement
   const handleTouchMove = (direction) => {
@@ -756,6 +763,22 @@ const GameWorld = ({
     
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Add an event listener for auth errors
+  useEffect(() => {
+    const handleAuthError = (event) => {
+      // Show error message and redirect to login
+      alert(event.detail.message || "Your session has expired. Please login again.");
+      // Set logged in state to false
+      setIsLoggedIn(false);
+    };
+    
+    window.addEventListener('authError', handleAuthError);
+    
+    return () => {
+      window.removeEventListener('authError', handleAuthError);
+    };
   }, []);
 
   return (

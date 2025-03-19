@@ -22,17 +22,70 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// 🔹 Handle token expiration and errors
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("API Error:", error);
+    
+    // Handle authentication errors
+    if (error.response && error.response.status === 401) {
+      console.warn("Authentication error detected, clearing session");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      
+      // Create a custom event for auth errors that components can listen to
+      window.dispatchEvent(new CustomEvent('authError', { 
+        detail: { message: "Your session has expired. Please log in again." } 
+      }));
+      
+      // Redirect to login if not already there
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login?expired=true';
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+// Add a global error handler function
+const handleApiError = (error, defaultMessage = "An error occurred") => {
+  // Extract the most useful error message from the error response
+  if (error.response?.data?.message) {
+    return error.response.data.message;
+  } else if (error.response?.data?.error) {
+    return error.response.data.error;
+  } else if (error.message) {
+    return error.message;
+  } else {
+    return defaultMessage;
+  }
+};
+
 /* ────────────────────────────────
    🔹 AUTHENTICATION ENDPOINTS
 ──────────────────────────────── */
 export const loginUser = async (username, password) => {
   try {
     const response = await API.post("/api/auth/login", { identifier: username, password });
-    localStorage.setItem("token", response.data.token);
-    return response.data;
+    
+    if (response.data && response.data.token) {
+      localStorage.setItem("token", response.data.token);
+      
+      // Store user data if available
+      if (response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
+      
+      return response.data;
+    } else {
+      throw new Error("Invalid response from server: No authentication token received");
+    }
   } catch (error) {
     console.error("Login error:", error);
-    handleError(error);
+    const errorMessage = handleApiError(error, "Login failed. Please check your credentials.");
+    throw new Error(errorMessage);
   }
 };
 
@@ -128,6 +181,12 @@ export const fetchArtifacts = async () => {
 
 export const createArtifact = async (artifactData) => {
   try {
+    // Check authentication
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("You must be logged in to create artifacts");
+    }
+    
     // Validate artifact data
     if (!artifactData.name || artifactData.name.trim().length < 1) {
       throw new Error('Artifact name is required');
@@ -136,7 +195,8 @@ export const createArtifact = async (artifactData) => {
       throw new Error('Artifact description is required');
     }
     if (!artifactData.content || artifactData.content.trim().length < 1) {
-      throw new Error('Artifact content is required');
+      // Set content to description if missing
+      artifactData.content = artifactData.description;
     }
     
     // Ensure location data is valid
@@ -188,7 +248,7 @@ export const createArtifact = async (artifactData) => {
   } catch (error) {
     console.error("Error creating artifact:", error);
     // Format the error message nicely
-    const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to create artifact';
+    const errorMessage = handleApiError(error, 'Failed to create artifact');
     throw new Error(errorMessage);
   }
 };

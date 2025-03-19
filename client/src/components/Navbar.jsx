@@ -48,6 +48,7 @@ const Navbar = () => {
                 <button 
                   className="game-menu-btn inventory-btn"
                   onClick={() => {
+                    console.log("🎒 Dispatching showInventory event");
                     // Dispatch a custom event that GameWorld can listen for
                     window.dispatchEvent(new CustomEvent('showInventory'));
                   }}
@@ -57,6 +58,7 @@ const Navbar = () => {
                 <button 
                   className="game-menu-btn create-btn"
                   onClick={() => {
+                    console.log("✏️ Dispatching showCreateArtifact event");
                     window.dispatchEvent(new CustomEvent('showCreateArtifact'));
                   }}
                 >
@@ -65,6 +67,7 @@ const Navbar = () => {
                 <button 
                   className="game-menu-btn quotes-btn"
                   onClick={() => {
+                    console.log("📜 Dispatching showQuotes event");
                     window.dispatchEvent(new CustomEvent('showQuotes'));
                   }}
                 >

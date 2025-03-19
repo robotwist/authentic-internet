@@ -35,10 +35,21 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
+    setSuccess("");
 
     try {
-      if (!formData.name || !formData.description) {
-        throw new Error("Name and description are required");
+      // Validate token/auth
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication required. Please log in and try again.");
+      }
+
+      // Validate form data
+      if (!formData.name.trim()) {
+        throw new Error("Name is required");
+      }
+      if (!formData.description.trim()) {
+        throw new Error("Description is required");
       }
 
       // Always set content to description if empty to meet server requirements
@@ -56,11 +67,6 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
         area: "Overworld" // Default area
       };
 
-      // Make sure we meet server requirements
-      if (!updatedFormData.content) {
-        throw new Error("Content is required");
-      }
-
       console.log("Submitting artifact data:", updatedFormData);
       const response = await createArtifact(updatedFormData);
       console.log("Artifact created:", response);
@@ -68,7 +74,14 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
       setSuccess("Artifact created successfully!");
       
       // Refresh artifacts to update the game world
-      await refreshArtifacts();
+      if (typeof refreshArtifacts === 'function') {
+        try {
+          await refreshArtifacts();
+        } catch (refreshError) {
+          console.error("Error refreshing artifacts:", refreshError);
+          // Don't fail the entire operation if just the refresh fails
+        }
+      }
       
       // Close form after a short delay to allow user to see success message
       setTimeout(() => {
@@ -76,8 +89,8 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
       }, 1500);
       
     } catch (err) {
-      setError(err.message || "Failed to create artifact");
       console.error("Error creating artifact:", err);
+      setError(err.message || "Failed to create artifact. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -143,6 +156,7 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
               onChange={handleChange}
               maxLength={50}
               required
+              placeholder="Enter artifact name"
             />
           </div>
           <div className="form-group">
@@ -154,6 +168,7 @@ const ArtifactCreation = ({ position, onClose, refreshArtifacts }) => {
               onChange={handleChange}
               maxLength={200}
               required
+              placeholder="Describe your artifact"
             />
           </div>
           <div className="form-group">
