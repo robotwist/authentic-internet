@@ -542,7 +542,7 @@ const formatCitation = (response, npcType) => {
   }
 };
 
-export const chat = async (prompt, context, role, npcConfig = null) => {
+export const chat = async (prompt, context, role, npcConfig = null, signal = null) => {
   try {
     // Special handling for Shakespeare using Folger API
     if (npcConfig?.type === NPC_TYPES.SHAKESPEARE) {
@@ -557,7 +557,8 @@ export const chat = async (prompt, context, role, npcConfig = null) => {
           works: HISTORICAL_SOURCES.SHAKESPEARE.works,
           textTypes: HISTORICAL_SOURCES.SHAKESPEARE.textTypes,
           format: HISTORICAL_SOURCES.SHAKESPEARE.format
-        })
+        }),
+        signal
       });
 
       if (!response.ok) throw new Error('Folger API response was not ok');
@@ -593,7 +594,8 @@ export const chat = async (prompt, context, role, npcConfig = null) => {
           prompt,
           context,
           sourceConfig: HISTORICAL_SOURCES[npcConfig.type.toUpperCase()]
-        })
+        }),
+        signal
       });
 
       if (!response.ok) throw new Error('Historical API response was not ok');
@@ -685,12 +687,19 @@ export const chat = async (prompt, context, role, npcConfig = null) => {
         prompt,
         context,
         role
-      })
+      }),
+      signal
     });
 
     if (!response.ok) throw new Error('Network response was not ok');
     return await response.json();
   } catch (error) {
+    // Check if this is an AbortError
+    if (error.name === 'AbortError') {
+      console.log('Request was aborted');
+      throw error; // Rethrow to be handled by the component
+    }
+    
     console.error('Error in chat:', error);
     throw error;
   }
