@@ -56,15 +56,6 @@ const Navbar = () => {
                   Inventory
                 </button>
                 <button 
-                  className="game-menu-btn create-btn"
-                  onClick={() => {
-                    console.log("✏️ Dispatching showCreateArtifact event");
-                    window.dispatchEvent(new CustomEvent('showCreateArtifact'));
-                  }}
-                >
-                  Create Artifact
-                </button>
-                <button 
                   className="game-menu-btn quotes-btn"
                   onClick={() => {
                     console.log("📜 Dispatching showQuotes event");

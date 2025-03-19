@@ -335,10 +335,17 @@ const ArtifactsPage = () => {
         <div className="artifacts-header">
           <h1>Artifacts</h1>
           {user && (
-            <Button onClick={() => setShowForm(true)} className="create-artifact-btn">
+            <Button onClick={() => setShowForm(true)} className="create-artifact-btn primary-btn">
               Create New Artifact
             </Button>
           )}
+        </div>
+
+        <div className="artifacts-description">
+          <p>
+            Browse all artifacts created by the community. You can create new artifacts here or
+            press the 'e' key while in the game world to create artifacts at your character's location.
+          </p>
         </div>
 
         <div className="artifacts-filters">

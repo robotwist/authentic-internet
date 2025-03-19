@@ -18,33 +18,21 @@ import "./GameWorld.css";
 import "./Character.css";
 import "./Artifact.css";
 import "./Inventory.css";
+import SavedQuotes from "./SavedQuotes";
 
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
   const [inventory, setInventory] = useState([]);
-  const [characterPosition, setCharacterPosition] = useState({ x: 1 * TILE_SIZE, y: 1 * TILE_SIZE });
+  const [characterPosition, setCharacterPosition] = useState({ x: 0, y: 0 });
   const [character, setCharacter] = useState(null);
   const [viewport, setViewport] = useState({ x: 0, y: 0 });
   const [showInventory, setShowInventory] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showQuotes, setShowQuotes] = useState(false);
   const [formPosition, setFormPosition] = useState({ x: 0, y: 0 });
   const [visibleArtifact, setVisibleArtifact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [artifacts, setArtifacts] = useState([]);
-  const [showDebug, setShowDebug] = useState(false);
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'F2') {
-        setShowDebug(prev => !prev);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
 
   useEffect(() => {
     fetchArtifacts()
@@ -104,6 +92,27 @@ const GameWorld = () => {
       });
     }
   }, [character?.experience, character?.level]);
+
+  useEffect(() => {
+    // Setup event listeners for navbar button actions
+    const handleShowInventory = () => {
+      setShowInventory(true);
+    };
+
+    const handleShowQuotes = () => {
+      setShowQuotes(true);
+    };
+
+    // Add event listeners
+    window.addEventListener('showInventory', handleShowInventory);
+    window.addEventListener('showQuotes', handleShowQuotes);
+
+    // Clean up event listeners on component unmount
+    return () => {
+      window.removeEventListener('showInventory', handleShowInventory);
+      window.removeEventListener('showQuotes', handleShowQuotes);
+    };
+  }, []);
 
   const adjustViewport = (pos) => {
     setViewport({
@@ -250,45 +259,51 @@ const GameWorld = () => {
     }
   }, [characterPosition, currentMapIndex]);
 
+  const handleDeleteQuote = (index) => {
+    if (character && character.savedQuotes) {
+      const updatedQuotes = [...character.savedQuotes];
+      updatedQuotes.splice(index, 1);
+      
+      const updatedCharacter = {
+        ...character,
+        savedQuotes: updatedQuotes
+      };
+      
+      setCharacter(updatedCharacter);
+      
+      if (updatedCharacter.id) {
+        updateCharacter(updatedCharacter)
+          .then(() => console.log("✅ Quote deleted successfully"))
+          .catch(err => console.error("❌ Failed to update character after quote deletion:", err));
+      }
+    }
+  };
+
   return (
     <div className="game-container">
       <div className="viewport" style={{ width: "100%", height: "100%" }}>
         <div className="game-world">
-          <Map 
-            mapData={MAPS[currentMapIndex].data} 
-            viewport={viewport} 
-            artifacts={artifacts}
-            npcs={MAPS[currentMapIndex].npcs}
-            onTileClick={(x, y) => console.log("Tile clicked:", x, y)}
-            onNPCClick={(npc) => console.log("NPC clicked:", npc)}
-            onArtifactClick={(artifact) => console.log("Artifact clicked:", artifact)}
-            mapName={MAPS[currentMapIndex].name}
-          />
-          <Character 
-            x={characterPosition.x} 
-            y={characterPosition.y} 
-            exp={character?.experience || 0}
-            level={character?.level || 1}
-          />
+          <Map mapData={MAPS[currentMapIndex].data} viewport={viewport} />
+          <Character position={characterPosition} />
           <ErrorBoundary>
-            {artifacts && artifacts.filter(artifact => 
-              artifact.visible && artifact.location
-            ).map((artifact) => (
-              <Artifact
-                key={`artifact-${artifact.id || artifact._id}`}
-                src={artifact.image}
-                artifact={artifact}
-                visible={artifact.id === visibleArtifact?.id}
-                style={{
-                  position: "absolute",
-                  left: `${artifact.location.x * TILE_SIZE}px`,
-                  top: `${artifact.location.y * TILE_SIZE}px`,
-                  width: TILE_SIZE,
-                  height: TILE_SIZE,
-                  zIndex: 10000
-                }}
-              />
-            ))}
+            {MAPS[currentMapIndex].artifacts.map((artifact) =>
+              artifact.visible && artifact.location ? (
+                <Artifact
+                  key={`artifact-${artifact.id}`}
+                  src={artifact.image}
+                  artifact={artifact}
+                  visible={artifact.id === visibleArtifact?.id}
+                  style={{
+                    position: "absolute",
+                    left: `${artifact.location.x * TILE_SIZE}px`,
+                    top: `${artifact.location.y * TILE_SIZE}px`,
+                    width: TILE_SIZE,
+                    height: TILE_SIZE,
+                    zIndex: 10000
+                  }}
+                />
+              ) : null
+            )}
           </ErrorBoundary>
         </div>
       </div>
@@ -311,19 +326,12 @@ const GameWorld = () => {
         />      
       )}
 
-      {showDebug && (
-        <div className="debug-overlay">
-          <h3>Debug Information</h3>
-          <p>Press F2 to toggle debug overlay</p>
-          <p>Character Position: x={characterPosition.x}, y={characterPosition.y}</p>
-          <p>Grid Position: row={Math.floor(characterPosition.y / TILE_SIZE)}, col={Math.floor(characterPosition.x / TILE_SIZE)}</p>
-          <p>Current Map: {MAPS[currentMapIndex].name} (index: {currentMapIndex})</p>
-          <p>Viewport: x={viewport.x}, y={viewport.y}</p>
-          <p>Map Size: {MAPS[currentMapIndex].data.length} rows × {MAPS[currentMapIndex].data[0]?.length || 0} cols</p>
-          <p>Logged In: {isLoggedIn ? 'Yes' : 'No'}</p>
-          <p>Character Level: {character?.level || 1}, XP: {character?.experience || 0}</p>
-          <p>Control Keys: WASD/Arrows = move, E = interact, I = inventory, P = pickup</p>
-        </div>
+      {showQuotes && character && (
+        <SavedQuotes 
+          quotes={character.savedQuotes || []}
+          onClose={() => setShowQuotes(false)}
+          onDeleteQuote={handleDeleteQuote}
+        />      
       )}
     </div>
   );
