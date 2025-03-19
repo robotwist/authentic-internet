@@ -19,6 +19,7 @@ import "./Character.css";
 import "./Artifact.css";
 import "./Inventory.css";
 import SavedQuotes from "./SavedQuotes";
+import Level4Shooter from "./Level4Shooter";
 
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
@@ -33,6 +34,15 @@ const GameWorld = () => {
   const [visibleArtifact, setVisibleArtifact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [artifacts, setArtifacts] = useState([]);
+  const [levelCompletion, setLevelCompletion] = useState({
+    level1: false,
+    level2: false,
+    level3: false,
+    level4: false
+  });
+  const [showWinNotification, setShowWinNotification] = useState(false);
+  const [winMessage, setWinMessage] = useState('');
+  const [showLevel4, setShowLevel4] = useState(false);
 
   useEffect(() => {
     fetchArtifacts()
@@ -251,13 +261,30 @@ const GameWorld = () => {
   useEffect(() => {
     const row = Math.floor(characterPosition.y / TILE_SIZE);
     const col = Math.floor(characterPosition.x / TILE_SIZE);
+    
     if (MAPS[currentMapIndex].data[row][col] === 5) {
       if (currentMapIndex < MAPS.length - 1) {
         setCurrentMapIndex((prev) => prev + 1);
         setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
       }
     }
-  }, [characterPosition, currentMapIndex]);
+    
+    if (MAPS[currentMapIndex].data[row][col] === 6) {
+      if (levelCompletion.level3) {
+        setShowLevel4(true);
+      } else {
+        alert("You must complete Level 3 first to access this portal.");
+      }
+    }
+    
+    if (currentMapIndex === 0 && row === 17 && col === 19) {
+      handleLevelCompletion('level1');
+    } else if (currentMapIndex === 1 && row === 0 && col === 19) {
+      handleLevelCompletion('level2');
+    } else if (currentMapIndex === 2 && !levelCompletion.level3 && character?.qualifyingArtifacts?.level3) {
+      handleLevelCompletion('level3');
+    }
+  }, [characterPosition, currentMapIndex, character, levelCompletion]);
 
   const handleDeleteQuote = (index) => {
     if (character && character.savedQuotes) {
@@ -279,67 +306,148 @@ const GameWorld = () => {
     }
   };
 
+  const handleLevelCompletion = (level) => {
+    if (levelCompletion[level]) return;
+    
+    setLevelCompletion(prev => ({
+      ...prev,
+      [level]: true
+    }));
+    
+    let message = '';
+    switch(level) {
+      case 'level1':
+        message = 'Congratulations! You have completed Level 1 - The Digital Wilderness!';
+        break;
+      case 'level2':
+        message = 'Magnificent! You have completed Level 2 - The Realm of Shadows!';
+        break;
+      case 'level3':
+        message = 'Extraordinary! You have completed Level 3 - The Terminal Void!';
+        setTimeout(() => {
+          const goToLevel4 = window.confirm('You have unlocked Level 4: The Hemingway Challenge! Ready to enter?');
+          if (goToLevel4) {
+            setShowLevel4(true);
+          }
+        }, 3000);
+        break;
+      case 'level4':
+        message = 'Amazing! You have completed Level 4 - The Hemingway Challenge!';
+        break;
+      default:
+        message = 'Level completed!';
+    }
+    
+    handleGainExperience(level === 'level3' ? 20 : level === 'level4' ? 30 : 10);
+    
+    setWinMessage(message);
+    setShowWinNotification(true);
+    
+    setTimeout(() => {
+      setShowWinNotification(false);
+    }, 5000);
+  };
+
+  const handleLevel4Complete = (score) => {
+    handleLevelCompletion('level4');
+    setShowLevel4(false);
+    
+    const bonusExp = Math.floor(score / 100);
+    if (bonusExp > 0) {
+      handleGainExperience(bonusExp);
+      alert(`You earned ${bonusExp} bonus experience points from your score!`);
+    }
+  };
+
+  const handleLevel4Exit = () => {
+    setShowLevel4(false);
+  };
+
   return (
-    <div className="game-container">
-      <div className="viewport" style={{ width: "100%", height: "100%" }}>
-        <div className="game-world">
-          <Map mapData={MAPS[currentMapIndex].data} viewport={viewport} />
-          <Character 
-            x={characterPosition.x} 
-            y={characterPosition.y} 
-            exp={character?.experience || 0}
-            level={character?.level || 1}
-            avatar={character?.avatar}
+    <ErrorBoundary>
+      <div className="game-container">
+        {showLevel4 && (
+          <Level4Shooter 
+            onComplete={handleLevel4Complete}
+            onExit={handleLevel4Exit}
           />
-          <ErrorBoundary>
-            {MAPS[currentMapIndex].artifacts.map((artifact) =>
-              artifact.visible && artifact.location ? (
-                <Artifact
-                  key={`artifact-${artifact.id}`}
-                  src={artifact.image}
-                  artifact={artifact}
-                  visible={artifact.id === visibleArtifact?.id}
-                  style={{
-                    position: "absolute",
-                    left: `${artifact.location.x * TILE_SIZE}px`,
-                    top: `${artifact.location.y * TILE_SIZE}px`,
-                    width: TILE_SIZE,
-                    height: TILE_SIZE,
-                    zIndex: 10000
-                  }}
-                />
-              ) : null
-            )}
-          </ErrorBoundary>
+        )}
+        <div className="viewport" style={{ width: "100%", height: "100%" }}>
+          <div
+            className={`game-world ${currentMapIndex === 2 ? 'level-3' : currentMapIndex === 1 ? 'level-2' : 'level-1'}`}
+            style={{
+              transform: `translate(${-viewport.x}px, ${-viewport.y}px)`,
+            }}
+          >
+            <Map mapData={MAPS[currentMapIndex].data} viewport={viewport} />
+            <Character 
+              x={characterPosition.x} 
+              y={characterPosition.y} 
+              exp={character?.experience || 0}
+              level={character?.level || 1}
+              avatar={character?.avatar}
+            />
+            <ErrorBoundary>
+              {MAPS[currentMapIndex].artifacts.map((artifact) =>
+                artifact.visible && artifact.location ? (
+                  <Artifact
+                    key={`artifact-${artifact.id}`}
+                    src={artifact.image}
+                    artifact={artifact}
+                    visible={artifact.id === visibleArtifact?.id}
+                    style={{
+                      position: "absolute",
+                      left: `${artifact.location.x * TILE_SIZE}px`,
+                      top: `${artifact.location.y * TILE_SIZE}px`,
+                      width: TILE_SIZE,
+                      height: TILE_SIZE,
+                      zIndex: 10000
+                    }}
+                  />
+                ) : null
+              )}
+            </ErrorBoundary>
+          </div>
         </div>
+        
+        {showWinNotification && (
+          <div className="win-notification">
+            <div className="win-content">
+              <h2>Level Complete!</h2>
+              <p>{winMessage}</p>
+              <div className="win-stars">★★★</div>
+              <button onClick={() => setShowWinNotification(false)}>Continue</button>
+            </div>
+          </div>
+        )}
+
+        {showForm && (
+          <ArtifactCreation
+            position={formPosition}
+            onClose={() => setShowForm(false)}
+            refreshArtifacts={refreshArtifacts}
+          />
+        )}
+
+        {showInventory && (
+          <Inventory 
+            artifacts={inventory}
+            onClose={() => setShowInventory(false)}
+            onUpdateArtifact={handleUpdateArtifact}
+            onGainExperience={handleGainExperience}
+            refreshArtifacts={refreshArtifacts}
+          />      
+        )}
+
+        {showQuotes && character && (
+          <SavedQuotes 
+            quotes={character.savedQuotes || []}
+            onClose={() => setShowQuotes(false)}
+            onDeleteQuote={handleDeleteQuote}
+          />      
+        )}
       </div>
-
-      {showForm && (
-        <ArtifactCreation
-          position={formPosition}
-          onClose={() => setShowForm(false)}
-          refreshArtifacts={refreshArtifacts}
-        />
-      )}
-
-      {showInventory && (
-        <Inventory 
-          artifacts={inventory}
-          onClose={() => setShowInventory(false)}
-          onUpdateArtifact={handleUpdateArtifact}
-          onGainExperience={handleGainExperience}
-          refreshArtifacts={refreshArtifacts}
-        />      
-      )}
-
-      {showQuotes && character && (
-        <SavedQuotes 
-          quotes={character.savedQuotes || []}
-          onClose={() => setShowQuotes(false)}
-          onDeleteQuote={handleDeleteQuote}
-        />      
-      )}
-    </div>
+    </ErrorBoundary>
   );
 };
 

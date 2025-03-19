@@ -1,0 +1,325 @@
+.level4-shooter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  z-index: 9999;
+  overflow: hidden;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+}
+
+.game-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-bottom: 2px solid #555;
+}
+
+.health-bar {
+  margin-right: 20px;
+  margin-bottom: 5px;
+  flex: 1;
+  max-width: 300px;
+}
+
+.health-label {
+  color: #fff;
+  font-size: 12px;
+  margin-bottom: 5px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.health-bar-outer {
+  background-color: #333;
+  border: 2px solid #777;
+  height: 15px;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.health-bar-inner {
+  height: 100%;
+  background-color: #3f3;
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.health-bar-outer.boss {
+  border-color: #f00;
+  background-color: #300;
+}
+
+.score-display, .level-display {
+  color: #ff0;
+  font-size: 14px;
+  margin-left: 20px;
+  margin-top: 10px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.boss-health-bar {
+  width: 100%;
+  margin-top: 5px;
+}
+
+.game-canvas-container {
+  position: relative;
+  width: 100%;
+  height: calc(100% - 80px);
+  overflow: hidden;
+  margin-top: 80px;
+  background: linear-gradient(to bottom, #56CCF2, #2F80ED);
+}
+
+.game-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Game Elements Styling */
+.player, .hemingway, .enemy, .bullet, .item, .boss {
+  position: absolute;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.player {
+  width: 50px;
+  height: 50px;
+  background-image: url('/assets/player.png');
+  background-color: #f00; /* Fallback color if image not found */
+  z-index: 20;
+}
+
+.hemingway {
+  width: 50px;
+  height: 50px;
+  background-image: url('/assets/hemingway.png');
+  background-color: #0f0; /* Fallback color if image not found */
+  z-index: 20;
+}
+
+.enemy {
+  width: 40px;
+  height: 40px;
+  z-index: 15;
+}
+
+.enemy.soldier {
+  background-image: url('/assets/enemy-soldier.png');
+  background-color: #00f; /* Fallback color if image not found */
+}
+
+.enemy.grunt {
+  background-image: url('/assets/enemy-grunt.png');
+  background-color: #f0f; /* Fallback color if image not found */
+}
+
+.bullet {
+  width: 10px;
+  height: 5px;
+  background-color: #ff0;
+  border-radius: 2px;
+  z-index: 10;
+}
+
+.bullet.player {
+  background-color: #f00;
+}
+
+.bullet.hemingway {
+  background-color: #0f0;
+}
+
+.bullet.enemy, .bullet.boss {
+  background-color: #00f;
+}
+
+.platform {
+  position: absolute;
+  background-color: #964B00;
+  border-top: 2px solid #c69c6d;
+  z-index: 5;
+}
+
+.platform.ground {
+  background-color: #5a3921;
+  border-top: 5px solid #7d5637;
+}
+
+.platform.boss-platform {
+  background-color: #4a1111;
+  border-top: 5px solid #6c2525;
+}
+
+.item {
+  width: 30px;
+  height: 30px;
+  z-index: 12;
+}
+
+.item.health {
+  background-image: url('/assets/health.png');
+  background-color: #f00; /* Fallback color if image not found */
+}
+
+.item.weapon {
+  background-image: url('/assets/weapon.png');
+  background-color: #ff0; /* Fallback color if image not found */
+}
+
+.boss {
+  width: 100px;
+  height: 100px;
+  background-image: url('/assets/boss.png');
+  background-color: #f00; /* Fallback color if image not found */
+  z-index: 25;
+}
+
+/* Overlays */
+.game-over-overlay, .victory-overlay, .intro-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+.game-over-content, .victory-content, .intro-content {
+  background-color: #333;
+  border: 4px solid #f00;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 80%;
+}
+
+.victory-content {
+  border-color: #0f0;
+}
+
+.intro-content {
+  border-color: #00f;
+}
+
+.game-over-content h2, .victory-content h2, .intro-content h2 {
+  color: #ff0;
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.game-over-content p, .victory-content p, .intro-content p {
+  color: #fff;
+  font-size: 16px;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.game-over-content button, .victory-content button, .intro-content button {
+  background-color: #f00;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.victory-content button {
+  background-color: #0f0;
+  color: #000;
+}
+
+.intro-content button {
+  background-color: #00f;
+}
+
+.game-over-content button:hover, 
+.victory-content button:hover, 
+.intro-content button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
+/* Animations */
+@keyframes player-idle {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes player-jump {
+  0% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-20px) scaleY(0.9); }
+  100% { transform: translateY(0) scaleY(1.1); }
+}
+
+@keyframes player-shoot {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes hemingway-idle {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes hemingway-shoot {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .health-bar {
+    margin-right: 10px;
+    max-width: 150px;
+  }
+  
+  .health-label {
+    font-size: 10px;
+  }
+  
+  .score-display, .level-display {
+    font-size: 12px;
+    margin-left: 10px;
+  }
+  
+  .game-over-content h2, .victory-content h2, .intro-content h2 {
+    font-size: 20px;
+  }
+  
+  .game-over-content p, .victory-content p, .intro-content p {
+    font-size: 14px;
+  }
+  
+  .game-over-content button, .victory-content button, .intro-content button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+} 
