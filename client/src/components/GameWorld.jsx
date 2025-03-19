@@ -21,6 +21,7 @@ import "./Artifact.css";
 import "./Inventory.css";
 import SavedQuotes from "./SavedQuotes";
 import Level4Shooter from "./Level4Shooter";
+import RewardModal from "./RewardModal";
 
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
@@ -44,6 +45,8 @@ const GameWorld = () => {
   const [showWinNotification, setShowWinNotification] = useState(false);
   const [winMessage, setWinMessage] = useState('');
   const [showLevel4, setShowLevel4] = useState(false);
+  const [showRewardModal, setShowRewardModal] = useState(false);
+  const [currentAchievement, setCurrentAchievement] = useState('');
 
   useEffect(() => {
     // Load and apply saved artifact visibility state
@@ -123,14 +126,44 @@ const GameWorld = () => {
       setShowQuotes(true);
     };
 
+    // Add development keyboard shortcuts for testing
+    const handleKeyDown = (event) => {
+      // Only in development mode
+      if (process.env.NODE_ENV === 'development') {
+        // Shift + 1 to trigger level 1 completion for testing
+        if (event.shiftKey && event.key === '1') {
+          console.log("🛠️ DEV: Manually triggering Level 1 completion");
+          handleLevelCompletion('level1');
+        }
+        
+        // Shift + 0 to reset level completion for testing
+        if (event.shiftKey && event.key === '0') {
+          console.log("🛠️ DEV: Resetting level completion and rewards state");
+          setLevelCompletion({
+            level1: false,
+            level2: false,
+            level3: false,
+            level4: false
+          });
+          localStorage.removeItem('level-level1-completed');
+          localStorage.removeItem('level-level2-completed');
+          localStorage.removeItem('level-level3-completed');
+          localStorage.removeItem('level-level4-completed');
+          localStorage.removeItem('nkd-man-reward-shown');
+        }
+      }
+    };
+
     // Add event listeners
     window.addEventListener('showInventory', handleShowInventory);
     window.addEventListener('showQuotes', handleShowQuotes);
+    window.addEventListener('keydown', handleKeyDown);
 
     // Clean up event listeners on component unmount
     return () => {
       window.removeEventListener('showInventory', handleShowInventory);
       window.removeEventListener('showQuotes', handleShowQuotes);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -389,10 +422,32 @@ const GameWorld = () => {
       [level]: true
     }));
     
+    // Save level completion to localStorage so we don't show rewards again
+    try {
+      localStorage.setItem(`level-${level}-completed`, 'true');
+    } catch (error) {
+      console.error("Error saving level completion to localStorage:", error);
+    }
+    
     let message = '';
     switch(level) {
       case 'level1':
         message = 'Congratulations! You have completed Level 1 - The Digital Wilderness!';
+        // Show the NKD Man Extension reward after the win notification closes
+        setTimeout(() => {
+          // Check if we've already shown this reward by checking localStorage
+          const rewardShown = localStorage.getItem('nkd-man-reward-shown');
+          if (!rewardShown) {
+            setCurrentAchievement('level1');
+            setShowRewardModal(true);
+            try {
+              // Mark this reward as shown so we don't show it again
+              localStorage.setItem('nkd-man-reward-shown', 'true');
+            } catch (error) {
+              console.error("Error saving reward state to localStorage:", error);
+            }
+          }
+        }, 5500); // Wait slightly longer than the win notification
         break;
       case 'level2':
         message = 'Magnificent! You have completed Level 2 - The Realm of Shadows!';
@@ -571,6 +626,12 @@ const GameWorld = () => {
             </div>
           </div>
         )}
+
+        <RewardModal 
+          visible={showRewardModal} 
+          onClose={() => setShowRewardModal(false)} 
+          achievement={currentAchievement}
+        />
 
         {showForm && (
           <ArtifactCreation
