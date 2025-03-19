@@ -1,5 +1,6 @@
 import express from "express";
 import Artifact from "../models/Artifact.js";
+import User from "../models/User.js";
 import authenticateToken from "../middleware/authMiddleware.js";
 import multer from "multer";
 import path from "path";
@@ -520,6 +521,121 @@ router.post("/:id/share", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Error recording share:", error);
     res.status(500).json({ error: "Failed to record share." });
+  }
+});
+
+/* ────────────────────────────────
+   🔹 RECORD ARTIFACT INTERACTION
+──────────────────────────────── */
+router.post("/:id/interact", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { interactionType } = req.body;
+    const userId = req.user.userId;
+
+    // Valid interaction types
+    const validInteractions = ['view', 'vote', 'comment', 'share', 'save'];
+    
+    if (!validInteractions.includes(interactionType)) {
+      return res.status(400).json({ 
+        error: "Invalid interaction type", 
+        validTypes: validInteractions 
+      });
+    }
+
+    const artifact = await Artifact.findById(id);
+    if (!artifact) {
+      return res.status(404).json({ error: "Artifact not found." });
+    }
+
+    // Don't reward self-interactions
+    if (artifact.creator && artifact.creator.toString() === userId) {
+      return res.json({ 
+        message: "Self-interaction recorded", 
+        rewardedExp: 0 
+      });
+    }
+
+    // Record the interaction on the artifact
+    switch (interactionType) {
+      case 'view':
+        artifact.views += 1;
+        break;
+      case 'vote':
+        // Only add vote if user hasn't voted before
+        if (!artifact.voters.includes(userId)) {
+          artifact.votes += 1;
+          artifact.voters.push(userId);
+        }
+        break;
+      case 'comment':
+        // Comment content should be handled by the comment endpoint
+        // This just tracks the interaction for XP purposes
+        break;
+      case 'share':
+        artifact.shares += 1;
+        break;
+      case 'save':
+        // Saving to inventory is handled separately
+        // This just tracks the interaction for XP purposes
+        break;
+    }
+    
+    await artifact.save();
+    
+    // Find creator to award experience
+    if (artifact.creator) {
+      const creator = await User.findById(artifact.creator);
+      if (creator) {
+        // Award experience based on interaction type
+        let rewardedExp = 0;
+        
+        switch (interactionType) {
+          case 'view':
+            rewardedExp = 1; // 1 XP per view
+            break;
+          case 'vote':
+            rewardedExp = 5; // 5 XP per vote
+            break;
+          case 'comment':
+            rewardedExp = 10; // 10 XP per comment
+            break;
+          case 'share':
+            rewardedExp = 15; // 15 XP per share
+            break;
+          case 'save':
+            rewardedExp = 20; // 20 XP when someone saves the artifact
+            break;
+        }
+        
+        // Update creator's experience
+        creator.experience = (creator.experience || 0) + rewardedExp;
+        
+        // Check if creator leveled up
+        const newLevel = Math.floor(creator.experience / 100) + 1;
+        if (newLevel > creator.level) {
+          creator.level = newLevel;
+          // Could add notifications or other level-up rewards here
+        }
+        
+        await creator.save();
+        
+        return res.json({ 
+          message: `Interaction recorded and ${rewardedExp} XP awarded to creator`, 
+          rewardedExp, 
+          newCreatorExp: creator.experience,
+          newCreatorLevel: creator.level
+        });
+      }
+    }
+    
+    res.json({ 
+      message: "Interaction recorded", 
+      rewardedExp: 0 
+    });
+  } catch (error) {
+    console.error("Error recording interaction:", error);
+    res.status(500).json({ error: "Failed to record interaction." });
   }
 });
 

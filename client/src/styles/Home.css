@@ -308,4 +308,152 @@
     width: 100%;
     margin-top: 0.8rem;
   }
+}
+
+/* Create Artifacts Section Styles */
+.create-artifacts-section {
+  background-color: #1a2634;
+  padding: 2.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  color: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.create-artifacts-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/assets/world_map_bg.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.create-artifacts-section h2 {
+  font-size: 2rem;
+  margin-bottom: 1.2rem;
+  color: #3498db;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-questions {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-questions p {
+  margin: 0.5rem 0;
+  color: #ecf0f1;
+}
+
+.creative-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  color: #bdc3c7;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-step {
+  flex: 1;
+  background: rgba(44, 62, 80, 0.6);
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.creative-step:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.step-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.creative-step h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.8rem;
+  color: #3498db;
+}
+
+.creative-step p {
+  font-size: 0.95rem;
+  color: #ecf0f1;
+  line-height: 1.5;
+}
+
+.create-button {
+  display: block !important;
+  width: 250px;
+  margin: 0 auto !important;
+  font-size: 1.1rem !important;
+  padding: 12px 24px !important;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(to right, #3498db, #2980b9) !important;
+  transition: transform 0.3s, box-shadow 0.3s !important;
+}
+
+.create-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4) !important;
+}
+
+/* Mobile responsiveness for Create Artifacts Section */
+@media (max-width: 768px) {
+  .create-artifacts-section {
+    padding: 1.5rem;
+  }
+  
+  .creative-steps {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .creative-step {
+    padding: 1.2rem;
+  }
+  
+  .create-artifacts-section h2 {
+    font-size: 1.6rem;
+  }
+  
+  .creative-questions {
+    font-size: 1.1rem;
+  }
+  
+  .creative-description {
+    font-size: 1rem;
+  }
 } 

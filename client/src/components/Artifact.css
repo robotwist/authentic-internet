@@ -172,3 +172,494 @@
   align-items: center;
   z-index: 10003;
 }
+
+/* User-created artifacts - Making them special and distinct */
+.artifact.user-created {
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.7));
+  z-index: 1001; /* Slightly higher than system artifacts */
+}
+
+.artifact.user-created:hover {
+  transform: scale(1.15);
+  filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+}
+
+.artifact.user-created .artifact-glow {
+  animation: user-artifact-glow 3s ease-in-out infinite;
+}
+
+@keyframes user-artifact-glow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%);
+  }
+}
+
+/* Theme-specific styles for user artifacts */
+.artifact.theme-wisdom .artifact-glow {
+  background: radial-gradient(circle, rgba(147,112,219,0.3) 0%, rgba(147,112,219,0) 70%);
+}
+
+.artifact.theme-inspiration .artifact-glow {
+  background: radial-gradient(circle, rgba(255,140,0,0.3) 0%, rgba(255,140,0,0) 70%);
+}
+
+.artifact.theme-nature .artifact-glow {
+  background: radial-gradient(circle, rgba(76,187,23,0.3) 0%, rgba(76,187,23,0) 70%);
+}
+
+.artifact.theme-literature .artifact-glow {
+  background: radial-gradient(circle, rgba(70,130,180,0.3) 0%, rgba(70,130,180,0) 70%);
+}
+
+.artifact.theme-history .artifact-glow {
+  background: radial-gradient(circle, rgba(165,42,42,0.3) 0%, rgba(165,42,42,0) 70%);
+}
+
+.artifact.theme-personal .artifact-glow {
+  background: radial-gradient(circle, rgba(255,105,180,0.3) 0%, rgba(255,105,180,0) 70%);
+}
+
+/* Creator indicator */
+.artifact-indicator {
+  position: absolute;
+  top: -10px;
+  right: -5px;
+  pointer-events: none;
+}
+
+.artifact-creator-badge {
+  display: inline-block;
+  color: #ffda79;
+  font-size: 18px;
+  text-shadow: 0 0 5px rgba(0,0,0,0.7);
+  animation: star-twinkle 2s infinite;
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+/* Artifact details popup */
+.artifact-details {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+  z-index: 1010;
+  pointer-events: none;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.artifact-details:after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid rgba(0, 0, 0, 0.85);
+}
+
+.artifact-details h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #ffda79;
+  text-align: center;
+}
+
+.artifact-description {
+  font-size: 13px;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+  color: #ddd;
+}
+
+.artifact-creator {
+  font-size: 12px;
+  font-style: italic;
+  margin: 8px 0;
+  color: #3498db;
+}
+
+.artifact-dedication {
+  font-size: 12px;
+  font-style: italic;
+  margin: 8px 0;
+  color: #e74c3c;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 8px;
+}
+
+.artifact-interaction-hint {
+  font-size: 11px;
+  color: #2ecc71;
+  text-align: center;
+  margin-top: 8px;
+  background: rgba(46, 204, 113, 0.1);
+  padding: 4px;
+  border-radius: 4px;
+}
+
+/* Creative Aspirations Modal Overlay */
+.creative-aspirations-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.92), rgba(20, 30, 48, 0.95));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10004;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.creative-aspirations-container {
+  background: rgba(30, 40, 60, 0.8);
+  backdrop-filter: blur(5px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  width: 90%;
+  max-width: 600px;
+  padding: 40px;
+  color: white;
+  text-align: center;
+}
+
+.creative-aspirations-title {
+  font-size: 28px;
+  margin-bottom: 25px;
+  color: #3498db;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.creative-aspirations-questions {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 30px;
+  color: #ecf0f1;
+}
+
+.creative-aspirations-description {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  color: #bdc3c7;
+}
+
+.creative-aspirations-button {
+  background: linear-gradient(to right, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 50px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+}
+
+.creative-aspirations-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(52, 152, 219, 0.6);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Mobile Responsiveness for Aspiration Overlay */
+@media (max-width: 600px) {
+  .creative-aspirations-container {
+    padding: 25px;
+  }
+  
+  .creative-aspirations-title {
+    font-size: 22px;
+  }
+  
+  .creative-aspirations-questions {
+    font-size: 16px;
+  }
+  
+  .creative-aspirations-description {
+    font-size: 14px;
+  }
+}
+
+/* Artifact theme information */
+.artifact-theme {
+  font-size: 11px;
+  font-style: italic;
+  color: #3498db;
+  margin: 4px 0;
+  background: rgba(52, 152, 219, 0.1);
+  padding: 3px 6px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+/* Creative Aspirations Popup */
+.artifact-aspirations {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10005;
+  animation: fadeIn 0.3s ease;
+  cursor: pointer;
+}
+
+.aspirations-content {
+  background: rgba(20, 30, 48, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 25px;
+  max-width: 320px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+
+.aspirations-content h4 {
+  color: #f39c12;
+  margin: 0 0 15px 0;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.aspiration-question {
+  color: #3498db;
+  font-size: 16px;
+  margin: 15px 0 5px 0;
+  font-weight: 500;
+}
+
+.aspiration-answer {
+  color: #ecf0f1;
+  font-size: 18px;
+  font-style: italic;
+  margin: 5px 0 20px 0;
+  line-height: 1.4;
+  position: relative;
+  padding: 10px 0;
+}
+
+.aspiration-answer::before,
+.aspiration-answer::after {
+  content: '';
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+  left: 10%;
+  right: 10%;
+}
+
+.aspiration-answer::before {
+  top: 0;
+}
+
+.aspiration-answer::after {
+  bottom: 0;
+}
+
+.aspirations-close {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #bdc3c7;
+  opacity: 0.7;
+}
+
+/* Interaction level indicators */
+.level-indicator {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #ffd700;
+  color: #000;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  border: 1px solid #fff;
+  z-index: 10;
+}
+
+.level-indicator.level-2 {
+  background-color: #00bfff;
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+}
+
+.level-indicator.level-3 {
+  background-color: #9932cc;
+  box-shadow: 0 0 10px rgba(153, 50, 204, 0.5);
+}
+
+/* Interaction level glows */
+.artifact.interaction-level-1 {
+  animation: pulse-level1 2s infinite;
+}
+
+.artifact.interaction-level-2 {
+  animation: pulse-level2 2s infinite;
+}
+
+.artifact.interaction-level-3 {
+  animation: pulse-level3 2s infinite;
+}
+
+@keyframes pulse-level1 {
+  0% {
+    box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.5);
+  }
+}
+
+@keyframes pulse-level2 {
+  0% {
+    box-shadow: 0 0 5px 2px rgba(0, 191, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px 5px rgba(0, 191, 255, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 5px 2px rgba(0, 191, 255, 0.5);
+  }
+}
+
+@keyframes pulse-level3 {
+  0% {
+    box-shadow: 0 0 5px 2px rgba(153, 50, 204, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px 5px rgba(153, 50, 204, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 5px 2px rgba(153, 50, 204, 0.5);
+  }
+}
+
+/* Interaction status in details */
+.interaction-status {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.interaction-status span {
+  font-size: 12px;
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+/* Creator aspirations section */
+.creator-aspirations {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(255, 215, 0, 0.1);
+  border-left: 2px solid #ffd700;
+  border-radius: 4px;
+}
+
+.creator-aspirations h4 {
+  margin-top: 0;
+  color: #ffd700;
+}
+
+.creator-aspirations p {
+  font-style: italic;
+  margin-bottom: 5px;
+}
+
+.creator-aspirations .dedication {
+  font-size: 12px;
+  text-align: right;
+  color: #ffd700;
+}
+
+.aspirations-button {
+  display: block;
+  margin: 5px auto;
+  padding: 5px 10px;
+  background: rgba(255, 215, 0, 0.3);
+  color: #fff;
+  border: 1px solid #ffd700;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.aspirations-button:hover {
+  background: rgba(255, 215, 0, 0.5);
+}
+
+/* Guide trail effect for high-level artifacts */
+.artifact.interaction-level-3::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(153, 50, 204, 0.3) 0%, transparent 70%);
+  filter: blur(5px);
+  animation: trail-glow 2s infinite alternate;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes trail-glow {
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0.1;
+  }
+}

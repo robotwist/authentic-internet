@@ -3,9 +3,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 80%;
+  width: 90%;
   max-width: 600px;
-  max-height: 80vh;
+  max-height: 85vh;
   background: rgba(0, 0, 0, 0.95);
   border: 2px solid #ffd700;
   border-radius: 8px;
@@ -23,12 +23,14 @@
   align-items: center;
   padding: 12px;
   border-bottom: 1px solid #ffd700;
+  min-height: 50px;
 }
 
 .saved-quotes-header h2 {
   color: #ffd700;
   font-size: 1em;
   margin: 0;
+  white-space: nowrap;
 }
 
 .saved-quotes-header .close-button {
@@ -38,10 +40,132 @@
   font-size: 1.5em;
   cursor: pointer;
   padding: 0 8px;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .saved-quotes-header .close-button:hover {
   color: #ffffff;
+}
+
+.quotes-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  justify-content: center;
+}
+
+.quotes-actions button {
+  background: rgba(52, 152, 219, 0.7);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.8em;
+  font-family: var(--game-font);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+  flex: 1;
+  min-width: 110px;
+  max-width: 160px;
+  white-space: nowrap;
+}
+
+.quotes-actions button:hover {
+  background: rgba(52, 152, 219, 0.9);
+  transform: translateY(-2px);
+}
+
+.quotes-actions button:active {
+  transform: translateY(0);
+}
+
+.export-button {
+  background: rgba(46, 204, 113, 0.7) !important;
+}
+
+.export-button:hover {
+  background: rgba(46, 204, 113, 0.9) !important;
+}
+
+.share-button {
+  background: rgba(155, 89, 182, 0.7) !important;
+}
+
+.share-button:hover {
+  background: rgba(155, 89, 182, 0.9) !important;
+}
+
+.add-quote-button {
+  background: rgba(230, 126, 34, 0.7) !important;
+}
+
+.add-quote-button:hover {
+  background: rgba(230, 126, 34, 0.9) !important;
+}
+
+.share-form {
+  display: flex;
+  padding: 12px;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.share-form input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 0.8em;
+}
+
+.share-form input:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+
+.share-submit-button {
+  background: rgba(155, 89, 182, 0.7);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.8em;
+  cursor: pointer;
+  min-width: 70px;
+}
+
+.share-submit-button:hover {
+  background: rgba(155, 89, 182, 0.9);
+}
+
+.select-all-container {
+  padding: 8px 0;
+  color: #cccccc;
+  font-size: 0.8em;
+  display: flex;
+  align-items: center;
+}
+
+.select-all-container label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.select-all-container input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
 .quotes-list {
@@ -57,6 +181,31 @@
   padding: 12px;
   margin-bottom: 12px;
   position: relative;
+  display: flex;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.quote-item.selected {
+  background: rgba(52, 152, 219, 0.2);
+  border-color: rgba(52, 152, 219, 0.7);
+}
+
+.quote-checkbox {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.quote-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.quote-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .quote-text {
@@ -65,12 +214,16 @@
   line-height: 1.6;
   margin-bottom: 8px;
   font-style: italic;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .quote-source {
   color: #ffd700;
   font-size: 0.7em;
   margin-bottom: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .npc-type {
@@ -83,10 +236,14 @@
   font-size: 0.6em;
 }
 
-.delete-quote-button {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+.quote-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: flex-start;
+}
+
+.delete-quote-button, .copy-quote-button {
   background: rgba(139, 0, 0, 0.7);
   color: #ffffff;
   border: 1px solid #ff6b6b;
@@ -95,10 +252,22 @@
   font-size: 0.6em;
   font-family: var(--game-font);
   cursor: pointer;
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: center;
 }
 
 .delete-quote-button:hover {
   background: rgba(139, 0, 0, 0.9);
+}
+
+.copy-quote-button {
+  background: rgba(52, 152, 219, 0.7);
+  border-color: rgba(52, 152, 219, 0.9);
+}
+
+.copy-quote-button:hover {
+  background: rgba(52, 152, 219, 0.9);
 }
 
 .no-quotes-message {
@@ -109,7 +278,21 @@
   line-height: 1.6;
 }
 
-/* Scrollbar styling */
+.no-quotes-message button {
+  margin-top: 16px;
+  background: rgba(230, 126, 34, 0.7);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 1.1em;
+  cursor: pointer;
+}
+
+.no-quotes-message button:hover {
+  background: rgba(230, 126, 34, 0.9);
+}
+
 .quotes-list::-webkit-scrollbar {
   width: 6px;
 }
@@ -126,4 +309,85 @@
 
 .quotes-list::-webkit-scrollbar-thumb:hover {
   background: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .saved-quotes-container {
+    width: 95%;
+    max-height: 90vh;
+    top: 50%;
+    border-width: 1px;
+  }
+  
+  .quotes-actions {
+    padding: 8px;
+  }
+  
+  .quotes-actions button {
+    font-size: 0.7em;
+    padding: 6px 8px;
+    min-width: 90px;
+  }
+  
+  .quote-item {
+    padding: 10px;
+    flex-direction: column;
+  }
+  
+  .quote-checkbox {
+    align-self: flex-start;
+  }
+  
+  .quote-actions {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  .delete-quote-button, .copy-quote-button {
+    flex: 1;
+    max-width: 48%;
+  }
+  
+  .quotes-list {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .saved-quotes-container {
+    width: 98%;
+    max-height: 95vh;
+  }
+  
+  .saved-quotes-header h2 {
+    font-size: 0.9em;
+  }
+  
+  .quotes-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .quotes-actions button {
+    max-width: none;
+    width: 100%;
+  }
+  
+  .quote-text {
+    font-size: 0.75em;
+  }
+  
+  .quote-source {
+    font-size: 0.65em;
+  }
+  
+  .share-form {
+    flex-direction: column;
+  }
+  
+  .share-submit-button {
+    width: 100%;
+  }
 } 

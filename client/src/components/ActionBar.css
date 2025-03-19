@@ -1,0 +1,190 @@
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  z-index: 1000;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 768px;
+  margin: 0 auto;
+}
+
+.action-bar-left,
+.action-bar-center,
+.action-bar-right {
+  display: flex;
+  align-items: center;
+}
+
+.action-bar-center {
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.action-button {
+  background: rgba(30, 40, 60, 0.8);
+  color: white;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  background: rgba(52, 152, 219, 0.2);
+  transform: translateY(-2px);
+}
+
+.action-button:active {
+  transform: translateY(1px);
+}
+
+.action-icon {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.action-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Inventory button specific styles */
+.inventory-button {
+  position: relative;
+}
+
+.inventory-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 4px;
+}
+
+/* Inspiration button specific styles */
+.inspiration-button {
+  background: linear-gradient(to right, rgba(52, 152, 219, 0.8), rgba(46, 204, 113, 0.8));
+  border: none;
+  padding: 10px 18px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  animation: glow 2s infinite alternate;
+}
+
+.inspiration-button:hover {
+  background: linear-gradient(to right, rgba(52, 152, 219, 0.9), rgba(46, 204, 113, 0.9));
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.5);
+}
+
+.inspiration-button .action-icon {
+  font-size: 20px;
+}
+
+.inspiration-button .action-label {
+  font-weight: 600;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+  }
+  to {
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
+  }
+}
+
+/* Character stats styles */
+.character-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 15px;
+}
+
+.level-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.level-label {
+  font-size: 12px;
+  color: #bdc3c7;
+  margin-right: 5px;
+}
+
+.level-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #f39c12;
+}
+
+.exp-bar {
+  height: 8px;
+  width: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.exp-progress {
+  height: 100%;
+  background: linear-gradient(to right, #3498db, #2ecc71);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .action-bar {
+    padding: 8px;
+  }
+  
+  .action-label {
+    display: none;
+  }
+  
+  .action-icon {
+    margin-right: 0;
+    font-size: 22px;
+  }
+  
+  .action-button {
+    padding: 8px;
+  }
+  
+  .inspiration-button {
+    padding: 10px;
+  }
+  
+  .inspiration-button .action-label {
+    display: inline-block;
+    font-size: 12px;
+  }
+  
+  .character-stats {
+    margin-left: 8px;
+  }
+  
+  .exp-bar {
+    width: 60px;
+  }
+} 

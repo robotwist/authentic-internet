@@ -1,0 +1,348 @@
+/* Level3Terminal.css */
+.terminal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  color: #33ff33;
+  font-family: "Courier New", monospace;
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
+  animation: terminalFadeIn 1s ease-out;
+  overflow: hidden;
+}
+
+@keyframes terminalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.terminal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #111;
+  padding: 8px 16px;
+  border-bottom: 1px solid #33ff33;
+}
+
+.terminal-title {
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.terminal-status {
+  color: #ff3333;
+  font-size: 0.9em;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0.5;
+  }
+}
+
+.terminal-exit {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #666;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.terminal-exit:hover {
+  background-color: #ff3333;
+  color: #000;
+}
+
+.terminal-screen {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #000;
+  background-image: 
+    radial-gradient(rgba(0, 50, 0, 0.1) 15%, transparent 16%),
+    radial-gradient(rgba(0, 50, 0, 0.1) 15%, transparent 16%);
+  background-size: 4px 4px;
+  background-position: 0 0, 2px 2px;
+  position: relative;
+}
+
+/* Simulate an old CRT screen effect */
+.terminal-screen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Add a vignette effect to the edges */
+.terminal-screen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.terminal-line {
+  margin-bottom: 12px;
+  line-height: 1.5;
+  position: relative;
+  z-index: 5;
+}
+
+.system-output {
+  color: #33ff33;
+  text-shadow: 0 0 5px rgba(51, 255, 51, 0.5);
+}
+
+.user-input {
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.current-line {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cursor {
+  animation: cursorBlink 0.8s infinite;
+  color: #33ff33;
+  font-weight: bold;
+}
+
+@keyframes cursorBlink {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
+}
+
+.terminal-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.terminal-choice {
+  background-color: rgba(0, 0, 0, 0.7);
+  border: 1px solid #33ff33;
+  color: #33ff33;
+  padding: 8px 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "Courier New", monospace;
+  font-size: 1em;
+}
+
+.terminal-choice:hover {
+  background-color: rgba(51, 255, 51, 0.2);
+  text-shadow: 0 0 8px rgba(51, 255, 51, 0.8);
+}
+
+.terminal-input-area {
+  display: flex;
+  align-items: center;
+  background-color: #0f0f0f;
+  padding: 16px;
+  border-top: 1px solid #33ff33;
+  position: relative;
+  z-index: 10;
+}
+
+.input-prompt {
+  color: #33ff33;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.terminal-input {
+  flex: 1;
+  background-color: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: "Courier New", monospace;
+  font-size: 1em;
+  caret-color: transparent; /* Hide default cursor */
+  outline: none;
+}
+
+.terminal-input.active {
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.terminal-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Error state styling */
+.error-text {
+  color: #ff3333 !important;
+  text-shadow: 0 0 8px rgba(255, 51, 51, 0.8) !important;
+  animation: glitch 0.3s infinite;
+}
+
+@keyframes glitch {
+  0% {
+    transform: translateX(-2px);
+  }
+  25% {
+    transform: translateX(2px);
+  }
+  50% {
+    transform: translateX(-1px);
+  }
+  75% {
+    transform: translateX(1px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Occasional visual glitches */
+.terminal-container.glitch {
+  animation: terminalGlitch 0.2s;
+}
+
+@keyframes terminalGlitch {
+  0% {
+    transform: translateX(0);
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    transform: translateX(-5px);
+    filter: hue-rotate(90deg) brightness(1.5);
+  }
+  50% {
+    transform: translateX(5px);
+    filter: hue-rotate(180deg) contrast(1.5);
+  }
+  75% {
+    transform: translateX(-2px);
+    filter: hue-rotate(270deg) brightness(0.8);
+  }
+  100% {
+    transform: translateX(0);
+    filter: hue-rotate(0deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .terminal-header {
+    padding: 8px;
+  }
+  
+  .terminal-title {
+    font-size: 0.8em;
+  }
+  
+  .terminal-screen {
+    padding: 12px;
+  }
+  
+  .terminal-choice {
+    padding: 6px 12px;
+    font-size: 0.9em;
+  }
+  
+  .terminal-input-area {
+    padding: 12px;
+  }
+}
+
+/* Add special effects for dark narrative moments */
+.terminal-line.dark {
+  color: #ff0000;
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+}
+
+/* Screen disruption effect */
+.disruption {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(51, 255, 51, 0.1),
+    transparent
+  );
+  pointer-events: none;
+  opacity: 0;
+  z-index: 4;
+  animation: disrupt 5s infinite;
+}
+
+@keyframes disrupt {
+  0%, 95%, 100% {
+    opacity: 0;
+  }
+  50%, 55% {
+    opacity: 0.8;
+    transform: translateY(100%);
+  }
+}
+
+/* Text distortion effect */
+.system-output.distorted {
+  animation: distort 0.1s steps(2) infinite;
+}
+
+@keyframes distort {
+  0% {
+    transform: skewX(0deg);
+    filter: blur(0);
+  }
+  25% {
+    transform: skewX(3deg);
+    filter: blur(1px);
+  }
+  75% {
+    transform: skewX(-3deg);
+    filter: blur(1px);
+  }
+  100% {
+    transform: skewX(0deg);
+    filter: blur(0);
+  }
+} 

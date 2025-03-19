@@ -24,6 +24,9 @@ import NPC from "./NPC";
 import TouchControls from './TouchControls';
 import Dialog from "./Dialog";
 import ActionBar from "./ActionBar";
+import WorldGuideOnboarding from "./WorldGuideOnboarding";
+import CreativeAspirations from "./CreativeAspirations";
+import Level3Terminal from "./Level3Terminal";
 
 const MOVEMENT_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
 
@@ -50,7 +53,9 @@ const GameWorld = ({
     position: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
     exp: 0,
     level: 1
-  }
+  },
+  isLoggedIn = false,
+  username = ''
 }) => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
   const [inventory, setInventory] = useState([]);
@@ -80,6 +85,19 @@ const GameWorld = ({
   const [renderKey, setRenderKey] = useState(0);
   const [showYosemiteButton, setShowYosemiteButton] = useState(false);
   const [debugMode, setDebugMode] = useState(false);
+  const [showWorldGuide, setShowWorldGuide] = useState(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [showCreativeAspirations, setShowCreativeAspirations] = useState(false);
+  const [showLevel3Terminal, setShowLevel3Terminal] = useState(false);
+  const [gameLevel, setGameLevel] = useState(1);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [levelUpMessage, setLevelUpMessage] = useState(null);
+
+  // Add Dante quotes for level transitions
+  const DANTE_QUOTES = {
+    level2: "In the middle of the journey of our life, I found myself in a dark forest, for the straight way was lost.",
+    level3: "All hope abandon, ye who enter here."
+  };
 
   useEffect(() => {
     fetchArtifacts()
@@ -181,39 +199,6 @@ const GameWorld = ({
       x: newViewportX,
       y: newViewportY
     });
-  };
-
-  const handleCreateArtifact = (name, description, messageText) => {
-    if (!isLoggedIn) {
-      alert("You need to be logged in to create artifacts.");
-      return;
-    }
-
-    const newArtifact = {
-      name,
-      description,
-      messageText,
-      location: { x: characterPosition.x / TILE_SIZE, y: characterPosition.y / TILE_SIZE },
-      area: currentMap?.name || "Overworld",
-      visible: true,
-      status: "dropped",
-      type: "artifact"
-    };
-
-    console.log("✨ Creating artifact at:", newArtifact.location);
-
-    createArtifact(newArtifact)
-      .then((data) => {
-        console.log("✅ Artifact Created:", data);
-        updateArtifactsState(data);
-        // Refresh artifacts to ensure we have the latest data
-        refreshArtifacts();
-        setShowForm(false); // Close the form after successful creation
-      })
-      .catch((error) => {
-        console.error("❌ Error creating artifact:", error);
-        alert("Failed to create artifact. Please try again.");
-      });
   };
 
   const updateArtifactsState = (newArtifact) => {
@@ -319,6 +304,9 @@ const GameWorld = ({
 
     const key = e.key.toLowerCase();
     
+    // Skip keyboard handling during onboarding
+    if (showWorldGuide) return;
+    
     // Escape key should exit any dialog or menu, regardless of other conditions
     if (key === 'escape') {
       e.preventDefault();
@@ -419,14 +407,7 @@ const GameWorld = ({
         break;
       case 'c':
         e.preventDefault();
-        if (isLoggedIn) {
-          setIsInMenu(true);
-          setShowForm(true);
-          setFormPosition({ 
-            x: Math.floor(characterPosition.x / TILE_SIZE), 
-            y: Math.floor(characterPosition.y / TILE_SIZE) 
-          });
-        }
+        handleShowCreateArtifact();
         break;
       case 'q':
         e.preventDefault();
@@ -1001,280 +982,470 @@ const GameWorld = ({
     }
   };
 
+  // Check if this is a new user who needs onboarding
+  useEffect(() => {
+    const checkNewUser = async () => {
+      if (isLoggedIn && character && !localStorage.getItem('onboardingCompleted')) {
+        // If user is level 1 and has no artifacts, show the onboarding
+        if (character.level === 1 && character.exp === 0 && (!inventory || inventory.length === 0)) {
+          // Wait a moment for the game world to load before showing the guide
+          setTimeout(() => {
+            setShowWorldGuide(true);
+          }, 2000);
+        }
+      }
+    };
+    
+    checkNewUser();
+  }, [isLoggedIn, character, inventory]);
+  
+  // Handle completing the onboarding
+  const handleCompleteOnboarding = () => {
+    setShowWorldGuide(false);
+    setHasCompletedOnboarding(true);
+    localStorage.setItem('onboardingCompleted', 'true');
+    
+    // Show a congratulatory message
+    setTimeout(() => {
+      alert('Congratulations! You have completed the onboarding experience. Your artifact is now in the world for others to find and interact with, which will earn you experience points. Explore the world to find artifacts created by others!');
+    }, 500);
+  };
+
+  // Show creative aspirations overlay
+  const handleShowCreativeAspirations = () => {
+    setShowCreativeAspirations(true);
+  };
+
+  // Handle when user clicks Start Creating in the aspirations overlay
+  const handleStartCreating = () => {
+    setShowCreativeAspirations(false);
+    // Either show the artifact creation form or move to a location for creation
+    setShowForm(true);
+  };
+
+  // Determine the game level based on character experience or level
+  useEffect(() => {
+    if (character && character.level >= 3) {
+      setGameLevel(3);
+      // Only show terminal if player is at level 3
+      setShowLevel3Terminal(true);
+    } else if (character && character.level >= 2) {
+      setGameLevel(2);
+      // Level 2 Yosemite experience
+    } else {
+      setGameLevel(1);
+      // Level 1 standard experience
+    }
+  }, [character]);
+
+  // Check if character has any artifacts that qualify for level progression
+  const checkLevelQualification = useCallback(() => {
+    if (!artifacts || !username) return;
+    
+    // Filter artifacts created by this user
+    const userArtifacts = artifacts.filter(a => a.creator === username);
+    
+    if (userArtifacts.length === 0) return;
+    
+    // Level 2 qualification: At least one artifact with 3+ total interactions
+    const level2Artifact = userArtifacts.find(artifact => {
+      const totalInteractions = (artifact.interactions?.views || 0) + 
+                               (artifact.interactions?.saves || 0) + 
+                               (artifact.interactions?.shares || 0);
+      return totalInteractions >= 3;
+    });
+    
+    // Level 3 qualification: At least one artifact with 5+ total interactions and at least 2 saves
+    const level3Artifact = userArtifacts.find(artifact => {
+      const totalInteractions = (artifact.interactions?.views || 0) + 
+                               (artifact.interactions?.saves || 0) + 
+                               (artifact.interactions?.shares || 0);
+      return totalInteractions >= 5 && (artifact.interactions?.saves || 0) >= 2;
+    });
+    
+    // Update character level based on artifact qualifications
+    if (level3Artifact && character.level < 3) {
+      const updatedCharacter = {
+        ...character,
+        level: 3,
+        exp: Math.max(character.exp, 300),
+        qualifyingArtifacts: {
+          ...(character.qualifyingArtifacts || {}),
+          level3: level3Artifact._id
+        }
+      };
+      
+      setCharacter(updatedCharacter);
+      
+      // Show level up notification with guide appearance
+      setLevelUpMessage({
+        guide: "Virgil",
+        level: 3,
+        message: "Your creation has resonated deeply with others. The path to the inner realm is now open to you. Follow me into the darkness, where truth is found in absence of light.",
+        artifactName: level3Artifact.name,
+        onClose: () => {
+          setLevelUpMessage(null);
+          // If user is logged in, save progress
+          if (isLoggedIn) {
+            updateCharacter(updatedCharacter)
+              .catch(err => console.error('Error updating character after level qualification:', err));
+          }
+        }
+      });
+      
+    } else if (level2Artifact && character.level < 2) {
+      const updatedCharacter = {
+        ...character,
+        level: 2,
+        exp: Math.max(character.exp, 150),
+        qualifyingArtifacts: {
+          ...(character.qualifyingArtifacts || {}),
+          level2: level2Artifact._id
+        }
+      };
+      
+      setCharacter(updatedCharacter);
+      
+      // Show level up notification with guide appearance
+      setLevelUpMessage({
+        guide: "John Muir",
+        level: 2,
+        message: "Your creation has touched others, and in doing so, has opened the path to Yosemite. Nature awaits you - come walk with me among the mountains and meadows where inspiration flows like water.",
+        artifactName: level2Artifact.name,
+        onClose: () => {
+          setLevelUpMessage(null);
+          // If user is logged in, save progress
+          if (isLoggedIn) {
+            updateCharacter(updatedCharacter)
+              .catch(err => console.error('Error updating character after level qualification:', err));
+          }
+        }
+      });
+    }
+  }, [artifacts, username, character, isLoggedIn]);
+
+  // Check for level qualification whenever artifacts are updated
+  useEffect(() => {
+    checkLevelQualification();
+  }, [artifacts, checkLevelQualification]);
+
+  // Handle transition to level 3
+  const handleTransitionToLevel3 = () => {
+    // Only allow transition if character has qualified through their artifacts
+    if (character.level < 3 && !debugMode) {
+      // Guide message about needing more meaningful artifacts
+      setErrorMessage({
+        title: "Virgil",
+        message: "You cannot yet enter this realm. Create artifacts that resonate with others - when your creations are viewed, saved, and shared, the way forward will reveal itself.",
+        onClose: () => setErrorMessage(null)
+      });
+      return;
+    }
+
+    // Get qualifying artifact that opened the path
+    const qualifyingArtifactId = character.qualifyingArtifacts?.level3;
+    const qualifyingArtifact = qualifyingArtifactId ? artifacts.find(a => a._id === qualifyingArtifactId) : null;
+
+    // Create divine transition effect
+    const divineTransition = document.createElement('div');
+    divineTransition.className = 'divine-transition';
+    document.body.appendChild(divineTransition);
+    setTimeout(() => divineTransition.classList.add('active'), 100);
+
+    // Create Virgil guide appearance
+    const guideAppearance = document.createElement('div');
+    guideAppearance.className = 'guide-appearance virgil';
+    document.body.appendChild(guideAppearance);
+    setTimeout(() => guideAppearance.classList.add('active'), 500);
+
+    // Show Dante quote
+    const danteQuote = document.createElement('div');
+    danteQuote.className = 'dante-quote';
+    danteQuote.textContent = DANTE_QUOTES.level3;
+    document.body.appendChild(danteQuote);
+    setTimeout(() => danteQuote.classList.add('active'), 1000);
+
+    // Play transition sound
+    const transitionSound = new Audio('/assets/sounds/digital-transition.mp3');
+    transitionSound.volume = 0.5;
+    transitionSound.play().catch(console.error);
+
+    // Add visual effects for transition
+    setIsTransitioning(true);
+    document.querySelector('.game-world').classList.add('level-3-transition');
+
+    // Create cursor animation element
+    const cursorElement = document.createElement('div');
+    cursorElement.className = 'cursor-entry';
+    document.body.appendChild(cursorElement);
+
+    // After animation completes, show the terminal
+    setTimeout(() => {
+      setShowLevel3Terminal(true);
+      setGameLevel(3);
+      setIsTransitioning(false);
+      document.querySelector('.game-world').classList.remove('level-3-transition');
+      
+      // Remove transition elements
+      if (divineTransition && divineTransition.parentNode) divineTransition.parentNode.removeChild(divineTransition);
+      if (guideAppearance && guideAppearance.parentNode) guideAppearance.parentNode.removeChild(guideAppearance);
+      if (danteQuote && danteQuote.parentNode) danteQuote.parentNode.removeChild(danteQuote);
+      if (cursorElement && cursorElement.parentNode) cursorElement.parentNode.removeChild(cursorElement);
+    }, 5000);
+  };
+
+  // Modify handleMapTransition for Level 2 access
+  const handleMapTransition = useCallback((targetMapIndex) => {
+    // Check for Level 3 portal
+    const currentX = Math.floor(characterPosition.x / TILE_SIZE);
+    const currentY = Math.floor(characterPosition.y / TILE_SIZE);
+    const currentTile = MAPS[currentMapIndex].data[currentY][currentX];
+
+    // Level 3 portal is a special type of portal (value 13 in the map data)
+    if (currentTile === 13) {
+      handleTransitionToLevel3();
+      return;
+    }
+    
+    // Yosemite (Level 2) access check
+    if (targetMapIndex === 2 && character.level < 2 && !debugMode) {
+      // Guide message about needing more meaningful artifacts
+      setErrorMessage({
+        title: "John Muir",
+        message: "The path to Yosemite is not yet open to you. Create artifacts that touch others' hearts - when your creations begin to resonate with the world, I will guide you to the mountains.",
+        onClose: () => setErrorMessage(null)
+      });
+      return;
+    }
+    
+    // Regular map transition logic
+    if (targetMapIndex !== undefined && targetMapIndex !== currentMapIndex) {
+      // Dante-inspired transition for Level 2
+      if (targetMapIndex === 2) {
+        // Create divine transition effect
+        const divineTransition = document.createElement('div');
+        divineTransition.className = 'divine-transition';
+        document.body.appendChild(divineTransition);
+        setTimeout(() => divineTransition.classList.add('active'), 100);
+
+        // Create John Muir guide appearance
+        const guideAppearance = document.createElement('div');
+        guideAppearance.className = 'guide-appearance john-muir';
+        document.body.appendChild(guideAppearance);
+        setTimeout(() => guideAppearance.classList.add('active'), 500);
+
+        // Show Dante quote
+        const danteQuote = document.createElement('div');
+        danteQuote.className = 'dante-quote';
+        danteQuote.textContent = DANTE_QUOTES.level2;
+        document.body.appendChild(danteQuote);
+        setTimeout(() => danteQuote.classList.add('active'), 1000);
+      }
+      
+      // Transition animation
+      setIsTransitioning(true);
+      setShowPortalFlash(true);
+      
+      // Play portal sound if available
+      const portalSound = new Audio('/assets/sounds/portal.mp3');
+      portalSound.volume = 0.5;
+      portalSound.play().catch(console.error);
+      
+      // Level 2 (Yosemite) special intro dialog with John Muir
+      if (targetMapIndex === 2 && !showedLevel2Intro) {
+        // Get qualifying artifact that opened the path
+        const qualifyingArtifactId = character.qualifyingArtifacts?.level2;
+        const qualifyingArtifact = qualifyingArtifactId ? artifacts.find(a => a._id === qualifyingArtifactId) : null;
+        
+        const muirIntro = {
+          title: "John Muir",
+          message: `Welcome to Yosemite, my dear friend! Your creation "${qualifyingArtifact?.name || 'artifact'}" has opened the way to this sacred place. The grandeur of these mountains will lift your spirit. Let us walk among the sequoias and beside the shimmering waters. The wilderness holds answers to questions we have not yet learned to ask.`,
+          onClose: () => {
+            // Continue with map transition after greeting
+            setTimeout(() => {
+              setCurrentMapIndex(targetMapIndex);
+              setCharacterPosition({
+                x: 5 * TILE_SIZE,
+                y: 5 * TILE_SIZE
+              });
+              setIsTransitioning(false);
+              setShowPortalFlash(false);
+              setShowedLevel2Intro(true);
+            }, 500);
+          }
+        };
+        
+        // Show dialog after a short delay
+        setTimeout(() => {
+          setErrorMessage(muirIntro);
+        }, 1000);
+      } else {
+        // Standard transition without dialog
+        setTimeout(() => {
+          setCurrentMapIndex(targetMapIndex);
+          setCharacterPosition({
+            x: 5 * TILE_SIZE,
+            y: 5 * TILE_SIZE
+          });
+          setIsTransitioning(false);
+          setShowPortalFlash(false);
+        }, 1000);
+      }
+    }
+  }, [characterPosition.x, characterPosition.y, currentMapData, currentMapIndex, handleTransitionToLevel3, showedLevel2Intro, character.level, debugMode]);
+
   return (
-    <div className="game-container" style={{ 
-      width: '100%', 
-      maxWidth: '768px', 
-      height: isMobile ? 'calc(100vh - 60px)' : '768px', 
-      overflow: 'hidden',
-      margin: '0 auto'
-    }}>
-      {showControls && (
-        <div className="controls-hint" style={{
-          position: 'absolute',
-          top: '10px',
-          left: '10px',
-          background: 'rgba(0, 0, 0, 0.7)',
-          color: 'white',
-          padding: '10px',
-          borderRadius: '5px',
-          fontSize: '14px',
-          zIndex: 100,
-          opacity: 1,
-          transition: 'opacity 1s ease-out'
-        }}>
-          <div>🎮 Controls:</div>
-          <div>Arrow Keys / D-Pad - Move Character</div>
-          <div>Click on NPCs - Talk to Characters</div>
-          <div>Top Navigation Bar - Access Menus</div>
-          <div>Use "Quotes" Button - View Saved Quotes</div>
-          <div>P Button - Pick Up Artifact (when standing on it)</div>
-          <div>D Button - Drop Artifact (from inventory)</div>
-          <div>Esc - Close Dialogs</div>
-        </div>
-      )}
-      <div className="viewport" style={{ 
+    <ErrorBoundary>
+      <div className="game-container" style={{ 
         width: '100%', 
-        height: '100%', 
-        position: 'relative',
-        overflow: 'hidden'
+        maxWidth: '768px', 
+        height: isMobile ? 'calc(100vh - 60px)' : '768px', 
+        overflow: 'hidden',
+        margin: '0 auto'
       }}>
-        <div className={`game-world ${isTransitioning ? 'transitioning' : ''}`} style={{
-          transform: `translate(${-viewport.x}px, ${-viewport.y}px)`,
-          position: 'absolute',
-          width: `${MAP_COLS * TILE_SIZE}px`,
-          height: `${MAP_ROWS * TILE_SIZE}px`
-        }}>
-          <Map 
-            mapData={MAPS[currentMapIndex].data} 
-            mapName={MAPS[currentMapIndex].name}
-          />
-          <Character
-            x={characterPosition.x}
-            y={characterPosition.y}
-            exp={character.exp}
-            level={getLevel(character.exp)}
-            movementDirection={movementDirection}
-            avatar={character.avatar}
-          />
-          <ErrorBoundary>
-            {/* Render NPCs */}
-            {MAPS[currentMapIndex].npcs?.map((npc) => (
-              <NPC
-                key={`npc-${npc.id}`}
-                npc={npc}
-                position={npc.position}
-                characterPosition={characterPosition}
-                mapData={MAPS[currentMapIndex].data}
-                character={character}
-                onUpdateCharacter={(updatedCharacter) => {
-                  setCharacter(updatedCharacter);
-                  // Save to backend if needed
-                  if (updatedCharacter.id) {
-                    updateCharacter(updatedCharacter)
-                      .catch(err => console.error("Failed to update character:", err));
-                  }
-                }}
-                onDialogStateChange={(isOpen) => {
-                  setDialogOpen(isOpen);
-                }}
-              />
-            ))}
-            {/* Render map artifacts */}
-            {MAPS[currentMapIndex].artifacts.map((artifact) =>
-              artifact.visible ? (
-                <Artifact
-                  key={`map-artifact-${artifact.id}`}
-                  artifact={{
-                    ...artifact,
-                    location: {
-                      x: artifact.location?.x || 0,
-                      y: artifact.location?.y || 0
-                    }
-                  }}
-                  characterPosition={characterPosition}
-                  visible={true}
-                />
-              ) : null
+        {/* Only show normal game world if not in terminal mode */}
+        {!showLevel3Terminal ? (
+          <>
+            {showControls && (
+              <div className="controls-hint" style={{
+                position: 'absolute',
+                top: '10px',
+                left: '10px',
+                background: 'rgba(0, 0, 0, 0.7)',
+                color: 'white',
+                padding: '10px',
+                borderRadius: '5px',
+                fontSize: '14px',
+                zIndex: 100,
+                opacity: 1,
+                transition: 'opacity 1s ease-out'
+              }}>
+                <div>🎮 Controls:</div>
+                <div>Arrow Keys / D-Pad - Move Character</div>
+                <div>Click on NPCs - Talk to Characters</div>
+                <div>Top Navigation Bar - Access Menus</div>
+                <div>Use "Quotes" Button - View Saved Quotes</div>
+                <div>P Button - Pick Up Artifact (when standing on it)</div>
+                <div>D Button - Drop Artifact (from inventory)</div>
+                <div>Esc - Close Dialogs</div>
+              </div>
             )}
-            {/* Render user-created artifacts */}
-            {artifacts.map((artifact) =>
-              artifact.visible ? (
-                <Artifact
-                  key={`user-artifact-${artifact.id || artifact._id}`}
-                  artifact={{
-                    ...artifact,
-                    location: {
-                      x: artifact.location?.x || 0,
-                      y: artifact.location?.y || 0
-                    }
-                  }}
-                  characterPosition={characterPosition}
-                  visible={true}
+            <div className="viewport" style={{ 
+              width: '100%', 
+              height: '100%', 
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div className={`game-world ${isTransitioning ? 'transitioning' : ''} level-${gameLevel}`} style={{
+                transform: `translate(${-viewport.x}px, ${-viewport.y}px)`,
+                position: 'absolute',
+                width: `${MAP_COLS * TILE_SIZE}px`,
+                height: `${MAP_ROWS * TILE_SIZE}px`
+              }}>
+                <Map 
+                  mapData={MAPS[currentMapIndex].data} 
+                  mapName={MAPS[currentMapIndex].name}
                 />
-              ) : null
-            )}
-          </ErrorBoundary>
-        </div>
-      </div>
-
-      {showForm && (
-        <ArtifactCreation
-          position={characterPosition}
-          onClose={() => setShowForm(false)}
-          refreshArtifacts={refreshArtifacts}
-        />
-      )}
-
-      {showInventory && (
-        <Inventory 
-          artifacts={inventory}
-          onClose={() => setShowInventory(false)}
-          onUpdateArtifact={handleArtifactPickup}
-          onGainExperience={handleExp}
-          refreshArtifacts={refreshArtifacts}
-          characterPosition={characterPosition}
-        />      
-      )}
-
-      {showPortalFlash && <div className="portal-flash" />}
-
-      {/* Quotes button */}
-      <button 
-        className="quotes-button"
-        onClick={() => setShowSavedQuotes(true)}
-        disabled={dialogOpen}
-      >
-        📜 Quotes
-      </button>
-
-      {/* Saved Quotes Modal */}
-      {showSavedQuotes && (
-        <SavedQuotes 
-          quotes={character?.savedQuotes || []}
-          onClose={() => setShowSavedQuotes(false)}
-          onDeleteQuote={handleDeleteQuote}
-        />
-      )}
-
-      {/* Add TouchControls component */}
-      <TouchControls onMove={handleTouchMove} onDrop={() => setShowDropDown(true)} />
-      
-      {/* Artifact Drop Down Menu */}
-      {showDropDown && (
-        <div className="drop-down-menu">
-          <div className="drop-down-header">
-            <h3>Drop an Artifact</h3>
-            <button className="close-button" onClick={() => setShowDropDown(false)}>×</button>
-          </div>
-          <div className="drop-down-items">
-            {inventory.length === 0 ? (
-              <div className="no-items-message">Your inventory is empty</div>
-            ) : (
-              inventory.map((item, index) => (
-                <div key={index} className="drop-down-item" onClick={() => handleDropArtifact(item)}>
-                  <div className="item-name">{item.name}</div>
-                  <div className="item-action">Drop</div>
+                <Character
+                  x={characterPosition.x}
+                  y={characterPosition.y}
+                  exp={character.exp}
+                  level={getLevel(character.exp)}
+                  movementDirection={movementDirection}
+                  avatar={character.avatar}
+                />
+                <ErrorBoundary>
+                  {/* Render NPCs */}
+                  {MAPS[currentMapIndex].npcs?.map((npc) => (
+                    <NPC
+                      key={`npc-${npc.id}`}
+                      npc={npc}
+                      position={npc.position}
+                      characterPosition={characterPosition}
+                      mapData={MAPS[currentMapIndex].data}
+                      character={character}
+                      onUpdateCharacter={(updatedCharacter) => {
+                        setCharacter(updatedCharacter);
+                        // Save to backend if needed
+                        if (updatedCharacter.id) {
+                          updateCharacter(updatedCharacter)
+                            .catch(err => console.error("Failed to update character:", err));
+                        }
+                      }}
+                      onDialogStateChange={(isOpen) => {
+                        setDialogOpen(isOpen);
+                      }}
+                    />
+                  ))}
+                  {/* Render map artifacts */}
+                  {MAPS[currentMapIndex].artifacts.map((artifact) =>
+                    artifact.visible ? (
+                      <Artifact
+                        key={`map-artifact-${artifact.id}`}
+                        artifact={{
+                          ...artifact,
+                          location: {
+                            x: artifact.location?.x || 0,
+                            y: artifact.location?.y || 0
+                          }
+                        }}
+                        characterPosition={characterPosition}
+                        visible={true}
+                      />
+                    ) : null
+                  )}
+                  {/* Render user-created artifacts */}
+                  {artifacts.map((artifact) =>
+                    artifact.visible ? (
+                      <Artifact
+                        key={`user-artifact-${artifact.id || artifact._id}`}
+                        artifact={{
+                          ...artifact,
+                          location: {
+                            x: artifact.location?.x || 0,
+                            y: artifact.location?.y || 0
+                          }
+                        }}
+                        characterPosition={characterPosition}
+                        visible={true}
+                      />
+                    ) : null
+                  )}
+                </ErrorBoundary>
+              </div>
+            </div>
+          </>
+        ) : (
+          <Level3Terminal
+            showLevel3Terminal={showLevel3Terminal}
+            handleTransitionToLevel3={handleTransitionToLevel3}
+          />
+        )}
+        {levelUpMessage && (
+          <div className="level-up-notification">
+            <div className="level-up-content">
+              <h3>Level {levelUpMessage.level} Unlocked</h3>
+              <div className="guide-message">
+                <div className="guide-portrait">
+                  <img 
+                    src={`/assets/guides/${levelUpMessage.guide.toLowerCase()}.png`} 
+                    alt={levelUpMessage.guide}
+                  />
                 </div>
-              ))
-            )}
+                <div className="guide-text">
+                  <h4>{levelUpMessage.guide}</h4>
+                  <p>{levelUpMessage.message}</p>
+                </div>
+              </div>
+              <div className="artifact-recognition">
+                <p>Your artifact "{levelUpMessage.artifactName}" has opened the way.</p>
+              </div>
+              <button onClick={levelUpMessage.onClose}>Continue Journey</button>
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Add the YosemiteAccess component near the end, just before touch controls */}
-      <YosemiteAccess 
-        onAccess={handleYosemiteAccess} 
-        showButton={showYosemiteButton && !showedLevel2Intro && currentMapIndex === 0}
-      />
-      
-      {isMobile && (
-        <TouchControls
-          onMove={handleMove}
-          onAction={handleAction}
-          onInteract={handleInteract}
-          onDrop={handleDrop}
-        />
-      )}
-
-      {debugMode && (
-        <div className="debug-info">
-          <h3>Debug Info</h3>
-          <p>Current Map: {MAPS[currentMapIndex].name}</p>
-          <p>Player Position: x={Math.floor(characterPosition.x / TILE_SIZE)}, y={Math.floor(characterPosition.y / TILE_SIZE)}</p>
-          <p>Character Level: {character?.level || 1}</p>
-          <h4>NPCs:</h4>
-          <ul>
-            {MAPS[currentMapIndex].npcs?.map((npc, index) => (
-              <li key={index}>
-                {npc.name} ({npc.type}): x={Math.floor(npc.position.x / TILE_SIZE)}, y={Math.floor(npc.position.y / TILE_SIZE)}
-                <button onClick={() => {
-                  // Teleport to this NPC
-                  setCharacterPosition({
-                    x: npc.position.x,
-                    y: npc.position.y
-                  });
-                }}>
-                  Teleport to NPC
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button onClick={() => {
-            // Force refresh NPCs
-            setRenderKey(prevKey => prevKey + 1);
-          }}>
-            Refresh NPCs
-          </button>
-          <button onClick={() => {
-            // Force John Muir to appear at player position if in Yosemite
-            if (MAPS[currentMapIndex].name === "Yosemite") {
-              const updatedMaps = [...MAPS];
-              const yosemiteIndex = currentMapIndex;
-              
-              // Check if John Muir already exists
-              const johnMuirIndex = updatedMaps[yosemiteIndex].npcs.findIndex(
-                npc => npc.type === NPC_TYPES.JOHN_MUIR
-              );
-              
-              if (johnMuirIndex !== -1) {
-                // Update his position
-                updatedMaps[yosemiteIndex].npcs[johnMuirIndex].position = {
-                  x: characterPosition.x,
-                  y: characterPosition.y
-                };
-              } else {
-                // Add John Muir to the map
-                updatedMaps[yosemiteIndex].npcs.push({
-                  id: 'john_muir_yosemite',
-                  type: NPC_TYPES.JOHN_MUIR,
-                  name: 'John Muir',
-                  position: { x: characterPosition.x, y: characterPosition.y },
-                  patrolArea: {
-                    startX: Math.floor(characterPosition.x / TILE_SIZE) - 2,
-                    startY: Math.floor(characterPosition.y / TILE_SIZE) - 2,
-                    width: 5,
-                    height: 5
-                  },
-                  dialogue: [
-                    "Welcome to Yosemite, the grandest of all the special temples of Nature. (The Yosemite, 1912)",
-                    "This is Nature's cathedral, surpassing any ever yet reared by hands. (Our National Parks, 1901)",
-                    "Climb the mountains and get their good tidings. Nature's peace will flow into you as sunshine flows into trees. (Our National Parks, 1901)",
-                    "Walk along the river to see Yosemite Falls, then follow the Mist Trail to experience the raw power of water shaping granite.",
-                    "Half Dome awaits the bold at the end of your journey. Its majestic face has been shaped by the forces of glaciers over millions of years."
-                  ]
-                });
-              }
-              
-              // Force refresh
-              setRenderKey(prevKey => prevKey + 1);
-            }
-          }}>
-            Fix John Muir
-          </button>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 };
 

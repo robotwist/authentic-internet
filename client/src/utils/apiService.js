@@ -114,6 +114,34 @@ export const dropArtifact = async (characterId, artifactId) => {
   }
 };
 
+export const trackArtifactInteraction = async (artifactId, interactionType) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.log('User not authenticated, skipping interaction tracking');
+      return null;
+    }
+    
+    const response = await fetch(`/api/artifacts/${artifactId}/interact`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ interactionType })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to track interaction');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error(`Error tracking ${interactionType} interaction:`, error);
+    return null;
+  }
+};
+
 // User settings and preferences
 export const updateUserSettings = async (userId, settings) => {
   try {

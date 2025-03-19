@@ -29,6 +29,106 @@
   transform-origin: center center;
 }
 
+/* Level-specific transitions and effects */
+.game-world.level-3-transition {
+  animation: level3Transition 3s forwards;
+}
+
+.game-world.level-2 {
+  filter: saturate(1.2) brightness(1.1);
+}
+
+.game-world.level-3 {
+  filter: grayscale(1) contrast(0.8) brightness(0.5);
+  transition: filter 2s ease-in-out;
+}
+
+/* Dante's Inferno inspired level styling */
+.game-world.level-1 {
+  filter: saturate(1) brightness(1);
+  transition: filter 2s ease-in-out;
+}
+
+.game-world.level-2 {
+  filter: saturate(1.3) brightness(1.2) hue-rotate(15deg);
+  transition: filter 2s ease-in-out;
+}
+
+.game-world.level-3 {
+  filter: grayscale(0.7) contrast(1.2) brightness(0.7) hue-rotate(-15deg);
+  transition: filter 2s ease-in-out;
+}
+
+/* Terminal transition animation */
+@keyframes level3Transition {
+  0% {
+    filter: brightness(1) contrast(1) blur(0);
+    transform: scale(1);
+  }
+  20% {
+    filter: brightness(1.5) contrast(1.2) blur(2px);
+    transform: scale(1.05);
+  }
+  40% {
+    filter: brightness(0.8) contrast(1.5) blur(5px);
+    transform: scale(1.1) rotate(1deg);
+  }
+  60% {
+    filter: brightness(0.4) contrast(2) blur(10px);
+    transform: scale(1.15) rotate(-1deg);
+  }
+  80% {
+    filter: brightness(0.2) contrast(3) blur(15px);
+    transform: scale(1.2) rotate(0deg);
+  }
+  100% {
+    filter: brightness(0) contrast(5) blur(20px);
+    transform: scale(1.3);
+  }
+}
+
+/* Terminal Entry effect - for the cursor animation */
+.cursor-entry {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 40px;
+  background-color: #33ff33;
+  box-shadow: 0 0 20px #33ff33;
+  z-index: 9998;
+  animation: cursorExpand 3s forwards;
+}
+
+@keyframes cursorExpand {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  20% {
+    width: 10px;
+    opacity: 1;
+  }
+  40% {
+    width: 20px;
+    opacity: 1;
+  }
+  60% {
+    width: 40px;
+    opacity: 1;
+  }
+  80% {
+    width: 100px;
+    opacity: 1;
+  }
+  100% {
+    width: 200vw;
+    opacity: 1;
+  }
+}
+
+/* Portal transition animation for regular map changes */
 @keyframes portalTransition {
   0% {
     transform: rotate(0deg) scale(1);
@@ -286,33 +386,48 @@
 
 .error-message {
   position: fixed;
-  bottom: 2rem;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  background: rgba(255, 0, 0, 0.9);
-  padding: 1rem 2rem;
-  border-radius: 5px;
-  color: white;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  animation: slideUp 0.3s ease;
+  transform: translate(-50%, -50%);
+  background-color: rgba(26, 26, 26, 0.95);
+  border: 2px solid #ffd700;
+  border-radius: 10px;
+  padding: 20px;
+  width: 80%;
+  max-width: 500px;
+  z-index: 9000;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.error-message h3 {
+  margin-top: 0;
+  color: #ffd700;
+  font-family: 'Cinzel', serif;
+  margin-bottom: 15px;
+}
+
+.error-message p {
+  margin-bottom: 20px;
+  line-height: 1.5;
+  font-style: italic;
 }
 
 .error-message button {
-  padding: 0.3rem 0.8rem;
-  background: transparent;
-  border: 1px solid white;
-  border-radius: 3px;
-  color: white;
+  background-color: #ffd700;
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  font-weight: bold;
+  transition: all 0.2s;
 }
 
 .error-message button:hover {
-  background: white;
-  color: red;
+  background-color: #fff;
+  transform: translateY(-2px);
 }
 
 .loading-spinner {
@@ -641,4 +756,342 @@
 
 .debug-info button:hover {
   background: #006600;
+}
+
+/* Level Up Notification */
+.level-up-notification {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9995;
+  animation: levelUpFadeIn 0.8s ease-out;
+}
+
+@keyframes levelUpFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.level-up-content {
+  width: 80%;
+  max-width: 600px;
+  background-color: #1a1a1a;
+  border: 2px solid #ffd700;
+  border-radius: 10px;
+  padding: 30px;
+  color: #fff;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.level-up-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(255, 215, 0, 0.1) 0%, transparent 60%),
+    radial-gradient(circle at 70% 70%, rgba(255, 215, 0, 0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.level-up-content h3 {
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ffd700;
+  font-family: 'Cinzel', serif;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  letter-spacing: 2px;
+}
+
+.guide-message {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.guide-portrait {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #ffd700;
+  flex-shrink: 0;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.guide-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.guide-text {
+  flex: 1;
+}
+
+.guide-text h4 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #ffd700;
+  font-family: 'Cinzel', serif;
+}
+
+.guide-text p {
+  font-size: 16px;
+  line-height: 1.6;
+  font-style: italic;
+  color: #e6e6e6;
+}
+
+.artifact-recognition {
+  background-color: rgba(255, 215, 0, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-left: 3px solid #ffd700;
+}
+
+.artifact-recognition p {
+  font-size: 16px;
+  color: #ffd700;
+}
+
+.level-up-content button {
+  display: block;
+  width: 200px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  background-color: #ffd700;
+  color: #000;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.level-up-content button:hover {
+  background-color: #fff;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+/* Theme-specific guide styling */
+.guide-portrait img[alt="John Muir"] {
+  filter: sepia(0.3) saturate(1.2);
+}
+
+.guide-portrait img[alt="Virgil"] {
+  filter: grayscale(0.7) brightness(0.9);
+}
+
+/* Dante's journey transition effects */
+.divine-transition {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9990;
+  opacity: 0;
+  background: radial-gradient(circle at center, rgba(255, 215, 0, 0.7) 0%, transparent 70%);
+}
+
+.divine-transition.active {
+  animation: divine-passage 3s forwards;
+}
+
+@keyframes divine-passage {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+/* Guide appearance effects */
+.guide-appearance {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+  z-index: 9991;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.guide-appearance.virgil {
+  background-image: url('/assets/guides/virgil.png');
+}
+
+.guide-appearance.john-muir {
+  background-image: url('/assets/guides/john_muir.png');
+}
+
+.guide-appearance.active {
+  animation: guide-reveal 4s forwards;
+}
+
+@keyframes guide-reveal {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* Dante-inspired portal effects */
+.level-portal {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.level-portal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 215, 0, 0.8) 30%, rgba(255, 140, 0, 0.6) 70%, transparent 100%);
+  animation: portal-glow 3s infinite alternate;
+}
+
+.level-portal::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.8);
+  animation: portal-ripple 3s infinite;
+}
+
+.level-portal.level-2-portal::before {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(0, 191, 255, 0.8) 30%, rgba(30, 144, 255, 0.6) 70%, transparent 100%);
+}
+
+.level-portal.level-3-portal::before {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(153, 50, 204, 0.8) 30%, rgba(75, 0, 130, 0.6) 70%, transparent 100%);
+}
+
+@keyframes portal-glow {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes portal-ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+}
+
+/* Dante quotes for level transitions */
+.dante-quote {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 600px;
+  text-align: center;
+  color: #fff;
+  font-family: 'Cinzel', serif;
+  font-style: italic;
+  font-size: 24px;
+  line-height: 1.6;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  z-index: 9992;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dante-quote.active {
+  animation: quote-fade 5s forwards;
+}
+
+@keyframes quote-fade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
 }
