@@ -13,9 +13,25 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
   const [isPatrolling, setIsPatrolling] = useState(true);
   const [isThinking, setIsThinking] = useState(false);
   const [savedQuotes, setSavedQuotes] = useState(character?.savedQuotes || []);
-  const conversationRef = useRef(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [notification, setNotification] = useState({ show: false, message: '' });
+  const [suggestedReplies, setSuggestedReplies] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+  const conversationRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768 || 
+                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Enhanced patrol behavior
   useEffect(() => {
@@ -59,7 +75,7 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
     // Function to detect if virtual keyboard is likely visible
     const handleFocus = () => {
       // Only on mobile
-      if (window.innerWidth <= 768) {
+      if (isMobile) {
         setKeyboardVisible(true);
         
         // Add class for CSS positioning
@@ -93,7 +109,61 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
         input.removeEventListener('blur', handleBlur);
       });
     };
-  }, [showDialog]);
+  }, [showDialog, isMobile]);
+
+  // Generate suggested replies based on conversation context
+  useEffect(() => {
+    if (chatHistory.length > 0 && !isTyping) {
+      // Get the last NPC message to generate contextual replies
+      const lastNpcMessage = [...chatHistory]
+        .reverse()
+        .find(msg => msg.role === 'npc');
+      
+      if (lastNpcMessage) {
+        const npcType = npc.type.toLowerCase();
+        let replies = [];
+        
+        // Generate replies based on NPC type and last message
+        switch(npcType) {
+          case NPC_TYPES.SHAKESPEARE.toLowerCase():
+            replies = [
+              "Tell me about your plays",
+              "What inspires your writing?",
+              "Your thoughts on love?",
+              "Tell me a quote"
+            ];
+            break;
+          case NPC_TYPES.JOHN_MUIR.toLowerCase():
+            replies = [
+              "Tell me about Yosemite",
+              "What about conservation?",
+              "Your favorite natural place?",
+              "Why is nature important?"
+            ];
+            break;
+          case NPC_TYPES.ZEUS.toLowerCase():
+            replies = [
+              "Tell me a myth",
+              "About Mount Olympus?",
+              "Your favorite child?",
+              "Weather prediction?"
+            ];
+            break;
+          default:
+            replies = [
+              "Tell me more",
+              "What's your philosophy?",
+              "Any advice for me?",
+              "Share a quote"
+            ];
+        }
+        
+        // If we have a message text, we can use AI to generate more contextual replies
+        // For now we'll use the static ones above
+        setSuggestedReplies(replies);
+      }
+    }
+  }, [chatHistory, isTyping, npc.type]);
 
   const handleInteraction = (e) => {
     e.preventDefault();
@@ -120,11 +190,10 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
       }
       
       setTimeout(() => {
-        const inputElement = document.querySelector('.prompt-form input');
-        if (inputElement) {
-          inputElement.focus();
+        if (inputRef.current) {
+          inputRef.current.focus();
           // Prevent input from triggering game controls
-          inputElement.addEventListener('keydown', e => e.stopPropagation());
+          inputRef.current.addEventListener('keydown', e => e.stopPropagation());
         }
       }, 100);
     }
@@ -188,12 +257,23 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
       setIsTyping(false);
       setIsThinking(false);
       setTimeout(() => {
-        const inputElement = document.querySelector('.prompt-form input');
-        if (inputElement) {
-          inputElement.focus();
-          // Ensure the input is in focus to capture keyboard events
-          inputElement.addEventListener('keydown', e => e.stopPropagation());
+        if (inputRef.current) {
+          inputRef.current.focus();
         }
+      }, 100);
+    }
+  };
+
+  // Function to handle quick reply selection
+  const handleQuickReply = (reply) => {
+    setUserInput(reply);
+    
+    // On mobile, automatically submit after selecting a quick reply
+    if (isMobile) {
+      setTimeout(() => {
+        const formEvent = { preventDefault: () => {}, stopPropagation: () => {} };
+        userInput = reply; // Ensure the reply is set
+        handleSubmitPrompt(formEvent);
       }, 100);
     }
   };
@@ -254,6 +334,11 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
 
   // Add a function to save quotes
   const handleSaveQuote = (quoteText, source) => {
+    // Vibrate on mobile for tactile feedback
+    if (isMobile && 'vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+    
     // Create a new quote object
     const newQuote = {
       text: quoteText,
@@ -310,6 +395,9 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
     const isNPC = message.role === 'npc';
     const messageClasses = `message ${isNPC ? 'npc-message' : 'user-message'}`;
     
+    // Check if this quote is already saved
+    const isAlreadySaved = savedQuotes.some(q => q.text === message.text);
+    
     return (
       <div key={index} className={messageClasses}>
         {isNPC && (
@@ -322,11 +410,12 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
           )}
           {isNPC && (
             <button 
-              className="save-quote-btn" 
+              className={`save-quote-btn ${isAlreadySaved ? 'saved' : ''}`}
               onClick={() => handleSaveQuote(message.text, message.source)}
-              title="Save this quote to your collection"
+              title={isAlreadySaved ? "Quote already saved" : "Save this quote to your collection"}
+              disabled={isAlreadySaved}
             >
-              💾 Save Quote
+              {isAlreadySaved ? '✓ Saved' : '💾 Save Quote'}
             </button>
           )}
         </div>
@@ -355,11 +444,7 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
       />
       
       {showDialog && (
-        <div className={`dialog-overlay ${keyboardVisible ? 'keyboard-open' : ''}`} style={{
-          left: `${Math.min(Math.max(currentPosition.x + TILE_SIZE / 2, TILE_SIZE * 2), window.innerWidth - TILE_SIZE * 2)}px`,
-          top: `${Math.max(currentPosition.y, TILE_SIZE * 2)}px`,
-          transform: `translate(-50%, ${currentPosition.y < window.innerHeight / 2 ? '0' : '-100%'})`
-        }}>
+        <div className={`dialog-overlay ${keyboardVisible ? 'keyboard-open' : ''} ${isMobile ? 'mobile' : ''}`}>
           <div className="dialog-box">
             <div className="dialog-header">
               <h3>{npc.name}</h3>
@@ -388,6 +473,21 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
               </div>
             )}
             
+            {/* Quick Replies */}
+            {!isTyping && suggestedReplies.length > 0 && (
+              <div className="quick-replies">
+                {suggestedReplies.map((reply, index) => (
+                  <button 
+                    key={index} 
+                    className="quick-reply-btn"
+                    onClick={() => handleQuickReply(reply)}
+                  >
+                    {reply}
+                  </button>
+                ))}
+              </div>
+            )}
+            
             <form className="prompt-form" onSubmit={handleSubmitPrompt}>
               <input
                 type="text"
@@ -395,6 +495,8 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
                 onChange={(e) => setUserInput(e.target.value)}
                 placeholder={`Ask ${npc.name} something...`}
                 disabled={isTyping}
+                ref={inputRef}
+                autoComplete="off"
               />
               <button type="submit" disabled={isTyping || !userInput.trim()}>
                 {isTyping ? "Thinking..." : "Send"}
