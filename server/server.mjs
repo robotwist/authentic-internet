@@ -157,7 +157,7 @@ const startServer = async () => {
     }
 
     // Initialize WebSocket service
-    initSocketService(server);
+    await initSocketService(server);
     
     // Start server
     const PORT = process.env.PORT || 5000;

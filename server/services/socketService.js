@@ -14,10 +14,10 @@ const activeConnections = new Map();
  * Initialize the WebSocket service with an HTTP server
  * @param {http.Server} server - The HTTP server to attach Socket.io to
  */
-export const initSocketService = (server) => {
+export const initSocketService = async (server) => {
   try {
-    // Dynamic import of socket.io
-    const socketIo = require('socket.io');
+    // Dynamic import of socket.io (ESM compatible)
+    const socketIo = await import('socket.io');
     socketIoAvailable = true;
     
     io = new socketIo.Server(server, {
@@ -40,8 +40,8 @@ export const initSocketService = (server) => {
         }
         
         // Verify token
-        const jwt = require('jsonwebtoken');
-        const User = require('../models/User.js').default;
+        const jwt = await import('jsonwebtoken');
+        const { default: User } = await import('../models/User.js');
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
         // Find user
