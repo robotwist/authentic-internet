@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   fetchArtifacts,
@@ -22,8 +22,25 @@ import "./Artifact.css";
 import "./Inventory.css";
 import NPC from "./NPC";
 import TouchControls from './TouchControls';
+import Dialog from "./Dialog";
+import ActionBar from "./ActionBar";
 
 const MOVEMENT_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+
+const YosemiteAccess = ({ onAccess, showButton }) => {
+  if (!showButton) return null;
+  
+  return (
+    <div className="yosemite-access">
+      <button 
+        onClick={onAccess}
+        className="yosemite-access-button"
+      >
+        Visit Yosemite with John Muir
+      </button>
+    </div>
+  );
+};
 
 const GameWorld = ({ 
   mapData, 
@@ -60,6 +77,9 @@ const GameWorld = ({
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showedLevel2Intro, setShowedLevel2Intro] = useState(false);
   const [showDropDown, setShowDropDown] = useState(false);
+  const [renderKey, setRenderKey] = useState(0);
+  const [showYosemiteButton, setShowYosemiteButton] = useState(false);
+  const [debugMode, setDebugMode] = useState(false);
 
   useEffect(() => {
     fetchArtifacts()
@@ -422,6 +442,12 @@ const GameWorld = ({
       default:
         break;
     }
+
+    // Debug mode with 'D' + 'Shift' key
+    if (e.key.toLowerCase() === 'd' && e.shiftKey) {
+      setDebugMode(prev => !prev);
+      console.log("Debug mode:", !debugMode);
+    }
   };
 
   const handleKeyUp = (e) => {
@@ -438,7 +464,7 @@ const GameWorld = ({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [characterPosition]);
+  }, [characterPosition, debugMode]);
 
   // Calculate experience level based on exp
   const getLevel = (exp) => {
@@ -693,9 +719,12 @@ const GameWorld = ({
   }, [characterPosition]);
 
   // Handle touch controls movement
-  const handleTouchMove = (direction) => {
+  const handleTouchMove = useCallback((direction) => {
+    // Ignore touch moves when dialog is open
+    if (dialogOpen || isInDialog || isInMenu) return;
+    
     const newPosition = { ...characterPosition };
-      
+    
     switch(direction) {
       case 'up':
         newPosition.y -= TILE_SIZE;
@@ -717,9 +746,31 @@ const GameWorld = ({
         break;
     }
 
+    // Add a small vibration for tactile feedback if supported and on mobile
+    if (isMobile && 'vibrate' in navigator) {
+      navigator.vibrate(20); // Short 20ms vibration
+    }
+
     if (isValidMove(newPosition)) {
       setCharacterPosition(newPosition);
       adjustViewport(newPosition);
+      
+      // Check for artifacts at the new position
+      checkForArtifactsAtPosition(newPosition);
+    }
+  }, [characterPosition, dialogOpen, isInDialog, isInMenu, isMobile]);
+
+  // Add this function to check for artifacts
+  const checkForArtifactsAtPosition = (position) => {
+    const tileX = Math.floor(position.x / TILE_SIZE);
+    const tileY = Math.floor(position.y / TILE_SIZE);
+    
+    const artifact = findArtifactAtLocation(tileX, tileY);
+    if (artifact && isMobile) {
+      // For mobile, show a pickup button or notification
+      if (window.showNotification) {
+        window.showNotification(`Found: ${artifact.name}. Tap pickup to collect.`, 'info');
+      }
     }
   };
 
@@ -765,29 +816,67 @@ const GameWorld = ({
     return () => window.removeEventListener('artifactDrop', handleArtifactDropEvent);
   }, [inventory]);
 
-  // Check for mobile/tablet devices and resize events
+  // Add/enhance the useEffect for mobile detection
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const isMobileDevice = window.innerWidth <= 768 || 
+                          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(isMobileDevice);
+      
+      // Add a class to the body for CSS targeting
+      if (isMobileDevice) {
+        document.body.classList.add('mobile-device');
+      } else {
+        document.body.classList.remove('mobile-device');
+      }
     };
     
+    // Initial check
+    checkMobile();
+    
+    // Listen for resize events
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Add an event listener for auth errors
-  useEffect(() => {
-    const handleAuthError = (event) => {
-      // Show error message and redirect to login
-      alert(event.detail.message || "Your session has expired. Please login again.");
-      // Set logged in state to false
-      setIsLoggedIn(false);
-    };
     
-    window.addEventListener('authError', handleAuthError);
+    // iOS specific event to handle virtual keyboard
+    window.addEventListener('focusin', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        setKeyboardVisible(true);
+        // Add a class to handle viewport adjustments when keyboard is visible
+        document.body.classList.add('keyboard-open');
+      }
+    });
+    
+    window.addEventListener('focusout', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        setKeyboardVisible(false);
+        document.body.classList.remove('keyboard-open');
+      }
+    });
+    
+    // Handle iOS PWA standalone mode detection
+    const isInStandaloneMode = () => 
+      (window.navigator.standalone) || 
+      (window.matchMedia('(display-mode: standalone)').matches);
+    
+    if (isInStandaloneMode()) {
+      document.body.classList.add('standalone-mode');
+    }
+    
+    // Handle iOS orientation changes
+    window.addEventListener('orientationchange', () => {
+      // Small timeout to ensure the UI updates after orientation change completes
+      setTimeout(() => {
+        adjustViewport(characterPosition);
+        // Force re-render for iOS
+        setRenderKey(prev => prev + 1);
+      }, 300);
+    });
     
     return () => {
-      window.removeEventListener('authError', handleAuthError);
+      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('orientationchange', () => {});
+      window.removeEventListener('focusin', () => {});
+      window.removeEventListener('focusout', () => {});
     };
   }, []);
 
@@ -852,6 +941,63 @@ const GameWorld = ({
       if (window.showNotification) {
         window.showNotification("Failed to drop artifact. Please try again.", 'error');
       }
+    }
+  };
+
+  // Add a new useEffect to check if we should show the Yosemite button
+  // This will show the button after 2 minutes of gameplay or if the player has explored enough
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowYosemiteButton(true);
+    }, 2 * 60 * 1000); // 2 minutes
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Add a function to handle direct access to Yosemite
+  const handleYosemiteAccess = () => {
+    const yosemiteMapIndex = MAPS.findIndex(map => map.name === "Yosemite");
+    
+    if (yosemiteMapIndex !== -1) {
+      // Start transition effects
+      setIsTransitioning(true);
+      setShowPortalFlash(true);
+      
+      // Set character level to 2 if it's not already
+      if (character && character.level < 2) {
+        const updatedCharacter = {
+          ...character,
+          level: 2,
+          experience: 0
+        };
+        
+        setCharacter(updatedCharacter);
+        
+        if (updatedCharacter.id) {
+          updateCharacter(updatedCharacter)
+            .then(() => console.log("✅ Character level set to 2"))
+            .catch((err) => console.error("❌ Failed to update character:", err));
+        }
+      }
+      
+      // Transition to Yosemite
+      setTimeout(() => {
+        setCurrentMapIndex(yosemiteMapIndex);
+        // Spawn near John Muir at the entrance
+        setCharacterPosition({ x: 3 * TILE_SIZE, y: 17 * TILE_SIZE });
+        
+        // Second phase - remove effects
+        setTimeout(() => {
+          setIsTransitioning(false);
+          setShowPortalFlash(false);
+          
+          // Show John Muir's introduction to Yosemite
+          setTimeout(() => {
+            setShowedLevel2Intro(true);
+            alert("John Muir: Welcome to Yosemite, the grandest of all the special temples of Nature! Now that you've joined me in this majestic wilderness, let me guide you. Explore Half Dome, Yosemite Falls, and the Mist Trail. The wonders of Yosemite await!");
+          }, 500);
+        }, 1000);
+      }, 500);
     }
   };
 
@@ -1033,6 +1179,99 @@ const GameWorld = ({
               ))
             )}
           </div>
+        </div>
+      )}
+
+      {/* Add the YosemiteAccess component near the end, just before touch controls */}
+      <YosemiteAccess 
+        onAccess={handleYosemiteAccess} 
+        showButton={showYosemiteButton && !showedLevel2Intro && currentMapIndex === 0}
+      />
+      
+      {isMobile && (
+        <TouchControls
+          onMove={handleMove}
+          onAction={handleAction}
+          onInteract={handleInteract}
+          onDrop={handleDrop}
+        />
+      )}
+
+      {debugMode && (
+        <div className="debug-info">
+          <h3>Debug Info</h3>
+          <p>Current Map: {MAPS[currentMapIndex].name}</p>
+          <p>Player Position: x={Math.floor(characterPosition.x / TILE_SIZE)}, y={Math.floor(characterPosition.y / TILE_SIZE)}</p>
+          <p>Character Level: {character?.level || 1}</p>
+          <h4>NPCs:</h4>
+          <ul>
+            {MAPS[currentMapIndex].npcs?.map((npc, index) => (
+              <li key={index}>
+                {npc.name} ({npc.type}): x={Math.floor(npc.position.x / TILE_SIZE)}, y={Math.floor(npc.position.y / TILE_SIZE)}
+                <button onClick={() => {
+                  // Teleport to this NPC
+                  setCharacterPosition({
+                    x: npc.position.x,
+                    y: npc.position.y
+                  });
+                }}>
+                  Teleport to NPC
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button onClick={() => {
+            // Force refresh NPCs
+            setRenderKey(prevKey => prevKey + 1);
+          }}>
+            Refresh NPCs
+          </button>
+          <button onClick={() => {
+            // Force John Muir to appear at player position if in Yosemite
+            if (MAPS[currentMapIndex].name === "Yosemite") {
+              const updatedMaps = [...MAPS];
+              const yosemiteIndex = currentMapIndex;
+              
+              // Check if John Muir already exists
+              const johnMuirIndex = updatedMaps[yosemiteIndex].npcs.findIndex(
+                npc => npc.type === NPC_TYPES.JOHN_MUIR
+              );
+              
+              if (johnMuirIndex !== -1) {
+                // Update his position
+                updatedMaps[yosemiteIndex].npcs[johnMuirIndex].position = {
+                  x: characterPosition.x,
+                  y: characterPosition.y
+                };
+              } else {
+                // Add John Muir to the map
+                updatedMaps[yosemiteIndex].npcs.push({
+                  id: 'john_muir_yosemite',
+                  type: NPC_TYPES.JOHN_MUIR,
+                  name: 'John Muir',
+                  position: { x: characterPosition.x, y: characterPosition.y },
+                  patrolArea: {
+                    startX: Math.floor(characterPosition.x / TILE_SIZE) - 2,
+                    startY: Math.floor(characterPosition.y / TILE_SIZE) - 2,
+                    width: 5,
+                    height: 5
+                  },
+                  dialogue: [
+                    "Welcome to Yosemite, the grandest of all the special temples of Nature. (The Yosemite, 1912)",
+                    "This is Nature's cathedral, surpassing any ever yet reared by hands. (Our National Parks, 1901)",
+                    "Climb the mountains and get their good tidings. Nature's peace will flow into you as sunshine flows into trees. (Our National Parks, 1901)",
+                    "Walk along the river to see Yosemite Falls, then follow the Mist Trail to experience the raw power of water shaping granite.",
+                    "Half Dome awaits the bold at the end of your journey. Its majestic face has been shaped by the forces of glaciers over millions of years."
+                  ]
+                });
+              }
+              
+              // Force refresh
+              setRenderKey(prevKey => prevKey + 1);
+            }
+          }}>
+            Fix John Muir
+          </button>
         </div>
       )}
     </div>

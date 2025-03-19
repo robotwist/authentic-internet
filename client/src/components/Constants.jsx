@@ -1033,9 +1033,9 @@ export const MAPS = [
         id: 'john_muir_yosemite',
         type: NPC_TYPES.JOHN_MUIR,
         name: 'John Muir',
-        position: { x: 2 * TILE_SIZE, y: 17 * TILE_SIZE },
+        position: { x: 3 * TILE_SIZE, y: 17 * TILE_SIZE },
         patrolArea: {
-          startX: 1,
+          startX: 2,
           startY: 16,
           width: 5,
           height: 2
