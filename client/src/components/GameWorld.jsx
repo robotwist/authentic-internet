@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   fetchArtifacts,
@@ -46,10 +46,19 @@ const GameWorld = () => {
   const [showLevel4, setShowLevel4] = useState(false);
 
   useEffect(() => {
+    // Load and apply saved artifact visibility state
+    applyMapArtifactVisibilityFromStorage();
+    
     fetchArtifacts()
       .then((data) => {
         console.log("📦 Loaded Artifacts:", data);
-        setArtifacts(data);
+        // Filter out any server artifacts that duplicate artifacts already defined in MAPS
+        const mapArtifacts = MAPS.flatMap(map => map.artifacts.map(art => art.name));
+        const filteredServerArtifacts = data.filter(serverArt => 
+          !mapArtifacts.includes(serverArt.name) || 
+          !serverArt.location // Include artifacts without location (inventory items)
+        );
+        setArtifacts(filteredServerArtifacts);
       })
       .catch((error) => console.error("❌ Error fetching artifacts:", error));
   }, []);
@@ -198,16 +207,42 @@ const GameWorld = () => {
 
     console.log("📍 Checking for artifact at:", { x, y });
 
-    const artifact = findArtifactAtLocation(x, y);
+    // Check server artifacts first
+    const serverArtifact = findArtifactAtLocation(x, y);
 
-    if (artifact) {
+    // Check map artifacts
+    const mapArtifactIndex = MAPS[currentMapIndex].artifacts.findIndex(
+      a => a?.location?.x === x && a?.location?.y === y && a.visible
+    );
+    
+    // Prioritize server artifacts for pickup
+    if (serverArtifact) {
       // Play pickup sound
       playSound('pickup', 0.5).catch(err => console.error("Error playing pickup sound:", err));
       
-      console.log("✅ Picking Up Artifact:", artifact);
-      setInventory((prev) => [...prev, artifact]);
-      handleGainExperience(artifact.exp || 0);
-      removeArtifactFromMap(artifact.id);
+      console.log("✅ Picking Up Server Artifact:", serverArtifact);
+      setInventory((prev) => [...prev, serverArtifact]);
+      handleGainExperience(serverArtifact.exp || 0);
+      removeArtifactFromMap(serverArtifact.id);
+    } else if (mapArtifactIndex !== -1) {
+      // Handle map-defined artifact
+      const mapArtifact = MAPS[currentMapIndex].artifacts[mapArtifactIndex];
+      
+      // Play pickup sound
+      playSound('pickup', 0.5).catch(err => console.error("Error playing pickup sound:", err));
+      
+      console.log("✅ Picking Up Map Artifact:", mapArtifact);
+      setInventory((prev) => [...prev, mapArtifact]);
+      handleGainExperience(mapArtifact.exp || 0);
+      
+      // Update the map artifact to be non-visible
+      MAPS[currentMapIndex].artifacts[mapArtifactIndex].visible = false;
+      
+      // Persist this change to localStorage
+      saveMapArtifactVisibilityToStorage(mapArtifact.id);
+      
+      // Force a re-render
+      setCharacterPosition({...characterPosition});
     } else {
       console.warn("⚠️ No artifact found at this location.");
     }
@@ -256,16 +291,41 @@ const GameWorld = () => {
   useCharacterMovement(characterPosition, setCharacterPosition, currentMapIndex, setCurrentMapIndex, isLoggedIn, visibleArtifact, handleArtifactPickup, setShowForm, setFormPosition, setShowInventory, adjustViewport);
 
   useEffect(() => {
-    const collidedArtifact = MAPS[currentMapIndex].artifacts.find(
-      (artifact) => artifact.location && artifact.location.x === characterPosition.x / TILE_SIZE && artifact.location.y === characterPosition.y / TILE_SIZE
-    );
-
-    if (collidedArtifact) {
-      setVisibleArtifact(collidedArtifact);
-    } else {
-      setVisibleArtifact(null);
-    }
-  }, [characterPosition, currentMapIndex]);
+    // Check for both map artifacts and server artifacts at the player's position
+    const checkBothArtifactSources = () => {
+      if (!characterPosition) return;
+      
+      const playerX = characterPosition.x / TILE_SIZE;
+      const playerY = characterPosition.y / TILE_SIZE;
+      
+      // Check map artifacts
+      const mapArtifact = MAPS[currentMapIndex].artifacts.find(
+        artifact => artifact.location && 
+        artifact.visible && 
+        artifact.location.x === playerX && 
+        artifact.location.y === playerY
+      );
+      
+      // Check server artifacts
+      const serverArtifact = artifacts.find(
+        artifact => artifact.location && 
+        artifact.location.x === playerX && 
+        artifact.location.y === playerY &&
+        (!artifact.area || artifact.area === MAPS[currentMapIndex].name)
+      );
+      
+      // Prioritize server artifacts (they might be more up-to-date)
+      if (serverArtifact) {
+        setVisibleArtifact(serverArtifact);
+      } else if (mapArtifact) {
+        setVisibleArtifact(mapArtifact);
+      } else {
+        setVisibleArtifact(null);
+      }
+    };
+    
+    checkBothArtifactSources();
+  }, [characterPosition, currentMapIndex, artifacts]);
 
   useEffect(() => {
     const row = Math.floor(characterPosition.y / TILE_SIZE);
@@ -383,6 +443,44 @@ const GameWorld = () => {
     setShowLevel4(false);
   };
 
+  // Utilities for persisting map artifact visibility
+  const applyMapArtifactVisibilityFromStorage = () => {
+    try {
+      const savedState = localStorage.getItem('collectedMapArtifacts');
+      if (!savedState) return;
+      
+      const collectedIds = JSON.parse(savedState);
+      
+      // Apply to all maps
+      MAPS.forEach((map, mapIndex) => {
+        map.artifacts.forEach((artifact, artifactIndex) => {
+          if (collectedIds.includes(artifact.id)) {
+            MAPS[mapIndex].artifacts[artifactIndex].visible = false;
+          }
+        });
+      });
+      
+      console.log("🔍 Restored artifact visibility state from localStorage");
+    } catch (error) {
+      console.error("❌ Error restoring artifact visibility:", error);
+    }
+  };
+  
+  const saveMapArtifactVisibilityToStorage = (artifactId) => {
+    try {
+      const savedState = localStorage.getItem('collectedMapArtifacts');
+      let collectedIds = savedState ? JSON.parse(savedState) : [];
+      
+      if (!collectedIds.includes(artifactId)) {
+        collectedIds.push(artifactId);
+        localStorage.setItem('collectedMapArtifacts', JSON.stringify(collectedIds));
+        console.log("💾 Saved artifact collection state to localStorage");
+      }
+    } catch (error) {
+      console.error("❌ Error saving artifact collection state:", error);
+    }
+  };
+
   return (
     <ErrorBoundary>
       <div className="game-container">
@@ -408,10 +506,11 @@ const GameWorld = () => {
               avatar={character?.avatar}
             />
             <ErrorBoundary>
+              {/* Render map-defined artifacts */}
               {MAPS[currentMapIndex].artifacts.map((artifact) =>
                 artifact.visible && artifact.location ? (
                   <Artifact
-                    key={`artifact-${artifact.id}`}
+                    key={`map-artifact-${artifact.id}`}
                     src={artifact.image}
                     artifact={artifact}
                     visible={artifact.id === visibleArtifact?.id}
@@ -426,6 +525,28 @@ const GameWorld = () => {
                   />
                 ) : null
               )}
+              
+              {/* Render server-defined artifacts */}
+              {artifacts
+                .filter(artifact => artifact.location && 
+                  // Only show server artifacts on the current map
+                  (!artifact.area || artifact.area === MAPS[currentMapIndex].name))
+                .map((artifact) => (
+                  <Artifact
+                    key={`server-artifact-${artifact.id}`}
+                    src={artifact.image}
+                    artifact={artifact}
+                    visible={artifact.id === visibleArtifact?.id}
+                    style={{
+                      position: "absolute",
+                      left: `${artifact.location.x * TILE_SIZE}px`,
+                      top: `${artifact.location.y * TILE_SIZE}px`,
+                      width: TILE_SIZE,
+                      height: TILE_SIZE,
+                      zIndex: 10000
+                    }}
+                  />
+                ))}
             </ErrorBoundary>
           </div>
         </div>
