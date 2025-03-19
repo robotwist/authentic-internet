@@ -4,7 +4,8 @@ import {
   fetchArtifacts,
   createArtifact,
   fetchCharacter,
-  updateCharacter
+  updateCharacter,
+  updateArtifact
 } from "../api/api";
 import Character from "./Character";
 import Artifact from "./Artifact";
@@ -58,6 +59,7 @@ const GameWorld = ({
   const [showSavedQuotes, setShowSavedQuotes] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showedLevel2Intro, setShowedLevel2Intro] = useState(false);
+  const [showDropDown, setShowDropDown] = useState(false);
 
   useEffect(() => {
     fetchArtifacts()
@@ -409,6 +411,13 @@ const GameWorld = ({
       case 'q':
         e.preventDefault();
         setShowSavedQuotes(true);
+        break;
+      case 'f':
+        if (inventory.length > 0 && !showDropDown) {
+          setShowDropDown(true);
+        } else {
+          setShowDropDown(false);
+        }
         break;
       default:
         break;
@@ -782,6 +791,70 @@ const GameWorld = ({
     };
   }, []);
 
+  // Handle dropping an artifact at the current location
+  const handleDropArtifact = async (artifact) => {
+    if (!artifact) return;
+    
+    try {
+      const dropLocation = {
+        x: Math.floor(characterPosition.x / TILE_SIZE),
+        y: Math.floor(characterPosition.y / TILE_SIZE)
+      };
+      
+      console.log(`Dropping artifact "${artifact.name}" at position:`, dropLocation);
+      
+      // Update the artifact in the database
+      const response = await updateArtifact(artifact.id || artifact._id, {
+        status: 'dropped',
+        location: dropLocation,
+        visible: true
+      });
+      
+      if (response) {
+        // Remove from inventory
+        setInventory(prev => prev.filter(item => (item.id || item._id) !== (artifact.id || artifact._id)));
+        
+        // Add to the world artifacts
+        const droppedArtifact = {
+          ...artifact,
+          status: 'dropped',
+          location: dropLocation,
+          visible: true
+        };
+        
+        setArtifacts(prev => [...prev, droppedArtifact]);
+        
+        // Play drop sound
+        const dropSound = new Audio('/assets/sounds/drop.mp3');
+        dropSound.volume = 0.3;
+        dropSound.play().catch(console.error);
+        
+        // Show notification
+        if (window.showNotification) {
+          window.showNotification(`Dropped ${artifact.name}`, 'info');
+        }
+        
+        // Close dropdown
+        setShowDropDown(false);
+        
+        // Save updated game state
+        const gameState = {
+          characterPosition,
+          currentMapIndex,
+          inventory: inventory.filter(item => (item.id || item._id) !== (artifact.id || artifact._id)),
+          exp,
+          pickedUpArtifacts
+        };
+        localStorage.setItem('gameState', JSON.stringify(gameState));
+      }
+    } catch (error) {
+      console.error("Error dropping artifact:", error);
+      if (window.showNotification) {
+        window.showNotification("Failed to drop artifact. Please try again.", 'error');
+      }
+    }
+  };
+
   return (
     <div className="game-container" style={{ 
       width: '100%', 
@@ -939,7 +1012,29 @@ const GameWorld = ({
       )}
 
       {/* Add TouchControls component */}
-      <TouchControls onMove={handleTouchMove} />
+      <TouchControls onMove={handleTouchMove} onDrop={() => setShowDropDown(true)} />
+      
+      {/* Artifact Drop Down Menu */}
+      {showDropDown && (
+        <div className="drop-down-menu">
+          <div className="drop-down-header">
+            <h3>Drop an Artifact</h3>
+            <button className="close-button" onClick={() => setShowDropDown(false)}>×</button>
+          </div>
+          <div className="drop-down-items">
+            {inventory.length === 0 ? (
+              <div className="no-items-message">Your inventory is empty</div>
+            ) : (
+              inventory.map((item, index) => (
+                <div key={index} className="drop-down-item" onClick={() => handleDropArtifact(item)}>
+                  <div className="item-name">{item.name}</div>
+                  <div className="item-action">Drop</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import './TouchControls.css';
 
-const TouchControls = ({ onMove }) => {
+const TouchControls = ({ onMove, onDrop }) => {
   const handleTouchStart = (direction, e) => {
     e.preventDefault();
     onMove(direction);
@@ -62,15 +62,17 @@ const TouchControls = ({ onMove }) => {
           e.currentTarget.classList.remove('active');
         }}
       >
-        P
+        Pickup
       </button>
       
       <button 
         className="action-btn drop-btn" 
         onTouchStart={(e) => {
           e.preventDefault();
-          // Dispatch a drop event (to be handled in GameWorld)
-          window.dispatchEvent(new CustomEvent('artifactDrop'));
+          // Call the onDrop prop if provided
+          if (onDrop) {
+            onDrop();
+          }
           e.currentTarget.classList.add('active');
         }}
         onTouchEnd={(e) => {
@@ -78,7 +80,7 @@ const TouchControls = ({ onMove }) => {
           e.currentTarget.classList.remove('active');
         }}
       >
-        D
+        Drop
       </button>
     </div>
   );
