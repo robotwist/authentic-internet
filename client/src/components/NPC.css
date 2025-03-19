@@ -775,3 +775,132 @@
     opacity: 0.7; /* Always show speech bubble indicator on mobile */
   }
 }
+
+/* Add styling for the Save Quote button */
+.save-quote-btn {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.8;
+}
+
+.save-quote-btn:hover {
+  background-color: #357abd;
+  transform: scale(1.05);
+  opacity: 1;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+.save-quote-btn:active {
+  transform: scale(0.98);
+}
+
+.message-content {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.npc-message {
+  background-color: rgba(30, 30, 30, 0.9);
+  border-left: 3px solid #4a90e2;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  display: flex;
+  gap: 10px;
+  max-width: 85%;
+  align-self: flex-start;
+}
+
+.user-message {
+  background-color: rgba(20, 50, 80, 0.8);
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  align-self: flex-end;
+  max-width: 80%;
+}
+
+.message-text {
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.message-source {
+  font-size: 0.8rem;
+  font-style: italic;
+  opacity: 0.8;
+  margin-top: 5px;
+  padding-left: 8px;
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Style the Save button when quote is saved */
+.save-quote-btn.saved {
+  background-color: #4CAF50;
+}
+
+.dialog-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+}
+
+/* Tooltip for saved quotes */
+.save-quote-btn[data-saved="true"]::after {
+  content: "Quote saved!";
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+/* Notification styling */
+.notification {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  font-size: 0.85rem;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out, fadeOut 0.3s ease-in-out 2.7s forwards;
+  border-left: 3px solid #4a90e2;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, -10px); }
+}

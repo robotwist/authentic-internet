@@ -12,7 +12,7 @@ const SavedQuotes = ({ quotes = [], onClose, onDeleteQuote }) => {
         </div>
         <div className="no-quotes-message">
           <p>You haven't saved any quotes yet.</p>
-          <p>Talk to Shakespeare and save his quotes to see them here!</p>
+          <p>Talk to NPCs and save their wisdom to see them here!</p>
         </div>
       </div>
     );
@@ -21,7 +21,7 @@ const SavedQuotes = ({ quotes = [], onClose, onDeleteQuote }) => {
   return (
     <div className="saved-quotes-container">
       <div className="saved-quotes-header">
-        <h2>Saved Shakespeare Quotes</h2>
+        <h2>Saved Quotes Collection</h2>
         <button className="close-button" onClick={onClose}>×</button>
       </div>
       
@@ -29,7 +29,10 @@ const SavedQuotes = ({ quotes = [], onClose, onDeleteQuote }) => {
         {quotes.map((quote, index) => (
           <div key={index} className="quote-item">
             <div className="quote-text">"{quote.text}"</div>
-            <div className="quote-source">{quote.source}</div>
+            <div className="quote-source">
+              {quote.npcType && <span className="npc-type">{quote.npcType}: </span>}
+              {quote.source}
+            </div>
             <div className="quote-timestamp">Saved on: {new Date(quote.timestamp).toLocaleDateString()}</div>
             {onDeleteQuote && (
               <button 
@@ -51,6 +54,7 @@ SavedQuotes.propTypes = {
     PropTypes.shape({
       text: PropTypes.string.isRequired,
       source: PropTypes.string,
+      npcType: PropTypes.string,
       timestamp: PropTypes.string
     })
   ),

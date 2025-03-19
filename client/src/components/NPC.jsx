@@ -15,6 +15,7 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
   const [savedQuotes, setSavedQuotes] = useState(character?.savedQuotes || []);
   const conversationRef = useRef(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [notification, setNotification] = useState({ show: false, message: '' });
 
   // Enhanced patrol behavior
   useEffect(() => {
@@ -251,76 +252,87 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
     }
   }, [chatHistory]);
 
-  const handleSaveQuote = (quote) => {
-    if (!character) return;
+  // Add a function to save quotes
+  const handleSaveQuote = (quoteText, source) => {
+    // Create a new quote object
+    const newQuote = {
+      text: quoteText,
+      source: source || npc.name,
+      timestamp: new Date().toISOString(),
+      npcType: npc.type
+    };
     
-    // Create a new savedQuotes array if it doesn't exist
-    const updatedQuotes = [...(character.savedQuotes || [])];
+    // Check if this quote is already saved
+    const isAlreadySaved = savedQuotes.some(q => q.text === quoteText);
     
-    // Check if quote is already saved
-    if (!updatedQuotes.some(q => q.text === quote.text)) {
-      updatedQuotes.push({
-        text: quote.text,
-        source: quote.source,
-        timestamp: new Date().toISOString()
+    if (isAlreadySaved) {
+      // Show notification instead of alert
+      setNotification({
+        show: true,
+        message: "This quote is already in your saved quotes!"
       });
       
-      // Update character with new quotes
+      // Hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification({ show: false, message: '' });
+      }, 3000);
+      
+      return;
+    }
+    
+    // Update local state
+    const updatedQuotes = [...savedQuotes, newQuote];
+    setSavedQuotes(updatedQuotes);
+    
+    // Update character state with new quote
+    if (character && onUpdateCharacter) {
       const updatedCharacter = {
         ...character,
         savedQuotes: updatedQuotes
       };
+      onUpdateCharacter(updatedCharacter);
       
-      // Update local state
-      setSavedQuotes(updatedQuotes);
+      // Show notification instead of alert
+      setNotification({
+        show: true,
+        message: `Quote saved: "${quoteText.substring(0, 30)}${quoteText.length > 30 ? '...' : ''}"`
+      });
       
-      // Update character in parent component
-      if (onUpdateCharacter) {
-        onUpdateCharacter(updatedCharacter);
-      }
-      
-      // Update character in database
-      updateCharacter(updatedCharacter)
-        .then(() => console.log("✅ Quote saved to character profile"))
-        .catch(err => console.error("❌ Failed to save quote:", err));
-      
-      return true;
+      // Hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification({ show: false, message: '' });
+      }, 3000);
     }
-    
-    return false;
   };
 
-  // Add a function to ensure each message is visible
-  const renderMessage = (msg, index) => (
-    <div key={index} className={`message ${msg.role}`}>
-      <p>{msg.text}</p>
-      {msg.source && (
-        <p className="message-source">Source: {msg.source}</p>
-      )}
-      {msg.role === 'npc' && npc.type === NPC_TYPES.SHAKESPEARE && msg.source && (
-        <button 
-          className="save-quote-button"
-          onClick={() => {
-            const saved = handleSaveQuote(msg);
-            if (saved) {
-              // Show saved confirmation
-              const button = document.querySelector(`.message:nth-child(${index + 1}) .save-quote-button`);
-              if (button) {
-                button.textContent = "✓ Saved to Profile";
-                button.disabled = true;
-                setTimeout(() => {
-                  button.textContent = "Save Quote";
-                  button.disabled = false;
-                }, 2000);
-              }
-            }
-          }}
-        >
-          {savedQuotes?.some(q => q.text === msg.text) ? "✓ Saved" : "Save Quote"}
-        </button>
-      )}
-    </div>
-  );
+  // Then in the render section, update the message rendering to include a save button
+  const renderMessage = (message, index) => {
+    const isNPC = message.role === 'npc';
+    const messageClasses = `message ${isNPC ? 'npc-message' : 'user-message'}`;
+    
+    return (
+      <div key={index} className={messageClasses}>
+        {isNPC && (
+          <div className="npc-avatar" style={{ backgroundImage: `url(${getNPCImage()})` }}></div>
+        )}
+        <div className="message-content">
+          <div className="message-text">{message.text}</div>
+          {isNPC && message.source && (
+            <div className="message-source">Source: {message.source}</div>
+          )}
+          {isNPC && (
+            <button 
+              className="save-quote-btn" 
+              onClick={() => handleSaveQuote(message.text, message.source)}
+              title="Save this quote to your collection"
+            >
+              💾 Save Quote
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -351,45 +363,41 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
           <div className="dialog-box">
             <div className="dialog-header">
               <h3>{npc.name}</h3>
-              <button className="close-button" onClick={handleCloseDialog}>×</button>
+              <button className="close-btn" onClick={handleCloseDialog}>×</button>
             </div>
-            
-            <div className="npc-info">
-              <img src={getNPCImage()} alt={npc.name} className="npc-avatar" />
-              <div className="npc-details">
-                <p className="npc-role">{npc.role}</p>
-                <p className="npc-description">{npc.description}</p>
-              </div>
-            </div>
-            
-            <div className="conversation" ref={conversationRef}>
-              {chatHistory.map(renderMessage)}
-              
+            <div className="dialog-content" ref={conversationRef}>
+              {chatHistory.map((message, index) => renderMessage(message, index))}
               {isTyping && (
                 <div className="typing-indicator">
-                  <span>●</span><span>●</span><span>●</span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              )}
+              {isThinking && (
+                <div className="thinking-indicator">
+                  <div className="thinking-text">{npc.name} is pondering...</div>
                 </div>
               )}
             </div>
             
-            <form onSubmit={handleSubmitPrompt} className="prompt-form">
+            {/* Notification */}
+            {notification.show && (
+              <div className="notification">
+                {notification.message}
+              </div>
+            )}
+            
+            <form className="prompt-form" onSubmit={handleSubmitPrompt}>
               <input
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                placeholder={isThinking ? `${npc.name} is contemplating...` : `Ask ${npc.name} something...`}
+                placeholder={`Ask ${npc.name} something...`}
                 disabled={isTyping}
-                onKeyDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
-                onFocus={() => {
-                  if (window.innerWidth <= 768) {
-                    setKeyboardVisible(true);
-                  }
-                }}
-                onBlur={() => setKeyboardVisible(false)}
               />
               <button type="submit" disabled={isTyping || !userInput.trim()}>
-                {isTyping ? 'Thinking...' : 'Send'}
+                {isTyping ? "Thinking..." : "Send"}
               </button>
             </form>
           </div>

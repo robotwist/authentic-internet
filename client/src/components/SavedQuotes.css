@@ -73,6 +73,11 @@
   margin-bottom: 8px;
 }
 
+.npc-type {
+  font-weight: bold;
+  color: #ff9900;
+}
+
 .quote-timestamp {
   color: #aaaaaa;
   font-size: 0.6em;
