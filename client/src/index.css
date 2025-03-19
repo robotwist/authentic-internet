@@ -1,5 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap');
+@import './styles/variables.css';
+
 /* Reset styles */
 /* Font imports moved to fonts.css */
+
+/* iOS touch optimization */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  height: 100%;
+  overscroll-behavior: none;
+}
 
 :root {
   --primary-color: #2c3e50;
@@ -22,14 +33,19 @@
 }
 
 body {
+  font-family: var(--base-font);
   background-color: var(--background-color);
   color: var(--text-color);
-  overflow-y: auto;
+  line-height: 1.6;
+  overflow-x: hidden;
   text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.1); /* Subtle retro effect */
   image-rendering: pixelated; /* Ensures crisp pixel art */
-  font-family: var(--primary-font);
-  line-height: 1.6;
   min-height: 100vh;
+  height: 100%;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  position: fixed; /* Prevent bounce on iOS */
+  width: 100%;
 }
 
 #root {
@@ -37,22 +53,58 @@ body {
   display: flex;
   flex-direction: column;
   background: url("/assets/background-pattern.png") repeat;
+  height: 100%;
+  width: 100%;
+}
+
+/* Fix for iOS Safari 100vh issue */
+@supports (-webkit-touch-callout: none) {
+  .viewport-height {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Add iOS specific button styling */
+button, 
+.button,
+[role="button"] {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Prevent text selection on game elements */
+.game-container,
+.game-world,
+.touch-controls,
+.d-pad-btn,
+.action-btn {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* ✅ Buttons & Inputs */
 button {
+  cursor: pointer;
+  font-family: var(--base-font);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
   background: var(--button-bg);
   border: none;
   color: white;
-  font-size: 14px;
   padding: 12px 20px;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: bold;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 button:hover {
@@ -67,20 +119,19 @@ button:active {
 }
 
 /* ✅ Inputs */
-input {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: all 0.2s ease-in-out;
+input, textarea, select {
+  font-family: var(--base-font);
+  font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.2);
+  color: var(--text-color);
 }
 
-input:focus {
+input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--secondary-color);
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
 .app {
@@ -343,5 +394,99 @@ input:focus {
     width: 100%;
     text-align: center;
     padding: 0.75rem;
+  }
+}
+
+/* Container utilities */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.section {
+  padding: 2rem 0;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--secondary-color-rgb), 0.8);
+}
+
+/* Utilities */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt-1 { margin-top: var(--space-sm); }
+.mt-2 { margin-top: var(--space-md); }
+.mt-3 { margin-top: var(--space-lg); }
+.mt-4 { margin-top: var(--space-xl); }
+
+.mb-1 { margin-bottom: var(--space-sm); }
+.mb-2 { margin-bottom: var(--space-md); }
+.mb-3 { margin-bottom: var(--space-lg); }
+.mb-4 { margin-bottom: var(--space-xl); }
+
+.p-1 { padding: var(--space-sm); }
+.p-2 { padding: var(--space-md); }
+.p-3 { padding: var(--space-lg); }
+.p-4 { padding: var(--space-xl); }
+
+.text-success { color: var(--success-color); }
+.text-error { color: var(--error-color); }
+.text-warning { color: var(--warning-color); }
+.text-info { color: var(--info-color); }
+
+/* Fade animations */
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease forwards;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.3rem; }
+  
+  .container {
+    padding: 0 0.75rem;
+  }
+  
+  .section {
+    padding: 1.5rem 0;
   }
 }

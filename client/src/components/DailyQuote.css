@@ -1,0 +1,132 @@
+.daily-quote {
+  background: rgba(20, 20, 30, 0.6);
+  border-radius: 8px;
+  padding: 2rem;
+  position: relative;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid var(--secondary-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.daily-quote::before {
+  content: """;
+  position: absolute;
+  top: -30px;
+  left: 20px;
+  font-size: 150px;
+  color: rgba(var(--secondary-color-rgb), 0.1);
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.daily-quote-loading {
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.daily-quote-text {
+  font-size: 1.3rem;
+  font-style: italic;
+  color: var(--text-color);
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+  max-width: 80%;
+  line-height: 1.6;
+  font-weight: 300;
+  position: relative;
+  z-index: 1;
+}
+
+.daily-quote-source {
+  color: var(--secondary-color);
+  font-size: 0.9rem;
+  text-align: right;
+  margin-bottom: 1.5rem;
+  align-self: flex-end;
+  font-weight: 500;
+}
+
+.source-name {
+  opacity: 0.9;
+}
+
+.daily-quote-save-button {
+  background: rgba(var(--secondary-color-rgb), 0.2);
+  color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+  border-radius: 4px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.daily-quote-save-button:hover {
+  background: rgba(var(--secondary-color-rgb), 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.daily-quote-save-button:active {
+  transform: translateY(0);
+}
+
+/* Animation for quote appearance */
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.daily-quote {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .daily-quote {
+    padding: 1.5rem;
+  }
+  
+  .daily-quote-text {
+    font-size: 1.1rem;
+    max-width: 95%;
+  }
+  
+  .daily-quote::before {
+    font-size: 120px;
+    top: -20px;
+    left: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .daily-quote {
+    padding: 1.2rem;
+  }
+  
+  .daily-quote-text {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .daily-quote::before {
+    font-size: 100px;
+    top: -15px;
+    left: 5px;
+  }
+  
+  .daily-quote-save-button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+  }
+} 
