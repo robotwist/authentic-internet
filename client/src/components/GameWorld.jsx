@@ -54,7 +54,7 @@ const GameWorld = ({
     exp: 0,
     level: 1
   },
-  isLoggedIn = false,
+  isLoggedIn: initialIsLoggedIn = false,
   username = ''
 }) => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
@@ -66,7 +66,7 @@ const GameWorld = ({
   const [showForm, setShowForm] = useState(false);
   const [formPosition, setFormPosition] = useState({ x: 0, y: 0 });
   const [visibleArtifact, setVisibleArtifact] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
   const [artifacts, setArtifacts] = useState(initialArtifacts);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showPortalFlash, setShowPortalFlash] = useState(false);
