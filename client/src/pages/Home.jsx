@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Layout from '../components/shared/Layout';
 import Button from '../components/shared/Button';
 import DailyQuote from '../components/DailyQuote';
+import SecretMessage from '../components/SecretMessage';
 import '../styles/Home.css';
 import { getQuoteForArtifact, getRandomShakespeareQuote, getZenQuote } from '../api/externalApis';
 import { updateCharacter } from '../api/api';
@@ -13,6 +14,7 @@ const Home = () => {
   const [inspirationalQuotes, setInspirationalQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSavedMessage, setShowSavedMessage] = useState(false);
+  const [showSecretMessage, setShowSecretMessage] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -117,6 +119,11 @@ const Home = () => {
     }
   };
 
+  const handleCreateNewWorld = (e) => {
+    e.preventDefault();
+    setShowSecretMessage(true);
+  };
+
   const header = (
     <div className="home-header">
       <h1>Welcome to Authentic Internet</h1>
@@ -168,14 +175,19 @@ const Home = () => {
             <p>Your worlds will appear here...</p>
           </div>
           
-          <div className="action-buttons">
-            <Button as={Link} to="/worlds/create" variant="primary">
-              Create New World
-            </Button>
-            <Button as={Link} to="/dashboard" variant="secondary">
-              Go to Dashboard
-            </Button>
-          </div>
+          {/* Show SecretMessage or buttons based on state */}
+          {showSecretMessage ? (
+            <SecretMessage />
+          ) : (
+            <div className="action-buttons">
+              <Button onClick={handleCreateNewWorld} variant="primary">
+                Create New World
+              </Button>
+              <Button as={Link} to="/dashboard" variant="secondary">
+                Go to Dashboard
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="unauthenticated-content">
