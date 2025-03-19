@@ -87,11 +87,20 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '' }) => {
         position: 'absolute',
         left: `${x * size}px`,
         top: `${y * size}px`,
-        zIndex: type === 5 ? 2 : 1, // portal has higher z-index
+        zIndex: type === 5 ? 10 : 1, // Increased z-index for portal
+        transition: type === 5 ? 'all 0.3s ease-in-out' : 'all 0.2s ease-in-out', // Smoother transition for portals
       }}
       onClick={onClick}
       data-tile-type={type}
-    />
+    >
+      {/* For portal tiles, add inner elements for immediate vortex effect */}
+      {type === 5 && (
+        <>
+          <div className="portal-inner-vortex"></div>
+          <div className="portal-glow"></div>
+        </>
+      )}
+    </div>
   );
 };
 

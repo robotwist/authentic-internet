@@ -30,7 +30,36 @@
 
 .tile.portal {
   background-image: url('/assets/tiles/portal.webp');
-  animation: portalPulse 2s infinite;
+  animation: portalVortex 4s infinite linear;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(186, 85, 211, 0.7);
+}
+
+/* Add pseudo-element for the vortex effect */
+.tile.portal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(186, 85, 211, 0.1) 20%, rgba(186, 85, 211, 0.5) 40%, rgba(186, 85, 211, 0.1) 60%, transparent 70%);
+  animation: portalSwirl 3s infinite linear;
+  z-index: 1;
+  transform-origin: center;
+}
+
+.tile.portal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(120, 180, 255, 0.5) 10%, transparent 50%);
+  animation: portalGlow 2s infinite alternate;
+  z-index: 2;
 }
 
 /* Style for tiles with loading images */
@@ -61,18 +90,43 @@
 
 .tile.image-loading.portal {
   background-color: rgba(186, 85, 211, 0.7);
-  animation: portalPulse 2s infinite;
+  animation: portalVortex 4s infinite linear;
 }
 
-@keyframes portalPulse {
+@keyframes portalVortex {
   0% {
-    opacity: 1;
+    transform: rotate(0deg) scale(1);
+    filter: hue-rotate(0deg) brightness(1);
   }
   50% {
+    transform: rotate(180deg) scale(1.1);
+    filter: hue-rotate(45deg) brightness(1.2);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    filter: hue-rotate(0deg) brightness(1);
+  }
+}
+
+@keyframes portalSwirl {
+  0% {
+    transform: rotate(0deg);
     opacity: 0.7;
   }
   100% {
+    transform: rotate(360deg);
     opacity: 1;
+  }
+}
+
+@keyframes portalGlow {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.2);
   }
 }
 
@@ -171,4 +225,57 @@
   100% {
     filter: hue-rotate(0deg) brightness(1);
   }
+}
+
+/* Portal inner elements for immediate vortex effect */
+.portal-inner-vortex {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  right: 10%;
+  bottom: 10%;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(186, 85, 211, 0.2) 0%, rgba(186, 85, 211, 0.7) 50%, rgba(186, 85, 211, 0.2) 100%);
+  animation: portalInnerVortex 1.5s infinite linear;
+  transform-origin: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.portal-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.7) 0%, transparent 70%);
+  animation: portalImmediateGlow 2s infinite alternate;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: screen;
+}
+
+@keyframes portalInnerVortex {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(0.8);
+  }
+}
+
+@keyframes portalImmediateGlow {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Make portal tiles appear immediately with a fallback color even before images load */
+.tile.portal {
+  background-color: rgba(90, 20, 120, 0.8);
 } 
