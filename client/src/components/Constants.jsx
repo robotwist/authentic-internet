@@ -27,6 +27,7 @@ export const isWalkable = (x, y, map, character = null) => {
   
   // Check boundaries
   if (row < 0 || row >= map.length || col < 0 || col >= (map[0]?.length || 0)) {
+    console.log(`Out of bounds: ${col},${row}`);
     return false;
   }
   

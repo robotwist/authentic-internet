@@ -18,11 +18,11 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '' }) => {
       case 0:
         return '/assets/tiles/piskel_grass.png';
       case 1:
-        return '/assets/tiles/wall_new.png';
+        return '/assets/tiles/wall.webp';
       case 2:
-        return '/assets/tiles/water_new.png';
+        return '/assets/tiles/water.webp';
       case 3:
-        return '/assets/tiles/sand_new.png';
+        return '/assets/tiles/sand.png';
       case 4: // dungeon
         return '/assets/tiles/dungeon.webp';
       case 5: // portal
@@ -41,11 +41,18 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '' }) => {
     // Create a new image to check if it loads properly
     const img = new Image();
     img.onload = () => setImageLoaded(true);
-    img.onerror = () => {
-      console.error(`Failed to load image: ${path}`);
+    img.onerror = (e) => {
+      console.error(`Failed to load image: ${path}`, e);
       setImageLoaded(false);
     };
     img.src = path;
+
+    // Preload image when component mounts
+    return () => {
+      // Clean up by removing the image when component unmounts
+      img.onload = null;
+      img.onerror = null;
+    };
   }, [type]);
 
   const getTileClass = () => {
@@ -73,7 +80,7 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '' }) => {
       style={{
         width: `${size}px`,
         height: `${size}px`,
-        backgroundImage: `url(${imagePath})`,
+        backgroundImage: imageLoaded ? `url(${imagePath})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

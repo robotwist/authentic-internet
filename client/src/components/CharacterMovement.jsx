@@ -2,35 +2,36 @@ import { useEffect } from "react";
 import { TILE_SIZE, MAP_COLS, MAPS, isWalkable } from "./Constants";
 
 const useCharacterMovement = (
-  characterPosition,
-  setCharacterPosition,
-  currentMapIndex,
-  setCurrentMapIndex,
-  isLoggedIn,
-  visibleArtifact,
-  handleArtifactPickup,
-  setShowForm,
+  characterPosition, 
+  setCharacterPosition, 
+  currentMapIndex, 
+  setCurrentMapIndex, 
+  isLoggedIn, 
+  visibleArtifact, 
+  handleArtifactPickup, 
+  setShowForm, 
   setFormPosition,
-  setShowInventory,
+  setShowInventory, 
   adjustViewport
 ) => {
   useEffect(() => {
     const handleKeyDown = (event) => {
-      // Skip if input is focused on form elements
+      // Skip if input is focused
       if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+        return;
+      }
+
+      // Validate characterPosition to prevent NaN issues
+      if (!characterPosition || typeof characterPosition !== 'object' || 
+          typeof characterPosition.x !== 'number' || typeof characterPosition.y !== 'number') {
+        console.error("Invalid character position:", characterPosition);
         return;
       }
 
       const speed = TILE_SIZE;
       let newPosition = { ...characterPosition };
 
-      // Make sure characterPosition is valid to avoid NaN issues
-      if (!newPosition || typeof newPosition.x !== 'number' || typeof newPosition.y !== 'number') {
-        console.error("Invalid character position:", newPosition);
-        newPosition = { x: 0, y: 0 };
-      }
-
-      // Get current map data - add safety check
+      // Get current map data with safety check
       const currentMapData = MAPS[currentMapIndex]?.data;
       if (!currentMapData) {
         console.error("Map data not found for index:", currentMapIndex);
@@ -90,9 +91,9 @@ const useCharacterMovement = (
           return;
       }
 
-      // Only update position if it actually changed
+      // Only update if position has changed
       if (newPosition.x !== characterPosition.x || newPosition.y !== characterPosition.y) {
-        console.log("Character moved to:", newPosition);
+        console.log("Moving character to:", newPosition);
         setCharacterPosition(newPosition);
         adjustViewport(newPosition);
       }
@@ -100,19 +101,8 @@ const useCharacterMovement = (
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    characterPosition, 
-    currentMapIndex, 
-    isLoggedIn, 
-    visibleArtifact, 
-    setCharacterPosition, 
-    setCurrentMapIndex, 
-    handleArtifactPickup, 
-    setShowForm, 
-    setFormPosition, 
-    setShowInventory, 
-    adjustViewport
-  ]);
+  }, [characterPosition, currentMapIndex, isLoggedIn, visibleArtifact, 
+      handleArtifactPickup, setShowForm, setFormPosition, setShowInventory, adjustViewport, setCharacterPosition, setCurrentMapIndex]);
 };
 
 export default useCharacterMovement;

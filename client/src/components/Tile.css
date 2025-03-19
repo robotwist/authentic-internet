@@ -13,15 +13,15 @@
 }
 
 .tile.wall {
-  background-image: url('/assets/tiles/wall_new.png');
+  background-image: url('/assets/tiles/wall.webp');
 }
 
 .tile.water {
-  background-image: url('/assets/tiles/water_new.png');
+  background-image: url('/assets/tiles/water.webp');
 }
 
 .tile.sand {
-  background-image: url('/assets/tiles/sand_new.png');
+  background-image: url('/assets/tiles/sand.png');
 }
 
 .tile.dungeon {
@@ -107,7 +107,7 @@
 /* Special Yosemite map effects */
 .yosemite-map .tile.water {
   animation: waterfall 2s infinite linear;
-  background-image: url('/assets/tiles/water_new.png');
+  background-image: url('/assets/tiles/water.webp');
   filter: saturate(1.2) brightness(1.1);
   box-shadow: 0 0 15px rgba(62, 125, 240, 0.6);
 }
@@ -128,7 +128,7 @@
 }
 
 .yosemite-map .tile.wall {
-  background-image: url('/assets/tiles/wall_new.png');
+  background-image: url('/assets/tiles/wall.webp');
   filter: contrast(1.2) brightness(1.1);
   box-shadow: 0 0 10px rgba(110, 110, 110, 0.4);
 }

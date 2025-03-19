@@ -23,7 +23,7 @@ import SavedQuotes from "./SavedQuotes";
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
   const [inventory, setInventory] = useState([]);
-  const [characterPosition, setCharacterPosition] = useState({ x: 0, y: 0 });
+  const [characterPosition, setCharacterPosition] = useState({ x: 64, y: 64 });
   const [character, setCharacter] = useState(null);
   const [viewport, setViewport] = useState({ x: 0, y: 0 });
   const [showInventory, setShowInventory] = useState(false);
@@ -284,7 +284,13 @@ const GameWorld = () => {
       <div className="viewport" style={{ width: "100%", height: "100%" }}>
         <div className="game-world">
           <Map mapData={MAPS[currentMapIndex].data} viewport={viewport} />
-          <Character position={characterPosition} />
+          <Character 
+            x={characterPosition.x} 
+            y={characterPosition.y} 
+            exp={character?.experience || 0}
+            level={character?.level || 1}
+            avatar={character?.avatar}
+          />
           <ErrorBoundary>
             {MAPS[currentMapIndex].artifacts.map((artifact) =>
               artifact.visible && artifact.location ? (
