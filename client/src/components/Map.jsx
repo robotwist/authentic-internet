@@ -14,7 +14,8 @@ const Map = ({
   onArtifactClick,
   zoom = 1,
   offset = { x: 0, y: 0 },
-  onZoomChange
+  onZoomChange,
+  mapName = ""
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -53,9 +54,46 @@ const Map = ({
     onZoomChange?.(newZoom);
   };
 
+  // Function to determine if a tile is part of Half Dome
+  const isHalfDome = (x, y) => {
+    // Half Dome coordinates from the map data (walls in the upper center-right)
+    return mapName === "Yosemite" && (
+      (x === 9 && y === 3) || 
+      (x === 10 && y === 3) || 
+      (x === 11 && y === 3) || 
+      (x === 12 && y === 3) ||
+      (x === 11 && y === 4) ||
+      (x === 11 && y === 5)
+    );
+  };
+
+  // Function to determine if a tile is part of Mist Trail
+  const isMistTrail = (x, y) => {
+    // Mist Trail coordinates (water tiles on the right side)
+    return mapName === "Yosemite" && (
+      (x === 15 && y === 9) ||
+      (x === 15 && y === 10) ||
+      (x === 15 && y === 11) ||
+      (x === 14 && y === 15) ||
+      (x === 13 && y === 16) ||
+      (x === 13 && y === 17)
+    );
+  };
+
+  // Function to determine whether a tile is Yosemite Falls
+  const isYosemiteFalls = (x, y) => {
+    // Yosemite Falls coordinates (water tiles on the left)
+    return mapName === "Yosemite" && (
+      (x === 3 && y === 6) ||
+      (x === 3 && y === 7) ||
+      (x === 2 && y === 8) ||
+      (x === 2 && y === 9)
+    );
+  };
+
   return (
     <div 
-      className="map-container"
+      className={`map ${mapName === "Yosemite" ? 'yosemite-map' : ''}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -78,6 +116,11 @@ const Map = ({
               y={y}
               size={TILE_SIZE}
               onClick={() => onTileClick?.(x, y)}
+              className={`
+                ${isHalfDome(x, y) ? 'half-dome' : ''} 
+                ${isMistTrail(x, y) ? 'mist-trail' : ''}
+                ${isYosemiteFalls(x, y) ? 'yosemite-falls' : ''}
+              `}
             />
           ))
         ))}
@@ -144,7 +187,8 @@ Map.propTypes = {
     x: PropTypes.number,
     y: PropTypes.number
   }),
-  onZoomChange: PropTypes.func
+  onZoomChange: PropTypes.func,
+  mapName: PropTypes.string
 };
 
 export default Map;

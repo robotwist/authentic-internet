@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { TILE_TYPES } from './Constants';
 import './Tile.css';
 
-const Tile = ({ type, x, y, size = 64 }) => {
+const Tile = ({ type, x, y, size = 64, onClick, className = '' }) => {
   const getTileImage = () => {
     if (!type || type === 0) {
       return '/assets/tiles/piskel_grass.png';
@@ -11,11 +11,11 @@ const Tile = ({ type, x, y, size = 64 }) => {
 
     switch (type) {
       case 1:
-        return '/assets/tiles/wall.webp';
+        return '/assets/tiles/wall_new.png';
       case 2:
-        return '/assets/tiles/water.webp';
+        return '/assets/tiles/water_new.png';
       case 3:
-        return '/assets/tiles/mountain.webp';
+        return '/assets/tiles/sand_new.png';
       case 4: // dungeon
         return '/assets/tiles/dungeon.webp';
       case 5: // portal
@@ -38,7 +38,7 @@ const Tile = ({ type, x, y, size = 64 }) => {
 
   return (
     <div
-      className={`tile ${getTileClass()}`}
+      className={`tile ${getTileClass()} ${className}`}
       style={{
         width: `${size}px`,
         height: `${size}px`,
@@ -49,6 +49,7 @@ const Tile = ({ type, x, y, size = 64 }) => {
         top: `${y * size}px`,
         zIndex: type === 5 ? 2 : 1, // portal has higher z-index
       }}
+      onClick={onClick}
     />
   );
 };
@@ -58,6 +59,8 @@ Tile.propTypes = {
   x: PropTypes.number.isRequired,
   y: PropTypes.number.isRequired,
   size: PropTypes.number,
+  onClick: PropTypes.func,
+  className: PropTypes.string
 };
 
 export default Tile; 

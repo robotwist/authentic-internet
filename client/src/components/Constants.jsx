@@ -36,7 +36,8 @@ export const ARTIFACT_TYPES = {
   SCROLL: 'scroll',
   RELIC: 'relic',
   KEY: 'key',
-  CONTAINER: 'container'
+  CONTAINER: 'container',
+  PORTAL: 'portal'
 };
 
 export const ARTIFACT_INTERACTIONS = {
@@ -434,8 +435,7 @@ export const MAPS = [
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
       [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
       [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-      [1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-      [1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -950,6 +950,102 @@ export const MAPS = [
           "A little learning is a dangerous thing; Drink deep, or taste not the Pierian spring. (An Essay on Criticism, 1711)",
           "Hope springs eternal in the human breast; Man never is, but always to be blessed. (An Essay on Man, 1734)",
           "The proper study of Mankind is Man. (An Essay on Man, 1734)"
+        ]
+      }
+    ]
+  },
+  // Add the Yosemite map after the existing maps
+  {
+    name: "Yosemite",
+    data: [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 1],
+      [1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
+      [1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 2, 2, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 2, 2, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 2, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1],
+      [1, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ],
+    artifacts: [
+      {
+        id: uuidv4(),
+        name: "Half Dome View",
+        description: "A breathtaking view of Half Dome, the iconic granite dome at the eastern end of Yosemite Valley.",
+        content: "Standing here, you can see the majestic Half Dome rising 4,737 ft (1,444 m) above the valley floor.",
+        location: { x: 10, y: 3 },
+        exp: 25,
+        visible: true,
+        area: "Yosemite",
+        type: ARTIFACT_TYPES.RELIC,
+        interactions: []
+      },
+      {
+        id: uuidv4(),
+        name: "Yosemite Falls",
+        description: "The magnificent Yosemite Falls, one of the world's tallest waterfalls.",
+        content: "Yosemite Falls is 2,425 feet (739 m) tall and consists of three sections: Upper Falls, Middle Cascades, and Lower Falls.",
+        location: { x: 3, y: 6 },
+        exp: 25,
+        visible: true,
+        area: "Yosemite",
+        type: ARTIFACT_TYPES.RELIC,
+        interactions: []
+      },
+      {
+        id: uuidv4(),
+        name: "Mist Trail",
+        description: "The popular Mist Trail alongside Vernal and Nevada Falls.",
+        content: "The Mist Trail gets its name from the mist that sprays off Vernal Falls, often creating rainbows in the afternoon sun.",
+        location: { x: 15, y: 12 },
+        exp: 25,
+        visible: true,
+        area: "Yosemite",
+        type: ARTIFACT_TYPES.RELIC,
+        interactions: []
+      },
+      {
+        id: uuidv4(),
+        name: "Return Portal",
+        description: "A portal that will take you back to the main world.",
+        content: "This magical gateway will transport you back to where you began your journey. Use it when you're ready to leave Yosemite National Park.",
+        location: { x: 18, y: 1 },
+        exp: 10,
+        visible: true,
+        area: "Yosemite",
+        type: ARTIFACT_TYPES.PORTAL,
+        interactions: []
+      }
+    ],
+    npcs: [
+      {
+        id: 'john_muir_yosemite',
+        type: NPC_TYPES.JOHN_MUIR,
+        name: 'John Muir',
+        position: { x: 2 * TILE_SIZE, y: 17 * TILE_SIZE },
+        patrolArea: {
+          startX: 1,
+          startY: 16,
+          width: 5,
+          height: 2
+        },
+        dialogue: [
+          "Welcome to Yosemite, the grandest of all the special temples of Nature. (The Yosemite, 1912)",
+          "This is Nature's cathedral, surpassing any ever yet reared by hands. (Our National Parks, 1901)",
+          "Climb the mountains and get their good tidings. Nature's peace will flow into you as sunshine flows into trees. (Our National Parks, 1901)",
+          "Walk along the river to see Yosemite Falls, then follow the Mist Trail to experience the raw power of water shaping granite.",
+          "Half Dome awaits the bold at the end of your journey. Its majestic face has been shaped by the forces of glaciers over millions of years."
         ]
       }
     ]

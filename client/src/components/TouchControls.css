@@ -78,8 +78,6 @@
 
 .action-btn {
   position: fixed;
-  bottom: 40px;
-  right: 40px;
   width: 70px;
   height: 70px;
   background-color: rgba(0, 0, 0, 0.6);
@@ -95,7 +93,29 @@
   touch-action: manipulation;
 }
 
+.action-btn.pickup-btn {
+  bottom: 40px;
+  right: 40px;
+  border-color: rgba(0, 255, 0, 0.7);
+  color: rgba(0, 255, 0, 0.9);
+}
+
+.action-btn.drop-btn {
+  bottom: 40px;
+  right: 130px;
+  border-color: rgba(255, 100, 0, 0.7);
+  color: rgba(255, 100, 0, 0.9);
+}
+
 .action-btn.active {
   background-color: rgba(255, 215, 0, 0.5);
   color: rgba(0, 0, 0, 0.9);
+}
+
+.action-btn.pickup-btn.active {
+  background-color: rgba(0, 255, 0, 0.5);
+}
+
+.action-btn.drop-btn.active {
+  background-color: rgba(255, 100, 0, 0.5);
 } 

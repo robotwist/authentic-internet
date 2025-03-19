@@ -71,4 +71,73 @@
     width: 48px;
     height: 48px;
   }
+}
+
+/* Special Yosemite map effects */
+.yosemite-map .tile.water {
+  animation: waterfall 2s infinite linear;
+  background-image: url('/assets/tiles/water_new.png');
+  filter: saturate(1.2) brightness(1.1);
+  box-shadow: 0 0 15px rgba(62, 125, 240, 0.6);
+}
+
+@keyframes waterfall {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 200%;
+  }
+}
+
+.yosemite-map .tile.grass {
+  background-image: url('/assets/tiles/piskel_grass.png');
+  filter: saturate(1.3) brightness(1.1);
+  transition: all 0.3s ease;
+}
+
+.yosemite-map .tile.wall {
+  background-image: url('/assets/tiles/wall_new.png');
+  filter: contrast(1.2) brightness(1.1);
+  box-shadow: 0 0 10px rgba(110, 110, 110, 0.4);
+}
+
+/* Half Dome effect for walls around the Half Dome coordinates */
+.yosemite-map .tile.wall.half-dome {
+  filter: contrast(1.5) brightness(1.2);
+  box-shadow: 0 0 15px rgba(255, 217, 179, 0.5);
+}
+
+/* Mist trail effect */
+.yosemite-map .tile.water.mist-trail {
+  animation: mistTrail 3s infinite alternate;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes mistTrail {
+  0% {
+    filter: brightness(1) blur(1px);
+    opacity: 0.8;
+  }
+  100% {
+    filter: brightness(1.5) blur(2px);
+    opacity: 1;
+  }
+}
+
+/* Add ambient animation for the entire Yosemite map */
+.yosemite-map {
+  animation: yosemiteAmbient 60s infinite alternate linear;
+}
+
+@keyframes yosemiteAmbient {
+  0% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  50% {
+    filter: hue-rotate(5deg) brightness(1.05);
+  }
+  100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
 } 

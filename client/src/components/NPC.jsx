@@ -35,8 +35,11 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
         const newX = currentX + direction.x;
         const newY = currentY + direction.y;
         
+        // Use the NPC type for walkable check if it's Jesus
+        const characterType = npc.type === NPC_TYPES.JESUS ? 'jesus' : null;
+        
         if (newX >= 0 && newX < 20 && newY >= 0 && newY < 18 && 
-            isWalkable(newX * TILE_SIZE, newY * TILE_SIZE, mapData)) {
+            isWalkable(newX * TILE_SIZE, newY * TILE_SIZE, mapData, characterType)) {
           setCurrentPosition({
             x: newX * TILE_SIZE,
             y: newY * TILE_SIZE
@@ -48,7 +51,7 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
 
     const patrolInterval = setInterval(moveRandomly, 2000);
     return () => clearInterval(patrolInterval);
-  }, [isPatrolling, currentPosition, mapData]);
+  }, [isPatrolling, currentPosition, mapData, npc.type]);
 
   // Handle mobile keyboard visibility
   useEffect(() => {
@@ -203,7 +206,9 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
       [NPC_TYPES.MICHELANGELO]: "The greater danger for most of us lies not in setting our aim too high and falling short, but in setting our aim too low and achieving our mark.",
       [NPC_TYPES.OSCAR_WILDE]: "I can resist everything except temptation. (Lady Windermere's Fan, 1892)",
       [NPC_TYPES.ALEXANDER_POPE]: "To err is human, to forgive divine. (An Essay on Criticism, 1711)",
-      [NPC_TYPES.ZEUS]: "Even the gods cannot alter the past, but the future is yet in my power. (Greek mythology)"
+      [NPC_TYPES.ZEUS]: "Even the gods cannot alter the past, but the future is yet in my power. (Greek mythology)",
+      [NPC_TYPES.JOHN_MUIR]: "The mountains are calling and I must go. (Letter to his sister Sarah Muir, 1873)",
+      [NPC_TYPES.JESUS]: "Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you. (Matthew 7:7)"
     };
     return messages[npcType] || "Forgive me, but I need a moment to gather my thoughts...";
   };
@@ -217,7 +222,9 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
       [NPC_TYPES.LORD_BYRON]: '/assets/npcs/lord_byron.webp',
       [NPC_TYPES.OSCAR_WILDE]: '/assets/npcs/oscar_wilde.svg',
       [NPC_TYPES.ALEXANDER_POPE]: '/assets/npcs/alexander_pope.svg',
-      [NPC_TYPES.ZEUS]: '/assets/npcs/zeus.svg'
+      [NPC_TYPES.ZEUS]: '/assets/npcs/zeus.svg',
+      [NPC_TYPES.JOHN_MUIR]: '/assets/npcs/john_muir.png',
+      [NPC_TYPES.JESUS]: '/assets/npcs/jesus.png'
     };
     return images[npc.type] || `/assets/npcs/${npc.type}.svg`;
   };
@@ -231,7 +238,9 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
       [NPC_TYPES.MICHELANGELO]: "I saw the angel in the marble and carved until I set him free. (Letter to Benedetto Varchi, 1549)",
       [NPC_TYPES.OSCAR_WILDE]: "The truth is rarely pure and never simple. (The Importance of Being Earnest, 1895)",
       [NPC_TYPES.ALEXANDER_POPE]: "Hope springs eternal in the human breast; Man never is, but always to be blessed. (An Essay on Man, 1734)",
-      [NPC_TYPES.ZEUS]: "I am the Thunderer! Here in my cloud-girded hall, what mortal dares challenge the might of Zeus? (Iliad, 8th century BCE)"
+      [NPC_TYPES.ZEUS]: "I am the Thunderer! Here in my cloud-girded hall, what mortal dares challenge the might of Zeus? (Iliad, 8th century BCE)",
+      [NPC_TYPES.JOHN_MUIR]: "The mountains are calling and I must go. (Letter to his sister Sarah Muir, 1873)",
+      [NPC_TYPES.JESUS]: "Come, follow me, and I will make you fishers of men. (Matthew 4:19)"
     };
     return greetings[npc.type] || npc.dialogue?.[0] || "Hello, traveler!";
   };

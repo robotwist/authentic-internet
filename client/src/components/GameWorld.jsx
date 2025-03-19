@@ -57,6 +57,7 @@ const GameWorld = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showSavedQuotes, setShowSavedQuotes] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showedLevel2Intro, setShowedLevel2Intro] = useState(false);
 
   useEffect(() => {
     fetchArtifacts()
@@ -369,6 +370,25 @@ const GameWorld = ({
           handleArtifactPickup(artifactAtLocation);
         }
         break;
+        
+      case 'd':
+        e.preventDefault();
+        // If inventory is not empty, show quick drop interface
+        if (inventory.length > 0) {
+          setIsInMenu(true);
+          setShowInventory(true);
+          // Focus on drop mode for the inventory interface
+          setTimeout(() => {
+            const firstArtifact = document.querySelector('.artifact-item');
+            if (firstArtifact) {
+              firstArtifact.click();
+              const dropButton = document.querySelector('.artifact-actions button:nth-child(2)');
+              if (dropButton) dropButton.click();
+            }
+          }, 100);
+        }
+        break;
+        
       case 'i':
         e.preventDefault();
         setIsInMenu(true);
@@ -445,15 +465,51 @@ const GameWorld = ({
     const row = Math.floor(characterPosition.y / TILE_SIZE);
     const col = Math.floor(characterPosition.x / TILE_SIZE);
     if (MAPS[currentMapIndex].data[row][col] === 5) {
-      if (currentMapIndex < MAPS.length - 1) {
+      // Find Yosemite map index
+      const yosemiteMapIndex = MAPS.findIndex(map => map.name === "Yosemite");
+      
+      // Check if player completed level 1 and should go to Yosemite
+      if (character.level >= 2 && yosemiteMapIndex !== -1 && !showedLevel2Intro) {
         // Start transition effects
         setIsTransitioning(true);
         setShowPortalFlash(true);
         
         // First phase of transition
         setTimeout(() => {
-          setCurrentMapIndex((prev) => prev + 1);
-          setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
+          setCurrentMapIndex(yosemiteMapIndex);
+          // Spawn near John Muir at the entrance
+          setCharacterPosition({ x: 3 * TILE_SIZE, y: 17 * TILE_SIZE });
+          
+          // Second phase - remove effects
+          setTimeout(() => {
+            setIsTransitioning(false);
+            setShowPortalFlash(false);
+            
+            // Show John Muir's introduction to Yosemite
+            setTimeout(() => {
+              setShowedLevel2Intro(true);
+              alert("John Muir: Welcome to Yosemite, the grandest of all the special temples of Nature! Now that you've completed the first level, I'll guide you through this majestic wilderness. Explore Half Dome, Yosemite Falls, and the Mist Trail. The wonders of Yosemite await!");
+            }, 500);
+          }, 1000);
+        }, 500);
+      } 
+      // Original portal logic for other levels
+      else if (currentMapIndex < MAPS.length - 1) {
+        // Start transition effects
+        setIsTransitioning(true);
+        setShowPortalFlash(true);
+        
+        // First phase of transition
+        setTimeout(() => {
+          // If already shown level 2 intro and on a level before Yosemite, go to next level
+          // Otherwise follow normal progression
+          if (showedLevel2Intro && yosemiteMapIndex !== -1 && currentMapIndex < yosemiteMapIndex) {
+            setCurrentMapIndex(yosemiteMapIndex);
+            setCharacterPosition({ x: 3 * TILE_SIZE, y: 17 * TILE_SIZE });
+          } else {
+            setCurrentMapIndex((prev) => prev + 1);
+            setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
+          }
           
           // Second phase - remove effects
           setTimeout(() => {
@@ -496,7 +552,7 @@ const GameWorld = ({
         }
       }
     }
-  }, [characterPosition, currentMapIndex]);
+  }, [characterPosition, currentMapIndex, character, showedLevel2Intro]);
 
   // Add isValidMove function that was missing
   const isValidMove = (newPosition) => {
@@ -668,6 +724,30 @@ const GameWorld = ({
     return () => window.removeEventListener('artifactPickup', handleArtifactPickupEvent);
   }, [characterPosition, artifacts]);
 
+  // Event listener for artifact drop button 
+  useEffect(() => {
+    const handleArtifactDropEvent = () => {
+      // Show inventory with drop mode if inventory is not empty
+      if (inventory.length > 0) {
+        setIsInMenu(true);
+        setShowInventory(true);
+        // Focus on drop mode for the inventory interface
+        setTimeout(() => {
+          const firstArtifact = document.querySelector('.artifact-item');
+          if (firstArtifact) {
+            firstArtifact.click();
+            const dropButton = document.querySelector('.artifact-actions button:nth-child(2)');
+            if (dropButton) dropButton.click();
+          }
+        }, 100);
+      }
+    };
+    
+    window.addEventListener('artifactDrop', handleArtifactDropEvent);
+    
+    return () => window.removeEventListener('artifactDrop', handleArtifactDropEvent);
+  }, [inventory]);
+
   // Check for mobile/tablet devices and resize events
   useEffect(() => {
     const checkMobile = () => {
@@ -706,6 +786,7 @@ const GameWorld = ({
           <div>Top Navigation Bar - Access Menus</div>
           <div>Use "Quotes" Button - View Saved Quotes</div>
           <div>P Button - Pick Up Artifact (when standing on it)</div>
+          <div>D Button - Drop Artifact (from inventory)</div>
           <div>Esc - Close Dialogs</div>
         </div>
       )}
@@ -721,7 +802,10 @@ const GameWorld = ({
           width: `${MAP_COLS * TILE_SIZE}px`,
           height: `${MAP_ROWS * TILE_SIZE}px`
         }}>
-          <Map mapData={MAPS[currentMapIndex].data} />
+          <Map 
+            mapData={MAPS[currentMapIndex].data} 
+            mapName={MAPS[currentMapIndex].name}
+          />
           <Character
             x={characterPosition.x}
             y={characterPosition.y}

@@ -1,13 +1,14 @@
-.map-container {
+.map {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
+  image-rendering: pixelated;
   background-color: #1a1a1a;
   cursor: grab;
 }
 
-.map-container:active {
+.map:active {
   cursor: grabbing;
 }
 
@@ -29,7 +30,7 @@
 }
 
 /* Add a subtle shadow to the map container */
-.map-container::after {
+.map::after {
   content: '';
   position: absolute;
   top: 0;
@@ -55,7 +56,7 @@
 }
 
 /* Add a subtle vignette effect */
-.map-container::before {
+.map::before {
   content: '';
   position: absolute;
   top: 0;

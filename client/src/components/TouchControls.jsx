@@ -50,7 +50,7 @@ const TouchControls = ({ onMove }) => {
       </div>
       
       <button 
-        className="action-btn" 
+        className="action-btn pickup-btn" 
         onTouchStart={(e) => {
           e.preventDefault();
           // Dispatch a pickup event (to be handled in GameWorld)
@@ -63,6 +63,22 @@ const TouchControls = ({ onMove }) => {
         }}
       >
         P
+      </button>
+      
+      <button 
+        className="action-btn drop-btn" 
+        onTouchStart={(e) => {
+          e.preventDefault();
+          // Dispatch a drop event (to be handled in GameWorld)
+          window.dispatchEvent(new CustomEvent('artifactDrop'));
+          e.currentTarget.classList.add('active');
+        }}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          e.currentTarget.classList.remove('active');
+        }}
+      >
+        D
       </button>
     </div>
   );
