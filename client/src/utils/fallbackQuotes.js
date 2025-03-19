@@ -230,6 +230,50 @@ export const DAILY_QUOTES = [
   }
 ];
 
+// Inspirational quotes for fallback
+export const INSPIRATIONAL_QUOTES = [
+  {
+    text: "The only way to do great work is to love what you do.",
+    source: "Steve Jobs",
+    type: "inspiration"
+  },
+  {
+    text: "Life is what happens when you're busy making other plans.",
+    source: "John Lennon",
+    type: "inspiration"
+  },
+  {
+    text: "The future belongs to those who believe in the beauty of their dreams.",
+    source: "Eleanor Roosevelt",
+    type: "inspiration"
+  },
+  {
+    text: "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+    source: "Winston Churchill",
+    type: "inspiration"
+  },
+  {
+    text: "Don't watch the clock; do what it does. Keep going.",
+    source: "Sam Levenson",
+    type: "inspiration"
+  },
+  {
+    text: "Believe you can and you're halfway there.",
+    source: "Theodore Roosevelt",
+    type: "inspiration"
+  },
+  {
+    text: "The best way to predict the future is to create it.",
+    source: "Peter Drucker",
+    type: "inspiration"
+  },
+  {
+    text: "Everything you've ever wanted is on the other side of fear.",
+    source: "George Addair",
+    type: "inspiration"
+  }
+];
+
 // Helper function to get a random quote from an array
 export const getRandomQuoteFromArray = (quoteArray) => {
   if (!quoteArray || !quoteArray.length) {
@@ -267,6 +311,7 @@ export const getAllQuotes = () => {
     ...ZEN_QUOTES,
     ...JOHN_MUIR_QUOTES,
     ...PHILOSOPHER_QUOTES,
-    ...DAILY_QUOTES
+    ...DAILY_QUOTES,
+    ...INSPIRATIONAL_QUOTES
   ];
 }; 

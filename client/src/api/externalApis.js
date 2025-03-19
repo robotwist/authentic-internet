@@ -4,7 +4,7 @@
  */
 
 import axios from 'axios';
-import { SHAKESPEARE_QUOTES, getRandomQuoteFromArray } from '../utils/fallbackQuotes';
+import { SHAKESPEARE_QUOTES, INSPIRATIONAL_QUOTES, getRandomQuoteFromArray } from '../utils/fallbackQuotes';
 
 // Folger Shakespeare API
 const FOLGER_BASE_URL = 'https://www.folgerdigitaltexts.org';
@@ -36,13 +36,18 @@ export const getRandomShakespeareQuote = async () => {
       throw new Error('Failed to fetch Shakespeare quote');
     }
     
-    const data = await response.json();
+    const text = await response.text();
     
-    if (data && data.text && data.source) {
-      return {
-        text: data.text,
-        source: `${data.source} - Shakespeare`
-      };
+    // Check if the response is JSON
+    if (text.startsWith('{') && text.endsWith('}')) {
+      const data = JSON.parse(text);
+      
+      if (data && data.text && data.source) {
+        return {
+          text: data.text,
+          source: `${data.source} - Shakespeare`
+        };
+      }
     }
     
     throw new Error('Invalid response format');
@@ -133,20 +138,11 @@ const FALLBACK_QUOTES = [
  */
 export const getRandomQuote = async (options = {}) => {
   try {
-    let url = `${QUOTABLE_BASE_URL}/random`;
-    const params = new URLSearchParams();
+    let url = 'https://api.quotable.io/random';
     
-    if (options.tags) {
-      params.append('tags', options.tags);
-    }
-    
-    if (options.author) {
-      params.append('author', options.author);
-    }
-    
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
+    // Add query parameters for filtering
+    if (options.maxLength) url += `?maxLength=${options.maxLength}`;
+    if (options.tags) url += `${url.includes('?') ? '&' : '?'}tags=${options.tags}`;
     
     const response = await axios.get(url);
     
@@ -156,8 +152,10 @@ export const getRandomQuote = async (options = {}) => {
     };
   } catch (error) {
     console.error('Error fetching random quote:', error);
-    // Return a random fallback quote
-    return FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
+    
+    // Return a fallback quote
+    const fallbackQuote = getRandomQuoteFromArray(INSPIRATIONAL_QUOTES);
+    return fallbackQuote;
   }
 };
 
@@ -226,31 +224,25 @@ export const getTags = async () => {
  */
 export const getQuoteForArtifact = async (theme) => {
   try {
-    // First try to find a quote by tag
-    const tagResponse = await axios.get(`${QUOTABLE_BASE_URL}/quotes?tags=${encodeURIComponent(theme.toLowerCase())}&limit=1`);
+    const tags = theme ? theme.split(',').map(t => t.trim()).join('|') : 'inspiration';
+    const response = await axios.get(`https://api.quotable.io/quotes?tags=${tags}&limit=1`);
     
-    if (tagResponse.data.count > 0) {
+    if (response.data.count > 0) {
+      const quote = response.data.results[0];
       return {
-        text: tagResponse.data.results[0].content,
-        source: tagResponse.data.results[0].author
+        text: quote.content,
+        source: quote.author
       };
     }
     
-    // If no quote by tag, try a search
-    const searchResponse = await axios.get(`${QUOTABLE_BASE_URL}/search/quotes?query=${encodeURIComponent(theme)}&limit=1`);
-    
-    if (searchResponse.data.count > 0) {
-      return {
-        text: searchResponse.data.results[0].content,
-        source: searchResponse.data.results[0].author
-      };
-    }
-    
-    // If all else fails, get a random quote
+    // Fallback to a random quote if no quotes match the tag
     return getRandomQuote();
   } catch (error) {
     console.error('Error getting quote for artifact:', error);
-    return getRandomQuote();
+    
+    // Return a fallback quote
+    const fallbackQuote = getRandomQuoteFromArray(INSPIRATIONAL_QUOTES);
+    return fallbackQuote;
   }
 };
 
@@ -277,27 +269,39 @@ const FALLBACK_ZEN_QUOTES = [
  */
 export const getZenQuote = async () => {
   try {
-    const response = await axios.get(`${ZENQUOTES_BASE_URL}/random`);
+    // Create server-side proxy URL to avoid CORS issues
+    const proxyUrl = `/api/proxy?url=${encodeURIComponent('https://zenquotes.io/api/random')}`;
+    
+    // First try using the proxy
+    try {
+      const response = await axios.get(proxyUrl);
+      if (response.data && response.data.length > 0) {
+        return {
+          text: response.data[0].q,
+          source: response.data[0].a
+        };
+      }
+    } catch (proxyError) {
+      console.log("Proxy failed, falling back to direct API call");
+    }
+    
+    // Direct call as fallback (might fail due to CORS)
+    const response = await axios.get('https://zenquotes.io/api/random');
     
     if (response.data && response.data.length > 0) {
-      const quote = response.data[0];
       return {
-        text: quote.q,
-        source: quote.a
+        text: response.data[0].q,
+        source: response.data[0].a
       };
     }
     
-    throw new Error('No quote returned from ZenQuotes API');
+    throw new Error('Invalid ZenQuote response format');
   } catch (error) {
     console.error('Error fetching ZenQuote:', error);
-    // First try Quotable API as fallback
-    try {
-      return await getRandomQuote();
-    } catch (fallbackError) {
-      // If both APIs fail, use our hardcoded fallbacks
-      console.error('Both APIs failed, using hardcoded fallback', fallbackError);
-      return FALLBACK_ZEN_QUOTES[Math.floor(Math.random() * FALLBACK_ZEN_QUOTES.length)];
-    }
+    
+    // Return a fallback quote
+    const fallbackQuote = getRandomQuoteFromArray(INSPIRATIONAL_QUOTES);
+    return fallbackQuote;
   }
 };
 
