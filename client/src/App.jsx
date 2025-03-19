@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -14,6 +14,7 @@ import GameWorld from './components/GameWorld';
 import TestPage from './pages/TestPage';
 import ArtifactsPage from './pages/ArtifactsPage';
 import ErrorBoundary from './components/ErrorBoundary';
+import errorMonitor from './utils/errorMonitor';
 import './App.css';
 
 // Configure future flags for React Router v7
@@ -24,6 +25,31 @@ const routerOptions = {
 };
 
 function App() {
+  // Initialize error monitor
+  useEffect(() => {
+    // Start the error monitor
+    errorMonitor.start();
+    
+    // Add keyboard shortcut to toggle the error monitor (Alt+E)
+    const handleKeyDown = (e) => {
+      if (e.altKey && e.key === 'e') {
+        if (errorMonitor.isActive) {
+          errorMonitor.stop();
+        } else {
+          errorMonitor.start();
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    
+    // Clean up
+    return () => {
+      errorMonitor.stop();
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <ErrorBoundary>
       <AuthProvider>

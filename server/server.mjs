@@ -14,11 +14,19 @@ import worldRoutes from "./routes/worlds.js";
 import npcRoutes from "./routes/npcs.js";
 import proxyRoutes from "./routes/proxy.js";
 import { initSocketService } from "./services/socketService.js";
+import errorLogger from "./middleware/errorLogger.js";
+import corsUpdater from "./middleware/cors-updater.js";
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
+// Apply error logger middleware early to catch all requests
+app.use(errorLogger);
+
+// Use CORS updater to automatically handle CORS issues
+app.use(corsUpdater);
 
 // Middleware
 app.use(express.json());
@@ -28,6 +36,9 @@ app.use(express.urlencoded({ extended: true }));
 const allowedOrigins = process.env.NODE_ENV === 'development' 
   ? ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177', 'http://localhost:5178', 'http://localhost:5179', 'http://localhost:5180', 'http://localhost:5181']
   : [process.env.CLIENT_URL, 'https://flourishing-starburst-8cf88b.netlify.app'];
+
+// Store allowedOrigins for later access by middleware
+app.set('allowedOrigins', allowedOrigins);
 
 app.use(cors({
   origin: function(origin, callback) {
