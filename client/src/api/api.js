@@ -3,12 +3,30 @@ import { NPC_TYPES } from "../components/Constants";
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5001",
-  withCredentials: true,
+  withCredentials: false,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
 });
+
+// Helper function to handle API errors
+const handleApiError = (error, defaultMessage = "An error occurred") => {
+  console.error("API Error details:", error);
+  
+  if (error.response) {
+    // The request was made and the server responded with a status code
+    // that falls out of the range of 2xx
+    return error.response.data?.message || error.response.data?.error || defaultMessage;
+  } else if (error.request) {
+    // The request was made but no response was received
+    console.log("No response received:", error.request);
+    return "No response from server. Please check your network connection.";
+  } else {
+    // Something happened in setting up the request that triggered an Error
+    return error.message || defaultMessage;
+  }
+};
 
 // 🔹 Attach Token to Requests
 API.interceptors.request.use(
@@ -49,26 +67,16 @@ API.interceptors.response.use(
   }
 );
 
-// Add a global error handler function
-const handleApiError = (error, defaultMessage = "An error occurred") => {
-  // Extract the most useful error message from the error response
-  if (error.response?.data?.message) {
-    return error.response.data.message;
-  } else if (error.response?.data?.error) {
-    return error.response.data.error;
-  } else if (error.message) {
-    return error.message;
-  } else {
-    return defaultMessage;
-  }
-};
-
 /* ────────────────────────────────
    🔹 AUTHENTICATION ENDPOINTS
 ──────────────────────────────── */
 export const loginUser = async (username, password) => {
   try {
-    const response = await API.post("/api/auth/login", { identifier: username, password });
+    // Use the Netlify proxy redirect path for the API call
+    const response = await API.post("/api/auth/login", { 
+      identifier: username, 
+      password 
+    });
     
     if (response.data && response.data.token) {
       localStorage.setItem("token", response.data.token);

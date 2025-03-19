@@ -14,7 +14,12 @@
   to = "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com/api/:splat"
   status = 200
   force = true
-  headers = {X-From = "Netlify"}
+  headers = {
+    X-From = "flourishing-starburst-8cf88b.netlify.app",
+    Access-Control-Allow-Origin = "*",
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS",
+    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  }
 
 # Environment variables
 [context.production.environment]
