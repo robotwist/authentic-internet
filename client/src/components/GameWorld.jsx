@@ -497,7 +497,17 @@ const GameWorld = () => {
               transform: `translate(${-viewport.x}px, ${-viewport.y}px)`,
             }}
           >
-            <Map mapData={MAPS[currentMapIndex].data} viewport={viewport} />
+            <Map 
+              mapData={MAPS[currentMapIndex].data} 
+              viewport={viewport} 
+              npcs={MAPS[currentMapIndex].npcs}
+              onNPCClick={(npc) => {
+                console.log("🎭 Clicked on NPC:", npc.name);
+                // Here you could add logic to interact with the NPC
+                // For example, display a dialogue box or trigger some interaction
+                alert(`You clicked on ${npc.name}. Interaction will be implemented soon.`);
+              }}
+            />
             <Character 
               x={characterPosition.x} 
               y={characterPosition.y} 

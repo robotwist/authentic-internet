@@ -140,27 +140,59 @@ const Map = ({
           />
         ))}
 
-        {/* Render NPCs */}
-        {npcs?.map(npc => (
-          <div
-            key={npc._id}
-            className="npc-sprite"
-            style={{
-              position: 'absolute',
-              left: `${npc.position.x * TILE_SIZE}px`,
-              top: `${npc.position.y * TILE_SIZE}px`,
-              width: `${TILE_SIZE}px`,
-              height: `${TILE_SIZE}px`,
-              backgroundImage: `url(${npc.sprite})`,
-              backgroundSize: 'contain',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              cursor: 'pointer',
-              zIndex: 3,
-            }}
-            onClick={() => onNPCClick?.(npc)}
-          />
-        ))}
+        {/* Render NPCs with improved visibility */}
+        {npcs?.map(npc => {
+          // Extract the correct position values
+          const posX = npc.position.x !== undefined ? npc.position.x : 
+                      (npc.position ? parseInt(npc.position.x, 10) : 0);
+          const posY = npc.position.y !== undefined ? npc.position.y : 
+                      (npc.position ? parseInt(npc.position.y, 10) : 0);
+          
+          // Determine sprite URL
+          let spriteUrl = npc.sprite;
+          if (!spriteUrl) {
+            // Fallback to determine sprite based on NPC type
+            if (npc.type === 1) spriteUrl = '/assets/npcs/shakespeare.webp'; // Shakespeare
+            else if (npc.type === 2) spriteUrl = '/assets/npcs/artist.svg'; // Artist
+            else if (npc.type === 3) spriteUrl = '/assets/npcs/ada_lovelace.png'; // Ada Lovelace
+            else if (npc.type === 4) spriteUrl = '/assets/npcs/lord_byron.webp'; // Lord Byron
+            else if (npc.type === 5) spriteUrl = '/assets/npcs/oscar_wilde.svg'; // Oscar Wilde
+            else if (npc.type === 6) spriteUrl = '/assets/npcs/alexander_pope.svg'; // Alexander Pope
+            else if (npc.type === 7) spriteUrl = '/assets/npcs/zeus.svg'; // Zeus
+            else if (npc.type === 8) spriteUrl = '/assets/npcs/john_muir.png'; // John Muir
+            else if (npc.type === 9) spriteUrl = '/assets/npcs/jesus.png'; // Jesus
+            else spriteUrl = '/assets/npcs/guide.png'; // Default Guide
+          }
+          
+          return (
+            <div
+              key={npc._id || npc.id}
+              className={`npc-sprite npc-type-${npc.type || 'unknown'}`}
+              style={{
+                position: 'absolute',
+                left: `${posX}px`,
+                top: `${posY}px`,
+                width: `${TILE_SIZE}px`,
+                height: `${TILE_SIZE * 1.5}px`, // Make NPCs slightly taller for better visibility
+                backgroundImage: `url(${spriteUrl})`,
+                backgroundSize: 'contain',
+                backgroundPosition: 'center bottom',
+                backgroundRepeat: 'no-repeat',
+                cursor: 'pointer',
+                zIndex: 500, // Higher z-index to ensure visibility
+                filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.7))', // Add glow effect
+                transition: 'transform 0.3s ease, filter 0.3s ease',
+              }}
+              onClick={() => onNPCClick?.(npc)}
+              title={npc.name}
+            >
+              {/* Add hover indicator */}
+              <div className="npc-indicator">
+                <span>Talk</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
