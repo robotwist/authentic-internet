@@ -54,7 +54,10 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
     exp: initialProps.exp || 10,
     visible: initialProps.visible !== undefined ? initialProps.visible : true,
     status: initialProps.status || 'dropped',
-    type: initialProps.type || 'artifact'
+    type: initialProps.type || 'artifact',
+    image: initialProps.image || '/images/default-artifact.png',
+    iconPreview: null,
+    iconFile: null
   });
   
   const [attachment, setAttachment] = useState(null);
@@ -154,8 +157,8 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
         throw new Error('Valid location coordinates are required');
       }
       
-      // Check if we're using file upload
-      if (attachment) {
+      // Check if we're using file upload (either attachment or icon)
+      if (attachment || formData.iconFile) {
         // Create a FormData object for file upload
         const formDataObj = new FormData();
         
@@ -168,15 +171,23 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
           } else if (key === 'isExclusive') {
             // Handle boolean
             formDataObj.append(key, formData[key] ? 'true' : 'false');
-          } else {
+          } else if (key !== 'iconFile' && key !== 'iconPreview' && formData[key] !== null && formData[key] !== undefined) {
+            // Skip the iconFile and iconPreview fields, we'll handle them separately
             formDataObj.append(key, formData[key]);
           }
         });
         
-        // Add the file last
-        formDataObj.append('attachment', attachment);
+        // Add the file attachment if present
+        if (attachment) {
+          formDataObj.append('attachment', attachment);
+        }
         
-        console.log("Submitting form with attachment");
+        // Add the icon file if present
+        if (formData.iconFile) {
+          formDataObj.append('artifactIcon', formData.iconFile);
+        }
+        
+        console.log("Submitting form with file(s)");
         await onSubmit(formDataObj);
       } else {
         // Regular JSON submission - prepare the data object
@@ -192,6 +203,10 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
             y: Number(formData.location.y)
           }
         };
+        
+        // Remove the icon-related fields that don't need to be sent to the server
+        delete submitData.iconFile;
+        delete submitData.iconPreview;
         
         console.log("Submitting form data:", submitData);
         await onSubmit(submitData);
@@ -212,13 +227,20 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
           exp: 10,
           visible: true,
           status: 'dropped',
-          type: 'artifact'
+          type: 'artifact',
+          image: '/images/default-artifact.png',
+          iconPreview: null,
+          iconFile: null
         });
         setAttachment(null);
         setAttachmentPreview(null);
         setUseRandomLocation(true);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
+        }
+        // Reset the icon upload input
+        if (document.getElementById('icon-upload')) {
+          document.getElementById('icon-upload').value = '';
         }
       }
     } catch (err) {
@@ -427,6 +449,102 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
             )}
           </div>
           <p className="attachment-help">Upload an image, audio, video, or document (max 10MB)</p>
+        </div>
+        
+        <div className="form-group icon-section">
+          <label>Custom Icon (Optional)</label>
+          <div className="icon-container">
+            <input 
+              type="file" 
+              id="icon-upload"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // Only allow images for icons
+                if (!file.type.startsWith('image/')) {
+                  setError('Icons must be image files (JPG, PNG, GIF, SVG)');
+                  return;
+                }
+                
+                // Check file size (max 1MB)
+                if (file.size > 1 * 1024 * 1024) {
+                  setError('Icon size should be less than 1MB');
+                  return;
+                }
+                
+                // Create FormData for icon upload
+                const iconFormData = new FormData();
+                iconFormData.append('artifactIcon', file);
+                
+                // Set to state
+                setFormData(prev => ({
+                  ...prev,
+                  iconFile: file
+                }));
+                
+                // Create preview
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  setFormData(prev => ({
+                    ...prev,
+                    iconPreview: reader.result
+                  }));
+                };
+                reader.readAsDataURL(file);
+              }}
+              accept="image/*"
+              style={{ display: 'none' }}
+            />
+            
+            <div className="icon-preview">
+              {formData.iconPreview ? (
+                <img 
+                  src={formData.iconPreview} 
+                  alt="Icon preview" 
+                  className="custom-icon-preview" 
+                />
+              ) : (
+                <img 
+                  src={initialProps.image || "/images/default-artifact.png"} 
+                  alt="Default icon" 
+                  className="default-icon-preview" 
+                />
+              )}
+            </div>
+            
+            <Button 
+              type="button"
+              onClick={() => document.getElementById('icon-upload').click()} 
+              className="icon-button"
+              disabled={uploading}
+            >
+              Choose Icon
+            </Button>
+          </div>
+          <p className="icon-help">Upload a custom icon for your artifact (recommended: 64x64px)</p>
+          <div className="icon-options">
+            <label>Or choose from preset icons:</label>
+            <div className="preset-icons">
+              {["/images/default-artifact.png", "/images/artifact-scroll.png", "/images/artifact-gem.png", "/images/artifact-book.png", "/images/artifact-potion.png"].map((iconPath, index) => (
+                <img 
+                  key={index}
+                  src={iconPath}
+                  alt={`Preset icon ${index+1}`}
+                  className={`preset-icon ${formData.image === iconPath ? 'selected' : ''}`}
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      image: iconPath,
+                      iconPreview: null,
+                      iconFile: null
+                    }));
+                    document.getElementById('icon-upload').value = null;
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
         
         <div className="form-actions">

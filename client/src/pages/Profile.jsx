@@ -239,24 +239,14 @@ const Profile = () => {
         </div>
       </div>
 
-      {character && hasCompletedFinalDungeon ? (
+      {character && (
         <div className="custom-avatar-section">
           <AvatarUpload 
             character={character} 
             onUpdateCharacter={handleUpdateCharacter} 
           />
-          <div className="achievement-unlocked">
-            <div className="achievement-badge">🏆</div>
-            <p>You've unlocked the NKD Man Chrome Extension by completing the final dungeon!</p>
-          </div>
         </div>
-      ) : character ? (
-        <div className="locked-feature">
-          <div className="locked-icon">🔒</div>
-          <p>Complete the final dungeon to unlock custom avatar uploads!</p>
-          <p className="hint">Hint: Reach the final portal in the last level of the map.</p>
-        </div>
-      ) : null}
+      )}
 
       <Form onSubmit={handleSubmit} className="profile-form">
         <h3>Account Settings</h3>

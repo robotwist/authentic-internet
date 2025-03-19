@@ -7,10 +7,18 @@ import fs from "fs";
 
 const router = express.Router();
 
-// Configure multer for artifact attachments
+// Configure multer for artifact attachments and icons
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(process.cwd(), 'public/uploads/artifacts');
+    let uploadDir;
+    
+    // Choose directory based on file field name
+    if (file.fieldname === 'artifactIcon') {
+      uploadDir = path.join(process.cwd(), 'public/uploads/icons');
+    } else {
+      uploadDir = path.join(process.cwd(), 'public/uploads/artifacts');
+    }
+    
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -20,12 +28,30 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
-    cb(null, 'artifact-' + uniqueSuffix + ext);
+    
+    // Name files differently based on type
+    if (file.fieldname === 'artifactIcon') {
+      cb(null, 'icon-' + uniqueSuffix + ext);
+    } else {
+      cb(null, 'artifact-' + uniqueSuffix + ext);
+    }
   }
 });
 
 // File filter to allow various file types
 const fileFilter = (req, file, cb) => {
+  // Only allow images for icons
+  if (file.fieldname === 'artifactIcon') {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type for icon. Only images are allowed.'), false);
+    }
+    return;
+  }
+  
+  // For attachments, allow more file types
   const allowedTypes = [
     'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', // Images
     'audio/mpeg', 'audio/wav', 'audio/ogg', // Audio
@@ -49,10 +75,16 @@ const upload = multer({
   }
 });
 
+// Configure the upload fields to accept both attachment and artifactIcon
+const uploadFields = upload.fields([
+  { name: 'attachment', maxCount: 1 },
+  { name: 'artifactIcon', maxCount: 1 }
+]);
+
 /* ────────────────────────────────
    🔹 CREATE ARTIFACT (WITH MESSAGE)
 ──────────────────────────────── */
-router.post("/", authenticateToken, upload.single('attachment'), async (req, res) => {
+router.post("/", authenticateToken, uploadFields, async (req, res) => {
   try {
     const { name, description, content, riddle, unlockAnswer, area, isExclusive, location } = req.body;
 
@@ -73,20 +105,30 @@ router.post("/", authenticateToken, upload.single('attachment'), async (req, res
     });
 
     // Add attachment if provided
-    if (req.file) {
-      newArtifact.attachment = '/uploads/artifacts/' + req.file.filename;
-      newArtifact.attachmentOriginalName = req.file.originalname;
+    if (req.files && req.files.attachment && req.files.attachment[0]) {
+      const file = req.files.attachment[0];
+      newArtifact.attachment = '/uploads/artifacts/' + file.filename;
+      newArtifact.attachmentOriginalName = file.originalname;
       
       // Determine attachment type based on mimetype
-      if (req.file.mimetype.startsWith('image/')) {
+      if (file.mimetype.startsWith('image/')) {
         newArtifact.attachmentType = 'image';
-      } else if (req.file.mimetype.startsWith('audio/')) {
+      } else if (file.mimetype.startsWith('audio/')) {
         newArtifact.attachmentType = 'audio';
-      } else if (req.file.mimetype.startsWith('video/')) {
+      } else if (file.mimetype.startsWith('video/')) {
         newArtifact.attachmentType = 'video';
       } else {
         newArtifact.attachmentType = 'document';
       }
+    }
+    
+    // Add custom icon if provided
+    if (req.files && req.files.artifactIcon && req.files.artifactIcon[0]) {
+      const iconFile = req.files.artifactIcon[0];
+      newArtifact.image = '/uploads/icons/' + iconFile.filename;
+    } else if (req.body.image) {
+      // If no file upload but image path was provided
+      newArtifact.image = req.body.image;
     }
 
     await newArtifact.save();
@@ -129,7 +171,7 @@ router.get("/:id", async (req, res) => {
 /* ────────────────────────────────
    🔹 UPDATE ARTIFACT (EDIT PROPERTIES)
 ──────────────────────────────── */
-router.put("/:id", authenticateToken, upload.single('attachment'), async (req, res) => {
+router.put("/:id", authenticateToken, uploadFields, async (req, res) => {
   try {
     const artifactId = req.params.id;
     const artifact = await Artifact.findById(artifactId);
@@ -151,13 +193,13 @@ router.put("/:id", authenticateToken, upload.single('attachment'), async (req, r
         artifact[key] = req.body[key] === 'true';
       }
       // Handle all other fields normally
-      else if (key !== 'attachment') {
+      else if (key !== 'attachment' && key !== 'artifactIcon') {
         artifact[key] = req.body[key];
       }
     });
     
     // Add attachment if provided
-    if (req.file) {
+    if (req.files && req.files.attachment && req.files.attachment[0]) {
       // If there was a previous attachment, delete it
       if (artifact.attachment) {
         try {
@@ -172,19 +214,43 @@ router.put("/:id", authenticateToken, upload.single('attachment'), async (req, r
       }
       
       // Update with new attachment
-      artifact.attachment = '/uploads/artifacts/' + req.file.filename;
-      artifact.attachmentOriginalName = req.file.originalname;
+      const file = req.files.attachment[0];
+      artifact.attachment = '/uploads/artifacts/' + file.filename;
+      artifact.attachmentOriginalName = file.originalname;
       
       // Determine attachment type based on mimetype
-      if (req.file.mimetype.startsWith('image/')) {
+      if (file.mimetype.startsWith('image/')) {
         artifact.attachmentType = 'image';
-      } else if (req.file.mimetype.startsWith('audio/')) {
+      } else if (file.mimetype.startsWith('audio/')) {
         artifact.attachmentType = 'audio';
-      } else if (req.file.mimetype.startsWith('video/')) {
+      } else if (file.mimetype.startsWith('video/')) {
         artifact.attachmentType = 'video';
       } else {
         artifact.attachmentType = 'document';
       }
+    }
+    
+    // Add custom icon if provided
+    if (req.files && req.files.artifactIcon && req.files.artifactIcon[0]) {
+      // If there was a previous custom icon, delete it
+      if (artifact.image && artifact.image.startsWith('/uploads/icons/')) {
+        try {
+          const oldIconPath = path.join(process.cwd(), 'public', artifact.image);
+          if (fs.existsSync(oldIconPath)) {
+            fs.unlinkSync(oldIconPath);
+          }
+        } catch (error) {
+          console.error("Error deleting old icon:", error);
+          // Continue with the update even if file deletion fails
+        }
+      }
+      
+      // Update with new icon
+      const iconFile = req.files.artifactIcon[0];
+      artifact.image = '/uploads/icons/' + iconFile.filename;
+    } else if (req.body.image) {
+      // If no file upload but image path was provided
+      artifact.image = req.body.image;
     }
     
     await artifact.save();

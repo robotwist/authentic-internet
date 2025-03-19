@@ -9,6 +9,7 @@ const AvatarUpload = ({ character, onUpdateCharacter }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
   const [showPiskelInfo, setShowPiskelInfo] = useState(false);
+  const [success, setSuccess] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -63,6 +64,9 @@ const AvatarUpload = ({ character, onUpdateCharacter }) => {
         onUpdateCharacter(updatedCharacter);
       }
       
+      // Set success message
+      setSuccess('Your custom avatar has been uploaded successfully!');
+      
       // Reset state
       setSelectedFile(null);
       setPreviewUrl(null);
@@ -85,18 +89,44 @@ const AvatarUpload = ({ character, onUpdateCharacter }) => {
 
   return (
     <div className="avatar-upload-container">
-      <h3>NKD Man Chrome Extension</h3>
-      <p>Congratulations on completing the final dungeon! Upload your own pixel art avatar to replace NKD Man.</p>
+      <h3>Custom Pixel Sprite Avatar</h3>
+      <p>Upload your own pixel art avatar to personalize your profile!</p>
       
-      <div className="avatar-preview">
-        {previewUrl ? (
-          <img src={previewUrl} alt="Avatar preview" />
-        ) : (
-          <div className="avatar-placeholder">
-            <span>Preview</span>
-          </div>
-        )}
+      <div className="avatar-preview-section">
+        <div className="current-avatar">
+          <h4>Current Avatar</h4>
+          <img 
+            src={character?.avatar || '/assets/default-avatar.svg'} 
+            alt="Current avatar" 
+            className="current-avatar-image"
+          />
+        </div>
+        
+        <div className="new-avatar">
+          <h4>Preview New Avatar</h4>
+          {previewUrl ? (
+            <img src={previewUrl} alt="Avatar preview" className="new-avatar-image" />
+          ) : (
+            <div className="avatar-placeholder">
+              <span>Preview</span>
+            </div>
+          )}
+        </div>
       </div>
+      
+      {success && (
+        <div className="avatar-upload-success">
+          {success}
+          <button onClick={() => setSuccess(null)} className="dismiss-button">✕</button>
+        </div>
+      )}
+      
+      {error && (
+        <div className="avatar-upload-error">
+          {error}
+          <button onClick={() => setError(null)} className="dismiss-button">✕</button>
+        </div>
+      )}
       
       <div className="avatar-upload-controls">
         <input
@@ -119,35 +149,53 @@ const AvatarUpload = ({ character, onUpdateCharacter }) => {
         </button>
       </div>
       
-      {error && <div className="avatar-upload-error">{error}</div>}
-      
       <div className="piskel-info">
         <button 
           className="piskel-info-button"
           onClick={() => setShowPiskelInfo(!showPiskelInfo)}
         >
-          {showPiskelInfo ? 'Hide Piskel Info' : 'How to Create Pixel Art with Piskel'}
+          {showPiskelInfo ? 'Hide Piskel Tutorial' : 'How to Create Pixel Art with Piskel'}
         </button>
         
         {showPiskelInfo && (
           <div className="piskel-instructions">
             <h4>Creating Pixel Art with Piskel</h4>
             <ol>
-              <li>Go to <a href="https://www.piskelapp.com/p/create/sprite" target="_blank" rel="noopener noreferrer">Piskel App</a></li>
-              <li>Create your pixel art character (32x32 pixels recommended)</li>
-              <li>Export as PNG</li>
-              <li>Upload the PNG file here</li>
+              <li>Go to <a href="https://www.piskelapp.com/p/create/sprite" target="_blank" rel="noopener noreferrer">Piskel App</a> (free, no account required)</li>
+              <li>Start with a blank canvas (32x32 pixels recommended)</li>
+              <li>Use the drawing tools to create your character:</li>
+              <ul>
+                <li>Pen tool (P) for individual pixels</li>
+                <li>Paint bucket (B) to fill areas</li>
+                <li>Eraser (E) to remove pixels</li>
+                <li>Color picker (O) to select colors from your artwork</li>
+              </ul>
+              <li>When finished, click "Export" in the top-right</li>
+              <li>Select "PNG" and download your image</li>
+              <li>Upload the PNG file here as your avatar</li>
             </ol>
-            <p>Your custom avatar will replace NKD Man in the game!</p>
+            
+            <div className="piskel-tips">
+              <h5>Tips for Great Pixel Art:</h5>
+              <ul>
+                <li>Start with a simple design - pixel art works best with minimalism</li>
+                <li>Limit your color palette to 4-8 colors for a classic pixel art look</li>
+                <li>Use outlines to define your character's shape</li>
+                <li>Make your avatar face forward or at a 3/4 angle for best results</li>
+                <li>Test your avatar at small sizes to ensure it's recognizable</li>
+              </ul>
+            </div>
+            
+            <div className="piskel-examples">
+              <h5>Example Pixel Avatars:</h5>
+              <div className="example-gallery">
+                <img src="/assets/pixel-example-1.png" alt="Pixel art example 1" />
+                <img src="/assets/pixel-example-2.png" alt="Pixel art example 2" />
+                <img src="/assets/pixel-example-3.png" alt="Pixel art example 3" />
+              </div>
+            </div>
           </div>
         )}
-      </div>
-      
-      <div className="chrome-extension-info">
-        <h4>NKD Man Chrome Extension</h4>
-        <p>You've unlocked the NKD Man Chrome Extension worth infinite dollars!</p>
-        <p>This exclusive reward for completing the final dungeon allows you to create and use your own custom avatars in the game.</p>
-        <p className="extension-value">Estimated Value: ∞ dollars</p>
       </div>
     </div>
   );
