@@ -2,8 +2,16 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 
-const secretKey = process.env.JWT_SECRET || "default_secret"; // Fallback for dev
-const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10; // Allow salt rounds config
+// Validate that JWT_SECRET is properly set
+if (!process.env.JWT_SECRET) {
+  console.error("ERROR: JWT_SECRET environment variable is not set!");
+  console.error("This is a critical security issue. The application should not run without a proper JWT_SECRET.");
+  // In production, we might want to exit the process here
+  // process.exit(1);
+}
+
+const secretKey = process.env.JWT_SECRET; // No fallback - JWT_SECRET must be set
+const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10; // Salt rounds can have a reasonable default
 
 // ✅ Register a new user
 export const register = async (req, res) => {

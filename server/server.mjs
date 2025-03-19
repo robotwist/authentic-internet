@@ -59,6 +59,26 @@ app.use((err, req, res, next) => {
   }
 });
 
+// Validate critical environment variables
+const validateEnv = () => {
+  const requiredVars = ['JWT_SECRET', 'SESSION_SECRET'];
+  const missingVars = requiredVars.filter(varName => !process.env[varName]);
+  
+  if (missingVars.length > 0) {
+    console.error(`ERROR: Missing required environment variables: ${missingVars.join(', ')}`);
+    console.error("These are critical security settings. Fix this before continuing.");
+    if (process.env.NODE_ENV === 'production') {
+      console.error("Exiting process due to missing security variables in production");
+      process.exit(1);
+    }
+    return false;
+  }
+  return true;
+};
+
+// Check environment variables
+validateEnv();
+
 // Session configuration
 try {
   if (process.env.MONGO_URI) {
@@ -68,7 +88,7 @@ try {
           mongoUrl: process.env.MONGO_URI,
           ttl: 14 * 24 * 60 * 60 // 14 days
         }),
-        secret: process.env.SESSION_SECRET || "supersecretkey",
+        secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
         cookie: { 
@@ -83,7 +103,7 @@ try {
     console.log("⚠️ No MONGO_URI provided, using memory sessions");
     app.use(
       session({
-        secret: process.env.SESSION_SECRET || "supersecretkey",
+        secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
         cookie: { 
@@ -99,7 +119,7 @@ try {
   // Fallback to memory sessions
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || "supersecretkey",
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: { 
