@@ -280,18 +280,40 @@ const GameWorld = ({
   const handleKeyDown = (e) => {
     // Prevent game actions if typing in an input field, textarea, or if a dialog or chat is open
     if (e.target.tagName.toLowerCase() === 'input' || 
-        e.target.tagName.toLowerCase() === 'textarea' || 
-        dialogOpen || isInDialog || isInMenu) {
+        e.target.tagName.toLowerCase() === 'textarea') {
       
       // Only allow Escape key to close dialogs
       if (e.key === 'Escape') {
         setIsInDialog(false);
         setIsInMenu(false);
+        setCurrentNPC(null);
+        setDialogOpen(false);
+        setShowInventory(false);
+        setShowForm(false);
+        setShowSavedQuotes(false);
       }
       return;
     }
 
     const key = e.key.toLowerCase();
+    
+    // Escape key should exit any dialog or menu, regardless of other conditions
+    if (key === 'escape') {
+      e.preventDefault();
+      setIsInDialog(false);
+      setIsInMenu(false);
+      setCurrentNPC(null);
+      setDialogOpen(false);
+      setShowInventory(false);
+      setShowForm(false);
+      setShowSavedQuotes(false);
+      return;
+    }
+
+    // If dialog or menu is open, prevent other keyboard actions
+    if (dialogOpen || isInDialog || isInMenu) {
+      return;
+    }
     
     // Handle movement keys
     if (MOVEMENT_KEYS.includes(key)) {
@@ -332,27 +354,6 @@ const GameWorld = ({
 
     // Handle action keys
     switch(key) {
-      // Disabling T and E keyboard shortcuts as requested
-      // case 't':
-      // case 'e':
-      //   e.preventDefault();
-      //   const nearbyNPC = npcs.find(npc => {
-      //     const dx = (characterPosition.x - npc.position.x * TILE_SIZE);
-      //     const dy = (characterPosition.y - npc.position.y * TILE_SIZE);
-      //     const distance = Math.sqrt(dx * dx + dy * dy);
-      //     return distance <= TILE_SIZE * 3;
-      //   });
-        
-      //   if (nearbyNPC) {
-      //     setCurrentNPC(nearbyNPC);
-      //     setIsInDialog(true);
-      //     // Play dialog sound
-      //     const dialogSound = new Audio('/assets/sounds/dialog.mp3');
-      //     dialogSound.volume = 0.2;
-      //     dialogSound.play().catch(console.error);
-      //   }
-      //   break;
-      
       case 'escape':
         if (isInDialog) {
           setIsInDialog(false);

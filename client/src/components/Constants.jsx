@@ -558,7 +558,7 @@ export const MAPS = [
         id: uuidv4(),
         name: "Ada Lovelace",
         type: NPC_TYPES.ADA_LOVELACE,
-        position: { x: 12 * TILE_SIZE, y: 8 * TILE_SIZE },
+        position: { x: 3 * TILE_SIZE, y: 3 * TILE_SIZE },
         dialogue: [
           "The Analytical Engine weaves algebraic patterns just as the Jacquard loom weaves flowers and leaves. (Notes on the Analytical Engine, 1843)",
           "I am more than ever the bride of science. (Letter to Charles Babbage, 1841)",
@@ -570,7 +570,7 @@ export const MAPS = [
         id: uuidv4(),
         name: "Lord Byron",
         type: NPC_TYPES.LORD_BYRON,
-        position: { x: 14 * TILE_SIZE, y: 8 * TILE_SIZE },
+        position: { x: 5 * TILE_SIZE, y: 3 * TILE_SIZE },
         dialogue: [
           "She walks in beauty, like the night of cloudless climes and starry skies. (She Walks in Beauty, 1814)",
           "There is a pleasure in the pathless woods, there is a rapture on the lonely shore. (Childe Harold's Pilgrimage, Canto IV, Stanza 178)",

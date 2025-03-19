@@ -27,10 +27,18 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '' }) => {
 
   const getTileClass = () => {
     switch (type) {
+      case 0: // grass
+        return 'grass';
+      case 1: // wall
+        return 'wall';
       case 2: // water
-        return 'tile-water';
+        return 'water';
+      case 3: // sand
+        return 'sand';
+      case 4: // dungeon
+        return 'dungeon';
       case 5: // portal
-        return 'tile-portal';
+        return 'portal';
       default:
         return `tile-${TILE_TYPES[type]}`;
     }
