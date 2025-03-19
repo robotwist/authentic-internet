@@ -52,27 +52,53 @@ const ApiHealthCheck = () => {
    */
   const checkServerHealth = async () => {
     try {
-      const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-      const response = await axios.get(`${serverUrl}/api/health`);
+      // Try to get the current API URL from api.js if available
+      let serverUrl;
+      try {
+        const { getCurrentApiUrl } = await import('../api/api');
+        if (typeof getCurrentApiUrl === 'function') {
+          serverUrl = getCurrentApiUrl();
+        }
+      } catch (err) {
+        console.log('Could not import getCurrentApiUrl, using environment variable');
+      }
+      
+      // Fallback to environment variable if getCurrentApiUrl is not available
+      if (!serverUrl) {
+        serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      }
+      
+      const response = await axios.get(`${serverUrl}/api/health`, { timeout: 3000 });
       
       if (response.status === 200) {
         setApiStatuses(prev => ({
           ...prev,
           server: {
             status: 'online',
-            message: `Server is online (${response.data.environment || 'unknown'})`,
-            details: response.data
+            message: `Server is online at ${serverUrl} (${response.data.environment || 'unknown'})`,
+            details: {
+              ...response.data,
+              url: serverUrl
+            }
           }
         }));
       }
     } catch (error) {
       console.error('Server health check failed:', error);
+      
+      // Try to detect if this is a port conflict issue
+      const isPortConflict = error.message?.includes('EADDRINUSE') || 
+                             error.message?.includes('Connection refused');
+      
       setApiStatuses(prev => ({
         ...prev,
         server: {
           status: 'offline',
-          message: `Server check failed: ${error.message}`,
-          error: error.message
+          message: isPortConflict 
+            ? `Server check failed: Port conflict detected. The application will try alternative ports.`
+            : `Server check failed: ${error.message}`,
+          error: error.message,
+          isPortConflict
         }
       }));
     }

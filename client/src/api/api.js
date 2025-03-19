@@ -1,14 +1,90 @@
 import axios from "axios";
 import { NPC_TYPES } from "../components/Constants";
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5001",
-  withCredentials: false,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
+// Function to create API instance with the given base URL
+const createApiInstance = (baseUrl) => {
+  return axios.create({
+    baseURL: baseUrl,
+    withCredentials: false,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
+};
+
+// Get the configured API URL or default to localhost:5001
+const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
+// Initialize API with the configured URL
+let API = createApiInstance(configuredApiUrl);
+
+// Store alternative ports to try if the main one is unavailable
+const alternativePorts = [5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010];
+let isApiInitialized = false;
+let currentApiUrl = configuredApiUrl;
+
+// Initialize API with port detection
+const initApi = async () => {
+  if (isApiInitialized) return;
+
+  try {
+    // First try the configured URL
+    const response = await axios.get(`${configuredApiUrl}/health`, { timeout: 2000 });
+    if (response.status === 200) {
+      console.log(`✅ Connected to API at ${configuredApiUrl}`);
+      API = createApiInstance(configuredApiUrl);
+      currentApiUrl = configuredApiUrl;
+      isApiInitialized = true;
+      return;
+    }
+  } catch (error) {
+    // Try again with the proper health endpoint
+    try {
+      const response = await axios.get(`${configuredApiUrl}/api/health`, { timeout: 2000 });
+      if (response.status === 200) {
+        console.log(`✅ Connected to API at ${configuredApiUrl}`);
+        API = createApiInstance(configuredApiUrl);
+        currentApiUrl = configuredApiUrl;
+        isApiInitialized = true;
+        return;
+      }
+    } catch (retryError) {
+      console.warn(`⚠️ Could not connect to API at ${configuredApiUrl}: ${error.message}`);
+    }
   }
-});
+
+  // If main URL fails, try alternative ports
+  const baseUrl = configuredApiUrl.split(':').slice(0, -1).join(':');
+  
+  for (const port of alternativePorts) {
+    const altUrl = `${baseUrl}:${port}`;
+    try {
+      const response = await axios.get(`${altUrl}/api/health`, { timeout: 1000 });
+      if (response.status === 200) {
+        console.log(`✅ Connected to API at alternative port: ${altUrl}`);
+        API = createApiInstance(altUrl);
+        currentApiUrl = altUrl;
+        isApiInitialized = true;
+        
+        // Update environment variable for future use
+        if (window.sessionStorage) {
+          window.sessionStorage.setItem('apiUrl', altUrl);
+        }
+        
+        return;
+      }
+    } catch (error) {
+      // Continue trying other ports
+    }
+  }
+
+  console.error("❌ Failed to connect to API on any port. Using default configuration.");
+  // Keep the default API instance as fallback
+};
+
+// Try to initialize API on load
+initApi();
 
 // Helper function to handle API errors
 const handleApiError = (error, defaultMessage = "An error occurred") => {
@@ -27,6 +103,9 @@ const handleApiError = (error, defaultMessage = "An error occurred") => {
     return error.message || defaultMessage;
   }
 };
+
+// Export the current API URL for reference
+export const getCurrentApiUrl = () => currentApiUrl;
 
 // 🔹 Attach Token to Requests
 API.interceptors.request.use(
