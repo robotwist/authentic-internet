@@ -14,6 +14,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import Map from "./Map";
 import useCharacterMovement from "./CharacterMovement";
 import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS } from "./Constants";
+import { initSounds, playRandomPortalSound, playSound } from "../utils/soundEffects";
 import "./GameWorld.css";
 import "./Character.css";
 import "./Artifact.css";
@@ -124,6 +125,11 @@ const GameWorld = () => {
     };
   }, []);
 
+  useEffect(() => {
+    // Initialize sound effects when component mounts
+    initSounds();
+  }, []);
+
   const adjustViewport = (pos) => {
     setViewport({
       x: Math.max(
@@ -195,6 +201,9 @@ const GameWorld = () => {
     const artifact = findArtifactAtLocation(x, y);
 
     if (artifact) {
+      // Play pickup sound
+      playSound('pickup', 0.5).catch(err => console.error("Error playing pickup sound:", err));
+      
       console.log("✅ Picking Up Artifact:", artifact);
       setInventory((prev) => [...prev, artifact]);
       handleGainExperience(artifact.exp || 0);
@@ -264,6 +273,10 @@ const GameWorld = () => {
     
     if (MAPS[currentMapIndex].data[row][col] === 5) {
       if (currentMapIndex < MAPS.length - 1) {
+        // Play random portal sound (30% chance of toilet flush)
+        playRandomPortalSound(0.3).catch(err => console.error("Error playing portal sound:", err));
+        
+        // Change map
         setCurrentMapIndex((prev) => prev + 1);
         setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
       }
@@ -271,6 +284,8 @@ const GameWorld = () => {
     
     if (MAPS[currentMapIndex].data[row][col] === 6) {
       if (levelCompletion.level3) {
+        // Play random portal sound with higher chance of toilet flush for special portal
+        playRandomPortalSound(0.5).catch(err => console.error("Error playing portal sound:", err));
         setShowLevel4(true);
       } else {
         alert("You must complete Level 3 first to access this portal.");
@@ -327,6 +342,8 @@ const GameWorld = () => {
         setTimeout(() => {
           const goToLevel4 = window.confirm('You have unlocked Level 4: The Hemingway Challenge! Ready to enter?');
           if (goToLevel4) {
+            // Play random portal sound with higher chance of toilet flush for special portal
+            playRandomPortalSound(0.6).catch(err => console.error("Error playing portal sound:", err));
             setShowLevel4(true);
           }
         }, 3000);
@@ -337,6 +354,9 @@ const GameWorld = () => {
       default:
         message = 'Level completed!';
     }
+    
+    // Play level complete sound
+    playSound('levelComplete').catch(err => console.error("Error playing level complete sound:", err));
     
     handleGainExperience(level === 'level3' ? 20 : level === 'level4' ? 30 : 10);
     
