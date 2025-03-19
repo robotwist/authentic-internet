@@ -3,24 +3,36 @@ import { useAuth } from '../context/AuthContext';
 import Button from './shared/Button';
 import '../styles/ArtifactForm.css';
 
-// Area-specific coordinate ranges
-const AREA_COORDINATES = {
-  'Overworld': { x: [100, 900], y: [100, 900] },
-  'main': { x: [100, 900], y: [100, 900] },
-  'library': { x: [50, 450], y: [50, 450] },
-  'garden': { x: [500, 950], y: [50, 450] },
-  'tavern': { x: [50, 450], y: [500, 950] },
-  'workshop': { x: [500, 950], y: [500, 950] },
-  'dungeon': { x: [200, 800], y: [200, 800] }
-};
-
-// Helper to generate random coordinates based on area
+// Helper function to generate random coordinates
 const generateRandomCoordinates = (area) => {
-  const coords = AREA_COORDINATES[area] || AREA_COORDINATES['main'];
-  return {
-    x: Math.floor(Math.random() * (coords.x[1] - coords.x[0])) + coords.x[0],
-    y: Math.floor(Math.random() * (coords.y[1] - coords.y[0])) + coords.y[0]
-  };
+  // Define bounds based on area
+  let bounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
+  
+  switch (area) {
+    case 'library':
+      bounds = { minX: 10, maxX: 50, minY: 10, maxY: 50 };
+      break;
+    case 'garden':
+      bounds = { minX: 60, maxX: 100, minY: 10, maxY: 50 };
+      break;
+    case 'tavern':
+      bounds = { minX: 10, maxX: 50, minY: 60, maxY: 100 };
+      break;
+    case 'workshop':
+      bounds = { minX: 60, maxX: 100, minY: 60, maxY: 100 };
+      break;
+    case 'dungeon':
+      bounds = { minX: 30, maxX: 70, minY: 30, maxY: 70 };
+      break;
+    default: // Overworld
+      bounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
+  }
+  
+  // Generate random coordinates within bounds
+  const x = Math.floor(Math.random() * (bounds.maxX - bounds.minX + 1)) + bounds.minX;
+  const y = Math.floor(Math.random() * (bounds.maxY - bounds.minY + 1)) + bounds.minY;
+  
+  return { x, y };
 };
 
 const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {}, isEditing = false }) => {
@@ -33,11 +45,16 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
     name: initialProps.name || '',
     description: initialProps.description || '',
     content: initialProps.content || '',
+    messageText: initialProps.messageText || '',
     riddle: initialProps.riddle || '',
     unlockAnswer: initialProps.unlockAnswer || '',
     area: initialProps.area || 'Overworld',
     isExclusive: initialProps.isExclusive || false,
-    location: initialProps.location || generateRandomCoordinates('Overworld')
+    location: initialProps.location || generateRandomCoordinates('Overworld'),
+    exp: initialProps.exp || 10,
+    visible: initialProps.visible !== undefined ? initialProps.visible : true,
+    status: initialProps.status || 'dropped',
+    type: initialProps.type || 'artifact'
   });
   
   const [attachment, setAttachment] = useState(null);
@@ -68,96 +85,117 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
 
   const handleLocationChange = (e) => {
     const { name, value } = e.target;
-    setUseRandomLocation(false); // User is manually setting coordinates
     setFormData(prev => ({
       ...prev,
       location: {
         ...prev.location,
-        [name]: parseInt(value, 10) || 0
+        [name]: Number(value)
       }
     }));
   };
 
-  const handleRandomLocation = () => {
-    const newCoords = generateRandomCoordinates(formData.area);
-    setFormData(prev => ({
-      ...prev,
-      location: newCoords
-    }));
-    setUseRandomLocation(true);
+  const toggleRandomLocation = () => {
+    const newUseRandom = !useRandomLocation;
+    setUseRandomLocation(newUseRandom);
+    
+    if (newUseRandom) {
+      // Generate new random coordinates
+      const newCoords = generateRandomCoordinates(formData.area);
+      setFormData(prev => ({
+        ...prev,
+        location: newCoords
+      }));
+    }
   };
 
   const handleAttachmentChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setAttachment(file);
-      
-      // Create preview for images
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setAttachmentPreview(reader.result);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        // For non-image files, just show the filename
-        setAttachmentPreview(file.name);
-      }
+    if (!file) return;
+    
+    setAttachment(file);
+    
+    // Preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAttachmentPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // For non-images, just show the filename
+      setAttachmentPreview(file.name);
     }
   };
-
+  
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setUploading(true);
     
     try {
-      setUploading(true);
-      
-      // Ensure we have valid coordinates for the selected area
-      if (useRandomLocation || !formData.location.x || !formData.location.y) {
-        const newCoords = generateRandomCoordinates(formData.area);
-        setFormData(prev => ({
-          ...prev,
-          location: newCoords
-        }));
+      // Validate the form data
+      if (!formData.name.trim()) {
+        throw new Error('Name is required');
+      }
+      if (!formData.description.trim()) {
+        throw new Error('Description is required');
+      }
+      if (!formData.content.trim()) {
+        // If content is empty, use description as content to meet backend requirements
+        formData.content = formData.description;
       }
       
-      // Create FormData object for file upload
-      const artifactFormData = new FormData();
+      // Ensure location is properly formatted
+      if (!formData.location || typeof formData.location.x !== 'number' || typeof formData.location.y !== 'number') {
+        throw new Error('Valid location coordinates are required');
+      }
       
-      // Add all form fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key === 'location') {
-          artifactFormData.append('location[x]', value.x);
-          artifactFormData.append('location[y]', value.y);
-        } else {
-          artifactFormData.append(key, value);
-        }
-      });
-      
-      // Add attachment if present
+      // Check if we're using file upload
       if (attachment) {
-        artifactFormData.append('attachment', attachment);
+        // Create a FormData object for file upload
+        const formDataObj = new FormData();
+        
+        // Add all text fields
+        Object.keys(formData).forEach(key => {
+          if (key === 'location') {
+            // Handle location object specially
+            formDataObj.append('location[x]', formData.location.x);
+            formDataObj.append('location[y]', formData.location.y);
+          } else if (key === 'isExclusive') {
+            // Handle boolean
+            formDataObj.append(key, formData[key] ? 'true' : 'false');
+          } else {
+            formDataObj.append(key, formData[key]);
+          }
+        });
+        
+        // Add the file last
+        formDataObj.append('attachment', attachment);
+        
+        console.log("Submitting form with attachment");
+        await onSubmit(formDataObj);
+      } else {
+        // Regular JSON submission - prepare the data object
+        const submitData = {
+          ...formData,
+          // Ensure strings are trimmed
+          name: formData.name.trim(),
+          description: formData.description.trim(),
+          content: formData.content.trim(),
+          // Ensure location is properly formatted as numbers
+          location: {
+            x: Number(formData.location.x),
+            y: Number(formData.location.y)
+          }
+        };
+        
+        console.log("Submitting form data:", submitData);
+        await onSubmit(submitData);
       }
-      
-      // Add content if not present but description is
-      if (!formData.content && formData.description) {
-        artifactFormData.append('content', formData.description);
-      }
-      
-      // Add area if not present
-      if (!formData.area) {
-        artifactFormData.append('area', 'Overworld');
-      }
-      
-      console.log("Submitting artifact with area:", formData.area, "and location:", formData.location);
-      
-      // Call the onSubmit callback with the FormData
-      await onSubmit(artifactFormData);
       
       // Reset form if not editing
       if (!isEditMode) {
@@ -165,11 +203,16 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
           name: '',
           description: '',
           content: '',
+          messageText: '',
           riddle: '',
           unlockAnswer: '',
           area: 'Overworld',
           isExclusive: false,
-          location: generateRandomCoordinates('Overworld')
+          location: generateRandomCoordinates('Overworld'),
+          exp: 10,
+          visible: true,
+          status: 'dropped',
+          type: 'artifact'
         });
         setAttachment(null);
         setAttachmentPreview(null);
@@ -180,7 +223,7 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
       }
     } catch (err) {
       console.error('Error submitting artifact:', err);
-      setError('Failed to save artifact. Please try again.');
+      setError(err.message || 'Failed to save artifact. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -202,6 +245,7 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
             value={formData.name}
             onChange={handleChange}
             required
+            maxLength={50}
           />
         </div>
         
@@ -213,6 +257,7 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
             value={formData.description}
             onChange={handleChange}
             required
+            maxLength={200}
           />
         </div>
         
@@ -225,6 +270,21 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
             onChange={handleChange}
             required
             rows={5}
+            maxLength={1000}
+            placeholder="If left empty, description will be used as content"
+          />
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="messageText">Message (optional)</label>
+          <textarea
+            id="messageText"
+            name="messageText"
+            value={formData.messageText}
+            onChange={handleChange}
+            rows={3}
+            maxLength={500}
+            placeholder="Message displayed when player interacts with the artifact"
           />
         </div>
         
@@ -237,6 +297,7 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
               name="riddle"
               value={formData.riddle}
               onChange={handleChange}
+              maxLength={100}
             />
           </div>
           
@@ -248,6 +309,7 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
               name="unlockAnswer"
               value={formData.unlockAnswer}
               onChange={handleChange}
+              maxLength={100}
             />
           </div>
         </div>
@@ -285,38 +347,50 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
           </div>
         </div>
         
-        <div className="form-row location-controls">
-          <div className="form-group">
-            <label htmlFor="locationX">X Position</label>
-            <input
-              type="number"
-              id="locationX"
-              name="x"
-              value={formData.location.x}
-              onChange={handleLocationChange}
-              required
-            />
+        <div className="form-group location-group">
+          <label>Location</label>
+          <div className="location-controls">
+            <div className="form-row">
+              <div className="form-group half-width">
+                <label htmlFor="location-x">X Coordinate</label>
+                <input
+                  type="number"
+                  id="location-x"
+                  name="x"
+                  value={formData.location?.x || 0}
+                  onChange={handleLocationChange}
+                  disabled={useRandomLocation}
+                  required
+                  min="0"
+                  max="1000"
+                />
+              </div>
+              <div className="form-group half-width">
+                <label htmlFor="location-y">Y Coordinate</label>
+                <input
+                  type="number"
+                  id="location-y"
+                  name="y"
+                  value={formData.location?.y || 0}
+                  onChange={handleLocationChange}
+                  disabled={useRandomLocation}
+                  required
+                  min="0"
+                  max="1000"
+                />
+              </div>
+            </div>
+            <div className="random-location-toggle">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={useRandomLocation}
+                  onChange={toggleRandomLocation}
+                />
+                Use random coordinates for this area
+              </label>
+            </div>
           </div>
-          
-          <div className="form-group">
-            <label htmlFor="locationY">Y Position</label>
-            <input
-              type="number"
-              id="locationY"
-              name="y"
-              value={formData.location.y}
-              onChange={handleLocationChange}
-              required
-            />
-          </div>
-          
-          <button 
-            type="button" 
-            className="random-location-btn"
-            onClick={handleRandomLocation}
-          >
-            Random Location
-          </button>
         </div>
         
         <div className="form-group attachment-section">
@@ -362,6 +436,13 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
             disabled={uploading}
           >
             {uploading ? 'Saving...' : isEditMode ? 'Update Artifact' : 'Create Artifact'}
+          </Button>
+          <Button 
+            type="button" 
+            className="cancel-button"
+            onClick={onClose}
+          >
+            Cancel
           </Button>
         </div>
       </form>

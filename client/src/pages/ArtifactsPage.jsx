@@ -5,7 +5,7 @@ import ArtifactCard from '../components/ArtifactCard';
 import ArtifactForm from '../components/ArtifactForm';
 import Button from '../components/shared/Button';
 import { useAuth } from '../context/AuthContext';
-import { fetchArtifacts as apiFetchArtifacts, deleteArtifact, updateArtifact } from '../api/api';
+import { fetchArtifacts as apiFetchArtifacts, deleteArtifact, updateArtifact, createArtifact as apiCreateArtifact } from '../api/api';
 import '../styles/ArtifactsPage.css';
 
 const ArtifactsPage = () => {
@@ -86,80 +86,78 @@ const ArtifactsPage = () => {
 
   const handleCreateArtifact = async (formData) => {
     try {
-      // Validation
-      if (!formData.name || formData.name.trim().length < 1) {
-        throw new Error('Artifact name is required');
-      }
-      if (!formData.description || formData.description.trim().length < 1) {
-        throw new Error('Artifact description is required');
-      }
-      
-      // Generate random coordinates if not provided
-      const randomLocation = {
-        x: Math.floor(Math.random() * 1000),
-        y: Math.floor(Math.random() * 1000)
-      };
-      
-      // Set default values if missing
-      const processedData = {
-        ...formData,
-        content: formData.content || formData.description, // Use description as content if missing
-        area: formData.area || "Overworld",  // Default area
-        location: formData.location || randomLocation // Use random location if not provided
-      };
-      
-      console.log("Creating artifact with data:", processedData);
       setLoading(true);
+      setError('');
       
-      // Determine if we're submitting FormData or JSON
-      let requestData;
-      let headers = {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      };
+      console.log("Creating artifact with data:", formData);
+      
+      // Handle FormData differently than JSON data
+      let result;
       
       if (formData instanceof FormData) {
-        // It's already FormData
-        requestData = formData;
-        // Don't set content-type for FormData, browser will set it with boundary
+        // Create a proper FormData object for file upload
+        const token = localStorage.getItem('token');
         
-        // Add location to FormData if missing
-        if (!formData.has('location')) {
-          formData.append('location[x]', randomLocation.x);
-          formData.append('location[y]', randomLocation.y);
+        // Make the API request with FormData
+        const response = await fetch('/api/artifacts', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || errorData.error || `Error ${response.status}: Failed to create artifact`);
         }
         
-        // Add area if missing
-        if (!formData.has('area')) {
-          formData.append('area', 'Overworld');
-        }
-        
-        // Add content if missing
-        if (!formData.has('content') && formData.has('description')) {
-          const description = formData.get('description');
-          formData.append('content', description);
-        }
+        result = await response.json();
       } else {
-        // Send as JSON
-        requestData = JSON.stringify(processedData);
-        headers['Content-Type'] = 'application/json';
+        // Ensure required fields are present and properly formatted
+        if (!formData.name || formData.name.trim().length < 1) {
+          throw new Error('Artifact name is required');
+        }
+        if (!formData.description || formData.description.trim().length < 1) {
+          throw new Error('Artifact description is required');
+        }
+        
+        // Make sure content is set (use description if content is missing)
+        if (!formData.content || formData.content.trim().length < 1) {
+          formData.content = formData.description;
+        }
+        
+        // Make sure area is set
+        if (!formData.area) {
+          formData.area = 'Overworld';
+        }
+        
+        // Ensure location is properly formatted
+        if (!formData.location || typeof formData.location.x === 'undefined' || typeof formData.location.y === 'undefined') {
+          // Generate random coordinates if not provided
+          formData.location = {
+            x: Math.floor(Math.random() * 100),
+            y: Math.floor(Math.random() * 100)
+          };
+        }
+        
+        // Set default values for other required fields
+        formData.exp = formData.exp || 10;
+        formData.visible = formData.visible !== undefined ? formData.visible : true;
+        formData.status = formData.status || 'dropped';
+        formData.type = formData.type || 'artifact';
+        
+        // Use the API function for JSON data
+        result = await apiCreateArtifact(formData);
       }
       
-      const response = await fetch('/api/artifacts', {
-        method: 'POST',
-        headers,
-        body: requestData
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || errorData.error || `Error ${response.status}: Failed to create artifact`);
-      }
-      
-      const result = await response.json();
       console.log("Artifact created successfully:", result);
       
       // Add the new artifact to state
-      setArtifacts(prevArtifacts => [result.artifact || result, ...prevArtifacts]);
+      const newArtifact = result.artifact || result;
+      setArtifacts(prevArtifacts => [newArtifact, ...prevArtifacts]);
+      
+      // Close the form
       setShowForm(false);
       
       // Show success message

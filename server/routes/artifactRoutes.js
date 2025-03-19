@@ -129,19 +129,66 @@ router.get("/:id", async (req, res) => {
 /* ────────────────────────────────
    🔹 UPDATE ARTIFACT (EDIT PROPERTIES)
 ──────────────────────────────── */
-router.put("/:id", authenticateToken, async (req, res) => {
+router.put("/:id", authenticateToken, upload.single('attachment'), async (req, res) => {
   try {
-    const updatedArtifact = await Artifact.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedArtifact || updatedArtifact.type !== "artifact") {
+    const artifactId = req.params.id;
+    const artifact = await Artifact.findById(artifactId);
+    
+    if (!artifact || artifact.type !== "artifact") {
       return res.status(404).json({ error: "Artifact not found." });
     }
-
-    res.json({ message: "Artifact updated successfully!", artifact: updatedArtifact });
+    
+    // Update basic fields from body
+    Object.keys(req.body).forEach(key => {
+      // Handle location object specially
+      if (key === 'location[x]' || key === 'location[y]') {
+        if (!artifact.location) artifact.location = {};
+        if (key === 'location[x]') artifact.location.x = Number(req.body[key]);
+        if (key === 'location[y]') artifact.location.y = Number(req.body[key]);
+      } 
+      // Handle boolean conversions
+      else if (key === 'isExclusive') {
+        artifact[key] = req.body[key] === 'true';
+      }
+      // Handle all other fields normally
+      else if (key !== 'attachment') {
+        artifact[key] = req.body[key];
+      }
+    });
+    
+    // Add attachment if provided
+    if (req.file) {
+      // If there was a previous attachment, delete it
+      if (artifact.attachment) {
+        try {
+          const oldFilePath = path.join(process.cwd(), 'public', artifact.attachment);
+          if (fs.existsSync(oldFilePath)) {
+            fs.unlinkSync(oldFilePath);
+          }
+        } catch (error) {
+          console.error("Error deleting old attachment:", error);
+          // Continue with the update even if file deletion fails
+        }
+      }
+      
+      // Update with new attachment
+      artifact.attachment = '/uploads/artifacts/' + req.file.filename;
+      artifact.attachmentOriginalName = req.file.originalname;
+      
+      // Determine attachment type based on mimetype
+      if (req.file.mimetype.startsWith('image/')) {
+        artifact.attachmentType = 'image';
+      } else if (req.file.mimetype.startsWith('audio/')) {
+        artifact.attachmentType = 'audio';
+      } else if (req.file.mimetype.startsWith('video/')) {
+        artifact.attachmentType = 'video';
+      } else {
+        artifact.attachmentType = 'document';
+      }
+    }
+    
+    await artifact.save();
+    res.json({ message: "Artifact updated successfully!", artifact });
   } catch (error) {
     console.error("Error updating artifact:", error);
     res.status(500).json({ error: "Failed to update artifact." });
