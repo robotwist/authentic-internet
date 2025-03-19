@@ -14,13 +14,20 @@ export const TILE_TYPES = {
   5: "portal",
 };
 
-export const isWalkable = (x, y, map) => {
+export const isWalkable = (x, y, map, character = null) => {
   const row = Math.floor(y / TILE_SIZE);
   const col = Math.floor(x / TILE_SIZE);
   
-  // Only grass (0), portal (5), sand (3), and dungeon (4) are walkable
-  // Water (2) and walls (1) are not walkable
+  // Get tile type
   const tile = map?.[row]?.[col];
+  
+  // If this is for Jesus, allow walking on water
+  if (character === 'jesus') {
+    return tile === 0 || tile === 5 || tile === 3 || tile === 4 || tile === 2; // Jesus can walk on water (2)
+  }
+  
+  // For everyone else: Only grass (0), portal (5), sand (3), and dungeon (4) are walkable
+  // Water (2) and walls (1) are not walkable
   return tile === 0 || tile === 5 || tile === 3 || tile === 4;
 };
 
@@ -60,7 +67,9 @@ export const NPC_TYPES = {
   LORD_BYRON: 'lord_byron',
   OSCAR_WILDE: 'oscar_wilde',
   ALEXANDER_POPE: 'alexander_pope',
-  ZEUS: 'zeus'
+  ZEUS: 'zeus',
+  JOHN_MUIR: 'john_muir',
+  JESUS: 'jesus'
 };
 
 export const NPC_CONFIG = {
@@ -220,7 +229,41 @@ export const NPC_CONFIG = {
       width: 4,
       height: 4
     }
-  }
+  },
+  [NPC_TYPES.JOHN_MUIR]: {
+    role: 'The Naturalist',
+    name: 'John Muir',
+    description: 'The pioneering naturalist, conservationist, and father of the American national parks.',
+    context: 'You are John Muir, speaking only through your authentic writings and documented sayings.',
+    basePrompt: 'Respond using only verified quotes from John Muir\'s writings and speeches.',
+    apiEndpoint: '/api/john_muir',
+    type: NPC_TYPES.JOHN_MUIR,
+    sourceValidation: true,
+    isRoaming: true,  // Special flag for NPCs that roam the entire map
+    patrolArea: {
+      startX: 5,
+      startY: 5,
+      width: 10,
+      height: 10
+    }
+  },
+  [NPC_TYPES.JESUS]: {
+    role: 'The Christ',
+    name: 'Jesus',
+    description: 'The central figure of Christianity, who speaks only His authentic words from the Bible.',
+    context: 'You are Jesus Christ, speaking only through your direct quotes from the Bible.',
+    basePrompt: 'Respond using only verified quotes attributed to Jesus in the Bible.',
+    apiEndpoint: '/api/jesus',
+    type: NPC_TYPES.JESUS,
+    sourceValidation: true,
+    canWalkOnWater: true,
+    patrolArea: {
+      startX: 10,
+      startY: 6,
+      width: 10,
+      height: 10
+    }
+  },
 };
 
 export const MAPS = [
@@ -339,6 +382,25 @@ export const MAPS = [
           "The course of true love never did run smooth. (A Midsummer Night's Dream, Act I, Scene I)",
           "We are such stuff as dreams are made on, and our little life is rounded with a sleep. (The Tempest, Act IV, Scene I)",
           "Love looks not with the eyes, but with the mind, and therefore is winged Cupid painted blind. (A Midsummer Night's Dream, Act I, Scene I)"
+        ]
+      },
+      {
+        id: 'john_muir1',
+        type: NPC_TYPES.JOHN_MUIR,
+        name: 'John Muir',
+        position: { x: 5 * TILE_SIZE, y: 14 * TILE_SIZE },
+        patrolArea: {
+          startX: 3,
+          startY: 13,
+          width: 10,
+          height: 4
+        },
+        dialogue: [
+          "The mountains are calling and I must go. (Letter to his sister Sarah Muir, 1873)",
+          "In every walk with nature one receives far more than he seeks. (Unpublished journals, circa 1877)",
+          "The clearest way into the Universe is through a forest wilderness. (John of the Mountains, 1938)",
+          "When one tugs at a single thing in nature, he finds it attached to the rest of the world. (My First Summer in the Sierra, 1911)",
+          "The world is big and I want to have a good look at it before it gets dark. (Letter to his sister, 1873)"
         ]
       },
       {

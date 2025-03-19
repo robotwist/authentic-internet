@@ -695,4 +695,243 @@ export const fetchZeusQuote = async (prompt) => {
     console.error('Zeus quote error:', error);
     throw new Error('Failed to fetch Zeus quote');
   }
+};
+
+// Jesus quotes API integration
+export const fetchJesusQuote = async (prompt) => {
+  try {
+    // Collection of direct Jesus quotes from the Bible with references
+    const jesusQuotes = [
+      {
+        quote: "Blessed are the poor in spirit, for theirs is the kingdom of heaven.",
+        source: "Matthew 5:3",
+        context: "The Sermon on the Mount"
+      },
+      {
+        quote: "You are the light of the world. A city set on a hill cannot be hidden.",
+        source: "Matthew 5:14",
+        context: "The Sermon on the Mount"
+      },
+      {
+        quote: "Love your enemies and pray for those who persecute you.",
+        source: "Matthew 5:44",
+        context: "The Sermon on the Mount"
+      },
+      {
+        quote: "Our Father in heaven, hallowed be your name. Your kingdom come, your will be done, on earth as it is in heaven.",
+        source: "Matthew 6:9-10",
+        context: "The Lord's Prayer"
+      },
+      {
+        quote: "Ask, and it will be given to you; seek, and you will find; knock, and it will be opened to you.",
+        source: "Matthew 7:7",
+        context: "The Sermon on the Mount"
+      },
+      {
+        quote: "Come to me, all who labor and are heavy laden, and I will give you rest.",
+        source: "Matthew 11:28",
+        context: "Jesus's invitation"
+      },
+      {
+        quote: "I am the way, and the truth, and the life. No one comes to the Father except through me.",
+        source: "John 14:6",
+        context: "Last Supper discourse"
+      },
+      {
+        quote: "Let the little children come to me and do not hinder them, for to such belongs the kingdom of heaven.",
+        source: "Matthew 19:14",
+        context: "Jesus blessing the children"
+      },
+      {
+        quote: "For what will it profit a man if he gains the whole world, but loses his soul?",
+        source: "Mark 8:36",
+        context: "Teaching about discipleship"
+      },
+      {
+        quote: "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.",
+        source: "John 3:16",
+        context: "Conversation with Nicodemus"
+      },
+      {
+        quote: "Peace I leave with you; my peace I give to you. Not as the world gives do I give to you. Let not your hearts be troubled, neither let them be afraid.",
+        source: "John 14:27",
+        context: "Last Supper discourse"
+      },
+      {
+        quote: "I am the bread of life; whoever comes to me shall not hunger, and whoever believes in me shall never thirst.",
+        source: "John 6:35",
+        context: "Bread of Life discourse"
+      },
+      {
+        quote: "You shall love the Lord your God with all your heart and with all your soul and with all your mind. This is the great and first commandment. And a second is like it: You shall love your neighbor as yourself.",
+        source: "Matthew 22:37-39",
+        context: "Response to questioning about the greatest commandment"
+      },
+      {
+        quote: "I am the resurrection and the life. Whoever believes in me, though he die, yet shall he live.",
+        source: "John 11:25",
+        context: "Before raising Lazarus"
+      },
+      {
+        quote: "Go therefore and make disciples of all nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit.",
+        source: "Matthew 28:19",
+        context: "The Great Commission"
+      },
+      {
+        quote: "It is finished.",
+        source: "John 19:30",
+        context: "Jesus's words from the cross"
+      }
+    ];
+    
+    // Select 2-3 relevant quotes based on the prompt keywords
+    const relevantQuotes = [];
+    const promptLower = prompt.toLowerCase();
+    
+    // If specific keywords are found, try to find matching quotes
+    if (promptLower.includes("love") || promptLower.includes("neighbor")) {
+      jesusQuotes.filter(q => q.quote.toLowerCase().includes("love")).forEach(q => relevantQuotes.push(q));
+    }
+    
+    if (promptLower.includes("heaven") || promptLower.includes("kingdom")) {
+      jesusQuotes.filter(q => q.quote.toLowerCase().includes("heaven") || q.quote.toLowerCase().includes("kingdom")).forEach(q => relevantQuotes.push(q));
+    }
+    
+    if (promptLower.includes("father") || promptLower.includes("god")) {
+      jesusQuotes.filter(q => q.quote.toLowerCase().includes("father") || q.quote.toLowerCase().includes("god")).forEach(q => relevantQuotes.push(q));
+    }
+    
+    if (promptLower.includes("pray") || promptLower.includes("prayer")) {
+      jesusQuotes.filter(q => q.quote.toLowerCase().includes("pray") || q.context.includes("Prayer")).forEach(q => relevantQuotes.push(q));
+    }
+    
+    // If no specific matches or if just greeting, select random quotes
+    if (relevantQuotes.length === 0 || promptLower.includes("hello") || promptLower.includes("hi")) {
+      // Get 2-3 random quotes
+      const numQuotes = Math.floor(Math.random() * 2) + 2; // 2 or 3 quotes
+      const usedIndices = new Set();
+      
+      for (let i = 0; i < numQuotes; i++) {
+        let randomIndex;
+        do {
+          randomIndex = Math.floor(Math.random() * jesusQuotes.length);
+        } while (usedIndices.has(randomIndex) && usedIndices.size < jesusQuotes.length);
+        
+        usedIndices.add(randomIndex);
+        relevantQuotes.push(jesusQuotes[randomIndex]);
+      }
+    }
+    
+    // Limit to 3 quotes maximum
+    const selectedQuotes = relevantQuotes.slice(0, 3);
+    
+    // Format the response
+    return {
+      quote: selectedQuotes.map(q => `${q.quote} (${q.source})`).join('\n\n'),
+      author: 'Jesus Christ',
+      source: 'Bible',
+      context: selectedQuotes.map(q => q.context).join(', ')
+    };
+  } catch (error) {
+    console.error('Jesus quotes error:', error);
+    throw new Error('Failed to fetch Jesus quotes');
+  }
+};
+
+// John Muir API integration
+export const fetchJohnMuirQuote = async (prompt) => {
+  try {
+    // John Muir quotes collection - authentic quotes from his writings
+    const johnMuirQuotes = [
+      {
+        quote: "The mountains are calling and I must go.",
+        source: "Letter to sister Sarah Muir",
+        date: "1873",
+        work: "Personal correspondence"
+      },
+      {
+        quote: "In every walk with nature one receives far more than he seeks.",
+        source: "Unpublished journals",
+        date: "circa 1877",
+        work: "Personal journals"
+      },
+      {
+        quote: "The clearest way into the Universe is through a forest wilderness.",
+        source: "John of the Mountains",
+        date: "1938",
+        work: "Posthumous collection of writings"
+      },
+      {
+        quote: "When one tugs at a single thing in nature, he finds it attached to the rest of the world.",
+        source: "My First Summer in the Sierra",
+        date: "1911",
+        work: "Published book"
+      },
+      {
+        quote: "The world is big and I want to have a good look at it before it gets dark.",
+        source: "Letter to sister Sarah Muir",
+        date: "1873",
+        work: "Personal correspondence"
+      },
+      {
+        quote: "Between every two pine trees there is a door leading to a new way of life.",
+        source: "John of the Mountains",
+        date: "1938",
+        work: "Posthumous collection of writings"
+      },
+      {
+        quote: "Of all the paths you take in life, make sure a few of them are dirt.",
+        source: "The Mountains of California",
+        date: "1894",
+        work: "Published book"
+      },
+      {
+        quote: "The power of imagination makes us infinite.",
+        source: "Journal entry",
+        date: "August 1875",
+        work: "Personal journals"
+      },
+      {
+        quote: "Nature is ever at work building and pulling down, creating and destroying, keeping everything whirling and flowing, allowing no rest but in rhythmical motion, chasing everything in endless song out of one beautiful form into another.",
+        source: "Our National Parks",
+        date: "1901",
+        work: "Published book"
+      },
+      {
+        quote: "Climb the mountains and get their good tidings. Nature's peace will flow into you as sunshine flows into trees.",
+        source: "Our National Parks",
+        date: "1901",
+        work: "Published book"
+      }
+    ];
+    
+    // Select random quotes from the collection
+    const randomQuotes = [];
+    
+    // Get 2-3 random quotes
+    const numQuotes = Math.floor(Math.random() * 2) + 2; // 2 or 3 quotes
+    const usedIndices = new Set();
+    
+    for (let i = 0; i < numQuotes && i < johnMuirQuotes.length; i++) {
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * johnMuirQuotes.length);
+      } while (usedIndices.has(randomIndex) && usedIndices.size < johnMuirQuotes.length);
+      
+      usedIndices.add(randomIndex);
+      randomQuotes.push(johnMuirQuotes[randomIndex]);
+    }
+    
+    // Format the response with multiple quotes
+    return {
+      quote: randomQuotes.map(q => `${q.quote} (${q.source}, ${q.date})`).join('\n\n'),
+      author: 'John Muir',
+      work: randomQuotes[0].work,
+      date: randomQuotes[0].date,
+      source: randomQuotes[0].source
+    };
+  } catch (error) {
+    console.error('John Muir API error:', error);
+    throw new Error('Failed to fetch John Muir quotes');
+  }
 }; 

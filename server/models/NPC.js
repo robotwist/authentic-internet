@@ -8,7 +8,9 @@ import {
   fetchMichelangeloQuote,
   fetchOscarWildeQuote,
   fetchAlexanderPopeQuote,
-  fetchZeusQuote
+  fetchZeusQuote,
+  fetchJesusQuote,
+  fetchJohnMuirQuote
 } from '../services/apiIntegrations.js';
 
 const NPCSchema = new mongoose.Schema({
@@ -45,7 +47,9 @@ const NPCSchema = new mongoose.Schema({
       'michelangelo',
       'oscar_wilde',
       'alexander_pope',
-      'zeus'
+      'zeus',
+      'jesus',
+      'john_muir'
     ],
     default: 'quotes'
   },
@@ -149,6 +153,17 @@ NPCSchema.methods.interact = async function(prompt) {
         return {
           response: response.quote,
           source: `${response.author}, ${response.source || 'Various works'}`,
+          text: response.quote,
+          work: response.work || 'Various works',
+          date: response.date || 'Unknown date',
+          additionalQuotes: response.additionalQuotes || []
+        };
+      case 'john_muir':
+        response = await fetchJohnMuirQuote(prompt);
+        // Format the response for client consumption
+        return {
+          response: response.quote,
+          source: `${response.author}, ${response.work || 'Various works'}`,
           text: response.quote,
           work: response.work || 'Various works',
           date: response.date || 'Unknown date',

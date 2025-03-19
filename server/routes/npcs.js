@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import { auth } from '../middleware/auth.js';
 import NPC from '../models/NPC.js';
 import World from '../models/World.js';
+import { fetchJohnMuirQuote } from '../services/apiIntegrations.js';
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const validateNPC = [
   body('name').trim().isLength({ min: 3 }).escape(),
   body('description').trim().isLength({ min: 10 }).escape(),
   body('world').isMongoId(),
-  body('apiType').isIn(['weather', 'quotes', 'shakespeare', 'keats', 'socrates', 'michelangelo', 'oscar_wilde', 'alexander_pope', 'zeus']),
+  body('apiType').isIn(['weather', 'quotes', 'shakespeare', 'keats', 'socrates', 'michelangelo', 'oscar_wilde', 'alexander_pope', 'zeus', 'jesus', 'john_muir']),
   body('apiConfig').isObject(),
   body('position').isObject(),
   body('dialogue').isArray()
@@ -246,6 +247,50 @@ router.post('/zeus', auth, async (req, res) => {
   } catch (error) {
     console.error('Zeus API error:', error);
     res.status(500).json({ message: 'Failed to get Zeus response' });
+  }
+});
+
+// Add Jesus API route
+router.post('/jesus', auth, async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    
+    // Import the fetchJesusQuote function
+    const { fetchJesusQuote } = await import('../services/apiIntegrations.js');
+    
+    // Get Jesus's response
+    const response = await fetchJesusQuote(prompt);
+    
+    // Return the response
+    res.json({
+      text: response.quote,
+      source: response.source,
+      context: response.context,
+      author: response.author
+    });
+  } catch (error) {
+    console.error('Jesus API error:', error);
+    res.status(500).json({ message: 'Failed to get Jesus response' });
+  }
+});
+
+// John Muir quotes endpoint
+router.post('/john_muir', async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    const response = await fetchJohnMuirQuote(prompt);
+    res.json({
+      response: response.quote,
+      source: response.source ? `${response.work}, ${response.date}` : 'The writings of John Muir',
+      character: 'John Muir',
+      prompt
+    });
+  } catch (error) {
+    console.error('Error fetching John Muir quotes:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch John Muir quotes', 
+      message: error.message 
+    });
   }
 });
 

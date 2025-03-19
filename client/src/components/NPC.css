@@ -75,6 +75,20 @@
   height: 64px;
 }
 
+.npc[data-type="john_muir"] {
+  filter: none;
+  image-rendering: pixelated;
+}
+
+.npc[data-type="john_muir"] .npc-sprite {
+  background-image: url('/assets/npcs/john_muir.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 64px;
+  height: 64px;
+}
+
 /* Dialog styles */
 .dialog-overlay {
   position: absolute;
