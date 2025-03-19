@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useAuth } from '../context/AuthContext';
 import Button from './shared/Button';
 import '../styles/ArtifactCard.css';
@@ -221,6 +222,47 @@ const ArtifactCard = ({ artifact, onVote, onComment, onView, onShare, onDelete, 
       )}
     </div>
   );
+};
+
+// Add PropTypes at the bottom of the file
+ArtifactCard.propTypes = {
+  artifact: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    creator: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({
+        _id: PropTypes.string,
+        id: PropTypes.string,
+        username: PropTypes.string
+      })
+    ]),
+    createdAt: PropTypes.string.isRequired,
+    votes: PropTypes.number,
+    views: PropTypes.number,
+    shares: PropTypes.number,
+    voters: PropTypes.arrayOf(PropTypes.string),
+    comments: PropTypes.arrayOf(
+      PropTypes.shape({
+        _id: PropTypes.string,
+        text: PropTypes.string.isRequired,
+        user: PropTypes.shape({
+          username: PropTypes.string
+        }),
+        createdAt: PropTypes.string
+      })
+    ),
+    attachment: PropTypes.string,
+    attachmentType: PropTypes.string,
+    attachmentOriginalName: PropTypes.string
+  }).isRequired,
+  onVote: PropTypes.func,
+  onComment: PropTypes.func,
+  onView: PropTypes.func,
+  onShare: PropTypes.func,
+  onDelete: PropTypes.func,
+  onEdit: PropTypes.func
 };
 
 export default ArtifactCard; 

@@ -11,9 +11,9 @@ import World from './pages/World';
 import Profile from './pages/Profile';
 import CreateWorld from './pages/CreateWorld';
 import GameWorld from './components/GameWorld';
-import PrivateRoute from './components/PrivateRoute';
 import TestPage from './pages/TestPage';
 import ArtifactsPage from './pages/ArtifactsPage';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
 // Configure future flags for React Router v7
