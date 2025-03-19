@@ -15,11 +15,26 @@ export const TILE_TYPES = {
 };
 
 export const isWalkable = (x, y, map, character = null) => {
+  // Guards for invalid inputs
+  if (!map || !Array.isArray(map)) {
+    console.error("Map data is invalid in isWalkable:", map);
+    return false;
+  }
+
+  // Convert pixels to grid coordinates
   const row = Math.floor(y / TILE_SIZE);
   const col = Math.floor(x / TILE_SIZE);
   
+  // Check boundaries
+  if (row < 0 || row >= map.length || col < 0 || col >= (map[0]?.length || 0)) {
+    return false;
+  }
+  
   // Get tile type
-  const tile = map?.[row]?.[col];
+  const tile = map[row][col];
+
+  // Debug output
+  console.log(`Checking walkability at (${col},${row}): tile type ${tile}`);
   
   // If this is for Jesus, allow walking on water
   if (character === 'jesus') {

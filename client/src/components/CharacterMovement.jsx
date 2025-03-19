@@ -1,82 +1,118 @@
 import { useEffect } from "react";
 import { TILE_SIZE, MAP_COLS, MAPS, isWalkable } from "./Constants";
 
-export const useCharacterMovement = (characterPosition, setCharacterPosition, currentMapIndex, setCurrentMapIndex, isLoggedIn, visibleArtifact, handleArtifactPickup, setShowForm, setFormPosition, setShowInventory, adjustViewport) => {
+const useCharacterMovement = (
+  characterPosition,
+  setCharacterPosition,
+  currentMapIndex,
+  setCurrentMapIndex,
+  isLoggedIn,
+  visibleArtifact,
+  handleArtifactPickup,
+  setShowForm,
+  setFormPosition,
+  setShowInventory,
+  adjustViewport
+) => {
   useEffect(() => {
-    const handleKeyPress = (e) => {
-      const key = e.key.toLowerCase();
-      
-      // Get current position in tile coordinates
-      const currentX = Math.floor(characterPosition.x / TILE_SIZE);
-      const currentY = Math.floor(characterPosition.y / TILE_SIZE);
-
-      // Calculate new position based on key press
-      let newX = characterPosition.x;
-      let newY = characterPosition.y;
-
-      switch (key) {
-        case 'arrowup':
-          newY = characterPosition.y - TILE_SIZE;
-          break;
-        case 'arrowdown':
-          newY = characterPosition.y + TILE_SIZE;
-          break;
-        case 'arrowleft':
-          newX = characterPosition.x - TILE_SIZE;
-          break;
-        case 'arrowright':
-          newX = characterPosition.x + TILE_SIZE;
-          break;
-        case 'p':
-          if (visibleArtifact) {
-            handleArtifactPickup();
-          }
-          break;
-        case 'c':
-          if (isLoggedIn) {
-            setShowForm(true);
-            setFormPosition({ x: currentX, y: currentY });
-          } else {
-            alert('You need to be logged in to create artifacts!');
-          }
-          break;
-        case 'i':
-          setShowInventory(prev => !prev);
-          break;
-        default:
-          break;
+    const handleKeyDown = (event) => {
+      // Skip if input is focused on form elements
+      if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+        return;
       }
 
-      // Convert new position to tile coordinates
-      const newTileX = Math.floor(newX / TILE_SIZE);
-      const newTileY = Math.floor(newY / TILE_SIZE);
+      const speed = TILE_SIZE;
+      let newPosition = { ...characterPosition };
 
-      // Check if the new position is within bounds and not a wall
-      if (
-        newTileX >= 0 &&
-        newTileX < MAPS[currentMapIndex].data[0].length &&
-        newTileY >= 0 &&
-        newTileY < MAPS[currentMapIndex].data.length &&
-        MAPS[currentMapIndex].data[newTileY][newTileX] !== 1 // 1 represents a wall
-      ) {
-        setCharacterPosition({ x: newX, y: newY });
-        adjustViewport({ x: newX, y: newY });
+      // Make sure characterPosition is valid to avoid NaN issues
+      if (!newPosition || typeof newPosition.x !== 'number' || typeof newPosition.y !== 'number') {
+        console.error("Invalid character position:", newPosition);
+        newPosition = { x: 0, y: 0 };
+      }
+
+      // Get current map data - add safety check
+      const currentMapData = MAPS[currentMapIndex]?.data;
+      if (!currentMapData) {
+        console.error("Map data not found for index:", currentMapIndex);
+        return;
+      }
+
+      switch (event.key) {
+        case "ArrowUp":
+        case "w":
+          if (isWalkable(newPosition.x, newPosition.y - speed, currentMapData)) {
+            newPosition.y -= speed;
+          }
+          break;
+        case "ArrowDown":
+        case "s":
+          if (isWalkable(newPosition.x, newPosition.y + speed, currentMapData)) {
+            newPosition.y += speed;
+          }
+          break;
+        case "ArrowLeft":
+        case "a":
+          if (characterPosition.x - speed < 0 && currentMapIndex > 0) {
+            setCurrentMapIndex((prev) => prev - 1);
+            newPosition.x = (MAP_COLS - 1) * TILE_SIZE;
+          } else if (isWalkable(newPosition.x - speed, newPosition.y, currentMapData)) {
+            newPosition.x -= speed;
+          }
+          break;
+        case "ArrowRight":
+        case "d":
+          if (characterPosition.x + speed >= MAP_COLS * TILE_SIZE && currentMapIndex < MAPS.length - 1) {
+            setCurrentMapIndex((prev) => prev + 1);
+            newPosition.x = 0;
+          } else if (isWalkable(newPosition.x + speed, newPosition.y, currentMapData)) {
+            newPosition.x += speed;
+          }
+          break;
+        case "e":
+          if (visibleArtifact) {
+            handleArtifactPickup();
+          } else {
+            if (isLoggedIn) {
+              setFormPosition({ x: newPosition.x, y: newPosition.y });
+              setShowForm(true);
+            } else {
+              alert("You need to be logged in to create artifacts.");
+            }
+          }
+          return;
+        case "p":
+          handleArtifactPickup();
+          return;
+        case "i":
+          setShowInventory((prev) => !prev);
+          return;
+        default:
+          return;
+      }
+
+      // Only update position if it actually changed
+      if (newPosition.x !== characterPosition.x || newPosition.y !== characterPosition.y) {
+        console.log("Character moved to:", newPosition);
+        setCharacterPosition(newPosition);
+        adjustViewport(newPosition);
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
-    characterPosition,
-    setCharacterPosition,
-    currentMapIndex,
-    setCurrentMapIndex,
-    isLoggedIn,
-    visibleArtifact,
-    handleArtifactPickup,
-    setShowForm,
-    setFormPosition,
-    setShowInventory,
+    characterPosition, 
+    currentMapIndex, 
+    isLoggedIn, 
+    visibleArtifact, 
+    setCharacterPosition, 
+    setCurrentMapIndex, 
+    handleArtifactPickup, 
+    setShowForm, 
+    setFormPosition, 
+    setShowInventory, 
     adjustViewport
   ]);
 };
+
+export default useCharacterMovement;

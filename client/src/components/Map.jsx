@@ -91,6 +91,12 @@ const Map = ({
     );
   };
 
+  // Check if mapData is valid before rendering
+  if (!mapData || !Array.isArray(mapData) || mapData.length === 0) {
+    console.error("Invalid mapData provided to Map component:", mapData);
+    return <div className="map error">Error: Invalid map data</div>;
+  }
+
   return (
     <div 
       className={`map ${mapName === "Yosemite" ? 'yosemite-map' : ''}`}

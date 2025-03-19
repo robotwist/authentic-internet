@@ -9,27 +9,58 @@
 }
 
 .tile.grass {
-  background-image: url('/assets/tiles/grass.png');
+  background-image: url('/assets/tiles/piskel_grass.png');
 }
 
 .tile.wall {
-  background-image: url('/assets/tiles/wall.png');
+  background-image: url('/assets/tiles/wall_new.png');
 }
 
 .tile.water {
-  background-image: url('/assets/tiles/water.png');
+  background-image: url('/assets/tiles/water_new.png');
 }
 
 .tile.sand {
-  background-image: url('/assets/tiles/sand.png');
+  background-image: url('/assets/tiles/sand_new.png');
 }
 
 .tile.dungeon {
-  background-image: url('/assets/tiles/dungeon.png');
+  background-image: url('/assets/tiles/dungeon.webp');
 }
 
 .tile.portal {
-  background-image: url('/assets/tiles/portal.png');
+  background-image: url('/assets/tiles/portal.webp');
+  animation: portalPulse 2s infinite;
+}
+
+/* Style for tiles with loading images */
+.tile.image-loading {
+  background-color: rgba(120, 120, 120, 0.5);
+  border: 1px dashed #999;
+}
+
+.tile.image-loading.wall {
+  background-color: rgba(90, 77, 65, 0.8);
+}
+
+.tile.image-loading.water {
+  background-color: rgba(30, 144, 255, 0.6);
+}
+
+.tile.image-loading.grass {
+  background-color: rgba(50, 205, 50, 0.6);
+}
+
+.tile.image-loading.sand {
+  background-color: rgba(244, 164, 96, 0.7);
+}
+
+.tile.image-loading.dungeon {
+  background-color: rgba(72, 61, 139, 0.7);
+}
+
+.tile.image-loading.portal {
+  background-color: rgba(186, 85, 211, 0.7);
   animation: portalPulse 2s infinite;
 }
 

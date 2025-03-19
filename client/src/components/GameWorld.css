@@ -1095,3 +1095,30 @@
     transform: translate(-50%, -60%);
   }
 }
+
+.debug-overlay {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #00ff00;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: monospace;
+  font-size: 12px;
+  z-index: 9999;
+  max-width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.debug-overlay h3 {
+  margin-top: 0;
+  color: #ffff00;
+  border-bottom: 1px solid #ffff00;
+  padding-bottom: 5px;
+}
+
+.debug-overlay p {
+  margin: 5px 0;
+}
