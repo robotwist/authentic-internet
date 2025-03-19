@@ -12,6 +12,7 @@ import userRoutes from "./routes/userRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import worldRoutes from "./routes/worlds.js";
 import npcRoutes from "./routes/npcs.js";
+import proxyRoutes from "./routes/proxy.js";
 import { initSocketService } from "./services/socketService.js";
 
 dotenv.config();
@@ -149,6 +150,7 @@ app.use("/api/artifacts", artifactRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/worlds", worldRoutes);
 app.use("/api/npcs", npcRoutes);
+app.use("/api/proxy", proxyRoutes);
 
 // WebSocket route for testing
 app.get("/api/socket-test", (req, res) => {

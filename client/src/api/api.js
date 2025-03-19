@@ -49,23 +49,37 @@ API.interceptors.response.use(
     // Handle authentication errors
     if (error.response && error.response.status === 401) {
       console.warn("Authentication error detected, clearing session");
+      
+      // Clear token and user data
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       
-      // Create a custom event for auth errors that components can listen to
-      window.dispatchEvent(new CustomEvent('authError', { 
-        detail: { message: "Your session has expired. Please log in again." } 
-      }));
-      
-      // Redirect to login if not already there
+      // Redirect to login page if not already there
       if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login?expired=true';
+        window.location.href = '/login';
       }
     }
     
     return Promise.reject(error);
   }
 );
+
+// Proxy function for external APIs to avoid CORS issues
+export const proxyExternalRequest = async (url, options = {}) => {
+  try {
+    const response = await API.post('/api/proxy', {
+      url,
+      method: options.method || 'GET',
+      headers: options.headers || {},
+      data: options.data || null
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Proxy request failed:', error);
+    throw error;
+  }
+};
 
 /* ────────────────────────────────
    🔹 AUTHENTICATION ENDPOINTS

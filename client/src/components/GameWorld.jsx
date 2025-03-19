@@ -54,7 +54,7 @@ const GameWorld = ({
     exp: 0,
     level: 1
   },
-  isLoggedIn: initialIsLoggedIn = false,
+  initialIsLoggedIn = false,
   username = ''
 }) => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
@@ -1292,7 +1292,7 @@ const GameWorld = ({
         }, 1000);
       }
     }
-  }, [characterPosition.x, characterPosition.y, currentMapData, currentMapIndex, handleTransitionToLevel3, showedLevel2Intro, character.level, debugMode]);
+  }, [characterPosition.x, characterPosition.y, MAPS, currentMapIndex, handleTransitionToLevel3, showedLevel2Intro, character, debugMode, artifacts]);
 
   return (
     <ErrorBoundary>

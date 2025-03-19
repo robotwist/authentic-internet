@@ -1,0 +1,174 @@
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dialog-overlay.active {
+  opacity: 1;
+}
+
+.dialog-overlay.closing {
+  opacity: 0;
+}
+
+.dialog-container {
+  background-color: #242424;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  width: 95%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  color: #e0e0e0;
+  border: 2px solid #0c1a2d;
+}
+
+.dialog-container.active {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.dialog-container.closing {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+.dialog-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: -40px auto 0;
+  border: 4px solid #0c1a2d;
+  background-color: #242424;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.dialog-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dialog-content {
+  padding: 20px;
+}
+
+.dialog-title {
+  font-size: 1.4rem;
+  margin: 0 0 15px;
+  color: #9ecaff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.dialog-message {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.dialog-message p {
+  margin-bottom: 15px;
+}
+
+.dialog-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.dialog-option {
+  background-color: #0c1a2d;
+  color: #ffffff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.dialog-option:hover {
+  background-color: #1a3c6e;
+}
+
+.dialog-close {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.dialog-close button {
+  background-color: #0c1a2d;
+  color: #ffffff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.dialog-close button:hover {
+  background-color: #1a3c6e;
+}
+
+/* NPC-specific dialog styles */
+.dialog-container.npc-dialog {
+  border-color: #2a4d7c;
+}
+
+.dialog-container.npc-dialog .dialog-title {
+  color: #64b5f6;
+}
+
+/* Quest dialog styles */
+.dialog-container.quest-dialog {
+  border-color: #7e57c2;
+}
+
+.dialog-container.quest-dialog .dialog-title {
+  color: #b39ddb;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .dialog-container {
+    width: 90%;
+    max-height: 70vh;
+  }
+  
+  .dialog-title {
+    font-size: 1.2rem;
+  }
+  
+  .dialog-message {
+    font-size: 0.95rem;
+    max-height: 40vh;
+  }
+  
+  .dialog-option {
+    padding: 12px 15px;
+    font-size: 1rem;
+  }
+} 
