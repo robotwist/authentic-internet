@@ -5,11 +5,22 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: undefined, // Prevents unnecessary module splitting
       },
     },
+  },
+  // Improve source map handling
+  server: {
+    hmr: {
+      overlay: true
+    }
+  },
+  // Ensure proper JSON handling
+  resolve: {
+    dedupe: ['react', 'react-dom'],
   },
 });
 

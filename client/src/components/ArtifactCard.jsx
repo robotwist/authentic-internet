@@ -186,7 +186,7 @@ const ArtifactCard = ({ artifact, onVote, onComment, onView, onShare, onDelete, 
               <div className="comments-list">
                 {artifact.comments && artifact.comments.length > 0 ? (
                   artifact.comments.map((comment, index) => (
-                    <div key={index} className="comment-item">
+                    <div key={comment._id || `comment-${index}`} className="comment-item">
                       <div className="comment-header">
                         <span className="comment-author">{comment.user?.username || 'Unknown'}</span>
                         <span className="comment-date">{formatDate(comment.createdAt)}</span>

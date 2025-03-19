@@ -16,80 +16,89 @@ import TestPage from './pages/TestPage';
 import ArtifactsPage from './pages/ArtifactsPage';
 import './App.css';
 
+// Configure future flags for React Router v7
+const routerOptions = {
+  future: {
+    v7_startTransition: true
+  }
+};
+
 function App() {
   return (
-    <Router>
+    <ErrorBoundary>
       <AuthProvider>
-        <div className="app">
-          <Navbar />
-          <main className="main-content">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/worlds/create"
-                element={
-                  <ProtectedRoute>
-                    <CreateWorld />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/world/:id"
-                element={
-                  <ProtectedRoute>
-                    <World />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/artifacts"
-                element={
-                  <ProtectedRoute>
-                    <ArtifactsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/artifacts/:id"
-                element={
-                  <ProtectedRoute>
-                    <ArtifactsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/game"
-                element={
-                  <ProtectedRoute>
-                    <GameWorld />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/test" element={<TestPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-        </div>
+        <Router {...routerOptions}>
+          <div className="app">
+            <Navbar />
+            <main className="main-content">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/worlds/create"
+                  element={
+                    <ProtectedRoute>
+                      <CreateWorld />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/world/:id"
+                  element={
+                    <ProtectedRoute>
+                      <World />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/artifacts"
+                  element={
+                    <ProtectedRoute>
+                      <ArtifactsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/artifacts/:id"
+                  element={
+                    <ProtectedRoute>
+                      <ArtifactsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/game"
+                  element={
+                    <ProtectedRoute>
+                      <GameWorld />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/test" element={<TestPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </main>
+          </div>
+        </Router>
       </AuthProvider>
-    </Router>
+    </ErrorBoundary>
   );
 }
 
