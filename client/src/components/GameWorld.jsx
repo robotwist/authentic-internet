@@ -396,7 +396,20 @@ const GameWorld = () => {
     });
   };
 
-  useCharacterMovement(characterPosition, setCharacterPosition, currentMapIndex, setCurrentMapIndex, isLoggedIn, visibleArtifact, handleArtifactPickup, setShowForm, setFormPosition, setShowInventory, adjustViewport);
+  // Destructure the returned values from the movement hook to get bumping states
+  const { isBumping, bumpDirection, movementDirection } = useCharacterMovement(
+    characterPosition, 
+    setCharacterPosition, 
+    currentMapIndex, 
+    setCurrentMapIndex, 
+    isLoggedIn, 
+    visibleArtifact, 
+    handleArtifactPickup, 
+    setShowForm, 
+    setFormPosition, 
+    setShowInventory, 
+    adjustViewport
+  );
 
   useEffect(() => {
     // Check for both map artifacts and server artifacts at the player's position
@@ -671,6 +684,9 @@ const GameWorld = () => {
               exp={character?.experience || 0}
               level={character?.level || 1}
               avatar={character?.avatar}
+              isBumping={isBumping}
+              bumpDirection={bumpDirection}
+              movementDirection={movementDirection}
             />
             <ErrorBoundary>
               {/* Render map-defined artifacts */}

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { TILE_SIZE } from './Constants';
 import './Character.css';
 
-const Character = ({ x, y, exp = 0, level = 1, movementDirection = null, avatar = null }) => {
+const Character = ({ x, y, exp = 0, level = 1, movementDirection = null, avatar = null, isBumping = false, bumpDirection = null }) => {
   // Calculate the bubble size based on experience
   const bubbleSize = Math.min(1.5, 1 + (exp / 1000)); // Max size is 1.5x
   const [isNKDMan, setIsNKDMan] = useState(true);
@@ -17,9 +17,20 @@ const Character = ({ x, y, exp = 0, level = 1, movementDirection = null, avatar 
     }
   }, [avatar]);
 
+  // Determine which class to apply based on movement and bumping states
+  const getAnimationClass = () => {
+    if (isBumping && bumpDirection) {
+      return `bumping-${bumpDirection}`;
+    }
+    if (movementDirection) {
+      return `moving-${movementDirection}`;
+    }
+    return '';
+  };
+
   return (
     <div
-      className={`character-container ${movementDirection ? `moving-${movementDirection}` : ''} ${isNKDMan ? 'nkd-man' : ''}`}
+      className={`character-container ${getAnimationClass()} ${isNKDMan ? 'nkd-man' : ''}`}
       data-level={level}
       style={{
         position: 'absolute',
@@ -56,7 +67,9 @@ Character.propTypes = {
   exp: PropTypes.number,
   level: PropTypes.number,
   movementDirection: PropTypes.oneOf([null, 'up', 'down', 'left', 'right']),
-  avatar: PropTypes.string
+  avatar: PropTypes.string,
+  isBumping: PropTypes.bool,
+  bumpDirection: PropTypes.oneOf([null, 'up', 'down', 'left', 'right'])
 };
 
 export default Character;

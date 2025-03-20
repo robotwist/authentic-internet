@@ -197,3 +197,129 @@
   background: radial-gradient(circle, rgba(74, 144, 226, 0.5) 0%, rgba(74, 144, 226, 0) 70%);
   box-shadow: 0 0 25px 12px rgba(74, 144, 226, 0.8);
 }
+
+/* Add bumping animation keyframes and classes after the existing character animations */
+
+/* Bumping animation keyframes */
+@keyframes bump-up {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-6px); }
+  50% { transform: translateY(-8px) rotate(-3deg); }
+  75% { transform: translateY(-4px) rotate(3deg); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes bump-down {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(6px); }
+  50% { transform: translateY(8px) rotate(3deg); }
+  75% { transform: translateY(4px) rotate(-3deg); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes bump-left {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(-8px) rotate(3deg); }
+  75% { transform: translateX(-4px) rotate(-3deg); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes bump-right {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(6px); }
+  50% { transform: translateX(8px) rotate(-3deg); }
+  75% { transform: translateX(4px) rotate(3deg); }
+  100% { transform: translateX(0); }
+}
+
+/* Apply bumping animations to character sprite */
+.bumping-up .character-sprite {
+  animation: bump-up 0.4s ease-in-out;
+}
+
+.bumping-down .character-sprite {
+  animation: bump-down 0.4s ease-in-out;
+}
+
+.bumping-left .character-sprite {
+  animation: bump-left 0.4s ease-in-out;
+}
+
+.bumping-right .character-sprite {
+  animation: bump-right 0.4s ease-in-out;
+}
+
+/* NKD Man specific bumping animations */
+.nkd-man.bumping-up .character-sprite {
+  animation: nkd-bump-up 0.4s ease-in-out;
+}
+
+.nkd-man.bumping-down .character-sprite {
+  animation: nkd-bump-down 0.4s ease-in-out;
+}
+
+.nkd-man.bumping-left .character-sprite {
+  animation: nkd-bump-left 0.4s ease-in-out;
+}
+
+.nkd-man.bumping-right .character-sprite {
+  animation: nkd-bump-right 0.4s ease-in-out;
+}
+
+/* NKD Man bumping keyframes */
+@keyframes nkd-bump-up {
+  0% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-8px) scale(0.9); }
+  50% { transform: translateY(-10px) scale(0.9) rotate(-5deg); }
+  75% { transform: translateY(-6px) scale(0.95) rotate(5deg); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes nkd-bump-down {
+  0% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(8px) scale(0.9); }
+  50% { transform: translateY(10px) scale(0.9) rotate(5deg); }
+  75% { transform: translateY(6px) scale(0.95) rotate(-5deg); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes nkd-bump-left {
+  0% { transform: translateX(0) scale(1); }
+  25% { transform: translateX(-8px) scale(0.9); }
+  50% { transform: translateX(-10px) scale(0.9) rotate(5deg); }
+  75% { transform: translateX(-6px) scale(0.95) rotate(-5deg); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes nkd-bump-right {
+  0% { transform: translateX(0) scale(1); }
+  25% { transform: translateX(8px) scale(0.9); }
+  50% { transform: translateX(10px) scale(0.9) rotate(-5deg); }
+  75% { transform: translateX(6px) scale(0.95) rotate(5deg); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+/* Add visual feedback for bumping */
+.character-container.bumping-up::after,
+.character-container.bumping-down::after,
+.character-container.bumping-left::after,
+.character-container.bumping-right::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  opacity: 0;
+  animation: bump-flash 0.4s ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes bump-flash {
+  0% { opacity: 0; transform: scale(0.8); }
+  40% { opacity: 0.8; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.3); }
+}

@@ -236,4 +236,44 @@ export const initSounds = () => {
       }
     }
   }, 1000);
+};
+
+// If the bump sound file doesn't exist, we'll create a programmatic bump sound using the Web Audio API
+const createBumpSound = () => {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Function to create a short "bump" sound programmatically
+    return () => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(110, audioContext.currentTime); // Low frequency for "bump"
+      oscillator.frequency.exponentialRampToValueAtTime(55, audioContext.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.2);
+      
+      return new Promise(resolve => {
+        setTimeout(resolve, 200);
+      });
+    };
+  } catch (error) {
+    console.error("Error creating bump sound:", error);
+    return () => Promise.resolve(); // Fallback to silent function
+  }
+};
+
+// Add the new bump sound to the SOUNDS object
+SOUNDS.bump = {
+  src: '/assets/sounds/bump.mp3',
+  volume: 0.4,
+  fallback: createBumpSound()
 }; 
