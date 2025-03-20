@@ -1,7 +1,6 @@
 import testShakespeareResponses from './shakespeare-test';
 import { NPC_TYPES } from '../components/Constants';
 import { chat } from '../api/api';
-import { testHistoricalNPCs } from './npcTests';
 import { testArtifactUpdate } from './artifactTests';
 
 // Test all historical NPCs
