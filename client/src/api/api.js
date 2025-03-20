@@ -266,7 +266,8 @@ export const updateCharacter = async (updatedCharacter) => {
     return response.data.user;
   } catch (error) {
     console.error("❌ Error updating character:", error);
-    handleError(error);
+    const errorMessage = handleApiError(error, "Failed to update character");
+    throw new Error(errorMessage);
   }
 };
 
@@ -488,8 +489,8 @@ export const sendMessage = async (recipient, content, artifactId = null) => {
     return response.data;
   } catch (error) {
     console.error("❌ Error sending message:", error.response?.data || error.message);
-    handleError(error);
-    return null;
+    const errorMessage = handleApiError(error, "Failed to send message");
+    throw new Error(errorMessage);
   }
 };
 
@@ -500,7 +501,8 @@ export const fetchMessage = async (artifactId) => {
     return response.data;
   } catch (error) {
     console.error("Error fetching message:", error);
-    return null;
+    const errorMessage = handleApiError(error, "Failed to fetch message");
+    throw new Error(errorMessage);
   }
 };
 
@@ -510,8 +512,8 @@ export const fetchMessages = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching messages:", error);
-    handleError(error);
-    return [];
+    const errorMessage = handleApiError(error, "Failed to fetch messages");
+    throw new Error(errorMessage);
   }
 };
 
@@ -535,10 +537,7 @@ export const updateMessage = async (artifactId, messageText) => {
     return response.data;
   } catch (error) {
     console.error("Error updating message:", error);
-    const errorMessage = error.response?.data?.message || 
-                         error.response?.data?.error || 
-                         error.message || 
-                         'Failed to update message';
+    const errorMessage = handleApiError(error, "Failed to update message");
     throw new Error(errorMessage);
   }
 };
@@ -550,7 +549,8 @@ export const deleteMessage = async (artifactId) => {
     return response.data;
   } catch (error) {
     console.error("Error deleting message:", error);
-    throw error;
+    const errorMessage = handleApiError(error, "Failed to delete message");
+    throw new Error(errorMessage);
   }
 };
 
@@ -872,23 +872,8 @@ export const chat = async (prompt, context, role, npcConfig = null, signal = nul
     }
     
     console.error('Error in chat:', error);
-    throw error;
-  }
-};
-
-/* ────────────────────────────────
-   🔹 ERROR HANDLING FUNCTION
-──────────────────────────────── */
-const handleError = (error) => {
-  if (error.response) {
-    console.error("Backend error:", error.response.data);
-    throw error.response.data;
-  } else if (error.request) {
-    console.error("Network error:", error.request);
-    throw new Error("Network error, please try again later.");
-  } else {
-    console.error("Error:", error.message);
-    throw new Error(error.message);
+    const errorMessage = handleApiError(error, "Failed to chat");
+    throw new Error(errorMessage);
   }
 };
 
