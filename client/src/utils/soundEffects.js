@@ -8,6 +8,9 @@ const soundAvailability = {};
 // Single AudioContext instance for all fallback sounds
 let fallbackAudioContext = null;
 
+// Define SOUNDS object to store sound configurations
+const SOUNDS = {};
+
 /**
  * Preload a sound for later use
  * @param {string} soundId - Identifier for the sound

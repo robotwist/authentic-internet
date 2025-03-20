@@ -14,7 +14,8 @@
     <meta name="theme-color" content="#000000" />
     <link rel="icon" type="image/png" href="/favicon.png" />
 
-    <!-- iOS specific PWA metadata -->
+    <!-- Mobile and iOS PWA metadata -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Authentic Internet" />
@@ -43,14 +44,39 @@
     <!-- Register service worker -->
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js')
-            .then(registration => {
-              console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            })
-            .catch(error => {
-              console.log('ServiceWorker registration failed: ', error);
+        window.addEventListener('load', async () => {
+          try {
+            const registration = await navigator.serviceWorker.register('/service-worker.js', {
+              scope: '/'
             });
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            
+            // Handle updates
+            registration.onupdatefound = () => {
+              const installingWorker = registration.installing;
+              
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    console.log('New content is available; please refresh the page.');
+                  } else {
+                    console.log('Content is cached for offline use.');
+                  }
+                }
+              };
+            };
+          } catch (error) {
+            console.error('ServiceWorker registration failed: ', error);
+          }
+        });
+        
+        // Handle communication errors with service worker
+        navigator.serviceWorker.addEventListener('message', event => {
+          console.log('Message from service worker: ', event.data);
+        });
+        
+        navigator.serviceWorker.addEventListener('messageerror', event => {
+          console.error('Error in message from service worker: ', event);
         });
       }
     </script>

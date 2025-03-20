@@ -26,7 +26,13 @@ self.addEventListener('install', (event) => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
+      .catch(error => {
+        console.error('Service worker installation failed:', error);
+      })
   );
+  
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
 });
 
 // Fetch event - serve from cache if available, otherwise fetch from network
@@ -48,8 +54,11 @@ self.addEventListener('fetch', (event) => {
           return response;
         }
         
-        return fetch(event.request).then(
-          (response) => {
+        // Clone the request because it can only be used once
+        const fetchRequest = event.request.clone();
+        
+        return fetch(fetchRequest)
+          .then((response) => {
             // Don't cache non-successful responses or non-GET requests
             if (!response || response.status !== 200 || response.type !== 'basic' || event.request.method !== 'GET') {
               return response;
@@ -61,11 +70,22 @@ self.addEventListener('fetch', (event) => {
             caches.open(CACHE_NAME)
               .then((cache) => {
                 cache.put(event.request, responseToCache);
+              })
+              .catch(err => {
+                console.error('Failed to cache response:', err);
               });
 
             return response;
-          }
-        );
+          })
+          .catch(error => {
+            console.error('Fetch failed:', error);
+            // Optional: return a custom offline page or fallback content here
+          });
+      })
+      .catch(error => {
+        console.error('Cache match failed:', error);
+        // Fall back to network
+        return fetch(event.request);
       })
   );
 });
@@ -73,16 +93,25 @@ self.addEventListener('fetch', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
+  
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-          return null;
-        })
-      );
-    })
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheWhitelist.indexOf(cacheName) === -1) {
+              return caches.delete(cacheName);
+            }
+            return Promise.resolve();
+          })
+        );
+      })
+      .then(() => {
+        // Take control of uncontrolled clients
+        return self.clients.claim();
+      })
+      .catch(error => {
+        console.error('Service worker activation failed:', error);
+      })
   );
 }); 
