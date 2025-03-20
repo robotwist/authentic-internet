@@ -160,6 +160,75 @@
   animation: spin 1s infinite linear;
 }
 
+/* Export options styling */
+.export-options {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.export-options button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  max-width: 220px;
+}
+
+.export-options .primary-button {
+  background-color: #4a7dff;
+  color: white;
+}
+
+.export-options .primary-button:hover {
+  background-color: #3a6ae8;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.export-options .secondary-button {
+  background-color: #555;
+  color: white;
+}
+
+.export-options .secondary-button:hover {
+  background-color: #666;
+}
+
+.export-instructions {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #4a7dff;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.export-instructions h3 {
+  color: #f8d65b;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.export-instructions p {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.export-instructions ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.export-instructions li {
+  margin-bottom: 5px;
+}
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -191,11 +260,15 @@
     font-size: 1.5rem;
   }
   
-  .button-container {
+  .button-container,
+  .export-options {
     flex-direction: column;
+    align-items: center;
   }
   
-  .button-container button {
+  .button-container button,
+  .export-options button {
     width: 100%;
+    max-width: 100%;
   }
 } 
