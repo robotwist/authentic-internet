@@ -1,6 +1,20 @@
 import axios from "axios";
 import { NPC_TYPES } from "../components/Constants";
 
+// Display build information in console for tracking deployments
+const displayBuildInfo = () => {
+  const buildDate = new Date().toISOString();
+  const buildEnv = import.meta.env.MODE || 'development';
+  console.info(`%cApplication Build Info:
+  🔹 Environment: ${buildEnv}
+  🔹 Build Date: ${buildDate}
+  🔹 API URL: ${import.meta.env.VITE_API_URL || 'http://localhost:5001'}`,
+  'color: #6366F1; font-weight: bold;');
+};
+
+// Call this on app initialization
+displayBuildInfo();
+
 // Function to create API instance with the given base URL
 const createApiInstance = (baseUrl) => {
   return axios.create({
@@ -89,6 +103,9 @@ initApi();
 // Helper function to handle API errors
 const handleApiError = (error, defaultMessage = "An error occurred") => {
   console.error("API Error details:", error);
+  
+  // TODO: Consider integrating an error tracking service like Sentry.io for production applications
+  // This would allow remote monitoring of client-side errors
   
   if (error.response) {
     // The request was made and the server responded with a status code

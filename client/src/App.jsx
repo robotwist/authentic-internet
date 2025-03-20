@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -15,6 +15,9 @@ import TestPage from './pages/TestPage';
 import ArtifactsPage from './pages/ArtifactsPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import errorMonitor from './utils/errorMonitor';
+import deploymentVerifier from './utils/deploymentVerifier';
+import { logBuildInfo } from './buildInfo';
+import DeploymentStatus from './components/DeploymentStatus';
 import './App.css';
 
 // Configure future flags for React Router v7
@@ -25,8 +28,28 @@ const routerOptions = {
 };
 
 function App() {
-  // Initialize error monitor
+  const [deploymentStatus, setDeploymentStatus] = useState(null);
+  const [showDeploymentStatus, setShowDeploymentStatus] = useState(false);
+
+  // Initialize error monitor and log build info
   useEffect(() => {
+    // Log build information for version tracking
+    logBuildInfo();
+    
+    // Verify deployment is current with GitHub
+    const checkDeployment = async () => {
+      try {
+        const result = await deploymentVerifier.verifyDeployment('robotwist', 'authentic-internet');
+        setDeploymentStatus(result);
+      } catch (error) {
+        console.error('Error checking deployment status:', error);
+      }
+    };
+    
+    // Check immediately and then every 10 minutes
+    checkDeployment();
+    const interval = setInterval(checkDeployment, 10 * 60 * 1000);
+    
     // Start the error monitor
     errorMonitor.start();
     
@@ -39,6 +62,12 @@ function App() {
           errorMonitor.start();
         }
       }
+      
+      // Add keyboard shortcut to check deployment status (Alt+D)
+      if (e.altKey && e.key === 'd') {
+        checkDeployment();
+        setShowDeploymentStatus(prev => !prev);
+      }
     };
     
     window.addEventListener('keydown', handleKeyDown);
@@ -47,6 +76,7 @@ function App() {
     return () => {
       errorMonitor.stop();
       window.removeEventListener('keydown', handleKeyDown);
+      clearInterval(interval);
     };
   }, []);
 
@@ -56,6 +86,17 @@ function App() {
         <Router {...routerOptions}>
           <div className="app">
             <Navbar />
+            {showDeploymentStatus && (
+              <div style={{ 
+                position: 'fixed', 
+                bottom: '10px', 
+                right: '10px', 
+                zIndex: 1000,
+                maxWidth: '350px'
+              }}>
+                <DeploymentStatus status={deploymentStatus} />
+              </div>
+            )}
             <main className="main-content">
               <Routes>
                 <Route path="/" element={<Home />} />

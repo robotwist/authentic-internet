@@ -1,0 +1,32 @@
+[build]
+  command = "npm run build"
+  publish = "client/dist"
+  environment = { NODE_VERSION = "18" }
+
+# Add commit hash to environment during build
+[build.environment]
+  VITE_COMMIT_REF = "${COMMIT_REF}"
+  VITE_CONTEXT = "${CONTEXT}"
+  
+# Production context: all deploys from the Production branch set in your site's
+# deploy contexts will inherit these settings.
+[context.production]
+  environment = { VITE_APP_ENV = "production" }
+
+# Deploy Preview context: all deploys generated from a pull/merge request will
+# inherit these settings.
+[context.deploy-preview]
+  environment = { VITE_APP_ENV = "preview" }
+
+# Branch Deploy context: all deploys that are not from a pull/merge request or from
+# the Production branch will inherit these settings.
+[context.branch-deploy]
+  environment = { VITE_APP_ENV = "branch-deploy" }
+
+# Redirects and headers are GLOBAL for all builds – they do not get scoped to
+# contexts no matter where you define them in the file.
+[[redirects]]
+  from = "/api/*"
+  to = "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com/api/:splat"
+  status = 200
+  force = true 

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp public/_headers dist/",
+    "prebuild": "node prebuild.js",
+    "build": "npm run prebuild && vite build && cp public/_headers dist/",
     "lint": "eslint . --ext js,jsx",
     "preview": "vite preview",
     "start": "vite preview",
