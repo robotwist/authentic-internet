@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   fetchArtifacts,
@@ -24,6 +24,7 @@ import "./Inventory.css";
 import SavedQuotes from "./SavedQuotes";
 import Level4Shooter from "./Level4Shooter";
 import RewardModal from "./RewardModal";
+import DialogBox from './DialogBox';
 
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
@@ -50,6 +51,8 @@ const GameWorld = () => {
   const [showLevel4, setShowLevel4] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [currentAchievement, setCurrentAchievement] = useState('');
+  const [activeNPC, setActiveNPC] = useState(null);
+  const [showNPCDialog, setShowNPCDialog] = useState(false);
 
   useEffect(() => {
     // Load and apply saved artifact visibility state
@@ -676,6 +679,93 @@ const GameWorld = () => {
     }
   };
 
+  // Function to find the closest NPC to the player
+  const findClosestNPC = useCallback(() => {
+    if (!MAPS[currentMapIndex]?.npcs?.length) return null;
+    
+    const playerX = characterPosition.x;
+    const playerY = characterPosition.y;
+    
+    let closestNPC = null;
+    let minDistance = Infinity;
+    
+    MAPS[currentMapIndex].npcs.forEach(npc => {
+      if (!npc.position) return;
+      
+      const distance = Math.sqrt(
+        Math.pow(playerX - npc.position.x, 2) + 
+        Math.pow(playerY - npc.position.y, 2)
+      );
+      
+      // Only consider NPCs within interaction range (2 tiles)
+      if (distance <= TILE_SIZE * 2 && distance < minDistance) {
+        minDistance = distance;
+        closestNPC = npc;
+      }
+    });
+    
+    return closestNPC;
+  }, [characterPosition, currentMapIndex]);
+  
+  // Handle talking to NPCs with 'T' key
+  const handleTalkToNPC = useCallback(() => {
+    const closestNPC = findClosestNPC();
+    if (closestNPC) {
+      console.log("🗣️ Talking to NPC:", closestNPC.name);
+      setActiveNPC(closestNPC);
+      setShowNPCDialog(true);
+    } else {
+      console.log("No NPCs nearby to talk to.");
+    }
+  }, [findClosestNPC]);
+  
+  // Add the T key handler to the useCharacterMovement hook
+  const addTKeyHandler = useCallback((handleKeyDown) => {
+    const enhancedKeyHandler = (event) => {
+      // Call the original handler first
+      handleKeyDown(event);
+      
+      // Skip if input is focused
+      if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+        return;
+      }
+      
+      // Add T key handler
+      if (event.key.toLowerCase() === 't') {
+        handleTalkToNPC();
+      }
+    };
+    
+    return enhancedKeyHandler;
+  }, [handleTalkToNPC]);
+  
+  // Pass the enhanced key handler to the character movement hook
+  useEffect(() => {
+    const originalKeyDownHandler = (event) => {
+      // Handle core movement keys
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', 'i', 'p', 'e'].includes(event.key)) {
+        // Skip if input is focused
+        if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+          return;
+        }
+        
+        // Handle standard keys with existing logic
+        // (the actual handler is in CharacterMovement.jsx)
+      }
+    };
+    
+    const enhancedHandler = addTKeyHandler(originalKeyDownHandler);
+    
+    window.addEventListener('keydown', enhancedHandler);
+    return () => window.removeEventListener('keydown', enhancedHandler);
+  }, [addTKeyHandler]);
+  
+  // Close NPC dialog
+  const handleCloseNPCDialog = () => {
+    setShowNPCDialog(false);
+    setActiveNPC(null);
+  };
+
   return (
     <ErrorBoundary>
       <div className="game-container">
@@ -710,9 +800,8 @@ const GameWorld = () => {
               })}
               onNPCClick={(npc) => {
                 console.log("🎭 Clicked on NPC:", npc.name);
-                // Here you could add logic to interact with the NPC
-                // For example, display a dialogue box or trigger some interaction
-                alert(`You clicked on ${npc.name}. Interaction will be implemented soon.`);
+                setActiveNPC(npc);
+                setShowNPCDialog(true);
               }}
             />
             <Character 
@@ -768,6 +857,14 @@ const GameWorld = () => {
                   />
                 ))}
             </ErrorBoundary>
+            
+            {/* Add the DialogBox for NPC interaction */}
+            {showNPCDialog && activeNPC && (
+              <DialogBox 
+                npc={activeNPC} 
+                onClose={handleCloseNPCDialog}
+              />
+            )}
           </div>
         </div>
         

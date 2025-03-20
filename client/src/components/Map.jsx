@@ -145,7 +145,7 @@ const Map = ({
           />
         ))}
 
-        {/* Render NPCs with improved visibility */}
+        {/* Render NPCs with improved visibility and interaction indicators */}
         {npcs?.map(npc => {
           if (!npc.position) return null;
           
@@ -173,7 +173,11 @@ const Map = ({
               style={spriteStyle}
               onClick={() => onNPCClick?.(npc)}
             >
-              <div className="npc-indicator">Click to talk</div>
+              {/* Enhanced interaction indicator */}
+              <div className="npc-interaction-indicator">
+                <div className="npc-key-hint">Press 'T' to talk</div>
+                <div className="npc-indicator-arrow"></div>
+              </div>
               <div className="npc-name-label">{npc.name || 'NPC'}</div>
             </div>
           );

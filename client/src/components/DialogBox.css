@@ -1,0 +1,146 @@
+.dialog-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 450px;
+  max-width: 90vw;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+  animation: dialogFadeIn 0.3s ease-out;
+  user-select: none;
+}
+
+@keyframes dialogFadeIn {
+  from { opacity: 0; transform: translate(-50%, -60%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.dialog-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  box-sizing: border-box;
+  color: #f0f0f0;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ffd700;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.dialog-header h3 {
+  margin: 0;
+  color: #ffd700;
+  font-size: 1.2em;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #ffd700;
+  font-size: 1.4em;
+  cursor: pointer;
+  height: 25px;
+  width: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #ffffff;
+}
+
+.dialog-content {
+  min-height: 100px;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.npc-message {
+  background: rgba(50, 50, 50, 0.5);
+  border-radius: 5px;
+  padding: 15px;
+  position: relative;
+  border-left: 3px solid #ffd700;
+}
+
+.typing-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: cursorBlink 0.8s infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dialog-btn {
+  background: #333;
+  color: #ffd700;
+  border: 1px solid #ffd700;
+  border-radius: 4px;
+  padding: 6px 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9em;
+}
+
+.dialog-btn:hover {
+  background: #444;
+  box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .dialog-overlay {
+    width: 90vw;
+  }
+  
+  .dialog-box {
+    padding: 10px;
+  }
+  
+  .dialog-content {
+    min-height: 80px;
+    font-size: 0.9em;
+  }
+}
+
+/* Highlight message when complete */
+.npc-message:not(.typing) {
+  transition: background-color 0.3s;
+}
+
+/* Custom styling for guide NPCs */
+.dialog-overlay[data-npc-type="guide"] .dialog-header {
+  border-color: #00bfff;
+}
+
+.dialog-overlay[data-npc-type="guide"] .npc-message {
+  border-left-color: #00bfff;
+}
+
+.dialog-overlay[data-npc-type="guide"] .dialog-btn {
+  color: #00bfff;
+  border-color: #00bfff;
+} 
