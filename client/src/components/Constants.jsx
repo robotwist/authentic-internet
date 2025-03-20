@@ -289,7 +289,7 @@ export const MAPS = [
     data: [
       [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -312,7 +312,7 @@ export const MAPS = [
         name: "Ancient Sword", 
         description: "A legendary blade that once belonged to a great warrior", 
         content: "The sword pulses with ancient power, its edge never dulling.", 
-        location: { x: 14, y: 3 }, 
+        location: { x: 3, y: 2 }, // Updated to be on walkable grass tile
         exp: 15, 
         visible: true, 
         area: "Overworld",
@@ -780,28 +780,28 @@ export const MAPS = [
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
       [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
       [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
-      [4, 0, 0, 0, 0, 0, 0, 4, 0, 4],
-      [4, 4, 4, 4, 4, 4, 4, 4, 0, 4],
-      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
-      [4, 5, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 5, 4], // Add portal at (8,8) to go to Yosemite
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
     ],
     artifacts: [
       { 
         id: uuidv4(), 
-        name: "Dungeon Key", 
-        description: "An ornate key that seems important", 
-        content: "This key must unlock something valuable deeper in the dungeon.", 
-        location: { x: 5, y: 5 }, 
-        exp: 25, 
+        name: "Ancient Tome", 
+        description: "A weathered book bound in mysterious materials", 
+        content: "The pages contain knowledge of artifact creation and manipulation, with spaces for users to add their own discoveries.", 
+        location: { x: 3, y: 7 }, 
+        exp: 30, 
         visible: true, 
         area: "Dungeon",
-        type: ARTIFACT_TYPES.KEY,
+        type: ARTIFACT_TYPES.SCROLL,
         interactions: [
           {
             type: ARTIFACT_INTERACTIONS.REVEAL,
             condition: "nearWater",
-            revealedContent: "The key shows visions of an ancient underwater city..."
+            revealedContent: "The tome shows visions of an ancient underwater city..."
           }
         ],
         properties: {
@@ -896,10 +896,10 @@ export const MAPS = [
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
       [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
       [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
-      [4, 0, 0, 0, 0, 0, 0, 4, 0, 4],
-      [4, 4, 4, 4, 5, 4, 4, 4, 0, 4],
-      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 5, 4], // Add portal at (8,8) to go to Yosemite
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
     ],
     artifacts: [
@@ -1012,7 +1012,7 @@ export const MAPS = [
         name: "Yosemite Falls",
         description: "The magnificent Yosemite Falls, one of the world's tallest waterfalls.",
         content: "Yosemite Falls is 2,425 feet (739 m) tall and consists of three sections: Upper Falls, Middle Cascades, and Lower Falls.",
-        location: { x: 3, y: 6 },
+        location: { x: 3, y: 3 }, // Moved to walkable tile away from water
         exp: 25,
         visible: true,
         area: "Yosemite",
@@ -1024,7 +1024,7 @@ export const MAPS = [
         name: "Mist Trail",
         description: "The popular Mist Trail alongside Vernal and Nevada Falls.",
         content: "The Mist Trail gets its name from the mist that sprays off Vernal Falls, often creating rainbows in the afternoon sun.",
-        location: { x: 15, y: 12 },
+        location: { x: 14, y: 5 }, // Moved to walkable tile away from water
         exp: 25,
         visible: true,
         area: "Yosemite",
@@ -1069,7 +1069,7 @@ export const MAPS = [
   {
     name: "Hemingway's Battleground",
     data: [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],

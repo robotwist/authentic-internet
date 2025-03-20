@@ -4,6 +4,8 @@
  * Utility functions to help diagnose issues with game rendering and assets
  */
 
+import { MAPS } from "../components/Constants";
+
 /**
  * Verify NPC sprites by attempting to load each one and reporting any failures
  * @param {Array} npcs - Array of NPC objects
@@ -155,19 +157,18 @@ export const fixNPCRendering = (gameWorld) => {
   
   console.group('🔧 NPC Rendering Fix Tool');
   
-  // Check current map index
-  const currentMapIndex = gameWorld.state.currentMapIndex || 0;
+  // Check current map index - directly access from gameWorld
+  const currentMapIndex = gameWorld.currentMapIndex || 0;
   console.log(`Current map: ${currentMapIndex}`);
   
-  // Get NPCs from current map
-  const maps = window.MAPS || [];
-  if (!maps.length || !maps[currentMapIndex]) {
+  // Get NPCs from current map using the imported MAPS constant
+  if (!MAPS.length || !MAPS[currentMapIndex]) {
     console.error('Maps data not available');
     console.groupEnd();
     return;
   }
   
-  const npcs = maps[currentMapIndex].npcs || [];
+  const npcs = MAPS[currentMapIndex].npcs || [];
   console.log(`Found ${npcs.length} NPCs on current map`);
   
   // Verify NPC sprites

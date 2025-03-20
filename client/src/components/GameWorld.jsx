@@ -241,15 +241,28 @@ const GameWorld = () => {
   }, []);
 
   const adjustViewport = (pos) => {
+    // Get the dimensions of the current map
+    const mapWidth = MAPS[currentMapIndex].data[0].length * TILE_SIZE;
+    const mapHeight = MAPS[currentMapIndex].data.length * TILE_SIZE;
+    
+    // Get viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Center the character in the viewport
+    const viewportX = Math.max(
+      0,
+      Math.min(pos.x - viewportWidth / 2, mapWidth - viewportWidth)
+    );
+    
+    const viewportY = Math.max(
+      0,
+      Math.min(pos.y - viewportHeight / 2, mapHeight - viewportHeight)
+    );
+    
     setViewport({
-      x: Math.max(
-        0,
-        Math.min(pos.x - 8 * TILE_SIZE, MAP_COLS * TILE_SIZE - 16 * TILE_SIZE)
-      ),
-      y: Math.max(
-        0,
-        Math.min(pos.y - 6 * TILE_SIZE, MAP_ROWS * TILE_SIZE - 12 * TILE_SIZE)
-      ),
+      x: viewportX,
+      y: viewportY
     });
   };
 
@@ -785,6 +798,8 @@ const GameWorld = () => {
             className={`game-world ${currentMapIndex === 2 ? 'level-3' : currentMapIndex === 1 ? 'level-2' : 'level-1'}`}
             style={{
               transform: `translate(${-viewport.x}px, ${-viewport.y}px)`,
+              width: `${MAPS[currentMapIndex].data[0].length * TILE_SIZE}px`, // Set width based on map columns
+              height: `${MAPS[currentMapIndex].data.length * TILE_SIZE}px`, // Set height based on map rows
             }}
           >
             <Map 
