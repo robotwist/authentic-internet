@@ -103,6 +103,7 @@ const Map = ({
   return (
     <div 
       className={`map ${mapName === "Yosemite" ? 'yosemite-map' : ''}`}
+      data-map-name={mapName}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

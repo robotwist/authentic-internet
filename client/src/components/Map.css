@@ -6,6 +6,7 @@
   image-rendering: pixelated;
   background-color: #1a1a1a;
   cursor: grab;
+  min-height: 600px; /* Ensure minimum height for small screens */
 }
 
 .map:active {
@@ -18,6 +19,8 @@
   left: 0;
   transition: transform 0.1s ease-out;
   will-change: transform;
+  min-width: calc(var(--tile-size) * 20); /* Ensure minimum width based on map size */
+  min-height: calc(var(--tile-size) * 20); /* Ensure minimum height based on map size */
 }
 
 .npc-sprite {
@@ -144,4 +147,28 @@
   bottom: 0;
   background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
   pointer-events: none;
+}
+
+/* Add specific styling for different map types to ensure consistent appearance */
+.map[data-map-name="Overworld"] {
+  filter: brightness(1.1) saturate(1.1);
+}
+
+.map[data-map-name="Overworld 2"] {
+  filter: brightness(1.1) saturate(1.1);
+}
+
+.map[data-map-name="Overworld 3"] {
+  filter: brightness(1.2) saturate(1.2) !important; /* Ensure this overrides any other filters */
+}
+
+.map[data-map-name="Desert 1"],
+.map[data-map-name="Desert 2"],
+.map[data-map-name="Desert 3"] {
+  filter: brightness(1.1) saturate(1.1) hue-rotate(10deg); /* Warm tint for desert areas */
+}
+
+/* Keep the special styling for Yosemite */
+.yosemite-map {
+  animation: yosemiteAmbient 60s infinite alternate linear;
 } 

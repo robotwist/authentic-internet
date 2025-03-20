@@ -33,7 +33,8 @@
   animation: portalVortex 4s infinite linear;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 15px rgba(186, 85, 211, 0.7);
+  box-shadow: 0 0 20px rgba(186, 85, 211, 0.9);
+  z-index: 100 !important;
 }
 
 /* Add pseudo-element for the vortex effect */
@@ -44,7 +45,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(186, 85, 211, 0.1) 20%, rgba(186, 85, 211, 0.5) 40%, rgba(186, 85, 211, 0.1) 60%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(186, 85, 211, 0.3) 20%, rgba(186, 85, 211, 0.7) 40%, rgba(186, 85, 211, 0.3) 60%, transparent 70%);
   animation: portalSwirl 3s infinite linear;
   z-index: 1;
   transform-origin: center;
@@ -57,7 +58,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(120, 180, 255, 0.5) 10%, transparent 50%);
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.7) 10%, transparent 50%);
   animation: portalGlow 2s infinite alternate;
   z-index: 2;
 }
@@ -235,11 +236,11 @@
   right: 10%;
   bottom: 10%;
   border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(186, 85, 211, 0.2) 0%, rgba(186, 85, 211, 0.7) 50%, rgba(186, 85, 211, 0.2) 100%);
+  background: radial-gradient(circle at center, rgba(186, 85, 211, 0.4) 0%, rgba(186, 85, 211, 0.8) 50%, rgba(186, 85, 211, 0.4) 100%);
   animation: portalInnerVortex 1.5s infinite linear;
   transform-origin: center;
   pointer-events: none;
-  z-index: 1;
+  z-index: 10;
 }
 
 .portal-glow {
@@ -248,10 +249,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.7) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
   animation: portalImmediateGlow 2s infinite alternate;
   pointer-events: none;
-  z-index: 2;
+  z-index: 20;
   mix-blend-mode: screen;
 }
 
@@ -277,5 +278,5 @@
 
 /* Make portal tiles appear immediately with a fallback color even before images load */
 .tile.portal {
-  background-color: rgba(90, 20, 120, 0.8);
+  background-color: rgba(186, 85, 211, 0.9);
 } 
