@@ -168,7 +168,7 @@ const Map = ({
           
           return (
             <div 
-              key={npc._id} 
+              key={npc._id || npc.id || `npc-${npc.name}-${Math.random().toString(36).substr(2, 9)}`} 
               className="npc-sprite"
               style={spriteStyle}
               onClick={() => onNPCClick?.(npc)}
@@ -190,12 +190,13 @@ const Map = ({
 Map.propTypes = {
   mapData: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
   npcs: PropTypes.arrayOf(PropTypes.shape({
-    _id: PropTypes.string.isRequired,
+    _id: PropTypes.string,
+    id: PropTypes.string,
     position: PropTypes.shape({
       x: PropTypes.number.isRequired,
       y: PropTypes.number.isRequired
     }).isRequired,
-    sprite: PropTypes.string.isRequired
+    sprite: PropTypes.string
   })),
   artifacts: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,

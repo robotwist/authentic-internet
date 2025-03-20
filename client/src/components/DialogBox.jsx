@@ -52,7 +52,7 @@ const DialogBox = ({ npc, onClose }) => {
   };
   
   return (
-    <div className="dialog-overlay" onClick={handleNext}>
+    <div className="dialog-overlay" data-npc-type={npc.type?.toLowerCase()} onClick={handleNext}>
       <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
         <div className="dialog-header">
           <h3>{npc.name}</h3>
@@ -81,6 +81,7 @@ const DialogBox = ({ npc, onClose }) => {
 DialogBox.propTypes = {
   npc: PropTypes.shape({
     name: PropTypes.string.isRequired,
+    type: PropTypes.string,
     dialogue: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.arrayOf(PropTypes.string)

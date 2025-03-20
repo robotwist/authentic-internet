@@ -131,16 +131,29 @@
   transition: background-color 0.3s;
 }
 
-/* Custom styling for guide NPCs */
+/* Enhance styling for guide NPCs */
 .dialog-overlay[data-npc-type="guide"] .dialog-header {
   border-color: #00bfff;
+  background-color: rgba(0, 110, 175, 0.2);
+}
+
+.dialog-overlay[data-npc-type="guide"] .dialog-header h3 {
+  color: #00bfff;
+  text-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
 }
 
 .dialog-overlay[data-npc-type="guide"] .npc-message {
   border-left-color: #00bfff;
+  background-color: rgba(0, 120, 190, 0.2);
 }
 
 .dialog-overlay[data-npc-type="guide"] .dialog-btn {
   color: #00bfff;
   border-color: #00bfff;
+  background-color: rgba(0, 100, 150, 0.3);
+}
+
+.dialog-overlay[data-npc-type="guide"] .dialog-btn:hover {
+  background-color: rgba(0, 120, 190, 0.4);
+  box-shadow: 0 0 8px rgba(0, 191, 255, 0.7);
 } 
