@@ -1,6 +1,8 @@
 import testShakespeareResponses from './shakespeare-test';
 import { NPC_TYPES } from '../components/Constants';
 import { chat } from '../api/api';
+import { testHistoricalNPCs } from './npcTests';
+import { testArtifactUpdate } from './artifactTests';
 
 // Test all historical NPCs
 async function testHistoricalNPCs() {
@@ -91,6 +93,13 @@ async function testAppFunctionality() {
   } catch (error) {
     console.error('❌ Error testing artifacts:', error.message);
   }
+  
+  // Test artifact update functionality
+  try {
+    await testArtifactUpdate();
+  } catch (error) {
+    console.error('❌ Error testing artifact updates:', error.message);
+  }
 }
 
 // Run all tests
@@ -115,15 +124,21 @@ async function runAllTests() {
   }
 }
 
+// Only run tests if we're in a browser environment or if explicitly called
+if (typeof window !== 'undefined') {
+  // If this is loaded directly in a browser
+  if (document.readyState === 'complete') {
+    runAllTests();
+  } else {
+    window.addEventListener('load', runAllTests);
+  }
+}
+
 // Export the test functions
 export { 
   testShakespeareResponses,
   testHistoricalNPCs,
   testAppFunctionality,
+  testArtifactUpdate,
   runAllTests
-};
-
-// Auto-run tests if this script is executed directly
-if (typeof require !== 'undefined' && require.main === module) {
-  runAllTests();
-} 
+}; 
