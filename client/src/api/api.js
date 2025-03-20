@@ -376,6 +376,28 @@ export const createArtifact = async (artifactData) => {
 
 export const updateArtifact = async (artifactId, updatedData) => {
   try {
+    if (!artifactId) {
+      throw new Error('Artifact ID is required for updates');
+    }
+
+    // Check if we're dealing with FormData (file uploads)
+    if (updatedData instanceof FormData) {
+      console.log("Updating artifact with file attachment:", artifactId);
+      
+      // For FormData, we need to use specific config
+      const requestConfig = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+      
+      // Make the API request with proper content type header
+      const response = await API.put(`/api/artifacts/${artifactId}`, updatedData, requestConfig);
+      console.log("Updated artifact with file:", response.data);
+      return response.data;
+    }
+    
+    // Regular JSON update (no files) - continue with validation
     // Validate artifact data
     if (updatedData.name !== undefined && updatedData.name.trim().length < 1) {
       throw new Error('Artifact name is required');
@@ -413,7 +435,8 @@ export const updateArtifact = async (artifactId, updatedData) => {
     return response.data;
   } catch (error) {
     console.error("Error updating artifact:", error);
-    throw error.response?.data?.message || error.message || 'Failed to update artifact';
+    const errorMessage = handleApiError(error, 'Failed to update artifact');
+    throw new Error(errorMessage);
   }
 };
 

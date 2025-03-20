@@ -179,45 +179,16 @@ const ArtifactsPage = () => {
       setLoading(true);
       setError('');
 
-      // When formData is a FormData object, we need special handling for file uploads
-      if (formData instanceof FormData) {
-        // Preserve the file upload if one exists
-        const token = localStorage.getItem('token');
-        
-        // Add the token to headers but don't directly modify the FormData object
-        const response = await fetch(`/api/artifacts/${editingArtifact._id}`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formData
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || errorData.error || `Error ${response.status}: Failed to update artifact`);
-        }
-        
-        const updatedArtifact = await response.json();
-        
-        // Update the artifacts list with the updated artifact
-        setArtifacts(prev => 
-          prev.map(artifact => 
-            artifact._id === editingArtifact._id ? updatedArtifact : artifact
-          )
-        );
-      } else {
-        // For regular JSON data, use the API function
-        const updateData = formData;
-        const updatedArtifact = await updateArtifact(editingArtifact._id, updateData);
-        
-        // Update the artifacts list with the updated artifact
-        setArtifacts(prev => 
-          prev.map(artifact => 
-            artifact._id === editingArtifact._id ? updatedArtifact : artifact
-          )
-        );
-      }
+      // Use our enhanced updateArtifact API function for all updates
+      // It now properly handles both FormData and regular JSON data
+      const updatedArtifact = await updateArtifact(editingArtifact._id, formData);
+      
+      // Update the artifacts list with the updated artifact
+      setArtifacts(prev => 
+        prev.map(artifact => 
+          artifact._id === editingArtifact._id ? updatedArtifact : artifact
+        )
+      );
 
       // Reset form state
       setEditingArtifact(null);
