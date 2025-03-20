@@ -21,10 +21,23 @@ const MagicalButton = () => {
     setIsVisible(false);
     setBirdVisible(true);
     
-    // Play sound effect
-    const poofSound = new Audio('/assets/sounds/poof.mp3');
-    poofSound.volume = 0.5;
-    poofSound.play().catch(err => console.log('Audio play failed:', err));
+    // Play sound effect with robust error handling
+    try {
+      const poofSound = new Audio('/assets/sounds/poof.mp3');
+      poofSound.volume = 0.5;
+      
+      // Only try to play if browser is likely to support Audio API
+      if (typeof poofSound.play === 'function') {
+        poofSound.play()
+          .catch(err => {
+            console.log('Audio play failed (expected if no interaction):', err);
+            // Continue with animation even if sound fails
+          });
+      }
+    } catch (err) {
+      console.log('Audio creation failed:', err);
+      // Continue with animation even if sound creation fails
+    }
   };
 
   // Animate the bird flying upward and off the screen
