@@ -205,12 +205,32 @@ export const registerUser = async (username, password) => {
 ──────────────────────────────── */
 export const fetchCharacter = async (userId) => {
   try {
+    // Check if we have a token before making the request
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.log("Skipping character fetch - no authentication token");
+      return null;
+    }
+
+    // Validate userId
+    if (!userId) {
+      console.log("Skipping character fetch - no userId provided");
+      return null;
+    }
+
     const response = await API.get(`/api/users/${userId}`);
     console.log("Character data response:", response); // Debugging log
     return response.data;
   } catch (error) {
-    console.error("Error fetching character:", error);
-    handleError(error);
+    // Don't log the full error for 401 errors as they're expected when not logged in
+    if (error.response && error.response.status === 401) {
+      console.log("Unable to fetch character: Authentication required");
+    } else {
+      console.error("Error fetching character:", error);
+    }
+    
+    // Return null instead of throwing to prevent UI crashes
+    return null;
   }
 };
 

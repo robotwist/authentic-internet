@@ -79,14 +79,55 @@ const GameWorld = () => {
         const storedUser = JSON.parse(localStorage.getItem("user"));
         if (!storedUser || !storedUser.id) {
           console.warn("🚨 No user found in localStorage. Cannot fetch character.");
+          // Create a minimal default character to avoid errors when not logged in
+          setCharacter({
+            level: 1,
+            experience: 0,
+            savedQuotes: [],
+            qualifyingArtifacts: {},
+            id: null
+          });
+          return;
+        }
+
+        // Check if token exists before making the API call
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.warn("🚨 No authentication token found. Skip character fetch to avoid 401 errors.");
+          setCharacter({
+            level: 1,
+            experience: 0,
+            savedQuotes: [],
+            qualifyingArtifacts: {},
+            id: null
+          });
           return;
         }
 
         const characterData = await fetchCharacter(storedUser.id);
         console.log("✅ Character Loaded:", characterData);
-        setCharacter(characterData);
+        if (characterData) {
+          setCharacter(characterData);
+        } else {
+          // Fallback to default character if API returns nothing
+          setCharacter({
+            level: 1,
+            experience: 0,
+            savedQuotes: [],
+            qualifyingArtifacts: {},
+            id: null
+          });
+        }
       } catch (err) {
         console.error("❌ Failed to load character:", err);
+        // Set a default character to avoid UI errors
+        setCharacter({
+          level: 1,
+          experience: 0,
+          savedQuotes: [],
+          qualifyingArtifacts: {},
+          id: null
+        });
       }
     };
 

@@ -23,7 +23,18 @@ const RewardModal = ({ visible, onClose, achievement }) => {
             alt="NKD Man Chrome Extension" 
             className="reward-image" 
             onError={(e) => {
-              e.target.src = '/assets/tiles/portal.webp'; // Fallback image
+              console.log("Image failed to load: /assets/npcs/nkd-man-extension.png");
+              // First try a known fallback image
+              e.target.src = '/assets/tiles/portal.webp';
+              
+              // Add a second error handler for the fallback image
+              e.target.onerror = () => {
+                console.log("Fallback image also failed, using data URI");
+                // If that also fails, use a simple data URI as last resort
+                e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23cccccc"/><text x="50%" y="50%" font-family="sans-serif" font-size="12" text-anchor="middle" dominant-baseline="middle" fill="%23333333">Image</text></svg>';
+                // Remove the error handler to prevent infinite loops
+                e.target.onerror = null;
+              };
             }}
           />
           <div className="reward-details">
