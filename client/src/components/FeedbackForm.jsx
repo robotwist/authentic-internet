@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './FeedbackForm.css';
 
-// Updated for automatic deployment testing
+// Updated for automatic deployment testing - Added GitHub repository secrets
 const FeedbackForm = ({ onClose }) => {
   const [feedback, setFeedback] = useState({
     gameplay: '',
