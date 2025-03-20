@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './FeedbackForm.css';
 
+// Updated for automatic deployment testing
 const FeedbackForm = ({ onClose }) => {
   const [feedback, setFeedback] = useState({
     gameplay: '',
