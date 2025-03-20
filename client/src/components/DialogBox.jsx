@@ -7,9 +7,17 @@ const DialogBox = ({ npc, onClose }) => {
   const [isTyping, setIsTyping] = useState(true);
   const [displayedText, setDisplayedText] = useState('');
   
-  // If npc.dialogue is a string, convert it to an array
-  const dialogueArray = Array.isArray(npc.dialogue) ? npc.dialogue : [npc.dialogue];
-  const currentDialogue = dialogueArray[currentDialogueIndex];
+  // Ensure dialogue is always valid, with fallback for invalid data
+  const getDialogueArray = () => {
+    if (!npc) return ['No NPC data available'];
+    if (!npc.dialogue) return ['This NPC has nothing to say...'];
+    
+    // If npc.dialogue is a string, convert it to an array
+    return Array.isArray(npc.dialogue) ? npc.dialogue : [npc.dialogue];
+  };
+  
+  const dialogueArray = getDialogueArray();
+  const currentDialogue = dialogueArray[currentDialogueIndex] || 'No dialogue available';
   
   // Typing effect
   useEffect(() => {
@@ -53,23 +61,28 @@ const DialogBox = ({ npc, onClose }) => {
 
   // Safely access NPC type even if it's nested or undefined
   const npcType = npc?.type?.toLowerCase ? npc.type.toLowerCase() : 'generic';
+  const npcName = npc?.name || 'Unknown NPC';
   
   return (
     <div className="dialog-overlay" data-npc-type={npcType}>
       <div className="dialog-box">
         <div className="dialog-header">
-          <h3>{npc.name || 'Unknown'}</h3>
+          <h3>{npcName}</h3>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
         
         <div className="dialog-content">
-          <p>{displayedText}</p>
+          <div className="npc-message">
+            {displayedText}
+            {isTyping && <span className="typing-cursor">_</span>}
+          </div>
         </div>
         
         <div className="dialog-actions">
           <button 
             onClick={handleNext}
             disabled={!currentDialogue}
+            className="dialog-btn"
           >
             {isTyping ? 'Skip' : currentDialogueIndex < dialogueArray.length - 1 ? 'Next' : 'Close'}
           </button>

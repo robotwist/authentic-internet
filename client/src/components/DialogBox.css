@@ -180,7 +180,9 @@
   margin-top: 15px;
 }
 
-.dialog-actions button {
+/* Make both button styles compatible */
+.dialog-actions button,
+.dialog-btn {
   background-color: #ffd700;
   color: #000;
   border: none;
@@ -191,11 +193,13 @@
   font-weight: bold;
 }
 
-.dialog-actions button:hover {
+.dialog-actions button:hover,
+.dialog-btn:hover {
   background-color: #ffcc00;
 }
 
-.dialog-actions button:disabled {
+.dialog-actions button:disabled,
+.dialog-btn:disabled {
   background-color: #a0a0a0;
   cursor: not-allowed;
 } 
