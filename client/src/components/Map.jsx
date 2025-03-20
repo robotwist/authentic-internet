@@ -118,8 +118,8 @@ const Map = ({
         transition: 'all 0.2s ease'
       };
       
-      // Create a stable, unique key that won't change between renders
-      const npcKey = npc._id || npc.id || `npc-${npc.name}-${npc.position.x}-${npc.position.y}`;
+      // Create a stable, unique key with multiple fallbacks for reliability
+      const npcKey = npc._id || npc.id || `npc-${npc.name || ''}-${npc.type || ''}-${npc.position.x}-${npc.position.y}`;
       
       return (
         <div 
@@ -185,7 +185,7 @@ const Map = ({
         {/* Render artifacts */}
         {artifacts?.map(artifact => (
           <Artifact
-            key={artifact.id || artifact._id || `artifact-${Math.random()}`}
+            key={artifact.id || artifact._id || `artifact-${artifact.name || ''}-${artifact.location?.x || 0}-${artifact.location?.y || 0}-${Math.random().toString(36).substr(2, 5)}`}
             artifact={artifact}
             onInteract={() => onArtifactClick?.(artifact)}
           />

@@ -50,41 +50,39 @@ const DialogBox = ({ npc, onClose }) => {
       return;
     }
     
-    // Otherwise move to the next dialogue
+    // Otherwise, move to the next dialogue if available
     if (currentDialogueIndex < dialogueArray.length - 1) {
       setCurrentDialogueIndex(currentDialogueIndex + 1);
     } else {
-      // We've reached the end of the dialogue
-      onClose();
+      onClose(); // Close dialog when no more dialogue available
     }
   };
 
-  // Safely access NPC type even if it's nested or undefined
-  const npcType = npc?.type?.toLowerCase ? npc.type.toLowerCase() : 'generic';
-  const npcName = npc?.name || 'Unknown NPC';
-  
   return (
-    <div className="dialog-overlay" data-npc-type={npcType}>
+    <div 
+      className="dialog-overlay" 
+      data-npc-type={npc?.type?.toLowerCase()} // Add data attribute for CSS styling
+    >
       <div className="dialog-box">
         <div className="dialog-header">
-          <h3>{npcName}</h3>
+          <h3>{npc?.name || 'NPC'}</h3>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
         
         <div className="dialog-content">
-          <div className="npc-message">
+          <div className={`npc-message ${isTyping ? 'typing' : ''}`}>
             {displayedText}
-            {isTyping && <span className="typing-cursor">_</span>}
+            {isTyping && <span className="typing-cursor">|</span>}
           </div>
         </div>
         
-        <div className="dialog-actions">
+        <div className="dialog-footer">
           <button 
+            className="dialog-btn" 
             onClick={handleNext}
-            disabled={!currentDialogue}
-            className="dialog-btn"
           >
-            {isTyping ? 'Skip' : currentDialogueIndex < dialogueArray.length - 1 ? 'Next' : 'Close'}
+            {isTyping ? 'Skip' : 
+              (currentDialogueIndex < dialogueArray.length - 1 ? 'Next' : 'Close')}
           </button>
         </div>
       </div>
@@ -98,9 +96,9 @@ DialogBox.propTypes = {
     dialogue: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.arrayOf(PropTypes.string)
-    ]).isRequired,
+    ]),
     type: PropTypes.string
-  }).isRequired,
+  }),
   onClose: PropTypes.func.isRequired
 };
 
