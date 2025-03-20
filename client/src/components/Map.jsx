@@ -5,6 +5,9 @@ import Artifact from './Artifact';
 import { TILE_SIZE } from './Constants';
 import './Map.css';
 
+// Add a default placeholder sprite as a data URI
+const DEFAULT_NPC_SPRITE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="20" r="16" fill="%23ffd700"/><rect x="16" y="36" width="32" height="28" fill="%23228b22"/></svg>';
+
 const Map = ({ 
   mapData, 
   npcs, 
@@ -148,26 +151,62 @@ const Map = ({
           const posY = npc.position.y !== undefined ? npc.position.y : 
                       (npc.position ? parseInt(npc.position.y, 10) : 0);
           
-          // Determine sprite URL
+          // Determine sprite URL with improved fallback
           let spriteUrl = npc.sprite;
+          let isUsingFallback = false;
+          
           if (!spriteUrl) {
-            // Fallback to determine sprite based on NPC type
-            if (npc.type === 1) spriteUrl = '/assets/npcs/shakespeare.webp'; // Shakespeare
-            else if (npc.type === 2) spriteUrl = '/assets/npcs/artist.svg'; // Artist
-            else if (npc.type === 3) spriteUrl = '/assets/npcs/ada_lovelace.png'; // Ada Lovelace
-            else if (npc.type === 4) spriteUrl = '/assets/npcs/lord_byron.webp'; // Lord Byron
-            else if (npc.type === 5) spriteUrl = '/assets/npcs/oscar_wilde.svg'; // Oscar Wilde
-            else if (npc.type === 6) spriteUrl = '/assets/npcs/alexander_pope.svg'; // Alexander Pope
-            else if (npc.type === 7) spriteUrl = '/assets/npcs/zeus.svg'; // Zeus
-            else if (npc.type === 8) spriteUrl = '/assets/npcs/john_muir.png'; // John Muir
-            else if (npc.type === 9) spriteUrl = '/assets/npcs/jesus.png'; // Jesus
-            else spriteUrl = '/assets/npcs/guide.png'; // Default Guide
+            isUsingFallback = true;
+            // Improved fallback logic based on files that actually exist
+            switch (npc.type) {
+              case 'shakespeare':
+              case 1:
+                spriteUrl = '/assets/npcs/shakespeare.webp';
+                break;
+              case 'artist':
+              case 2:
+                spriteUrl = '/assets/npcs/artist.svg';
+                break;
+              case 'ada_lovelace':
+              case 3:
+                spriteUrl = '/assets/npcs/ada_lovelace.png';
+                break;
+              case 'lord_byron':
+              case 4:
+                spriteUrl = '/assets/npcs/lord_byron.webp';
+                break;
+              case 'oscar_wilde':
+              case 5:
+                spriteUrl = '/assets/npcs/oscar_wilde.svg';
+                break;
+              case 'alexander_pope':
+              case 6:
+                spriteUrl = '/assets/npcs/alexander_pope.svg';
+                break;
+              case 'zeus':
+              case 7:
+                spriteUrl = '/assets/npcs/zeus.svg';
+                break;
+              case 'john_muir':
+              case 8:
+                spriteUrl = '/assets/npcs/john_muir.png';
+                break;
+              case 'jesus':
+              case 9:
+                spriteUrl = '/assets/npcs/jesus.png';
+                break;
+              default:
+                // Default data URI fallback that will always work
+                spriteUrl = DEFAULT_NPC_SPRITE;
+                console.warn(`No sprite found for NPC type: ${npc.type}, using default`);
+                break;
+            }
           }
           
           return (
             <div
               key={npc._id || npc.id}
-              className={`npc-sprite npc-type-${npc.type || 'unknown'}`}
+              className={`npc-sprite npc-type-${npc.type || 'unknown'}${isUsingFallback ? ' using-fallback' : ''}`}
               style={{
                 position: 'absolute',
                 left: `${posX}px`,
@@ -185,10 +224,19 @@ const Map = ({
               }}
               onClick={() => onNPCClick?.(npc)}
               title={npc.name}
+              onError={(e) => {
+                console.error(`Failed to load NPC sprite: ${spriteUrl}`);
+                e.target.style.backgroundImage = `url(${DEFAULT_NPC_SPRITE})`;
+              }}
             >
               {/* Add hover indicator */}
               <div className="npc-indicator">
                 <span>Talk</span>
+              </div>
+              
+              {/* Add a name label to make NPCs more visible */}
+              <div className="npc-name-label">
+                {npc.name.split(' ')[0]}
               </div>
             </div>
           );

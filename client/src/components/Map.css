@@ -56,6 +56,33 @@
   opacity: 1;
 }
 
+/* Add styles for NPC name labels */
+.npc-name-label {
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* Fallback styling for NPCs with missing sprites */
+.npc-sprite.using-fallback {
+  background-color: rgba(255, 215, 0, 0.3);
+  border-radius: 50% 50% 0 0;
+  border: 2px solid rgba(255, 215, 0, 0.7);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
 /* Add specific styling for different NPC types */
 .npc-type-1 { /* Shakespeare */
   filter: drop-shadow(0 0 5px rgba(230, 230, 250, 0.7));

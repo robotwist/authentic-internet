@@ -15,6 +15,7 @@ import Map from "./Map";
 import useCharacterMovement from "./CharacterMovement";
 import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS } from "./Constants";
 import { initSounds, playRandomPortalSound, playSound } from "../utils/soundEffects";
+import { debugNPCSprites } from "../utils/debugTools";
 import "./GameWorld.css";
 import "./Character.css";
 import "./Artifact.css";
@@ -211,6 +212,14 @@ const GameWorld = () => {
   useEffect(() => {
     // Initialize sound effects when component mounts
     initSounds();
+    
+    // In development mode, run NPC sprite debug to help identify issues
+    if (process.env.NODE_ENV === 'development') {
+      // Wait a bit to ensure DOM is fully loaded
+      setTimeout(() => {
+        debugNPCSprites();
+      }, 2000);
+    }
   }, []);
 
   const adjustViewport = (pos) => {
@@ -596,7 +605,18 @@ const GameWorld = () => {
             <Map 
               mapData={MAPS[currentMapIndex].data} 
               viewport={viewport} 
-              npcs={MAPS[currentMapIndex].npcs}
+              npcs={MAPS[currentMapIndex].npcs.map(npc => {
+                // Ensure each NPC has a proper type that matches available sprites
+                if (typeof npc.type === 'string' && !npc.sprite) {
+                  // If type is a string but no sprite specified, make sure it maps to our sprite assets
+                  // by adding a default sprite path based on type
+                  return {
+                    ...npc,
+                    sprite: `/assets/npcs/${npc.type.toLowerCase()}.${npc.type === 'shakespeare' || npc.type === 'lord_byron' ? 'webp' : npc.type === 'artist' || npc.type === 'oscar_wilde' || npc.type === 'alexander_pope' || npc.type === 'zeus' ? 'svg' : 'png'}`
+                  };
+                }
+                return npc;
+              })}
               onNPCClick={(npc) => {
                 console.log("🎭 Clicked on NPC:", npc.name);
                 // Here you could add logic to interact with the NPC
