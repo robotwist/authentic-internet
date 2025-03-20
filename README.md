@@ -205,3 +205,13 @@ This project is organized with:
 - Backend code in the `/server` directory
 
 Do not add server files to the root directory.
+
+## Deployment Status
+
+- GitHub: https://github.com/robotwist/authentic-internet
+- Heroku API: https://authentic-internet-api-9739ffaa9c5f.herokuapp.com/
+- Netlify Client: https://flourishing-starburst-8cf88b.netlify.app/
+
+## Automatic Deployment Test
+
+Last updated: 2023-07-21 14:00:00
