@@ -21,8 +21,51 @@
   will-change: transform;
   min-width: calc(var(--tile-size) * 20); /* Ensure minimum width based on map size */
   min-height: calc(var(--tile-size) * 20); /* Ensure minimum height based on map size */
+  z-index: 1; /* Ensure proper stacking */
 }
 
+/* Style improvements for specific map types to ensure proper saturation and visibility */
+[data-map-name="Overworld"] {
+  filter: saturate(1.1) brightness(1.05); /* Light brightness boost */
+}
+
+[data-map-name="Overworld 2"] {
+  filter: saturate(1.15) brightness(1.05); /* Slightly higher saturation */
+}
+
+[data-map-name="Overworld 3"] {
+  filter: saturate(1.3) brightness(1.1); /* Higher saturation to prevent muted appearance */
+}
+
+/* Desert maps need warmer tones */
+[data-map-name="Desert 1"],
+[data-map-name="Desert 2"],
+[data-map-name="Desert 3"] {
+  filter: saturate(1.2) brightness(1.1) sepia(0.15); /* Add sepia for warmer desert feel */
+}
+
+/* Yosemite should be vibrant and natural */
+[data-map-name="Yosemite"] {
+  filter: saturate(1.25) brightness(1.15) hue-rotate(-5deg); /* Slight hue shift toward green */
+}
+
+/* Enhanced debugging grid for development - helps ensure tiles are properly aligned */
+.map-grid::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: var(--tile-size) var(--tile-size);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+/* Improve NPC elements for better visibility */
 .npc-sprite {
   transition: transform 0.2s ease-out;
 }
@@ -80,35 +123,99 @@
 
 /* Fallback styling for NPCs with missing sprites */
 .npc-sprite.using-fallback {
-  background-color: rgba(255, 215, 0, 0.3);
-  border-radius: 50% 50% 0 0;
-  border: 2px solid rgba(255, 215, 0, 0.7);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  filter: hue-rotate(-20deg) saturate(1.5) drop-shadow(0 0 5px gold);
 }
 
-/* Add specific styling for different NPC types */
-.npc-type-1 { /* Shakespeare */
-  filter: drop-shadow(0 0 5px rgba(230, 230, 250, 0.7));
+/* Mobile responsiveness adjustments */
+@media (max-width: 768px) {
+  .map {
+    min-height: 400px;
+  }
+  
+  .npc-name-label {
+    font-size: 8px;
+    padding: 1px 4px;
+  }
 }
 
-.npc-type-3 { /* Ada Lovelace */
-  filter: drop-shadow(0 0 5px rgba(173, 216, 230, 0.7));
+/* Ensure artifacts are visible on the map */
+.artifact-icon {
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.7));
+  transition: transform 0.2s ease;
 }
 
-.npc-type-4 { /* Lord Byron */
-  filter: drop-shadow(0 0 5px rgba(220, 20, 60, 0.7));
+.artifact-icon:hover {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.9));
 }
 
-.npc-type-7 { /* Zeus */
-  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.7));
+/* Special Yosemite map features */
+.yosemite-map .tile.water {
+  animation: waterfall 2s infinite linear;
+  background-image: url('/assets/tiles/water.webp');
+  filter: saturate(1.2) brightness(1.1);
+  box-shadow: 0 0 15px rgba(62, 125, 240, 0.6);
 }
 
-.npc-type-9 { /* Jesus */
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.9));
+@keyframes waterfall {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 200%;
+  }
 }
 
-.npc-type-unknown {
-  filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.7));
+.yosemite-map .tile.grass {
+  background-image: url('/assets/tiles/piskel_grass.png');
+  filter: saturate(1.3) brightness(1.1);
+  transition: all 0.3s ease;
+}
+
+.yosemite-map .tile.wall {
+  background-image: url('/assets/tiles/wall.webp');
+  filter: contrast(1.2) brightness(1.1);
+  box-shadow: 0 0 10px rgba(110, 110, 110, 0.4);
+}
+
+/* Half Dome effect for walls around the Half Dome coordinates */
+.yosemite-map .tile.wall.half-dome {
+  filter: contrast(1.5) brightness(1.2);
+  box-shadow: 0 0 15px rgba(255, 217, 179, 0.5);
+}
+
+/* Mist trail effect */
+.yosemite-map .tile.water.mist-trail {
+  animation: mistTrail 3s infinite alternate;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes mistTrail {
+  0% {
+    filter: brightness(1) blur(1px);
+    opacity: 0.8;
+  }
+  100% {
+    filter: brightness(1.5) blur(2px);
+    opacity: 1;
+  }
+}
+
+/* Add ambient animation for the entire Yosemite map */
+.yosemite-map {
+  animation: yosemiteAmbient 60s infinite alternate linear;
+}
+
+@keyframes yosemiteAmbient {
+  0% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  50% {
+    filter: hue-rotate(5deg) brightness(1.05);
+  }
+  100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
 }
 
 /* Add a subtle shadow to the map container */

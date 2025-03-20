@@ -452,20 +452,49 @@ const GameWorld = () => {
     const row = Math.floor(characterPosition.y / TILE_SIZE);
     const col = Math.floor(characterPosition.x / TILE_SIZE);
     
+    // Map-specific portal handling
     if (MAPS[currentMapIndex].data[row][col] === 5) {
-      if (currentMapIndex < MAPS.length - 1) {
+      // Get current map name for better context
+      const currentMapName = MAPS[currentMapIndex].name;
+      
+      // Define destination based on current map - making progression more logical
+      let destinationMap = null;
+      let spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE }; // Default spawn
+      
+      // Logical world progression paths
+      if (currentMapName === "Overworld") {
+        destinationMap = "Overworld 2";
+        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+      } 
+      else if (currentMapName === "Overworld 2") {
+        destinationMap = "Overworld 3";
+        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+      }
+      else if (currentMapName === "Overworld 3") {
+        destinationMap = "Yosemite";
+        spawnPosition = { x: 10 * TILE_SIZE, y: 15 * TILE_SIZE };
+      }
+      else if (currentMapName === "Desert 1") {
+        // Allow return path from Desert back to Overworld 3
+        destinationMap = "Overworld 3";
+        spawnPosition = { x: 15 * TILE_SIZE, y: 10 * TILE_SIZE };
+      }
+      
+      // Find the index of the destination map
+      const destinationIndex = MAPS.findIndex(map => map.name === destinationMap);
+      
+      if (destinationIndex !== -1) {
         // Play random portal sound (30% chance of toilet flush)
         playRandomPortalSound(0.3).catch(err => console.error("Error playing portal sound:", err));
         
         // Change map
-        setCurrentMapIndex((prev) => prev + 1);
-        setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
+        setCurrentMapIndex(destinationIndex);
+        setCharacterPosition(spawnPosition);
         
         // Announce the world name
-        const nextWorldName = MAPS[currentMapIndex + 1].name;
         const portalAnnouncement = document.createElement('div');
         portalAnnouncement.className = 'world-announcement';
-        portalAnnouncement.innerHTML = `<h2>Welcome to ${nextWorldName}</h2>`;
+        portalAnnouncement.innerHTML = `<h2>Welcome to ${destinationMap}</h2>`;
         document.body.appendChild(portalAnnouncement);
         
         // Remove the announcement after a few seconds
@@ -475,9 +504,18 @@ const GameWorld = () => {
             document.body.removeChild(portalAnnouncement);
           }, 1000);
         }, 3000);
+        
+        // Check if this is the path to Yosemite (Level 1 completion)
+        if (destinationMap === "Yosemite") {
+          // Add slight delay to show portal transition first
+          setTimeout(() => {
+            handleLevelCompletion('level1');
+          }, 800);
+        }
       }
     }
     
+    // Special portal (code 6) handling for Level 4
     if (MAPS[currentMapIndex].data[row][col] === 6) {
       if (levelCompletion.level3) {
         // Play random portal sound with higher chance of toilet flush for special portal
@@ -488,9 +526,8 @@ const GameWorld = () => {
       }
     }
     
-    if (currentMapIndex === 0 && row === 17 && col === 19) {
-      handleLevelCompletion('level1');
-    } else if (currentMapIndex === 1 && row === 0 && col === 19) {
+    // Legacy level completion logic (for backwards compatibility)
+    if (currentMapIndex === 1 && row === 0 && col === 19) {
       handleLevelCompletion('level2');
     } else if (currentMapIndex === 2 && !levelCompletion.level3 && character?.qualifyingArtifacts?.level3) {
       handleLevelCompletion('level3');

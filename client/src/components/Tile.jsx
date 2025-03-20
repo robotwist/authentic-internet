@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { TILE_TYPES } from './Constants';
 import './Tile.css';
 
-const Tile = ({ type, x, y, size = 64, onClick, className = '' }) => {
+const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imagePath, setImagePath] = useState('');
 
@@ -55,45 +55,54 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '' }) => {
     };
   }, [type]);
 
-  const getTileClass = () => {
-    switch (type) {
-      case 0: // grass
-        return 'grass';
-      case 1: // wall
-        return 'wall';
-      case 2: // water
-        return 'water';
-      case 3: // sand
-        return 'sand';
-      case 4: // dungeon
-        return 'dungeon';
-      case 5: // portal
-        return 'portal';
-      default:
-        return `tile-${TILE_TYPES[type] || 'unknown'}`;
+  // Determine if this portal leads to a specific area
+  const getPortalDestination = () => {
+    if (type !== 5) return null;
+    
+    // Determine where this portal leads based on map and coordinates
+    if (mapName === "Overworld" && x === 8 && y === 11) {
+      return "overworld2";
+    } else if (mapName === "Overworld 2" && x === 8 && y === 6) {
+      return "overworld3";
+    } else if (mapName === "Overworld 3" && x === 8 && y === 1) {
+      return "yosemite";
     }
+    
+    return null;
   };
+
+  // Get portal level for styling
+  const getPortalLevel = () => {
+    const destination = getPortalDestination();
+    if (destination === "yosemite") return 1;
+    if (destination === "overworld3") return 2;
+    if (destination === "desert1") return 3;
+    return null;
+  };
+
+  // Generate additional classes and attributes for portals
+  const portalDestination = type === 5 ? getPortalDestination() : null;
+  const portalLevel = type === 5 ? getPortalLevel() : null;
+  const portalClasses = portalDestination ? `portal-to-${portalDestination}` : '';
+  const isYosemitePortal = portalDestination === "yosemite";
 
   return (
     <div
-      className={`tile ${getTileClass()} ${className} ${!imageLoaded ? 'image-loading' : ''}`}
+      className={`tile ${TILE_TYPES[type] || 'unknown'} ${imageLoaded ? '' : 'image-loading'} ${className} ${portalClasses} ${isYosemitePortal ? 'yosemite-portal' : ''}`}
       style={{
-        width: `${size}px`,
-        height: `${size}px`,
-        backgroundImage: imageLoaded ? `url(${imagePath})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        position: 'absolute',
         left: `${x * size}px`,
         top: `${y * size}px`,
-        zIndex: type === 5 ? 10 : 1, // Increased z-index for portal
-        transition: type === 5 ? 'all 0.3s ease-in-out' : 'all 0.2s ease-in-out', // Smoother transition for portals
+        width: `${size}px`,
+        height: `${size}px`,
+        backgroundImage: imageLoaded ? `url(${imagePath})` : 'none'
       }}
       onClick={onClick}
+      data-coords={`${x},${y}`}
       data-tile-type={type}
+      data-portal-destination={portalDestination}
+      data-level={portalLevel}
     >
-      {/* For portal tiles, add inner elements for immediate vortex effect */}
+      {/* Inner elements for immediate portal visibility */}
       {type === 5 && (
         <>
           <div className="portal-inner-vortex"></div>
@@ -110,7 +119,8 @@ Tile.propTypes = {
   y: PropTypes.number.isRequired,
   size: PropTypes.number,
   onClick: PropTypes.func,
-  className: PropTypes.string
+  className: PropTypes.string,
+  mapName: PropTypes.string
 };
 
 export default Tile; 

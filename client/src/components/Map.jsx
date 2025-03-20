@@ -131,6 +131,7 @@ const Map = ({
                 ${isMistTrail(x, y) ? 'mist-trail' : ''}
                 ${isYosemiteFalls(x, y) ? 'yosemite-falls' : ''}
               `}
+              mapName={mapName}
             />
           ))
         ))}
@@ -146,99 +147,34 @@ const Map = ({
 
         {/* Render NPCs with improved visibility */}
         {npcs?.map(npc => {
-          // Extract the correct position values
-          const posX = npc.position.x !== undefined ? npc.position.x : 
-                      (npc.position ? parseInt(npc.position.x, 10) : 0);
-          const posY = npc.position.y !== undefined ? npc.position.y : 
-                      (npc.position ? parseInt(npc.position.y, 10) : 0);
+          if (!npc.position) return null;
           
-          // Determine sprite URL with improved fallback
-          let spriteUrl = npc.sprite;
-          let isUsingFallback = false;
-          
-          if (!spriteUrl) {
-            isUsingFallback = true;
-            // Improved fallback logic based on files that actually exist
-            switch (npc.type) {
-              case 'shakespeare':
-              case 1:
-                spriteUrl = '/assets/npcs/shakespeare.webp';
-                break;
-              case 'artist':
-              case 2:
-                spriteUrl = '/assets/npcs/artist.svg';
-                break;
-              case 'ada_lovelace':
-              case 3:
-                spriteUrl = '/assets/npcs/ada_lovelace.png';
-                break;
-              case 'lord_byron':
-              case 4:
-                spriteUrl = '/assets/npcs/lord_byron.webp';
-                break;
-              case 'oscar_wilde':
-              case 5:
-                spriteUrl = '/assets/npcs/oscar_wilde.svg';
-                break;
-              case 'alexander_pope':
-              case 6:
-                spriteUrl = '/assets/npcs/alexander_pope.svg';
-                break;
-              case 'zeus':
-              case 7:
-                spriteUrl = '/assets/npcs/zeus.svg';
-                break;
-              case 'john_muir':
-              case 8:
-                spriteUrl = '/assets/npcs/john_muir.png';
-                break;
-              case 'jesus':
-              case 9:
-                spriteUrl = '/assets/npcs/jesus.png';
-                break;
-              default:
-                // Default data URI fallback that will always work
-                spriteUrl = DEFAULT_NPC_SPRITE;
-                console.warn(`No sprite found for NPC type: ${npc.type}, using default`);
-                break;
-            }
-          }
+          const actualSprite = npc.sprite || DEFAULT_NPC_SPRITE;
+          const spriteStyle = {
+            position: 'absolute',
+            left: `${npc.position.x * TILE_SIZE}px`,
+            top: `${npc.position.y * TILE_SIZE}px`,
+            width: `${TILE_SIZE}px`,
+            height: `${TILE_SIZE}px`,
+            backgroundImage: `url('${actualSprite}')`,
+            backgroundSize: 'contain',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            zIndex: 20,
+            cursor: 'pointer',
+            filter: 'drop-shadow(0 0 5px rgba(255,255,100,0.5))',
+            transition: 'all 0.2s ease'
+          };
           
           return (
-            <div
-              key={npc._id || npc.id}
-              className={`npc-sprite npc-type-${npc.type || 'unknown'}${isUsingFallback ? ' using-fallback' : ''}`}
-              style={{
-                position: 'absolute',
-                left: `${posX}px`,
-                top: `${posY}px`,
-                width: `${TILE_SIZE}px`,
-                height: `${TILE_SIZE * 1.5}px`, // Make NPCs slightly taller for better visibility
-                backgroundImage: `url(${spriteUrl})`,
-                backgroundSize: 'contain',
-                backgroundPosition: 'center bottom',
-                backgroundRepeat: 'no-repeat',
-                cursor: 'pointer',
-                zIndex: 500, // Higher z-index to ensure visibility
-                filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.7))', // Add glow effect
-                transition: 'transform 0.3s ease, filter 0.3s ease',
-              }}
+            <div 
+              key={npc._id} 
+              className="npc-sprite"
+              style={spriteStyle}
               onClick={() => onNPCClick?.(npc)}
-              title={npc.name}
-              onError={(e) => {
-                console.error(`Failed to load NPC sprite: ${spriteUrl}`);
-                e.target.style.backgroundImage = `url(${DEFAULT_NPC_SPRITE})`;
-              }}
             >
-              {/* Add hover indicator */}
-              <div className="npc-indicator">
-                <span>Talk</span>
-              </div>
-              
-              {/* Add a name label to make NPCs more visible */}
-              <div className="npc-name-label">
-                {npc.name.split(' ')[0]}
-              </div>
+              <div className="npc-indicator">Click to talk</div>
+              <div className="npc-name-label">{npc.name || 'NPC'}</div>
             </div>
           );
         })}
