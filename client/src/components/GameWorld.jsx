@@ -318,9 +318,14 @@ const GameWorld = () => {
 
     console.log("📍 Checking for artifact at:", { x, y });
 
-    // Check server artifacts first
-    const serverArtifact = findArtifactAtLocation(x, y);
-
+    // Check server artifacts
+    const serverArtifact = artifacts && Array.isArray(artifacts) ? artifacts.find(
+      artifact => artifact && artifact.location && 
+      artifact.location.x === x && 
+      artifact.location.y === y &&
+      (!artifact.area || artifact.area === MAPS[currentMapIndex].name)
+    ) : null;
+    
     // Check map artifacts
     const mapArtifactIndex = MAPS[currentMapIndex].artifacts.findIndex(
       a => a?.location?.x === x && a?.location?.y === y && a.visible
@@ -431,12 +436,12 @@ const GameWorld = () => {
       );
       
       // Check server artifacts
-      const serverArtifact = artifacts.find(
-        artifact => artifact.location && 
+      const serverArtifact = artifacts && Array.isArray(artifacts) ? artifacts.find(
+        artifact => artifact && artifact.location && 
         artifact.location.x === playerX && 
         artifact.location.y === playerY &&
         (!artifact.area || artifact.area === MAPS[currentMapIndex].name)
-      );
+      ) : null;
       
       // Prioritize server artifacts (they might be more up-to-date)
       if (serverArtifact) {
@@ -791,9 +796,19 @@ const GameWorld = () => {
                 if (typeof npc.type === 'string' && !npc.sprite) {
                   // If type is a string but no sprite specified, make sure it maps to our sprite assets
                   // by adding a default sprite path based on type
+                  const npcType = npc.type.toLowerCase();
+                  let extension = 'png'; // Default extension
+                  
+                  // Determine the correct file extension based on NPC type
+                  if (['shakespeare', 'lord_byron'].includes(npcType)) {
+                    extension = 'webp';
+                  } else if (['artist', 'oscar_wilde', 'alexander_pope', 'zeus'].includes(npcType)) {
+                    extension = 'svg';
+                  }
+                  
                   return {
                     ...npc,
-                    sprite: `/assets/npcs/${npc.type.toLowerCase()}.${npc.type === 'shakespeare' || npc.type === 'lord_byron' ? 'webp' : npc.type === 'artist' || npc.type === 'oscar_wilde' || npc.type === 'alexander_pope' || npc.type === 'zeus' ? 'svg' : 'png'}`
+                    sprite: `/assets/npcs/${npcType}.${extension}`
                   };
                 }
                 return npc;
@@ -836,26 +851,33 @@ const GameWorld = () => {
               )}
               
               {/* Render server-defined artifacts */}
-              {artifacts
-                .filter(artifact => artifact.location && 
+              {artifacts && artifacts.length > 0 && artifacts
+                .filter(artifact => 
+                  artifact && artifact.location && 
                   // Only show server artifacts on the current map
-                  (!artifact.area || artifact.area === MAPS[currentMapIndex].name))
-                .map((artifact) => (
-                  <Artifact
-                    key={`server-artifact-${artifact.id}`}
-                    src={artifact.image}
-                    artifact={artifact}
-                    visible={artifact.id === visibleArtifact?.id}
-                    style={{
-                      position: "absolute",
-                      left: `${artifact.location.x * TILE_SIZE}px`,
-                      top: `${artifact.location.y * TILE_SIZE}px`,
-                      width: TILE_SIZE,
-                      height: TILE_SIZE,
-                      zIndex: 10000
-                    }}
-                  />
-                ))}
+                  (!artifact.area || artifact.area === MAPS[currentMapIndex].name)
+                )
+                .map((artifact) => {
+                  // Generate a stable key for the artifact
+                  const artifactKey = artifact._id || artifact.id || `artifact-${artifact.name}-${artifact.location.x}-${artifact.location.y}`;
+                  
+                  return (
+                    <Artifact
+                      key={`server-artifact-${artifactKey}`}
+                      src={artifact.image}
+                      artifact={artifact}
+                      visible={artifact.id === visibleArtifact?.id || artifact._id === visibleArtifact?._id}
+                      style={{
+                        position: "absolute",
+                        left: `${artifact.location.x * TILE_SIZE}px`,
+                        top: `${artifact.location.y * TILE_SIZE}px`,
+                        width: TILE_SIZE,
+                        height: TILE_SIZE,
+                        zIndex: 10000
+                      }}
+                    />
+                  );
+                })}
             </ErrorBoundary>
             
             {/* Add the DialogBox for NPC interaction */}

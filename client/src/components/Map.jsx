@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Tile from './Tile';
 import Artifact from './Artifact';
@@ -94,6 +94,52 @@ const Map = ({
     );
   };
 
+  // Memoize NPC rendering to avoid unnecessary re-renders
+  const renderNPCs = useMemo(() => {
+    if (!npcs || !Array.isArray(npcs)) return null;
+    
+    return npcs.map(npc => {
+      if (!npc || !npc.position) return null;
+      
+      const actualSprite = npc.sprite || DEFAULT_NPC_SPRITE;
+      const spriteStyle = {
+        position: 'absolute',
+        left: `${npc.position.x * TILE_SIZE}px`,
+        top: `${npc.position.y * TILE_SIZE}px`,
+        width: `${TILE_SIZE}px`,
+        height: `${TILE_SIZE}px`,
+        backgroundImage: `url('${actualSprite}')`,
+        backgroundSize: 'contain',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        zIndex: 20,
+        cursor: 'pointer',
+        filter: 'drop-shadow(0 0 5px rgba(255,255,100,0.5))',
+        transition: 'all 0.2s ease'
+      };
+      
+      // Create a stable, unique key that won't change between renders
+      const npcKey = npc._id || npc.id || `npc-${npc.name}-${npc.position.x}-${npc.position.y}`;
+      
+      return (
+        <div 
+          key={npcKey}
+          className="npc-sprite"
+          style={spriteStyle}
+          onClick={() => onNPCClick?.(npc)}
+          data-npc-type={npc.type?.toLowerCase?.() || 'generic'}
+        >
+          {/* Enhanced interaction indicator */}
+          <div className="npc-interaction-indicator">
+            <div className="npc-key-hint">Press 'T' to talk</div>
+            <div className="npc-indicator-arrow"></div>
+          </div>
+          <div className="npc-name-label">{npc.name || 'NPC'}</div>
+        </div>
+      );
+    });
+  }, [npcs, onNPCClick]);
+
   // Check if mapData is valid before rendering
   if (!mapData || !Array.isArray(mapData) || mapData.length === 0) {
     console.error("Invalid mapData provided to Map component:", mapData);
@@ -139,53 +185,14 @@ const Map = ({
         {/* Render artifacts */}
         {artifacts?.map(artifact => (
           <Artifact
-            key={artifact.id || artifact._id}
+            key={artifact.id || artifact._id || `artifact-${Math.random()}`}
             artifact={artifact}
             onInteract={() => onArtifactClick?.(artifact)}
           />
         ))}
 
         {/* Render NPCs with improved visibility and interaction indicators */}
-        {npcs?.map(npc => {
-          if (!npc.position) return null;
-          
-          const actualSprite = npc.sprite || DEFAULT_NPC_SPRITE;
-          const spriteStyle = {
-            position: 'absolute',
-            left: `${npc.position.x * TILE_SIZE}px`,
-            top: `${npc.position.y * TILE_SIZE}px`,
-            width: `${TILE_SIZE}px`,
-            height: `${TILE_SIZE}px`,
-            backgroundImage: `url('${actualSprite}')`,
-            backgroundSize: 'contain',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            zIndex: 20,
-            cursor: 'pointer',
-            filter: 'drop-shadow(0 0 5px rgba(255,255,100,0.5))',
-            transition: 'all 0.2s ease'
-          };
-          
-          // Create a stable, unique key that won't change between renders
-          const npcKey = npc._id || npc.id || `npc-${npc.name}-${npc.position.x}-${npc.position.y}`;
-          
-          return (
-            <div 
-              key={npcKey}
-              className="npc-sprite"
-              style={spriteStyle}
-              onClick={() => onNPCClick?.(npc)}
-              data-npc-type={npc.type?.toLowerCase?.() || 'generic'}
-            >
-              {/* Enhanced interaction indicator */}
-              <div className="npc-interaction-indicator">
-                <div className="npc-key-hint">Press 'T' to talk</div>
-                <div className="npc-indicator-arrow"></div>
-              </div>
-              <div className="npc-name-label">{npc.name || 'NPC'}</div>
-            </div>
-          );
-        })}
+        {renderNPCs}
       </div>
     </div>
   );
