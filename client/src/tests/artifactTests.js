@@ -8,6 +8,12 @@ const testArtifactUpdate = async () => {
   console.log('🧪 Testing Artifact Update Functionality');
   console.log('=======================================');
   
+  // Save original token if it exists
+  const originalToken = localStorage.getItem('token');
+  
+  // Set a mock token for testing
+  localStorage.setItem('token', 'mock-test-token-12345');
+  
   try {
     // First, test a basic JSON update without file attachment
     await testBasicUpdate();
@@ -18,6 +24,13 @@ const testArtifactUpdate = async () => {
     console.log('✅ All artifact update tests completed successfully!');
   } catch (error) {
     console.error('❌ Artifact update test failed:', error.message);
+  } finally {
+    // Restore the original token state
+    if (originalToken) {
+      localStorage.setItem('token', originalToken);
+    } else {
+      localStorage.removeItem('token');
+    }
   }
 };
 
@@ -38,9 +51,15 @@ const testBasicUpdate = async () => {
     // Mock the API response
     const originalAPI = window.API;
     window.API = {
-      put: async (url, data) => {
+      put: async (url, data, config) => {
         console.log(`Mock API PUT request to ${url}`);
         console.log('Request data:', data);
+        console.log('Request config:', config);
+        
+        // Check for authentication token in the request
+        if (!config || !config.headers || !config.headers.Authorization) {
+          throw new Error('No authentication token provided in request');
+        }
         
         // Validate the request URL
         if (!url.includes(artifactId)) {
@@ -111,6 +130,11 @@ const testFileAttachmentUpdate = async () => {
       put: async (url, data, config) => {
         console.log(`Mock API PUT request to ${url}`);
         
+        // Check for authentication token in the request
+        if (!config || !config.headers || !config.headers.Authorization) {
+          throw new Error('No authentication token provided in request');
+        }
+        
         // Check if data is FormData
         if (!(data instanceof FormData)) {
           throw new Error('Update data should be FormData for file uploads');
@@ -167,4 +191,5 @@ const testFileAttachmentUpdate = async () => {
   }
 };
 
-export { testArtifactUpdate }; 
+// Export functions for use in test runner
+export { testArtifactUpdate, testBasicUpdate, testFileAttachmentUpdate }; 

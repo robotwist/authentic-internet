@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentic Internet API Tests</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: #f5f5f5;
+    }
+    header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    .test-container {
+      background-color: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+    .test-output {
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .success { color: #28a745; }
+    .error { color: #dc3545; }
+    .info { color: #17a2b8; }
+    .warning { color: #ffc107; }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Authentic Internet API Tests</h1>
+  </header>
+
+  <div class="test-container">
+    <h2>Artifact API Tests</h2>
+    <p>Tests for artifact CRUD operations, including updates with and without file attachments.</p>
+    <button id="runArtifactTests">Run Artifact Tests</button>
+    <div class="test-output" id="artifactTestOutput">Click the button above to run the tests...</div>
+  </div>
+
+  <script type="module">
+    // Import the test modules
+    import { testArtifactUpdate } from '../src/tests/artifactTests.js';
+    
+    // Function to capture console output and display it in the test output container
+    function setupConsoleCapture(elementId) {
+      const outputElement = document.getElementById(elementId);
+      
+      // Save original console methods
+      const originalLog = console.log;
+      const originalError = console.error;
+      const originalWarn = console.warn;
+      const originalInfo = console.info;
+      
+      // Override console methods to capture output
+      console.log = function(message, ...args) {
+        originalLog.apply(console, [message, ...args]);
+        const formattedMsg = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
+        outputElement.innerHTML += `<div>${formattedMsg}</div>`;
+        outputElement.scrollTop = outputElement.scrollHeight;
+      };
+      
+      console.error = function(message, ...args) {
+        originalError.apply(console, [message, ...args]);
+        const formattedMsg = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
+        outputElement.innerHTML += `<div class="error">${formattedMsg}</div>`;
+        outputElement.scrollTop = outputElement.scrollHeight;
+      };
+      
+      console.warn = function(message, ...args) {
+        originalWarn.apply(console, [message, ...args]);
+        const formattedMsg = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
+        outputElement.innerHTML += `<div class="warning">${formattedMsg}</div>`;
+        outputElement.scrollTop = outputElement.scrollHeight;
+      };
+      
+      console.info = function(message, ...args) {
+        originalInfo.apply(console, [message, ...args]);
+        const formattedMsg = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
+        outputElement.innerHTML += `<div class="info">${formattedMsg}</div>`;
+        outputElement.scrollTop = outputElement.scrollHeight;
+      };
+      
+      return function restoreConsole() {
+        console.log = originalLog;
+        console.error = originalError;
+        console.warn = originalWarn;
+        console.info = originalInfo;
+      };
+    }
+    
+    // Setup event listener for artifact tests
+    document.getElementById('runArtifactTests').addEventListener('click', async () => {
+      const outputElement = document.getElementById('artifactTestOutput');
+      outputElement.innerHTML = 'Running tests...\n\n';
+      
+      // Capture console output
+      const restoreConsole = setupConsoleCapture('artifactTestOutput');
+      
+      try {
+        // Mock the API object for testing
+        if (!window.API) {
+          window.API = {};
+        }
+        
+        // Run the artifact update tests
+        await testArtifactUpdate();
+        
+        console.log('\n✅ Test run completed successfully!');
+      } catch (error) {
+        console.error('\n❌ Test run failed:', error.message);
+      } finally {
+        // Restore console
+        restoreConsole();
+      }
+    });
+  </script>
+</body>
+</html> 
