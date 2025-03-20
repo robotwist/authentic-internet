@@ -56,6 +56,12 @@
     button:hover {
       background-color: #45a049;
     }
+    button.game-test {
+      background-color: #007bff;
+    }
+    button.game-test:hover {
+      background-color: #0069d9;
+    }
   </style>
 </head>
 <body>
@@ -69,10 +75,18 @@
     <button id="runArtifactTests">Run Artifact Tests</button>
     <div class="test-output" id="artifactTestOutput">Click the button above to run the tests...</div>
   </div>
+  
+  <div class="test-container">
+    <h2>End-to-End Game Test</h2>
+    <p>Comprehensive test that simulates a player progressing through the entire game, testing all game mechanics, NPC interactions, and level completions.</p>
+    <button id="runGameTests" class="game-test">Run Complete Game Test</button>
+    <div class="test-output" id="gameTestOutput">Click the button above to run the complete game test...</div>
+  </div>
 
   <script type="module">
     // Import the test modules
     import { testArtifactUpdate } from '../src/tests/artifactTests.js';
+    import { runE2EGameTest } from '../src/tests/e2eGameTest.js';
     
     // Function to capture console output and display it in the test output container
     function setupConsoleCapture(elementId) {
@@ -141,6 +155,33 @@
         console.log('\n✅ Test run completed successfully!');
       } catch (error) {
         console.error('\n❌ Test run failed:', error.message);
+      } finally {
+        // Restore console
+        restoreConsole();
+      }
+    });
+    
+    // Setup event listener for end-to-end game tests
+    document.getElementById('runGameTests').addEventListener('click', async () => {
+      const outputElement = document.getElementById('gameTestOutput');
+      outputElement.innerHTML = 'Running game tests...\n\n';
+      
+      // Capture console output
+      const restoreConsole = setupConsoleCapture('gameTestOutput');
+      
+      try {
+        // Mock the API object for testing if needed
+        if (!window.API) {
+          window.API = {};
+        }
+        
+        // Run the end-to-end game test
+        await runE2EGameTest();
+        
+        console.log('\n✅ Game test run completed successfully!');
+      } catch (error) {
+        console.error('\n❌ Game test run failed:', error.message);
+        console.error('Error details:', error.stack || 'No stack trace available');
       } finally {
         // Restore console
         restoreConsole();

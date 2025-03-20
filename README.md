@@ -97,10 +97,29 @@ We've implemented a browser-based test suite to verify API functionality:
 
 3. Click the "Run Artifact Tests" button to execute tests for artifact operations.
 
-The test suite includes:
+The API test suite includes:
 - Basic update tests (JSON data)
 - File attachment update tests (FormData)
 - Proper authentication token handling
+
+### Running End-to-End Game Tests
+
+We've also implemented a comprehensive end-to-end test that simulates a player going through the entire game:
+
+1. Navigate to the run-tests page as described above
+2. Click the "Run Complete Game Test" button
+
+The end-to-end game test covers:
+- Character movement in all directions
+- NPC interactions (finding NPCs, dialogue system)
+- Inventory management
+- Artifact collection and creation
+- World map navigation
+- Portal transitions between maps
+- Level completion conditions for all levels
+- Final challenge completion
+
+This test helps ensure that all game mechanics are working correctly and that players can progress through the entire game experience.
 
 ### Troubleshooting Tests
 
@@ -108,6 +127,11 @@ If you encounter the error "Basic update test failed = error denied - no token p
 - Make sure the test runner is properly setting the mock authentication token
 - Check your browser console for more detailed error messages
 - Verify that the API endpoints are correctly configured for authentication
+
+For game test errors:
+- Make sure all game assets (sprites, maps, sounds) are properly loaded
+- Check the DOM structure matches what the tests are looking for (class names, element hierarchy)
+- Review the specific test stage where the failure occurred for more details
 
 ## Deployment
 
