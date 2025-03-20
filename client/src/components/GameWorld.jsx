@@ -13,6 +13,7 @@ import Inventory from "./Inventory";
 import ErrorBoundary from "./ErrorBoundary";
 import Map from "./Map";
 import WorldMap from "./WorldMap";
+import FeedbackForm from "./FeedbackForm";
 import useCharacterMovement from "./CharacterMovement";
 import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS, isWalkable } from "./Constants";
 import { initSounds, playRandomPortalSound, playSound } from "../utils/soundEffects";
@@ -36,6 +37,7 @@ const GameWorld = () => {
   const [showForm, setShowForm] = useState(false);
   const [showQuotes, setShowQuotes] = useState(false);
   const [showWorldMap, setShowWorldMap] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [formPosition, setFormPosition] = useState({ x: 0, y: 0 });
   const [visibleArtifact, setVisibleArtifact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -212,6 +214,14 @@ const GameWorld = () => {
         // Play a sound when toggling the map
         playSound('pickup', 0.3).catch(err => console.error("Error playing sound:", err));
       }
+
+      // Toggle feedback form with 'F' key
+      if (event.key === 'f' || event.key === 'F') {
+        setShowFeedback(prev => !prev);
+        
+        // Play a sound when toggling the feedback form
+        playSound('pickup', 0.3).catch(err => console.error("Error playing sound:", err));
+      }
     };
 
     // Add event listeners
@@ -219,13 +229,19 @@ const GameWorld = () => {
     window.addEventListener('showQuotes', handleShowQuotes);
     window.addEventListener('keydown', handleKeyDown);
 
+    // Store game state in window object for access by feedback form
+    window.gameState = {
+      currentMapIndex,
+      characterLevel: character?.level || 1
+    };
+
     // Clean up event listeners on component unmount
     return () => {
       window.removeEventListener('showInventory', handleShowInventory);
       window.removeEventListener('showQuotes', handleShowQuotes);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [currentMapIndex, character]);
 
   useEffect(() => {
     // Initialize sound effects when component mounts
@@ -913,6 +929,11 @@ const GameWorld = () => {
           />
         )}
         
+        {/* Display feedback form when toggled */}
+        {showFeedback && (
+          <FeedbackForm onClose={() => setShowFeedback(false)} />
+        )}
+        
         {showWinNotification && (
           <div className="win-notification">
             <div className="win-content">
@@ -956,10 +977,16 @@ const GameWorld = () => {
           />      
         )}
 
+        {/* Feedback button */}
+        <div className="feedback-button" onClick={() => setShowFeedback(true)}>
+          <span role="img" aria-label="Feedback">💬</span>
+          <span className="feedback-text">Feedback</span>
+        </div>
+
         {/* Map key hint - only shown when there's no other overlay */}
-        {!showInventory && !showForm && !showQuotes && !showWorldMap && !showWinNotification && !showRewardModal && !showLevel4 && (
+        {!showInventory && !showForm && !showQuotes && !showWorldMap && !showWinNotification && !showRewardModal && !showLevel4 && !showFeedback && (
           <div className="map-key-hint">
-            Press 'M' to view World Map
+            Press 'M' to view World Map | Press 'F' for Feedback
           </div>
         )}
       </div>

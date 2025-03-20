@@ -1273,3 +1273,52 @@
     transform: translateY(-3px);
   }
 }
+
+/* Feedback button */
+.feedback-button {
+  position: fixed;
+  right: 20px;
+  bottom: 70px;
+  background-color: #4a7dff;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+  transition: all 0.2s ease;
+}
+
+.feedback-button:hover {
+  background-color: #3a6ae8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.feedback-button:active {
+  transform: translateY(0px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.feedback-text {
+  display: block;
+}
+
+/* On small screens, just show the icon */
+@media (max-width: 480px) {
+  .feedback-button {
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    border-radius: 50%;
+    padding: 0;
+  }
+  
+  .feedback-text {
+    display: none;
+  }
+}
