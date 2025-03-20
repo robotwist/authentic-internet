@@ -18,6 +18,7 @@ import errorMonitor from './utils/errorMonitor';
 import deploymentVerifier from './utils/deploymentVerifier';
 import { logBuildInfo } from './buildInfo';
 import DeploymentStatus from './components/DeploymentStatus';
+import TextAdventure from './components/TextAdventure';
 import './App.css';
 
 // Configure future flags for React Router v7
@@ -30,6 +31,8 @@ const routerOptions = {
 function App() {
   const [deploymentStatus, setDeploymentStatus] = useState(null);
   const [showDeploymentStatus, setShowDeploymentStatus] = useState(false);
+  const [world, setWorld] = useState('desert1');
+  const [user, setUser] = useState(null);
 
   // Initialize error monitor and log build info
   useEffect(() => {
@@ -79,6 +82,25 @@ function App() {
       clearInterval(interval);
     };
   }, []);
+
+  const handleWorldChange = (worldId) => {
+    // ... existing code ...
+    
+    // Add handling for Hemingway's Adventure and Text Adventure
+    if (worldId === 'hemingway') {
+      return <Level4Shooter onComplete={() => setWorld('desert1')} onExit={() => setWorld('desert1')} />;
+    }
+    
+    if (worldId === 'text_adventure') {
+      return <TextAdventure 
+        username={user?.username || 'traveler'}
+        onComplete={() => setWorld('dungeon3')} 
+        onExit={() => setWorld('dungeon3')} 
+      />;
+    }
+    
+    // ... existing code ...
+  };
 
   return (
     <ErrorBoundary>

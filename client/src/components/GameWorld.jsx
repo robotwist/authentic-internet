@@ -26,6 +26,7 @@ import SavedQuotes from "./SavedQuotes";
 import Level4Shooter from "./Level4Shooter";
 import RewardModal from "./RewardModal";
 import DialogBox from './DialogBox';
+import TextAdventure from './TextAdventure';
 
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
@@ -55,6 +56,7 @@ const GameWorld = () => {
   const [currentAchievement, setCurrentAchievement] = useState('');
   const [activeNPC, setActiveNPC] = useState(null);
   const [showNPCDialog, setShowNPCDialog] = useState(false);
+  const [currentSpecialWorld, setCurrentSpecialWorld] = useState(null);
 
   useEffect(() => {
     // Load and apply saved artifact visibility state
@@ -800,6 +802,45 @@ const GameWorld = () => {
     setActiveNPC(null);
   };
 
+  // Add a handler for the World Map node click
+  const handleWorldMapNodeClick = (worldId) => {
+    // Check if it's a special world type
+    if (worldId === 'hemingway') {
+      setCurrentSpecialWorld('hemingway');
+      setShowWorldMap(false);
+    } else if (worldId === 'text_adventure') {
+      setCurrentSpecialWorld('text_adventure');
+      setShowWorldMap(false);
+    } else {
+      // Handle normal world navigation here
+      // (This would depend on your existing world navigation logic)
+      setShowWorldMap(false);
+    }
+  };
+
+  // Add handlers for exiting special worlds
+  const handleHemingwayComplete = () => {
+    setCurrentSpecialWorld(null);
+    // Give rewards, etc.
+    setCurrentAchievement('Completed Hemingway\'s Adventure');
+    setShowRewardModal(true);
+  };
+
+  const handleHemingwayExit = () => {
+    setCurrentSpecialWorld(null);
+  };
+
+  const handleTextAdventureComplete = () => {
+    setCurrentSpecialWorld(null);
+    // Give rewards, etc.
+    setCurrentAchievement('Completed The Writer\'s Journey');
+    setShowRewardModal(true);
+  };
+
+  const handleTextAdventureExit = () => {
+    setCurrentSpecialWorld(null);
+  };
+
   return (
     <ErrorBoundary>
       <div className="game-container">
@@ -924,8 +965,9 @@ const GameWorld = () => {
         {/* Display world map when toggled */}
         {showWorldMap && (
           <WorldMap 
-            currentWorld={MAPS[currentMapIndex].name}
+            currentWorld={MAPS[currentMapIndex].name} 
             onClose={() => setShowWorldMap(false)}
+            onNodeClick={handleWorldMapNodeClick}
           />
         )}
         
@@ -988,6 +1030,21 @@ const GameWorld = () => {
           <div className="map-key-hint">
             Press 'M' to view World Map | Press 'F' for Feedback
           </div>
+        )}
+
+        {currentSpecialWorld === 'hemingway' && (
+          <Level4Shooter 
+            onComplete={handleHemingwayComplete}
+            onExit={handleHemingwayExit}
+          />
+        )}
+
+        {currentSpecialWorld === 'text_adventure' && (
+          <TextAdventure 
+            username={character?.username || 'traveler'}
+            onComplete={handleTextAdventureComplete}
+            onExit={handleTextAdventureExit}
+          />
         )}
       </div>
     </ErrorBoundary>

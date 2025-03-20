@@ -1204,13 +1204,24 @@ export const NPCs = {
 // World map structure to visualize connections between worlds
 export const WORLD_MAP = {
   structure: [
-    { id: 'overworld', name: 'Overworld', x: 200, y: 100, connections: ['overworld2'] },
+    { id: 'overworld', name: 'Overworld', x: 200, y: 100, connections: ['overworld2', 'dungeon1'] },
     { id: 'overworld2', name: 'Overworld 2', x: 350, y: 200, connections: ['overworld', 'overworld3'] },
     { id: 'overworld3', name: 'Overworld 3', x: 500, y: 100, connections: ['overworld2', 'desert1'] },
-    { id: 'desert1', name: 'Desert 1', x: 650, y: 200, connections: ['overworld3', 'desert2', 'yosemite'] },
+    { id: 'desert1', name: 'Desert 1', x: 650, y: 200, connections: ['overworld3', 'desert2', 'yosemite', 'hemingway'] },
     { id: 'desert2', name: 'Desert 2', x: 800, y: 100, connections: ['desert1', 'desert3'] },
     { id: 'desert3', name: 'Desert 3', x: 950, y: 200, connections: ['desert2'] },
-    { id: 'yosemite', name: 'Yosemite', x: 650, y: 350, connections: ['desert1'] }
+    { id: 'yosemite', name: 'Yosemite', x: 650, y: 350, connections: ['desert1'] },
+    
+    // New dungeon levels
+    { id: 'dungeon1', name: 'Dungeon Level 1', x: 200, y: 250, connections: ['overworld', 'dungeon2'], type: 'dungeon' },
+    { id: 'dungeon2', name: 'Dungeon Level 2', x: 150, y: 350, connections: ['dungeon1', 'dungeon3'], type: 'dungeon' },
+    { id: 'dungeon3', name: 'Dungeon Level 3', x: 250, y: 450, connections: ['dungeon2', 'text_adventure'], type: 'dungeon' },
+    
+    // Hemingway's adventure
+    { id: 'hemingway', name: 'Hemingway\'s Adventure', x: 800, y: 300, connections: ['desert1'], type: 'special' },
+    
+    // Text-based adventure
+    { id: 'text_adventure', name: 'Text Adventure', x: 400, y: 450, connections: ['dungeon3'], type: 'text' }
   ],
   mapToId: {
     'Overworld': 'overworld',
@@ -1219,6 +1230,11 @@ export const WORLD_MAP = {
     'Desert 1': 'desert1',
     'Desert 2': 'desert2',
     'Desert 3': 'desert3',
-    'Yosemite': 'yosemite'
+    'Yosemite': 'yosemite',
+    'Dungeon Level 1': 'dungeon1',
+    'Dungeon Level 2': 'dungeon2',
+    'Dungeon Level 3': 'dungeon3',
+    'Hemingway\'s Adventure': 'hemingway',
+    'Text Adventure': 'text_adventure'
   }
 };
