@@ -1,3 +1,6 @@
 Are we able to win the game at level 1 and 2 and 3? 
 I would like to make level 4 a side scrolling shooter like Contra where user fights alongside Ernest Hemingway.
 https://www.reinerstilesets.de/graphics/texturen/ground/
+est exp for different areas, one will be a funny random exp category will people will get funny and bizarre levels of exp.
+All NPCs need to be visible, have proper dialogue and proper sprite
+When is token applied for use of making 2nd artifact.

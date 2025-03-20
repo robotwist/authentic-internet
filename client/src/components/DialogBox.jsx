@@ -58,32 +58,38 @@ const DialogBox = ({ npc, onClose }) => {
     }
   };
 
+  const handleBackgroundClick = (e) => {
+    // Implement background click handling if needed
+  };
+
+  const stopPropagation = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div 
-      className="dialog-overlay" 
-      data-npc-type={npc?.type?.toLowerCase()} // Add data attribute for CSS styling
-    >
-      <div className="dialog-box">
+    <div className="dialog-overlay" onClick={handleBackgroundClick}>
+      <div 
+        className="dialog-box" 
+        onClick={stopPropagation}
+        data-npc-type={npc?.type?.toLowerCase?.()}
+      >
         <div className="dialog-header">
-          <h3>{npc?.name || 'NPC'}</h3>
+          <h2>{npc?.name || 'NPC'}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
-        
         <div className="dialog-content">
-          <div className={`npc-message ${isTyping ? 'typing' : ''}`}>
-            {displayedText}
-            {isTyping && <span className="typing-cursor">|</span>}
-          </div>
+          <p>{isTyping ? displayedText : currentDialogue}</p>
         </div>
-        
-        <div className="dialog-footer">
-          <button 
-            className="dialog-btn" 
-            onClick={handleNext}
-          >
-            {isTyping ? 'Skip' : 
-              (currentDialogueIndex < dialogueArray.length - 1 ? 'Next' : 'Close')}
-          </button>
+        <div className="dialog-actions">
+          {currentDialogueIndex < dialogueArray.length - 1 ? (
+            <button className="dialog-btn" onClick={handleNext} disabled={isTyping}>
+              Next
+            </button>
+          ) : (
+            <button className="dialog-btn" onClick={onClose} disabled={isTyping}>
+              Close
+            </button>
+          )}
         </div>
       </div>
     </div>

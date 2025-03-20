@@ -133,7 +133,7 @@
 }
 
 /* Enhance styling for guide NPCs */
-.dialog-overlay[data-npc-type="guide"] .dialog-header {
+.dialog-box[data-npc-type="guide"] .dialog-header {
   background-color: rgba(0, 80, 255, 0.2);
   border-bottom: 1px solid #4080ff;
   padding: 10px 15px;
@@ -141,12 +141,12 @@
   border-radius: 4px 4px 0 0;
 }
 
-.dialog-overlay[data-npc-type="guide"] .dialog-header h3 {
+.dialog-box[data-npc-type="guide"] .dialog-header h2 {
   color: #4080ff;
   text-shadow: 0 0 5px rgba(0, 100, 255, 0.5);
 }
 
-.dialog-overlay[data-npc-type="guide"] .dialog-content {
+.dialog-box[data-npc-type="guide"] .dialog-content {
   background-color: rgba(0, 50, 150, 0.1);
   border-left: 3px solid #4080ff;
   padding: 10px;
@@ -154,7 +154,7 @@
   border-radius: 0 4px 4px 0;
 }
 
-.dialog-overlay[data-npc-type="guide"] .dialog-actions button {
+.dialog-box[data-npc-type="guide"] .dialog-actions button {
   background-color: #4080ff;
   color: white;
   border: none;
@@ -164,11 +164,11 @@
   transition: background-color 0.2s;
 }
 
-.dialog-overlay[data-npc-type="guide"] .dialog-actions button:hover {
+.dialog-box[data-npc-type="guide"] .dialog-actions button:hover {
   background-color: #2060dd;
 }
 
-.dialog-overlay[data-npc-type="guide"] .dialog-actions button:disabled {
+.dialog-box[data-npc-type="guide"] .dialog-actions button:disabled {
   background-color: #a0a0a0;
   cursor: not-allowed;
 }

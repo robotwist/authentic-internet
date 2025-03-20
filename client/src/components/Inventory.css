@@ -56,6 +56,25 @@
   color: #ff4444;
 }
 
+/* Error Message Display */
+.form-error {
+  background-color: rgba(192, 57, 43, 0.8);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin: 0.5rem 1rem;
+  text-align: center;
+  font-weight: 500;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* Content */
 .inventory-content {
   display: flex;
@@ -110,6 +129,7 @@
   padding: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .artifact-item:hover {
@@ -131,6 +151,23 @@
   color: #999;
   margin: 0;
   font-size: 0.9rem;
+}
+
+/* Attachment Badge */
+.attachment-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: #4a90e2;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .artifact-actions {
@@ -156,6 +193,15 @@
 
 /* 📝 Message Editor */
 .message-editor {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #2a2a2a;
+}
+
+/* 📎 Attachment Editor */
+.attachment-editor {
   flex: 1;
   padding: 1.5rem;
   display: flex;
@@ -220,6 +266,92 @@
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
+/* File Upload Section */
+.attachment-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.current-attachment {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.current-attachment h4 {
+  color: #4a90e2;
+  margin: 0 0 0.5rem 0;
+}
+
+.current-attachment p {
+  color: #ccc;
+  margin: 0;
+}
+
+.file-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: #1a1a1a;
+  border: 2px dashed #333;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.file-upload:hover {
+  border-color: #4a90e2;
+}
+
+.upload-button {
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-button:hover {
+  background-color: #3498db;
+  transform: translateY(-2px);
+}
+
+.attachment-preview {
+  width: 100%;
+  padding: 1rem;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 4px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.file-preview {
+  color: #ccc;
+  font-size: 0.9rem;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  background-color: #1a1a1a;
+  border-radius: 4px;
+  width: 100%;
+  text-align: center;
+}
+
 .editor-actions {
   display: flex;
   gap: 1rem;
@@ -248,75 +380,74 @@
 }
 
 .editor-actions .save-button:hover {
-  background-color: #388e3c;
-  transform: translateY(-1px);
+  background-color: #45a049;
 }
 
 .editor-actions .delete-button {
-  background-color: #f44336;
+  background-color: #e74c3c;
   color: white;
 }
 
 .editor-actions .delete-button:hover {
-  background-color: #d32f2f;
-  transform: translateY(-1px);
+  background-color: #c0392b;
 }
 
 .editor-actions .cancel-button {
-  background-color: #666;
+  background-color: #7f8c8d;
   color: white;
 }
 
 .editor-actions .cancel-button:hover {
-  background-color: #555;
-  transform: translateY(-1px);
+  background-color: #95a5a6;
 }
 
 .editor-actions button:disabled {
-  opacity: 0.6;
+  background-color: #555;
+  color: #888;
   cursor: not-allowed;
-  transform: none !important;
 }
 
 .editor-actions button:disabled:hover {
   transform: none;
-  background-color: inherit;
+  box-shadow: none;
 }
 
 /* Drop Confirmation */
 .drop-confirmation {
   flex: 1;
-  padding: 1rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  background-color: #2a2a2a;
 }
 
 .drop-confirmation h3 {
-  color: #4a90e2;
+  color: #e74c3c;
   margin-bottom: 1rem;
 }
 
 .drop-confirmation p {
-  color: #999;
-  text-align: center;
+  color: #ccc;
   margin-bottom: 2rem;
+  text-align: center;
+  line-height: 1.5;
 }
 
-/* Button Groups */
 .button-group {
   display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
+  gap: 1rem;
 }
 
 .button-group button {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .save-button {
@@ -325,34 +456,64 @@
 }
 
 .save-button:hover {
-  background-color: #388e3c;
+  background-color: #45a049;
 }
 
 .delete-button {
-  background-color: #f44336;
+  background-color: #e74c3c;
   color: white;
 }
 
 .delete-button:hover {
-  background-color: #d32f2f;
+  background-color: #c0392b;
 }
 
 .cancel-button {
-  background-color: #666;
+  background-color: #7f8c8d;
   color: white;
 }
 
 .cancel-button:hover {
-  background-color: #555;
+  background-color: #95a5a6;
 }
 
 .confirm-button {
-  background-color: #4caf50;
+  background-color: #e74c3c;
   color: white;
 }
 
 .confirm-button:hover {
-  background-color: #388e3c;
+  background-color: #c0392b;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .inventory-container {
+    width: 95%;
+    height: 90vh;
+  }
+  
+  .inventory-content {
+    flex-direction: column;
+  }
+  
+  .artifact-list {
+    border-right: none;
+    border-bottom: 1px solid #333;
+    max-height: 40vh;
+  }
+  
+  .attachment-preview {
+    max-height: 150px;
+  }
+  
+  .editor-actions {
+    flex-direction: column;
+  }
+  
+  .upload-button {
+    width: 100%;
+  }
 }
 
 /* 🏁 Fix Z-Index Issues */

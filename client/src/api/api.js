@@ -384,50 +384,66 @@ export const updateArtifact = async (artifactId, updatedData) => {
     if (updatedData instanceof FormData) {
       console.log("Updating artifact with file attachment:", artifactId);
       
-      // For FormData, we need to use specific config
-      const requestConfig = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      };
+      // Ensure the FormData object has the artifact ID
+      if (!updatedData.has('id') && !updatedData.has('_id')) {
+        updatedData.append('id', artifactId);
+      }
       
-      // Make the API request with proper content type header
-      const response = await API.put(`/api/artifacts/${artifactId}`, updatedData, requestConfig);
+      // For FormData, we need to set the correct axios config
+      // Note: We do NOT set Content-Type here - axios will automatically set the correct
+      // multipart/form-data boundary header when it detects FormData
+      const response = await API.put(`/api/artifacts/${artifactId}`, updatedData, {
+        headers: {
+          // Let axios set the correct Content-Type with boundary
+          // 'Content-Type' is intentionally omitted
+        }
+      });
+      
       console.log("Updated artifact with file:", response.data);
       return response.data;
     }
     
-    // Regular JSON update (no files) - continue with validation
-    // Validate artifact data
-    if (updatedData.name !== undefined && updatedData.name.trim().length < 1) {
-      throw new Error('Artifact name is required');
-    }
-    if (updatedData.description !== undefined && updatedData.description.trim().length < 1) {
-      throw new Error('Artifact description is required');
-    }
-    if (updatedData.content !== undefined && updatedData.content.trim().length < 1) {
-      throw new Error('Artifact content is required');
+    // Regular JSON update (no files) - validate only fields that are provided
+    const processedData = { ...updatedData };
+    
+    // Only validate name if provided
+    if (processedData.name !== undefined) {
+      if (processedData.name.trim().length < 1) {
+        throw new Error('Artifact name cannot be empty');
+      }
+      processedData.name = processedData.name.trim();
     }
     
-    // Ensure location data is valid if it's being updated
-    if (updatedData.location) {
-      if ((typeof updatedData.location.x !== 'number' && typeof updatedData.location.x !== 'string') ||
-          (typeof updatedData.location.y !== 'number' && typeof updatedData.location.y !== 'string')) {
+    // Only validate description if provided
+    if (processedData.description !== undefined) {
+      if (processedData.description.trim().length < 1) {
+        throw new Error('Artifact description cannot be empty');
+      }
+      processedData.description = processedData.description.trim();
+    }
+    
+    // Only validate content if provided
+    if (processedData.content !== undefined) {
+      if (processedData.content.trim().length < 1) {
+        throw new Error('Artifact content cannot be empty');
+      }
+      processedData.content = processedData.content.trim();
+    }
+    
+    // Process location data if provided
+    if (processedData.location) {
+      // Validate location coordinates
+      if ((typeof processedData.location.x !== 'number' && typeof processedData.location.x !== 'string') ||
+          (typeof processedData.location.y !== 'number' && typeof processedData.location.y !== 'string')) {
         throw new Error('Valid location coordinates are required');
       }
       
       // Ensure location values are numbers
-      updatedData.location = {
-        x: Number(updatedData.location.x),
-        y: Number(updatedData.location.y)
+      processedData.location = {
+        x: Number(processedData.location.x),
+        y: Number(processedData.location.y)
       };
     }
-
-    // Process string fields to trim whitespace
-    const processedData = { ...updatedData };
-    if (processedData.name) processedData.name = processedData.name.trim();
-    if (processedData.description) processedData.description = processedData.description.trim();
-    if (processedData.content) processedData.content = processedData.content.trim();
     
     console.log("Updating artifact with data:", processedData);
     const response = await API.put(`/api/artifacts/${artifactId}`, processedData);
@@ -435,7 +451,17 @@ export const updateArtifact = async (artifactId, updatedData) => {
     return response.data;
   } catch (error) {
     console.error("Error updating artifact:", error);
-    const errorMessage = handleApiError(error, 'Failed to update artifact');
+    // Create a user-friendly error message
+    let errorMessage = 'Failed to update artifact';
+    
+    if (error.response?.data?.error) {
+      errorMessage = error.response.data.error;
+    } else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
     throw new Error(errorMessage);
   }
 };

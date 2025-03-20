@@ -201,19 +201,19 @@ const Map = ({
 Map.propTypes = {
   mapData: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
   npcs: PropTypes.arrayOf(PropTypes.shape({
-    _id: PropTypes.string,
-    id: PropTypes.string,
+    _id: PropTypes.string, // Optional
+    id: PropTypes.string,  // Optional
     name: PropTypes.string,
     type: PropTypes.string,
     position: PropTypes.shape({
       x: PropTypes.number.isRequired,
       y: PropTypes.number.isRequired
     }).isRequired,
-    sprite: PropTypes.string
+    sprite: PropTypes.string // Optional
   })),
   artifacts: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string,
-    _id: PropTypes.string,
+    id: PropTypes.string,  // Optional
+    _id: PropTypes.string, // Optional
     name: PropTypes.string.isRequired,
     location: PropTypes.shape({
       x: PropTypes.number.isRequired,
