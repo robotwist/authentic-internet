@@ -61,12 +61,53 @@ A digital world where users explore, create, and unlock hidden artifacts with au
    - Frontend: http://localhost:5173
    - Backend: http://localhost:5000
 
+### Running Development Servers
+
+1. Start the backend server:
+   ```
+   cd server
+   npm run dev
+   ```
+
+2. In a new terminal, start the frontend development server:
+   ```
+   cd client
+   npm run dev
+   ```
+
+3. Access the application at `http://localhost:5173`
+
 ## Testing
 
-Access the test page at http://localhost:5173/test to run tests for:
-- Shakespeare NPC responses
-- Historical NPC functionality
-- Application features
+### Running API Tests
+
+We've implemented a browser-based test suite to verify API functionality:
+
+1. Start the development server:
+   ```
+   cd client
+   npm run dev
+   ```
+
+2. Open your browser and navigate to:
+   ```
+   http://localhost:5173/run-tests.html
+   ```
+   (If you're using a different port, replace 5173 with your port number)
+
+3. Click the "Run Artifact Tests" button to execute tests for artifact operations.
+
+The test suite includes:
+- Basic update tests (JSON data)
+- File attachment update tests (FormData)
+- Proper authentication token handling
+
+### Troubleshooting Tests
+
+If you encounter the error "Basic update test failed = error denied - no token provided":
+- Make sure the test runner is properly setting the mock authentication token
+- Check your browser console for more detailed error messages
+- Verify that the API endpoints are correctly configured for authentication
 
 ## Deployment
 
