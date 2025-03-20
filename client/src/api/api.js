@@ -190,13 +190,14 @@ export const loginUser = async (username, password) => {
   }
 };
 
-export const registerUser = async (username, password) => {
+export const registerUser = async (username, email, password) => {
   try {
-    const response = await API.post("/api/auth/register", { username, password });
+    const response = await API.post("/api/auth/register", { username, email, password });
     return response.data;
   } catch (error) {
     console.error("Registration error:", error);
-    handleError(error);
+    const errorMessage = handleApiError(error, "Registration failed. Please check your information.");
+    throw new Error(errorMessage);
   }
 };
 
