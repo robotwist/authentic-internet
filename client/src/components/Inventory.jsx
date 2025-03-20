@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   fetchMessage,
   updateMessage,
   deleteMessage,
+  updateArtifact,
 } from "../api/api";
 import "./Inventory.css";
 
@@ -11,6 +13,10 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
   const [selectedArtifact, setSelectedArtifact] = useState(null);
   const [actionMode, setActionMode] = useState(null); // 'message', 'drop', or null
   const [saveStatus, setSaveStatus] = useState(null); // 'saving', 'success', 'error'
+  const [attachment, setAttachment] = useState(null);
+  const [attachmentPreview, setAttachmentPreview] = useState(null);
+  const [formError, setFormError] = useState("");
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const artifactId = selectedArtifact?.id || selectedArtifact?._id;
@@ -34,6 +40,7 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
     
     if (!artifactId) {
       console.error("🚨 Error: No artifact selected for message update.");
+      setFormError("No artifact selected");
       return;
     }
 
@@ -54,8 +61,12 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
     } catch (error) {
       console.error("Error updating message:", error);
       setSaveStatus('error');
+      setFormError(error.message || "Failed to save message");
       // Clear error status after 3 seconds
-      setTimeout(() => setSaveStatus(null), 3000);
+      setTimeout(() => {
+        setSaveStatus(null);
+        setFormError("");
+      }, 3000);
     }
   };
 
@@ -65,43 +76,49 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
     console.log("Using artifact ID:", artifactId);
     
     if (!artifactId) {
-      console.error("🚨 Error: No artifact selected to drop.");
+      console.error("🚨 Error: No artifact selected for drop.");
       return;
     }
 
     try {
-      // First save the message if there is one
-      if (messageContent) {
-        await updateMessage(artifactId, messageContent);
-      }
-      
-      // Calculate drop position from character position
-      const dropLocation = {
-        x: Math.floor(characterPosition.x / 64),
-        y: Math.floor(characterPosition.y / 64)
+      const updatedArtifact = {
+        status: 'dropped',
+        location: characterPosition
       };
 
-      // Update the artifact's status and return it to the world
+      // Update the artifact's location to the current character position
+      const response = await updateArtifact(artifactId, updatedArtifact);
+      
+      // Call the parent component's onUpdateArtifact function
       if (onUpdateArtifact) {
-        await onUpdateArtifact(artifactId, {
-          status: 'dropped',
-          location: dropLocation,
-          messageText: messageContent
-        });
+        onUpdateArtifact(response.artifact || response);
+      }
+      
+      // Reward the player with experience
+      if (onGainExperience) {
+        onGainExperience(5);
+      }
+      
+      // Refresh the artifacts list
+      if (refreshArtifacts) {
+        refreshArtifacts();
       }
       
       setActionMode(null);
       setSelectedArtifact(null);
-      setMessageContent("");
-      refreshArtifacts();
     } catch (error) {
       console.error("Error dropping artifact:", error);
+      setFormError(error.message || "Failed to drop artifact");
+      setTimeout(() => setFormError(""), 3000);
     }
   };
 
   const handleDeleteMessage = async () => {
     const artifactId = selectedArtifact?.id || selectedArtifact?._id;
-    if (!artifactId) return;
+    if (!artifactId) {
+      setFormError("No artifact selected");
+      return;
+    }
     
     try {
       await deleteMessage(artifactId);
@@ -109,6 +126,94 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
       setActionMode(null);
     } catch (error) {
       console.error("Error deleting message:", error);
+      setFormError(error.message || "Failed to delete message");
+      setTimeout(() => setFormError(""), 3000);
+    }
+  };
+
+  const handleUpdateArtifact = async () => {
+    const artifactId = selectedArtifact?.id || selectedArtifact?._id;
+    if (!artifactId) {
+      setFormError("No artifact selected");
+      return;
+    }
+
+    setSaveStatus('saving');
+    try {
+      let updateResponse;
+      
+      // Check if there's a file attachment to update
+      if (attachment) {
+        // Create FormData for the file upload
+        const formData = new FormData();
+        formData.append('attachment', attachment);
+        
+        // Add the artifact ID to the FormData
+        formData.append('id', artifactId);
+        
+        // Make the update request with FormData
+        updateResponse = await updateArtifact(artifactId, formData);
+      } else {
+        // Just update basic info without a file
+        updateResponse = await updateArtifact(artifactId, {
+          // You can add other fields to update here if needed
+          name: selectedArtifact.name,
+          description: selectedArtifact.description
+        });
+      }
+      
+      console.log("✅ Artifact updated successfully:", updateResponse);
+      setSaveStatus('success');
+      
+      // Call the parent component's onUpdateArtifact function
+      if (onUpdateArtifact) {
+        onUpdateArtifact(updateResponse.artifact || updateResponse);
+      }
+      
+      // Wait a brief moment to show success message
+      setTimeout(() => {
+        setSaveStatus(null);
+        setAttachment(null);
+        setAttachmentPreview(null);
+        setSelectedArtifact(null);
+        setActionMode(null);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error updating artifact:", error);
+      setSaveStatus('error');
+      setFormError(error.message || "Failed to update artifact");
+      // Clear error status after 3 seconds
+      setTimeout(() => {
+        setSaveStatus(null);
+        setFormError("");
+      }, 3000);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setFormError("File size should be less than 5MB");
+      return;
+    }
+    
+    // Set the file for upload
+    setAttachment(file);
+    
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAttachmentPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // For non-images, show file name as preview
+      setAttachmentPreview(`File: ${file.name}`);
     }
   };
 
@@ -120,6 +225,8 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
           <button className="close-button" onClick={onClose}>×</button>
         </div>
 
+        {formError && <div className="form-error">{formError}</div>}
+        
         <div className="inventory-content">
           <div className="artifact-list">
             <h3>Your Artifacts</h3>
@@ -139,6 +246,9 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
                     <div className="artifact-info">
                       <h4>{artifact.name}</h4>
                       <p>{artifact.description}</p>
+                      {artifact.attachment && (
+                        <div className="attachment-badge" title="Has attachment">📎</div>
+                      )}
                     </div>
                     {(selectedArtifact?.id === artifact.id || selectedArtifact?._id === artifact._id) && !actionMode && (
                       <div className="artifact-actions">
@@ -146,6 +256,10 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
                           e.stopPropagation();
                           setActionMode('message');
                         }}>📝 Add/Edit Message</button>
+                        <button onClick={(e) => {
+                          e.stopPropagation();
+                          setActionMode('update');
+                        }}>📎 Add Attachment</button>
                         <button onClick={(e) => {
                           e.stopPropagation();
                           setActionMode('drop');
@@ -205,6 +319,77 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
             </div>
           )}
 
+          {actionMode === 'update' && selectedArtifact && (
+            <div className="attachment-editor">
+              <div className="editor-header">
+                <h3>📎 Update {selectedArtifact.name}</h3>
+                <div className="editor-info">
+                  <p>Add an attachment to this artifact. Click Save when done.</p>
+                  {saveStatus === 'saving' && <p className="save-status saving">Uploading...</p>}
+                  {saveStatus === 'success' && <p className="save-status success">✅ Updated successfully!</p>}
+                  {saveStatus === 'error' && <p className="save-status error">❌ Error updating</p>}
+                </div>
+              </div>
+              
+              <div className="attachment-section">
+                {selectedArtifact.attachment && (
+                  <div className="current-attachment">
+                    <h4>Current Attachment</h4>
+                    <p>{selectedArtifact.attachmentOriginalName || "Attachment"}</p>
+                  </div>
+                )}
+                
+                <div className="file-upload">
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                  <button 
+                    onClick={() => fileInputRef.current?.click()} 
+                    className="upload-button"
+                    disabled={saveStatus === 'saving'}
+                  >
+                    📁 Choose File
+                  </button>
+                  
+                  {attachmentPreview && (
+                    <div className="attachment-preview">
+                      {attachmentPreview.startsWith('data:image') ? (
+                        <img src={attachmentPreview} alt="Preview" className="image-preview" />
+                      ) : (
+                        <p className="file-preview">{attachmentPreview}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="editor-actions">
+                <button 
+                  onClick={handleUpdateArtifact} 
+                  className="save-button"
+                  disabled={saveStatus === 'saving' || !attachment}
+                >
+                  {saveStatus === 'saving' ? '⏳ Uploading...' : '💾 Save Changes'}
+                </button>
+                <button 
+                  onClick={() => {
+                    setActionMode(null);
+                    setAttachment(null);
+                    setAttachmentPreview(null);
+                    setSaveStatus(null);
+                  }} 
+                  className="cancel-button"
+                  disabled={saveStatus === 'saving'}
+                >
+                  ❌ Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           {actionMode === 'drop' && selectedArtifact && (
             <div className="drop-confirmation">
               <h3>🗺️ Drop {selectedArtifact.name}</h3>
@@ -219,6 +404,15 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
       </div>
     </div>
   );
+};
+
+Inventory.propTypes = {
+  artifacts: PropTypes.array.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onUpdateArtifact: PropTypes.func,
+  onGainExperience: PropTypes.func,
+  refreshArtifacts: PropTypes.func,
+  characterPosition: PropTypes.object
 };
 
 export default Inventory;
