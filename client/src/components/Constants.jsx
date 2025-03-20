@@ -1200,3 +1200,25 @@ export const NPCs = {
     ]
   }
 };
+
+// World map structure to visualize connections between worlds
+export const WORLD_MAP = {
+  structure: [
+    { id: 'overworld', name: 'Overworld', x: 200, y: 100, connections: ['overworld2'] },
+    { id: 'overworld2', name: 'Overworld 2', x: 350, y: 200, connections: ['overworld', 'overworld3'] },
+    { id: 'overworld3', name: 'Overworld 3', x: 500, y: 100, connections: ['overworld2', 'desert1'] },
+    { id: 'desert1', name: 'Desert 1', x: 650, y: 200, connections: ['overworld3', 'desert2', 'yosemite'] },
+    { id: 'desert2', name: 'Desert 2', x: 800, y: 100, connections: ['desert1', 'desert3'] },
+    { id: 'desert3', name: 'Desert 3', x: 950, y: 200, connections: ['desert2'] },
+    { id: 'yosemite', name: 'Yosemite', x: 650, y: 350, connections: ['desert1'] }
+  ],
+  mapToId: {
+    'Overworld': 'overworld',
+    'Overworld 2': 'overworld2',
+    'Overworld 3': 'overworld3',
+    'Desert 1': 'desert1',
+    'Desert 2': 'desert2',
+    'Desert 3': 'desert3',
+    'Yosemite': 'yosemite'
+  }
+};

@@ -12,8 +12,9 @@ import ArtifactCreation from "./ArtifactCreation";
 import Inventory from "./Inventory";
 import ErrorBoundary from "./ErrorBoundary";
 import Map from "./Map";
+import WorldMap from "./WorldMap";
 import useCharacterMovement from "./CharacterMovement";
-import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS } from "./Constants";
+import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS, isWalkable } from "./Constants";
 import { initSounds, playRandomPortalSound, playSound } from "../utils/soundEffects";
 import { debugNPCSprites } from "../utils/debugTools";
 import "./GameWorld.css";
@@ -33,6 +34,7 @@ const GameWorld = () => {
   const [showInventory, setShowInventory] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showQuotes, setShowQuotes] = useState(false);
+  const [showWorldMap, setShowWorldMap] = useState(false);
   const [formPosition, setFormPosition] = useState({ x: 0, y: 0 });
   const [visibleArtifact, setVisibleArtifact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -170,6 +172,11 @@ const GameWorld = () => {
 
     // Add development keyboard shortcuts for testing
     const handleKeyDown = (event) => {
+      // Skip if input is focused
+      if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+        return;
+      }
+      
       // Only in development mode
       if (process.env.NODE_ENV === 'development') {
         // Shift + 1 to trigger level 1 completion for testing
@@ -193,6 +200,14 @@ const GameWorld = () => {
           localStorage.removeItem('level-level4-completed');
           localStorage.removeItem('nkd-man-reward-shown');
         }
+      }
+      
+      // Toggle world map with 'M' key
+      if (event.key === 'm' || event.key === 'M') {
+        setShowWorldMap(prev => !prev);
+        
+        // Play a sound when toggling the map
+        playSound('pickup', 0.3).catch(err => console.error("Error playing sound:", err));
       }
     };
 
@@ -241,11 +256,21 @@ const GameWorld = () => {
       return;
     }
 
+    // Check if the current position is walkable before creating an artifact
+    const playerX = characterPosition.x / TILE_SIZE;
+    const playerY = characterPosition.y / TILE_SIZE;
+    const currentMapData = MAPS[currentMapIndex]?.data;
+    
+    if (!isWalkable(characterPosition.x, characterPosition.y, currentMapData)) {
+      alert("You cannot place artifacts on unwalkable tiles. Please move to a grass, sand, or portal tile.");
+      return;
+    }
+
     const newArtifact = {
       name,
       description,
       messageText,
-      location: { x: characterPosition.x / TILE_SIZE, y: characterPosition.y / TILE_SIZE },
+      location: { x: playerX, y: playerY },
       creator: uuidv4(),
       visible: true,
     };
@@ -422,6 +447,21 @@ const GameWorld = () => {
         // Change map
         setCurrentMapIndex((prev) => prev + 1);
         setCharacterPosition({ x: 4 * TILE_SIZE, y: 4 * TILE_SIZE });
+        
+        // Announce the world name
+        const nextWorldName = MAPS[currentMapIndex + 1].name;
+        const portalAnnouncement = document.createElement('div');
+        portalAnnouncement.className = 'world-announcement';
+        portalAnnouncement.innerHTML = `<h2>Welcome to ${nextWorldName}</h2>`;
+        document.body.appendChild(portalAnnouncement);
+        
+        // Remove the announcement after a few seconds
+        setTimeout(() => {
+          portalAnnouncement.classList.add('fade-out');
+          setTimeout(() => {
+            document.body.removeChild(portalAnnouncement);
+          }, 1000);
+        }, 3000);
       }
     }
     
@@ -605,6 +645,7 @@ const GameWorld = () => {
             <Map 
               mapData={MAPS[currentMapIndex].data} 
               viewport={viewport} 
+              mapName={MAPS[currentMapIndex].name}
               npcs={MAPS[currentMapIndex].npcs.map(npc => {
                 // Ensure each NPC has a proper type that matches available sprites
                 if (typeof npc.type === 'string' && !npc.sprite) {
@@ -677,6 +718,14 @@ const GameWorld = () => {
           </div>
         </div>
         
+        {/* Display world map when toggled */}
+        {showWorldMap && (
+          <WorldMap 
+            currentWorld={MAPS[currentMapIndex].name}
+            onClose={() => setShowWorldMap(false)}
+          />
+        )}
+        
         {showWinNotification && (
           <div className="win-notification">
             <div className="win-content">
@@ -718,6 +767,13 @@ const GameWorld = () => {
             onClose={() => setShowQuotes(false)}
             onDeleteQuote={handleDeleteQuote}
           />      
+        )}
+
+        {/* Map key hint - only shown when there's no other overlay */}
+        {!showInventory && !showForm && !showQuotes && !showWorldMap && !showWinNotification && !showRewardModal && !showLevel4 && (
+          <div className="map-key-hint">
+            Press 'M' to view World Map
+          </div>
         )}
       </div>
     </ErrorBoundary>
