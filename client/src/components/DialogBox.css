@@ -65,9 +65,10 @@
 }
 
 .dialog-content {
-  min-height: 100px;
-  margin-bottom: 15px;
+  min-height: 80px;
   line-height: 1.5;
+  font-size: 1.05em;
+  margin-bottom: 10px;
 }
 
 .npc-message {
@@ -133,27 +134,68 @@
 
 /* Enhance styling for guide NPCs */
 .dialog-overlay[data-npc-type="guide"] .dialog-header {
-  border-color: #00bfff;
-  background-color: rgba(0, 110, 175, 0.2);
+  background-color: rgba(0, 80, 255, 0.2);
+  border-bottom: 1px solid #4080ff;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 4px 4px 0 0;
 }
 
 .dialog-overlay[data-npc-type="guide"] .dialog-header h3 {
-  color: #00bfff;
-  text-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
+  color: #4080ff;
+  text-shadow: 0 0 5px rgba(0, 100, 255, 0.5);
 }
 
-.dialog-overlay[data-npc-type="guide"] .npc-message {
-  border-left-color: #00bfff;
-  background-color: rgba(0, 120, 190, 0.2);
+.dialog-overlay[data-npc-type="guide"] .dialog-content {
+  background-color: rgba(0, 50, 150, 0.1);
+  border-left: 3px solid #4080ff;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 0 4px 4px 0;
 }
 
-.dialog-overlay[data-npc-type="guide"] .dialog-btn {
-  color: #00bfff;
-  border-color: #00bfff;
-  background-color: rgba(0, 100, 150, 0.3);
+.dialog-overlay[data-npc-type="guide"] .dialog-actions button {
+  background-color: #4080ff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.dialog-overlay[data-npc-type="guide"] .dialog-btn:hover {
-  background-color: rgba(0, 120, 190, 0.4);
-  box-shadow: 0 0 8px rgba(0, 191, 255, 0.7);
+.dialog-overlay[data-npc-type="guide"] .dialog-actions button:hover {
+  background-color: #2060dd;
+}
+
+.dialog-overlay[data-npc-type="guide"] .dialog-actions button:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+/* Ensure dialog actions have proper spacing */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 15px;
+}
+
+.dialog-actions button {
+  background-color: #ffd700;
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: bold;
+}
+
+.dialog-actions button:hover {
+  background-color: #ffcc00;
+}
+
+.dialog-actions button:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
 } 

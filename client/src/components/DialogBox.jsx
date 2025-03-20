@@ -50,28 +50,29 @@ const DialogBox = ({ npc, onClose }) => {
       onClose();
     }
   };
+
+  // Safely access NPC type even if it's nested or undefined
+  const npcType = npc?.type?.toLowerCase ? npc.type.toLowerCase() : 'generic';
   
   return (
-    <div className="dialog-overlay" data-npc-type={npc.type?.toLowerCase()} onClick={handleNext}>
-      <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
+    <div className="dialog-overlay" data-npc-type={npcType}>
+      <div className="dialog-box">
         <div className="dialog-header">
-          <h3>{npc.name}</h3>
+          <h3>{npc.name || 'Unknown'}</h3>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
+        
         <div className="dialog-content">
-          <div className="npc-message">
-            {displayedText}
-            {isTyping && <span className="typing-cursor">_</span>}
-          </div>
+          <p>{displayedText}</p>
         </div>
-        <div className="dialog-footer">
-          {isTyping ? (
-            <button className="dialog-btn" onClick={handleNext}>Skip</button>
-          ) : (
-            <button className="dialog-btn" onClick={handleNext}>
-              {currentDialogueIndex < dialogueArray.length - 1 ? 'Next' : 'Close'}
-            </button>
-          )}
+        
+        <div className="dialog-actions">
+          <button 
+            onClick={handleNext}
+            disabled={!currentDialogue}
+          >
+            {isTyping ? 'Skip' : currentDialogueIndex < dialogueArray.length - 1 ? 'Next' : 'Close'}
+          </button>
         </div>
       </div>
     </div>
@@ -80,12 +81,12 @@ const DialogBox = ({ npc, onClose }) => {
 
 DialogBox.propTypes = {
   npc: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    type: PropTypes.string,
+    name: PropTypes.string,
     dialogue: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.arrayOf(PropTypes.string)
-    ]).isRequired
+    ]).isRequired,
+    type: PropTypes.string
   }).isRequired,
   onClose: PropTypes.func.isRequired
 };

@@ -166,12 +166,16 @@ const Map = ({
             transition: 'all 0.2s ease'
           };
           
+          // Create a stable, unique key that won't change between renders
+          const npcKey = npc._id || npc.id || `npc-${npc.name}-${npc.position.x}-${npc.position.y}`;
+          
           return (
             <div 
-              key={npc._id || npc.id || `npc-${npc.name}-${Math.random().toString(36).substr(2, 9)}`} 
+              key={npcKey}
               className="npc-sprite"
               style={spriteStyle}
               onClick={() => onNPCClick?.(npc)}
+              data-npc-type={npc.type?.toLowerCase?.() || 'generic'}
             >
               {/* Enhanced interaction indicator */}
               <div className="npc-interaction-indicator">
@@ -192,6 +196,8 @@ Map.propTypes = {
   npcs: PropTypes.arrayOf(PropTypes.shape({
     _id: PropTypes.string,
     id: PropTypes.string,
+    name: PropTypes.string,
+    type: PropTypes.string,
     position: PropTypes.shape({
       x: PropTypes.number.isRequired,
       y: PropTypes.number.isRequired
