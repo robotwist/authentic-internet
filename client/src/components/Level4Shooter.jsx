@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { playSound, preloadSound, createFallbackSound } from '../utils/soundEffects';
+import { playSound, preloadSound } from '../utils/soundEffects';
 import './Level4Shooter.css';
 
 const Level4Shooter = ({ onComplete, onExit }) => {
@@ -161,9 +161,6 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     preloadSound('hemingway-game-over', '/assets/sounds/hemingway/game-over.mp3');
     preloadSound('hemingway-victory', '/assets/sounds/hemingway/victory.mp3');
     preloadSound('hemingway-boss-defeated', '/assets/sounds/hemingway/boss-defeated.mp3');
-    
-    // Create fallback sounds in case files don't exist yet
-    createFallbackSounds();
     
     // Create platforms based on current level
     initializeLevelDesign();
@@ -1180,7 +1177,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
             // Activate rapid fire powerup
             setPlayerPowerups(prev => ({...prev, rapidFire: { active: true, timeLeft: 15 }}));
             setTimeout(() => {
-              setPlayerPowerups(prev => ({...prev, rapidFire: { active: false, timeLeft: 0 }}}));
+              setPlayerPowerups(prev => ({...prev, rapidFire: { active: false, timeLeft: 0 }}));
             }, 15000); // 15 seconds
             playGameSound('weaponPickup');
             setPlayerXP(prev => prev + 15); // XP for weapon pickup
@@ -1202,12 +1199,12 @@ const Level4Shooter = ({ onComplete, onExit }) => {
             if (item.variant === 'speed') {
               setPlayerPowerups(prev => ({...prev, speedBoost: { active: true, timeLeft: 10 }}));
               setTimeout(() => {
-                setPlayerPowerups(prev => ({...prev, speedBoost: { active: false, timeLeft: 0 }}}));
+                setPlayerPowerups(prev => ({...prev, speedBoost: { active: false, timeLeft: 0 }}));
               }, 10000); // 10 seconds
             } else if (item.variant === 'shield') {
-              setPlayerPowerups(prev => ({...prev, shield: { active: true, timeLeft: 10 }}}));
+              setPlayerPowerups(prev => ({...prev, shield: { active: true, timeLeft: 10 }}));
               setTimeout(() => {
-                setPlayerPowerups(prev => ({...prev, shield: { active: false, timeLeft: 0 }}}));
+                setPlayerPowerups(prev => ({...prev, shield: { active: false, timeLeft: 0 }}));
               }, 10000); // 10 seconds
             }
             setPlayerXP(prev => prev + 20); // XP for powerup pickup
@@ -1556,75 +1553,6 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     // Show brief intro for new level
     setShowIntro(true);
     setTimeout(() => setShowIntro(false), 3000);
-  };
-  
-  // Add the fallback sound creation function
-  const createFallbackSounds = () => {
-    // Player action sounds
-    createFallbackSound('hemingway-shoot', { type: 'retro', frequency: 220, duration: 0.1 });
-    createFallbackSound('hemingway-special-shoot', { type: 'retro', frequency: 330, duration: 0.2 });
-    createFallbackSound('hemingway-jump', { type: 'retro', frequency: 165, duration: 0.2 });
-    createFallbackSound('hemingway-player-hit', { type: 'noise', frequency: 100, duration: 0.3 });
-    createFallbackSound('hemingway-companion-hit', { type: 'noise', frequency: 120, duration: 0.3 });
-    
-    // Enemy sounds
-    createFallbackSound('hemingway-enemy-hit', { type: 'retro', frequency: 440, duration: 0.1 });
-    createFallbackSound('hemingway-critical-hit', { type: 'retro', frequency: 880, duration: 0.2 });
-    createFallbackSound('hemingway-boss-hit', { type: 'retro', frequency: 660, duration: 0.15 });
-    createFallbackSound('hemingway-boss-critical', { type: 'retro', frequency: 990, duration: 0.25 });
-    
-    // Item pickup sounds
-    createFallbackSound('hemingway-health-pickup', { type: 'sine', frequency: 523, duration: 0.2 });  // C5
-    createFallbackSound('hemingway-weapon-pickup', { type: 'sine', frequency: 659, duration: 0.3 });  // E5
-    createFallbackSound('hemingway-ammo-pickup', { type: 'sine', frequency: 784, duration: 0.2 });    // G5
-    createFallbackSound('hemingway-manuscript-pickup', { type: 'sine', frequency: 880, duration: 0.4 }); // A5
-    createFallbackSound('hemingway-powerup-pickup', { type: 'sine', frequency: 988, duration: 0.3 });  // B5
-    
-    // Game state sounds
-    createFallbackSound('hemingway-level-up', { 
-      type: 'sequence', 
-      notes: [
-        { frequency: 523, duration: 0.1 }, // C5
-        { frequency: 659, duration: 0.1 }, // E5
-        { frequency: 784, duration: 0.1 }, // G5
-        { frequency: 1047, duration: 0.2 } // C6
-      ]
-    });
-    
-    createFallbackSound('hemingway-game-over', { 
-      type: 'sequence', 
-      notes: [
-        { frequency: 440, duration: 0.2 }, // A4
-        { frequency: 349, duration: 0.2 }, // F4
-        { frequency: 293, duration: 0.2 }, // D4
-        { frequency: 220, duration: 0.4 }  // A3
-      ]
-    });
-    
-    createFallbackSound('hemingway-victory', { 
-      type: 'sequence', 
-      notes: [
-        { frequency: 523, duration: 0.1 }, // C5
-        { frequency: 659, duration: 0.1 }, // E5
-        { frequency: 784, duration: 0.1 }, // G5
-        { frequency: 1047, duration: 0.2 }, // C6
-        { frequency: 1047, duration: 0.1 }, // C6
-        { frequency: 1175, duration: 0.3 }  // D6
-      ]
-    });
-    
-    createFallbackSound('hemingway-boss-defeated', { 
-      type: 'sequence', 
-      notes: [
-        { frequency: 440, duration: 0.1 }, // A4
-        { frequency: 494, duration: 0.1 }, // B4
-        { frequency: 523, duration: 0.1 }, // C5
-        { frequency: 587, duration: 0.1 }, // D5
-        { frequency: 659, duration: 0.1 }, // E5
-        { frequency: 740, duration: 0.1 }, // F#5
-        { frequency: 880, duration: 0.3 }  // A5
-      ]
-    });
   };
   
   return (
