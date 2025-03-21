@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { playSound, preloadSound, createFallbackSound } from '../utils/soundEffects';
 import './Level4Shooter.css';
 
 const Level4Shooter = ({ onComplete, onExit }) => {
@@ -64,6 +65,35 @@ const Level4Shooter = ({ onComplete, onExit }) => {
   const HEMINGWAY_AI_DELAY = 500; // ms
   const LEVEL_WIDTH = 2500; // Total level width
   
+  // Sound mapping - maps game events to sound IDs
+  const SOUND_MAPPING = {
+    // Player actions
+    'shoot': 'hemingway-shoot',
+    'special-shoot': 'hemingway-special-shoot',
+    'jump': 'hemingway-jump',
+    'playerHit': 'hemingway-player-hit',
+    'hemingwayHit': 'hemingway-companion-hit',
+    
+    // Enemy sounds
+    'hit': 'hemingway-enemy-hit',
+    'criticalHit': 'hemingway-critical-hit',
+    'bossHit': 'hemingway-boss-hit',
+    'boss-criticalHit': 'hemingway-boss-critical',
+    
+    // Item pickups
+    'healthPickup': 'hemingway-health-pickup',
+    'weaponPickup': 'hemingway-weapon-pickup',
+    'ammoPickup': 'hemingway-ammo-pickup',
+    'manuscriptPickup': 'hemingway-manuscript-pickup',
+    'powerupPickup': 'hemingway-powerup-pickup',
+    
+    // Game state changes
+    'levelUp': 'hemingway-level-up',
+    'gameOver': 'hemingway-game-over',
+    'victory': 'hemingway-victory',
+    'bossDefeated': 'hemingway-boss-defeated'
+  };
+  
   // Hemingway quotes collection
   const hemingwayQuotes = [
     "Courage is grace under pressure.",
@@ -109,6 +139,32 @@ const Level4Shooter = ({ onComplete, onExit }) => {
   
   // Initialize game
   useEffect(() => {
+    // Preload all game sounds
+    preloadSound('hemingway-shoot', '/assets/sounds/hemingway/shoot.mp3');
+    preloadSound('hemingway-special-shoot', '/assets/sounds/hemingway/special-shoot.mp3');
+    preloadSound('hemingway-jump', '/assets/sounds/hemingway/jump.mp3');
+    preloadSound('hemingway-player-hit', '/assets/sounds/hemingway/player-hit.mp3');
+    preloadSound('hemingway-companion-hit', '/assets/sounds/hemingway/companion-hit.mp3');
+    
+    preloadSound('hemingway-enemy-hit', '/assets/sounds/hemingway/enemy-hit.mp3');
+    preloadSound('hemingway-critical-hit', '/assets/sounds/hemingway/critical-hit.mp3');
+    preloadSound('hemingway-boss-hit', '/assets/sounds/hemingway/boss-hit.mp3');
+    preloadSound('hemingway-boss-critical', '/assets/sounds/hemingway/boss-critical.mp3');
+    
+    preloadSound('hemingway-health-pickup', '/assets/sounds/hemingway/health-pickup.mp3');
+    preloadSound('hemingway-weapon-pickup', '/assets/sounds/hemingway/weapon-pickup.mp3');
+    preloadSound('hemingway-ammo-pickup', '/assets/sounds/hemingway/ammo-pickup.mp3');
+    preloadSound('hemingway-manuscript-pickup', '/assets/sounds/hemingway/manuscript-pickup.mp3');
+    preloadSound('hemingway-powerup-pickup', '/assets/sounds/hemingway/powerup-pickup.mp3');
+    
+    preloadSound('hemingway-level-up', '/assets/sounds/hemingway/level-up.mp3');
+    preloadSound('hemingway-game-over', '/assets/sounds/hemingway/game-over.mp3');
+    preloadSound('hemingway-victory', '/assets/sounds/hemingway/victory.mp3');
+    preloadSound('hemingway-boss-defeated', '/assets/sounds/hemingway/boss-defeated.mp3');
+    
+    // Create fallback sounds in case files don't exist yet
+    createFallbackSounds();
+    
     // Create platforms based on current level
     initializeLevelDesign();
     
@@ -345,11 +401,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     if (!isJumping) {
       setIsJumping(true);
       setPlayerPosition(prev => ({ ...prev, velocityY: JUMP_FORCE }));
-      
-      // Reset jumping state after animation completes
-      setTimeout(() => {
-        setIsJumping(false);
-      }, 500);
+      playGameSound('jump');
     }
   };
   
@@ -500,7 +552,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     setBullets(prev => [...prev, newBullet]);
     
     // Play sound effect
-    playSound(special ? 'special-shoot' : 'shoot');
+    playGameSound(special ? 'special-shoot' : 'shoot');
   };
   
   // Update game state
@@ -1004,7 +1056,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
             setScore(prev => prev + Math.floor(damage));
             
             // Play hit sound
-            playSound(isCritical ? 'criticalHit' : 'hit');
+            playGameSound(isCritical ? 'criticalHit' : 'hit');
           }
         });
         
@@ -1047,7 +1099,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
           setScore(prev => prev + Math.floor(damage));
           
           // Play hit sound
-          playSound(isCritical ? 'boss-criticalHit' : 'bossHit');
+          playGameSound(isCritical ? 'boss-criticalHit' : 'bossHit');
           
           // Check if boss is defeated
           if (bossHealth - damage <= 0) {
@@ -1060,7 +1112,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
             displayRandomQuote('victory');
             
             // Play victory sound
-            playSound('bossDefeated');
+            playGameSound('bossDefeated');
           }
         }
       } else if (bullet.shooter === 'boss' || bullet.shooter.startsWith('enemy-')) {
@@ -1087,7 +1139,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
           setPlayerHealth(prev => Math.max(0, prev - damage));
           
           // Play hit sound
-          playSound('playerHit');
+          playGameSound('playerHit');
         }
         
         // Check against Hemingway
@@ -1104,7 +1156,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
           setHemingwayHealth(prev => Math.max(0, prev - (bullet.damage || 5)));
           
           // Play hit sound
-          playSound('hemingwayHit');
+          playGameSound('hemingwayHit');
         }
       }
     });
@@ -1122,7 +1174,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
         switch (item.type) {
           case 'health':
             setPlayerHealth(prev => Math.min(100, prev + 20));
-            playSound('healthPickup');
+            playGameSound('healthPickup');
             break;
           case 'weapon':
             // Activate rapid fire powerup
@@ -1130,20 +1182,20 @@ const Level4Shooter = ({ onComplete, onExit }) => {
             setTimeout(() => {
               setPlayerPowerups(prev => ({...prev, rapidFire: { active: false, timeLeft: 0 }}}));
             }, 15000); // 15 seconds
-            playSound('weaponPickup');
+            playGameSound('weaponPickup');
             setPlayerXP(prev => prev + 15); // XP for weapon pickup
             break;
           case 'ammo':
             // Create a special shot
             setTimeout(() => shootBullet('player', true), 100);
-            playSound('ammoPickup');
+            playGameSound('ammoPickup');
             setPlayerXP(prev => prev + 5); // XP for ammo pickup
             break;
           case 'manuscript':
             // Increase score and XP
             setScore(prev => prev + 100);
             setPlayerXP(prev => prev + 25); // XP for manuscript pickup
-            playSound('manuscriptPickup');
+            playGameSound('manuscriptPickup');
             break;
           case 'powerup':
             // Apply specific powerup and grant XP
@@ -1159,7 +1211,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
               }, 10000); // 10 seconds
             }
             setPlayerXP(prev => prev + 20); // XP for powerup pickup
-            playSound('powerupPickup');
+            playGameSound('powerupPickup');
             break;
         }
         
@@ -1192,12 +1244,6 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     }
   };
   
-  // Play sound effect
-  const playSound = (type) => {
-    // Implementation would depend on your sound system
-    console.log(`Playing sound: ${type}`);
-  };
-  
   // Render game (this would typically use canvas or DOM elements)
   const renderGame = () => {
     // This is a placeholder for actual rendering
@@ -1227,7 +1273,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
       setShowLevelUp(true);
       
       // Play level up sound
-      playSound('levelUp');
+      playGameSound('levelUp');
       
       // Display a random Hemingway quote
       displayRandomQuote('levelUp');
@@ -1244,44 +1290,125 @@ const Level4Shooter = ({ onComplete, onExit }) => {
   
   // Apply level up bonuses
   const applyLevelUpBonus = () => {
-    // Health boost
-    setPlayerHealth(prev => Math.min(prev + 20, 100));
-    setHemingwayHealth(prev => Math.min(prev + 20, 100));
+    // Play level up sound
+    playGameSound('levelUp');
     
-    // Temporary power-up based on level
-    const newLevel = playerLevel + 1;
-    if (newLevel % 3 === 0) {
-      // Every 3rd level: Shield
-      setPlayerPowerups(prev => ({...prev, shield: { active: true, timeLeft: 10 }}}));
-    } else if (newLevel % 3 === 1) {
-      // Every 1st level after multiple of 3: Rapid Fire
-      setPlayerPowerups(prev => ({...prev, rapidFire: { active: true, timeLeft: 15 }}}));
-    } else {
-      // Every 2nd level after multiple of 3: Speed Boost
-      setPlayerPowerups(prev => ({...prev, speedBoost: { active: true, timeLeft: 10 }}}));
+    // Determine bonus based on current level
+    const bonusType = Math.floor(Math.random() * 3);
+    
+    switch(bonusType) {
+      case 0:
+        // Health bonus
+        setPlayerHealth(prev => Math.min(100, prev + 25));
+        setPlayerMessage("Health boost!");
+        break;
+      case 1:
+        // Temporary power-up - rapid fire
+        setPlayerPowerups(prev => ({
+          ...prev,
+          rapidFire: { active: true, timeLeft: 10000 }
+        }));
+        setPlayerMessage("Rapid fire activated!");
+        break;
+      case 2:
+        // Temporary shield
+        setPlayerPowerups(prev => ({
+          ...prev,
+          shield: { active: true, timeLeft: 8000 }
+        }));
+        setPlayerMessage("Shield activated!");
+        break;
+    }
+    
+    // Give extra ammo
+    setSpecialAmmo(prev => prev + 2);
+    
+    // Show message for a while
+    setTimeout(() => {
+      setPlayerMessage("");
+    }, 3000);
+  };
+  
+  // Handle player death
+  const handlePlayerDeath = () => {
+    if (!gameOver) {
+      // Play game over sound
+      playGameSound('gameOver');
+      
+      // Display death quote
+      displayRandomQuote('death');
+      
+      // Set game over after a short delay
+      setTimeout(() => {
+        setGameOver(true);
+      }, 1500);
     }
   };
   
-  // Display a random Hemingway quote based on game event
-  const displayRandomQuote = (context = 'random') => {
-    let quotePool;
-    
-    if (context === 'random') {
-      quotePool = hemingwayQuotes;
-    } else if (contextQuotes[context]) {
-      quotePool = contextQuotes[context];
-    } else {
-      quotePool = hemingwayQuotes;
+  // Update player health check in the game loop to use handlePlayerDeath
+  useEffect(() => {
+    if (playerHealth <= 0 && !gameOver) {
+      handlePlayerDeath();
     }
     
-    const randomIndex = Math.floor(Math.random() * quotePool.length);
-    setCurrentQuote(quotePool[randomIndex]);
+    // Health low warning quote
+    if (playerHealth < 30 && !showQuote && Math.random() < 0.02) {
+      displayRandomQuote('lowHealth');
+    }
+  }, [playerHealth, gameOver, showQuote]);
+  
+  // Display a random Hemingway quote based on game event
+  const displayRandomQuote = (context) => {
+    let relevantQuotes = [];
+    
+    // Select quotes based on context
+    switch(context) {
+      case 'levelUp':
+        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('triumph') || q.themes.includes('courage'));
+        break;
+      case 'criticalHit':
+        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('battle') || q.themes.includes('blood'));
+        // Play critical hit sound for quotes about battle
+        playGameSound('criticalHit', 0.4);
+        break;
+      case 'lowHealth':
+        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('death') || q.themes.includes('pain'));
+        break;
+      case 'death':
+        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('death') || q.themes.includes('loss'));
+        break;
+      case 'victory':
+        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('triumph') || q.themes.includes('victory'));
+        // Play victory sound for victory quotes
+        playGameSound('victory', 0.6);
+        break;
+      default:
+        relevantQuotes = hemingwayQuotes;
+    }
+    
+    // Select a random quote from relevant ones or fallback to any quote
+    const selectedQuote = relevantQuotes.length > 0
+      ? relevantQuotes[Math.floor(Math.random() * relevantQuotes.length)]
+      : hemingwayQuotes[Math.floor(Math.random() * hemingwayQuotes.length)];
+      
+    // Display the quote
+    setCurrentQuote(selectedQuote);
     setShowQuote(true);
     
-    // Hide quote after a few seconds
+    // Hide quote after 5 seconds
     setTimeout(() => {
       setShowQuote(false);
-    }, 4000);
+    }, 5000);
+  };
+  
+  // Create a wrapper function to play sounds using our mapping
+  const playGameSound = (type, volume = 0.5) => {
+    const soundId = SOUND_MAPPING[type];
+    if (soundId) {
+      playSound(soundId, volume);
+    } else {
+      console.log(`No sound mapping found for: ${type}`);
+    }
   };
   
   // Update enemy defeated handler to award XP
@@ -1332,6 +1459,9 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     const xpGain = currentLevel * 100;
     setPlayerXP(prevXP => prevXP + xpGain);
     
+    // Play boss defeated sound
+    playGameSound('bossDefeated');
+    
     // Display victory quote
     displayRandomQuote('victory');
     
@@ -1339,6 +1469,8 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     if (currentLevel === 3) {
       // Final level completed
       setTimeout(() => {
+        // Play victory sound
+        playGameSound('victory');
         setVictory(true);
       }, 2000);
     } else {
@@ -1378,6 +1510,9 @@ const Level4Shooter = ({ onComplete, onExit }) => {
       // Display victory quote
       displayRandomQuote('victory');
       
+      // Play victory sound
+      playGameSound('victory');
+      
       // Show victory screen after a delay
       setTimeout(() => {
         setVictory(true);
@@ -1388,6 +1523,9 @@ const Level4Shooter = ({ onComplete, onExit }) => {
       
       // Reset level-specific elements but keep progression
       resetLevelElements();
+      
+      // Play level up sound
+      playGameSound('levelUp');
       
       // Display level transition quote
       displayRandomQuote('levelUp');
@@ -1418,6 +1556,75 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     // Show brief intro for new level
     setShowIntro(true);
     setTimeout(() => setShowIntro(false), 3000);
+  };
+  
+  // Add the fallback sound creation function
+  const createFallbackSounds = () => {
+    // Player action sounds
+    createFallbackSound('hemingway-shoot', { type: 'retro', frequency: 220, duration: 0.1 });
+    createFallbackSound('hemingway-special-shoot', { type: 'retro', frequency: 330, duration: 0.2 });
+    createFallbackSound('hemingway-jump', { type: 'retro', frequency: 165, duration: 0.2 });
+    createFallbackSound('hemingway-player-hit', { type: 'noise', frequency: 100, duration: 0.3 });
+    createFallbackSound('hemingway-companion-hit', { type: 'noise', frequency: 120, duration: 0.3 });
+    
+    // Enemy sounds
+    createFallbackSound('hemingway-enemy-hit', { type: 'retro', frequency: 440, duration: 0.1 });
+    createFallbackSound('hemingway-critical-hit', { type: 'retro', frequency: 880, duration: 0.2 });
+    createFallbackSound('hemingway-boss-hit', { type: 'retro', frequency: 660, duration: 0.15 });
+    createFallbackSound('hemingway-boss-critical', { type: 'retro', frequency: 990, duration: 0.25 });
+    
+    // Item pickup sounds
+    createFallbackSound('hemingway-health-pickup', { type: 'sine', frequency: 523, duration: 0.2 });  // C5
+    createFallbackSound('hemingway-weapon-pickup', { type: 'sine', frequency: 659, duration: 0.3 });  // E5
+    createFallbackSound('hemingway-ammo-pickup', { type: 'sine', frequency: 784, duration: 0.2 });    // G5
+    createFallbackSound('hemingway-manuscript-pickup', { type: 'sine', frequency: 880, duration: 0.4 }); // A5
+    createFallbackSound('hemingway-powerup-pickup', { type: 'sine', frequency: 988, duration: 0.3 });  // B5
+    
+    // Game state sounds
+    createFallbackSound('hemingway-level-up', { 
+      type: 'sequence', 
+      notes: [
+        { frequency: 523, duration: 0.1 }, // C5
+        { frequency: 659, duration: 0.1 }, // E5
+        { frequency: 784, duration: 0.1 }, // G5
+        { frequency: 1047, duration: 0.2 } // C6
+      ]
+    });
+    
+    createFallbackSound('hemingway-game-over', { 
+      type: 'sequence', 
+      notes: [
+        { frequency: 440, duration: 0.2 }, // A4
+        { frequency: 349, duration: 0.2 }, // F4
+        { frequency: 293, duration: 0.2 }, // D4
+        { frequency: 220, duration: 0.4 }  // A3
+      ]
+    });
+    
+    createFallbackSound('hemingway-victory', { 
+      type: 'sequence', 
+      notes: [
+        { frequency: 523, duration: 0.1 }, // C5
+        { frequency: 659, duration: 0.1 }, // E5
+        { frequency: 784, duration: 0.1 }, // G5
+        { frequency: 1047, duration: 0.2 }, // C6
+        { frequency: 1047, duration: 0.1 }, // C6
+        { frequency: 1175, duration: 0.3 }  // D6
+      ]
+    });
+    
+    createFallbackSound('hemingway-boss-defeated', { 
+      type: 'sequence', 
+      notes: [
+        { frequency: 440, duration: 0.1 }, // A4
+        { frequency: 494, duration: 0.1 }, // B4
+        { frequency: 523, duration: 0.1 }, // C5
+        { frequency: 587, duration: 0.1 }, // D5
+        { frequency: 659, duration: 0.1 }, // E5
+        { frequency: 740, duration: 0.1 }, // F#5
+        { frequency: 880, duration: 0.3 }  // A5
+      ]
+    });
   };
   
   return (
