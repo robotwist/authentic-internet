@@ -1,12 +1,7 @@
 [build]
   command = "npm run build"
   publish = "client/dist"
-  environment = { NODE_VERSION = "18" }
-
-# Add commit hash to environment during build
-[build.environment]
-  VITE_COMMIT_REF = "${COMMIT_REF}"
-  VITE_CONTEXT = "${CONTEXT}"
+  environment = { NODE_VERSION = "18", VITE_COMMIT_REF = "${COMMIT_REF}", VITE_CONTEXT = "${CONTEXT}" }
   
 # Production context: all deploys from the Production branch set in your site's
 # deploy contexts will inherit these settings.

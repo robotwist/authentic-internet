@@ -4,3 +4,6 @@ client/node_modules/
 server/node_modules/
 dist/
 .qodo
+
+# Local Netlify folder
+.netlify
