@@ -1,297 +1,674 @@
 .level4-shooter {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #000;
-  z-index: 9999;
+  position: relative;
+  width: 800px;
+  height: 450px;
+  margin: 0 auto;
   overflow: hidden;
-  font-family: 'Press Start 2P', monospace, sans-serif;
+  border: 2px solid #333;
+  background-color: #111;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
 }
 
 .game-hud {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 10px;
+  position: relative;
   display: flex;
   flex-wrap: wrap;
-  z-index: 100;
-  background-color: rgba(0, 0, 0, 0.7);
-  border-bottom: 2px solid #555;
+  align-items: center;
+  padding: 5px;
+  height: 50px;
+  background-color: #222;
+  border-bottom: 2px solid #444;
 }
 
 .health-bar {
-  margin-right: 20px;
-  margin-bottom: 5px;
-  flex: 1;
-  max-width: 300px;
+  margin-right: 15px;
+  display: flex;
+  flex-direction: column;
 }
 
 .health-label {
-  color: #fff;
-  font-size: 12px;
-  margin-bottom: 5px;
-  text-shadow: 2px 2px 0 #000;
+  font-size: 8px;
+  margin-bottom: 2px;
 }
 
 .health-bar-outer {
+  width: 150px;
+  height: 10px;
   background-color: #333;
-  border: 2px solid #777;
-  height: 15px;
-  width: 100%;
-  border-radius: 10px;
-  overflow: hidden;
+  border: 1px solid #555;
 }
 
 .health-bar-inner {
   height: 100%;
+  width: 100%;
   background-color: #3f3;
-  transition: width 0.2s ease, background-color 0.2s ease;
+  transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-.health-bar-outer.boss {
-  border-color: #f00;
-  background-color: #300;
+/* Progression system elements */
+.player-level {
+  font-size: 10px;
+  margin-right: 5px;
+  color: #ff9;
+  text-shadow: 0 0 3px #660;
 }
 
-.score-display, .level-display {
-  color: #ff0;
-  font-size: 14px;
-  margin-left: 20px;
-  margin-top: 10px;
-  text-shadow: 2px 2px 0 #000;
+.xp-bar {
+  width: 100px;
+  height: 6px;
+  background-color: #333;
+  border: 1px solid #555;
+  margin-right: 15px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.xp-bar-inner {
+  height: 100%;
+  background: linear-gradient(to right, #ff9, #fc3);
+  transition: width 0.5s ease;
 }
 
 .boss-health-bar {
-  width: 100%;
-  margin-top: 5px;
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  width: 250px;
 }
 
+.health-bar-outer.boss {
+  width: 250px;
+  height: 15px;
+  background-color: #222;
+  border: 1px solid #f55;
+}
+
+.score-display, .level-display {
+  margin-right: 15px;
+  font-size: 10px;
+}
+
+.level-name {
+  font-size: 10px;
+  font-style: italic;
+  margin-left: auto;
+  padding-right: 15px;
+}
+
+/* Quote display */
+.quote-container {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  max-width: 80%;
+  animation: fade-in 0.5s ease;
+}
+
+.quote-bubble {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid #777;
+  position: relative;
+}
+
+.quote-bubble:after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid rgba(0, 0, 0, 0.8);
+}
+
+.quote-text {
+  font-style: italic;
+  margin: 0 0 5px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #fff;
+  text-align: center;
+}
+
+.quote-attribution {
+  font-size: 10px;
+  margin: 0;
+  text-align: right;
+  color: #ccc;
+}
+
+/* Level up notification */
+.level-up-notification {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  animation: level-up-bounce 0.5s ease, fade-in 0.3s ease;
+}
+
+.level-up-content {
+  background: linear-gradient(135deg, #46a, #83c);
+  padding: 15px 25px;
+  border-radius: 10px;
+  border: 2px solid #adf;
+  box-shadow: 0 0 20px #adf;
+  text-align: center;
+}
+
+.level-up-content h3 {
+  color: #ff9;
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  text-shadow: 0 0 5px #fff;
+}
+
+.level-up-content p {
+  margin: 0;
+  font-size: 10px;
+  color: #fff;
+}
+
+/* Game canvas container */
 .game-canvas-container {
   position: relative;
-  width: 100%;
-  height: calc(100% - 80px);
+  width: 800px;
+  height: 400px;
   overflow: hidden;
-  margin-top: 80px;
-  background: linear-gradient(to bottom, #56CCF2, #2F80ED);
+  background-color: #87CEEB; /* Default sky color */
+  transition: background-color 1s ease;
+}
+
+/* Level Backgrounds */
+.paris-background {
+  background-image: linear-gradient(to bottom, #6CA0DC, #87CEEB);
+  background-position: 0 0;
+  background-size: 800px 400px;
+}
+
+.spain-background {
+  background-image: linear-gradient(to bottom, #E1BC92, #D2691E);
+  background-position: 0 0;
+  background-size: 800px 400px;
+}
+
+.africa-background {
+  background-image: linear-gradient(to bottom, #FFA500, #FFD700);
+  background-position: 0 0;
+  background-size: 800px 400px;
 }
 
 .game-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  background: transparent;
 }
 
-/* Game Elements Styling */
-.player, .hemingway, .enemy, .bullet, .item, .boss {
+/* Game Elements */
+.player, .hemingway, .enemy, .boss {
   position: absolute;
   background-size: contain;
   background-repeat: no-repeat;
-  background-position: center;
-  image-rendering: pixelated;
 }
 
 .player {
-  width: 50px;
+  width: 40px;
   height: 50px;
-  background-image: url('/assets/player.png');
-  background-color: #f00; /* Fallback color if image not found */
-  z-index: 20;
+  background-color: #3f3;
+  /* Replace with actual sprite */
+  z-index: 10;
+}
+
+.player.jumping {
+  animation: player-jump 0.5s !important;
+}
+
+.player.crouching {
+  height: 40px;
+  transform-origin: bottom center;
 }
 
 .hemingway {
-  width: 50px;
+  width: 40px;
   height: 50px;
-  background-image: url('/assets/hemingway.png');
-  background-color: #0f0; /* Fallback color if image not found */
-  z-index: 20;
+  background-color: #33f;
+  /* Replace with actual sprite */
+  z-index: 10;
 }
 
 .enemy {
   width: 40px;
   height: 40px;
-  z-index: 15;
-}
-
-.enemy.soldier {
-  background-image: url('/assets/enemy-soldier.png');
-  background-color: #00f; /* Fallback color if image not found */
+  background-color: #f33;
+  /* Replace with actual sprite */
 }
 
 .enemy.grunt {
-  background-image: url('/assets/enemy-grunt.png');
-  background-color: #f0f; /* Fallback color if image not found */
+  background-color: #f33;
+  width: 35px;
+  height: 40px;
 }
 
-.bullet {
-  width: 10px;
-  height: 5px;
-  background-color: #ff0;
-  border-radius: 2px;
-  z-index: 10;
+.enemy.soldier {
+  background-color: #f55;
+  width: 35px;
+  height: 45px;
 }
 
-.bullet.player {
-  background-color: #f00;
-}
-
-.bullet.hemingway {
-  background-color: #0f0;
-}
-
-.bullet.enemy, .bullet.boss {
-  background-color: #00f;
-}
-
-.platform {
-  position: absolute;
-  background-color: #964B00;
-  border-top: 2px solid #c69c6d;
-  z-index: 5;
-}
-
-.platform.ground {
-  background-color: #5a3921;
-  border-top: 5px solid #7d5637;
-}
-
-.platform.boss-platform {
-  background-color: #4a1111;
-  border-top: 5px solid #6c2525;
-}
-
-.item {
+.enemy.sniper {
+  background-color: #f99;
   width: 30px;
-  height: 30px;
-  z-index: 12;
+  height: 45px;
 }
 
-.item.health {
-  background-image: url('/assets/health.png');
-  background-color: #f00; /* Fallback color if image not found */
-}
-
-.item.weapon {
-  background-image: url('/assets/weapon.png');
-  background-color: #ff0; /* Fallback color if image not found */
+.enemy.tank {
+  background-color: #833;
+  width: 50px;
+  height: 40px;
 }
 
 .boss {
   width: 100px;
   height: 100px;
-  background-image: url('/assets/boss.png');
-  background-color: #f00; /* Fallback color if image not found */
-  z-index: 25;
-}
-
-/* Overlays */
-.game-over-overlay, .victory-overlay, .intro-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 200;
-}
-
-.game-over-content, .victory-content, .intro-content {
-  background-color: #333;
-  border: 4px solid #f00;
-  padding: 30px;
-  border-radius: 10px;
-  text-align: center;
-  max-width: 80%;
-}
-
-.victory-content {
-  border-color: #0f0;
-}
-
-.intro-content {
-  border-color: #00f;
-}
-
-.game-over-content h2, .victory-content h2, .intro-content h2 {
-  color: #ff0;
-  font-size: 24px;
-  margin-bottom: 20px;
-  text-shadow: 3px 3px 0 #000;
-}
-
-.game-over-content p, .victory-content p, .intro-content p {
-  color: #fff;
-  font-size: 16px;
-  margin-bottom: 15px;
-  line-height: 1.4;
-}
-
-.game-over-content button, .victory-content button, .intro-content button {
   background-color: #f00;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  margin: 10px;
-  cursor: pointer;
+  /* Replace with actual sprite */
+  z-index: 15;
+}
+
+.boss.lion {
+  background-color: #b70;
+  border-radius: 15px 15px 5px 5px;
+}
+
+.boss.general {
+  background-color: #a33;
+  border-radius: 0;
+}
+
+/* Platform Types */
+.platform {
+  position: absolute;
+  background-color: #555;
+  border-top: 2px solid #777;
+}
+
+.platform.ground {
+  background-color: #373;
+  border-top: 2px solid #595;
+}
+
+.platform.end-platform {
+  background-color: #773;
+  border-top: 2px solid #995;
+}
+
+.platform.boss-platform {
+  background-color: #733;
+  border-top: 2px solid #955;
+}
+
+.platform.trench {
+  background-color: #654;
+  border-top: 2px solid #876;
+  height: 10px !important;
+}
+
+.platform.water {
+  background-color: #33c;
+  border-top: 2px solid #55f;
+  opacity: 0.7;
+  animation: water-ripple 2s infinite;
+}
+
+.platform.stone {
+  background-color: #666;
+  border-top: 2px solid #888;
   border-radius: 5px;
-  font-family: 'Press Start 2P', monospace, sans-serif;
-  transition: all 0.2s ease;
 }
 
-.victory-content button {
-  background-color: #0f0;
-  color: #000;
+.platform.hill {
+  background-color: #585;
+  border-top: 2px solid #7a7;
+  border-radius: 30px 30px 0 0;
 }
 
-.intro-content button {
-  background-color: #00f;
+.platform.tree-platform {
+  background-color: #563;
+  border-top: 2px solid #784;
+  border-radius: 2px;
 }
 
-.game-over-content button:hover, 
-.victory-content button:hover, 
-.intro-content button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+/* Items */
+.item {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: #ff0;
+  border-radius: 15px;
+  animation: item-pulse 1.5s infinite;
+  z-index: 5;
 }
 
-/* Animations */
+.item.health {
+  background-color: #0f5;
+}
+
+.item.weapon {
+  background-color: #f70;
+}
+
+.item.weapon.typewriter {
+  background-color: #aaa;
+  border-radius: 5px;
+}
+
+.item.weapon.rifle {
+  background-color: #853;
+  width: 40px;
+  height: 20px;
+  border-radius: 2px;
+}
+
+.item.weapon.hunting-rifle {
+  background-color: #a83;
+  width: 40px;
+  height: 20px;
+  border-radius: 2px;
+}
+
+.item.ammo {
+  background-color: #fa3;
+  width: 20px;
+  height: 20px;
+}
+
+.item.manuscript {
+  background-color: #fff;
+  border: 1px solid #000;
+  border-radius: 0;
+  width: 25px;
+  height: 30px;
+}
+
+.item.powerup {
+  background-color: #0ff;
+}
+
+.item.powerup.speed {
+  background-color: #0ff;
+  animation: item-pulse-fast 0.7s infinite;
+}
+
+.item.powerup.shield {
+  background-color: #55f;
+  animation: item-pulse 1s infinite;
+}
+
+/* Bullets */
+.bullet {
+  position: absolute;
+  width: 10px;
+  height: 4px;
+  background-color: #ff0;
+  z-index: 5;
+}
+
+.bullet.player {
+  background-color: #ff0;
+}
+
+.bullet.player.special {
+  background-color: #f0f;
+  width: 14px;
+  height: 6px;
+  box-shadow: 0 0 5px #f0f;
+}
+
+.bullet.hemingway {
+  background-color: #0ff;
+}
+
+.bullet.hemingway-special {
+  background-color: #f5f;
+  width: 14px;
+  height: 6px;
+  box-shadow: 0 0 5px #f5f;
+}
+
+.bullet.enemy- {
+  background-color: #f50;
+}
+
+.bullet.sniper {
+  background-color: #f00;
+  width: 12px;
+  height: 3px;
+}
+
+.bullet.tank {
+  background-color: #f00;
+  width: 16px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.bullet.boss {
+  background-color: #f33;
+  width: 14px;
+  height: 7px;
+}
+
+.bullet.boss-special {
+  background-color: #f00;
+  width: 20px;
+  height: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 8px #f00;
+}
+
+/* Animation Keyframes */
 @keyframes player-idle {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-2px); }
-  100% { transform: translateY(0); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
 }
 
 @keyframes player-jump {
-  0% { transform: translateY(0) scaleY(1); }
-  50% { transform: translateY(-20px) scaleY(0.9); }
-  100% { transform: translateY(0) scaleY(1.1); }
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0); }
 }
 
 @keyframes player-shoot {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes hemingway-idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(1px); }
+}
+
+@keyframes hemingway-shoot {
   0% { transform: translateX(0); }
   50% { transform: translateX(-3px); }
   100% { transform: translateX(0); }
 }
 
-@keyframes hemingway-idle {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-1px); }
-  100% { transform: translateY(0); }
+@keyframes item-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 5px rgba(255, 255, 0, 0.7); }
+  50% { transform: scale(1.1); box-shadow: 0 0 10px rgba(255, 255, 0, 0.9); }
 }
 
-@keyframes hemingway-shoot {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(-2px); }
-  100% { transform: translateX(0); }
+@keyframes item-pulse-fast {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 5px rgba(0, 255, 255, 0.7); }
+  50% { transform: scale(1.2); box-shadow: 0 0 15px rgba(0, 255, 255, 0.9); }
+}
+
+@keyframes powerup-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes shield-pulse {
+  0%, 100% { opacity: 0.5; box-shadow: 0 0 5px #55f; }
+  50% { opacity: 0.8; box-shadow: 0 0 10px #55f; }
+}
+
+@keyframes weapon-glow {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes speed-trail {
+  0% { width: 100%; opacity: 0.7; }
+  100% { width: 20%; opacity: 0; }
+}
+
+@keyframes water-ripple {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(-20px) translateX(-50%); }
+  100% { opacity: 1; transform: translateY(0) translateX(-50%); }
+}
+
+@keyframes level-up-bounce {
+  0% { transform: translateY(0) translateX(-50%) scale(0.8); }
+  50% { transform: translateY(-15px) translateX(-50%) scale(1.1); }
+  75% { transform: translateY(-5px) translateX(-50%) scale(1.05); }
+  100% { transform: translateY(0) translateX(-50%) scale(1); }
+}
+
+/* Overlays */
+.intro-overlay, .game-over-overlay, .victory-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.intro-content, .game-over-content, .victory-content {
+  background-color: #222;
+  border: 2px solid #555;
+  padding: 20px;
+  text-align: center;
+  max-width: 80%;
+}
+
+.intro-content h2, .game-over-content h2, .victory-content h2 {
+  color: #0ff;
+  margin-bottom: 15px;
+}
+
+.intro-content p, .game-over-content p, .victory-content p {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.victory-content p:nth-child(3), /* Writer Level */
+.victory-content p:nth-child(4) { /* XP Earned */
+  color: #ff9;
+  text-shadow: 0 0 3px #660;
+  font-weight: bold;
+}
+
+.intro-content button, .game-over-content button, .victory-content button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: #357;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.3s;
+}
+
+.intro-content button:hover, .game-over-content button:hover, .victory-content button:hover {
+  background-color: #46a;
+}
+
+/* Powerup indicators */
+.powerups {
+  display: flex;
+  margin-left: 10px;
+}
+
+.powerup-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+  text-align: center;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  animation: powerup-pulse 1s infinite;
+}
+
+.powerup-icon.rapid-fire {
+  background-color: rgba(255, 50, 50, 0.3);
+  border: 1px solid #f55;
+}
+
+.powerup-icon.shield {
+  background-color: rgba(100, 100, 255, 0.3);
+  border: 1px solid #55f;
+}
+
+.powerup-icon.speed {
+  background-color: rgba(100, 255, 100, 0.3);
+  border: 1px solid #5f5;
+}
+
+/* Power-up Effects */
+.shield-effect {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  border: 2px solid #55f;
+  animation: shield-pulse 1.5s infinite;
+  z-index: -1;
+}
+
+.weapon-effect {
+  position: absolute;
+  top: 15px;
+  left: 35px;
+  width: 15px;
+  height: 10px;
+  background-color: #f55;
+  animation: weapon-glow 0.5s infinite;
+}
+
+.speed-effect {
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background-color: #5f5;
+  animation: speed-trail 0.3s infinite;
 }
 
 /* Responsive adjustments */
@@ -305,9 +682,13 @@
     font-size: 10px;
   }
   
-  .score-display, .level-display {
+  .score-display, .level-display, .player-level {
     font-size: 12px;
     margin-left: 10px;
+  }
+  
+  .xp-bar {
+    width: 80px;
   }
   
   .game-over-content h2, .victory-content h2, .intro-content h2 {
