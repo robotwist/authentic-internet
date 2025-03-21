@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { playSound, preloadSound } from '../utils/soundEffects';
+import { playSound, preloadSound, preloadMusic, playMusic, pauseMusic, stopMusic, setMusicVolume } from '../utils/soundEffects';
 import './Level4Shooter.css';
 
 const Level4Shooter = ({ onComplete, onExit }) => {
@@ -94,6 +94,17 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     'bossDefeated': 'hemingway-boss-defeated'
   };
   
+  // Music mapping - maps level/state to music IDs
+  const MUSIC_MAPPING = {
+    'menu': 'hemingway-menu-music',
+    'level1': 'hemingway-paris-music',
+    'level2': 'hemingway-spain-music',
+    'level3': 'hemingway-africa-music',
+    'boss': 'hemingway-boss-music',
+    'victory': 'hemingway-victory-music',
+    'gameOver': 'hemingway-gameover-music'
+  };
+  
   // Hemingway quotes collection
   const hemingwayQuotes = [
     "Courage is grace under pressure.",
@@ -162,6 +173,15 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     preloadSound('hemingway-victory', '/assets/sounds/hemingway/victory.mp3');
     preloadSound('hemingway-boss-defeated', '/assets/sounds/hemingway/boss-defeated.mp3');
     
+    // Preload background music
+    preloadMusic('hemingway-menu-music', '/assets/sounds/hemingway/menu-music.mp3');
+    preloadMusic('hemingway-paris-music', '/assets/sounds/hemingway/paris-music.mp3');
+    preloadMusic('hemingway-spain-music', '/assets/sounds/hemingway/spain-music.mp3');
+    preloadMusic('hemingway-africa-music', '/assets/sounds/hemingway/africa-music.mp3');
+    preloadMusic('hemingway-boss-music', '/assets/sounds/hemingway/boss-music.mp3');
+    preloadMusic('hemingway-victory-music', '/assets/sounds/hemingway/victory-music.mp3');
+    preloadMusic('hemingway-gameover-music', '/assets/sounds/hemingway/gameover-music.mp3');
+    
     // Create platforms based on current level
     initializeLevelDesign();
     
@@ -176,6 +196,9 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     
+    // Play menu music initially
+    playMusic(MUSIC_MAPPING.menu, 0.3);
+    
     // Start the game
     startGame();
     
@@ -184,8 +207,59 @@ const Level4Shooter = ({ onComplete, onExit }) => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       cancelAnimationFrame(gameLoopRef.current);
+      
+      // Stop all music when component unmounts
+      stopMusic();
     };
   }, [currentLevel]); // Re-initialize when level changes
+
+  // Handle level change effects including music
+  useEffect(() => {
+    if (isGameActive) {
+      // Play the appropriate music for the current level
+      switch(currentLevel) {
+        case 1:
+          playMusic(MUSIC_MAPPING.level1, 0.3);
+          break;
+        case 2:
+          playMusic(MUSIC_MAPPING.level2, 0.3);
+          break;
+        case 3:
+          playMusic(MUSIC_MAPPING.level3, 0.3);
+          break;
+        default:
+          playMusic(MUSIC_MAPPING.level1, 0.3);
+      }
+    }
+  }, [currentLevel, isGameActive]);
+  
+  // Handle boss encounter effects
+  useEffect(() => {
+    if (bossActive) {
+      // Play boss music when boss becomes active
+      playMusic(MUSIC_MAPPING.boss, 0.4);
+      
+      // Display a boss-specific quote
+      displayRandomQuote('boss');
+    }
+  }, [bossActive]);
+  
+  // Handle game over and victory effects
+  useEffect(() => {
+    if (gameOver) {
+      // Play game over music
+      playMusic(MUSIC_MAPPING.gameOver, 0.3);
+      
+      // Display a game over quote
+      displayRandomQuote('lowHealth');
+    } else if (victory) {
+      // Play victory music
+      playMusic(MUSIC_MAPPING.victory, 0.3);
+      
+      // Display a victory quote
+      displayRandomQuote('victory');
+    }
+  }, [gameOver, victory]);
   
   // Initialize level design based on current level
   const initializeLevelDesign = () => {
@@ -324,6 +398,21 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     // Spawn initial enemies
     spawnEnemies();
     
+    // Play the appropriate level music
+    switch(currentLevel) {
+      case 1:
+        playMusic(MUSIC_MAPPING.level1, 0.3);
+        break;
+      case 2:
+        playMusic(MUSIC_MAPPING.level2, 0.3);
+        break;
+      case 3:
+        playMusic(MUSIC_MAPPING.level3, 0.3);
+        break;
+      default:
+        playMusic(MUSIC_MAPPING.level1, 0.3);
+    }
+    
     // Display a random Hemingway quote on start
     setTimeout(() => {
       displayRandomQuote('random');
@@ -398,7 +487,9 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     if (!isJumping) {
       setIsJumping(true);
       setPlayerPosition(prev => ({ ...prev, velocityY: JUMP_FORCE }));
-      playGameSound('jump');
+      
+      // Play jump sound
+      playGameSound('jump', 0.4);
     }
   };
   
@@ -1333,7 +1424,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
       playGameSound('gameOver');
       
       // Display death quote
-      displayRandomQuote('death');
+      displayRandomQuote('lowHealth');
       
       // Set game over after a short delay
       setTimeout(() => {
@@ -1434,6 +1525,9 @@ const Level4Shooter = ({ onComplete, onExit }) => {
         setScore(prevScore => prevScore + 10);
     }
     
+    // Play defeat sound
+    playGameSound('hit', 0.4);
+    
     // Award XP
     setPlayerXP(prevXP => prevXP + xpGain);
     
@@ -1448,34 +1542,24 @@ const Level4Shooter = ({ onComplete, onExit }) => {
   
   // Update the boss defeated handler 
   const handleBossDefeated = () => {
-    // Award score and XP for defeating boss
-    const scoreGain = currentLevel * 200;
-    setScore(prevScore => prevScore + scoreGain);
-    
-    // Award significant XP for defeating a boss
-    const xpGain = currentLevel * 100;
-    setPlayerXP(prevXP => prevXP + xpGain);
+    // Award XP and score for boss defeat
+    const bossBonus = 500;
+    setScore(prevScore => prevScore + bossBonus);
+    setPlayerXP(prevXP => prevXP + bossBonus);
     
     // Play boss defeated sound
-    playGameSound('bossDefeated');
+    playGameSound('bossDefeated', 0.7);
     
-    // Display victory quote
+    // Stop boss music and play victory music
+    playMusic(MUSIC_MAPPING.victory, 0.4);
+    
+    // Display victory message
     displayRandomQuote('victory');
     
-    // Boss is defeated, show victory or advance to next level
-    if (currentLevel === 3) {
-      // Final level completed
-      setTimeout(() => {
-        // Play victory sound
-        playGameSound('victory');
-        setVictory(true);
-      }, 2000);
-    } else {
-      // Complete level and advance
-      setTimeout(() => {
-        handleLevelCompletion();
-      }, 2000);
-    }
+    // Set the victory state
+    setTimeout(() => {
+      setVictory(true);
+    }, 2000);
   };
   
   // Add helper function to get level name
@@ -1494,39 +1578,29 @@ const Level4Shooter = ({ onComplete, onExit }) => {
   
   // Add a function to handle level completion
   const handleLevelCompletion = () => {
+    // Calculate score bonus based on health, time, etc.
+    const healthBonus = playerHealth * 2;
+    setScore(prevScore => prevScore + healthBonus);
+    
     // Award XP for level completion
-    const levelCompletionXP = currentLevel * 50;
-    setPlayerXP(prevXP => prevXP + levelCompletionXP);
+    const levelBonus = currentLevel * 100;
+    setPlayerXP(prevXP => prevXP + levelBonus);
     
-    // Award score bonus for completing level
-    const levelCompletionScore = currentLevel * 100;
-    setScore(prevScore => prevScore + levelCompletionScore);
+    // Play level complete sound
+    playGameSound('levelUp', 0.6);
     
-    // If final level, show victory
-    if (currentLevel === 3) {
-      // Display victory quote
-      displayRandomQuote('victory');
-      
-      // Play victory sound
-      playGameSound('victory');
-      
-      // Show victory screen after a delay
-      setTimeout(() => {
+    // Pause for dramatic effect
+    setTimeout(() => {
+      if (currentLevel < 3) {
+        // Move to next level
+        setCurrentLevel(prevLevel => prevLevel + 1);
+      } else {
+        // Game victory
         setVictory(true);
-      }, 2000);
-    } else {
-      // Otherwise move to next level
-      setCurrentLevel(prevLevel => prevLevel + 1);
-      
-      // Reset level-specific elements but keep progression
-      resetLevelElements();
-      
-      // Play level up sound
-      playGameSound('levelUp');
-      
-      // Display level transition quote
-      displayRandomQuote('levelUp');
-    }
+        playGameSound('victory', 0.7);
+        playMusic(MUSIC_MAPPING.victory, 0.4);
+      }
+    }, 2000);
   };
   
   // Add a reset level elements function

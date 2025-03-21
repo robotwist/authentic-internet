@@ -4,6 +4,10 @@
 const loadedSounds = {};
 // Track if sounds are available/valid
 const soundAvailability = {};
+// Track background music elements
+const backgroundMusic = {};
+// Track current background music ID
+let currentMusicId = null;
 
 // Single AudioContext instance for all fallback sounds
 let fallbackAudioContext = null;
@@ -38,6 +42,39 @@ export const preloadSound = (soundId, path) => {
     // Force load
     audio.load();
     console.log(`Attempting to preload sound: ${soundId}`);
+  }
+};
+
+/**
+ * Preload background music for later use
+ * @param {string} musicId - Identifier for the music
+ * @param {string} path - Path to the music file
+ */
+export const preloadMusic = (musicId, path) => {
+  if (!backgroundMusic[musicId]) {
+    const audio = new Audio();
+    
+    // Set up error handling before setting src
+    audio.onerror = () => {
+      console.warn(`Music file not available or invalid: ${path}`);
+      soundAvailability[musicId] = false;
+    };
+    
+    audio.onloadeddata = () => {
+      console.log(`Music loaded successfully: ${musicId}`);
+      soundAvailability[musicId] = true;
+    };
+    
+    // Set music to loop by default
+    audio.loop = true;
+    audio.volume = 0.3; // Default lower volume for background music
+    audio.preload = 'auto';
+    audio.src = path;
+    backgroundMusic[musicId] = audio;
+    
+    // Force load
+    audio.load();
+    console.log(`Attempting to preload music: ${musicId}`);
   }
 };
 
@@ -126,6 +163,204 @@ export const playSound = (soundId, volume = 1.0) => {
         resolve(); // Still resolve to prevent game disruption
       }
     });
+  });
+};
+
+/**
+ * Play background music
+ * @param {string} musicId - Identifier for the music track
+ * @param {number} volume - Volume from 0 to 1
+ * @param {boolean} fadeIn - Whether to fade in the music
+ * @returns {Promise} Resolves when music starts playing
+ */
+export const playMusic = (musicId, volume = 0.3, fadeIn = true) => {
+  return new Promise((resolve, reject) => {
+    // Stop current music if different from requested music
+    if (currentMusicId && currentMusicId !== musicId) {
+      stopMusic(currentMusicId, true);
+    }
+    
+    // Skip playing if we know the music isn't available
+    if (soundAvailability[musicId] === false) {
+      console.log(`Music not available: ${musicId}`);
+      resolve();
+      return;
+    }
+    
+    const music = backgroundMusic[musicId];
+    if (!music) {
+      console.error(`Music not loaded: ${musicId}`);
+      resolve();
+      return;
+    }
+    
+    // Set as current music track
+    currentMusicId = musicId;
+    
+    // If music is already playing, just adjust volume
+    if (!music.paused) {
+      if (fadeIn) {
+        fadeVolume(music, music.volume, volume, 1000);
+      } else {
+        music.volume = volume;
+      }
+      resolve();
+      return;
+    }
+    
+    // Set initial volume for fade-in
+    if (fadeIn) {
+      music.volume = 0;
+    } else {
+      music.volume = volume;
+    }
+    
+    // Start playing
+    music.play().then(() => {
+      console.log(`Now playing music: ${musicId}`);
+      
+      // Fade in if requested
+      if (fadeIn) {
+        fadeVolume(music, 0, volume, 1000);
+      }
+      
+      resolve();
+    }).catch(err => {
+      console.warn(`Failed to play music ${musicId}:`, err);
+      soundAvailability[musicId] = false;
+      resolve(); // Still resolve to prevent game disruption
+    });
+  });
+};
+
+/**
+ * Pause currently playing background music
+ * @param {string} musicId - Optional identifier for specific music to pause
+ * @param {boolean} fadeOut - Whether to fade out before pausing
+ * @returns {Promise} Resolves when music is paused
+ */
+export const pauseMusic = (musicId = null, fadeOut = true) => {
+  return new Promise((resolve) => {
+    // If musicId is not provided, use current music
+    const targetMusicId = musicId || currentMusicId;
+    
+    if (!targetMusicId) {
+      resolve();
+      return;
+    }
+    
+    const music = backgroundMusic[targetMusicId];
+    if (!music || music.paused) {
+      resolve();
+      return;
+    }
+    
+    if (fadeOut) {
+      fadeVolume(music, music.volume, 0, 500).then(() => {
+        music.pause();
+        resolve();
+      });
+    } else {
+      music.pause();
+      resolve();
+    }
+  });
+};
+
+/**
+ * Stop background music and reset it to the beginning
+ * @param {string} musicId - Optional identifier for specific music to stop
+ * @param {boolean} fadeOut - Whether to fade out before stopping
+ * @returns {Promise} Resolves when music is stopped
+ */
+export const stopMusic = (musicId = null, fadeOut = true) => {
+  return new Promise((resolve) => {
+    // If musicId is not provided, use current music
+    const targetMusicId = musicId || currentMusicId;
+    
+    if (!targetMusicId) {
+      resolve();
+      return;
+    }
+    
+    const music = backgroundMusic[targetMusicId];
+    if (!music) {
+      resolve();
+      return;
+    }
+    
+    if (fadeOut && !music.paused) {
+      fadeVolume(music, music.volume, 0, 500).then(() => {
+        music.pause();
+        music.currentTime = 0;
+        resolve();
+      });
+    } else {
+      music.pause();
+      music.currentTime = 0;
+      resolve();
+    }
+    
+    // Clear current music if stopping the active track
+    if (targetMusicId === currentMusicId) {
+      currentMusicId = null;
+    }
+  });
+};
+
+/**
+ * Set the volume of background music
+ * @param {string} musicId - Optional identifier for specific music
+ * @param {number} volume - Volume from 0 to 1
+ * @param {boolean} fade - Whether to fade to the new volume
+ */
+export const setMusicVolume = (volume, musicId = null, fade = true) => {
+  // If musicId is not provided, use current music
+  const targetMusicId = musicId || currentMusicId;
+  
+  if (!targetMusicId) return;
+  
+  const music = backgroundMusic[targetMusicId];
+  if (!music) return;
+  
+  if (fade) {
+    fadeVolume(music, music.volume, volume, 500);
+  } else {
+    music.volume = volume;
+  }
+};
+
+/**
+ * Helper function to fade volume over time
+ * @private
+ * @param {HTMLAudioElement} audio - Audio element to fade
+ * @param {number} startVolume - Starting volume (0-1)
+ * @param {number} endVolume - Target volume (0-1)
+ * @param {number} duration - Duration of fade in ms
+ * @returns {Promise} Resolves when fade is complete
+ */
+const fadeVolume = (audio, startVolume, endVolume, duration) => {
+  return new Promise((resolve) => {
+    const startTime = performance.now();
+    const volumeDiff = endVolume - startVolume;
+    
+    // Set initial volume
+    audio.volume = startVolume;
+    
+    const updateVolume = () => {
+      const elapsed = performance.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      audio.volume = startVolume + volumeDiff * progress;
+      
+      if (progress < 1) {
+        requestAnimationFrame(updateVolume);
+      } else {
+        resolve();
+      }
+    };
+    
+    requestAnimationFrame(updateVolume);
   });
 };
 
