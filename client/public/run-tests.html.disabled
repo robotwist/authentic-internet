@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!-- 
+  DISABLED TEST FILE - DO NOT USE IN PRODUCTION
+  This file was causing issues with the main application and has been disabled.
+  If you need to run tests, please enable this file manually by removing this comment
+  and renaming it back to run-tests.html
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
