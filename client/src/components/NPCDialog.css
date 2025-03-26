@@ -1,0 +1,206 @@
+.npc-dialog-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.npc-dialog-container {
+  background-color: #1a1a1a;
+  border: 3px solid #4d2c91;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(77, 44, 145, 0.7), 0 0 40px rgba(77, 44, 145, 0.4);
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 20px;
+  color: #e8e8e8;
+  animation: dialog-appear 0.3s ease-out;
+  position: relative;
+}
+
+@keyframes dialog-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.npc-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #4d2c91;
+  padding-bottom: 15px;
+}
+
+.npc-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #6e41c0;
+  margin-right: 15px;
+  background-color: #2a1a50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.npc-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.npc-info {
+  flex: 1;
+}
+
+.npc-name {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #8b5cf6;
+  margin: 0;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+.npc-title {
+  font-size: 1rem;
+  color: #a78bfa;
+  margin: 5px 0 0;
+  font-style: italic;
+}
+
+.npc-dialog-content {
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.npc-dialog-text {
+  background-color: #2a1a50;
+  padding: 15px;
+  border-radius: 6px;
+  position: relative;
+  margin-bottom: 25px;
+  border-left: 4px solid #6e41c0;
+}
+
+.npc-dialog-text:after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: -14px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent #2a1a50 transparent transparent;
+}
+
+.npc-responses {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.response-button {
+  background-color: #2d1b58;
+  color: #e8e8e8;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: left;
+  transition: all 0.2s ease;
+  border-left: 3px solid #6e41c0;
+}
+
+.response-button:hover {
+  background-color: #4d2c91;
+  transform: translateX(5px);
+}
+
+.close-dialog {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #a78bfa;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.close-dialog:hover {
+  color: #e8e8e8;
+  background-color: rgba(139, 92, 246, 0.3);
+}
+
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(139, 92, 246, 0.3);
+  border-radius: 50%;
+  border-top-color: #8b5cf6;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.thinking-text {
+  margin-left: 15px;
+  color: #a78bfa;
+  font-style: italic;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .npc-dialog-container {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .npc-avatar {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .npc-name {
+    font-size: 1.3rem;
+  }
+  
+  .npc-dialog-text {
+    padding: 10px;
+  }
+} 
