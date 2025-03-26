@@ -37,6 +37,7 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
     const artifactId = selectedArtifact?.id || selectedArtifact?._id;
     console.log("Saving message for artifact:", selectedArtifact);
     console.log("Using artifact ID:", artifactId);
+    console.log("Message content:", messageContent);
     
     if (!artifactId) {
       console.error("🚨 Error: No artifact selected for message update.");
@@ -46,6 +47,7 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
 
     setSaveStatus('saving');
     try {
+      console.log("Calling updateMessage with:", { artifactId, messageContent });
       const response = await updateMessage(artifactId, messageContent);
       console.log("✅ Message updated successfully:", response);
       setSaveStatus('success');
@@ -59,7 +61,14 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
       }, 1000);
       
     } catch (error) {
-      console.error("Error updating message:", error);
+      console.error("🚨 Error updating message:", error);
+      console.error("Error type:", typeof error);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
       setSaveStatus('error');
       setFormError(error.message || "Failed to save message");
       // Clear error status after 3 seconds

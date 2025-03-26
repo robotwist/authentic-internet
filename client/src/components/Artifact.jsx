@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from "prop-types";
 import "./Artifact.css";
-import defaultArtifactImage from "/assets/artifact.webp";
-import swordImage from "/assets/ancient_sword.png";
-import orbImage from "/assets/mystic_orb.png";
-import goldenIdolImage from "/assets/golden_idol.webp";
-import dungeonKeyImage from "/assets/dungeon_key.webp";
+
+// Use a single default image to avoid multiple failed requests
+const DEFAULT_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23555'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='white' text-anchor='middle' dominant-baseline='middle'%3EArtifact%3C/text%3E%3C/svg%3E";
+
+// Image paths (which will fallback to default if they fail to load)
+const IMAGE_PATHS = {
+  default: DEFAULT_IMAGE,
+  sword: DEFAULT_IMAGE,
+  orb: DEFAULT_IMAGE,
+  goldenIdol: DEFAULT_IMAGE,
+  dungeonKey: DEFAULT_IMAGE
+};
+
 import { TILE_SIZE } from './Constants';
 import { trackArtifactInteraction } from '../utils/apiService';
 
@@ -144,16 +152,26 @@ const Artifact = ({
     return baseClass;
   };
 
+  /**
+   * Gets the appropriate image for the artifact
+   * Uses a safe approach with fallbacks
+   */
   const getArtifactImage = (artifact) => {
-    // System artifact images
-    const name = artifact.name?.toLowerCase() || '';
-    if (name.includes("sword")) return swordImage;
-    if (name.includes("orb")) return orbImage;
-    if (name.includes("idol")) return goldenIdolImage;
-    if (name.includes("key")) return dungeonKeyImage;
+    if (!artifact) return IMAGE_PATHS.default;
     
-    // Use provided image or default
-    return artifact.image || defaultArtifactImage;
+    // Use type to determine image, defaulting to the basic artifact image
+    switch(artifact.type) {
+      case 'sword':
+        return IMAGE_PATHS.sword;
+      case 'orb':
+        return IMAGE_PATHS.orb;
+      case 'golden_idol':
+        return IMAGE_PATHS.goldenIdol;
+      case 'key':
+        return IMAGE_PATHS.dungeonKey;
+      default:
+        return IMAGE_PATHS.default;
+    }
   };
 
   const calculatePosition = (artifact) => {
