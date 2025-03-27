@@ -1,0 +1,761 @@
+2025-03-23 23:04:30 [INFO] [0;34mStarting service restart process[0m
+2025-03-23 23:04:30 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-23 23:04:30 [WARNING] [1;33mProcess using port 5000 (PID: 131254) found. Terminating...[0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-23 23:04:30 [WARNING] [1;33mProcess using port 5173 (PID: 131340) found. Terminating...[0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-23 23:04:30 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-23 23:04:30 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-23 23:04:30 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-23 23:04:30 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-23 23:04:30 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-23 23:04:30 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-23 23:04:30 [INFO] [0;34mBacked up server log.[0m
+2025-03-23 23:04:30 [INFO] [0;34mBacked up client log.[0m
+2025-03-23 23:04:30 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-23 23:22:40 [INFO] [0;34mStarting service restart process[0m
+2025-03-23 23:22:40 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-23 23:22:40 [WARNING] [1;33mProcess using port 5000 (PID: 134972) found. Terminating...[0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-23 23:22:40 [WARNING] [1;33mProcess using port 5173 (PID: 135071) found. Terminating...[0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-23 23:22:40 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-23 23:22:40 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-23 23:22:40 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-23 23:22:40 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-23 23:22:40 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-23 23:22:40 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-23 23:22:40 [INFO] [0;34mBacked up server log.[0m
+2025-03-23 23:22:40 [INFO] [0;34mBacked up client log.[0m
+2025-03-23 23:22:40 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-23 23:31:21 [INFO] [0;34mStarting service restart process[0m
+2025-03-23 23:31:21 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-23 23:31:21 [WARNING] [1;33mProcess using port 5000 (PID: 137539) found. Terminating...[0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-23 23:31:21 [WARNING] [1;33mProcess using port 5173 (PID: 59840
+137753) found. Terminating...[0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-23 23:31:21 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-23 23:31:21 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-23 23:31:21 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-23 23:31:21 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-23 23:31:21 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-23 23:31:21 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-23 23:31:21 [INFO] [0;34mBacked up server log.[0m
+2025-03-23 23:31:21 [INFO] [0;34mBacked up client log.[0m
+2025-03-23 23:31:21 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 03:37:29 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 03:37:29 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 03:37:29 [WARNING] [1;33mProcess using port 5000 (PID: 139964) found. Terminating...[0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 03:37:29 [WARNING] [1;33mProcess using port 5173 (PID: 139865
+140073) found. Terminating...[0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 03:37:29 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 03:37:29 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 03:37:29 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 03:37:29 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 03:37:29 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 03:37:29 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 03:37:29 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 03:37:29 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 03:37:29 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 03:39:44 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 03:39:44 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 03:39:44 [WARNING] [1;33mProcess using port 5000 (PID: 151237) found. Terminating...[0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 03:39:44 [WARNING] [1;33mProcess using port 5001 (PID: 151550) found. Terminating...[0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 03:39:44 [WARNING] [1;33mProcess using port 5173 (PID: 151388) found. Terminating...[0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 03:39:44 [WARNING] [1;33mProcess using port 5174 (PID: 151928) found. Terminating...[0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 03:39:44 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 03:39:44 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 03:39:44 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 03:39:44 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 03:39:44 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 03:39:44 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 03:39:44 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 03:39:44 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 03:52:19 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 03:52:19 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mPort 5000 is available.[0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 03:52:19 [WARNING] [1;33mProcess using port 5173 (PID: 151142) found. Terminating...[0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 03:52:19 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 03:52:19 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 03:52:19 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 03:52:19 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 03:52:19 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 03:52:19 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 03:52:19 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 03:52:19 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 04:04:16 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 04:04:16 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 04:04:16 [WARNING] [1;33mProcess using port 5000 (PID: 154194
+154334) found. Terminating...[0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 04:04:16 [WARNING] [1;33mProcess using port 5173 (PID: 154445) found. Terminating...[0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 04:04:16 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 04:04:16 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 04:04:16 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 04:04:16 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 04:04:16 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 04:04:16 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 04:04:16 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 04:04:16 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 04:04:16 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 04:07:02 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 04:07:02 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 04:07:02 [WARNING] [1;33mProcess using port 5000 (PID: 155593
+155718) found. Terminating...[0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 04:07:02 [WARNING] [1;33mProcess using port 5173 (PID: 155848) found. Terminating...[0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 04:07:02 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 04:07:02 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 04:07:02 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 04:07:02 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 04:07:02 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 04:07:02 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 04:07:02 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 04:07:02 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 04:07:02 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 04:13:15 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 04:13:15 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 04:13:15 [WARNING] [1;33mProcess using port 5000 (PID: 156540
+156672) found. Terminating...[0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 04:13:15 [WARNING] [1;33mProcess using port 5173 (PID: 156803) found. Terminating...[0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 04:13:15 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 04:13:15 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 04:13:15 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 04:13:15 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 04:13:15 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 04:13:15 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 04:13:15 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 04:13:15 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 04:13:15 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 04:22:59 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 04:22:59 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 04:22:59 [WARNING] [1;33mProcess using port 5000 (PID: 158513
+158669) found. Terminating...[0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 04:22:59 [WARNING] [1;33mProcess using port 5173 (PID: 158768) found. Terminating...[0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 04:22:59 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 04:22:59 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 04:22:59 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 04:22:59 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 04:22:59 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 04:22:59 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 04:22:59 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 04:22:59 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 04:22:59 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 04:25:36 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 04:25:36 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 04:25:36 [WARNING] [1;33mProcess using port 5000 (PID: 161436) found. Terminating...[0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 04:25:36 [WARNING] [1;33mProcess using port 5173 (PID: 161560) found. Terminating...[0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 04:25:36 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 04:25:36 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 04:25:36 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 04:25:36 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 04:25:36 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 04:25:36 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 04:25:36 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 04:25:36 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 04:25:36 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 04:38:47 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 04:38:47 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 04:38:47 [WARNING] [1;33mProcess using port 5000 (PID: 161260
+162420) found. Terminating...[0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 04:38:47 [WARNING] [1;33mProcess using port 5173 (PID: 162535) found. Terminating...[0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 04:38:47 [WARNING] [1;33mProcess using port 5175 (PID: 163693) found. Terminating...[0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:38:47 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 04:38:47 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 04:38:47 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 04:38:47 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 04:38:47 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 04:38:47 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 04:38:47 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 04:38:47 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 04:38:47 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 04:43:11 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 04:43:11 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 04:43:11 [WARNING] [1;33mProcess using port 5000 (PID: 165429) found. Terminating...[0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 04:43:11 [WARNING] [1;33mProcess using port 5173 (PID: 165568) found. Terminating...[0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 04:43:11 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 04:43:11 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 04:43:11 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 04:43:11 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 04:43:11 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 04:43:11 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 04:43:11 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 04:43:11 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 04:43:11 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 04:48:09 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 04:48:09 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 04:48:09 [WARNING] [1;33mProcess using port 5000 (PID: 166436) found. Terminating...[0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 04:48:09 [WARNING] [1;33mProcess using port 5173 (PID: 166574) found. Terminating...[0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 04:48:09 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 04:48:09 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 04:48:09 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 04:48:09 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 04:48:09 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 04:48:09 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 04:48:09 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 04:48:09 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 04:48:09 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 04:50:03 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 04:50:03 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 04:50:03 [WARNING] [1;33mProcess using port 5000 (PID: 167741) found. Terminating...[0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 04:50:03 [WARNING] [1;33mProcess using port 5173 (PID: 167906) found. Terminating...[0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 04:50:03 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 04:50:03 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 04:50:03 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 04:50:03 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 04:50:03 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 04:50:03 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 04:50:03 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 04:50:03 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 04:50:03 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:01:25 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:01:25 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:01:25 [WARNING] [1;33mProcess using port 5000 (PID: 165223
+168711) found. Terminating...[0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:01:25 [WARNING] [1;33mProcess using port 5173 (PID: 168827) found. Terminating...[0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:01:25 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:01:25 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:01:25 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:01:25 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:01:25 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:01:25 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:01:25 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:01:25 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:01:25 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:02:21 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:02:21 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:02:21 [WARNING] [1;33mProcess using port 5000 (PID: 171407
+171564) found. Terminating...[0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:02:21 [WARNING] [1;33mProcess using port 5173 (PID: 171691) found. Terminating...[0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:02:21 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:02:21 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:02:21 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:02:21 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:02:21 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:02:21 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:02:21 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:02:21 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:02:21 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:09:37 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:09:37 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:09:37 [WARNING] [1;33mProcess using port 5000 (PID: 172081) found. Terminating...[0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:09:37 [WARNING] [1;33mProcess using port 5173 (PID: 172199) found. Terminating...[0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:09:37 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:09:37 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:09:37 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:09:37 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:09:37 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:09:37 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:09:37 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:09:37 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:09:37 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:13:27 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:13:27 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:13:27 [WARNING] [1;33mProcess using port 5000 (PID: 171943
+173677) found. Terminating...[0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:13:27 [WARNING] [1;33mProcess using port 5001 (PID: 174929) found. Terminating...[0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:13:27 [WARNING] [1;33mProcess using port 5173 (PID: 173792) found. Terminating...[0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:13:27 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:13:27 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:13:27 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:13:27 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:13:27 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:13:27 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:13:27 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:13:27 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:16:37 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:16:37 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:16:37 [WARNING] [1;33mProcess using port 5000 (PID: 175084
+175265) found. Terminating...[0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:16:37 [WARNING] [1;33mProcess using port 5173 (PID: 175375) found. Terminating...[0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:16:37 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:16:37 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:16:37 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:16:37 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:16:37 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:16:37 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:16:37 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:16:37 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:16:37 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:18:47 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:18:47 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:18:47 [WARNING] [1;33mProcess using port 5000 (PID: 176296
+176419) found. Terminating...[0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:18:47 [WARNING] [1;33mProcess using port 5173 (PID: 176522) found. Terminating...[0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:18:47 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:18:47 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:18:47 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:18:47 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:18:47 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:18:47 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:18:47 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:18:47 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:18:47 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:23:31 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:23:31 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:23:31 [WARNING] [1;33mProcess using port 5000 (PID: 177672) found. Terminating...[0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:23:31 [WARNING] [1;33mProcess using port 5173 (PID: 177769) found. Terminating...[0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:23:31 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:23:31 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:23:31 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:23:31 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:23:31 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:23:31 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:23:31 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:23:31 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:23:31 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:35:59 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:35:59 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:35:59 [WARNING] [1;33mProcess using port 5000 (PID: 179005) found. Terminating...[0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:35:59 [WARNING] [1;33mProcess using port 5173 (PID: 179119) found. Terminating...[0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:35:59 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:35:59 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:35:59 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:35:59 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:35:59 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:35:59 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:35:59 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:35:59 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:35:59 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:41:42 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:41:42 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:41:42 [WARNING] [1;33mProcess using port 5000 (PID: 181507) found. Terminating...[0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:41:42 [WARNING] [1;33mProcess using port 5173 (PID: 181626) found. Terminating...[0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:41:42 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:41:42 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:41:42 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:41:42 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:41:42 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:41:42 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:41:42 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:41:42 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:41:42 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:54:18 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:54:18 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:54:18 [WARNING] [1;33mProcess using port 5000 (PID: 182461) found. Terminating...[0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:54:18 [WARNING] [1;33mProcess using port 5173 (PID: 182560
+183376) found. Terminating...[0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:54:18 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:54:18 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:54:18 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:54:18 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:54:18 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:54:18 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:54:18 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:54:18 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:54:18 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 05:57:48 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 05:57:48 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 05:57:48 [WARNING] [1;33mProcess using port 5000 (PID: 184992
+185173) found. Terminating...[0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 05:57:48 [WARNING] [1;33mProcess using port 5173 (PID: 185105) found. Terminating...[0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 05:57:48 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 05:57:48 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 05:57:48 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 05:57:48 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 05:57:48 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 05:57:48 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 05:57:48 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 05:57:48 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 05:57:48 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 06:07:28 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 06:07:28 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 06:07:28 [WARNING] [1;33mProcess using port 5000 (PID: 186200) found. Terminating...[0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 06:07:28 [WARNING] [1;33mProcess using port 5173 (PID: 186309) found. Terminating...[0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 06:07:28 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 06:07:28 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 06:07:28 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 06:07:28 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 06:07:28 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 06:07:28 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 06:07:28 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 06:07:28 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 06:15:28 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 06:15:28 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 06:15:28 [WARNING] [1;33mProcess using port 5000 (PID: 187976
+189145) found. Terminating...[0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 06:15:28 [WARNING] [1;33mProcess using port 5173 (PID: 189262) found. Terminating...[0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 06:15:28 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 06:15:28 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 06:15:28 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 06:15:28 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 06:15:28 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 06:15:28 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 06:15:28 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 06:15:28 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 06:15:28 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 06:21:40 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 06:21:40 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 06:21:40 [WARNING] [1;33mProcess using port 5000 (PID: 190918) found. Terminating...[0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 06:21:40 [WARNING] [1;33mProcess using port 5173 (PID: 191021) found. Terminating...[0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 06:21:40 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 06:21:40 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 06:21:40 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 06:21:40 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 06:21:40 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 06:21:40 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 06:21:40 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 06:21:40 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 06:21:40 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 06:32:54 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 06:32:54 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 06:32:54 [WARNING] [1;33mProcess using port 5000 (PID: 193691) found. Terminating...[0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 06:32:54 [WARNING] [1;33mProcess using port 5173 (PID: 191233
+193813) found. Terminating...[0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 06:32:54 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 06:32:54 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 06:32:54 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 06:32:54 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 06:32:54 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 06:32:54 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 06:32:54 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 06:32:54 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 06:32:54 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 06:41:07 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 06:41:07 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 06:41:07 [WARNING] [1;33mProcess using port 5000 (PID: 196737) found. Terminating...[0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 06:41:07 [WARNING] [1;33mProcess using port 5173 (PID: 196876
+197349) found. Terminating...[0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 06:41:07 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 06:41:07 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 06:41:07 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 06:41:07 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 06:41:07 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 06:41:07 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 06:41:07 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 06:41:07 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 06:41:07 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 06:45:05 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 06:45:05 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 06:45:05 [WARNING] [1;33mProcess using port 5000 (PID: 198786) found. Terminating...[0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 06:45:05 [WARNING] [1;33mProcess using port 5173 (PID: 198895) found. Terminating...[0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 06:45:05 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 06:45:05 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 06:45:05 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 06:45:05 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 06:45:05 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 06:45:05 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 06:45:05 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 06:45:05 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 06:45:05 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 06:56:21 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 06:56:21 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 06:56:21 [WARNING] [1;33mProcess using port 5000 (PID: 199532) found. Terminating...[0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 06:56:21 [WARNING] [1;33mProcess using port 5173 (PID: 199635
+200092) found. Terminating...[0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 06:56:21 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 06:56:21 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 06:56:21 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 06:56:21 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 06:56:21 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 06:56:21 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 06:56:21 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 06:56:21 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 06:56:21 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 07:08:21 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 07:08:21 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 07:08:21 [WARNING] [1;33mProcess using port 5000 (PID: 201723) found. Terminating...[0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 07:08:21 [WARNING] [1;33mProcess using port 5173 (PID: 201832
+202207) found. Terminating...[0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 07:08:21 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 07:08:21 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 07:08:21 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 07:08:21 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 07:08:21 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 07:08:21 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 07:08:21 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 07:08:21 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 07:08:21 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 07:24:12 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 07:24:12 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 07:24:12 [WARNING] [1;33mProcess using port 5000 (PID: 203930) found. Terminating...[0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 07:24:12 [WARNING] [1;33mProcess using port 5173 (PID: 204036
+204503) found. Terminating...[0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 07:24:12 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 07:24:12 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 07:24:12 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 07:24:12 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 07:24:12 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 07:24:12 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 07:24:12 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 07:24:12 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 07:24:12 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 07:25:48 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 07:25:48 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 07:25:48 [WARNING] [1;33mProcess using port 5000 (PID: 206542) found. Terminating...[0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 07:25:48 [WARNING] [1;33mProcess using port 5173 (PID: 206651) found. Terminating...[0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 07:25:48 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 07:25:48 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 07:25:48 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 07:25:48 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 07:25:48 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 07:25:48 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 07:25:48 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 07:25:48 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 07:25:48 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 07:44:56 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 07:44:56 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 07:44:56 [WARNING] [1;33mProcess using port 5000 (PID: 207093) found. Terminating...[0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 07:44:56 [WARNING] [1;33mProcess using port 5173 (PID: 207196
+208075) found. Terminating...[0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 07:44:56 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 07:44:56 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 07:44:56 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 07:44:56 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 07:44:56 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 07:44:56 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 07:44:56 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 07:44:56 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 07:44:56 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 07:55:52 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 07:55:52 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 07:55:52 [WARNING] [1;33mProcess using port 5000 (PID: 209550) found. Terminating...[0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 07:55:52 [WARNING] [1;33mProcess using port 5173 (PID: 209654) found. Terminating...[0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 07:55:52 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 07:55:52 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 07:55:52 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 07:55:52 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 07:55:52 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 07:55:52 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 07:55:52 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 07:55:52 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 07:55:52 [INFO] [0;34mStep 4: Starting the server...[0m
+2025-03-24 08:12:13 [INFO] [0;34mStarting service restart process[0m
+2025-03-24 08:12:13 [INFO] [0;34mStep 1: Checking for processes using required ports...[0m
+2025-03-24 08:12:13 [WARNING] [1;33mProcess using port 5000 (PID: 211338) found. Terminating...[0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mPort 5001 is available.[0m
+2025-03-24 08:12:13 [WARNING] [1;33mProcess using port 5173 (PID: 211443) found. Terminating...[0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mProcess terminated successfully.[0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mPort 5174 is available.[0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mPort 5175 is available.[0m
+2025-03-24 08:12:13 [INFO] [0;34mStep 2: Checking MongoDB status...[0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mMongoDB is running.[0m
+2025-03-24 08:12:13 [INFO] [0;34mVerifying MongoDB connection...[0m
+2025-03-24 08:12:13 [ERROR] [0;31mMongoDB connection failed. Please check MongoDB status.[0m
+2025-03-24 08:12:13 [INFO] [0;34mStep 3: Cleaning up any zombie Node.js processes...[0m
+2025-03-24 08:12:13 [INFO] [0;34mNo server processes found to kill.[0m
+2025-03-24 08:12:13 [INFO] [0;34mNo Vite dev server processes found to kill.[0m
+2025-03-24 08:12:13 [INFO] [0;34mBacked up server log.[0m
+2025-03-24 08:12:13 [INFO] [0;34mBacked up client log.[0m
+2025-03-24 08:12:13 [INFO] [0;34mStep 4: Starting the server...[0m

@@ -4,7 +4,7 @@ import { playSound } from "../utils/soundEffects";
 
 const useCharacterMovement = (
   characterPosition, 
-  setCharacterPosition, 
+  handleCharacterMove,
   currentMapIndex, 
   setCurrentMapIndex, 
   isLoggedIn, 
@@ -106,7 +106,6 @@ const useCharacterMovement = (
               canMove = false;
             }
           } else {
-            // Can't go further left on other maps
             triggerBump("left");
             canMove = false;
           }
@@ -137,7 +136,6 @@ const useCharacterMovement = (
               canMove = false;
             }
           } else {
-            // Can't go further right on other maps
             triggerBump("right");
             canMove = false;
           }
@@ -148,36 +146,19 @@ const useCharacterMovement = (
           canMove = false;
         }
         break;
-      default:
-        return;
     }
 
-    // Set the active movement direction for animation
-    setMovementDirection(direction);
-    
-    // Clear movement direction after a brief delay
-    setTimeout(() => {
-      setMovementDirection(null);
-    }, 200);
-
-    // Only update if position has changed and can move
-    if (canMove && (newPosition.x !== characterPosition.x || newPosition.y !== characterPosition.y || targetMapIndex !== currentMapIndex)) {
-      // If map changed, update map index
-      if (targetMapIndex !== currentMapIndex) {
-        setCurrentMapIndex(targetMapIndex);
-      }
+    if (canMove) {
+      setMovementDirection(direction);
+      handleCharacterMove(newPosition, targetMapIndex);
       
-      console.log("Moving character to:", newPosition);
-      setCharacterPosition(newPosition);
-      adjustViewport(newPosition);
-      
-      // Set brief cooldown to prevent rapid movement
+      // Set movement cooldown
       setMovementCooldown(true);
       setTimeout(() => {
         setMovementCooldown(false);
-      }, 150); // Short cooldown to avoid too rapid movement
+      }, 200); // Adjust this value to control movement speed
     }
-  }, [characterPosition, currentMapIndex, triggerBump, setCharacterPosition, adjustViewport, setCurrentMapIndex, movementCooldown]);
+  }, [characterPosition, currentMapIndex, handleCharacterMove, movementCooldown, triggerBump]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -189,49 +170,51 @@ const useCharacterMovement = (
       switch (event.key) {
         case "ArrowUp":
         case "w":
+        case "W":
           handleMove("up", event);
           break;
         case "ArrowDown":
         case "s":
+        case "S":
           handleMove("down", event);
           break;
         case "ArrowLeft":
         case "a":
+        case "A":
           handleMove("left", event);
           break;
         case "ArrowRight":
         case "d":
+        case "D":
           handleMove("right", event);
           break;
         case "e":
+        case "E":
           if (visibleArtifact) {
             handleArtifactPickup();
-          } else {
-            if (isLoggedIn) {
-              setFormPosition({ x: characterPosition.x, y: characterPosition.y });
-              setShowForm(true);
-            } else {
-              alert("You need to be logged in to create artifacts.");
-            }
           }
-          return;
-        case "p":
-          handleArtifactPickup();
-          return;
+          break;
         case "i":
-          setShowInventory((prev) => !prev);
-          return;
-        default:
-          return;
+        case "I":
+          setShowInventory(true);
+          break;
+        case "f":
+        case "F":
+          setShowForm(true);
+          setFormPosition({ x: characterPosition.x, y: characterPosition.y });
+          break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleMove, characterPosition, isLoggedIn, visibleArtifact, 
-      handleArtifactPickup, setShowForm, setFormPosition, setShowInventory]);
+  }, [handleMove, visibleArtifact, handleArtifactPickup, characterPosition, setShowForm, setFormPosition, setShowInventory]);
 
-  return { isBumping, bumpDirection, movementDirection };
+  return {
+    isBumping,
+    bumpDirection,
+    movementDirection
+  };
 };
 
 export default useCharacterMovement;

@@ -1,0 +1,37 @@
+
+> client@0.0.0 dev
+> vite
+
+Testing API availability on ports 5000 and 5001...
+✅ API available on http://localhost:5000
+🔌 Configuring proxy to target http://localhost:5000
+
+  VITE v5.4.14  ready in 155 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://192.168.0.19:5173/
+7:57:00 AM [vite] hmr update /src/components/GameWorld.jsx
+7:57:01 AM [vite] hmr update /src/components/GameWorld.jsx
+7:57:02 AM [vite] hmr update /src/components/WorldMap.jsx
+7:57:02 AM [vite] hmr update /src/components/WorldMap.css
+7:57:03 AM [vite] hmr update /src/components/WorldMap.jsx
+7:57:03 AM [vite] hmr update /src/components/WorldMap.css
+7:58:40 AM [vite] hmr update /src/components/Level3Terminal.jsx
+7:59:22 AM [vite] hmr update /src/components/Level3Terminal.jsx
+7:59:36 AM [vite] hmr update /src/components/Level3Terminal.jsx
+7:59:41 AM [vite] hmr update /src/components/Level3Terminal.jsx
+7:59:44 AM [vite] hmr update /src/components/Level3Terminal.jsx
+7:59:49 AM [vite] hmr update /src/components/Level3Terminal.jsx
+8:00:24 AM [vite] hmr update /src/components/Level3Terminal.jsx
+8:11:00 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:00 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:12 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:15 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:15 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:29 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:32 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:33 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:33 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:53 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:56 AM [vite] hmr update /src/components/GameWorld.jsx
+8:11:56 AM [vite] hmr update /src/components/GameWorld.jsx

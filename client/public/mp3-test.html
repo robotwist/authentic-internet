@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MP3 Sound Test - Authentic Internet</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #4F46E5;
+    }
+    h1 {
+      border-bottom: 2px solid #4F46E5;
+      padding-bottom: 10px;
+    }
+    .test-section {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .sound-button {
+      background-color: #4F46E5;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .sound-button:hover {
+      background-color: #3730a3;
+    }
+    .sound-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #f8fafc;
+    }
+    .sound-status {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .status-loading {
+      background-color: #f59e0b;
+    }
+    .status-success {
+      background-color: #10b981;
+    }
+    .status-error {
+      background-color: #ef4444;
+    }
+    .log {
+      background-color: #1e293b;
+      color: #e2e8f0;
+      padding: 15px;
+      border-radius: 5px;
+      height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+    .sound-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>MP3 Sound Test</h1>
+  
+  <div class="test-section">
+    <h2>Game Sound Effects</h2>
+    <p>Click on any button to test if the MP3 file loads and plays correctly.</p>
+    
+    <div class="sound-list" id="soundList">
+      <!-- Sound buttons will be added here dynamically -->
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Log</h2>
+    <div id="log" class="log"></div>
+  </div>
+  
+  <script>
+    // Sound files to test
+    const soundFiles = [
+      { id: 'portalStandard', path: '/assets/sounds/portal-standard.mp3', displayName: 'Portal Standard' },
+      { id: 'toiletFlush', path: '/assets/sounds/toilet-flush.mp3', displayName: 'Toilet Flush' },
+      { id: 'pickup', path: '/assets/sounds/pickup.mp3', displayName: 'Pickup' },
+      { id: 'levelComplete', path: '/assets/sounds/level-complete.mp3', displayName: 'Level Complete' },
+      { id: 'poof', path: '/assets/sounds/poof.mp3', displayName: 'Poof' },
+      { id: 'whisper', path: '/assets/sounds/whisper.mp3', displayName: 'Whisper' },
+      { id: 'typing', path: '/assets/sounds/typing.mp3', displayName: 'Typing' },
+      { id: 'digitalTransition', path: '/assets/sounds/digital-transition.mp3', displayName: 'Digital Transition' },
+      { id: 'portal', path: '/assets/sounds/portal.mp3', displayName: 'Portal' }
+    ];
+    
+    // Track audio elements
+    const audioElements = {};
+    
+    // Simple logging function
+    function log(message, type = 'info') {
+      const logElement = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      entry.style.color = type === 'error' ? '#ef4444' : 
+                          type === 'success' ? '#10b981' : 
+                          type === 'warning' ? '#f59e0b' : '#60a5fa';
+      logElement.appendChild(entry);
+      logElement.scrollTop = logElement.scrollHeight;
+      console[type === 'error' ? 'error' : type === 'warning' ? 'warn' : 'log'](message);
+    }
+    
+    // Create UI for each sound
+    function createSoundUI() {
+      const soundList = document.getElementById('soundList');
+      
+      soundFiles.forEach(sound => {
+        // Create container
+        const container = document.createElement('div');
+        container.className = 'sound-info';
+        
+        // Status indicator
+        const status = document.createElement('span');
+        status.className = 'sound-status status-loading';
+        status.id = `status-${sound.id}`;
+        
+        // Button
+        const button = document.createElement('button');
+        button.className = 'sound-button';
+        button.textContent = sound.displayName;
+        button.disabled = true; // Disabled until loaded
+        button.id = `button-${sound.id}`;
+        
+        // Add to container
+        container.appendChild(status);
+        container.appendChild(button);
+        soundList.appendChild(container);
+        
+        // Create audio element
+        const audio = new Audio();
+        audio.src = sound.path;
+        audioElements[sound.id] = audio;
+        
+        // Set up events
+        audio.addEventListener('canplaythrough', () => {
+          log(`Sound loaded successfully: ${sound.displayName}`, 'success');
+          status.className = 'sound-status status-success';
+          button.disabled = false;
+          
+          // Add click handler
+          button.addEventListener('click', () => {
+            log(`Playing sound: ${sound.displayName}`);
+            try {
+              // Clone to allow multiple plays
+              const clone = audio.cloneNode();
+              clone.play().catch(err => {
+                log(`Error playing sound: ${err.message}`, 'error');
+              });
+            } catch (err) {
+              log(`Error playing sound: ${err.message}`, 'error');
+            }
+          });
+        });
+        
+        audio.addEventListener('error', () => {
+          const error = audio.error;
+          log(`Error loading sound "${sound.displayName}": ${error?.message || 'Unknown error'}`, 'error');
+          status.className = 'sound-status status-error';
+          button.textContent = `${sound.displayName} (Error)`;
+        });
+        
+        // Start loading
+        log(`Loading sound: ${sound.displayName}`);
+        audio.load();
+      });
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      log('MP3 Test Page Loaded');
+      log(`Browser audio support: ${!!window.Audio ? 'Yes' : 'No'}`);
+      createSoundUI();
+    });
+  </script>
+</body>
+</html> 

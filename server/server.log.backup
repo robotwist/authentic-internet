@@ -1,0 +1,304 @@
+
+> server@1.0.0 start
+> PORT=5000 node server.mjs
+
+✅ MongoDB Session Store Connected Successfully
+✅ MongoDB Connected Successfully
+✅ MongoDB Connected Successfully
+✅ WebSocket service initialized
+🔌 Attempting to start server on port 5000
+🚀 Server running on port 5000
+🌍 Environment: development
+🔑 JWT Secret: Configured
+🔌 WebSockets: Enabled
+📝 API accessible at http://localhost:5000/api
+🩺 Health check available at http://localhost:5000/health
+[INFO] GET /health 200 - 2ms
+[INFO] GET /health 200 - 2ms
+[INFO] GET /health 200 - 3ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 16ms
+[INFO] GET /api/artifacts null - 17ms
+[INFO] GET /api/artifacts 200 - 17ms
+[INFO] GET /api/artifacts null - 7ms
+[INFO] GET /api/artifacts null - 7ms
+[INFO] GET /api/artifacts 200 - 7ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 5ms
+[INFO] GET /api/artifacts 200 - 5ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 6ms
+[INFO] GET /api/artifacts null - 6ms
+[INFO] GET /api/artifacts 200 - 6ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts 200 - 2ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 5ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts 200 - 2ms
+
+💤 SIGTERM signal received: shutting down gracefully...
+🔒 HTTP server closed
+🔒 MongoDB connection closed
+👋 Server shutdown complete

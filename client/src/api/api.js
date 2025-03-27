@@ -12,8 +12,10 @@ const displayBuildInfo = () => {
   'color: #6366F1; font-weight: bold;');
 };
 
-// Call this on app initialization
-displayBuildInfo();
+// Call this on app initialization (only in non-production)
+if (import.meta.env.MODE !== 'production') {
+  displayBuildInfo();
+}
 
 // Function to create API instance with the given base URL
 const createApiInstance = (baseUrl) => {
@@ -23,7 +25,8 @@ const createApiInstance = (baseUrl) => {
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
-    }
+    },
+    timeout: 5000 // 5 seconds timeout for all requests
   });
 };
 
@@ -43,29 +46,20 @@ const initApi = async () => {
   if (isApiInitialized) return;
 
   try {
-    // First try the configured URL
-    const response = await axios.get(`${configuredApiUrl}/health`, { timeout: 2000 });
+    // Try with the proper health endpoint first
+    const response = await axios.get(`${configuredApiUrl}/api/health`, { timeout: 3000 });
     if (response.status === 200) {
-      console.log(`✅ Connected to API at ${configuredApiUrl}`);
+      // No need to log success in production
+      if (import.meta.env.MODE !== 'production') {
+        console.log(`✅ Connected to API at ${configuredApiUrl}`);
+      }
       API = createApiInstance(configuredApiUrl);
       currentApiUrl = configuredApiUrl;
       isApiInitialized = true;
       return;
     }
   } catch (error) {
-    // Try again with the proper health endpoint
-    try {
-      const response = await axios.get(`${configuredApiUrl}/api/health`, { timeout: 2000 });
-      if (response.status === 200) {
-        console.log(`✅ Connected to API at ${configuredApiUrl}`);
-        API = createApiInstance(configuredApiUrl);
-        currentApiUrl = configuredApiUrl;
-        isApiInitialized = true;
-        return;
-      }
-    } catch (retryError) {
-      console.warn(`⚠️ Could not connect to API at ${configuredApiUrl}: ${error.message}`);
-    }
+    // Silent catch - will try alternative ports
   }
 
   // If main URL fails, try alternative ports
@@ -74,9 +68,12 @@ const initApi = async () => {
   for (const port of alternativePorts) {
     const altUrl = `${baseUrl}:${port}`;
     try {
-      const response = await axios.get(`${altUrl}/api/health`, { timeout: 1000 });
+      const response = await axios.get(`${altUrl}/api/health`, { timeout: 1500 });
       if (response.status === 200) {
-        console.log(`✅ Connected to API at alternative port: ${altUrl}`);
+        // No need to log success in production
+        if (import.meta.env.MODE !== 'production') {
+          console.log(`✅ Connected to API at alternative port: ${altUrl}`);
+        }
         API = createApiInstance(altUrl);
         currentApiUrl = altUrl;
         isApiInitialized = true;
@@ -89,23 +86,28 @@ const initApi = async () => {
         return;
       }
     } catch (error) {
-      // Continue trying other ports
+      // Continue trying other ports - silent catch
     }
   }
 
-  console.error("❌ Failed to connect to API on any port. Using default configuration.");
+  // No need to log error in production
+  if (import.meta.env.MODE !== 'production') {
+    console.warn("⚠️ Using default API configuration - health check unsuccessful");
+  }
   // Keep the default API instance as fallback
 };
 
 // Try to initialize API on load
-initApi();
+initApi().catch(() => {
+  // Silently fail and keep using default API
+});
 
 // Helper function to handle API errors
 const handleApiError = (error, defaultMessage = "An error occurred") => {
-  console.error("API Error details:", error);
-  
-  // TODO: Consider integrating an error tracking service like Sentry.io for production applications
-  // This would allow remote monitoring of client-side errors
+  // Only log errors in development mode
+  if (import.meta.env.MODE !== 'production') {
+    console.error("API Error details:", error);
+  }
   
   if (error.response) {
     // The request was made and the server responded with a status code
@@ -113,7 +115,6 @@ const handleApiError = (error, defaultMessage = "An error occurred") => {
     return error.response.data?.message || error.response.data?.error || defaultMessage;
   } else if (error.request) {
     // The request was made but no response was received
-    console.log("No response received:", error.request);
     return "No response from server. Please check your network connection.";
   } else {
     // Something happened in setting up the request that triggered an Error
@@ -133,29 +134,24 @@ API.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 // 🔹 Handle token expiration and errors
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error("API Error:", error);
-    
-    // Handle authentication errors
-    if (error.response && error.response.status === 401) {
-      console.warn("Authentication error detected, clearing session");
-      
-      // Clear token and user data
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      
-      // Redirect to login page if not already there
+    if (error.response?.status === 401) {
+      // Clear auth data on unauthorized
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Redirect to login if not already there
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
     }
-    
     return Promise.reject(error);
   }
 );
@@ -182,39 +178,50 @@ export const proxyExternalRequest = async (url, options = {}) => {
 ──────────────────────────────── */
 export const loginUser = async (username, password) => {
   try {
-    // Use the Netlify proxy redirect path for the API call
-    const response = await API.post("/api/auth/login", { 
-      identifier: username, 
-      password 
+    const response = await API.post('/api/auth/login', {
+      identifier: username,
+      password
     });
     
-    if (response.data && response.data.token) {
-      localStorage.setItem("token", response.data.token);
-      
-      // Store user data if available
-      if (response.data.user) {
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-      }
-      
+    if (response.data?.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       return response.data;
-    } else {
-      throw new Error("Invalid response from server: No authentication token received");
     }
+    throw new Error('Invalid response from server');
   } catch (error) {
-    console.error("Login error:", error);
-    const errorMessage = handleApiError(error, "Login failed. Please check your credentials.");
-    throw new Error(errorMessage);
+    console.error('Login error:', error);
+    throw error;
   }
 };
 
 export const registerUser = async (username, email, password) => {
   try {
-    const response = await API.post("/api/auth/register", { username, email, password });
+    const response = await API.post('/api/auth/register', {
+      username,
+      email,
+      password
+    });
+    
+    if (response.data?.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      return response.data;
+    }
+    throw new Error('Invalid response from server');
+  } catch (error) {
+    console.error('Registration error:', error);
+    throw error;
+  }
+};
+
+export const verifyToken = async () => {
+  try {
+    const response = await API.get('/api/auth/verify');
     return response.data;
   } catch (error) {
-    console.error("Registration error:", error);
-    const errorMessage = handleApiError(error, "Registration failed. Please check your information.");
-    throw new Error(errorMessage);
+    console.error('Token verification error:', error);
+    throw error;
   }
 };
 

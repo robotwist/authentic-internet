@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication Debugging Guide</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      color: #4F46E5;
+      border-bottom: 2px solid #4F46E5;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #4F46E5;
+      margin-top: 30px;
+    }
+    code {
+      background-color: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Consolas', monospace;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      border-left: 4px solid #4F46E5;
+    }
+    .important {
+      background-color: #fdeeee;
+      border-left: 4px solid #e53e3e;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .step {
+      background-color: #f0f7ff;
+      border-left: 4px solid #3182ce;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4F46E5;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    button:hover {
+      background-color: #4338CA;
+    }
+  </style>
+</head>
+<body>
+  <h1>Authentication Debugging Guide</h1>
+  
+  <p>This guide will help you debug and fix authentication issues in the Authentic Internet project.</p>
+  
+  <div class="important">
+    <h3>Important</h3>
+    <p>Before proceeding, make sure both your client and server are running:</p>
+    <ul>
+      <li>Server should be running on port 3001</li>
+      <li>Client should be running on port 5173 (though it can use other ports)</li>
+    </ul>
+  </div>
+  
+  <h2>Step 1: Clear Existing Authentication</h2>
+  <div class="step">
+    <p>First, let's clear any existing authentication data to start fresh:</p>
+    <pre>auth.clearAuth()</pre>
+    <button onclick="window.auth?.clearAuth()">Run Clear Auth</button>
+    <p>This will clear all tokens and user data from localStorage and sessionStorage.</p>
+  </div>
+  
+  <h2>Step 2: Check Authentication Status</h2>
+  <div class="step">
+    <p>Let's check if we're currently authenticated:</p>
+    <pre>auth.checkAuth()</pre>
+    <button onclick="window.auth?.checkAuth()">Check Auth Status</button>
+    <p>If you've cleared auth, this should show that you're not authenticated.</p>
+  </div>
+  
+  <h2>Step 3: Login with Test User</h2>
+  <div class="step">
+    <p>Now, let's log in with the test user account:</p>
+    <pre>auth.login('testuser', 'password123')</pre>
+    <button onclick="window.auth?.login('testuser', 'password123')">Login with Test User</button>
+    <p>This should show a success message if the login works.</p>
+  </div>
+  
+  <h2>Step 4: Verify Authentication</h2>
+  <div class="step">
+    <p>Check the authentication status again to confirm login worked:</p>
+    <pre>auth.checkAuth()</pre>
+    <button onclick="window.auth?.checkAuth()">Check Auth Status</button>
+    <p>This should now show that you're authenticated if the login was successful.</p>
+  </div>
+  
+  <h2>Step 5: Test API Call</h2>
+  <div class="step">
+    <p>Let's test a direct API call to verify the token is working:</p>
+    <pre>auth.testApiCall()</pre>
+    <button onclick="window.auth?.testApiCall()">Test API Call</button>
+    <p>This should make a direct call to the verify endpoint to check your token.</p>
+  </div>
+  
+  <h2>Step 6: Test Artifact Update</h2>
+  <div class="step">
+    <p>Now, let's specifically test the artifact update functionality:</p>
+    <pre>auth.testArtifactUpdate()</pre>
+    <button onclick="window.auth?.testArtifactUpdate()">Test Artifact Update</button>
+    <p>This will attempt to update a test artifact, which requires authentication.</p>
+    
+    <p><strong>Additional Advanced Tests:</strong></p>
+    <button onclick="window.auth?.testArtifactUpdateAdvanced()" style="background-color: #805AD5;">Run Advanced Artifact Tests</button>
+    <p>This runs multiple artifact update tests with different approaches to identify the issue.</p>
+    
+    <button onclick="window.auth?.testServerConnection()" style="background-color: #3182CE;">Test Server Connection</button>
+    <p>This tests the direct connection to the server without authentication.</p>
+  </div>
+  
+  <h2>Step 7: Run Full Diagnostics</h2>
+  <div class="step">
+    <p>If you're still having issues, run the full diagnostic tool:</p>
+    <pre>auth.diagnose()</pre>
+    <button onclick="window.auth?.diagnose()">Run Full Diagnostics</button>
+    <p>This will perform a comprehensive check of your authentication system.</p>
+  </div>
+  
+  <h2>Common Issues & Solutions</h2>
+  
+  <h3>Issue: 401 Unauthorized Errors</h3>
+  <p>If you're getting 401 errors, it could be:</p>
+  <ul>
+    <li>Token not being sent in the request headers</li>
+    <li>Token is expired or invalid</li>
+    <li>Server not recognizing the token</li>
+  </ul>
+  <p>Solution: Clear auth data, login again, and check the token is being properly set.</p>
+  
+  <h3>Issue: Token Existing but Not Being Used</h3>
+  <p>If the token exists in storage but isn't being sent with requests:</p>
+  <ul>
+    <li>The API instance might not be properly configured</li>
+    <li>Multiple API instances might be causing conflicts</li>
+    <li>Headers might not be properly set</li>
+  </ul>
+  <p>Solution: Check that the token is properly set in the API headers.</p>
+  
+  <h3>Issue: CORS Errors</h3>
+  <p>If you're getting CORS errors:</p>
+  <ul>
+    <li>Ensure the server's allowed origins include your client's address</li>
+    <li>Check that credentials are properly handled</li>
+  </ul>
+  <p>Solution: Verify CORS configuration on the server side.</p>
+  
+  <h3>Issue: Network Errors with Artifact Updates</h3>
+  <p>If you're getting network errors when updating artifacts:</p>
+  <ul>
+    <li>Ensure the server is running and accessible (try the Test Server Connection button)</li>
+    <li>Check that the server's CORS settings allow requests from your client</li>
+    <li>Verify that the token is being properly sent in the Authorization header</li>
+    <li>Try the Advanced Artifact Tests to identify which approach works</li>
+  </ul>
+  <p>The advanced artifact tests try different methods to update artifacts, including direct fetch calls that bypass axios.</p>
+  
+  <script>
+    // Check if auth helpers are loaded
+    window.addEventListener('load', function() {
+      if (!window.auth) {
+        document.body.insertAdjacentHTML('afterbegin', `
+          <div class="important">
+            <h3>Auth Helpers Not Loaded</h3>
+            <p>Authentication helpers are not loaded. Please make sure you've opened the main application first, then navigate to this guide.</p>
+            <p><a href="/" target="_blank">Open Main Application</a></p>
+          </div>
+        `);
+      }
+    });
+  </script>
+</body>
+</html> 

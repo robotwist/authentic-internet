@@ -17,13 +17,6 @@ import TextAdventure from './components/TextAdventure';
 import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 
-// Configure future flags for React Router v7
-const routerOptions = {
-  future: {
-    v7_startTransition: true
-  }
-};
-
 function App() {
   const [world, setWorld] = useState('desert1');
   const [user, setUser] = useState(null);
@@ -50,7 +43,7 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Router {...routerOptions}>
+        <Router>
           <div className="app">
             <Navbar />
             <main className="main-content">

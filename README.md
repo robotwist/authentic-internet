@@ -77,6 +77,47 @@ A digital world where users explore, create, and unlock hidden artifacts with au
 
 3. Access the application at `http://localhost:5173`
 
+### Updated Application Scripts
+
+We've created dedicated scripts to make running and managing the application easier:
+
+1. **Starting the Application (Both Frontend and Backend)**:
+   ```
+   npm start
+   # OR
+   ./start-app.sh
+   ```
+   This script:
+   - Kills any existing Node processes
+   - Checks if ports 5001 (API) and 5173 (client) are available
+   - Starts the backend server and waits for it to be ready
+   - Starts the frontend development server
+   - Provides real-time status updates
+
+2. **Stopping the Application**:
+   ```
+   npm run stop
+   # OR
+   ./stop-app.sh
+   ```
+   This script cleanly terminates all application processes.
+
+3. **Diagnosing Issues**:
+   ```
+   npm run diagnose
+   # OR
+   ./diagnose.sh
+   ```
+   This script checks for:
+   - Required tools and their versions
+   - Running processes that may conflict
+   - Port availability
+   - MongoDB connection
+   - .env configuration
+   - Available disk space
+
+These scripts ensure a consistent development environment and help troubleshoot common issues.
+
 ## Testing
 
 ### Running API Tests

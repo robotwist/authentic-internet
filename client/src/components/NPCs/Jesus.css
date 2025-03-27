@@ -1,0 +1,98 @@
+.jesus {
+  background-color: #e0ebf5;
+  border: 2px solid #3570b2;
+}
+
+.jesus-emoji {
+  font-size: 24px;
+}
+
+.jesus-title {
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  color: #3570b2;
+}
+
+.jesus .quote-preview {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #f0f7ff;
+  border: 1px solid #3570b2;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-family: 'Georgia', serif;
+  font-size: 12px;
+  max-width: 250px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: none;
+  z-index: 10;
+}
+
+.jesus:hover .quote-preview {
+  display: block;
+}
+
+.jesus .quote-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.jesus .save-quote-btn {
+  background: #a5c8e8;
+  border: 1px solid #3570b2;
+  border-radius: 3px;
+  color: #1a3e64;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 5px;
+  transition: background-color 0.3s;
+}
+
+.jesus .save-quote-btn:hover {
+  background: #c8e0f5;
+}
+
+.jesus .save-quote-btn.saved {
+  background: #c1e1c1;
+  color: #2e5a2e;
+}
+
+.jesus .quote-text-preview {
+  font-size: 11px;
+  margin-bottom: 5px;
+  color: #1a3e64;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 230px;
+}
+
+.jesus .error-message {
+  font-size: 10px;
+  color: #a83232;
+  margin-top: 5px;
+  max-width: 90%;
+  text-align: center;
+}
+
+/* Add a subtle glow to Jesus NPC */
+.jesus .npc-avatar {
+  position: relative;
+}
+
+.jesus .npc-avatar::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%);
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+} 

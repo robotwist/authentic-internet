@@ -1,0 +1,4911 @@
+
+> server@1.0.0 start
+> PORT=5000 node server.mjs
+
+✅ MongoDB Session Store Connected Successfully
+✅ MongoDB Connected Successfully
+✅ MongoDB Connected Successfully
+✅ WebSocket service initialized
+🔌 Attempting to start server on port 5000
+🚀 Server running on port 5000
+🌍 Environment: development
+🔑 JWT Secret: Configured
+🔌 WebSockets: Enabled
+📝 API accessible at http://localhost:5000/api
+🩺 Health check available at http://localhost:5000/health
+[INFO] GET /health 200 - 2ms
+[INFO] GET /health 200 - 2ms
+[INFO] GET /health 200 - 3ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 17ms
+[INFO] GET /api/artifacts null - 17ms
+[INFO] GET /api/artifacts 200 - 18ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 5ms
+[INFO] GET /api/artifacts null - 5ms
+[INFO] GET /api/artifacts 200 - 5ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 5ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 5ms
+[INFO] GET /api/artifacts 200 - 5ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts 200 - 2ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/login?_t=1742822126144&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/login?_t=1742822126144&testMode=true 400 - 8ms
+Request details: {
+  "timestamp": "2025-03-24T13:15:26.147Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822126144&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822126144",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 8,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822126144&testMode=true 400 - 8ms
+Request details: {
+  "timestamp": "2025-03-24T13:15:26.147Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822126144&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822126144",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 8,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822126144&testMode=true 400 - 8ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/login?_t=1742822139739&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/login?_t=1742822139739&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:15:39.747Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822139739&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822139739",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822139739&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:15:39.747Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822139739&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822139739",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822139739&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/login?_t=1742822158670&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/login?_t=1742822158670&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T13:15:58.698Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822158670&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822158670",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822158670&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T13:15:58.698Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822158670&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822158670",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822158670&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/login?_t=1742822168454&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/login?_t=1742822168454&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:16:08.464Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822168454&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822168454",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822168454&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:16:08.464Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822168454&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822168454",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822168454&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/login?_t=1742822173803&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/login?_t=1742822173803&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:16:13.811Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822173803&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822173803",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822173803&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:16:13.811Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742822173803&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822173803",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742822173803&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/register?_t=1742822218104&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/register?_t=1742822218104&testMode=true 400 - 4ms
+Request details: {
+  "timestamp": "2025-03-24T13:16:58.120Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742822218104&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822218104",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 4,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742822218104&testMode=true 400 - 4ms
+Request details: {
+  "timestamp": "2025-03-24T13:16:58.120Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742822218104&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822218104",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 4,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742822218104&testMode=true 400 - 5ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/register?_t=1742822220803&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/register?_t=1742822220803&testMode=true 400 - 2ms
+Request details: {
+  "timestamp": "2025-03-24T13:17:00.808Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742822220803&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822220803",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 2,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742822220803&testMode=true 400 - 2ms
+Request details: {
+  "timestamp": "2025-03-24T13:17:00.808Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742822220803&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822220803",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 2,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742822220803&testMode=true 400 - 2ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/register?_t=1742822230604&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/register?_t=1742822230604&testMode=true 400 - 2ms
+Request details: {
+  "timestamp": "2025-03-24T13:17:10.609Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742822230604&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822230604",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 2,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742822230604&testMode=true 400 - 2ms
+Request details: {
+  "timestamp": "2025-03-24T13:17:10.609Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742822230604&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742822230604",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 2,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742822230604&testMode=true 400 - 2ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 5ms
+[INFO] GET /api/artifacts 200 - 5ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 2ms
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts 200 - 3ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/login?_t=1742824457322&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/login?_t=1742824457322&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:17.328Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742824457322&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824457322",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742824457322&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:17.328Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742824457322&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824457322",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742824457322&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/login?_t=1742824470640&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/auth/login?_t=1742824470640&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:30.648Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742824470640&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824470640",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742824470640&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:30.648Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742824470640&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824470640",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742824470640&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824491332&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824491332&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824491342&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824491342&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824491348&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824491348&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824491354&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824491354&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824491359&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824491359&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824491365&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824491365&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824491370&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824491370&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/artifacts/test-artifact-12345?_t=1742824491376&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824491376&testMode=true 403 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:51.379Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824491376&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824491376",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824491376&testMode=true 403 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:51.379Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824491376&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824491376",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824491376&testMode=true 403 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824498361&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824498361&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824498371&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824498371&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824498378&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824498378&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824498384&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824498384&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824498391&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824498391&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824498397&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824498397&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824498404&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824498404&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/artifacts/test-artifact-12345?_t=1742824498411&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824498411&testMode=true 403 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:58.414Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824498411&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824498411",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824498411&testMode=true 403 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:58.414Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824498411&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824498411",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824498411&testMode=true 403 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824499375&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824499375&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824499383&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824499383&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824499389&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824499389&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824499395&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824499395&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824499401&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824499401&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824499407&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824499407&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824499412&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824499412&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/artifacts/test-artifact-12345?_t=1742824499417&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824499417&testMode=true 403 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:59.420Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824499417&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824499417",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824499417&testMode=true 403 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:54:59.420Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824499417&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824499417",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824499417&testMode=true 403 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824501194&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824501194&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824501203&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824501203&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824501210&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824501210&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824501215&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824501215&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824501221&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824501221&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824501227&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824501227&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824501233&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824501233&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/artifacts/test-artifact-12345?_t=1742824501240&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824501240&testMode=true 403 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T13:55:01.244Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824501240&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824501240",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824501240&testMode=true 403 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T13:55:01.244Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824501240&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824501240",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824501240&testMode=true 403 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824511854&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20do%20you%20think%20about%20love%3F/chat?_t=1742824511854&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824511865&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20your%20most%20famous%20play/chat?_t=1742824511865&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824511873&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20is%20your%20opinion%20on%20fate%3F/chat?_t=1742824511873&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824511882&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/How%20do%20you%20view%20human%20nature%3F/chat?_t=1742824511882&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824511891&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/What%20inspires%20your%20writing%3F/chat?_t=1742824511891&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824511899&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824511899&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824511906&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/npcs/Tell%20me%20about%20yourself/chat?_t=1742824511906&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/artifacts/test-artifact-12345?_t=1742824511913&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824511913&testMode=true 403 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:55:11.916Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824511913&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824511913",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824511913&testMode=true 403 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:55:11.916Z",
+  "method": "PUT",
+  "url": "/api/artifacts/test-artifact-12345?_t=1742824511913&testMode=true",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824511913",
+    "testMode": "true"
+  },
+  "statusCode": 403,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Invalid Token\"}"
+}
+[ERROR] PUT /api/artifacts/test-artifact-12345?_t=1742824511913&testMode=true 403 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/register?_t=1742824646321&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] POST /api/auth/register?_t=1742824646321&testMode=true 201 - 83ms
+[INFO] POST /api/auth/register?_t=1742824646321&testMode=true 201 - 83ms
+[INFO] POST /api/auth/register?_t=1742824646321&testMode=true 201 - 83ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/worlds/my-worlds?_t=1742824646438&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/worlds/my-worlds?_t=1742824646438&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+Test mode authentication bypass activated
+[ERROR] GET /api/worlds/my-worlds?_t=1742824646438&testMode=true 500 - 2ms
+Request details: {
+  "timestamp": "2025-03-24T13:57:26.444Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742824646438&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824646438",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 2,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742824646438&testMode=true 500 - 2ms
+Request details: {
+  "timestamp": "2025-03-24T13:57:26.444Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742824646438&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824646438",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 2,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742824646438&testMode=true 500 - 2ms
+👍 Allowing localhost origin: http://localhost:5173
+Test mode authentication bypass activated
+[ERROR] GET /api/worlds/my-worlds?_t=1742824646438&testMode=true 500 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:57:26.446Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742824646438&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824646438",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742824646438&testMode=true 500 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T13:57:26.446Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742824646438&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {
+    "_t": "1742824646438",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742824646438&testMode=true 500 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 3ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts null - 4ms
+[INFO] GET /api/artifacts 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/artifacts null - 6ms
+[INFO] GET /api/artifacts null - 7ms
+[INFO] GET /api/artifacts 200 - 7ms
+[INFO] GET /api/artifacts null - 6ms
+[INFO] GET /api/artifacts null - 6ms
+[INFO] GET /api/artifacts 200 - 6ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[ERROR] POST /api/artifacts 401 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:03:33.372Z",
+  "method": "POST",
+  "url": "/api/artifacts",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 401,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"error\":\"Access Denied - No token provided\"}"
+}
+[ERROR] POST /api/artifacts 401 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:03:33.372Z",
+  "method": "POST",
+  "url": "/api/artifacts",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 401,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"error\":\"Access Denied - No token provided\"}"
+}
+[ERROR] POST /api/artifacts 401 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /artifacts?_t=1742825294550&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /artifacts?_t=1742825294550&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /artifacts?_t=1742825294550&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/auth/verify?_t=1742825294558&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/auth/verify?_t=1742825294558&testMode=true null - 4ms
+[INFO] GET /api/auth/verify?_t=1742825294558&testMode=true null - 4ms
+[INFO] GET /api/auth/verify?_t=1742825294558&testMode=true 200 - 4ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] OPTIONS /api/users/67e164c6b1dea1b8cb5900b5?_t=1742825294595&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /api/users/67e164c6b1dea1b8cb5900b5?_t=1742825294595&testMode=true null - 2ms
+[INFO] GET /api/users/67e164c6b1dea1b8cb5900b5?_t=1742825294595&testMode=true null - 2ms
+[INFO] GET /api/users/67e164c6b1dea1b8cb5900b5?_t=1742825294595&testMode=true 200 - 2ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:5173
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[CORS Auto-Updater] Detected potentially blocked origin: http://localhost:3000
+[33m[CORS Auto-Updater] Do you want to add http://localhost:3000 to allowed origins?[0m
+[33mType the following command in the server terminal to add it:[0m
+[32mCORS_ADD_ORIGIN=http://localhost:3000 node add-cors-origin.js[0m
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742826783702&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742826783702&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:33:03.723Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742826783702&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742826783702",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742826783702&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:33:03.723Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742826783702&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742826783702",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742826783702&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/register?_t=1742826908950&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] POST /api/auth/register?_t=1742826908950&testMode=true 201 - 76ms
+[INFO] POST /api/auth/register?_t=1742826908950&testMode=true 201 - 77ms
+[INFO] POST /api/auth/register?_t=1742826908950&testMode=true 201 - 77ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/worlds/my-worlds?_t=1742826909052&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/worlds/my-worlds?_t=1742826909052&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+Test mode authentication bypass activated
+[ERROR] GET /api/worlds/my-worlds?_t=1742826909052&testMode=true 500 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:35:09.055Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742826909052&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742826909052",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742826909052&testMode=true 500 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:35:09.055Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742826909052&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742826909052",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742826909052&testMode=true 500 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+Test mode authentication bypass activated
+[ERROR] GET /api/worlds/my-worlds?_t=1742826909052&testMode=true 500 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:35:09.056Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742826909052&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742826909052",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742826909052&testMode=true 500 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:35:09.056Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742826909052&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742826909052",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742826909052&testMode=true 500 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/verify?_t=1742826974498&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/verify?_t=1742826974498&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /api/auth/verify?_t=1742826974498&testMode=true null - 3ms
+[INFO] GET /api/auth/verify?_t=1742826974498&testMode=true null - 3ms
+[INFO] GET /api/auth/verify?_t=1742826974498&testMode=true 200 - 3ms
+[INFO] GET /api/auth/verify?_t=1742826974498&testMode=true null - 2ms
+[INFO] GET /api/auth/verify?_t=1742826974498&testMode=true null - 2ms
+[INFO] GET /api/auth/verify?_t=1742826974498&testMode=true 200 - 2ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/users/67e16d9cb1dea1b8cb5900c2?_t=1742826974507&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/users/67e16d9cb1dea1b8cb5900c2?_t=1742826974508&testMode=true 200 - 1ms
+[INFO] GET /api/users/67e16d9cb1dea1b8cb5900c2?_t=1742826974507&testMode=true null - 2ms
+[INFO] GET /api/users/67e16d9cb1dea1b8cb5900c2?_t=1742826974507&testMode=true null - 2ms
+[INFO] GET /api/users/67e16d9cb1dea1b8cb5900c2?_t=1742826974507&testMode=true 200 - 2ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /api/users/67e16d9cb1dea1b8cb5900c2?_t=1742826974508&testMode=true null - 1ms
+[INFO] GET /api/users/67e16d9cb1dea1b8cb5900c2?_t=1742826974508&testMode=true null - 1ms
+[INFO] GET /api/users/67e16d9cb1dea1b8cb5900c2?_t=1742826974508&testMode=true 200 - 2ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742827048855&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742827048855&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T14:37:28.861Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742827048855&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742827048855",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742827048855&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T14:37:28.861Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742827048855&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742827048855",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742827048855&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742827054326&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742827054326&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:37:34.329Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742827054326&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742827054326",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742827054326&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T14:37:34.329Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742827054326&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742827054326",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742827054326&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742829975971&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742829975971&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:26:15.982Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742829975971&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742829975971",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742829975971&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:26:15.982Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742829975971&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742829975971",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742829975971&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742829979872&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742829979872&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T15:26:19.877Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742829979872&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742829979872",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742829979872&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T15:26:19.877Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742829979872&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742829979872",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742829979872&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742829989287&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742829989287&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T15:26:29.292Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742829989287&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742829989287",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742829989287&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T15:26:29.292Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742829989287&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742829989287",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742829989287&testMode=true 400 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/register?_t=1742830054488&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] POST /api/auth/register?_t=1742830054488&testMode=true 201 - 68ms
+[INFO] POST /api/auth/register?_t=1742830054488&testMode=true 201 - 69ms
+[INFO] POST /api/auth/register?_t=1742830054488&testMode=true 201 - 69ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/worlds/my-worlds?_t=1742830054579&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/worlds/my-worlds?_t=1742830054579&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+Test mode authentication bypass activated
+[ERROR] GET /api/worlds/my-worlds?_t=1742830054579&testMode=true 500 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:27:34.582Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742830054579&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742830054579",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742830054579&testMode=true 500 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:27:34.582Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742830054579&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742830054579",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742830054579&testMode=true 500 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+Test mode authentication bypass activated
+[ERROR] GET /api/worlds/my-worlds?_t=1742830054579&testMode=true 500 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T15:27:34.583Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742830054579&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742830054579",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742830054579&testMode=true 500 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T15:27:34.583Z",
+  "method": "GET",
+  "url": "/api/worlds/my-worlds?_t=1742830054579&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742830054579",
+    "testMode": "true"
+  },
+  "statusCode": 500,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"message\":\"Server error\",\"error\":\"Cast to ObjectId failed for value \\\"test-user-id\\\" (type string) at path \\\"creator\\\" for model \\\"World\\\"\"}"
+}
+[ERROR] GET /api/worlds/my-worlds?_t=1742830054579&testMode=true 500 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/verify?_t=1742830211590&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/verify?_t=1742830211590&testMode=true 200 - 0ms
+[INFO] GET /api/auth/verify?_t=1742830211590&testMode=true null - 3ms
+[INFO] GET /api/auth/verify?_t=1742830211590&testMode=true null - 3ms
+[INFO] GET /api/auth/verify?_t=1742830211590&testMode=true 200 - 3ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /api/auth/verify?_t=1742830211590&testMode=true null - 2ms
+[INFO] GET /api/auth/verify?_t=1742830211590&testMode=true null - 2ms
+[INFO] GET /api/auth/verify?_t=1742830211590&testMode=true 200 - 2ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/users/67e179e6b1dea1b8cb5900c9?_t=1742830211596&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /api/users/67e179e6b1dea1b8cb5900c9?_t=1742830211596&testMode=true null - 2ms
+[INFO] GET /api/users/67e179e6b1dea1b8cb5900c9?_t=1742830211596&testMode=true null - 2ms
+[INFO] GET /api/users/67e179e6b1dea1b8cb5900c9?_t=1742830211596&testMode=true 200 - 2ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/users/67e179e6b1dea1b8cb5900c9?_t=1742830211599&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /api/users/67e179e6b1dea1b8cb5900c9?_t=1742830211599&testMode=true null - 1ms
+[INFO] GET /api/users/67e179e6b1dea1b8cb5900c9?_t=1742830211599&testMode=true null - 1ms
+[INFO] GET /api/users/67e179e6b1dea1b8cb5900c9?_t=1742830211599&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742830349374&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742830349374&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:32:29.382Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742830349374&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742830349374",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742830349374&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:32:29.382Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742830349374&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742830349374",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742830349374&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742830542944&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742830542944&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:35:42.949Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742830542944&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742830542944",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742830542944&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:35:42.949Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742830542944&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742830542944",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742830542944&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742831550937&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742831550937&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:52:30.952Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742831550937&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831550937",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742831550937&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:52:30.952Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742831550937&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831550937",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742831550937&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/register?_t=1742831580986&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/register?_t=1742831580986&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:53:01.000Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742831580986&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831580986",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"test1\",\"msg\":\"Password must be at least 6 characters long\",\"path\":\"password\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/register?_t=1742831580986&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:53:01.000Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742831580986&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831580986",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"test1\",\"msg\":\"Password must be at least 6 characters long\",\"path\":\"password\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/register?_t=1742831580986&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/register?_t=1742831590169&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/register?_t=1742831590169&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:53:10.172Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742831590169&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831590169",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"test1\",\"msg\":\"Password must be at least 6 characters long\",\"path\":\"password\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/register?_t=1742831590169&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:53:10.172Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742831590169&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831590169",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"test1\",\"msg\":\"Password must be at least 6 characters long\",\"path\":\"password\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/register?_t=1742831590169&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742831596349&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742831596349&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:53:16.355Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742831596349&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831596349",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742831596349&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:53:16.355Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742831596349&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831596349",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742831596349&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742831604135&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742831604135&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:53:24.143Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742831604135&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831604135",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742831604135&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T15:53:24.143Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742831604135&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742831604135",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742831604135&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742833431446&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742833431446&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T16:23:51.451Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833431446&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833431446",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833431446&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:23:51.451Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833431446&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833431446",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833431446&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742833435372&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742833435372&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:23:55.377Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833435372&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833435372",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833435372&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:23:55.377Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833435372&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833435372",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833435372&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742833439033&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742833439033&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:23:59.038Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833439033&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833439033",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833439033&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:23:59.038Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833439033&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833439033",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833439033&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742833458037&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742833458037&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:24:18.053Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833458037&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833458037",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833458037&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:24:18.053Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833458037&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833458037",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833458037&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742833482476&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742833482476&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T16:24:42.489Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833482476&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833482476",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833482476&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T16:24:42.489Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833482476&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833482476",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833482476&testMode=true 400 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/register?_t=1742833511030&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/register?_t=1742833511030&testMode=true 400 - 3ms
+Request details: {
+  "timestamp": "2025-03-24T16:25:11.043Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742833511030&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833511030",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 3,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742833511030&testMode=true 400 - 3ms
+Request details: {
+  "timestamp": "2025-03-24T16:25:11.043Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742833511030&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833511030",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 3,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742833511030&testMode=true 400 - 3ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/register?_t=1742833516405&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/register?_t=1742833516405&testMode=true 400 - 2ms
+Request details: {
+  "timestamp": "2025-03-24T16:25:16.411Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742833516405&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833516405",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 2,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742833516405&testMode=true 400 - 2ms
+Request details: {
+  "timestamp": "2025-03-24T16:25:16.411Z",
+  "method": "POST",
+  "url": "/api/auth/register?_t=1742833516405&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833516405",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 2,
+  "error": null,
+  "response": "{\"message\":\"User already exists\"}"
+}
+[ERROR] POST /api/auth/register?_t=1742833516405&testMode=true 400 - 3ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742833553086&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742833553086&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:25:53.094Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833553086&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833553086",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833553086&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:25:53.094Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742833553086&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742833553086",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742833553086&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742834160897&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742834160897&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:36:00.901Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742834160897&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742834160897",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742834160897&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:36:00.901Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742834160897&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742834160897",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742834160897&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742834183233&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742834183233&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:36:23.240Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742834183233&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742834183233",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742834183233&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:36:23.240Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742834183233&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742834183233",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742834183233&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742835345423&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742835345423&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:55:45.427Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835345423&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835345423",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835345423&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:55:45.427Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835345423&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835345423",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835345423&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742835364732&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742835364732&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T16:56:04.739Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835364732&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835364732",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835364732&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T16:56:04.739Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835364732&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835364732",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835364732&testMode=true 400 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742835369519&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742835369519&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:56:09.524Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835369519&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835369519",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835369519&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T16:56:09.524Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835369519&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835369519",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835369519&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742835714857&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742835714857&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:01:54.866Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835714857&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835714857",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835714857&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:01:54.866Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835714857&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835714857",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835714857&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742835720139&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742835720139&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:02:00.145Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835720139&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835720139",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835720139&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:02:00.145Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835720139&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835720139",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835720139&testMode=true 400 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742835723848&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742835723848&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:02:03.858Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835723848&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835723848",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835723848&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:02:03.858Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835723848&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835723848",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835723848&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742835819800&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742835819800&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:03:39.806Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835819800&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835819800",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835819800&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:03:39.806Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835819800&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835819800",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835819800&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742835851765&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742835851765&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:04:11.786Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835851765&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835851765",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835851765&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:04:11.786Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835851765&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835851765",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835851765&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742835893883&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742835893883&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:04:53.891Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835893883&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835893883",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835893883&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:04:53.891Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742835893883&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742835893883",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742835893883&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742836025967&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742836025967&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:07:05.972Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742836025967&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742836025967",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742836025967&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:07:05.972Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742836025967&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742836025967",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742836025967&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742836030598&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742836030598&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:07:10.603Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742836030598&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742836030598",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742836030598&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:07:10.603Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742836030598&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742836030598",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742836030598&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742836035214&testMode=true 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742836035214&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:07:15.226Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742836035214&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742836035214",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742836035214&testMode=true 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:07:15.226Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742836035214&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742836035214",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742836035214&testMode=true 400 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[ERROR] POST /api/auth/login 400 - 66ms
+Request details: {
+  "timestamp": "2025-03-24T17:11:33.590Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "curl/7.81.0",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 66,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 66ms
+Request details: {
+  "timestamp": "2025-03-24T17:11:33.590Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "curl/7.81.0",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 66,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 66ms
+[ERROR] POST /api/auth/login 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:11:44.360Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "curl/7.81.0",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login 400 - 0ms
+Request details: {
+  "timestamp": "2025-03-24T17:11:44.360Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "curl/7.81.0",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 0,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login 400 - 0ms
+[ERROR] POST /api/auth/login 400 - 64ms
+Request details: {
+  "timestamp": "2025-03-24T17:11:58.993Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "axios/1.8.3",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 64,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 64ms
+Request details: {
+  "timestamp": "2025-03-24T17:11:58.993Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "axios/1.8.3",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 64,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 64ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] OPTIONS /api/auth/login?_t=1742836498615&testMode=true 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[ERROR] POST /api/auth/login?_t=1742836498615&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:14:58.620Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742836498615&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742836498615",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742836498615&testMode=true 400 - 1ms
+Request details: {
+  "timestamp": "2025-03-24T17:14:58.620Z",
+  "method": "POST",
+  "url": "/api/auth/login?_t=1742836498615&testMode=true",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:3000",
+  "referer": "http://localhost:3000/",
+  "params": {},
+  "query": {
+    "_t": "1742836498615",
+    "testMode": "true"
+  },
+  "statusCode": 400,
+  "responseTime": 1,
+  "error": null,
+  "response": "{\"errors\":[{\"type\":\"field\",\"value\":\"\",\"msg\":\"Username or email is required\",\"path\":\"identifier\",\"location\":\"body\"}]}"
+}
+[ERROR] POST /api/auth/login?_t=1742836498615&testMode=true 400 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+[INFO] GET /proxy?url=https%3A%2F%2Fzenquotes.io%2Fapi%2Frandom 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /artifacts 200 - 1ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+👍 Allowing localhost origin: http://localhost:3000
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+Killed

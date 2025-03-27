@@ -1,0 +1,25 @@
+// Simple constants file for API testing
+export const NPC_TYPES = {
+  GUIDE: 'guide',
+  MERCHANT: 'merchant',
+  SCHOLAR: 'scholar',
+  WARRIOR: 'warrior',
+  MYSTIC: 'mystic',
+  POET: 'scholar',
+  PHILOSOPHER: 'mystic',
+  WEATHERMAN: 'guide',
+  ARTIST: 'artist',
+  CODER: 'coder',
+  SHAKESPEARE: 'shakespeare',
+  SOCRATES: 'socrates',
+  AUGUSTINE: 'augustine',
+  MICHELANGELO: 'artist',
+  ZORK: 'zork',
+  ADA_LOVELACE: 'ada_lovelace',
+  LORD_BYRON: 'lord_byron',
+  OSCAR_WILDE: 'oscar_wilde',
+  ALEXANDER_POPE: 'alexander_pope',
+  ZEUS: 'zeus',
+  JOHN_MUIR: 'john_muir',
+  JESUS: 'jesus'
+}; 

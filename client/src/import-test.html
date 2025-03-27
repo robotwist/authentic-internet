@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Import Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .result {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .success {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background-color: #0069d9;
+    }
+  </style>
+</head>
+<body>
+  <h1>API Import Test</h1>
+  <div>
+    <button id="testLogin">Test Login Import</button>
+    <button id="testAuthStatus">Test Auth Status Import</button>
+    <button id="testAll">Test All Imports</button>
+  </div>
+  <div id="results"></div>
+
+  <script type="module">
+    import { loginUser, isAuthenticated, API } from './api/index.js';
+    
+    const resultsDiv = document.getElementById('results');
+    
+    function addResult(message, isSuccess) {
+      const resultDiv = document.createElement('div');
+      resultDiv.className = `result ${isSuccess ? 'success' : 'error'}`;
+      resultDiv.innerHTML = message;
+      resultsDiv.appendChild(resultDiv);
+    }
+    
+    function displayObject(obj) {
+      return `<pre>${JSON.stringify(obj, null, 2)}</pre>`;
+    }
+    
+    document.getElementById('testLogin').addEventListener('click', () => {
+      try {
+        addResult(`✅ Successfully imported loginUser function: ${loginUser.toString().substring(0, 100)}...`, true);
+      } catch (error) {
+        addResult(`❌ Error importing loginUser function: ${error.message}`, false);
+      }
+    });
+    
+    document.getElementById('testAuthStatus').addEventListener('click', () => {
+      try {
+        addResult(`✅ Successfully imported isAuthenticated function: ${isAuthenticated.toString().substring(0, 100)}...`, true);
+        
+        // Also try to call it
+        const status = isAuthenticated();
+        addResult(`✅ isAuthenticated() returned: ${status}`, true);
+      } catch (error) {
+        addResult(`❌ Error with isAuthenticated function: ${error.message}`, false);
+      }
+    });
+    
+    document.getElementById('testAll').addEventListener('click', () => {
+      try {
+        let results = [];
+        
+        if (typeof loginUser === 'function') {
+          results.push('✅ loginUser is a function');
+        } else {
+          results.push(`❌ loginUser is not a function, it's: ${typeof loginUser}`);
+        }
+        
+        if (typeof isAuthenticated === 'function') {
+          results.push('✅ isAuthenticated is a function');
+        } else {
+          results.push(`❌ isAuthenticated is not a function, it's: ${typeof isAuthenticated}`);
+        }
+        
+        if (API && typeof API.get === 'function') {
+          results.push('✅ API object with methods imported successfully');
+        } else {
+          results.push(`❌ API object not imported correctly`);
+        }
+        
+        addResult(`<h3>Import Test Results:</h3><ul>${results.map(r => `<li>${r}</li>`).join('')}</ul>`, true);
+      } catch (error) {
+        addResult(`❌ Error testing all imports: ${error.message}`, false);
+      }
+    });
+    
+    // Show initial status
+    addResult('Import test page loaded. Click a button to test imports.', true);
+  </script>
+</body>
+</html> 

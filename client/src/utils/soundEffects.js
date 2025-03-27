@@ -19,15 +19,16 @@ const SOUNDS_ENABLED = false; // Set to false to completely disable sounds
  * @param {string} path - Path to the sound file
  */
 export const preloadSound = (soundId, path) => {
+  // Silent return when sounds disabled - no logging
   if (!SOUNDS_ENABLED) return;
   
   try {
     if (!loadedSounds[soundId]) {
-      console.log(`Skipping preload of sound in safe mode: ${soundId}`);
+      // No need to log in safe mode
       soundAvailability[soundId] = false;
     }
   } catch (err) {
-    console.warn("Error in preloadSound (safe mode active):", err);
+    // Silent error in safe mode
   }
 };
 
@@ -37,15 +38,16 @@ export const preloadSound = (soundId, path) => {
  * @param {string} path - Path to the music file
  */
 export const preloadMusic = (musicId, path) => {
+  // Silent return when sounds disabled - no logging
   if (!SOUNDS_ENABLED) return;
   
   try {
     if (!backgroundMusic[musicId]) {
-      console.log(`Skipping preload of music in safe mode: ${musicId}`);
+      // No need to log in safe mode
       soundAvailability[musicId] = false;
     }
   } catch (err) {
-    console.warn("Error in preloadMusic (safe mode active):", err);
+    // Silent error in safe mode
   }
 };
 
@@ -58,19 +60,43 @@ export const preloadMusic = (musicId, path) => {
 export const playSound = (soundId, volume = 1.0) => {
   return new Promise((resolve) => {
     if (!SOUNDS_ENABLED) {
-      console.log(`Sound playback skipped in safe mode: ${soundId}`);
+      // Silent return when sounds disabled - no logging
       resolve();
       return;
     }
     
     try {
-      console.log(`Would play sound: ${soundId} at volume ${volume}`);
+      // No need to log in safe mode
       resolve();
     } catch (err) {
-      console.warn("Error in playSound (safe mode active):", err);
+      // Silent error in safe mode
       resolve();
     }
   });
+};
+
+/**
+ * Play music appropriate for the current world/map
+ * @param {number} worldIndex - The index of the current world
+ * @returns {Promise} Resolves when music starts playing
+ */
+export const playMusicForCurrentWorld = (worldIndex) => {
+  if (!SOUNDS_ENABLED) {
+    // Silent return when sounds disabled - no logging
+    return Promise.resolve();
+  }
+  
+  // Each world would have specific music
+  const worldMusicMap = {
+    0: 'main-theme',    // Main world
+    1: 'forest-theme',  // Forest world
+    2: 'cave-theme',    // Cave world
+    3: 'castle-theme',  // Castle world
+    4: 'beach-theme',   // Beach world
+  };
+  
+  const musicId = worldMusicMap[worldIndex] || 'main-theme';
+  return playMusic(musicId, 0.2, true);
 };
 
 /**
@@ -83,17 +109,17 @@ export const playSound = (soundId, volume = 1.0) => {
 export const playMusic = (musicId, volume = 0.3, fadeIn = true) => {
   return new Promise((resolve) => {
     if (!SOUNDS_ENABLED) {
-      console.log(`Music playback skipped in safe mode: ${musicId}`);
+      // Silent return when sounds disabled - no logging
       resolve();
       return;
     }
     
     try {
-      console.log(`Would play music: ${musicId} at volume ${volume}`);
+      // No need to log in safe mode
       currentMusicId = musicId;
       resolve();
     } catch (err) {
-      console.warn("Error in playMusic (safe mode active):", err);
+      // Silent error in safe mode
       resolve();
     }
   });
@@ -113,10 +139,10 @@ export const pauseMusic = (musicId = null, fadeOut = true) => {
     }
     
     try {
-      console.log(`Would pause music: ${musicId || currentMusicId}`);
+      // No need to log in safe mode
       resolve();
     } catch (err) {
-      console.warn("Error in pauseMusic (safe mode active):", err);
+      // Silent error in safe mode
       resolve();
     }
   });
@@ -136,10 +162,10 @@ export const stopMusic = (musicId = null, fadeOut = true) => {
     }
     
     try {
-      console.log(`Would stop music: ${musicId || currentMusicId}`);
+      // No need to log in safe mode
       resolve();
     } catch (err) {
-      console.warn("Error in stopMusic (safe mode active):", err);
+      // Silent error in safe mode
       resolve();
     }
   });
@@ -155,9 +181,9 @@ export const setMusicVolume = (volume, musicId = null, fade = true) => {
   if (!SOUNDS_ENABLED) return;
   
   try {
-    console.log(`Would set music volume to ${volume} for ${musicId || currentMusicId}`);
+    // No need to log in safe mode
   } catch (err) {
-    console.warn("Error in setMusicVolume (safe mode active):", err);
+    // Silent error in safe mode
   }
 };
 
@@ -175,7 +201,7 @@ export const playRandomPortalSound = (flushChance = 0.3) => {
  * This function would normally set up all sound fallbacks
  */
 export const initSounds = () => {
-  console.log("Sound system initialized in SAFE MODE - sounds disabled");
+  // No need to log in safe mode
 };
 
 // Call init function

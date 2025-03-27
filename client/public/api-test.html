@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Connection Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #4F46E5;
+    }
+    .test-card {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border-left: 4px solid #4F46E5;
+    }
+    button {
+      background-color: #4F46E5;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    button:hover {
+      background-color: #4338CA;
+    }
+    .result {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .success {
+      background-color: #d1fae5;
+      border-left: 4px solid #10b981;
+    }
+    .error {
+      background-color: #fee2e2;
+      border-left: 4px solid #ef4444;
+    }
+    .info {
+      background-color: #e0f2fe;
+      border-left: 4px solid #0ea5e9;
+    }
+    .neutral {
+      background-color: #f3f4f6;
+      border-left: 4px solid #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <h1>API Connection Test</h1>
+  <p>Use this page to test connectivity to your API server.</p>
+  
+  <div class="test-card">
+    <h2>1. Server Health Check</h2>
+    <p>Tests basic connectivity to the API server</p>
+    <button onclick="testHealth()">Test Health Endpoint</button>
+    <div id="health-result" class="result neutral">Click the button to run the test...</div>
+  </div>
+  
+  <div class="test-card">
+    <h2>2. Authentication Test</h2>
+    <p>Tests the authentication endpoints</p>
+    <button onclick="testAuthEndpoint('verify')">Test Auth Verify</button>
+    <button onclick="testLogin()">Test Login</button>
+    <div id="auth-result" class="result neutral">Click a button to run a test...</div>
+  </div>
+  
+  <div class="test-card">
+    <h2>3. Custom Endpoint Test</h2>
+    <p>Test a specific API endpoint</p>
+    <div style="display: flex; margin-bottom: 10px;">
+      <select id="method" style="margin-right: 10px; padding: 8px;">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+      </select>
+      <input type="text" id="endpoint" placeholder="/api/users" style="flex-grow: 1; padding: 8px;">
+    </div>
+    <textarea id="request-body" placeholder="{}" rows="4" style="width: 100%; margin-bottom: 10px;"></textarea>
+    <button onclick="testCustomEndpoint()">Run Custom Test</button>
+    <div id="custom-result" class="result neutral">Enter an endpoint path and click Run...</div>
+  </div>
+  
+  <div class="test-card">
+    <h2>Connection Configuration</h2>
+    <p>Information about your API connection</p>
+    <div class="result info" id="connection-info">Loading...</div>
+  </div>
+  
+  <script>
+    // Display connection configuration
+    document.getElementById('connection-info').textContent = `
+API URL: ${window.location.origin}
+Client Port: ${window.location.port || '80/443'}
+Expected Server URL: ${window.location.origin}/api
+Expected Server Port: 5000 (primary) or 5001 (fallback)
+    `;
+    
+    // Test the health endpoint
+    async function testHealth() {
+      const resultElement = document.getElementById('health-result');
+      resultElement.className = 'result neutral';
+      resultElement.textContent = 'Testing API health...';
+      
+      try {
+        // Try both the health endpoints
+        const urls = ['/api/health', '/health'];
+        let success = false;
+        
+        for (const url of urls) {
+          try {
+            const startTime = performance.now();
+            const response = await fetch(url);
+            const endTime = performance.now();
+            const responseTime = Math.round(endTime - startTime);
+            
+            if (response.ok) {
+              const data = await response.json();
+              resultElement.className = 'result success';
+              resultElement.textContent = `✅ API is healthy! Response time: ${responseTime}ms\n\nData: ${JSON.stringify(data, null, 2)}`;
+              success = true;
+              break;
+            }
+          } catch (innerError) {
+            console.warn(`Failed to connect to ${url}:`, innerError);
+          }
+        }
+        
+        if (!success) {
+          throw new Error('Could not connect to any health endpoints');
+        }
+      } catch (error) {
+        resultElement.className = 'result error';
+        resultElement.textContent = `❌ API health check failed: ${error.message}\n\nPlease make sure the server is running on port 5000.`;
+      }
+    }
+    
+    // Test auth endpoint
+    async function testAuthEndpoint(endpoint) {
+      const resultElement = document.getElementById('auth-result');
+      resultElement.className = 'result neutral';
+      resultElement.textContent = `Testing /api/auth/${endpoint}...`;
+      
+      try {
+        // Get token if available
+        const token = localStorage.getItem('token');
+        const headers = {};
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`/api/auth/${endpoint}`, {
+          headers
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultElement.className = 'result success';
+          resultElement.textContent = `✅ Auth endpoint test successful: /api/auth/${endpoint}\n\nStatus: ${response.status}\n\nData: ${JSON.stringify(data, null, 2)}`;
+        } else {
+          resultElement.className = 'result error';
+          resultElement.textContent = `❌ Auth endpoint returned error: /api/auth/${endpoint}\n\nStatus: ${response.status}\n\nError: ${JSON.stringify(data, null, 2)}`;
+        }
+      } catch (error) {
+        resultElement.className = 'result error';
+        resultElement.textContent = `❌ Auth endpoint test failed: ${error.message}`;
+      }
+    }
+    
+    // Test login
+    async function testLogin() {
+      const resultElement = document.getElementById('auth-result');
+      resultElement.className = 'result neutral';
+      resultElement.textContent = 'Testing login...';
+      
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: 'testuser',
+            password: 'password123'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.token) {
+          resultElement.className = 'result success';
+          resultElement.textContent = `✅ Login successful!\n\nToken: ${data.token.substring(0, 20)}...\n\nUser: ${JSON.stringify(data.user, null, 2)}`;
+          
+          // Store the token
+          localStorage.setItem('token', data.token);
+          if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+          }
+        } else {
+          resultElement.className = 'result error';
+          resultElement.textContent = `❌ Login failed\n\nStatus: ${response.status}\n\nError: ${JSON.stringify(data, null, 2)}`;
+        }
+      } catch (error) {
+        resultElement.className = 'result error';
+        resultElement.textContent = `❌ Login test failed: ${error.message}`;
+      }
+    }
+    
+    // Test custom endpoint
+    async function testCustomEndpoint() {
+      const resultElement = document.getElementById('custom-result');
+      const method = document.getElementById('method').value;
+      let endpoint = document.getElementById('endpoint').value;
+      const requestBodyText = document.getElementById('request-body').value;
+      
+      // Ensure endpoint starts with /api/
+      if (!endpoint.startsWith('/api/') && !endpoint.startsWith('/')) {
+        endpoint = '/api/' + endpoint;
+      } else if (!endpoint.startsWith('/api/') && endpoint.startsWith('/')) {
+        endpoint = '/api' + endpoint;
+      }
+      
+      resultElement.className = 'result neutral';
+      resultElement.textContent = `Testing ${method} ${endpoint}...`;
+      
+      try {
+        // Prepare request options
+        const options = {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+        
+        // Add token if available
+        const token = localStorage.getItem('token');
+        if (token) {
+          options.headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        // Add request body for non-GET requests
+        if (method !== 'GET' && requestBodyText.trim()) {
+          try {
+            options.body = requestBodyText.trim();
+            // Test if valid JSON
+            JSON.parse(options.body);
+          } catch (e) {
+            resultElement.className = 'result error';
+            resultElement.textContent = `❌ Invalid JSON in request body: ${e.message}`;
+            return;
+          }
+        }
+        
+        const startTime = performance.now();
+        const response = await fetch(endpoint, options);
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        
+        // Try to parse response as JSON
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          data = await response.text();
+        }
+        
+        if (response.ok) {
+          resultElement.className = 'result success';
+          resultElement.textContent = `✅ ${method} ${endpoint} successful! (${responseTime}ms)\n\nStatus: ${response.status}\n\nResponse: ${typeof data === 'object' ? JSON.stringify(data, null, 2) : data}`;
+        } else {
+          resultElement.className = 'result error';
+          resultElement.textContent = `❌ ${method} ${endpoint} failed\n\nStatus: ${response.status}\n\nError: ${typeof data === 'object' ? JSON.stringify(data, null, 2) : data}`;
+        }
+      } catch (error) {
+        resultElement.className = 'result error';
+        resultElement.textContent = `❌ Request failed: ${error.message}`;
+      }
+    }
+    
+    // Run health check on page load
+    window.addEventListener('load', function() {
+      testHealth();
+    });
+  </script>
+</body>
+</html> 

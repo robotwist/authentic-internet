@@ -6,18 +6,18 @@ import User from "../models/User.js";
 if (!process.env.JWT_SECRET) {
   console.error("ERROR: JWT_SECRET environment variable is not set!");
   console.error("This is a critical security issue. The application should not run without a proper JWT_SECRET.");
-  // In production, we might want to exit the process here
-  // process.exit(1);
+  process.exit(1); // Exit in production
 }
 
-const secretKey = process.env.JWT_SECRET; // No fallback - JWT_SECRET must be set
-const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10; // Salt rounds can have a reasonable default
+const secretKey = process.env.JWT_SECRET;
+const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
+const tokenExpiration = process.env.JWT_EXPIRES_IN || "24h";
 
 // ✅ Register a new user
 export const register = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const normalizedUsername = username.toLowerCase(); // Normalize username
+    const normalizedUsername = username.toLowerCase();
 
     // Check if user exists
     const existingUser = await User.findOne({ username: normalizedUsername });
@@ -30,10 +30,18 @@ export const register = async (req, res) => {
     const newUser = new User({ username: normalizedUsername, password: hashedPassword });
     await newUser.save();
 
-    // Generate JWT Token
-    const token = jwt.sign({ userId: newUser._id }, secretKey, { expiresIn: "24h" });
+    // Generate JWT Token with consistent expiration
+    const token = jwt.sign({ userId: newUser._id }, secretKey, { expiresIn: tokenExpiration });
 
-    res.status(201).json({ token, user: { id: newUser._id, username: newUser.username } });
+    res.status(201).json({ 
+      token, 
+      user: { 
+        id: newUser._id, 
+        username: newUser.username,
+        experience: newUser.experience || 0,
+        level: newUser.level || 1
+      } 
+    });
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -52,7 +60,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Username and password are required" });
     }
     
-    const normalizedUsername = username.toLowerCase(); // Normalize username
+    const normalizedUsername = username.toLowerCase();
     console.log(`📝 Looking up user: ${normalizedUsername}`);
     
     const user = await User.findOne({ username: normalizedUsername });
@@ -68,8 +76,8 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // ✅ Generate JWT Token
-    const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: "1h" });
+    // Generate JWT Token with consistent expiration
+    const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: tokenExpiration });
     console.log(`✅ Login successful for user: ${username}`);
 
     res.json({ 

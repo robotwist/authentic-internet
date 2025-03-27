@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG to PNG Converter</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .converter {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .preview {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .preview-box {
+      border: 1px dashed #ccc;
+      padding: 10px;
+      text-align: center;
+      width: 200px;
+    }
+    canvas {
+      background-color: rgba(0,0,0,0.05);
+      border: 1px solid #eee;
+    }
+    img {
+      max-width: 100%;
+      max-height: 150px;
+    }
+    button {
+      background-color: #4F46E5;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: #4338CA;
+    }
+    h1, h2 {
+      color: #4F46E5;
+    }
+    .controls {
+      margin: 20px 0;
+    }
+    input[type="file"] {
+      margin-right: 10px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 4px;
+    }
+    label {
+      margin-right: 10px;
+    }
+    .placeholder {
+      color: #999;
+      font-style: italic;
+    }
+    .download-link {
+      padding: 5px 10px;
+      background-color: #10B981;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>SVG to PNG Converter</h1>
+  <p>Use this tool to convert SVG files to PNG format for the Authentic Internet game.</p>
+
+  <div class="converter">
+    <h2>Convert SVG to PNG</h2>
+    <div class="controls">
+      <input type="file" id="svgFile" accept=".svg">
+      <label for="width">Width:</label>
+      <input type="number" id="width" value="64" min="16" max="1024">
+      <label for="height">Height:</label>
+      <input type="number" id="height" value="64" min="16" max="1024">
+      <button id="convertBtn">Convert</button>
+    </div>
+
+    <div class="preview">
+      <div class="preview-box">
+        <h3>SVG Preview</h3>
+        <div id="svgPreview">
+          <p class="placeholder">Select an SVG file</p>
+        </div>
+      </div>
+      <div class="preview-box">
+        <h3>PNG Result</h3>
+        <div id="pngResult">
+          <p class="placeholder">PNG will appear here</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="converter">
+    <h2>Generate Placeholder Images</h2>
+    <p>Click a button below to generate a placeholder image:</p>
+    
+    <button onclick="generatePlaceholder('artifact', 64, 64)">Default Artifact</button>
+    <button onclick="generatePlaceholder('scroll', 64, 64)">Artifact Scroll</button>
+    <button onclick="generatePlaceholder('gem', 64, 64)">Artifact Gem</button>
+    <button onclick="generatePlaceholder('book', 64, 64)">Artifact Book</button>
+    <button onclick="generatePlaceholder('potion', 64, 64)">Artifact Potion</button>
+    <button onclick="generatePlaceholder('logo', 192, 192)">Logo 192</button>
+    <button onclick="generatePlaceholder('logo', 512, 512)">Logo 512</button>
+    <button onclick="generatePlaceholder('apple-touch-icon', 180, 180)">Apple Touch Icon</button>
+    <button onclick="generatePlaceholder('favicon', 32, 32)">Favicon</button>
+    
+    <div class="preview">
+      <div class="preview-box">
+        <h3>Generated Placeholder</h3>
+        <div id="placeholderResult">
+          <p class="placeholder">Generate a placeholder</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // SVG to PNG conversion
+    document.getElementById('convertBtn').addEventListener('click', function() {
+      const fileInput = document.getElementById('svgFile');
+      const width = parseInt(document.getElementById('width').value);
+      const height = parseInt(document.getElementById('height').value);
+      
+      if (fileInput.files.length === 0) {
+        alert('Please select an SVG file first');
+        return;
+      }
+      
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        const svgData = e.target.result;
+        
+        // Display SVG preview
+        const svgPreview = document.getElementById('svgPreview');
+        svgPreview.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = svgData;
+        svgPreview.appendChild(img);
+        
+        // Convert SVG to PNG
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        // Create a new image to draw on canvas
+        const pngImg = new Image();
+        pngImg.onload = function() {
+          // Clear canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw image on canvas
+          ctx.drawImage(pngImg, 0, 0, width, height);
+          
+          // Show PNG result
+          const pngResult = document.getElementById('pngResult');
+          pngResult.innerHTML = '';
+          
+          // Add canvas
+          pngResult.appendChild(canvas);
+          
+          // Add download link
+          const downloadLink = document.createElement('a');
+          downloadLink.href = canvas.toDataURL('image/png');
+          downloadLink.download = file.name.replace('.svg', '.png');
+          downloadLink.textContent = 'Download PNG';
+          downloadLink.className = 'download-link';
+          pngResult.appendChild(document.createElement('br'));
+          pngResult.appendChild(downloadLink);
+        };
+        
+        pngImg.src = svgData;
+      };
+      
+      reader.readAsDataURL(file);
+    });
+    
+    // Generate placeholder images
+    function generatePlaceholder(type, width, height) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      
+      // Create background
+      ctx.fillStyle = '#f3f4f6';
+      ctx.fillRect(0, 0, width, height);
+      
+      // Add border
+      ctx.strokeStyle = '#9ca3af';
+      ctx.lineWidth = Math.max(1, Math.min(width, height) / 32);
+      ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, width-ctx.lineWidth, height-ctx.lineWidth);
+      
+      // Add text/icon based on type
+      ctx.fillStyle = '#4F46E5';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const fontSize = Math.max(10, Math.min(width, height) / 4);
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      
+      let text = 'IMG';
+      
+      switch(type) {
+        case 'artifact':
+          text = 'A';
+          break;
+        case 'scroll':
+          text = 'S';
+          break;
+        case 'gem':
+          text = 'G';
+          break;
+        case 'book':
+          text = 'B';
+          break;
+        case 'potion':
+          text = 'P';
+          break;
+        case 'logo':
+          text = 'AI';
+          // Add gradient
+          const gradient = ctx.createLinearGradient(0, 0, width, height);
+          gradient.addColorStop(0, '#4F46E5');
+          gradient.addColorStop(1, '#10B981');
+          ctx.fillStyle = gradient;
+          break;
+        case 'apple-touch-icon':
+          text = 'AI';
+          // Add gradient
+          const iconGradient = ctx.createLinearGradient(0, 0, width, height);
+          iconGradient.addColorStop(0, '#4F46E5');
+          iconGradient.addColorStop(1, '#10B981');
+          ctx.fillStyle = iconGradient;
+          break;
+        case 'favicon':
+          text = 'AI';
+          // Add gradient
+          const favGradient = ctx.createLinearGradient(0, 0, width, height);
+          favGradient.addColorStop(0, '#4F46E5');
+          favGradient.addColorStop(1, '#10B981');
+          ctx.fillStyle = favGradient;
+          break;
+      }
+      
+      ctx.fillText(text, width/2, height/2);
+      
+      // Show result
+      const placeholderResult = document.getElementById('placeholderResult');
+      placeholderResult.innerHTML = '';
+      
+      // Add canvas
+      placeholderResult.appendChild(canvas);
+      
+      // Add download link
+      const downloadLink = document.createElement('a');
+      downloadLink.href = canvas.toDataURL('image/png');
+      downloadLink.download = `${type}.png`;
+      downloadLink.textContent = 'Download PNG';
+      downloadLink.className = 'download-link';
+      placeholderResult.appendChild(document.createElement('br'));
+      placeholderResult.appendChild(downloadLink);
+    }
+  </script>
+</body>
+</html> 

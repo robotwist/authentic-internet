@@ -1,0 +1,3211 @@
+
+Starting server in development mode...
+Server PID 30259 saved to .server_pid
+Server startup script running. Press Ctrl+C to stop.
+✅ MongoDB Session Store Connected Successfully
+🔄 Attempting to connect to MongoDB with URI: mongodb+srv://robwistrand:fgsAbA41VXlWzPfV@clusterb.7y27j.mongodb.net/?retryWrites=true&w=majority&appName=ClusterB
+✅ MongoDB Connected Successfully
+✅ MongoDB Connected Successfully
+✅ WebSocket service initialized
+⚠️ Port 5001 is already in use, trying another port...
+⚠️ Port 5002 is already in use, trying another port...
+⚠️ Port 5003 is already in use, trying another port...
+⚠️ Port 5004 is already in use, trying another port...
+🚀 Server running on port 5001
+🌍 Environment: development
+🔑 JWT Secret: Configured
+🔌 WebSockets: Enabled
+🚀 Server running on port 5002
+🌍 Environment: development
+🔑 JWT Secret: Configured
+🔌 WebSockets: Enabled
+🚀 Server running on port 5003
+🌍 Environment: development
+🔑 JWT Secret: Configured
+🔌 WebSockets: Enabled
+🚀 Server running on port 5004
+🌍 Environment: development
+🔑 JWT Secret: Configured
+🔌 WebSockets: Enabled
+🚀 Server running on port 5005
+🌍 Environment: development
+🔑 JWT Secret: Configured
+🔌 WebSockets: Enabled
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api 200 - 0ms
+[INFO] GET /api 200 - 0ms
+[INFO] GET /api 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] OPTIONS /api/auth/login 200 - 0ms
+[ERROR] POST /api/auth/login 400 - 71ms
+Request details: {
+  "timestamp": "2025-03-27T18:46:04.286Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 71,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 71ms
+Request details: {
+  "timestamp": "2025-03-27T18:46:04.286Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 71,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 71ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[ERROR] POST /api/auth/login 400 - 63ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:44.408Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 63,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 63ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:44.408Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 63,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 63ms
+[ERROR] POST /api/auth/login 400 - 54ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:45.763Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 54,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 55ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:45.763Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 55,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 55ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[ERROR] POST /api/auth/login 400 - 46ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:46.729Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 46,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 46ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:46.729Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 46,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 46ms
+[ERROR] POST /api/auth/login 400 - 48ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:47.952Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 48,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 48ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:47.952Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 48,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 48ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[ERROR] POST /api/auth/login 400 - 47ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:52.134Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 47,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 48ms
+Request details: {
+  "timestamp": "2025-03-27T19:06:52.134Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5173",
+  "referer": "http://localhost:5173/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 48,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 48ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts 200 - 47ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 277ms
+[INFO] GET /api/artifacts null - 277ms
+[INFO] GET /api/artifacts 200 - 277ms
+[INFO] GET /api/artifacts null - 43ms
+[INFO] GET /api/artifacts null - 43ms
+[INFO] GET /api/artifacts 200 - 43ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts 200 - 46ms
+[INFO] GET /api/artifacts null - 54ms
+[INFO] GET /api/artifacts null - 54ms
+[INFO] GET /api/artifacts 200 - 54ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts 200 - 47ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts 200 - 46ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/artifacts null - 55ms
+[INFO] GET /api/artifacts null - 55ms
+[INFO] GET /api/artifacts 200 - 55ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts 200 - 51ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts 200 - 47ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 57ms
+[INFO] GET /api/artifacts null - 57ms
+[INFO] GET /api/artifacts 200 - 57ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts 200 - 47ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts 200 - 46ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts 200 - 47ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 60ms
+[INFO] GET /api/artifacts null - 60ms
+[INFO] GET /api/artifacts 200 - 60ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts 200 - 51ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 61ms
+[INFO] GET /api/artifacts null - 61ms
+[INFO] GET /api/artifacts 200 - 61ms
+[INFO] GET /api/artifacts null - 61ms
+[INFO] GET /api/artifacts null - 61ms
+[INFO] GET /api/artifacts 200 - 61ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 148ms
+[INFO] GET /api/artifacts null - 148ms
+[INFO] GET /api/artifacts 200 - 148ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 91ms
+[INFO] GET /api/artifacts null - 91ms
+[INFO] GET /api/artifacts 200 - 91ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts 200 - 50ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 99ms
+[INFO] GET /api/artifacts null - 99ms
+[INFO] GET /api/artifacts 200 - 99ms
+[INFO] GET /api/artifacts null - 96ms
+[INFO] GET /api/artifacts null - 96ms
+[INFO] GET /api/artifacts 200 - 96ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 101ms
+[INFO] GET /api/artifacts null - 101ms
+[INFO] GET /api/artifacts 200 - 101ms
+[INFO] GET /api/artifacts null - 98ms
+[INFO] GET /api/artifacts null - 98ms
+[INFO] GET /api/artifacts 200 - 98ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 309ms
+[INFO] GET /api/artifacts null - 309ms
+[INFO] GET /api/artifacts 200 - 309ms
+[INFO] GET /api/artifacts null - 128ms
+[INFO] GET /api/artifacts null - 128ms
+[INFO] GET /api/artifacts 200 - 128ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 59ms
+[INFO] GET /api/artifacts null - 60ms
+[INFO] GET /api/artifacts 200 - 60ms
+[INFO] GET /api/artifacts null - 62ms
+[INFO] GET /api/artifacts null - 62ms
+[INFO] GET /api/artifacts 200 - 62ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 55ms
+[INFO] GET /api/artifacts null - 55ms
+[INFO] GET /api/artifacts 200 - 55ms
+[INFO] GET /api/artifacts null - 68ms
+[INFO] GET /api/artifacts null - 68ms
+[INFO] GET /api/artifacts 200 - 68ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 342ms
+[INFO] GET /api/artifacts null - 342ms
+[INFO] GET /api/artifacts 200 - 342ms
+[INFO] GET /api/artifacts null - 60ms
+[INFO] GET /api/artifacts null - 61ms
+[INFO] GET /api/artifacts 200 - 61ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 57ms
+[INFO] GET /api/artifacts null - 57ms
+[INFO] GET /api/artifacts 200 - 57ms
+[INFO] GET /api/artifacts null - 62ms
+[INFO] GET /api/artifacts null - 62ms
+[INFO] GET /api/artifacts 200 - 62ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/artifacts null - 56ms
+[INFO] GET /api/artifacts null - 57ms
+[INFO] GET /api/artifacts 200 - 57ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts 200 - 47ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts 200 - 50ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 141ms
+[INFO] GET /api/artifacts null - 141ms
+[INFO] GET /api/artifacts 200 - 141ms
+[INFO] GET /api/artifacts null - 53ms
+[INFO] GET /api/artifacts null - 53ms
+[INFO] GET /api/artifacts 200 - 53ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 53ms
+[INFO] GET /api/artifacts null - 53ms
+[INFO] GET /api/artifacts 200 - 53ms
+[INFO] GET /api/artifacts null - 54ms
+[INFO] GET /api/artifacts null - 54ms
+[INFO] GET /api/artifacts 200 - 54ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts 200 - 50ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 45ms
+[INFO] GET /api/artifacts null - 45ms
+[INFO] GET /api/artifacts 200 - 46ms
+[INFO] GET /api/artifacts null - 44ms
+[INFO] GET /api/artifacts null - 44ms
+[INFO] GET /api/artifacts 200 - 44ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 62ms
+[INFO] GET /api/artifacts null - 62ms
+[INFO] GET /api/artifacts 200 - 62ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/artifacts null - 43ms
+[INFO] GET /api/artifacts null - 43ms
+[INFO] GET /api/artifacts 200 - 43ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts 200 - 51ms
+[INFO] GET /api/artifacts null - 54ms
+[INFO] GET /api/artifacts null - 54ms
+[INFO] GET /api/artifacts 200 - 54ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 62ms
+[INFO] GET /api/artifacts null - 62ms
+[INFO] GET /api/artifacts 200 - 62ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts 200 - 51ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts 200 - 51ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/artifacts null - 43ms
+[INFO] GET /api/artifacts null - 43ms
+[INFO] GET /api/artifacts 200 - 43ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 59ms
+[INFO] GET /api/artifacts null - 59ms
+[INFO] GET /api/artifacts 200 - 60ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts null - 46ms
+[INFO] GET /api/artifacts 200 - 46ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 50ms
+[INFO] GET /api/artifacts null - 44ms
+[INFO] GET /api/artifacts null - 44ms
+[INFO] GET /api/artifacts 200 - 44ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts 200 - 51ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 54ms
+[INFO] GET /api/artifacts null - 55ms
+[INFO] GET /api/artifacts 200 - 55ms
+[INFO] GET /api/artifacts null - 54ms
+[INFO] GET /api/artifacts null - 54ms
+[INFO] GET /api/artifacts 200 - 54ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] OPTIONS /api/auth/login 200 - 0ms
+[ERROR] POST /api/auth/login 400 - 51ms
+Request details: {
+  "timestamp": "2025-03-27T19:24:29.262Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5180",
+  "referer": "http://localhost:5180/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 51,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 51ms
+Request details: {
+  "timestamp": "2025-03-27T19:24:29.262Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5180",
+  "referer": "http://localhost:5180/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 51,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 51ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[ERROR] POST /api/auth/login 400 - 49ms
+Request details: {
+  "timestamp": "2025-03-27T19:25:58.428Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5180",
+  "referer": "http://localhost:5180/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 49,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 49ms
+Request details: {
+  "timestamp": "2025-03-27T19:25:58.428Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5180",
+  "referer": "http://localhost:5180/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 49,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 49ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /health 200 - 0ms
+[ERROR] POST /api/auth/login 400 - 50ms
+Request details: {
+  "timestamp": "2025-03-27T19:30:57.496Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5180",
+  "referer": "http://localhost:5180/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 50,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 50ms
+Request details: {
+  "timestamp": "2025-03-27T19:30:57.496Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::ffff:127.0.0.1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
+  "origin": "http://localhost:5180",
+  "referer": "http://localhost:5180/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 50,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 50ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/artifacts null - 60ms
+[INFO] GET /api/artifacts null - 60ms
+[INFO] GET /api/artifacts 200 - 60ms
+[INFO] GET /api/artifacts null - 59ms
+[INFO] GET /api/artifacts null - 59ms
+[INFO] GET /api/artifacts 200 - 60ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts 200 - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts 200 - 47ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts 200 - 50ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts 200 - 51ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 50ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts null - 50ms
+[INFO] GET /api/artifacts 200 - 51ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 56ms
+[INFO] GET /api/artifacts null - 56ms
+[INFO] GET /api/artifacts 200 - 56ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/health 200 - 1ms
+[INFO] GET /api/artifacts null - 61ms
+[INFO] GET /api/artifacts null - 61ms
+[INFO] GET /api/artifacts 200 - 61ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts null - 47ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 56ms
+[INFO] GET /api/artifacts null - 56ms
+[INFO] GET /api/artifacts 200 - 56ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts null - 51ms
+[INFO] GET /api/artifacts 200 - 51ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 69ms
+[INFO] GET /api/artifacts null - 69ms
+[INFO] GET /api/artifacts 200 - 69ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts null - 48ms
+[INFO] GET /api/artifacts 200 - 48ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts null - 49ms
+[INFO] GET /api/artifacts 200 - 49ms
+[INFO] GET /api/artifacts null - 44ms
+[INFO] GET /api/artifacts null - 44ms
+[INFO] GET /api/artifacts 200 - 44ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] OPTIONS /api/auth/login 200 - 1ms
+[ERROR] POST /api/auth/login 400 - 48ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:00.278Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 48,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 48ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:00.278Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 48,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 49ms
+[ERROR] POST /api/auth/login 400 - 53ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:01.263Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 53,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 53ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:01.263Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 53,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 53ms
+[ERROR] POST /api/auth/login 400 - 43ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:01.689Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 43,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 43ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:01.689Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 43,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 43ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[ERROR] POST /api/auth/login 400 - 46ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:02.063Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 46,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 46ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:02.063Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 46,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 46ms
+[ERROR] POST /api/auth/login 400 - 52ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:02.234Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 52,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 52ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:02.234Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 52,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 52ms
+[ERROR] POST /api/auth/login 400 - 45ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:02.705Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 45,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 45ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:02.705Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 45,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 45ms
+[ERROR] POST /api/auth/login 400 - 51ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:03.004Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 51,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 51ms
+Request details: {
+  "timestamp": "2025-03-27T19:35:03.004Z",
+  "method": "POST",
+  "url": "/api/auth/login",
+  "ip": "::1",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  "origin": "http://localhost:5181",
+  "referer": "http://localhost:5181/",
+  "params": {},
+  "query": {},
+  "statusCode": 400,
+  "responseTime": 51,
+  "error": null,
+  "response": "{\"message\":\"Invalid credentials\"}"
+}
+[ERROR] POST /api/auth/login 400 - 51ms
+[INFO] GET /health 200 - 1ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+[INFO] GET /api/health 200 - 0ms
+Stopping server process...
+Stopping server process...
+node:internal/process/per_thread:225
+      throw new ErrnoException(err, 'kill');
+      ^
+
+Error: kill ESRCH
+    at process.kill (node:internal/process/per_thread:225:13)
+    at process.handleTermination (file:///home/robwistrand/code/ga/projects/authentic-internet/server/scripts/start.js:69:15)
+    at process.emit (node:events:518:28) {
+  errno: -3,
+  code: 'ESRCH',
+  syscall: 'kill'
+}
+
+Node.js v22.14.0
+Stopping server process...
+node:internal/process/per_thread:225
+      throw new ErrnoException(err, 'kill');
+      ^
+
+Error: kill ESRCH
+    at process.kill (node:internal/process/per_thread:225:13)
+    at process.handleTermination (file:///home/robwistrand/code/ga/projects/authentic-internet/server/scripts/start.js:69:15)
+    at process.emit (node:events:518:28) {
+  errno: -3,
+  code: 'ESRCH',
+  syscall: 'kill'
+}
+
+Node.js v22.14.0
+node:internal/process/per_thread:225
+      throw new ErrnoException(err, 'kill');
+      ^
+
+Error: kill ESRCH
+    at process.kill (node:internal/process/per_thread:225:13)
+    at process.handleTermination (file:///home/robwistrand/code/ga/projects/authentic-internet/server/scripts/start.js:69:15)
+    at process.emit (node:events:518:28) {
+  errno: -3,
+  code: 'ESRCH',
+  syscall: 'kill'
+}
+
+Node.js v22.14.0

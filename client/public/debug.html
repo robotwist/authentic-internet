@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Connection Debugger</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    h1 {
+      color: #4F46E5;
+    }
+    pre {
+      background-color: #eee;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    .success {
+      color: #0d9488;
+      font-weight: bold;
+    }
+    .error {
+      color: #b91c1c;
+      font-weight: bold;
+    }
+    .warning {
+      color: #ca8a04;
+      font-weight: bold;
+    }
+    .card {
+      background-color: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+    button {
+      background-color: #4F46E5;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    button:hover {
+      background-color: #4338ca;
+    }
+    .logs {
+      height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background-color: #f0f0f0;
+      margin-top: 10px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>API Connection Debugger</h1>
+  <div class="card">
+    <h2>1. Check Server Health</h2>
+    <button id="checkHealth">Check Server Health (Port 5000)</button>
+    <button id="checkHealthFallback">Check Fallback Server (Port 5001)</button>
+    <div id="healthOutput" class="logs"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Test Authentication</h2>
+    <div>
+      <input type="text" id="username" placeholder="Username" value="testuser">
+      <input type="password" id="password" placeholder="Password" value="password123">
+      <button id="testLogin">Test Login</button>
+    </div>
+    <div id="authOutput" class="logs"></div>
+  </div>
+
+  <div class="card">
+    <h2>3. Test API Endpoints</h2>
+    <button id="testArtifacts">Test Artifacts Endpoint</button>
+    <button id="testArtifactUpdate">Test Artifact Update</button>
+    <button id="testUsers">Test Users Endpoint</button>
+    <div id="apiOutput" class="logs"></div>
+  </div>
+
+  <div class="card">
+    <h2>4. Network & Environment Info</h2>
+    <button id="showInfo">Show Environment Info</button>
+    <div id="infoOutput" class="logs"></div>
+  </div>
+
+  <div class="card">
+    <h2>5. Fix Common Issues</h2>
+    <button id="clearStorage">Clear Local Storage</button>
+    <button id="resetApiConfig">Reset API Configuration</button>
+    <div id="fixOutput" class="logs"></div>
+  </div>
+
+  <script>
+    // Helper to log to the page
+    function log(elementId, message, type = 'info') {
+      const output = document.getElementById(elementId);
+      const logEntry = document.createElement('div');
+      logEntry.className = type;
+      logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+      output.appendChild(logEntry);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    // 1. Health Check Functions
+    document.getElementById('checkHealth').addEventListener('click', async () => {
+      try {
+        log('healthOutput', 'Checking server health at http://localhost:5000/health...');
+        const response = await fetch('http://localhost:5000/health');
+        
+        if (response.ok) {
+          const data = await response.json();
+          log('healthOutput', 'Server is healthy! Response: ' + JSON.stringify(data), 'success');
+        } else {
+          log('healthOutput', `Server returned status: ${response.status}`, 'error');
+        }
+      } catch (error) {
+        log('healthOutput', `Error: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('checkHealthFallback').addEventListener('click', async () => {
+      try {
+        log('healthOutput', 'Checking fallback server at http://localhost:5001/health...');
+        const response = await fetch('http://localhost:5001/health');
+        
+        if (response.ok) {
+          const data = await response.json();
+          log('healthOutput', 'Fallback server is healthy! Response: ' + JSON.stringify(data), 'success');
+        } else {
+          log('healthOutput', `Fallback server returned status: ${response.status}`, 'error');
+        }
+      } catch (error) {
+        log('healthOutput', `Error: ${error.message}`, 'error');
+      }
+    });
+
+    // 2. Authentication Testing
+    document.getElementById('testLogin').addEventListener('click', async () => {
+      try {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        log('authOutput', `Testing login with username: ${username}...`);
+        
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          log('authOutput', 'Login successful! Token: ' + data.token.substring(0, 15) + '...', 'success');
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+        } else {
+          log('authOutput', `Login failed: ${data.message || 'Unknown error'}`, 'error');
+        }
+      } catch (error) {
+        log('authOutput', `Error: ${error.message}`, 'error');
+      }
+    });
+
+    // 3. API Endpoint Testing
+    document.getElementById('testArtifacts').addEventListener('click', async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          return log('apiOutput', 'No token found. Please login first.', 'warning');
+        }
+        
+        log('apiOutput', 'Testing artifacts endpoint...');
+        
+        const response = await fetch('http://localhost:5000/api/artifacts?testMode=true', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          log('apiOutput', `Artifacts endpoint success! Found ${data.length} artifacts.`, 'success');
+        } else {
+          const errorText = await response.text();
+          log('apiOutput', `Artifacts endpoint failed: ${response.status} - ${errorText}`, 'error');
+        }
+      } catch (error) {
+        log('apiOutput', `Error: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('testArtifactUpdate').addEventListener('click', async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          return log('apiOutput', 'No token found. Please login first.', 'warning');
+        }
+        
+        log('apiOutput', 'Testing artifact update endpoint...');
+        
+        const testData = {
+          name: 'Test Artifact',
+          description: 'Test Description',
+          content: 'Test Content',
+        };
+        
+        const response = await fetch('http://localhost:5000/api/artifacts/test-artifact-12345?testMode=true', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'X-Test-Mode': 'true'
+          },
+          body: JSON.stringify(testData),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          log('apiOutput', 'Artifact update success! Response: ' + JSON.stringify(data), 'success');
+        } else {
+          const errorText = await response.text();
+          log('apiOutput', `Artifact update failed: ${response.status} - ${errorText}`, 'error');
+        }
+      } catch (error) {
+        log('apiOutput', `Error: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('testUsers').addEventListener('click', async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          return log('apiOutput', 'No token found. Please login first.', 'warning');
+        }
+        
+        log('apiOutput', 'Testing users endpoint...');
+        
+        const response = await fetch('http://localhost:5000/api/users/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          log('apiOutput', 'Users endpoint success! User: ' + JSON.stringify(data), 'success');
+        } else {
+          const errorText = await response.text();
+          log('apiOutput', `Users endpoint failed: ${response.status} - ${errorText}`, 'error');
+        }
+      } catch (error) {
+        log('apiOutput', `Error: ${error.message}`, 'error');
+      }
+    });
+
+    // 4. Environment Info
+    document.getElementById('showInfo').addEventListener('click', () => {
+      const envInfo = {
+        userAgent: navigator.userAgent,
+        apiUrl: localStorage.getItem('apiUrl') || 'http://localhost:5000',
+        protocol: window.location.protocol,
+        host: window.location.host,
+        localStorage: {
+          token: localStorage.getItem('token') ? 'present' : 'missing',
+          user: localStorage.getItem('user') ? 'present' : 'missing',
+        },
+        sessionStorage: {
+          token: sessionStorage.getItem('token') ? 'present' : 'missing',
+          user: sessionStorage.getItem('user') ? 'present' : 'missing',
+        },
+      };
+      
+      log('infoOutput', 'Environment information:');
+      log('infoOutput', JSON.stringify(envInfo, null, 2));
+    });
+
+    // 5. Fix Common Issues
+    document.getElementById('clearStorage').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+      log('fixOutput', 'Local storage and session storage cleared', 'success');
+    });
+
+    document.getElementById('resetApiConfig').addEventListener('click', () => {
+      localStorage.setItem('apiUrl', 'http://localhost:5000');
+      log('fixOutput', 'API configuration reset to http://localhost:5000', 'success');
+    });
+
+    // Run initial health check on load
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('checkHealth').click();
+    });
+  </script>
+</body>
+</html> 

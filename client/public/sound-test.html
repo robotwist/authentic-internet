@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sound Test - Authentic Internet</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #4F46E5;
+      border-bottom: 2px solid #4F46E5;
+      padding-bottom: 10px;
+    }
+    .test-section {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .sound-button {
+      background-color: #4F46E5;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .sound-button:hover {
+      background-color: #3730a3;
+    }
+    .sound-button.wav {
+      background-color: #10B981;
+    }
+    .sound-button.wav:hover {
+      background-color: #059669;
+    }
+    .sound-button.mp3 {
+      background-color: #6366F1;
+    }
+    .sound-button.mp3:hover {
+      background-color: #4F46E5;
+    }
+    .sound-button.broken {
+      background-color: #F87171;
+    }
+    .sound-button.broken:hover {
+      background-color: #EF4444;
+    }
+    .log {
+      background-color: #1E293B;
+      color: #E2E8F0;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+    .success {
+      color: #10B981;
+    }
+    .error {
+      color: #F87171;
+    }
+    .warning {
+      color: #FBBF24;
+    }
+    .info {
+      color: #60A5FA;
+    }
+  </style>
+</head>
+<body>
+  <h1>Audio System Test</h1>
+  
+  <div class="test-section">
+    <h2>Sound Format Testing</h2>
+    <p>Test your browser's ability to play different audio formats. The system should automatically try WAV files first, then fall back to MP3 if WAV isn't supported.</p>
+    
+    <div>
+      <button id="testWav" class="sound-button wav">Test WAV Sound</button>
+      <button id="testMp3" class="sound-button mp3">Test MP3 Sound</button>
+      <button id="testBroken" class="sound-button broken">Test Missing Sound (fallback)</button>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Game Sound Effects</h2>
+    <p>Test the game's actual sound effects. These should work with either WAV or MP3 formats.</p>
+    
+    <div>
+      <button id="playPickup" class="sound-button">Play Pickup Sound</button>
+      <button id="playPortal" class="sound-button">Play Portal Sound</button>
+      <button id="playLevelComplete" class="sound-button">Play Level Complete</button>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Log</h2>
+    <div id="log" class="log"></div>
+  </div>
+  
+  <script>
+    // Simple logging function to the UI
+    function log(message, type = 'info') {
+      const logElement = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.classList.add(type);
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logElement.appendChild(entry);
+      
+      // Auto-scroll to bottom
+      logElement.scrollTop = logElement.scrollHeight;
+      
+      // Also log to console
+      console[type === 'error' ? 'error' : type === 'warning' ? 'warn' : 'log'](message);
+    }
+    
+    // Load and play a sound with format fallback
+    async function playSound(basePath, formats = ['wav', 'mp3']) {
+      log(`Attempting to play sound from base path: ${basePath}`);
+      
+      // Try each format in order
+      for (const format of formats) {
+        const path = `${basePath}.${format}`;
+        try {
+          log(`Trying ${format} format...`, 'info');
+          
+          // Create a new audio element
+          const audio = new Audio();
+          
+          // Create a promise to track loading and playing
+          const playPromise = new Promise((resolve, reject) => {
+            audio.oncanplaythrough = () => {
+              log(`Sound loaded successfully (${format})`, 'success');
+              
+              // Play the sound
+              audio.play().then(() => {
+                log(`Sound playing (${format})`, 'success');
+                resolve(true);
+              }).catch(err => {
+                log(`Error playing sound: ${err.message}`, 'error');
+                reject(err);
+              });
+            };
+            
+            audio.onerror = (err) => {
+              log(`Failed to load sound (${format}): ${audio.error?.message || 'Unknown error'}`, 'error');
+              reject(new Error(`Failed to load ${path}`));
+            };
+            
+            // Set a timeout to avoid hanging forever
+            setTimeout(() => reject(new Error(`Timeout loading ${path}`)), 5000);
+          });
+          
+          // Start loading
+          audio.src = path;
+          
+          // Wait for play to complete or fail
+          return await playPromise;
+          
+        } catch (err) {
+          log(`Failed with ${format} format: ${err.message}`, 'warning');
+          // Continue to next format
+        }
+      }
+      
+      // If all formats failed, create a fallback beep sound
+      log('All formats failed, playing fallback beep sound', 'warning');
+      playBeep(440, 200);
+      return false;
+    }
+    
+    // Play a simple beep sound as fallback
+    function playBeep(frequency = 440, duration = 200) {
+      try {
+        // Create AudioContext if needed
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Create oscillator
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        
+        // Create gain node for volume control
+        const gainNode = audioContext.createGain();
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        
+        // Connect nodes
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Play sound
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + duration / 1000);
+        
+        log(`Playing fallback beep at ${frequency}Hz for ${duration}ms`, 'info');
+        return true;
+      } catch (err) {
+        log(`Error creating beep sound: ${err.message}`, 'error');
+        return false;
+      }
+    }
+    
+    // Setup event listeners when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      // Test WAV
+      document.getElementById('testWav').addEventListener('click', () => {
+        playSound('./assets/test-wav', ['wav']);
+      });
+      
+      // Test MP3
+      document.getElementById('testMp3').addEventListener('click', () => {
+        playSound('./assets/test-mp3', ['mp3']);
+      });
+      
+      // Test Broken/Missing Sound
+      document.getElementById('testBroken').addEventListener('click', () => {
+        playSound('./assets/non-existent-sound', ['wav', 'mp3']);
+      });
+      
+      // Game sound effects
+      document.getElementById('playPickup').addEventListener('click', () => {
+        playSound('./assets/sounds/pickup', ['wav', 'mp3']);
+      });
+      
+      document.getElementById('playPortal').addEventListener('click', () => {
+        playSound('./assets/sounds/portal-standard', ['wav', 'mp3']);
+      });
+      
+      document.getElementById('playLevelComplete').addEventListener('click', () => {
+        playSound('./assets/sounds/level-complete', ['wav', 'mp3']);
+      });
+    });
+    
+    // Log initial info
+    log('Sound Test Page Loaded', 'info');
+    log('Browser Audio Support:', 'info');
+    log(`- WebAudio API: ${!!(window.AudioContext || window.webkitAudioContext)}`, !!(window.AudioContext || window.webkitAudioContext) ? 'success' : 'error');
+    log(`- HTML5 Audio: ${!!window.Audio}`, !!window.Audio ? 'success' : 'error');
+  </script>
+</body>
+</html> 

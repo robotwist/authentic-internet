@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth Test Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background-color: #f9f9f9;
+    }
+    button {
+      background-color: #6366F1;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    button:hover {
+      background-color: #4F46E5;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow: auto;
+    }
+    #results {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Authentication Test Page</h1>
+  <p>This page tests the authentication utilities we created. Open the console (F12) to see detailed logs.</p>
+  
+  <div class="card">
+    <h2>Authentication Utilities</h2>
+    <button onclick="testCheckAuth()">Check Auth Status</button>
+    <button onclick="testClearAuth()">Clear Auth Data</button>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testWhoAmI()">Who Am I?</button>
+  </div>
+  
+  <div class="card">
+    <h2>Manual Login</h2>
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" value="testuser">
+    </div>
+    <div style="margin-top: 0.5rem;">
+      <label for="password">Password:</label>
+      <input type="password" id="password" value="password123">
+    </div>
+    <div style="margin-top: 1rem;">
+      <button onclick="manualLogin()">Login</button>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>API Test</h2>
+    <button onclick="testHealth()">Test API Health</button>
+    <button onclick="testProtectedEndpoint()">Test Protected Endpoint</button>
+  </div>
+  
+  <div id="results" class="card">
+    <h2>Results</h2>
+    <pre id="output">Results will appear here...</pre>
+  </div>
+  
+  <script>
+    // Display results
+    function showResult(title, data) {
+      const output = document.getElementById('output');
+      output.innerHTML = `<strong>${title}</strong>\n\n${typeof data === 'object' ? JSON.stringify(data, null, 2) : data}`;
+      console.log(title, data);
+    }
+    
+    // Check auth status
+    async function testCheckAuth() {
+      try {
+        // Check if auth is already defined
+        if (typeof auth === 'undefined') {
+          showResult('Error', 'Auth utilities not found. Please make sure you\'re running the latest version and open the main app first.');
+          return;
+        }
+        
+        const status = auth.checkAuth();
+        showResult('Auth Status', status);
+      } catch (error) {
+        showResult('Error', error.message);
+      }
+    }
+    
+    // Clear auth data
+    async function testClearAuth() {
+      try {
+        if (typeof auth === 'undefined') {
+          showResult('Error', 'Auth utilities not found. Please make sure you\'re running the latest version and open the main app first.');
+          return;
+        }
+        
+        const result = auth.clearAuth();
+        showResult('Auth Cleared', { success: result });
+      } catch (error) {
+        showResult('Error', error.message);
+      }
+    }
+    
+    // Test login
+    async function testLogin() {
+      try {
+        if (typeof auth === 'undefined') {
+          showResult('Error', 'Auth utilities not found. Please make sure you\'re running the latest version and open the main app first.');
+          return;
+        }
+        
+        showResult('Login in progress...', 'Please wait...');
+        const result = await auth.testLogin();
+        showResult('Login Result', { success: result });
+      } catch (error) {
+        showResult('Error', error.message);
+      }
+    }
+    
+    // Who am I
+    async function testWhoAmI() {
+      try {
+        if (typeof auth === 'undefined') {
+          showResult('Error', 'Auth utilities not found. Please make sure you\'re running the latest version and open the main app first.');
+          return;
+        }
+        
+        showResult('Fetching user...', 'Please wait...');
+        const user = await auth.whoAmI();
+        showResult('Current User', user);
+      } catch (error) {
+        showResult('Error', error.message);
+      }
+    }
+    
+    // Manual login
+    async function manualLogin() {
+      try {
+        if (typeof auth === 'undefined') {
+          showResult('Error', 'Auth utilities not found. Please make sure you\'re running the latest version and open the main app first.');
+          return;
+        }
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        if (!username || !password) {
+          showResult('Error', 'Username and password are required');
+          return;
+        }
+        
+        showResult('Login in progress...', 'Please wait...');
+        
+        // Using the login function directly
+        const result = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            identifier: username,
+            password: password
+          })
+        });
+        
+        const data = await result.json();
+        
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          showResult('Login Successful', { user: data.user.username });
+        } else {
+          showResult('Login Failed', data);
+        }
+      } catch (error) {
+        showResult('Error', error.message);
+      }
+    }
+    
+    // Test API health
+    async function testHealth() {
+      try {
+        showResult('Checking API health...', 'Please wait...');
+        const response = await fetch('/health');
+        const data = await response.json();
+        showResult('API Health', data);
+      } catch (error) {
+        showResult('Error', error.message);
+      }
+    }
+    
+    // Test protected endpoint
+    async function testProtectedEndpoint() {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          showResult('Error', 'No authentication token found. Please login first.');
+          return;
+        }
+        
+        showResult('Testing protected endpoint...', 'Please wait...');
+        
+        const response = await fetch('/api/auth/verify', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        showResult('Protected Endpoint', data);
+      } catch (error) {
+        showResult('Error', error.message);
+      }
+    }
+  </script>
+</body>
+</html> 

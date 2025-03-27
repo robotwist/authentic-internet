@@ -1,76 +1,100 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import API from '../api/api';
+import { loginUser, registerUser, verifyToken } from '../api/api';
 
 const AuthContext = createContext(null);
+
+// Separate the useAuth hook for better compatibility with Fast Refresh
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (token && storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        if (!userData.id) {
-          console.error('Invalid user data in localStorage:', userData);
-          localStorage.removeItem('user');
-          localStorage.removeItem('token');
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-        setUser(userData);
-        verifyToken(token);
-      } catch (error) {
-        console.error('Error parsing stored user data:', error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        setUser(null);
-        setLoading(false);
-      }
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const verifyToken = async (token) => {
+  // Function to check if token is expired
+  const isTokenExpired = (token) => {
     try {
-      const response = await API.get('/api/auth/verify');
-      const userData = response.data.user;
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setError(null);
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 < Date.now();
     } catch (error) {
-      console.error('Token verification failed:', error);
-      if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        setError('Session expired. Please login again.');
-      }
-    } finally {
-      setLoading(false);
+      return true;
     }
   };
+
+  // Function to refresh token
+  const refreshToken = async () => {
+    try {
+      const storedToken = localStorage.getItem('token');
+      if (!storedToken) return false;
+
+      const response = await verifyToken();
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+
+      if (storedToken && storedUser && !isVerifying) {
+        try {
+          setIsVerifying(true);
+          const userData = JSON.parse(storedUser);
+          
+          if (!userData.id) {
+            throw new Error('Invalid user data');
+          }
+
+          // Check if token is expired
+          if (isTokenExpired(storedToken)) {
+            const refreshed = await refreshToken();
+            if (!refreshed) {
+              throw new Error('Token expired and refresh failed');
+            }
+          }
+
+          setUser(userData);
+          await verifyToken();
+        } catch (error) {
+          console.error('Auth initialization error:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+          setError('Session expired. Please login again.');
+        } finally {
+          setIsVerifying(false);
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, [isVerifying]);
 
   const login = async (username, password) => {
     try {
       setError(null);
-      const response = await API.post('/api/auth/login', {
-        identifier: username,
-        password
-      });
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+      const data = await loginUser(username, password);
+      setUser(data.user);
       return true;
     } catch (error) {
-      console.error('Login failed:', error);
       setError(error.response?.data?.message || 'Login failed. Please check your credentials.');
       return false;
     }
@@ -79,18 +103,10 @@ export const AuthProvider = ({ children }) => {
   const register = async (username, email, password) => {
     try {
       setError(null);
-      const response = await API.post('/api/auth/register', {
-        username,
-        email,
-        password
-      });
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+      const data = await registerUser(username, email, password);
+      setUser(data.user);
       return true;
     } catch (error) {
-      console.error('Registration failed:', error);
       setError(error.response?.data?.message || 'Registration failed. Please try again.');
       return false;
     }
@@ -107,9 +123,11 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     error,
+    isAuthenticated: !!user,
     login,
     register,
-    logout
+    logout,
+    refreshToken
   };
 
   return (
@@ -117,12 +135,4 @@ export const AuthProvider = ({ children }) => {
       {!loading && children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 }; 

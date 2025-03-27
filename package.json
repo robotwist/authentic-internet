@@ -1,36 +1,18 @@
 {
   "name": "authentic-internet",
   "version": "1.0.0",
+  "description": "Authentic Internet Project",
   "type": "module",
-  "main": "server.js",
-  "engines": {
-    "node": "20.x"
-  },
   "scripts": {
-    "start": "cd server && node server.mjs",
-    "dev": "cd server && nodemon server.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node scripts/dev.js",
+    "dev": "node scripts/dev.js",
+    "build": "cd client && npm run build",
+    "test": "cd server && npm run test && cd ../client && npm run test",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
   },
-  "dependencies": {
-    "axios": "^1.6.7",
-    "bcryptjs": "^2.4.3",
-    "connect-mongo": "^5.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "express-session": "^1.17.3",
-    "express-validator": "^7.2.1",
-    "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.14.2",
-    "mongoose": "^8.12.0",
-    "multer": "^1.4.5-lts.1",
-    "socket.io": "^4.7.5",
-    "uuid": "^11.1.0"
+  "engines": {
+    "node": ">=20.0.0"
   },
-  "devDependencies": {
-    "eslint": "^9.21.0",
-    "eslint-config-prettier": "^10.0.2",
-    "eslint-plugin-prettier": "^5.2.3",
-    "nodemon": "^3.1.9"
-  }
+  "author": "",
+  "license": "ISC"
 }

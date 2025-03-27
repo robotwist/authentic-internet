@@ -1,0 +1,429 @@
+2025-03-23 23:04:30 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-23 23:04:30 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-23 23:04:30 [INFO] [0;34mServer process started with PID: 134957[0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mServer process is running with PID: 134957[0m
+2025-03-23 23:04:30 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-23 23:04:30 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-23 23:04:30 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-23 23:04:30 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T04:04:43.095Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-23 23:04:30 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-23 23:22:40 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-23 23:22:40 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-23 23:22:40 [INFO] [0;34mServer process started with PID: 137524[0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mServer process is running with PID: 137524[0m
+2025-03-23 23:22:40 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-23 23:22:40 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-23 23:22:40 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-23 23:22:40 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T04:22:52.854Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-23 23:22:40 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-23 23:31:21 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-23 23:31:21 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-23 23:31:21 [INFO] [0;34mServer process started with PID: 139949[0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mServer process is running with PID: 139949[0m
+2025-03-23 23:31:21 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-23 23:31:21 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-23 23:31:21 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-23 23:31:21 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T04:31:33.930Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-23 23:31:21 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 03:37:29 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 03:37:29 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 03:37:29 [INFO] [0;34mServer process started with PID: 151222[0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mServer process is running with PID: 151222[0m
+2025-03-24 03:37:29 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 03:37:29 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 03:37:29 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 03:37:29 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T08:37:41.700Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 03:37:29 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 03:39:44 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 03:39:44 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 03:39:44 [INFO] [0;34mServer process started with PID: 152388[0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mServer process is running with PID: 152388[0m
+2025-03-24 03:39:44 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 03:39:44 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 03:39:44 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 03:39:44 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T08:40:01.019Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 03:39:44 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 03:52:19 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 03:52:19 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 03:52:19 [INFO] [0;34mServer process started with PID: 154319[0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mServer process is running with PID: 154319[0m
+2025-03-24 03:52:19 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 03:52:19 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 03:52:19 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 03:52:19 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T08:52:29.037Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 03:52:19 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 04:04:16 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 04:04:16 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 04:04:16 [INFO] [0;34mServer process started with PID: 155703[0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mServer process is running with PID: 155703[0m
+2025-03-24 04:04:16 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 04:04:16 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 04:04:16 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 04:04:16 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T09:04:29.022Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 04:04:16 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 04:07:02 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 04:07:02 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 04:07:02 [INFO] [0;34mServer process started with PID: 156657[0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mServer process is running with PID: 156657[0m
+2025-03-24 04:07:02 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 04:07:02 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 04:07:02 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 04:07:02 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T09:07:14.373Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 04:07:02 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 04:13:15 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 04:13:15 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 04:13:15 [INFO] [0;34mServer process started with PID: 158654[0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mServer process is running with PID: 158654[0m
+2025-03-24 04:13:15 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 04:13:15 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 04:13:15 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 04:13:15 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T09:13:27.243Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 04:13:15 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 04:22:59 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 04:22:59 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 04:22:59 [INFO] [0;34mServer process started with PID: 161421[0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mServer process is running with PID: 161421[0m
+2025-03-24 04:22:59 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 04:22:59 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 04:22:59 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 04:22:59 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T09:23:11.239Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 04:22:59 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 04:25:36 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 04:25:36 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 04:25:36 [INFO] [0;34mServer process started with PID: 162405[0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mServer process is running with PID: 162405[0m
+2025-03-24 04:25:36 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 04:25:36 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 04:25:36 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 04:25:36 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T09:25:48.691Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 04:25:36 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 04:38:47 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 04:38:47 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 04:38:47 [INFO] [0;34mServer process started with PID: 165414[0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mServer process is running with PID: 165414[0m
+2025-03-24 04:38:47 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 04:38:47 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 04:38:47 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 04:38:47 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T09:39:02.093Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 04:38:47 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 04:43:11 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 04:43:11 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 04:43:11 [INFO] [0;34mServer process started with PID: 166421[0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mServer process is running with PID: 166421[0m
+2025-03-24 04:43:11 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 04:43:11 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 04:43:11 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 04:43:11 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T09:43:23.798Z","uptime":4,"environment":"development","stats":{"requests":3,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 04:43:11 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 04:48:09 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 04:48:09 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 04:48:09 [INFO] [0;34mServer process started with PID: 167726[0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mServer process is running with PID: 167726[0m
+2025-03-24 04:48:09 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 04:48:09 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 04:48:09 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 04:48:09 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T09:48:22.067Z","uptime":4,"environment":"development","stats":{"requests":3,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 04:48:09 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 04:50:03 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 04:50:03 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 04:50:03 [INFO] [0;34mServer process started with PID: 168696[0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mServer process is running with PID: 168696[0m
+2025-03-24 04:50:03 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 04:50:03 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 04:50:03 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 04:50:03 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T09:50:15.687Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 04:50:03 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:01:25 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:01:25 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:01:25 [INFO] [0;34mServer process started with PID: 171549[0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mServer process is running with PID: 171549[0m
+2025-03-24 05:01:25 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:01:25 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:01:25 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:01:25 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:01:39.474Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:01:25 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:02:21 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:02:21 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:02:21 [INFO] [0;34mServer process started with PID: 172066[0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mServer process is running with PID: 172066[0m
+2025-03-24 05:02:21 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:02:21 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:02:21 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:02:21 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:02:33.752Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:02:21 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:09:37 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:09:37 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:09:37 [INFO] [0;34mServer process started with PID: 173662[0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mServer process is running with PID: 173662[0m
+2025-03-24 05:09:37 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:09:37 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:09:37 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:09:37 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:09:50.069Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:09:37 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:13:27 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:13:27 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:13:27 [INFO] [0;34mServer process started with PID: 175242[0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mServer process is running with PID: 175242[0m
+2025-03-24 05:13:27 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:13:27 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:13:27 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:13:27 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:13:41.285Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:13:27 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:16:37 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:16:37 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:16:37 [INFO] [0;34mServer process started with PID: 176404[0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mServer process is running with PID: 176404[0m
+2025-03-24 05:16:37 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:16:37 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:16:37 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:16:37 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:16:49.641Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:16:37 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:18:47 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:18:47 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:18:47 [INFO] [0;34mServer process started with PID: 177657[0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mServer process is running with PID: 177657[0m
+2025-03-24 05:18:47 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:18:47 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:18:47 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:18:47 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:18:59.898Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:18:47 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:23:31 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:23:31 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:23:31 [INFO] [0;34mServer process started with PID: 178990[0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mServer process is running with PID: 178990[0m
+2025-03-24 05:23:31 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:23:31 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:23:31 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:23:31 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:23:43.652Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:23:31 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:35:59 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:35:59 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:35:59 [INFO] [0;34mServer process started with PID: 181492[0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mServer process is running with PID: 181492[0m
+2025-03-24 05:35:59 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:35:59 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:35:59 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:35:59 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:36:11.751Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:35:59 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:41:42 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:41:42 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:41:42 [INFO] [0;34mServer process started with PID: 182446[0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mServer process is running with PID: 182446[0m
+2025-03-24 05:41:42 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:41:42 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:41:42 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:41:42 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:41:54.374Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:41:42 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:54:18 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:54:18 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:54:18 [INFO] [0;34mServer process started with PID: 184977[0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mServer process is running with PID: 184977[0m
+2025-03-24 05:54:18 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:54:18 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:54:18 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:54:18 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:54:31.082Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:54:18 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 05:57:48 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 05:57:48 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 05:57:48 [INFO] [0;34mServer process started with PID: 186185[0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mServer process is running with PID: 186185[0m
+2025-03-24 05:57:48 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 05:57:48 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 05:57:48 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 05:57:48 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T10:58:00.642Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 05:57:48 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 06:07:28 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 06:07:28 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 06:07:28 [INFO] [0;34mServer process started with PID: 189129[0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mServer process is running with PID: 189129[0m
+2025-03-24 06:07:28 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 06:07:28 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 06:07:28 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 06:07:28 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T11:07:40.499Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 06:07:28 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 06:15:28 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 06:15:28 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 06:15:28 [INFO] [0;34mServer process started with PID: 190903[0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mServer process is running with PID: 190903[0m
+2025-03-24 06:15:28 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 06:15:28 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 06:15:28 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 06:15:28 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T11:15:40.772Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 06:15:28 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 06:21:40 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 06:21:40 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 06:21:40 [INFO] [0;34mServer process started with PID: 193676[0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mServer process is running with PID: 193676[0m
+2025-03-24 06:21:40 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 06:21:40 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 06:21:40 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 06:21:40 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T11:21:52.296Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 06:21:40 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 06:32:54 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 06:32:54 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 06:32:54 [INFO] [0;34mServer process started with PID: 196722[0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mServer process is running with PID: 196722[0m
+2025-03-24 06:32:54 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 06:32:54 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 06:32:54 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 06:32:54 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T11:33:07.134Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 06:32:54 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 06:41:07 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 06:41:07 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 06:41:07 [INFO] [0;34mServer process started with PID: 198771[0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mServer process is running with PID: 198771[0m
+2025-03-24 06:41:07 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 06:41:07 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 06:41:07 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 06:41:07 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T11:41:19.884Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 06:41:07 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 06:45:05 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 06:45:05 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 06:45:05 [INFO] [0;34mServer process started with PID: 199517[0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mServer process is running with PID: 199517[0m
+2025-03-24 06:45:05 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 06:45:05 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 06:45:05 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 06:45:05 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T11:45:17.497Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 06:45:05 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 06:56:21 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 06:56:21 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 06:56:21 [INFO] [0;34mServer process started with PID: 201708[0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mServer process is running with PID: 201708[0m
+2025-03-24 06:56:21 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 06:56:21 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 06:56:21 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 06:56:21 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T11:56:33.726Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 06:56:21 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 07:08:21 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 07:08:21 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 07:08:21 [INFO] [0;34mServer process started with PID: 203915[0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mServer process is running with PID: 203915[0m
+2025-03-24 07:08:21 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 07:08:21 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 07:08:21 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 07:08:21 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T12:08:33.807Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 07:08:21 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 07:24:12 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 07:24:12 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 07:24:12 [INFO] [0;34mServer process started with PID: 206527[0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mServer process is running with PID: 206527[0m
+2025-03-24 07:24:12 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 07:24:12 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 07:24:12 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 07:24:12 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T12:24:24.406Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 07:24:12 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 07:25:48 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 07:25:48 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 07:25:48 [INFO] [0;34mServer process started with PID: 207078[0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mServer process is running with PID: 207078[0m
+2025-03-24 07:25:48 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 07:25:48 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 07:25:48 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 07:25:48 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T12:26:00.013Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 07:25:48 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 07:44:56 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 07:44:56 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 07:44:56 [INFO] [0;34mServer process started with PID: 209535[0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mServer process is running with PID: 209535[0m
+2025-03-24 07:44:56 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 07:44:56 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 07:44:56 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 07:44:56 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T12:45:08.869Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 07:44:56 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 07:55:52 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 07:55:52 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 07:55:52 [INFO] [0;34mServer process started with PID: 211323[0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mServer process is running with PID: 211323[0m
+2025-03-24 07:55:52 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 07:55:52 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 07:55:52 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 07:55:52 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T12:56:04.658Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 07:55:52 [INFO] [0;34mStep 5: Starting the client...[0m
+2025-03-24 08:12:13 [INFO] [0;34mInstalling any missing dependencies...[0m
+2025-03-24 08:12:13 [INFO] [0;34mStarting the server in the background...[0m
+2025-03-24 08:12:13 [INFO] [0;34mServer process started with PID: 216061[0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mServer process is running with PID: 216061[0m
+2025-03-24 08:12:13 [INFO] [0;34mWaiting for Server to be available on port 5000...[0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mServer is available on port 5000![0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mServer is listening on port 5000.[0m
+2025-03-24 08:12:13 [INFO] [0;34mVerifying server health on port 5000...[0m
+2025-03-24 08:12:13 [SUCCESS] [0;32mServer health check passed on port 5000![0m
+2025-03-24 08:12:13 [INFO] [0;34mHealth data: {"status":"ok","timestamp":"2025-03-24T13:12:25.442Z","uptime":4,"environment":"development","stats":{"requests":2,"errors":0},"services":{"database":"connected","sockets":"disabled"},"version":"1.0.0"}[0m
+2025-03-24 08:12:13 [INFO] [0;34mStep 5: Starting the client...[0m

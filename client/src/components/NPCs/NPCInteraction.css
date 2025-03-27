@@ -1,0 +1,306 @@
+.npc-interaction-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 20px;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.npc-interaction-dialog {
+  width: 100%;
+  max-width: 600px;
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: slideUp 0.4s ease-out;
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.npc-header {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #e0e0e0;
+  border-bottom: 1px solid #ccc;
+  position: relative;
+}
+
+.npc-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  margin-right: 15px;
+}
+
+.npc-name {
+  flex: 1;
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.close-dialog {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #555;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.2s;
+}
+
+.close-dialog:hover {
+  color: #000;
+}
+
+.npc-dialog-text {
+  padding: 20px;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: #333;
+  min-height: 100px;
+  max-height: 250px;
+  overflow-y: auto;
+  background-color: #fff;
+  position: relative;
+  cursor: pointer;
+}
+
+.typing-cursor {
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.skip-hint {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  font-size: 0.8rem;
+  color: #999;
+  font-style: italic;
+  pointer-events: none;
+}
+
+.npc-response-options {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background-color: #f0f0f0;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.response-button {
+  padding: 12px 15px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #333;
+}
+
+.response-button:hover {
+  background-color: #f0f8ff;
+  border-color: #a0c7e7;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.response-button:active {
+  transform: translateY(0);
+}
+
+/* Media Queries for Different Screen Sizes */
+@media (max-width: 768px) {
+  .npc-interaction-dialog {
+    max-width: 95%;
+    max-height: 80vh;
+  }
+  
+  .npc-avatar {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .npc-name {
+    font-size: 1.3rem;
+  }
+  
+  .npc-dialog-text {
+    font-size: 1rem;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .npc-interaction-container {
+    padding: 10px;
+  }
+  
+  .npc-header {
+    padding: 10px;
+  }
+  
+  .npc-avatar {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+  }
+  
+  .npc-name {
+    font-size: 1.1rem;
+  }
+  
+  .npc-dialog-text {
+    padding: 12px;
+    min-height: 80px;
+  }
+  
+  .response-button {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}
+
+.npc-interaction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  animation: fadeIn 0.3s ease-in-out;
+  position: relative;
+  margin: 0 auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.npc-portrait {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 3px solid #f0c75e;
+  box-shadow: 0 0 10px rgba(240, 199, 94, 0.5);
+}
+
+.npc-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.npc-avatar {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #555;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .npc-interaction {
+    width: 95%;
+    max-width: 95%;
+    padding: 0.75rem;
+  }
+  
+  .npc-portrait {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* Animation for dialog options */
+@keyframes optionPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* Custom styling for different NPC types */
+.npc-type-merchant .npc-portrait {
+  border-color: #c78f3c; /* Gold for merchants */
+}
+
+.npc-type-sage .npc-portrait {
+  border-color: #7e57c2; /* Purple for sages */
+}
+
+.npc-type-craftsman .npc-portrait {
+  border-color: #5d9cec; /* Blue for craftsmen */
+}
+
+.npc-type-guide .npc-portrait {
+  border-color: #4caf50; /* Green for guides */
+}
+
+/* Animations for quest-related interactions */
+.quest-received {
+  animation: questReceived 1s ease-in-out;
+}
+
+.quest-completed {
+  animation: questCompleted 1.5s ease-in-out;
+}
+
+@keyframes questReceived {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
+  50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+@keyframes questCompleted {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(76, 175, 80, 0); }
+  30% { transform: scale(1.07); box-shadow: 0 0 40px rgba(76, 175, 80, 0.8); }
+  70% { transform: scale(1.04); box-shadow: 0 0 25px rgba(76, 175, 80, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(76, 175, 80, 0); }
+} 
