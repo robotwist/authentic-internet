@@ -44,8 +44,14 @@ export const startServerWithPortResolution = async (server, preferredPort = 5001
   let attempts = 0;
   
   while (!serverStarted && attempts < maxAttempts) {
-    serverStarted = await startServerOnPort(currentPort);
-    if (!serverStarted) {
+    try {
+      serverStarted = await startServerOnPort(currentPort);
+      if (!serverStarted) {
+        currentPort++;
+        attempts++;
+      }
+    } catch (error) {
+      console.error(`❌ Error starting server on port ${currentPort}:`, error);
       currentPort++;
       attempts++;
     }
@@ -54,10 +60,10 @@ export const startServerWithPortResolution = async (server, preferredPort = 5001
   if (!serverStarted) {
     console.error(`❌ Failed to start server after ${maxAttempts} attempts`);
     console.error(`🔄 Please try a different port range or check running processes`);
-    process.exit(1);
+    return false;
   }
   
-  return serverStarted;
+  return true;
 };
 
 /**
@@ -98,29 +104,40 @@ export const gracefulShutdown = (server, signal) => {
   
   // Force exit if graceful shutdown takes too long
   setTimeout(() => {
-    console.error('⏱️ Could not close connections in time, forcefully shutting down');
+    console.error('⚠️ Forcing shutdown after timeout');
     process.exit(1);
-  }, 10000); // Give the server 10 seconds to finish processing requests
+  }, 10000); // 10 second timeout
 };
 
 /**
- * Setup global error handlers for uncaught exceptions and unhandled rejections
- * @param {Function} shutdownFn - The shutdown function to call
+ * Set up global error handlers for uncaught exceptions and unhandled rejections
+ * @param {Function} shutdownFn - Function to call on shutdown
  */
 export const setupGlobalErrorHandlers = (shutdownFn) => {
-  // Listen for termination signals
-  process.on('SIGTERM', () => shutdownFn('SIGTERM'));
-  process.on('SIGINT', () => shutdownFn('SIGINT'));
-
-  // Add global unhandled exception and rejection handlers
-  process.on('uncaughtException', (err) => {
-    console.error('❌ Uncaught Exception:', err);
-    shutdownFn('UNCAUGHT EXCEPTION');
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    if (shutdownFn) {
+      shutdownFn('SIGTERM');
+    }
   });
 
+  // Handle unhandled promise rejections
   process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Unhandled Promise Rejection at:', promise, 'reason:', reason);
-    shutdownFn('UNHANDLED REJECTION');
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    if (shutdownFn) {
+      shutdownFn('SIGTERM');
+    }
+  });
+
+  // Handle termination signals
+  ['SIGTERM', 'SIGINT'].forEach(signal => {
+    process.on(signal, () => {
+      console.log(`\n📡 Received ${signal} signal`);
+      if (shutdownFn) {
+        shutdownFn(signal);
+      }
+    });
   });
 };
 

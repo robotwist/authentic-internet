@@ -23,23 +23,7 @@ const validateLogin = [
 router.post('/register', validateRegistration, register);
 router.post('/login', validateLogin, login);
 
-// Protected routes
-router.get('/verify', auth, verifyToken);
-
-// Token refresh endpoint
-router.post('/refresh', auth, async (req, res) => {
-  try {
-    const token = jwt.sign(
-      { userId: req.user.userId },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "24h" }
-    );
-    
-    res.json({ token });
-  } catch (error) {
-    console.error('Token refresh error:', error);
-    res.status(500).json({ message: 'Failed to refresh token' });
-  }
-});
+// Protected routes - verify and refresh token
+router.post('/verify', auth, verifyToken);
 
 export default router; 

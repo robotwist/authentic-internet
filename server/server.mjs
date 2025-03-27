@@ -5,28 +5,23 @@ import connectDB from "./config/db.js";
 import { initSocketService } from "./services/socketService.js";
 import { applyMiddleware, applySessionMiddleware, applyErrorHandlingMiddleware } from "./middleware/index.js";
 import { applyRoutes } from "./routes/index.js";
-import { configureAllowedOrigins, validateEnv } from "./config/app-config.js";
+import { 
+  configureAllowedOrigins, 
+  validateEnv, 
+  PORT, 
+  managePort, 
+  cleanupPort 
+} from "./config/app-config.js";
 import { startServerWithPortResolution, gracefulShutdown, setupGlobalErrorHandlers } from "./utils/serverUtils.js";
 import fs from 'fs';
 
 // Load environment variables
 dotenv.config();
 
-// Check if server is already running
-try {
-  if (fs.existsSync('.server_pid')) {
-    const pid = parseInt(fs.readFileSync('.server_pid', 'utf8'));
-    try {
-      process.kill(pid, 0); // Check if process exists
-      console.error('❌ Server is already running with PID:', pid);
-      process.exit(1);
-    } catch (err) {
-      // Process doesn't exist, remove stale PID file
-      fs.unlinkSync('.server_pid');
-    }
-  }
-} catch (err) {
-  console.warn('⚠️ Could not check for existing server:', err);
+// Check if server is already running using port management
+if (!managePort()) {
+  console.error('❌ Server is already running on port', PORT);
+  process.exit(1);
 }
 
 // Initialize Express app and HTTP server
@@ -71,10 +66,10 @@ const startServer = async () => {
     await initSocketService(server);
     
     // Start server with port conflict resolution
-    const preferredPort = process.env.PORT || 5001;
-    await startServerWithPortResolution(server, preferredPort);
+    await startServerWithPortResolution(server, PORT);
   } catch (error) {
     console.error("❌ Failed to start server:", error);
+    cleanupPort();
     process.exit(1);
   }
 };
@@ -85,12 +80,5 @@ startServer();
 // Set up graceful shutdown and error handlers
 setupGlobalErrorHandlers((signal) => {
   gracefulShutdown(server, signal);
-  // Clean up PID file on shutdown
-  try {
-    if (fs.existsSync('.server_pid')) {
-      fs.unlinkSync('.server_pid');
-    }
-  } catch (err) {
-    console.warn('⚠️ Could not remove server PID file:', err);
-  }
+  cleanupPort();
 });

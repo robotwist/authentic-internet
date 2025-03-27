@@ -1,7 +1,49 @@
 import dotenv from "dotenv";
+import fs from 'fs';
+import path from 'path';
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Port management
+const PORT = parseInt(process.env.PORT) || 5001;
+const PORT_FILE = path.join(process.cwd(), '.server_pid');
+
+const managePort = () => {
+  try {
+    // Check if port file exists
+    if (fs.existsSync(PORT_FILE)) {
+      const pid = parseInt(fs.readFileSync(PORT_FILE, 'utf8'));
+      try {
+        // Check if process is still running
+        process.kill(pid, 0);
+        console.warn(`⚠️ Port ${PORT} is already in use by process ${pid}`);
+        return false;
+      } catch (error) {
+        // Process is not running, remove stale PID file
+        fs.unlinkSync(PORT_FILE);
+      }
+    }
+
+    // Write current process ID to file
+    fs.writeFileSync(PORT_FILE, process.pid.toString());
+    return true;
+  } catch (error) {
+    console.error('Error managing port:', error);
+    return false;
+  }
+};
+
+// Cleanup function for port management
+const cleanupPort = () => {
+  try {
+    if (fs.existsSync(PORT_FILE)) {
+      fs.unlinkSync(PORT_FILE);
+    }
+  } catch (error) {
+    console.error('Error cleaning up port file:', error);
+  }
+};
 
 // CORS configuration
 const configureAllowedOrigins = () => {
@@ -76,6 +118,9 @@ const validateEnv = () => {
 };
 
 export {
+  PORT,
+  managePort,
+  cleanupPort,
   configureAllowedOrigins,
   configureCorsOptions,
   configureSessionOptions,

@@ -19,15 +19,85 @@ if (import.meta.env.MODE !== 'production') {
 
 // Function to create API instance with the given base URL
 const createApiInstance = (baseUrl) => {
-  return axios.create({
+  const instance = axios.create({
     baseURL: baseUrl,
     withCredentials: false,
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    timeout: 5000 // 5 seconds timeout for all requests
+    timeout: 10000 // 10 seconds timeout for all requests
   });
+
+  // Add request interceptor
+  instance.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => {
+      console.error('Request interceptor error:', error);
+      return Promise.reject(error);
+    }
+  );
+
+  // Add response interceptor
+  instance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      if (error.response) {
+        const { status, data } = error.response;
+        
+        // Handle 401 Unauthorized
+        if (status === 401) {
+          console.warn('Session expired or invalid token');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          return Promise.reject(new Error('Session expired. Please log in again.'));
+        }
+        
+        // Handle 400 Bad Request
+        if (status === 400) {
+          console.error('Request validation error:', data);
+          return Promise.reject(new Error(data.message || 'Invalid request'));
+        }
+        
+        // Handle 403 Forbidden
+        if (status === 403) {
+          console.error('Access forbidden:', data);
+          return Promise.reject(new Error('Access forbidden'));
+        }
+        
+        // Handle 404 Not Found
+        if (status === 404) {
+          console.error('Resource not found:', data);
+          return Promise.reject(new Error('Resource not found'));
+        }
+        
+        // Handle 500 Internal Server Error
+        if (status === 500) {
+          console.error('Server error:', data);
+          return Promise.reject(new Error('Server error. Please try again later.'));
+        }
+      } else if (error.request) {
+        // Handle network errors
+        console.error('Network error:', error.message);
+        return Promise.reject(new Error('Network error. Please check your connection.'));
+      } else {
+        // Handle other errors
+        console.error('Error:', error.message);
+        return Promise.reject(error);
+      }
+      
+      return Promise.reject(error);
+    }
+  );
+
+  return instance;
 };
 
 // Get the configured API URL or default to localhost:5001
@@ -41,15 +111,26 @@ const alternativePorts = [5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010];
 let isApiInitialized = false;
 let currentApiUrl = configuredApiUrl;
 
+// Function to check server health
+const checkServerHealth = async (url) => {
+  try {
+    const response = await axios.get(`${url}/api/health`, { 
+      timeout: 5000,
+      validateStatus: (status) => status === 200
+    });
+    return response.status === 200;
+  } catch (error) {
+    return false;
+  }
+};
+
 // Initialize API with port detection
 const initApi = async () => {
   if (isApiInitialized) return;
 
   try {
-    // Try with the proper health endpoint first
-    const response = await axios.get(`${configuredApiUrl}/api/health`, { timeout: 3000 });
-    if (response.status === 200) {
-      // No need to log success in production
+    // Try with the configured URL first
+    if (await checkServerHealth(configuredApiUrl)) {
       if (import.meta.env.MODE !== 'production') {
         console.log(`✅ Connected to API at ${configuredApiUrl}`);
       }
@@ -58,49 +139,38 @@ const initApi = async () => {
       isApiInitialized = true;
       return;
     }
-  } catch (error) {
-    // Silent catch - will try alternative ports
-  }
 
-  // If main URL fails, try alternative ports
-  const baseUrl = configuredApiUrl.split(':').slice(0, -1).join(':');
-  
-  for (const port of alternativePorts) {
-    const altUrl = `${baseUrl}:${port}`;
-    try {
-      const response = await axios.get(`${altUrl}/api/health`, { timeout: 1500 });
-      if (response.status === 200) {
-        // No need to log success in production
+    // Try alternative ports
+    for (const port of alternativePorts) {
+      const url = `http://localhost:${port}`;
+      if (await checkServerHealth(url)) {
         if (import.meta.env.MODE !== 'production') {
-          console.log(`✅ Connected to API at alternative port: ${altUrl}`);
+          console.log(`✅ Connected to API at ${url}`);
         }
-        API = createApiInstance(altUrl);
-        currentApiUrl = altUrl;
+        API = createApiInstance(url);
+        currentApiUrl = url;
         isApiInitialized = true;
-        
-        // Update environment variable for future use
-        if (window.sessionStorage) {
-          window.sessionStorage.setItem('apiUrl', altUrl);
-        }
-        
         return;
       }
-    } catch (error) {
-      // Continue trying other ports - silent catch
     }
-  }
 
-  // No need to log error in production
-  if (import.meta.env.MODE !== 'production') {
-    console.warn("⚠️ Using default API configuration - health check unsuccessful");
+    throw new Error('No available API server found');
+  } catch (error) {
+    console.error('Failed to initialize API:', error);
+    throw error;
   }
-  // Keep the default API instance as fallback
 };
 
-// Try to initialize API on load
-initApi().catch(() => {
-  // Silently fail and keep using default API
+// Initialize API on import
+initApi().catch(error => {
+  console.error('API initialization failed:', error);
+  // In development, show a more user-friendly error
+  if (import.meta.env.MODE !== 'production') {
+    alert('Failed to connect to the server. Please ensure the server is running and try again.');
+  }
 });
+
+export default API;
 
 // Helper function to handle API errors
 const handleApiError = (error, defaultMessage = "An error occurred") => {
@@ -124,37 +194,6 @@ const handleApiError = (error, defaultMessage = "An error occurred") => {
 
 // Export the current API URL for reference
 export const getCurrentApiUrl = () => currentApiUrl;
-
-// 🔹 Attach Token to Requests
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// 🔹 Handle token expiration and errors
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Clear auth data on unauthorized
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      // Redirect to login if not already there
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
 
 // Proxy function for external APIs to avoid CORS issues
 export const proxyExternalRequest = async (url, options = {}) => {
@@ -900,5 +939,3 @@ export const chat = async (prompt, context, role, npcConfig = null, signal = nul
     throw new Error(errorMessage);
   }
 };
-
-export default API;
