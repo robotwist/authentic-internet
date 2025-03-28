@@ -1,103 +1,56 @@
 import { v4 as uuidv4 } from 'uuid';
-import { MAPS } from './GameData';
+import { MAPS, WORLD_MAP } from './GameData';
 import { TILE_SIZE, MAP_ROWS, MAP_COLS, TILE_TYPES, isWalkable } from './MapConstants';
+import { ARTIFACT_TYPES, ARTIFACT_INTERACTIONS, NPC_TYPES } from './GameConstants';
 
-// Re-export MAPS and map constants
-export { MAPS, TILE_SIZE, MAP_ROWS, MAP_COLS, TILE_TYPES, isWalkable };
-
-// Artifact Types and Interactions
-export const ARTIFACT_TYPES = {
-  WEAPON: 'weapon',
-  SCROLL: 'scroll',
-  RELIC: 'relic',
-  KEY: 'key',
-  CONTAINER: 'container',
-  PORTAL: 'portal'
-};
-
-export const ARTIFACT_INTERACTIONS = {
-  COMBINE: 'combine',
-  UNLOCK: 'unlock',
-  REVEAL: 'reveal',
-  TRANSFORM: 'transform'
-};
-
-// NPC Types and Config
-export const NPC_TYPES = {
-  GUIDE: 'guide',
-  MERCHANT: 'merchant',
-  SCHOLAR: 'scholar',
-  WARRIOR: 'warrior',
-  MYSTIC: 'mystic',
-  POET: 'scholar',    // For Shakespeare
-  PHILOSOPHER: 'mystic',  // For Socrates
-  WEATHERMAN: 'guide',  // For Zeus
-  ARTIST: 'artist',
-  CODER: 'coder',
-  SHAKESPEARE: 'shakespeare',
-  SOCRATES: 'socrates',
-  AUGUSTINE: 'augustine',
-  MICHELANGELO: 'artist',
-  ZORK: 'zork',
-  ADA_LOVELACE: 'ada_lovelace',
-  LORD_BYRON: 'lord_byron',
-  OSCAR_WILDE: 'oscar_wilde',
-  ALEXANDER_POPE: 'alexander_pope',
-  ZEUS: 'zeus',
-  JOHN_MUIR: 'john_muir',
-  JESUS: 'jesus'
-};
+// Re-export all constants from their respective files
+export { TILE_SIZE, MAP_ROWS, MAP_COLS, TILE_TYPES, isWalkable } from './MapConstants';
+export { ARTIFACT_TYPES, ARTIFACT_INTERACTIONS, NPC_TYPES } from './GameConstants';
+export { MAPS, WORLD_MAP } from './GameData';
 
 // Helper functions
-export const canInteract = (artifact1, artifact2) => {
-  if (!artifact1?.interactions || !artifact2?.name) return false;
-  return artifact1.interactions.some(interaction => 
-    interaction.type === ARTIFACT_INTERACTIONS.COMBINE && 
-    interaction.targetArtifact === artifact2.name
-  );
-};
-
-export const getInteractionResult = (artifact1, artifact2) => {
-  if (!artifact1?.interactions || !artifact2?.name) return null;
-  const interaction = artifact1.interactions.find(i => 
-    i.type === ARTIFACT_INTERACTIONS.COMBINE && 
-    i.targetArtifact === artifact2.name
-  );
-  return interaction?.result;
-};
-
-export const isNearConditionMet = (artifact, characterPosition, mapData) => {
-  if (!artifact?.interactions || !characterPosition || !mapData) return false;
-  
-  const interaction = artifact.interactions.find(i => i.type === ARTIFACT_INTERACTIONS.REVEAL);
-  if (!interaction) return false;
-
-  const { x, y } = characterPosition;
-  const tileType = mapData[Math.floor(y / TILE_SIZE)]?.[Math.floor(x / TILE_SIZE)];
+export const canInteract = (tileType) => {
   if (typeof tileType !== 'number') return false;
-  
-  switch (interaction.condition) {
-    case 'nearWater':
-      return tileType === 2; // Water tile
-    case 'nearPortal':
-      return tileType === 5; // Portal tile
+  switch (tileType) {
+    case 5: // Portal
+    case 6: // Terminal portal
+    case 7: // Shooter portal
+    case 8: // Text portal
+      return true;
     default:
       return false;
   }
 };
 
-export const canInteractWithNPC = (characterPosition, npcPosition) => {
-  if (!characterPosition || !npcPosition) return false;
-  
-  const charX = Math.floor(characterPosition.x / TILE_SIZE);
-  const charY = Math.floor(characterPosition.y / TILE_SIZE);
-  const npcX = Math.floor(npcPosition.x / TILE_SIZE);
-  const npcY = Math.floor(npcPosition.y / TILE_SIZE);
-
-  return Math.abs(charX - npcX) <= 1 && Math.abs(charY - npcY) <= 1;
+export const getInteractionResult = (tileType) => {
+  if (typeof tileType !== 'number') return null;
+  switch (tileType) {
+    case 5: // Portal
+      return { type: 'portal' };
+    case 6: // Terminal portal
+      return { type: 'terminal' };
+    case 7: // Shooter portal
+      return { type: 'shooter' };
+    case 8: // Text portal
+      return { type: 'text' };
+    default:
+      return null;
+  }
 };
 
-// Export default object with all constants and functions
+export const isNearConditionMet = (playerPos, targetPos, distance = 1) => {
+  if (!playerPos || !targetPos) return false;
+  const dx = Math.abs(playerPos.x - targetPos.x);
+  const dy = Math.abs(playerPos.y - targetPos.y);
+  return dx <= distance && dy <= distance;
+};
+
+export const canInteractWithNPC = (npc, playerPos) => {
+  if (!npc || !playerPos) return false;
+  return isNearConditionMet(playerPos, npc.position);
+};
+
+// Default export for backward compatibility
 export default {
   TILE_SIZE,
   MAP_ROWS,
@@ -107,6 +60,7 @@ export default {
   ARTIFACT_INTERACTIONS,
   NPC_TYPES,
   MAPS,
+  WORLD_MAP,
   isWalkable,
   canInteract,
   getInteractionResult,

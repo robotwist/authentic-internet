@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { TILE_SIZE, ARTIFACT_TYPES, ARTIFACT_INTERACTIONS, NPC_TYPES } from './Constants';
+import { TILE_SIZE } from './MapConstants';
+import { ARTIFACT_TYPES, ARTIFACT_INTERACTIONS, NPC_TYPES } from './GameConstants';
 import { isValidMapSize } from './MapConstants';
 
 // Maps array
