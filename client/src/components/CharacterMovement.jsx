@@ -64,10 +64,6 @@ const useCharacterMovement = (
       return;
     }
 
-    // Calculate movement speed (smaller than TILE_SIZE for smoother movement)
-    const BASE_SPEED = TILE_SIZE / 4; // Move 1/4 tile at a time
-    const DIAGONAL_MODIFIER = 0.707; // Approximately 1/√2 for diagonal movement
-
     let newPosition = { ...characterPosition };
     let canMove = true;
     let targetMapIndex = currentMapIndex;
@@ -83,44 +79,26 @@ const useCharacterMovement = (
     const mapWidth = currentMapData[0].length * TILE_SIZE;
     const mapHeight = currentMapData.length * TILE_SIZE;
 
-    // Calculate movement vector
-    let dx = 0;
-    let dy = 0;
-
-    // Check for diagonal movement
-    const isMovingVertically = keysPressed.current.has('ArrowUp') || keysPressed.current.has('w') ||
-                              keysPressed.current.has('ArrowDown') || keysPressed.current.has('s');
-    const isMovingHorizontally = keysPressed.current.has('ArrowLeft') || keysPressed.current.has('a') ||
-                                keysPressed.current.has('ArrowRight') || keysPressed.current.has('d');
-    const isDiagonal = isMovingVertically && isMovingHorizontally;
-
-    // Calculate speed based on diagonal movement
-    const speed = isDiagonal ? BASE_SPEED * DIAGONAL_MODIFIER : BASE_SPEED;
-
-    // Pre-calculate new position to check boundaries
+    // Calculate new position based on direction
     switch (direction) {
       case "up":
-        dy -= speed;
+        newPosition.y -= TILE_SIZE;
         break;
       case "down":
-        dy += speed;
+        newPosition.y += TILE_SIZE;
         break;
       case "left":
-        dx -= speed;
+        newPosition.x -= TILE_SIZE;
         break;
       case "right":
-        dx += speed;
+        newPosition.x += TILE_SIZE;
         break;
       default:
         return;
     }
 
-    // Check boundaries before applying movement
-    const potentialX = newPosition.x + dx;
-    const potentialY = newPosition.y + dy;
-
-    // Handle horizontal boundaries
-    if (potentialX < 0) {
+    // Boundary checks with smooth edge handling
+    if (newPosition.x < 0) {
       // Check for map transition to the left
       if (direction === "left") {
         const currentMapName = MAPS[currentMapIndex].name;
@@ -139,17 +117,15 @@ const useCharacterMovement = (
             canMove = false;
           }
         } else {
+          newPosition.x = 0; // Smooth edge stop
           canMove = false;
-          triggerBump(direction);
-          return;
         }
       } else {
+        newPosition.x = 0; // Smooth edge stop
         canMove = false;
-        triggerBump(direction);
-        return;
       }
-    } else if (potentialX >= mapWidth - TILE_SIZE) {
-      // Handle right boundary
+    } else if (newPosition.x >= mapWidth) {
+      // Check for map transition to the right
       if (direction === "right") {
         const currentMapName = MAPS[currentMapIndex].name;
         if (currentMapName === "Overworld") {
@@ -167,30 +143,26 @@ const useCharacterMovement = (
             canMove = false;
           }
         } else {
+          newPosition.x = mapWidth - TILE_SIZE; // Smooth edge stop
           canMove = false;
-          triggerBump(direction);
-          return;
         }
       } else {
+        newPosition.x = mapWidth - TILE_SIZE; // Smooth edge stop
         canMove = false;
-        triggerBump(direction);
-        return;
       }
     }
 
-    // Handle vertical boundaries
-    if (potentialY < 0 || potentialY >= mapHeight - TILE_SIZE) {
+    // Vertical boundary checks
+    if (newPosition.y < 0) {
+      newPosition.y = 0;
       canMove = false;
-      triggerBump(direction);
-      return;
+    } else if (newPosition.y >= mapHeight) {
+      newPosition.y = mapHeight - TILE_SIZE;
+      canMove = false;
     }
 
-    // Only apply movement if we can move
+    // Check if the new position is walkable
     if (canMove) {
-      newPosition.x += dx;
-      newPosition.y += dy;
-
-      // Check if the new position is walkable
       const tileX = Math.floor(newPosition.x / TILE_SIZE);
       const tileY = Math.floor(newPosition.y / TILE_SIZE);
       
@@ -198,26 +170,30 @@ const useCharacterMovement = (
       if (tileY >= 0 && tileY < currentMapData.length && 
           tileX >= 0 && tileX < currentMapData[0].length) {
         if (!isWalkable(newPosition.x, newPosition.y, currentMapData)) {
+          canMove = false;
           triggerBump(direction);
-          return;
         }
       } else {
-        triggerBump(direction);
-        return;
+        canMove = false;
       }
-
-      // Update movement direction for animation
-      setMovementDirection(direction);
-
-      // Move character
-      handleCharacterMove(newPosition, targetMapIndex);
-      
-      // Set movement cooldown (reduced for smoother movement)
-      setMovementCooldown(true);
-      setTimeout(() => {
-        setMovementCooldown(false);
-      }, 50); // Reduced from 200ms for more responsive movement
     }
+
+    if (!canMove) {
+      triggerBump(direction);
+      return;
+    }
+
+    // Update movement direction for animation
+    setMovementDirection(direction);
+
+    // Move character
+    handleCharacterMove(newPosition, targetMapIndex);
+    
+    // Set movement cooldown
+    setMovementCooldown(true);
+    setTimeout(() => {
+      setMovementCooldown(false);
+    }, 200);
   }, [characterPosition, currentMapIndex, handleCharacterMove, movementCooldown, triggerBump]);
 
   useEffect(() => {
