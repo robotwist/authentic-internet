@@ -97,7 +97,7 @@ const useCharacterMovement = (
     // Calculate speed based on diagonal movement
     const speed = isDiagonal ? BASE_SPEED * DIAGONAL_MODIFIER : BASE_SPEED;
 
-    // Calculate new position based on direction
+    // Pre-calculate new position to check boundaries
     switch (direction) {
       case "up":
         dy -= speed;
@@ -115,11 +115,12 @@ const useCharacterMovement = (
         return;
     }
 
-    newPosition.x += dx;
-    newPosition.y += dy;
+    // Check boundaries before applying movement
+    const potentialX = newPosition.x + dx;
+    const potentialY = newPosition.y + dy;
 
-    // Boundary checks with smooth edge handling
-    if (newPosition.x < 0) {
+    // Handle horizontal boundaries
+    if (potentialX < 0) {
       // Check for map transition to the left
       if (direction === "left") {
         const currentMapName = MAPS[currentMapIndex].name;
@@ -138,15 +139,17 @@ const useCharacterMovement = (
             canMove = false;
           }
         } else {
-          newPosition.x = 0; // Smooth edge stop
           canMove = false;
+          triggerBump(direction);
+          return;
         }
       } else {
-        newPosition.x = 0; // Smooth edge stop
         canMove = false;
+        triggerBump(direction);
+        return;
       }
-    } else if (newPosition.x >= mapWidth - TILE_SIZE) { // Subtract TILE_SIZE to prevent going off edge
-      // Check for map transition to the right
+    } else if (potentialX >= mapWidth - TILE_SIZE) {
+      // Handle right boundary
       if (direction === "right") {
         const currentMapName = MAPS[currentMapIndex].name;
         if (currentMapName === "Overworld") {
@@ -164,26 +167,30 @@ const useCharacterMovement = (
             canMove = false;
           }
         } else {
-          newPosition.x = mapWidth - TILE_SIZE; // Smooth edge stop
           canMove = false;
+          triggerBump(direction);
+          return;
         }
       } else {
-        newPosition.x = mapWidth - TILE_SIZE; // Smooth edge stop
         canMove = false;
+        triggerBump(direction);
+        return;
       }
     }
 
-    // Vertical boundary checks with smooth edge handling
-    if (newPosition.y < 0) {
-      newPosition.y = 0; // Smooth edge stop
+    // Handle vertical boundaries
+    if (potentialY < 0 || potentialY >= mapHeight - TILE_SIZE) {
       canMove = false;
-    } else if (newPosition.y >= mapHeight - TILE_SIZE) {
-      newPosition.y = mapHeight - TILE_SIZE; // Smooth edge stop
-      canMove = false;
+      triggerBump(direction);
+      return;
     }
 
-    // Check if the new position is walkable
+    // Only apply movement if we can move
     if (canMove) {
+      newPosition.x += dx;
+      newPosition.y += dy;
+
+      // Check if the new position is walkable
       const tileX = Math.floor(newPosition.x / TILE_SIZE);
       const tileY = Math.floor(newPosition.y / TILE_SIZE);
       
@@ -191,30 +198,26 @@ const useCharacterMovement = (
       if (tileY >= 0 && tileY < currentMapData.length && 
           tileX >= 0 && tileX < currentMapData[0].length) {
         if (!isWalkable(newPosition.x, newPosition.y, currentMapData)) {
-          canMove = false;
           triggerBump(direction);
+          return;
         }
       } else {
-        canMove = false;
+        triggerBump(direction);
+        return;
       }
+
+      // Update movement direction for animation
+      setMovementDirection(direction);
+
+      // Move character
+      handleCharacterMove(newPosition, targetMapIndex);
+      
+      // Set movement cooldown (reduced for smoother movement)
+      setMovementCooldown(true);
+      setTimeout(() => {
+        setMovementCooldown(false);
+      }, 50); // Reduced from 200ms for more responsive movement
     }
-
-    if (!canMove) {
-      triggerBump(direction);
-      return;
-    }
-
-    // Update movement direction for animation
-    setMovementDirection(direction);
-
-    // Move character
-    handleCharacterMove(newPosition, targetMapIndex);
-    
-    // Set movement cooldown (reduced for smoother movement)
-    setMovementCooldown(true);
-    setTimeout(() => {
-      setMovementCooldown(false);
-    }, 50); // Reduced from 200ms for more responsive movement
   }, [characterPosition, currentMapIndex, handleCharacterMove, movementCooldown, triggerBump]);
 
   useEffect(() => {
