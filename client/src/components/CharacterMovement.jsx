@@ -74,86 +74,86 @@ const useCharacterMovement = (
       return;
     }
 
-    // Current map name for special logic
-    const currentMapName = MAPS[currentMapIndex].name;
+    // Get map dimensions
+    const mapWidth = currentMapData[0].length;
+    const mapHeight = currentMapData.length;
 
+    // Calculate new position based on direction
     switch (direction) {
       case "up":
-        if (isWalkable(newPosition.x, newPosition.y - speed, currentMapData)) {
-          newPosition.y -= speed;
-        } else {
-          triggerBump("up");
-          canMove = false;
-        }
+        newPosition.y -= speed;
         break;
       case "down":
-        if (isWalkable(newPosition.x, newPosition.y + speed, currentMapData)) {
-          newPosition.y += speed;
-        } else {
-          triggerBump("down");
-          canMove = false;
-        }
+        newPosition.y += speed;
         break;
       case "left":
-        // World wrapping logic - moves to previous map if available
-        if (newPosition.x - speed < 0) {
-          if (currentMapName === "Overworld 2") {
-            targetMapIndex = MAPS.findIndex(map => map.name === "Overworld");
-            if (targetMapIndex !== -1) {
-              newPosition.x = (MAP_COLS - 1) * TILE_SIZE;
-            } else {
-              triggerBump("left");
-              canMove = false;
-            }
-          } else if (currentMapName === "Overworld 3") {
-            targetMapIndex = MAPS.findIndex(map => map.name === "Overworld 2");
-            if (targetMapIndex !== -1) {
-              newPosition.x = (MAP_COLS - 1) * TILE_SIZE;
-            } else {
-              triggerBump("left");
-              canMove = false;
-            }
-          } else {
-            triggerBump("left");
-            canMove = false;
-          }
-        } else if (isWalkable(newPosition.x - speed, newPosition.y, currentMapData)) {
-          newPosition.x -= speed;
-        } else {
-          triggerBump("left");
-          canMove = false;
-        }
+        newPosition.x -= speed;
         break;
       case "right":
-        // World wrapping logic - moves to next map if available
-        if (newPosition.x + speed >= MAP_COLS * TILE_SIZE) {
-          if (currentMapName === "Overworld") {
-            targetMapIndex = MAPS.findIndex(map => map.name === "Overworld 2");
-            if (targetMapIndex !== -1) {
-              newPosition.x = 0;
-            } else {
-              triggerBump("right");
-              canMove = false;
-            }
-          } else if (currentMapName === "Overworld 2") {
-            targetMapIndex = MAPS.findIndex(map => map.name === "Overworld 3");
-            if (targetMapIndex !== -1) {
-              newPosition.x = 0;
-            } else {
-              triggerBump("right");
-              canMove = false;
-            }
-          } else {
-            triggerBump("right");
-            canMove = false;
-          }
-        } else if (isWalkable(newPosition.x + speed, newPosition.y, currentMapData)) {
-          newPosition.x += speed;
-        } else {
-          triggerBump("right");
-          canMove = false;
-        }
+        newPosition.x += speed;
         break;
+    }
+
+    // Check if the new position is walkable
+    if (!isWalkable(newPosition.x, newPosition.y, currentMapData)) {
+      triggerBump(direction);
+      canMove = false;
+    }
+
+    // Handle map transitions
+    if (canMove) {
+      const currentMapName = MAPS[currentMapIndex].name;
+      
+      // Check for map transitions
+      if (direction === "left" && newPosition.x < 0) {
+        if (currentMapName === "Overworld 2") {
+          targetMapIndex = MAPS.findIndex(map => map.name === "Overworld");
+          if (targetMapIndex !== -1) {
+            newPosition.x = (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
+          } else {
+            canMove = false;
+            triggerBump("left");
+          }
+        } else if (currentMapName === "Overworld 3") {
+          targetMapIndex = MAPS.findIndex(map => map.name === "Overworld 2");
+          if (targetMapIndex !== -1) {
+            newPosition.x = (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
+          } else {
+            canMove = false;
+            triggerBump("left");
+          }
+        } else {
+          canMove = false;
+          triggerBump("left");
+        }
+      } else if (direction === "right" && newPosition.x >= mapWidth * TILE_SIZE) {
+        if (currentMapName === "Overworld") {
+          targetMapIndex = MAPS.findIndex(map => map.name === "Overworld 2");
+          if (targetMapIndex !== -1) {
+            newPosition.x = 0;
+          } else {
+            canMove = false;
+            triggerBump("right");
+          }
+        } else if (currentMapName === "Overworld 2") {
+          targetMapIndex = MAPS.findIndex(map => map.name === "Overworld 3");
+          if (targetMapIndex !== -1) {
+            newPosition.x = 0;
+          } else {
+            canMove = false;
+            triggerBump("right");
+          }
+        } else {
+          canMove = false;
+          triggerBump("right");
+        }
+      } else if (direction === "up" && newPosition.y < 0) {
+        canMove = false;
+        triggerBump("up");
+      } else if (direction === "down" && newPosition.y >= mapHeight * TILE_SIZE) {
+        canMove = false;
+        triggerBump("down");
+      }
     }
 
     if (canMove) {

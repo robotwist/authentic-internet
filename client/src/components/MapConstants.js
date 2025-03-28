@@ -30,8 +30,22 @@ export const isValidMapSize = (mapData) => {
 };
 
 // Map helper functions
-export const isWalkable = (tileType) => {
+export const isWalkable = (x, y, mapData) => {
+  if (!mapData || !Array.isArray(mapData)) return false;
+  
+  // Convert pixel coordinates to tile coordinates
+  const tileX = Math.floor(x / TILE_SIZE);
+  const tileY = Math.floor(y / TILE_SIZE);
+  
+  // Check map boundaries
+  if (tileX < 0 || tileX >= mapData[0].length || tileY < 0 || tileY >= mapData.length) {
+    return false;
+  }
+  
+  // Check tile type
+  const tileType = mapData[tileY][tileX];
   if (typeof tileType !== 'number') return false;
+  
   switch (tileType) {
     case 0: // Empty
     case 3: // Sand

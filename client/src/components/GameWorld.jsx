@@ -396,6 +396,13 @@ const GameWorld = () => {
     const row = Math.floor(characterPosition.y / TILE_SIZE);
     const col = Math.floor(characterPosition.x / TILE_SIZE);
     
+    // Safety check for map data
+    if (!MAPS[currentMapIndex]?.data || 
+        row < 0 || row >= MAPS[currentMapIndex].data.length ||
+        col < 0 || col >= MAPS[currentMapIndex].data[0].length) {
+      return;
+    }
+    
     // Map-specific portal handling
     if (MAPS[currentMapIndex].data[row][col] === 5) {
       // Get current map name for better context
@@ -440,13 +447,22 @@ const GameWorld = () => {
       }
       else if (currentMapName === "Dungeon 3") {
         destinationMap = "Yosemite";
-        spawnPosition = { x: 10 * TILE_SIZE, y: 15 * TILE_SIZE };
+        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
       }
       
       // Find the index of the destination map
       const destinationIndex = MAPS.findIndex(map => map.name === destinationMap);
       
       if (destinationIndex !== -1) {
+        // Get destination map dimensions
+        const destMap = MAPS[destinationIndex];
+        const destWidth = destMap.data[0].length;
+        const destHeight = destMap.data.length;
+        
+        // Adjust spawn position to be within map bounds
+        spawnPosition.x = Math.min(spawnPosition.x, (destWidth - 1) * TILE_SIZE);
+        spawnPosition.y = Math.min(spawnPosition.y, (destHeight - 1) * TILE_SIZE);
+        
         // Play portal sound
         if (soundManager) soundManager.playSound('portal');
         

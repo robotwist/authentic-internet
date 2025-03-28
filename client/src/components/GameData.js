@@ -443,26 +443,6 @@ export const MAPS = [
           }
         }
       }
-    ],
-    specialPortals: [
-      {
-        position: { x: 4, y: 3 },
-        type: "terminal",
-        destination: "Terminal3",
-        tileType: 6
-      },
-      {
-        position: { x: 6, y: 3 },
-        type: "shooter",
-        destination: "Level4Shooter",
-        tileType: 7
-      },
-      {
-        position: { x: 6, y: 5 },
-        type: "text",
-        destination: "Text Adventure",
-        tileType: 8
-      }
     ]
   },
   {
