@@ -8,7 +8,14 @@ import {
 } from "../api/api";
 import "./Inventory.css";
 
-const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, refreshArtifacts, characterPosition }) => {
+const Inventory = ({ 
+  artifacts = [], 
+  onClose = () => {}, 
+  onUpdateArtifact = () => {}, 
+  onGainExperience = () => {}, 
+  refreshArtifacts = () => {}, 
+  characterPosition = { x: 0, y: 0 } 
+}) => {
   const [messageContent, setMessageContent] = useState("");
   const [selectedArtifact, setSelectedArtifact] = useState(null);
   const [actionMode, setActionMode] = useState(null); // 'message', 'drop', or null
@@ -17,6 +24,33 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
   const [attachmentPreview, setAttachmentPreview] = useState(null);
   const [formError, setFormError] = useState("");
   const fileInputRef = useRef(null);
+
+  // Add error boundary
+  useEffect(() => {
+    const handleError = (error) => {
+      console.error("Inventory Error:", error);
+      setFormError("An error occurred. Please try again.");
+      // Reset state
+      setSelectedArtifact(null);
+      setActionMode(null);
+      setSaveStatus(null);
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  // Handle escape key to close inventory
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   useEffect(() => {
     const artifactId = selectedArtifact?.id || selectedArtifact?._id;
@@ -416,12 +450,24 @@ const Inventory = ({ artifacts, onClose, onUpdateArtifact, onGainExperience, ref
 };
 
 Inventory.propTypes = {
-  artifacts: PropTypes.array.isRequired,
-  onClose: PropTypes.func.isRequired,
+  artifacts: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string,
+    _id: PropTypes.string,
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    location: PropTypes.shape({
+      x: PropTypes.number,
+      y: PropTypes.number
+    })
+  })),
+  onClose: PropTypes.func,
   onUpdateArtifact: PropTypes.func,
   onGainExperience: PropTypes.func,
   refreshArtifacts: PropTypes.func,
-  characterPosition: PropTypes.object
+  characterPosition: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number
+  })
 };
 
 export default Inventory;

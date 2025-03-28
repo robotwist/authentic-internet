@@ -196,6 +196,58 @@ export const MAPS = [
     ]
   },
   {
+    name: "Overworld 3",
+    data: [
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 0, 0, 0, 0, 0, 5, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2],
+      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ],
+    artifacts: [
+      { 
+        id: uuidv4(), 
+        name: "Ancient Tome", 
+        description: "A weathered book bound in mysterious materials", 
+        content: "The pages contain knowledge of artifact creation and manipulation, with spaces for users to add their own discoveries.", 
+        location: { x: 3, y: 7 }, 
+        exp: 30, 
+        visible: true, 
+        area: "Overworld",
+        type: ARTIFACT_TYPES.SCROLL,
+        interactions: [
+          {
+            type: ARTIFACT_INTERACTIONS.REVEAL,
+            condition: "nearWater",
+            revealedContent: "The tome shows visions of an ancient underwater city..."
+          }
+        ],
+        properties: {
+          magic: 10,
+          visionRange: 2,
+          element: "arcane"
+        },
+        userModifiable: {
+          riddle: true,
+          properties: ["magic", "visionRange"]
+        }
+      }
+    ]
+  },
+  {
     name: "Desert 1",
     data: [
       [1, 1, 3, 3, 3, 1, 1, 1, 1, 1],
@@ -328,94 +380,6 @@ export const MAPS = [
     ]
   },
   {
-    name: "Dungeon 1",
-    data: [
-      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
-      [4, 0, 4, 0, 4, 4, 4, 4, 0, 4],
-      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
-      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
-      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
-      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
-      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
-      [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
-      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-    ],
-    artifacts: [
-      { 
-        id: uuidv4(), 
-        name: "Ancient Tome", 
-        description: "A weathered book bound in mysterious materials", 
-        content: "The pages contain knowledge of artifact creation and manipulation, with spaces for users to add their own discoveries.", 
-        location: { x: 3, y: 7 }, 
-        exp: 30, 
-        visible: true, 
-        area: "Dungeon",
-        type: ARTIFACT_TYPES.SCROLL,
-        interactions: [
-          {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
-            condition: "nearWater",
-            revealedContent: "The tome shows visions of an ancient underwater city..."
-          }
-        ],
-        properties: {
-          magic: 10,
-          visionRange: 2,
-          element: "arcane"
-        },
-        userModifiable: {
-          riddle: true,
-          properties: ["magic", "visionRange"]
-        }
-      }
-    ]
-  },
-  {
-    name: "Dungeon 2",
-    data: [
-      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-      [4, 3, 3, 3, 3, 3, 3, 3, 3, 4],
-      [4, 3, 4, 4, 4, 4, 4, 4, 3, 4],
-      [4, 3, 4, 3, 3, 3, 3, 4, 3, 4],
-      [4, 3, 4, 3, 4, 4, 3, 4, 3, 4],
-      [4, 3, 3, 3, 3, 3, 3, 4, 3, 4],
-      [4, 4, 4, 4, 4, 4, 4, 4, 3, 4],
-      [4, 3, 3, 3, 3, 3, 3, 3, 3, 4],
-      [4, 3, 4, 4, 4, 4, 4, 4, 4, 4],
-      [4, 5, 4, 4, 4, 4, 4, 4, 4, 4],
-    ],
-    artifacts: [
-      { 
-        id: uuidv4(), 
-        name: "Shadow Essence", 
-        description: "A swirling dark essence contained in an ornate vial", 
-        content: "The essence seems to react to the presence of other artifacts, growing stronger or weaker.", 
-        location: { x: 4, y: 3 }, 
-        exp: 28, 
-        visible: true, 
-        area: "Dungeon",
-        type: ARTIFACT_TYPES.RELIC,
-        interactions: [
-          {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
-            condition: "nearWater",
-            revealedContent: "The essence shows visions of an ancient underwater city..."
-          }
-        ],
-        properties: {
-          magic: 10,
-          visionRange: 2,
-          element: "arcane"
-        },
-        userModifiable: {
-          riddle: true,
-          properties: ["magic", "visionRange"]
-        }
-      }
-    ]
-  },
-  {
     name: "Yosemite",
     data: [
       [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -429,33 +393,24 @@ export const MAPS = [
       [2, 0, 0, 0, 0, 0, 0, 0, 5, 2],
       [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
     ],
-    artifacts: [
-      { 
-        id: uuidv4(), 
-        name: "Nature's Journal", 
-        description: "A journal filled with observations of Yosemite's natural wonders", 
-        content: "The journal contains detailed sketches and notes about the valley's formation and its unique ecosystem.", 
-        location: { x: 4, y: 4 }, 
-        exp: 35, 
-        visible: true, 
-        area: "Yosemite",
-        type: ARTIFACT_TYPES.SCROLL,
-        interactions: [
-          {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
-            condition: "nearWater",
-            revealedContent: "The journal reveals hidden connections between the valley's features..."
-          }
-        ],
-        properties: {
-          magic: 10,
-          visionRange: 2,
-          element: "nature"
-        },
-        userModifiable: {
-          riddle: true,
-          properties: ["magic", "visionRange"]
-        }
+    specialPortals: [
+      {
+        position: { x: 4, y: 3 },
+        type: "terminal",
+        destination: "Terminal3",
+        tileType: 6
+      },
+      {
+        position: { x: 6, y: 3 },
+        type: "shooter",
+        destination: "Level4Shooter",
+        tileType: 7
+      },
+      {
+        position: { x: 6, y: 5 },
+        type: "text",
+        destination: "Text Adventure",
+        tileType: 8
       }
     ],
     npcs: [

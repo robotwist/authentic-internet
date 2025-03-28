@@ -100,46 +100,42 @@ const GameWorld = () => {
         const storedUser = JSON.parse(localStorage.getItem("user"));
         const token = localStorage.getItem("token");
         
-        // If no user or token, create a default character for unauthenticated play
-        if (!storedUser || !storedUser.id || !token) {
-          console.log("👤 Creating default character for unauthenticated play");
-          setCharacter({
-            level: 1,
-            experience: 0,
-            savedQuotes: [],
-            qualifyingArtifacts: {},
-            id: null,
-            username: 'guest'
-          });
-          return;
-        }
-
-        const characterData = await fetchCharacter(storedUser.id);
-        console.log("✅ Character Loaded:", characterData);
-        if (characterData) {
-          setCharacter(characterData);
-        } else {
-          // Fallback to default character if API returns nothing
-          setCharacter({
-            level: 1,
-            experience: 0,
-            savedQuotes: [],
-            qualifyingArtifacts: {},
-            id: null,
-            username: 'guest'
-          });
-        }
-      } catch (err) {
-        console.error("❌ Failed to load character:", err);
-        // Set a default character to avoid UI errors
-        setCharacter({
+        // Create a default character state
+        const defaultCharacter = {
           level: 1,
           experience: 0,
           savedQuotes: [],
           qualifyingArtifacts: {},
           id: null,
-          username: 'guest'
-        });
+          username: 'guest',
+          inventory: []
+        };
+
+        // If no user or token, use default character but don't reset existing state
+        if (!storedUser || !storedUser.id || !token) {
+          console.log("👤 Using default character for unauthenticated play");
+          if (!character) {
+            setCharacter(defaultCharacter);
+          }
+          return;
+        }
+
+        // Only fetch character if we don't have one or if the ID changed
+        if (!character || character.id !== storedUser.id) {
+          const characterData = await fetchCharacter(storedUser.id);
+          console.log("✅ Character Loaded:", characterData);
+          if (characterData) {
+            setCharacter(characterData);
+          } else {
+            setCharacter(defaultCharacter);
+          }
+        }
+      } catch (err) {
+        console.error("❌ Failed to load character:", err);
+        // Only set default character if we don't have one
+        if (!character) {
+          setCharacter(defaultCharacter);
+        }
       }
     };
 
@@ -186,17 +182,29 @@ const GameWorld = () => {
         return;
       }
       
-      // Only in development mode
+      // Handle inventory toggle with 'i' key
+      if (event.key === 'i' || event.key === 'I') {
+        event.preventDefault();
+        setShowInventory(prev => !prev);
+        return;
+      }
+      
+      // Toggle world map with 'M' key
+      if (event.key === 'm' || event.key === 'M') {
+        setShowWorldMap(prev => !prev);
+      }
+
+      // Toggle feedback form with 'F' key
+      if (event.key === 'f' || event.key === 'F') {
+        setShowFeedback(prev => !prev);
+      }
+
+      // Development mode shortcuts
       if (process.env.NODE_ENV === 'development') {
-        // Shift + 1 to trigger level 1 completion for testing
         if (event.shiftKey && event.key === '1') {
-          console.log("🛠️ DEV: Manually triggering Level 1 completion");
           handleLevelCompletion('level1');
         }
-        
-        // Shift + 0 to reset level completion for testing
         if (event.shiftKey && event.key === '0') {
-          console.log("🛠️ DEV: Resetting level completion and rewards state");
           setLevelCompletion({
             level1: false,
             level2: false,
@@ -209,16 +217,6 @@ const GameWorld = () => {
           localStorage.removeItem('level-level4-completed');
           localStorage.removeItem('nkd-man-reward-shown');
         }
-      }
-      
-      // Toggle world map with 'M' key
-      if (event.key === 'm' || event.key === 'M') {
-        setShowWorldMap(prev => !prev);
-      }
-
-      // Toggle feedback form with 'F' key
-      if (event.key === 'f' || event.key === 'F') {
-        setShowFeedback(prev => !prev);
       }
     };
 
@@ -299,41 +297,48 @@ const GameWorld = () => {
       // Play pickup sound
       if (soundManager) soundManager.playSound('pickup');
 
-      // If it's a map artifact, mark it as collected
-      if (artifact.id && MAPS[currentMapIndex].artifacts.some(a => a.id === artifact.id)) {
-        saveMapArtifactVisibilityToStorage(artifact.id);
+      // Check if artifact is at player's position
+      const playerX = Math.floor(characterPosition.x / TILE_SIZE);
+      const playerY = Math.floor(characterPosition.y / TILE_SIZE);
+      const artifactX = artifact.location ? Math.floor(artifact.location.x) : null;
+      const artifactY = artifact.location ? Math.floor(artifact.location.y) : null;
+
+      if (artifactX === playerX && artifactY === playerY) {
+        // If it's a map artifact, mark it as collected
+        if (artifact.id && MAPS[currentMapIndex].artifacts.some(a => a.id === artifact.id)) {
+          saveMapArtifactVisibilityToStorage(artifact.id);
+          
+          // Update the artifact's visibility in the current map
+          MAPS[currentMapIndex].artifacts = MAPS[currentMapIndex].artifacts.map(a => 
+            a.id === artifact.id ? { ...a, visible: false } : a
+          );
+        }
+
+        // Add to inventory
+        setInventory(prev => [...prev, artifact]);
         
-        // Update the artifact's visibility in the current map
-        MAPS[currentMapIndex].artifacts = MAPS[currentMapIndex].artifacts.map(a => 
-          a.id === artifact.id ? { ...a, visible: false } : a
-        );
-      }
+        // Clear visible artifact
+        setVisibleArtifact(null);
 
-      // Add to inventory
-      setInventory(prev => [...prev, artifact]);
-      
-      // Clear visible artifact
-      setVisibleArtifact(null);
+        // If it's a server artifact, update it
+        if (artifact._id) {
+          await createArtifact({
+            ...artifact,
+            location: null // Remove location to indicate it's in inventory
+          });
+        }
 
-      // If it's a server artifact, update it
-      if (artifact._id) {
-        await createArtifact({
-          ...artifact,
-          location: null // Remove location to indicate it's in inventory
+        // Show feedback form
+        setFormPosition({
+          x: characterPosition.x,
+          y: characterPosition.y
         });
+        setShowForm(true);
       }
-
-      // Show feedback form
-      setFormPosition({
-        x: characterPosition.x,
-        y: characterPosition.y
-      });
-      setShowForm(true);
-
     } catch (error) {
       console.error("Error handling artifact pickup:", error);
     }
-  }, [currentMapIndex, characterPosition]);
+  }, [currentMapIndex, characterPosition, soundManager]);
 
   // Now we can safely use handleCharacterMove in the hook
   const { isBumping, bumpDirection, movementDirection } = useCharacterMovement(
