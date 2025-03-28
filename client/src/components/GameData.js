@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { TILE_SIZE, ARTIFACT_TYPES, ARTIFACT_INTERACTIONS, NPC_TYPES } from './Constants';
+import { isValidMapSize } from './MapConstants';
 
 // Maps array
 export const MAPS = [
@@ -665,8 +666,122 @@ export const MAPS = [
         }
       }
     ]
+  },
+  {
+    name: "Dungeon Level 1",
+    data: [
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    ],
+    artifacts: [
+      {
+        id: uuidv4(),
+        name: "Dungeon Key",
+        description: "A key that unlocks deeper dungeon levels",
+        content: "This key seems to resonate with the deeper levels of the dungeon.",
+        location: { x: 4, y: 4 },
+        exp: 20,
+        visible: true,
+        area: "Dungeon",
+        type: ARTIFACT_TYPES.KEY,
+        interactions: [
+          {
+            type: ARTIFACT_INTERACTIONS.UNLOCK,
+            targetArtifact: "Dungeon Door",
+            result: "Access to Dungeon Level 2"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    name: "Dungeon Level 2",
+    data: [
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    ],
+    artifacts: [
+      {
+        id: uuidv4(),
+        name: "Ancient Scroll",
+        description: "A scroll containing knowledge of the dungeon's history",
+        content: "The scroll tells of a powerful artifact hidden in the deepest level.",
+        location: { x: 4, y: 4 },
+        exp: 25,
+        visible: true,
+        area: "Dungeon",
+        type: ARTIFACT_TYPES.SCROLL
+      }
+    ]
+  },
+  {
+    name: "Dungeon Level 3",
+    data: [
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
+      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    ],
+    artifacts: [
+      {
+        id: uuidv4(),
+        name: "Terminal Key",
+        description: "A key that unlocks access to the terminal realm",
+        content: "This key seems to resonate with digital energy.",
+        location: { x: 4, y: 4 },
+        exp: 30,
+        visible: true,
+        area: "Dungeon",
+        type: ARTIFACT_TYPES.KEY,
+        interactions: [
+          {
+            type: ARTIFACT_INTERACTIONS.UNLOCK,
+            targetArtifact: "Terminal Portal",
+            result: "Access to Terminal3"
+          }
+        ]
+      }
+    ]
   }
 ];
+
+// Remove duplicate specialPortals from Yosemite map
+MAPS.forEach(map => {
+  if (map.name === "Yosemite" && map.specialPortals) {
+    map.specialPortals = map.specialPortals.filter((portal, index, self) =>
+      index === self.findIndex(p => p.position.x === portal.position.x && p.position.y === portal.position.y)
+    );
+  }
+});
+
+// Validate all maps on load
+MAPS.forEach((map, index) => {
+  if (!isValidMapSize(map.data)) {
+    console.error(`Invalid map size in map ${index}: ${map.name}`);
+  }
+});
 
 // NPCs and World Map
 export const NPCs = {

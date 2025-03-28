@@ -1,22 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
+import { MAPS } from './GameData';
+import { TILE_SIZE, MAP_ROWS, MAP_COLS, TILE_TYPES, isWalkable } from './MapConstants';
 
-// Constants
-export const TILE_SIZE = 64;
-export const MAP_ROWS = 20;
-export const MAP_COLS = 20;
-
-// Tile Classes
-export const TILE_TYPES = {
-  0: "empty",
-  1: "wall",
-  2: "tree",
-  3: "sand",
-  4: "dungeon",
-  5: "portal",
-  6: "terminal-portal",
-  7: "shooter-portal",
-  8: "text-portal"
-};
+// Re-export MAPS and map constants
+export { MAPS, TILE_SIZE, MAP_ROWS, MAP_COLS, TILE_TYPES, isWalkable };
 
 // Artifact Types and Interactions
 export const ARTIFACT_TYPES = {
@@ -62,29 +49,17 @@ export const NPC_TYPES = {
 };
 
 // Helper functions
-export const isWalkable = (tileType) => {
-  switch (tileType) {
-    case 0: // Empty
-    case 3: // Sand
-    case 5: // Portal
-    case 6: // Terminal portal
-    case 7: // Shooter portal
-    case 8: // Text portal
-      return true;
-    default:
-      return false;
-  }
-};
-
 export const canInteract = (artifact1, artifact2) => {
-  return artifact1.interactions?.some(interaction => 
+  if (!artifact1?.interactions || !artifact2?.name) return false;
+  return artifact1.interactions.some(interaction => 
     interaction.type === ARTIFACT_INTERACTIONS.COMBINE && 
     interaction.targetArtifact === artifact2.name
   );
 };
 
 export const getInteractionResult = (artifact1, artifact2) => {
-  const interaction = artifact1.interactions?.find(i => 
+  if (!artifact1?.interactions || !artifact2?.name) return null;
+  const interaction = artifact1.interactions.find(i => 
     i.type === ARTIFACT_INTERACTIONS.COMBINE && 
     i.targetArtifact === artifact2.name
   );
@@ -92,11 +67,14 @@ export const getInteractionResult = (artifact1, artifact2) => {
 };
 
 export const isNearConditionMet = (artifact, characterPosition, mapData) => {
-  const interaction = artifact.interactions?.find(i => i.type === ARTIFACT_INTERACTIONS.REVEAL);
+  if (!artifact?.interactions || !characterPosition || !mapData) return false;
+  
+  const interaction = artifact.interactions.find(i => i.type === ARTIFACT_INTERACTIONS.REVEAL);
   if (!interaction) return false;
 
   const { x, y } = characterPosition;
-  const tileType = mapData[Math.floor(y / 64)][Math.floor(x / 64)];
+  const tileType = mapData[Math.floor(y / TILE_SIZE)]?.[Math.floor(x / TILE_SIZE)];
+  if (typeof tileType !== 'number') return false;
   
   switch (interaction.condition) {
     case 'nearWater':
@@ -109,6 +87,8 @@ export const isNearConditionMet = (artifact, characterPosition, mapData) => {
 };
 
 export const canInteractWithNPC = (characterPosition, npcPosition) => {
+  if (!characterPosition || !npcPosition) return false;
+  
   const charX = Math.floor(characterPosition.x / TILE_SIZE);
   const charY = Math.floor(characterPosition.y / TILE_SIZE);
   const npcX = Math.floor(npcPosition.x / TILE_SIZE);
@@ -126,6 +106,7 @@ export default {
   ARTIFACT_TYPES,
   ARTIFACT_INTERACTIONS,
   NPC_TYPES,
+  MAPS,
   isWalkable,
   canInteract,
   getInteractionResult,
