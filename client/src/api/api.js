@@ -337,19 +337,38 @@ export const updateCharacter = async (updatedCharacter) => {
 /* ────────────────────────────────
    🔹 ARTIFACT ENDPOINTS (CRUD)
 ──────────────────────────────── */
-export const fetchArtifacts = async () => {
+export const fetchArtifacts = async (retryCount = 3) => {
   try {
     console.log("Fetching artifacts from server...");
-    const response = await API.get("/api/artifacts");
     
-    // Check if the response contains an array of artifacts
-    if (Array.isArray(response.data)) {
-      console.log(`Successfully fetched ${response.data.length} artifacts:`, response.data);
-      return response.data;
-    } else {
-      console.warn("Server returned non-array response for artifacts:", response.data);
-      return [];
+    // Add retry logic
+    let lastError = null;
+    for (let i = 0; i < retryCount; i++) {
+      try {
+        const response = await API.get("/api/artifacts");
+        
+        // Check if the response contains an array of artifacts
+        if (Array.isArray(response.data)) {
+          console.log(`Successfully fetched ${response.data.length} artifacts:`, response.data);
+          return response.data;
+        } else if (response.data && Array.isArray(response.data.artifacts)) {
+          // Handle case where artifacts might be nested
+          console.log(`Successfully fetched ${response.data.artifacts.length} artifacts:`, response.data.artifacts);
+          return response.data.artifacts;
+        } else {
+          console.warn("Server returned unexpected response format:", response.data);
+          return [];
+        }
+      } catch (error) {
+        lastError = error;
+        console.warn(`Attempt ${i + 1} failed:`, error);
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
     }
+    
+    // If we get here, all retries failed
+    throw lastError;
   } catch (error) {
     console.error("Error fetching artifacts:", error);
     // Log more details about the error for debugging

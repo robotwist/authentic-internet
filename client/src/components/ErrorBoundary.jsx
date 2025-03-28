@@ -1,64 +1,102 @@
-import React, { Component } from "react";
+import React from 'react';
 import PropTypes from 'prop-types';
+import './ErrorBoundary.css';
 
-class ErrorBoundary extends Component {
+class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { 
-      hasError: false,
+      hasError: false, 
       error: null,
       errorInfo: null
     };
   }
 
   static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI
     return { hasError: true, error };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log the error to console or an error reporting service
-    console.error("🔥 Error caught by ErrorBoundary:", error, errorInfo);
+    // Log the error to an error reporting service
+    console.error('Error caught by boundary:', error, errorInfo);
     this.setState({
-      error: error,
-      errorInfo: errorInfo
+      error,
+      errorInfo
     });
-    
-    // Optionally send to error reporting service
-    // logErrorToService(error, errorInfo);
+
+    // Try to save game state if possible
+    try {
+      const gameState = {
+        timestamp: new Date().toISOString(),
+        location: window.location.pathname,
+        error: {
+          message: error.message,
+          stack: error.stack
+        }
+      };
+      localStorage.setItem('gameState_backup', JSON.stringify(gameState));
+    } catch (e) {
+      console.error('Failed to save game state:', e);
+    }
   }
 
+  handleRetry = () => {
+    // Clear the error state
+    this.setState({ 
+      hasError: false, 
+      error: null,
+      errorInfo: null 
+    });
+
+    // Attempt to reload the component
+    if (this.props.onRetry) {
+      this.props.onRetry();
+    }
+  };
+
   handleReset = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
-    
-    // Force reload the app
-    window.location.href = '/';
+    // Clear local storage and reload the page
+    try {
+      localStorage.clear();
+      window.location.reload();
+    } catch (e) {
+      console.error('Failed to reset:', e);
+      // Force reload as fallback
+      window.location.href = '/';
+    }
   };
 
   render() {
     if (this.state.hasError) {
       return (
-        <div style={styles.container}>
-          <h1 style={styles.heading}>⚠️ Something went wrong!</h1>
-          <div style={styles.errorDetails}>
-            <p style={styles.errorMessage}>
-              {this.state.error && this.state.error.toString()}
-            </p>
-            {this.state.errorInfo && (
-              <details style={styles.errorStack}>
-                <summary>Error Details</summary>
-                <pre>{this.state.errorInfo.componentStack}</pre>
-              </details>
+        <div className="error-boundary">
+          <div className="error-content">
+            <h2>Oops! Something went wrong</h2>
+            <p>Don't worry, your progress has been saved.</p>
+            
+            {this.state.error && (
+              <div className="error-details">
+                <p>{this.state.error.message}</p>
+                {this.state.errorInfo && (
+                  <details>
+                    <summary>Technical Details</summary>
+                    <pre>{this.state.errorInfo.componentStack}</pre>
+                  </details>
+                )}
+              </div>
             )}
-          </div>
-          <p style={styles.instructions}>Please try resetting the application:</p>
-          <div style={styles.actions}>
-            <button onClick={this.handleReset} style={styles.resetButton}>
-              🔄 Reset App
-            </button>
-            <a href="/" style={styles.homeButton}>
-              🏠 Go to Homepage
-            </a>
+            
+            <div className="error-actions">
+              <button onClick={this.handleRetry} className="retry-button">
+                Try Again
+              </button>
+              <button onClick={this.handleReset} className="reset-button">
+                Reset Game
+              </button>
+              <a href="/" className="home-link">
+                Return to Home
+              </a>
+            </div>
           </div>
         </div>
       );
@@ -69,76 +107,8 @@ class ErrorBoundary extends Component {
 }
 
 ErrorBoundary.propTypes = {
-  children: PropTypes.node.isRequired
-};
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100vh",
-    backgroundColor: "#1b1b1b",
-    color: "#ffffff",
-    textAlign: "center",
-    padding: "20px",
-  },
-  heading: {
-    fontSize: "28px",
-    marginBottom: "20px",
-    color: "#f44336",
-  },
-  errorDetails: {
-    width: "80%",
-    maxWidth: "800px",
-    margin: "0 auto 20px auto",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    padding: "15px",
-    borderRadius: "8px",
-    textAlign: "left",
-  },
-  errorMessage: {
-    color: "#ff8a80",
-    fontSize: "18px",
-    marginBottom: "10px",
-  },
-  errorStack: {
-    color: "#aaaaaa",
-    fontSize: "14px",
-    fontFamily: "monospace",
-    maxHeight: "200px",
-    overflow: "auto",
-  },
-  instructions: {
-    fontSize: "16px",
-    marginBottom: "20px",
-  },
-  actions: {
-    display: "flex",
-    gap: "15px",
-  },
-  resetButton: {
-    padding: "12px 20px",
-    fontSize: "16px",
-    backgroundColor: "#f44336",
-    color: "#fff",
-    border: "none",
-    cursor: "pointer",
-    borderRadius: "5px",
-    fontWeight: "bold",
-  },
-  homeButton: {
-    padding: "12px 20px",
-    fontSize: "16px",
-    backgroundColor: "#2196f3",
-    color: "#fff",
-    border: "none",
-    cursor: "pointer",
-    borderRadius: "5px",
-    textDecoration: "none",
-    fontWeight: "bold",
-  }
+  children: PropTypes.node.isRequired,
+  onRetry: PropTypes.func
 };
 
 export default ErrorBoundary;
