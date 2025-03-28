@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { playSound, preloadSound, preloadMusic, playMusic, pauseMusic, stopMusic, setMusicVolume } from '../utils/soundEffects';
+import SoundManager from './utils/SoundManager';
+import { TILE_SIZE } from './Constants';
 import './Level4Shooter.css';
 
 const Level4Shooter = ({ onComplete, onExit }) => {
@@ -148,6 +149,19 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     ]
   };
   
+  // Add soundManager state
+  const [soundManager, setSoundManager] = useState(null);
+
+  // Add useEffect for sound initialization
+  useEffect(() => {
+    const initSoundManager = async () => {
+      const manager = SoundManager.getInstance();
+      await manager.initialize();
+      setSoundManager(manager);
+    };
+    initSoundManager();
+  }, []);
+
   // Initialize game
   useEffect(() => {
     // Preload all game sounds
@@ -209,57 +223,62 @@ const Level4Shooter = ({ onComplete, onExit }) => {
       cancelAnimationFrame(gameLoopRef.current);
       
       // Stop all music when component unmounts
-      stopMusic();
+      if (soundManager) {
+        soundManager.stopMusic();
+      }
     };
-  }, [currentLevel]); // Re-initialize when level changes
+  }, [currentLevel, soundManager]); // Re-initialize when level changes
 
   // Handle level change effects including music
   useEffect(() => {
+    if (!soundManager) return;
+
     if (isGameActive) {
       // Play the appropriate music for the current level
       switch(currentLevel) {
         case 1:
-          playMusic(MUSIC_MAPPING.level1, 0.3);
+          soundManager.playMusic('hemingway-paris-music', true, 0.3);
           break;
         case 2:
-          playMusic(MUSIC_MAPPING.level2, 0.3);
+          soundManager.playMusic('hemingway-spain-music', true, 0.3);
           break;
         case 3:
-          playMusic(MUSIC_MAPPING.level3, 0.3);
+          soundManager.playMusic('hemingway-africa-music', true, 0.3);
           break;
         default:
-          playMusic(MUSIC_MAPPING.level1, 0.3);
+          soundManager.playMusic('hemingway-paris-music', true, 0.3);
       }
     }
-  }, [currentLevel, isGameActive]);
+  }, [currentLevel, isGameActive, soundManager]);
   
   // Handle boss encounter effects
   useEffect(() => {
+    if (!soundManager) return;
+    
     if (bossActive) {
-      // Play boss music when boss becomes active
-      playMusic(MUSIC_MAPPING.boss, 0.4);
+      soundManager.playMusic('hemingway-boss-music', true, 0.4);
       
       // Display a boss-specific quote
       displayRandomQuote('boss');
     }
-  }, [bossActive]);
+  }, [bossActive, soundManager]);
   
   // Handle game over and victory effects
   useEffect(() => {
+    if (!soundManager) return;
+    
     if (gameOver) {
-      // Play game over music
-      playMusic(MUSIC_MAPPING.gameOver, 0.3);
+      soundManager.playMusic('hemingway-gameover-music', true, 0.3);
       
       // Display a game over quote
       displayRandomQuote('lowHealth');
     } else if (victory) {
-      // Play victory music
-      playMusic(MUSIC_MAPPING.victory, 0.3);
+      soundManager.playMusic('hemingway-victory-music', true, 0.3);
       
       // Display a victory quote
       displayRandomQuote('victory');
     }
-  }, [gameOver, victory]);
+  }, [gameOver, victory, soundManager]);
   
   // Initialize level design based on current level
   const initializeLevelDesign = () => {
@@ -401,16 +420,16 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     // Play the appropriate level music
     switch(currentLevel) {
       case 1:
-        playMusic(MUSIC_MAPPING.level1, 0.3);
+        soundManager.playMusic('hemingway-paris-music', true, 0.3);
         break;
       case 2:
-        playMusic(MUSIC_MAPPING.level2, 0.3);
+        soundManager.playMusic('hemingway-spain-music', true, 0.3);
         break;
       case 3:
-        playMusic(MUSIC_MAPPING.level3, 0.3);
+        soundManager.playMusic('hemingway-africa-music', true, 0.3);
         break;
       default:
-        playMusic(MUSIC_MAPPING.level1, 0.3);
+        soundManager.playMusic('hemingway-paris-music', true, 0.3);
     }
     
     // Display a random Hemingway quote on start
@@ -1489,11 +1508,13 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     }, 5000);
   };
   
-  // Create a wrapper function to play sounds using our mapping
+  // Update the playGameSound function
   const playGameSound = (type, volume = 0.5) => {
+    if (!soundManager) return;
+    
     const soundId = SOUND_MAPPING[type];
     if (soundId) {
-      playSound(soundId, volume);
+      soundManager.playSound(soundId, volume);
     } else {
       console.log(`No sound mapping found for: ${type}`);
     }
@@ -1551,7 +1572,7 @@ const Level4Shooter = ({ onComplete, onExit }) => {
     playGameSound('bossDefeated', 0.7);
     
     // Stop boss music and play victory music
-    playMusic(MUSIC_MAPPING.victory, 0.4);
+    playGameSound('victory', 0.4);
     
     // Display victory message
     displayRandomQuote('victory');
@@ -1598,7 +1619,6 @@ const Level4Shooter = ({ onComplete, onExit }) => {
         // Game victory
         setVictory(true);
         playGameSound('victory', 0.7);
-        playMusic(MUSIC_MAPPING.victory, 0.4);
       }
     }, 2000);
   };

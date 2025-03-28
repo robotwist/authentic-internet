@@ -1,665 +1,579 @@
 .artifact {
   position: absolute;
-  width: 64px;
-  height: 64px;
-  background-size: contain !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  image-rendering: pixelated;
-  z-index: 1000;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
-  transition: transform 0.2s ease-out;
-  pointer-events: all;
+  width: 32px;
+  height: 32px;
   cursor: pointer;
-}
-
-.artifact::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
-  pointer-events: none;
-}
-
-.artifact-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
-  pointer-events: none;
-  animation: glow 2s ease-in-out infinite;
+  transition: transform 0.2s ease;
+  z-index: 1000;
 }
 
 .artifact:hover {
   transform: scale(1.1);
-  filter: brightness(1.2);
 }
 
-.artifact.highlight {
-  animation: pulse 1.5s infinite;
+.artifact-near {
+  animation: pulse 2s infinite;
 }
 
-.pickup-animation {
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.artifact-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.artifact-prompt {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.artifact-pickup-animation {
   animation: pickup 0.5s ease-out forwards;
 }
 
 @keyframes pickup {
   0% {
-    transform: scale(1) translateY(0);
+    transform: scale(1);
     opacity: 1;
   }
   50% {
-    transform: scale(1.2) translateY(-20px);
+    transform: scale(1.2);
     opacity: 0.8;
   }
   100% {
-    transform: scale(0) translateY(-40px);
+    transform: scale(0);
     opacity: 0;
   }
 }
 
-@keyframes pulse {
-  0% {
-    filter: brightness(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
-  }
-  50% {
-    filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
-  }
-  100% {
-    filter: brightness(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
-  }
-}
-
-@keyframes glow {
-  0%, 100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1);
-  }
-}
-
-/* Artifact type-specific styles */
-.artifact.weapon .artifact-glow {
-  background: radial-gradient(circle, rgba(255,0,0,0.2) 0%, rgba(255,0,0,0) 70%);
-}
-
-.artifact.scroll .artifact-glow {
-  background: radial-gradient(circle, rgba(255,255,0,0.2) 0%, rgba(255,255,0,0) 70%);
-}
-
-.artifact.relic .artifact-glow {
-  background: radial-gradient(circle, rgba(0,255,255,0.2) 0%, rgba(0,255,255,0) 70%);
-}
-
-.artifact.key .artifact-glow {
-  background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(255,215,0,0) 70%);
-}
-
-.artifact.container .artifact-glow {
-  background: radial-gradient(circle, rgba(128,0,128,0.2) 0%, rgba(128,0,128,0) 70%);
-}
-
-.artifact.ancient-sword {
-  background-image: url("/assets/ancient_sword.png");
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
-}
-
-.artifact.mystic-orb {
-  background-image: url("/assets/mystic_orb.png");
-  filter: drop-shadow(0 0 8px rgba(147, 112, 219, 0.6));
-}
-
-.artifact.golden-idol {
-  background-image: url("/assets/golden_idol.webp");
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
-}
-
-.artifact.dungeon-key {
-  background-image: url("/assets/dungeon_key.webp");
-  filter: drop-shadow(0 0 8px rgba(192, 192, 192, 0.6));
-}
-
-.artifact.enchanted-mirror {
-  background-image: url("/assets/enchanted_mirror.png");
-  filter: drop-shadow(0 0 8px rgba(135, 206, 250, 0.6));
-}
-
-.artifact.default-artifact {
-  background-image: url("/assets/artifact.webp");
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
-}
-
-/* Debug outline for development */
-.artifact {
-  outline: 1px solid rgba(255, 0, 0, 0.3);
-}
-
-/* Interaction Popup */
-.interaction-popup {
-  position: absolute;
-  bottom: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 15px;
-  border-radius: 8px;
-  text-align: center;
-  z-index: 10002;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-  pointer-events: none;
-}
-
-/* Inventory Screen */
-.inventory-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10003;
-}
-
-/* User-created artifacts - Making them special and distinct */
-.artifact.user-created {
-  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.7));
-  z-index: 1001; /* Slightly higher than system artifacts */
-}
-
-.artifact.user-created:hover {
-  transform: scale(1.15);
-  filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
-}
-
-.artifact.user-created .artifact-glow {
-  animation: user-artifact-glow 3s ease-in-out infinite;
-}
-
-@keyframes user-artifact-glow {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(1);
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
-    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%);
-  }
-}
-
-/* Theme-specific styles for user artifacts */
-.artifact.theme-wisdom .artifact-glow {
-  background: radial-gradient(circle, rgba(147,112,219,0.3) 0%, rgba(147,112,219,0) 70%);
-}
-
-.artifact.theme-inspiration .artifact-glow {
-  background: radial-gradient(circle, rgba(255,140,0,0.3) 0%, rgba(255,140,0,0) 70%);
-}
-
-.artifact.theme-nature .artifact-glow {
-  background: radial-gradient(circle, rgba(76,187,23,0.3) 0%, rgba(76,187,23,0) 70%);
-}
-
-.artifact.theme-literature .artifact-glow {
-  background: radial-gradient(circle, rgba(70,130,180,0.3) 0%, rgba(70,130,180,0) 70%);
-}
-
-.artifact.theme-history .artifact-glow {
-  background: radial-gradient(circle, rgba(165,42,42,0.3) 0%, rgba(165,42,42,0) 70%);
-}
-
-.artifact.theme-personal .artifact-glow {
-  background: radial-gradient(circle, rgba(255,105,180,0.3) 0%, rgba(255,105,180,0) 70%);
-}
-
-/* Creator indicator */
-.artifact-indicator {
-  position: absolute;
-  top: -10px;
-  right: -5px;
-  pointer-events: none;
-}
-
-.artifact-creator-badge {
-  display: inline-block;
-  color: #ffda79;
-  font-size: 18px;
-  text-shadow: 0 0 5px rgba(0,0,0,0.7);
-  animation: star-twinkle 2s infinite;
-}
-
-@keyframes star-twinkle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.2); }
-}
-
-/* Artifact details popup */
 .artifact-details {
   position: absolute;
-  bottom: 110%;
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  width: 220px;
-  background: rgba(0, 0, 0, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 1rem;
   border-radius: 8px;
-  padding: 12px;
-  color: white;
-  z-index: 1010;
-  pointer-events: none;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-}
-
-.artifact-details:after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 10px solid rgba(0, 0, 0, 0.85);
-}
-
-.artifact-details h3 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  color: #ffda79;
-  text-align: center;
-}
-
-.artifact-description {
-  font-size: 13px;
-  margin: 0 0 8px 0;
-  line-height: 1.3;
-  color: #ddd;
-}
-
-.artifact-creator {
-  font-size: 12px;
-  font-style: italic;
-  margin: 8px 0;
-  color: #3498db;
-}
-
-.artifact-dedication {
-  font-size: 12px;
-  font-style: italic;
-  margin: 8px 0;
-  color: #e74c3c;
-  text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 8px;
-}
-
-.artifact-interaction-hint {
-  font-size: 11px;
-  color: #2ecc71;
-  text-align: center;
+  min-width: 200px;
+  max-width: 300px;
   margin-top: 8px;
-  background: rgba(46, 204, 113, 0.1);
-  padding: 4px;
-  border-radius: 4px;
-}
-
-/* Creative Aspirations Modal Overlay */
-.creative-aspirations-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.92), rgba(20, 30, 48, 0.95));
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10004;
-  animation: fadeIn 0.3s ease-out;
-}
-
-.creative-aspirations-container {
-  background: rgba(30, 40, 60, 0.8);
-  backdrop-filter: blur(5px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  width: 90%;
-  max-width: 600px;
-  padding: 40px;
-  color: white;
-  text-align: center;
-}
-
-.creative-aspirations-title {
-  font-size: 28px;
-  margin-bottom: 25px;
-  color: #3498db;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.creative-aspirations-questions {
-  font-size: 18px;
-  line-height: 1.5;
-  margin-bottom: 30px;
-  color: #ecf0f1;
-}
-
-.creative-aspirations-description {
-  font-size: 16px;
-  line-height: 1.6;
-  margin-bottom: 30px;
-  color: #bdc3c7;
-}
-
-.creative-aspirations-button {
-  background: linear-gradient(to right, #3498db, #2980b9);
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 50px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-}
-
-.creative-aspirations-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 7px 20px rgba(52, 152, 219, 0.6);
+  z-index: 1001;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Mobile Responsiveness for Aspiration Overlay */
-@media (max-width: 600px) {
-  .creative-aspirations-container {
-    padding: 25px;
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
   }
-  
-  .creative-aspirations-title {
-    font-size: 22px;
-  }
-  
-  .creative-aspirations-questions {
-    font-size: 16px;
-  }
-  
-  .creative-aspirations-description {
-    font-size: 14px;
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
 }
 
-/* Artifact theme information */
-.artifact-theme {
-  font-size: 11px;
+.artifact-details h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #ffd700;
+}
+
+.artifact-details p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.artifact-details .creator {
+  color: #a0a0a0;
   font-style: italic;
-  color: #3498db;
-  margin: 4px 0;
-  background: rgba(52, 152, 219, 0.1);
-  padding: 3px 6px;
-  border-radius: 3px;
-  text-align: center;
 }
 
-/* Creative Aspirations Popup */
-.artifact-aspirations {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10005;
+.artifact-details .message {
+  color: #ffd700;
+  font-style: italic;
+  border-left: 2px solid #ffd700;
+  padding-left: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.artifact-details .theme {
+  color: #90EE90;
+}
+
+.artifact-details .dedication {
+  color: #FFB6C1;
+}
+
+.artifact-details .significance {
+  color: #87CEEB;
+  font-style: italic;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Artifact type specific styles */
+.artifact-sword {
+  filter: drop-shadow(0 0 2px #ffd700);
+}
+
+.artifact-orb {
+  filter: drop-shadow(0 0 2px #00ffff);
+}
+
+.artifact-goldenIdol {
+  filter: drop-shadow(0 0 2px #ffd700);
+}
+
+.artifact-dungeonKey {
+  filter: drop-shadow(0 0 2px #c0c0c0);
+}
+
+/* Interaction level styles */
+.artifact-level-1 {
+  filter: drop-shadow(0 0 2px #90EE90);
+}
+
+.artifact-level-2 {
+  filter: drop-shadow(0 0 3px #00ffff);
+}
+
+.artifact-level-3 {
+  filter: drop-shadow(0 0 4px #ffd700);
+  animation: glow 2s infinite;
+}
+
+@keyframes glow {
+  0% {
+    filter: drop-shadow(0 0 4px #ffd700);
+  }
+  50% {
+    filter: drop-shadow(0 0 6px #ffd700);
+  }
+  100% {
+    filter: drop-shadow(0 0 4px #ffd700);
+  }
+}
+
+/* Portal styles */
+.artifact-portal {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+  animation: portalPulse 2s infinite;
+  transition: all 0.3s ease;
+}
+
+.artifact-portal:hover {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+.artifact-portal-textAdventure {
+  filter: drop-shadow(0 0 4px #4CAF50);
+}
+
+.artifact-portal-terminal {
+  filter: drop-shadow(0 0 4px #2196F3);
+}
+
+.artifact-portal-hemingway {
+  filter: drop-shadow(0 0 4px #F44336);
+}
+
+.artifact-portal-info {
+  color: #FFD700;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+/* Level progression styles */
+.artifact-level-1 {
+  filter: drop-shadow(0 0 2px #90EE90);
+  animation: level1Pulse 2s infinite;
+}
+
+@keyframes level1Pulse {
+  0% {
+    filter: drop-shadow(0 0 2px #90EE90);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px #90EE90);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #90EE90);
+  }
+}
+
+.artifact-level-2 {
+  filter: drop-shadow(0 0 3px #00ffff);
+  animation: level2Pulse 2s infinite;
+}
+
+@keyframes level2Pulse {
+  0% {
+    filter: drop-shadow(0 0 3px #00ffff);
+  }
+  50% {
+    filter: drop-shadow(0 0 6px #00ffff);
+  }
+  100% {
+    filter: drop-shadow(0 0 3px #00ffff);
+  }
+}
+
+.artifact-level-3 {
+  filter: drop-shadow(0 0 4px #ffd700);
+  animation: level3Pulse 2s infinite;
+}
+
+@keyframes level3Pulse {
+  0% {
+    filter: drop-shadow(0 0 4px #ffd700);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px #ffd700);
+  }
+  100% {
+    filter: drop-shadow(0 0 4px #ffd700);
+  }
+}
+
+/* Update prompt styles for portals */
+.artifact-prompt {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
   animation: fadeIn 0.3s ease;
-  cursor: pointer;
-}
-
-.aspirations-content {
-  background: rgba(20, 30, 48, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  padding: 25px;
-  max-width: 320px;
   text-align: center;
-  color: white;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  cursor: default;
 }
 
-.aspirations-content h4 {
-  color: #f39c12;
-  margin: 0 0 15px 0;
-  font-size: 20px;
+.artifact-portal .artifact-prompt {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+  font-weight: bold;
+  text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-.aspiration-question {
-  color: #3498db;
-  font-size: 16px;
-  margin: 15px 0 5px 0;
-  font-weight: 500;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .artifact-details {
+    max-width: 250px;
+    font-size: 0.8rem;
+  }
+  
+  .artifact-details h3 {
+    font-size: 1rem;
+  }
+
+  .artifact-portal-info {
+    font-size: 0.8rem;
+    padding: 0.3rem;
+  }
+
+  .artifact-prompt {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
 }
 
-.aspiration-answer {
-  color: #ecf0f1;
-  font-size: 18px;
-  font-style: italic;
-  margin: 5px 0 20px 0;
-  line-height: 1.4;
-  position: relative;
-  padding: 10px 0;
+/* Area-based styles */
+.artifact-area-overworld {
+  filter: drop-shadow(0 0 2px #90EE90);
+  animation: overworldPulse 2s infinite;
 }
 
-.aspiration-answer::before,
-.aspiration-answer::after {
-  content: '';
+@keyframes overworldPulse {
+  0% {
+    filter: drop-shadow(0 0 2px #90EE90);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px #90EE90);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #90EE90);
+  }
+}
+
+.artifact-area-desert {
+  filter: drop-shadow(0 0 2px #FFD700);
+  animation: desertPulse 2s infinite;
+}
+
+@keyframes desertPulse {
+  0% {
+    filter: drop-shadow(0 0 2px #FFD700);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px #FFD700);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #FFD700);
+  }
+}
+
+.artifact-area-dungeon {
+  filter: drop-shadow(0 0 2px #800080);
+  animation: dungeonPulse 2s infinite;
+}
+
+@keyframes dungeonPulse {
+  0% {
+    filter: drop-shadow(0 0 2px #800080);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px #800080);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #800080);
+  }
+}
+
+.artifact-area-yosemite {
+  filter: drop-shadow(0 0 2px #4169E1);
+  animation: yosemitePulse 2s infinite;
+}
+
+@keyframes yosemitePulse {
+  0% {
+    filter: drop-shadow(0 0 2px #4169E1);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px #4169E1);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #4169E1);
+  }
+}
+
+/* Update portal styles */
+.artifact-portal {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+  animation: portalPulse 2s infinite;
+}
+
+.artifact-portal-textAdventure {
+  filter: drop-shadow(0 0 4px #4CAF50);
+}
+
+.artifact-portal-terminal {
+  filter: drop-shadow(0 0 4px #2196F3);
+}
+
+.artifact-portal-hemingway {
+  filter: drop-shadow(0 0 4px #F44336);
+}
+
+/* Update prompt styles for area transitions */
+.artifact-prompt {
   position: absolute;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
-  left: 10%;
-  right: 10%;
-}
-
-.aspiration-answer::before {
-  top: 0;
-}
-
-.aspiration-answer::after {
-  bottom: 0;
-}
-
-.aspirations-close {
-  margin-top: 20px;
-  font-size: 12px;
-  color: #bdc3c7;
-  opacity: 0.7;
-}
-
-/* Interaction level indicators */
-.level-indicator {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: #ffd700;
-  color: #000;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  border: 1px solid #fff;
-  z-index: 10;
-}
-
-.level-indicator.level-2 {
-  background-color: #00bfff;
-  box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
-}
-
-.level-indicator.level-3 {
-  background-color: #9932cc;
-  box-shadow: 0 0 10px rgba(153, 50, 204, 0.5);
-}
-
-/* Interaction level glows */
-.artifact.interaction-level-1 {
-  animation: pulse-level1 2s infinite;
-}
-
-.artifact.interaction-level-2 {
-  animation: pulse-level2 2s infinite;
-}
-
-.artifact.interaction-level-3 {
-  animation: pulse-level3 2s infinite;
-}
-
-@keyframes pulse-level1 {
-  0% {
-    box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7);
-  }
-  100% {
-    box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.5);
-  }
-}
-
-@keyframes pulse-level2 {
-  0% {
-    box-shadow: 0 0 5px 2px rgba(0, 191, 255, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 15px 5px rgba(0, 191, 255, 0.7);
-  }
-  100% {
-    box-shadow: 0 0 5px 2px rgba(0, 191, 255, 0.5);
-  }
-}
-
-@keyframes pulse-level3 {
-  0% {
-    box-shadow: 0 0 5px 2px rgba(153, 50, 204, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 15px 5px rgba(153, 50, 204, 0.7);
-  }
-  100% {
-    box-shadow: 0 0 5px 2px rgba(153, 50, 204, 0.5);
-  }
-}
-
-/* Interaction status in details */
-.interaction-status {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 10px;
-  padding: 5px;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.interaction-status span {
-  font-size: 12px;
-  color: #fff;
-  padding: 2px 5px;
-  border-radius: 3px;
-}
-
-/* Creator aspirations section */
-.creator-aspirations {
-  margin-top: 10px;
-  padding: 10px;
-  background: rgba(255, 215, 0, 0.1);
-  border-left: 2px solid #ffd700;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd700;
+  padding: 4px 8px;
   border-radius: 4px;
-}
-
-.creator-aspirations h4 {
-  margin-top: 0;
-  color: #ffd700;
-}
-
-.creator-aspirations p {
-  font-style: italic;
-  margin-bottom: 5px;
-}
-
-.creator-aspirations .dedication {
   font-size: 12px;
-  text-align: right;
-  color: #ffd700;
-}
-
-.aspirations-button {
-  display: block;
-  margin: 5px auto;
-  padding: 5px 10px;
-  background: rgba(255, 215, 0, 0.3);
-  color: #fff;
-  border: 1px solid #ffd700;
-  border-radius: 15px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-
-.aspirations-button:hover {
-  background: rgba(255, 215, 0, 0.5);
-}
-
-/* Guide trail effect for high-level artifacts */
-.artifact.interaction-level-3::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(153, 50, 204, 0.3) 0%, transparent 70%);
-  filter: blur(5px);
-  animation: trail-glow 2s infinite alternate;
+  white-space: nowrap;
   pointer-events: none;
-  z-index: -1;
+  animation: fadeIn 0.3s ease;
+  text-align: center;
 }
 
-@keyframes trail-glow {
+.artifact-portal .artifact-prompt {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+}
+
+/* Area-specific portal prompts */
+.artifact-area-overworld .artifact-prompt {
+  border-color: #90EE90;
+  text-shadow: 0 0 4px #90EE90;
+}
+
+.artifact-area-desert .artifact-prompt {
+  border-color: #FFD700;
+  text-shadow: 0 0 4px #FFD700;
+}
+
+.artifact-area-dungeon .artifact-prompt {
+  border-color: #800080;
+  text-shadow: 0 0 4px #800080;
+}
+
+.artifact-area-yosemite .artifact-prompt {
+  border-color: #4169E1;
+  text-shadow: 0 0 4px #4169E1;
+}
+
+/* Portal transition styles */
+.artifact-portal {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+  animation: portalPulse 2s infinite;
+  transition: all 0.3s ease;
+}
+
+.artifact-portal:hover {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+/* Progress portal styles */
+.artifact-portal-progress {
+  border: 2px solid transparent;
+  animation: progressPortalPulse 2s infinite;
+}
+
+@keyframes progressPortalPulse {
+  0% {
+    border-color: rgba(255, 255, 255, 0.3);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.6);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+  }
+  100% {
+    border-color: rgba(255, 255, 255, 0.3);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+  }
+}
+
+/* Warp portal styles */
+.artifact-portal-warp {
+  border: 2px solid transparent;
+  animation: warpPortalPulse 2s infinite;
+}
+
+@keyframes warpPortalPulse {
+  0% {
+    border-color: rgba(255, 215, 0, 0.3);
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+  }
+  50% {
+    border-color: rgba(255, 215, 0, 0.6);
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+  }
+  100% {
+    border-color: rgba(255, 215, 0, 0.3);
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+  }
+}
+
+/* Area-specific portal styles */
+.artifact-area-overworld .artifact-portal-progress {
+  border-color: #90EE90;
+}
+
+.artifact-area-desert .artifact-portal-progress {
+  border-color: #FFD700;
+}
+
+.artifact-area-dungeon .artifact-portal-progress {
+  border-color: #800080;
+}
+
+.artifact-area-yosemite .artifact-portal-warp {
+  border-color: #4169E1;
+}
+
+/* Portal prompt styles */
+.artifact-portal .artifact-prompt {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Area-specific portal prompts */
+.artifact-area-overworld .artifact-prompt {
+  border-color: #90EE90;
+  text-shadow: 0 0 4px #90EE90;
+}
+
+.artifact-area-desert .artifact-prompt {
+  border-color: #FFD700;
+  text-shadow: 0 0 4px #FFD700;
+}
+
+.artifact-area-dungeon .artifact-prompt {
+  border-color: #800080;
+  text-shadow: 0 0 4px #800080;
+}
+
+.artifact-area-yosemite .artifact-prompt {
+  border-color: #4169E1;
+  text-shadow: 0 0 4px #4169E1;
+}
+
+/* Portal transition effects */
+.artifact-portal-transition {
+  animation: portalTransition 0.5s ease-out forwards;
+}
+
+@keyframes portalTransition {
   0% {
     transform: scale(1);
-    opacity: 0.3;
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
   }
   100% {
-    transform: scale(1.5);
-    opacity: 0.1;
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .artifact-portal .artifact-prompt {
+    font-size: 10px;
+    padding: 2px 4px;
   }
 }

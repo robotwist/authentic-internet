@@ -12,280 +12,224 @@ class SoundManager {
     this.soundVolume = 0.5;
     this.musicVolume = 0.3;
     this.initialized = false;
+    this.audioContext = null;
   }
 
   /**
    * Initialize the sound manager
    * @returns {Promise} - Promise that resolves when all sounds are loaded
    */
-  initialize() {
-    if (this.initialized) return Promise.resolve();
-    
-    const soundsToLoad = [
-      // Shooter game sounds
-      { id: 'player_shoot', src: '/assets/sounds/player_shoot.mp3' },
-      { id: 'player_jump', src: '/assets/sounds/player_jump.mp3' },
-      { id: 'player_hit', src: '/assets/sounds/player_hit.mp3' },
-      { id: 'player_death', src: '/assets/sounds/player_death.mp3' },
-      { id: 'enemy_hit', src: '/assets/sounds/enemy_hit.mp3' },
-      { id: 'enemy_death', src: '/assets/sounds/enemy_death.mp3' },
-      { id: 'boss_hit', src: '/assets/sounds/boss_hit.mp3' },
-      { id: 'boss_death', src: '/assets/sounds/boss_death.mp3' },
-      { id: 'item_pickup', src: '/assets/sounds/item_pickup.mp3' },
-      { id: 'level_up', src: '/assets/sounds/level_up.mp3' },
-      { id: 'game_over', src: '/assets/sounds/game_over.mp3' },
-      { id: 'victory', src: '/assets/sounds/victory.mp3' },
-      
-      // Overworld sounds
-      { id: 'portal', src: '/assets/sounds/portal.mp3' },
-      { id: 'npc_talk', src: '/assets/sounds/npc_talk.mp3' },
-      { id: 'footstep', src: '/assets/sounds/footstep.mp3' },
-      { id: 'bump', src: '/assets/sounds/bump.mp3' },
-      { id: 'collect', src: '/assets/sounds/collect.mp3' },
-      { id: 'error', src: '/assets/sounds/error.mp3' },
-      { id: 'unlock', src: '/assets/sounds/unlock.mp3' },
-      { id: 'water_splash', src: '/assets/sounds/water_splash.mp3' }
-    ];
-    
-    const musicToLoad = [
-      { id: 'shooter_paris', src: '/assets/music/paris_theme.mp3' },
-      { id: 'shooter_spain', src: '/assets/music/spain_theme.mp3' },
-      { id: 'shooter_africa', src: '/assets/music/africa_theme.mp3' },
-      { id: 'overworld_1', src: '/assets/music/overworld_theme.mp3' },
-      { id: 'overworld_2', src: '/assets/music/overworld_2_theme.mp3' },
-      { id: 'desert', src: '/assets/music/desert_theme.mp3' },
-      { id: 'dungeon', src: '/assets/music/dungeon_theme.mp3' },
-      { id: 'yosemite', src: '/assets/music/yosemite_theme.mp3' }
-    ];
-    
-    const soundPromises = soundsToLoad.map(sound => this.loadSound(sound.id, sound.src));
-    const musicPromises = musicToLoad.map(music => this.loadMusic(music.id, music.src));
-    
-    return Promise.all([...soundPromises, ...musicPromises])
-      .then(() => {
-        this.initialized = true;
-        console.log('Sound manager initialized successfully');
-        return true;
-      })
-      .catch(error => {
-        console.error('Failed to initialize sound manager:', error);
-        return false;
-      });
+  async initialize() {
+    if (this.initialized) return this;
+
+    try {
+      // Initialize Web Audio API context
+      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Load sound effects
+      await Promise.all([
+        this.loadSound('bump', '/assets/sounds/bump.mp3'),
+        this.loadSound('portal', '/assets/sounds/portal.mp3'),
+        this.loadSound('level_complete', '/assets/sounds/level-complete.mp3'),
+        this.loadSound('pickup', '/assets/sounds/pickup.mp3'),
+        this.loadSound('page_turn', '/assets/sounds/page-turn.mp3'),
+        this.loadSound('artifact_pickup', '/assets/sounds/artifact-pickup.mp3'),
+        this.loadSound('error', '/assets/sounds/error.mp3'),
+        this.loadSound('toilet_flush', '/assets/sounds/toilet-flush.mp3'),
+        this.loadSound('water', '/assets/sounds/water.mp3'),
+        this.loadSound('mountain', '/assets/sounds/mountain.mp3')
+      ]);
+
+      // Load music tracks
+      await Promise.all([
+        this.loadMusic('overworld', '/assets/music/overworldTheme.mp3'),
+        this.loadMusic('yosemite', '/assets/music/yosemiteTheme.mp3'),
+        this.loadMusic('terminal', '/assets/music/terminalTheme.mp3'),
+        this.loadMusic('textAdventure', '/assets/music/textAdventureTheme.mp3'),
+        this.loadMusic('hemingway', '/assets/music/hemingwayTheme.mp3')
+      ]);
+
+      this.initialized = true;
+      console.log('✅ SoundManager initialized successfully');
+    } catch (error) {
+      console.error('❌ Error initializing SoundManager:', error);
+    }
+
+    return this;
   }
   
   /**
    * Load a sound effect
-   * @param {string} id - Sound identifier
-   * @param {string} src - Sound file source
+   * @param {string} name - Sound identifier
+   * @param {string} path - Sound file source
    * @returns {Promise} - Promise that resolves when the sound is loaded
    */
-  loadSound(id, src) {
-    return new Promise((resolve, reject) => {
-      const audio = new Audio();
-      audio.src = src;
-      
-      audio.oncanplaythrough = () => {
-        this.sounds[id] = audio;
-        resolve();
-      };
-      
-      audio.onerror = () => {
-        console.warn(`Failed to load sound: ${src}`);
-        // Resolve anyway to prevent blocking other sounds
-        resolve();
-      };
-      
-      // Force load
-      audio.load();
-    });
+  async loadSound(name, path) {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Failed to load sound: ${response.statusText}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+      this.sounds[name] = audioBuffer;
+      console.log(`✅ Loaded sound: ${name}`);
+    } catch (error) {
+      console.error(`❌ Error loading sound ${name}:`, error);
+      // Resolve the promise even if the sound fails to load
+      this.sounds[name] = null;
+    }
   }
   
   /**
-   * Load music track
-   * @param {string} id - Music identifier
-   * @param {string} src - Music file source
+   * Load background music
+   * @param {string} name - Music identifier
+   * @param {string} path - Music file source
    * @returns {Promise} - Promise that resolves when the music is loaded
    */
-  loadMusic(id, src) {
-    return new Promise((resolve, reject) => {
-      const audio = new Audio();
-      audio.src = src;
-      audio.loop = true;
-      
-      audio.oncanplaythrough = () => {
-        this.music[id] = audio;
-        resolve();
-      };
-      
-      audio.onerror = () => {
-        console.warn(`Failed to load music: ${src}`);
-        // Resolve anyway to prevent blocking
-        resolve();
-      };
-      
-      // Force load
-      audio.load();
-    });
+  async loadMusic(name, path) {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Failed to load music: ${response.statusText}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+      this.music[name] = audioBuffer;
+      console.log(`✅ Loaded music: ${name}`);
+    } catch (error) {
+      console.error(`❌ Error loading music ${name}:`, error);
+      // Resolve the promise even if the music fails to load
+      this.music[name] = null;
+    }
   }
   
   /**
    * Play a sound effect
-   * @param {string} id - Sound identifier
-   * @param {number} volume - Optional volume override (0.0 to 1.0)
-   * @returns {HTMLAudioElement|null} - The audio element or null if sound not found
+   * @param {string} name - Sound identifier
+   * @param {number} volume - Optional volume override
    */
-  playSound(id, volume = null) {
-    if (this.isMuted) return null;
-    if (!this.sounds[id]) {
-      console.warn(`Sound not found: ${id}`);
-      return null;
-    }
-    
+  playSound(name, volume = 1) {
+    if (this.isMuted || !this.sounds[name]) return;
+
     try {
-      // Clone the audio to allow overlapping sounds
-      const sound = this.sounds[id].cloneNode();
-      sound.volume = volume !== null ? volume : this.soundVolume;
+      const source = this.audioContext.createBufferSource();
+      const gainNode = this.audioContext.createGain();
       
-      // Handle playback promise (for browsers that return a promise)
-      const playPromise = sound.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.warn(`Error playing sound ${id}:`, error);
-        });
-      }
+      source.buffer = this.sounds[name];
+      gainNode.gain.value = volume * this.soundVolume;
       
-      return sound;
+      source.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+      
+      source.start(0);
+      console.log(`🔊 Playing sound: ${name}`);
     } catch (error) {
-      console.error(`Error playing sound ${id}:`, error);
-      return null;
+      console.error(`❌ Error playing sound ${name}:`, error);
     }
   }
   
   /**
-   * Play a music track
-   * @param {string} id - Music identifier
-   * @param {boolean} fadeIn - Whether to fade in the music
-   * @param {number} fadeInDuration - Fade in duration in milliseconds
+   * Play background music
+   * @param {string} name - Music identifier
+   * @param {boolean} loop - Whether to loop the music
+   * @param {number} volume - Optional volume override
    */
-  playMusic(id, fadeIn = false, fadeInDuration = 1000) {
-    if (!this.music[id]) {
-      console.warn(`Music not found: ${id}`);
-      return;
-    }
-    
-    // Stop current music if playing
-    this.stopMusic();
-    
+  playMusic(name, loop = false, volume = 1) {
+    if (this.isMuted || !this.music[name]) return;
+
     try {
-      const music = this.music[id];
-      this.currentMusic = music;
-      
-      if (this.isMuted) {
-        music.volume = 0;
-      } else if (fadeIn) {
-        music.volume = 0;
-        music.play();
-        
-        // Fade in the volume
-        let startTime = Date.now();
-        const fadeInterval = setInterval(() => {
-          const elapsed = Date.now() - startTime;
-          const ratio = Math.min(elapsed / fadeInDuration, 1);
-          music.volume = this.musicVolume * ratio;
-          
-          if (ratio >= 1) {
-            clearInterval(fadeInterval);
-          }
-        }, 50);
-      } else {
-        music.volume = this.musicVolume;
-        music.play();
+      // Stop current music if playing
+      if (this.currentMusic) {
+        this.currentMusic.stop();
       }
+
+      const source = this.audioContext.createBufferSource();
+      const gainNode = this.audioContext.createGain();
+      
+      source.buffer = this.music[name];
+      source.loop = loop;
+      gainNode.gain.value = volume * this.musicVolume;
+      
+      source.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+      
+      source.start(0);
+      this.currentMusic = source;
+      console.log(`🎵 Playing music: ${name}${loop ? ' (looped)' : ''}`);
     } catch (error) {
-      console.error(`Error playing music ${id}:`, error);
+      console.error(`❌ Error playing music ${name}:`, error);
     }
   }
   
   /**
-   * Stop the currently playing music
+   * Stop current background music
    * @param {boolean} fadeOut - Whether to fade out the music
-   * @param {number} fadeOutDuration - Fade out duration in milliseconds
    */
-  stopMusic(fadeOut = false, fadeOutDuration = 1000) {
+  stopMusic(fadeOut = false) {
     if (!this.currentMusic) return;
-    
+
     try {
       if (fadeOut) {
-        const music = this.currentMusic;
-        const startVolume = music.volume;
-        const startTime = Date.now();
-        
-        const fadeInterval = setInterval(() => {
-          const elapsed = Date.now() - startTime;
-          const ratio = Math.min(elapsed / fadeOutDuration, 1);
-          music.volume = startVolume * (1 - ratio);
-          
-          if (ratio >= 1) {
-            clearInterval(fadeInterval);
-            music.pause();
-            music.currentTime = 0;
-          }
-        }, 50);
-      } else {
-        this.currentMusic.pause();
-        this.currentMusic.currentTime = 0;
+        const gainNode = this.audioContext.createGain();
+        gainNode.gain.setValueAtTime(this.musicVolume, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 1);
+        this.currentMusic.connect(gainNode);
       }
+      
+      this.currentMusic.stop();
+      this.currentMusic = null;
+      console.log('🛑 Stopped music');
     } catch (error) {
-      console.error('Error stopping music:', error);
+      console.error('❌ Error stopping music:', error);
     }
-    
-    this.currentMusic = null;
   }
   
   /**
-   * Set the master volume for all sounds
-   * @param {number} volume - Volume level (0.0 to 1.0)
+   * Set sound effect volume
+   * @param {number} volume - Volume level (0-1)
    */
   setSoundVolume(volume) {
     this.soundVolume = Math.max(0, Math.min(1, volume));
+    console.log(`🔊 Sound volume set to: ${this.soundVolume}`);
   }
   
   /**
-   * Set the master volume for music
-   * @param {number} volume - Volume level (0.0 to 1.0)
+   * Set music volume
+   * @param {number} volume - Volume level (0-1)
    */
   setMusicVolume(volume) {
     this.musicVolume = Math.max(0, Math.min(1, volume));
-    
-    if (this.currentMusic && !this.isMuted) {
-      this.currentMusic.volume = this.musicVolume;
-    }
-  }
-  
-  /**
-   * Mute or unmute all sounds
-   * @param {boolean} muted - True to mute, false to unmute
-   */
-  setMuted(muted) {
-    this.isMuted = muted;
-    
     if (this.currentMusic) {
-      this.currentMusic.volume = muted ? 0 : this.musicVolume;
+      const gainNode = this.audioContext.createGain();
+      gainNode.gain.value = this.musicVolume;
+      this.currentMusic.connect(gainNode);
     }
+    console.log(`🎵 Music volume set to: ${this.musicVolume}`);
   }
   
   /**
-   * Toggle mute state
-   * @returns {boolean} - The new mute state
+   * Set muted state
+   * @param {boolean} muted - Whether to mute all sounds
+   */
+  setMute(muted) {
+    this.isMuted = muted;
+    if (muted && this.currentMusic) {
+      this.stopMusic();
+    }
+    console.log(`🔇 Sound ${muted ? 'muted' : 'unmuted'}`);
+  }
+  
+  /**
+   * Toggle muted state
    */
   toggleMute() {
-    this.setMuted(!this.isMuted);
-    return this.isMuted;
+    this.setMute(!this.isMuted);
   }
   
   /**
-   * Create a singleton instance
-   * @returns {SoundManager} - Singleton sound manager instance
+   * Get singleton instance
+   * @returns {SoundManager} - Sound manager instance
    */
   static getInstance() {
     if (!SoundManager.instance) {
@@ -295,7 +239,4 @@ class SoundManager {
   }
 }
 
-// Create a singleton instance
-const soundManager = SoundManager.getInstance();
-
-export default soundManager; 
+export default SoundManager; 

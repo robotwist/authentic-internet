@@ -1,4 +1,4 @@
-import { MAPS } from '../components/Constants';
+import { MAPS } from '../components/GameData';
 
 export const saveGameState = (state) => {
   try {

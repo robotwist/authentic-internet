@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS, MAPS, isWalkable } from "./Constants";
-import { playSound } from "../utils/soundEffects";
+import SoundManager from "./utils/SoundManager";
 
 const useCharacterMovement = (
   characterPosition, 
@@ -19,6 +19,17 @@ const useCharacterMovement = (
   const [bumpDirection, setBumpDirection] = useState(null);
   const [movementDirection, setMovementDirection] = useState(null);
   const [movementCooldown, setMovementCooldown] = useState(false);
+  const [soundManager, setSoundManager] = useState(null);
+
+  // Add useEffect for initialization
+  useEffect(() => {
+    const initSoundManager = async () => {
+      const manager = SoundManager.getInstance();
+      await manager.initialize();
+      setSoundManager(manager);
+    };
+    initSoundManager();
+  }, []);
 
   // Trigger a bumping animation
   const triggerBump = useCallback((direction) => {
@@ -27,18 +38,15 @@ const useCharacterMovement = (
     setBumpDirection(direction);
     setIsBumping(true);
     
-    // Play a bump sound effect
-    playSound('bump', 0.3).catch(err => {
-      // Silently fail if bump sound not available
-      console.log("No bump sound available:", err);
-    });
+    // Update sound playing
+    if (soundManager) soundManager.playSound('bump', 0.3);
     
     // Reset after animation completes
     setTimeout(() => {
       setIsBumping(false);
       setBumpDirection(null);
     }, 400); // Match the animation duration in CSS
-  }, [isBumping]);
+  }, [isBumping, soundManager]);
 
   const handleMove = useCallback((direction, event) => {
     // Skip movement during cooldown
@@ -190,8 +198,10 @@ const useCharacterMovement = (
           break;
         case "e":
         case "E":
+        case "p":
+        case "P":
           if (visibleArtifact) {
-            handleArtifactPickup();
+            handleArtifactPickup(visibleArtifact);
           }
           break;
         case "i":

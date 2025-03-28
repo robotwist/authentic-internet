@@ -5,6 +5,8 @@
  * dynamic music changes based on game state, and adaptive volume control.
  */
 
+import SoundManager from '../components/utils/SoundManager';
+
 // Audio context for all music operations
 let audioContext;
 // Master volume node
@@ -13,29 +15,45 @@ let masterGainNode;
 const activeTracks = {};
 // Music configuration
 const musicConfig = {
-  defaultFadeTime: 2.0, // Default fade time in seconds
-  masterVolume: 0.5,    // Master volume (0-1)
-  musicEnabled: true,   // Whether music is enabled
-  currentWorld: null,   // Current world/theme
-  worldMusicMap: {      // Map of worlds to music tracks
-    'Overworld': 'overworldTheme',
-    'Yosemite': 'yosemiteTheme',
-    'Terminal': 'terminalTheme',
-    'Hemingway': 'hemingwayTheme',
-    'TextAdventure': 'textAdventureTheme'
-  },
-  // Volume levels for different tracks
-  trackVolumes: {
-    'overworldTheme': 0.5,
-    'yosemiteTheme': 0.6,
-    'terminalTheme': 0.4,
-    'hemingwayTheme': 0.5,
-    'textAdventureTheme': 0.5
+  defaultFadeTime: 1.0,
+  defaultVolume: 0.3,
+  tracks: {
+    'overworld': {
+      path: '/assets/music/overworldTheme.mp3',
+      volume: 0.3
+    },
+    'yosemite': {
+      path: '/assets/music/yosemiteTheme.mp3',
+      volume: 0.3
+    },
+    'terminal': {
+      path: '/assets/music/terminalTheme.mp3',
+      volume: 0.3
+    },
+    'textAdventure': {
+      path: '/assets/music/textAdventureTheme.mp3',
+      volume: 0.3
+    },
+    'hemingway': {
+      path: '/assets/music/hemingwayTheme.mp3',
+      volume: 0.3
+    }
   }
 };
 
 // Music tracks storage
 const musicTracks = {};
+
+// Initialize SoundManager
+let soundManager = null;
+
+const initSoundManager = async () => {
+  if (!soundManager) {
+    soundManager = SoundManager.getInstance();
+    await soundManager.initialize();
+  }
+  return soundManager;
+};
 
 /**
  * Initialize the music mixer system
@@ -44,7 +62,7 @@ export const initMusicMixer = () => {
   try {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     masterGainNode = audioContext.createGain();
-    masterGainNode.gain.value = musicConfig.masterVolume;
+    masterGainNode.gain.value = musicConfig.defaultVolume;
     masterGainNode.connect(audioContext.destination);
     
     console.log('🎵 Music mixer initialized successfully');
@@ -63,11 +81,11 @@ export const initMusicMixer = () => {
  * Preload all music tracks for faster playback
  */
 const preloadAllMusic = () => {
-  const tracks = Object.values(musicConfig.worldMusicMap);
+  const tracks = Object.values(musicConfig.tracks);
   console.log(`🎵 Preloading ${tracks.length} music tracks...`);
   
-  tracks.forEach(trackId => {
-    preloadMusic(trackId);
+  tracks.forEach(track => {
+    preloadMusic(track.path);
   });
 };
 
@@ -119,165 +137,44 @@ export const preloadMusic = (trackId, path) => {
     });
 };
 
-/**
- * Play a music track with optional crossfade
- * @param {string} trackId - The ID of the track to play
- * @param {Object} options - Playback options
- */
-export const playMusic = (trackId, options = {}) => {
-  if (!musicConfig.musicEnabled) {
-    console.log('🎵 Music is disabled, not playing:', trackId);
-    return null;
-  }
-  
-  const opts = {
-    volume: musicConfig.trackVolumes[trackId] || 0.5,
-    fadeIn: options.fadeIn ?? musicConfig.defaultFadeTime,
-    fadeOut: options.fadeOut ?? musicConfig.defaultFadeTime,
-    loop: options.loop !== undefined ? options.loop : true,
-    stopOthers: options.stopOthers !== undefined ? options.stopOthers : true,
-    startTime: options.startTime || 0
-  };
-  
-  console.log(`🎵 Playing music: ${trackId} (vol: ${opts.volume}, fade: ${opts.fadeIn}s)`);
-  
-  try {
-    // Ensure audio context is running (may be suspended due to browser autoplay policy)
-    if (audioContext.state === 'suspended') {
-      audioContext.resume();
-    }
-    
-    // Make sure the track is loaded
-    if (!musicTracks[trackId] || !musicTracks[trackId].buffer) {
-      console.warn(`🎵 Music track ${trackId} not loaded yet, loading now...`);
-      return preloadMusic(trackId).then(track => {
-        if (track) {
-          return playMusic(trackId, options);
-        } else {
-          console.error(`🎵 Failed to load music track ${trackId}`);
-          return null;
-        }
-      });
-    }
-    
-    // Stop other tracks if specified
-    if (opts.stopOthers) {
-      stopAllMusic(opts.fadeOut);
-    }
-    
-    // Create audio nodes
-    const source = audioContext.createBufferSource();
-    const gainNode = audioContext.createGain();
-    
-    source.buffer = musicTracks[trackId].buffer;
-    source.loop = opts.loop;
-    
-    // Connect the nodes
-    source.connect(gainNode);
-    gainNode.connect(masterGainNode);
-    
-    // Set initial gain to 0 for fade-in
-    gainNode.gain.value = 0;
-    
-    // Start playback
-    const startTime = audioContext.currentTime;
-    source.start(startTime, opts.startTime);
-    
-    // Fade in
-    gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(opts.volume, startTime + opts.fadeIn);
-    
-    // Store the active track info
-    activeTracks[trackId] = {
-      source,
-      gainNode,
-      startTime,
-      trackId,
-      volume: opts.volume
-    };
-    
-    // Set up event handler for when the track ends (if not looping)
-    if (!opts.loop) {
-      source.onended = () => {
-        console.log(`🎵 Music track ended: ${trackId}`);
-        delete activeTracks[trackId];
-      };
-    }
-    
-    return activeTracks[trackId];
-  } catch (error) {
-    console.error(`Failed to play music track ${trackId}:`, error);
-    return null;
-  }
-};
-
-/**
- * Stop a specific music track with optional fade-out
- * @param {string} trackId - The ID of the track to stop
- * @param {number} fadeTime - Fade-out time in seconds
- */
-export const stopMusic = (trackId, fadeTime = musicConfig.defaultFadeTime) => {
-  const track = activeTracks[trackId];
+// Play music with options
+export const playMusic = async (trackId, options = {}) => {
+  const manager = await initSoundManager();
+  const track = musicConfig.tracks[trackId];
   
   if (!track) {
-    console.log(`🎵 No active track found for ${trackId}`);
+    console.error(`Track not found: ${trackId}`);
     return;
   }
+
+  const volume = options.volume || track.volume || musicConfig.defaultVolume;
+  const loop = options.loop !== undefined ? options.loop : true;
   
-  console.log(`🎵 Stopping music: ${trackId} (fade: ${fadeTime}s)`);
-  
-  try {
-    const now = audioContext.currentTime;
-    const { gainNode, source } = track;
-    
-    // Start fade out
-    gainNode.gain.setValueAtTime(track.volume, now);
-    gainNode.gain.linearRampToValueAtTime(0, now + fadeTime);
-    
-    // Schedule the source to stop after fade
-    setTimeout(() => {
-      try {
-        source.stop();
-        // Clean up connections
-        source.disconnect();
-        gainNode.disconnect();
-        // Remove from active tracks
-        delete activeTracks[trackId];
-      } catch (e) {
-        console.warn(`Error cleaning up music track ${trackId}:`, e);
-      }
-    }, fadeTime * 1000);
-  } catch (error) {
-    console.error(`Error stopping music track ${trackId}:`, error);
-    
-    // Force cleanup in case of error
-    try {
-      track.source.stop();
-      track.source.disconnect();
-      track.gainNode.disconnect();
-    } catch (e) {
-      // Ignore secondary error
-    }
-    
-    delete activeTracks[trackId];
-  }
+  manager.playMusic(trackId, loop, volume);
+};
+
+// Stop music with fade out
+export const stopMusic = async (trackId, fadeTime = musicConfig.defaultFadeTime) => {
+  const manager = await initSoundManager();
+  manager.stopMusic(true);
 };
 
 /**
- * Stop all currently playing music tracks
- * @param {number} fadeTime - Fade-out time in seconds
+ * Play music for specific world
+ * @param {string} worldName - The name of the world/theme
  */
-export const stopAllMusic = (fadeTime = musicConfig.defaultFadeTime) => {
-  const trackIds = Object.keys(activeTracks);
+export const playMusicForWorld = async (worldName) => {
+  const trackId = worldName.toLowerCase().replace(/\s+/g, '');
+  const track = musicConfig.tracks[trackId];
   
-  if (trackIds.length === 0) {
+  if (!track) {
+    console.error(`No music track found for world: ${worldName}`);
     return;
   }
-  
-  console.log(`🎵 Stopping all music (${trackIds.length} tracks, fade: ${fadeTime}s)`);
-  
-  trackIds.forEach(trackId => {
-    stopMusic(trackId, fadeTime);
+
+  return playMusic(trackId, {
+    volume: track.volume,
+    loop: true
   });
 };
 
@@ -291,7 +188,7 @@ export const setMasterVolume = (volume) => {
   
   console.log(`🎵 Setting master volume to ${clampedVolume}`);
   
-  musicConfig.masterVolume = clampedVolume;
+  musicConfig.defaultVolume = clampedVolume;
   
   if (masterGainNode) {
     masterGainNode.gain.value = clampedVolume;
@@ -317,31 +214,20 @@ export const toggleMusic = (enabled) => {
 };
 
 /**
- * Change music based on the current world/theme
- * @param {string} worldName - The name of the world/theme
+ * Stop all currently playing music tracks
+ * @param {number} fadeTime - Fade-out time in seconds
  */
-export const playMusicForWorld = (worldName) => {
-  if (worldName === musicConfig.currentWorld) {
-    console.log(`🎵 Already playing music for world: ${worldName}`);
+export const stopAllMusic = (fadeTime = musicConfig.defaultFadeTime) => {
+  const trackIds = Object.keys(activeTracks);
+  
+  if (trackIds.length === 0) {
     return;
   }
   
-  console.log(`🎵 Changing music for world: ${worldName}`);
+  console.log(`🎵 Stopping all music (${trackIds.length} tracks, fade: ${fadeTime}s)`);
   
-  const trackId = musicConfig.worldMusicMap[worldName];
-  
-  if (!trackId) {
-    console.warn(`🎵 No music defined for world: ${worldName}`);
-    return;
-  }
-  
-  musicConfig.currentWorld = worldName;
-  
-  // Play the new track with crossfade
-  return playMusic(trackId, {
-    fadeIn: 2.5,
-    fadeOut: 2.0,
-    loop: true
+  trackIds.forEach(trackId => {
+    stopMusic(trackId, fadeTime);
   });
 };
 

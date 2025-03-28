@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { createArtifact } from "../api/api";
+import SoundManager from './utils/SoundManager';
 import { 
   getRandomQuote, 
   getRandomShakespeareQuote, 
@@ -28,12 +29,23 @@ const ArtifactCreation = ({ position, onClose, onSuccess, refreshArtifacts, isFi
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGeneratingQuote, setIsGeneratingQuote] = useState(false);
+  const [soundManager, setSoundManager] = useState(null);
   
   // New personalization fields
   const [theme, setTheme] = useState('wisdom');
   const [dedication, setDedication] = useState('');
   const [significance, setSignificance] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+  
+  // Initialize sound manager
+  useEffect(() => {
+    const initSoundManager = async () => {
+      const manager = SoundManager.getInstance();
+      await manager.initialize();
+      setSoundManager(manager);
+    };
+    initSoundManager();
+  }, []);
   
   // Add default values for first-time users
   useEffect(() => {
@@ -49,11 +61,13 @@ const ArtifactCreation = ({ position, onClose, onSuccess, refreshArtifacts, isFi
     
     if (!localStorage.getItem('token')) {
       setError('You must be logged in to create artifacts.');
+      if (soundManager) soundManager.playSound('error');
       return;
     }
     
     if (!name || !description || !content) {
       setError('Please fill in all required fields.');
+      if (soundManager) soundManager.playSound('error');
       return;
     }
     
@@ -65,10 +79,10 @@ const ArtifactCreation = ({ position, onClose, onSuccess, refreshArtifacts, isFi
       
       // Create a more detailed artifact object
       const artifactData = {
-        name,
-        description,
-        content,
-        messageText,
+        name: name.trim(),
+        description: description.trim(),
+        content: content.trim(),
+        messageText: messageText.trim(),
         area: 'world',
         isExclusive: isPrivate,
         location: {
@@ -79,85 +93,31 @@ const ArtifactCreation = ({ position, onClose, onSuccess, refreshArtifacts, isFi
         exp: isFirstArtifact ? 50 : 10,
         // Add personalization fields
         theme,
-        dedication: dedication || null,
-        significance: significance || null,
+        dedication: dedication.trim() || null,
+        significance: significance.trim() || null,
         creationDate: new Date().toISOString(),
         placeWithCare: true // Flag to indicate this was thoughtfully placed
       };
       
-      const response = await fetch('/api/artifacts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(artifactData)
-      });
+      const response = await createArtifact(artifactData);
       
-      if (!response.ok) {
+      if (response) {
+        setSuccess('Artifact created successfully!');
+        if (soundManager) soundManager.playSound('artifact_create');
+        
+        // Wait a moment before closing to show success message
+        setTimeout(() => {
+          if (onSuccess) onSuccess(response);
+          if (refreshArtifacts) refreshArtifacts();
+          if (onClose) onClose();
+        }, 1500);
+      } else {
         throw new Error('Failed to create artifact');
       }
-      
-      const result = await response.json();
-      setSuccess('Artifact created successfully!');
-      
-      // Update character experience for first artifact
-      if (isFirstArtifact) {
-        try {
-          const userResponse = await fetch('/api/users/me', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            
-            // Update user with bonus XP for first artifact
-            await fetch('/api/users/me', {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-              body: JSON.stringify({
-                exp: (userData.exp || 0) + 100, // Bonus 100 XP for first artifact
-              })
-            });
-          }
-        } catch (error) {
-          console.error('Error updating user experience:', error);
-        }
-      }
-      
-      // Refresh artifacts if provided
-      if (refreshArtifacts) {
-        refreshArtifacts();
-      }
-      
-      // Call onSuccess if provided
-      if (onSuccess) {
-        onSuccess(result.artifact);
-      }
-      
-      // Reset form
-      setName('');
-      setDescription('');
-      setContent('');
-      setMessageText('');
-      setTheme('wisdom');
-      setDedication('');
-      setSignificance('');
-      setIsPrivate(false);
-      
-      // Auto-close for first artifact flow
-      if (isFirstArtifact) {
-        setTimeout(() => {
-          onCancel ? onCancel() : onClose();
-        }, 2000);
-      }
-      
     } catch (error) {
       console.error('Error creating artifact:', error);
-      setError('Failed to create artifact. Please try again.');
+      setError(error.message || 'Failed to create artifact. Please try again.');
+      if (soundManager) soundManager.playSound('error');
     } finally {
       setIsSubmitting(false);
     }
@@ -165,313 +125,186 @@ const ArtifactCreation = ({ position, onClose, onSuccess, refreshArtifacts, isFi
 
   const handleGenerateQuote = async (source) => {
     setIsGeneratingQuote(true);
+    setError('');
+    
     try {
-      let quoteData;
-      
-      switch(source) {
-        case 'general':
-          quoteData = await getRandomQuote();
-          break;
+      let quote;
+      switch (source) {
         case 'shakespeare':
-          quoteData = await getRandomShakespeareQuote();
+          quote = await getRandomShakespeareQuote();
           break;
         case 'zen':
-          quoteData = await getZenQuote();
+          quote = await getZenQuote();
           break;
-        case 'themed':
-          if (!name) {
-            setError('Please enter a name first for themed quotes');
-            setIsGeneratingQuote(false);
-            return;
-          }
-          quoteData = await getQuoteForArtifact(theme || name);
+        case 'today':
+          quote = await getTodayQuote();
           break;
         default:
-          quoteData = await getRandomQuote();
+          quote = await getRandomQuote();
       }
       
-      if (quoteData && quoteData.text) {
-        setContent(quoteData.text);
+      if (quote) {
+        setContent(quote);
+        if (soundManager) soundManager.playSound('page_turn');
       } else {
-        setError('Could not generate quote. Please try again.');
+        throw new Error('Failed to generate quote');
       }
     } catch (error) {
       console.error('Error generating quote:', error);
       setError('Failed to generate quote. Please try again.');
+      if (soundManager) soundManager.playSound('error');
     } finally {
       setIsGeneratingQuote(false);
     }
   };
 
-  // Simplified form for first-time users
-  if (isFirstArtifact) {
-    return (
-      <div className="artifact-creation-container first-artifact-mode">
-        <h3>Create Your First Artifact</h3>
+  const handleCancel = () => {
+    if (soundManager) soundManager.playSound('bump');
+    if (onCancel) onCancel();
+    if (onClose) onClose();
+  };
+
+  return (
+    <div className="artifact-creation-modal">
+      <div className="artifact-creation-content">
+        <h2>{isFirstArtifact ? 'Create Your First Artifact' : 'Create New Artifact'}</h2>
         
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Name <span className="required">*</span></label>
+            <label htmlFor="name">Name *</label>
             <input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder="Enter artifact name"
               required
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="theme">Theme <span className="required">*</span></label>
-            <select
-              id="theme"
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-              required
-              className="theme-select"
-            >
-              {ARTIFACT_THEMES.map(theme => (
-                <option key={theme.value} value={theme.value}>{theme.label}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="content">Content <span className="required">*</span></label>
+            <label htmlFor="description">Description *</label>
             <textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
-              className="content-textarea"
-              placeholder="Enter profound wisdom or click a quote button below..."
-            />
-          </div>
-          
-          <div className="quote-buttons">
-            <button
-              type="button"
-              onClick={() => handleGenerateQuote('general')}
-              disabled={isGeneratingQuote}
-              className="quote-button"
-            >
-              Random Quote
-            </button>
-            <button
-              type="button"
-              onClick={() => handleGenerateQuote('shakespeare')}
-              disabled={isGeneratingQuote}
-              className="quote-button shakespeare"
-            >
-              Shakespeare Quote
-            </button>
-          </div>
-          
-          <div className="artifact-instructions">
-            <div className="instruction-icon">💡</div>
-            <p>This artifact will be placed in the world for others to discover. Make it meaningful!</p>
-          </div>
-          
-          <div className="form-action-buttons">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="create-button"
-            >
-              {isSubmitting ? 'Creating...' : 'Create My Artifact'}
-            </button>
-            <button
-              type="button"
-              onClick={onCancel || onClose}
-              className="cancel-button"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
-  // Regular full form with enhanced personalization
-  return (
-    <div className="artifact-creation-container">
-      <h3>Create a Meaningful Artifact</h3>
-      
-      {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-section">
-          <h4 className="section-title">Basic Information</h4>
-          
-          <div className="form-group">
-            <label htmlFor="name">Name <span className="required">*</span></label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="Give your artifact a meaningful name"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="description">Description <span className="required">*</span></label>
-            <input
-              type="text"
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe your artifact"
               required
-              placeholder="Briefly describe what this artifact represents"
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="theme">Theme <span className="required">*</span></label>
-            <select
-              id="theme"
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-              required
-              className="theme-select"
-            >
-              {ARTIFACT_THEMES.map(theme => (
-                <option key={theme.value} value={theme.value}>{theme.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        
-        <div className="form-section">
-          <h4 className="section-title">Content</h4>
-          
-          <div className="form-group">
-            <label htmlFor="content">Content <span className="required">*</span></label>
+            <label htmlFor="content">Content *</label>
             <textarea
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              placeholder="Enter artifact content"
               required
-              className="content-textarea"
-              placeholder="Enter wisdom, quotes, or thoughts you want to share with others..."
             />
           </div>
           
-          <div className="quote-buttons">
-            <button
-              type="button"
-              onClick={() => handleGenerateQuote('general')}
-              disabled={isGeneratingQuote}
-              className="quote-button"
-            >
-              Random Quote
-            </button>
-            <button
-              type="button"
-              onClick={() => handleGenerateQuote('shakespeare')}
-              disabled={isGeneratingQuote}
-              className="quote-button shakespeare"
-            >
-              Shakespeare Quote
-            </button>
-            <button
-              type="button"
-              onClick={() => handleGenerateQuote('zen')}
-              disabled={isGeneratingQuote}
-              className="quote-button zen"
-            >
-              Zen Quote
-            </button>
-            <button
-              type="button"
-              onClick={() => handleGenerateQuote('themed')}
-              disabled={isGeneratingQuote || (!name && !theme)}
-              className="quote-button themed"
-            >
-              Themed Quote
-            </button>
+          <div className="form-group">
+            <label htmlFor="messageText">Message (Optional)</label>
+            <textarea
+              id="messageText"
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              placeholder="Add a message for others"
+            />
           </div>
-        </div>
-        
-        <div className="form-section">
-          <h4 className="section-title">Personalization <span className="optional">(Optional)</span></h4>
           
           <div className="form-group">
-            <label htmlFor="dedication">Dedication</label>
+            <label htmlFor="theme">Theme</label>
+            <select
+              id="theme"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+            >
+              {ARTIFACT_THEMES.map(theme => (
+                <option key={theme.value} value={theme.value}>
+                  {theme.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="dedication">Dedication (Optional)</label>
             <input
               type="text"
               id="dedication"
               value={dedication}
               onChange={(e) => setDedication(e.target.value)}
-              placeholder="Dedicate this artifact to someone special"
-              className="optional-field"
+              placeholder="Dedicate this artifact to someone"
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="significance">Personal Significance</label>
+            <label htmlFor="significance">Significance (Optional)</label>
             <textarea
               id="significance"
               value={significance}
               onChange={(e) => setSignificance(e.target.value)}
-              placeholder="Why is this artifact meaningful to you? (Only visible to you)"
-              className="optional-field significance-textarea"
+              placeholder="What makes this artifact special?"
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="messageText">Message to Discoverers</label>
-            <input
-              type="text"
-              id="messageText"
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              placeholder="Leave a message for those who find your artifact"
-              className="optional-field"
-            />
+          <div className="form-group checkbox">
+            <label>
+              <input
+                type="checkbox"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+              />
+              Make this artifact private
+            </label>
           </div>
           
-          <div className="form-group checkbox-group">
-            <input
-              type="checkbox"
-              id="isPrivate"
-              checked={isPrivate}
-              onChange={(e) => setIsPrivate(e.target.checked)}
-            />
-            <label htmlFor="isPrivate">Make this a private artifact (only visible to you)</label>
+          <div className="quote-generation">
+            <button
+              type="button"
+              onClick={() => handleGenerateQuote('shakespeare')}
+              disabled={isGeneratingQuote}
+            >
+              Generate Shakespeare Quote
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGenerateQuote('zen')}
+              disabled={isGeneratingQuote}
+            >
+              Generate Zen Quote
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGenerateQuote('today')}
+              disabled={isGeneratingQuote}
+            >
+              Generate Today's Quote
+            </button>
           </div>
-        </div>
-        
-        <div className="artifact-instructions">
-          <div className="instruction-icon">💡</div>
-          <p>This artifact will be placed at your current location in the world. Choose this spot with care to give your artifact meaning in its context.</p>
-        </div>
-        
-        <div className="form-action-buttons">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="create-button"
-          >
-            {isSubmitting ? 'Creating...' : 'Create Artifact with Care'}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="cancel-button"
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+          
+          <div className="form-actions">
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating...' : 'Create Artifact'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
@@ -482,18 +315,10 @@ ArtifactCreation.propTypes = {
     y: PropTypes.number.isRequired
   }).isRequired,
   onClose: PropTypes.func,
-  refreshArtifacts: PropTypes.func,
   onSuccess: PropTypes.func,
+  refreshArtifacts: PropTypes.func,
   isFirstArtifact: PropTypes.bool,
   onCancel: PropTypes.func
-};
-
-ArtifactCreation.defaultProps = {
-  onClose: () => {},
-  refreshArtifacts: () => {},
-  onSuccess: null,
-  isFirstArtifact: false,
-  onCancel: null
 };
 
 export default ArtifactCreation;

@@ -15,8 +15,8 @@ import Map from "./Map";
 import WorldMap from "./WorldMap";
 import FeedbackForm from "./FeedbackForm";
 import useCharacterMovement from "./CharacterMovement";
-import { TILE_SIZE, MAPS, MAP_COLS, MAP_ROWS, isWalkable } from "./Constants";
-import { initSounds, playRandomPortalSound, playSound } from "../utils/soundEffects";
+import { TILE_SIZE, MAP_COLS, MAP_ROWS, isWalkable } from "./Constants";
+import { MAPS } from "./GameData";
 import { debugNPCSprites } from "../utils/debugTools";
 import "./GameWorld.css";
 import "./Character.css";
@@ -27,6 +27,7 @@ import Level4Shooter from "./Level4Shooter";
 import RewardModal from "./RewardModal";
 import DialogBox from './DialogBox';
 import TextAdventure from './TextAdventure';
+import SoundManager from "./utils/SoundManager";
 
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
@@ -58,6 +59,7 @@ const GameWorld = () => {
   const [showNPCDialog, setShowNPCDialog] = useState(false);
   const [currentSpecialWorld, setCurrentSpecialWorld] = useState(null);
   const [showWorldGuide, setShowWorldGuide] = useState(true);
+  const [soundManager, setSoundManager] = useState(null);
 
   useEffect(() => {
     // Load and apply saved artifact visibility state
@@ -212,17 +214,11 @@ const GameWorld = () => {
       // Toggle world map with 'M' key
       if (event.key === 'm' || event.key === 'M') {
         setShowWorldMap(prev => !prev);
-        
-        // Play a sound when toggling the map
-        playSound('pickup', 0.3).catch(err => console.error("Error playing sound:", err));
       }
 
       // Toggle feedback form with 'F' key
       if (event.key === 'f' || event.key === 'F') {
         setShowFeedback(prev => !prev);
-        
-        // Play a sound when toggling the feedback form
-        playSound('pickup', 0.3).catch(err => console.error("Error playing sound:", err));
       }
     };
 
@@ -246,17 +242,24 @@ const GameWorld = () => {
   }, [currentMapIndex, character]);
 
   useEffect(() => {
-    // Initialize sound effects when component mounts
-    initSounds();
-    
-    // In development mode, run NPC sprite debug to help identify issues
-    if (process.env.NODE_ENV === 'development') {
-      // Wait a bit to ensure DOM is fully loaded
-      setTimeout(() => {
-        debugNPCSprites();
-      }, 2000);
-    }
-  }, []);
+    // Initialize sound manager
+    const initSoundManager = async () => {
+      const manager = SoundManager.getInstance();
+      await manager.initialize();
+      setSoundManager(manager);
+      
+      // Start playing the main theme based on current map
+      const currentMapName = MAPS[currentMapIndex].name;
+      if (currentMapName.includes('Overworld')) {
+        manager.playMusic('overworld', true);
+      } else if (currentMapName === 'Yosemite') {
+        manager.playMusic('yosemite', true);
+      } else if (currentMapName.includes('Dungeon')) {
+        manager.playMusic('terminal', true);
+      }
+    };
+    initSoundManager();
+  }, [currentMapIndex]);
 
   const handleCharacterMove = useCallback((newPosition, targetMapIndex) => {
     // Update character position
@@ -294,7 +297,7 @@ const GameWorld = () => {
 
     try {
       // Play pickup sound
-      playSound('pickup').catch(err => console.error("Error playing pickup sound:", err));
+      if (soundManager) soundManager.playSound('pickup');
 
       // If it's a map artifact, mark it as collected
       if (artifact.id && MAPS[currentMapIndex].artifacts.some(a => a.id === artifact.id)) {
@@ -407,21 +410,40 @@ const GameWorld = () => {
         spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
       }
       else if (currentMapName === "Overworld 3") {
-        destinationMap = "Yosemite";
-        spawnPosition = { x: 10 * TILE_SIZE, y: 15 * TILE_SIZE };
+        destinationMap = "Desert 1";
+        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
       }
       else if (currentMapName === "Desert 1") {
-        // Allow return path from Desert back to Overworld 3
-        destinationMap = "Overworld 3";
-        spawnPosition = { x: 15 * TILE_SIZE, y: 10 * TILE_SIZE };
+        destinationMap = "Desert 2";
+        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+      }
+      else if (currentMapName === "Desert 2") {
+        destinationMap = "Desert 3";
+        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+      }
+      else if (currentMapName === "Desert 3") {
+        destinationMap = "Dungeon 1";
+        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+      }
+      else if (currentMapName === "Dungeon 1") {
+        destinationMap = "Dungeon 2";
+        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+      }
+      else if (currentMapName === "Dungeon 2") {
+        destinationMap = "Dungeon 3";
+        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+      }
+      else if (currentMapName === "Dungeon 3") {
+        destinationMap = "Yosemite";
+        spawnPosition = { x: 10 * TILE_SIZE, y: 15 * TILE_SIZE };
       }
       
       // Find the index of the destination map
       const destinationIndex = MAPS.findIndex(map => map.name === destinationMap);
       
       if (destinationIndex !== -1) {
-        // Play random portal sound (30% chance of toilet flush)
-        playRandomPortalSound(0.3).catch(err => console.error("Error playing portal sound:", err));
+        // Play portal sound
+        if (soundManager) soundManager.playSound('portal');
         
         // Change map
         setCurrentMapIndex(destinationIndex);
@@ -454,8 +476,8 @@ const GameWorld = () => {
     // Special portal (code 6) handling for Level 4
     if (MAPS[currentMapIndex].data[row][col] === 6) {
       if (levelCompletion.level3) {
-        // Play random portal sound with higher chance of toilet flush for special portal
-        playRandomPortalSound(0.5).catch(err => console.error("Error playing portal sound:", err));
+        // Play portal sound for special portal
+        if (soundManager) soundManager.playSound('portal');
         setShowLevel4(true);
       } else {
         alert("You must complete Level 3 first to access this portal.");
@@ -534,7 +556,13 @@ const GameWorld = () => {
           const goToLevel4 = window.confirm('You have unlocked Level 4: The Hemingway Challenge! Ready to enter?');
           if (goToLevel4) {
             // Play random portal sound with higher chance of toilet flush for special portal
-            playRandomPortalSound(0.6).catch(err => console.error("Error playing portal sound:", err));
+            if (soundManager) {
+              if (Math.random() < 0.6) {
+                soundManager.playSound('toilet_flush', 0.5);
+              } else {
+                soundManager.playSound('portal', 0.5);
+              }
+            }
             setShowLevel4(true);
           }
         }, 3000);
@@ -547,7 +575,7 @@ const GameWorld = () => {
     }
     
     // Play level complete sound
-    playSound('levelComplete').catch(err => console.error("Error playing level complete sound:", err));
+    if (soundManager) soundManager.playSound('level_complete');
     
     handleGainExperience(level === 'level3' ? 20 : level === 'level4' ? 30 : 10);
     
