@@ -256,7 +256,7 @@ export const registerUser = async (username, email, password) => {
 
 export const verifyToken = async () => {
   try {
-    const response = await API.get('/api/auth/verify');
+    const response = await API.post('/api/auth/verify');
     return response.data;
   } catch (error) {
     console.error('Token verification error:', error);

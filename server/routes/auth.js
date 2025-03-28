@@ -23,7 +23,8 @@ const validateLogin = [
 router.post('/register', validateRegistration, register);
 router.post('/login', validateLogin, login);
 
-// Protected routes - verify and refresh token
+// Protected routes - verify and refresh token (handle both GET and POST)
+router.get('/verify', auth, verifyToken);
 router.post('/verify', auth, verifyToken);
 
 export default router; 
