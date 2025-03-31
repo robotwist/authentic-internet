@@ -267,4 +267,4 @@ const useCharacterMovement = (
   };
 };
 
-export default useCharacterMovement;
+export { useCharacterMovement };

@@ -90,25 +90,6 @@ export const MAPS = [
     ],
     npcs: [
       {
-        id: 'shakespeare1',
-        type: NPC_TYPES.SHAKESPEARE,
-        name: 'William Shakespeare',
-        position: { x: 8 * TILE_SIZE, y: 2 * TILE_SIZE },
-        patrolArea: {
-          startX: 6,
-          startY: 2,
-          width: 4,
-          height: 4
-        },
-        dialogue: [
-          "To be, or not to be, that is the question. (Hamlet, Act III, Scene I)",
-          "All the world's a stage, and all the men and women merely players. (As You Like It, Act II, Scene VII)",
-          "The course of true love never did run smooth. (A Midsummer Night's Dream, Act I, Scene I)",
-          "We are such stuff as dreams are made on, and our little life is rounded with a sleep. (The Tempest, Act IV, Scene I)",
-          "Love looks not with the eyes, but with the mind, and therefore is winged Cupid painted blind. (A Midsummer Night's Dream, Act I, Scene I)"
-        ]
-      },
-      {
         id: 'john_muir1',
         type: NPC_TYPES.JOHN_MUIR,
         name: 'John Muir',
@@ -490,29 +471,16 @@ export const MAPS = [
     ],
     npcs: [
       {
-        id: uuidv4(),
-        name: "Ernest Hemingway",
-        type: NPC_TYPES.MENTOR,
-        location: { x: 2, y: 2 },
+        id: 'hemingway1',
+        type: NPC_TYPES.WRITER,
+        name: 'Ernest Hemingway',
+        position: { x: 128, y: 128 },
+        sprite: '/assets/npcs/hemingway.png',
         dialogue: [
-          "In war, there is no substitute for victory, but in writing, truth is the only victory that matters.",
-          "Every word must carry its weight. No flourishes, no excess.",
-          "The story of war is not in the battles, but in the hearts of those who fight them."
-        ],
-        quest: {
-          id: uuidv4(),
-          title: "Truth in War",
-          description: "Help Hemingway document the true nature of conflict",
-          objectives: [
-            "Find the War Manuscript",
-            "Document three personal war stories",
-            "Return to Hemingway"
-          ],
-          reward: {
-            exp: 50,
-            item: "Writer's Compass"
-          }
-        }
+          "Write hard and clear about what hurts.",
+          "All you have to do is write one true sentence.",
+          "The world breaks everyone, and afterward, some are strong at the broken places."
+        ]
       }
     ]
   },
@@ -654,7 +622,7 @@ export const MAPS = [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
-      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 4, 0, 4],
       [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
       [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
       [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
@@ -688,7 +656,7 @@ export const MAPS = [
     data: [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
-      [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
+      [4, 0, 4, 4, 0, 4, 4, 4, 0, 4],
       [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
       [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
       [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
@@ -717,7 +685,7 @@ export const MAPS = [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
-      [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
+      [4, 0, 0, 0, 0, 0, 0, 4, 0, 4],
       [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
       [4, 0, 4, 0, 4, 4, 0, 4, 0, 4],
       [4, 0, 4, 0, 0, 0, 0, 4, 0, 4],
@@ -748,15 +716,6 @@ export const MAPS = [
   }
 ];
 
-// Remove duplicate specialPortals from Yosemite map
-MAPS.forEach(map => {
-  if (map.name === "Yosemite" && map.specialPortals) {
-    map.specialPortals = map.specialPortals.filter((portal, index, self) =>
-      index === self.findIndex(p => p.position.x === portal.position.x && p.position.y === portal.position.y)
-    );
-  }
-});
-
 // Validate all maps on load
 MAPS.forEach((map, index) => {
   if (!isValidMapSize(map.data)) {
@@ -766,17 +725,12 @@ MAPS.forEach((map, index) => {
 
 // NPCs and World Map
 export const NPCs = {
-  "William Shakespeare": {
-    name: "William Shakespeare",
-    description: "The immortal Bard of Avon, master playwright and poet of the English Renaissance.",
-    apiType: "shakespeare",
-    apiConfig: {},
-    position: { x: 10, y: 10 },
-    dialogue: [
-      "To be, or not to be, that is the question. (Hamlet, Act III, Scene I)",
-      "All the world's a stage, and all the men and women merely players. (As You Like It, Act II, Scene VII)",
-      "Now is the winter of our discontent made glorious summer by this sun of York. (Richard III, Act I, Scene I)"
-    ]
+  "Ernest Hemingway": {
+    name: "Ernest Hemingway",
+    sprite: "/assets/npcs/hemingway.png",
+    apiType: "quotes",
+    dialogueStyle: "direct",
+    themes: ["writing", "courage", "life"]
   },
   // ... rest of NPCs ...
 };

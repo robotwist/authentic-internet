@@ -431,8 +431,8 @@ const Profile = () => {
             <div className="achievement-card locked">
               <div className="achievement-icon">🔒</div>
               <div className="achievement-content">
-                <div className="achievement-name">Shakespeare's Confidant</div>
-                <div className="achievement-description">Save 15 Shakespeare quotes</div>
+                <div className="achievement-name">Literary Explorer</div>
+                <div className="achievement-description">Save 15 quotes from different authors</div>
               </div>
             </div>
             <div className="achievement-card locked">

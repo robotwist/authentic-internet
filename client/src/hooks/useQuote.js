@@ -1,103 +1,65 @@
-import { useState, useEffect, useCallback } from 'react';
-import { 
-  getRandomQuote, 
-  getRandomShakespeareQuote, 
-  getZenQuote,
-  getTodayQuote,
-  getQuoteForArtifact
-} from '../api/externalApis';
+import { useState, useEffect } from 'react';
+import {
+  getRandomQuote,
+  getCategoryQuote
+} from '../utils/quoteSystem.js';
 
 /**
- * Custom hook for fetching quotes from various sources
+ * Custom hook for fetching and managing quotes
  * @param {Object} options - Configuration options
- * @param {string} options.source - Quote source ('general', 'shakespeare', 'zen', 'today', 'themed')
- * @param {string} options.theme - Theme for themed quotes
- * @param {string} options.tags - Tags for filtering quotes
- * @param {string} options.author - Author for filtering quotes
- * @param {number} options.refreshInterval - Auto-refresh interval in seconds (0 to disable)
- * @returns {Object} - Quote state and control functions
+ * @param {string} options.source - Quote source ('general', 'wisdom', 'nature', 'inspiration')
+ * @param {string} options.theme - Theme for themed quotes (maps to category)
+ * @returns {Object} Quote data and loading state
  */
-export const useQuote = ({
-  source = 'general',
-  theme = '',
-  tags = '',
-  author = '',
-  refreshInterval = 0 
-} = {}) => {
-  const [quote, setQuote] = useState({ text: '', source: '' });
+export function useQuote({ source = 'general', theme = null }) {
+  const [quote, setQuote] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
 
-  const fetchQuote = useCallback(async () => {
+  const fetchQuote = async () => {
     setLoading(true);
-    setError('');
-    
+    setError(null);
     try {
       let quoteData;
       
       switch (source) {
-        case 'shakespeare':
-          quoteData = await getRandomShakespeareQuote();
+        case 'wisdom':
+          quoteData = getCategoryQuote('wisdom');
           break;
-        case 'zen':
-          quoteData = await getZenQuote();
+        case 'nature':
+          quoteData = getCategoryQuote('nature');
           break;
-        case 'today':
-          quoteData = await getTodayQuote();
+        case 'inspiration':
+          quoteData = getCategoryQuote('inspiration');
           break;
         case 'themed':
-          quoteData = await getQuoteForArtifact(theme || 'wisdom');
+          quoteData = getCategoryQuote(theme || 'literary');
           break;
+        case 'general':
         default:
-          // For general quotes, we can pass tags and author
-          const options = {};
-          if (tags) options.tags = tags;
-          if (author) options.author = author;
-          
-          quoteData = await getRandomQuote(options);
-          break;
+          quoteData = getRandomQuote();
       }
-      
+
       setQuote(quoteData);
     } catch (err) {
-      console.error('Error fetching quote:', err);
-      setError('Failed to load quote');
-      // Set fallback quote
-      setQuote({ 
-        text: 'The journey of a thousand miles begins with a single step.', 
-        source: 'Lao Tzu' 
+      console.error('Failed to fetch quote:', err);
+      setError(err.message || 'Failed to fetch quote');
+      setQuote({
+        text: "The best way out is always through.",
+        author: "Robert Frost",
+        type: "wisdom"
       });
     } finally {
       setLoading(false);
     }
-  }, [source, theme, tags, author]);
+  };
 
   useEffect(() => {
+    // Fetch immediately when the hook is used
     fetchQuote();
-    
-    // Set up a refresh interval if specified
-    if (refreshInterval > 0) {
-      const intervalId = setInterval(fetchQuote, refreshInterval * 1000);
-      
-      // Clean up interval on component unmount
-      return () => clearInterval(intervalId);
-    }
-  }, [fetchQuote, refreshInterval]);
+  }, [source, theme]);
 
-  return {
-    quote,
-    loading,
-    error,
-    refreshQuote: fetchQuote,
-    setSource: (newSource) => {
-      if (['general', 'shakespeare', 'zen', 'today', 'themed'].includes(newSource)) {
-        source = newSource;
-        fetchQuote();
-      } else {
-        setError(`Invalid source: ${newSource}`);
-      }
-    }
-  };
-};
+  return { quote, loading, error, refetch: fetchQuote };
+}
 
 export default useQuote; 

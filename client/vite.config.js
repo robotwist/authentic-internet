@@ -18,17 +18,18 @@ export default defineConfig({
     hmr: {
       protocol: 'ws',
       host: 'localhost',
-      port: 5173,
+      port: 5174, // Use a different port for HMR to avoid conflicts
       overlay: false, // Disable overlay to prevent intrusive error reporting
-      timeout: 60000 // Increase HMR timeout to 60 seconds for more stability
+      timeout: 120000 // Increase HMR timeout to 120 seconds for more stability
     },
     host: 'localhost',
     port: 5173,
     strictPort: false, // Allow fallback to another port if 5173 is in use
     cors: true,
     watch: {
-      usePolling: false, // Disable polling to reduce CPU usage
-      interval: 5000 // Increased to 5 seconds
+      usePolling: true, // Enable polling for more reliable file watching
+      interval: 1000, // Check every second
+      binaryInterval: 3000 // Check binary files less frequently
     },
     proxy: {
       // Proxy API requests to the backend server
@@ -63,7 +64,12 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
-    force: false // Don't force dependency pre-bundling every time
+    force: false, // Don't force dependency pre-bundling every time
+    esbuildOptions: {
+      define: {
+        global: 'globalThis', // Fix issues with global references
+      },
+    }
   },
   // Handle cross-origin properly
   preview: {

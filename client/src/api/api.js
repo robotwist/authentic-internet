@@ -103,7 +103,7 @@ const createApiInstance = (baseUrl) => {
 // Get the configured API URL or default to localhost:5001
 const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-// Initialize API with the configured URL
+// Initialize API with the configured URL - use default instance as fallback
 let API = createApiInstance(configuredApiUrl);
 
 // Store alternative ports to try if the main one is unavailable
@@ -126,7 +126,7 @@ const checkServerHealth = async (url) => {
 
 // Initialize API with port detection
 const initApi = async () => {
-  if (isApiInitialized) return;
+  if (isApiInitialized) return API;
 
   try {
     // Try with the configured URL first
@@ -137,7 +137,7 @@ const initApi = async () => {
       API = createApiInstance(configuredApiUrl);
       currentApiUrl = configuredApiUrl;
       isApiInitialized = true;
-      return;
+      return API;
     }
 
     // Try alternative ports
@@ -150,23 +150,27 @@ const initApi = async () => {
         API = createApiInstance(url);
         currentApiUrl = url;
         isApiInitialized = true;
-        return;
+        return API;
       }
     }
 
-    throw new Error('No available API server found');
+    // If we get here, we couldn't connect to any API server
+    // Instead of throwing, return the default API instance to avoid undefined errors
+    console.warn('No available API server found. Using default configuration which may not connect.');
+    return API;
   } catch (error) {
     console.error('Failed to initialize API:', error);
-    throw error;
+    // Return the default API instance to avoid undefined errors
+    return API;
   }
 };
 
-// Initialize API on import
+// Initialize API on import but don't block execution
 initApi().catch(error => {
   console.error('API initialization failed:', error);
-  // In development, show a more user-friendly error
+  // In development, show a more user-friendly error, but don't use alert which blocks UI
   if (import.meta.env.MODE !== 'production') {
-    alert('Failed to connect to the server. Please ensure the server is running and try again.');
+    console.error('Failed to connect to the server. Please ensure the server is running and try again.');
   }
 });
 
@@ -282,6 +286,17 @@ export const fetchCharacter = async (userId) => {
       return null;
     }
 
+    // Ensure API is initialized
+    if (!API) {
+      console.warn("API not initialized yet, initializing now...");
+      try {
+        API = await initApi();
+      } catch (error) {
+        console.error("Failed to initialize API during fetchCharacter:", error);
+        return null; // Return null to prevent UI crashes
+      }
+    }
+
     const response = await API.get(`/api/users/${userId}`);
     console.log("Character data response:", response); // Debugging log
     return response.data;
@@ -308,6 +323,17 @@ export const updateCharacter = async (updatedCharacter) => {
     // Validate character data
     if (updatedCharacter.username !== undefined && updatedCharacter.username.trim().length < 1) {
       throw new Error('Username is required');
+    }
+    
+    // Ensure API is initialized
+    if (!API) {
+      console.warn("API not initialized yet, initializing now...");
+      try {
+        API = await initApi();
+      } catch (error) {
+        console.error("Failed to initialize API during updateCharacter:", error);
+        throw new Error("Cannot update character: API connection failed");
+      }
     }
     
     // Process data - trim strings, convert numbers, etc.
@@ -340,6 +366,17 @@ export const updateCharacter = async (updatedCharacter) => {
 export const fetchArtifacts = async (retryCount = 3) => {
   try {
     console.log("Fetching artifacts from server...");
+    
+    // Ensure API is initialized
+    if (!API) {
+      console.warn("API not initialized yet, initializing now...");
+      try {
+        API = await initApi();
+      } catch (error) {
+        console.error("Failed to initialize API during fetchArtifacts:", error);
+        return []; // Return empty array to prevent UI crashes
+      }
+    }
     
     // Add retry logic
     let lastError = null;
@@ -402,6 +439,17 @@ export const createArtifact = async (artifactData) => {
     if (!artifactData.content || artifactData.content.trim().length < 1) {
       // Set content to description if missing
       artifactData.content = artifactData.description;
+    }
+    
+    // Ensure API is initialized
+    if (!API) {
+      console.warn("API not initialized yet, initializing now...");
+      try {
+        API = await initApi();
+      } catch (error) {
+        console.error("Failed to initialize API during createArtifact:", error);
+        throw new Error("Cannot create artifact: API connection failed");
+      }
     }
     
     // Ensure location data is valid

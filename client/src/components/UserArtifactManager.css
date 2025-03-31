@@ -1,0 +1,79 @@
+.user-artifact-manager {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 15px;
+  border-radius: 8px;
+  color: white;
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-form input,
+.edit-form textarea {
+  padding: 8px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.edit-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.artifact-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.artifact-controls button,
+.button-group button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background: #4a90e2;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.artifact-controls button:hover,
+.button-group button:hover {
+  background: #357abd;
+}
+
+.artifact-controls button:last-child {
+  background: #e2844a;
+}
+
+.artifact-controls button:last-child:hover {
+  background: #bd6b35;
+}
+
+.placement-instructions {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+  border-radius: 8px;
+  color: white;
+  text-align: center;
+  z-index: 1001;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+} 

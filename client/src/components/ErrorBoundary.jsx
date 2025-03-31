@@ -6,23 +6,25 @@ class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { 
-      hasError: false, 
+      hasError: false,
       error: null,
       errorInfo: null
     };
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true, error };
+    return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log the error to an error reporting service
-    console.error('Error caught by boundary:', error, errorInfo);
+    console.error('!!! ErrorBoundary caught an error !!!', error, errorInfo);
     this.setState({
-      error,
-      errorInfo
+      error: error,
+      errorInfo: errorInfo
     });
+    
+    // Log the error to your error reporting service
+    console.error('Error caught by boundary:', error, errorInfo);
 
     // Try to save game state if possible
     try {
@@ -67,6 +69,7 @@ class ErrorBoundary extends React.Component {
   };
 
   render() {
+    console.log('ErrorBoundary render - hasError:', this.state.hasError);
     if (this.state.hasError) {
       return (
         <div className="error-boundary">

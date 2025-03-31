@@ -6,7 +6,7 @@ import Button from '../components/shared/Button';
 import DailyQuote from '../components/DailyQuote';
 import SecretMessage from '../components/SecretMessage';
 import '../styles/Home.css';
-import { getQuoteForArtifact, getRandomShakespeareQuote, getZenQuote } from '../api/externalApis';
+import { getRandomQuote } from '../utils/quoteSystem.js';
 import { updateCharacter } from '../api/api';
 
 const Home = () => {
@@ -21,39 +21,36 @@ const Home = () => {
     const fetchQuotes = async () => {
       setLoading(true);
       try {
-        // Fetch quotes from different sources
-        const promises = [
-          getQuoteForArtifact('inspiration'),
-          getRandomShakespeareQuote(),
-          getZenQuote()
-        ];
-        
-        const results = await Promise.allSettled(promises);
-        
-        // Filter out any rejected promises and format the quotes
-        const quotes = results
-          .filter(result => result.status === 'fulfilled' && result.value)
-          .map(result => ({
-            text: result.value.text || result.value.content || result.value.quote || result.value.q,
-            source: result.value.source || result.value.author || result.value.a || 'Unknown',
-            npcType: result.value.npcType || null,
-            timestamp: new Date().toISOString()
-          }));
-          
-        setInspirationalQuotes(quotes);
+        // Get quotes from different categories
+        const quotes = await Promise.all([
+          getRandomQuote('inspiration'),
+          getRandomQuote('wisdom'),
+          getRandomQuote('literary')
+        ]);
+
+        // Format the quotes
+        const formattedQuotes = quotes.map(quote => ({
+          text: quote.text,
+          source: quote.author,
+          type: quote.type,
+          timestamp: new Date().toISOString()
+        }));
+
+        setInspirationalQuotes(formattedQuotes);
       } catch (error) {
         console.error('Error fetching quotes:', error);
-        // Use fallback quotes if API calls fail
+        // Use fallback quotes
         setInspirationalQuotes([
           {
-            text: "The journey of a thousand miles begins with one step.",
-            source: "Lao Tzu",
+            text: "Write hard and clear about what hurts.",
+            source: "Ernest Hemingway",
+            type: "literary",
             timestamp: new Date().toISOString()
           },
           {
-            text: "To be, or not to be, that is the question.",
-            source: "William Shakespeare, Hamlet",
-            npcType: "SHAKESPEARE",
+            text: "The mountains are calling and I must go.",
+            source: "John Muir",
+            type: "nature",
             timestamp: new Date().toISOString()
           }
         ]);
@@ -61,16 +58,16 @@ const Home = () => {
         setLoading(false);
       }
     };
-    
+
     fetchQuotes();
   }, []);
-  
+
   const handleSaveQuote = async (quote) => {
     if (!user) {
       alert('You need to be logged in to save quotes. Please log in first.');
       return;
     }
-    
+
     try {
       // Get user's character data
       const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -78,41 +75,41 @@ const Home = () => {
         alert('No user profile found. Please log in again.');
         return;
       }
-      
+
       // Fetch the current character
       const character = JSON.parse(localStorage.getItem('character')) || {};
-      
+
       // Add the quote to the saved quotes array
       const savedQuotes = character.savedQuotes || [];
-      
+
       // Check if this quote is already saved
       const isAlreadySaved = savedQuotes.some(q => q.text === quote.text);
       if (isAlreadySaved) {
         alert('This quote is already in your saved quotes!');
         return;
       }
-      
+
       // Add the new quote
       const updatedQuotes = [...savedQuotes, quote];
-      
+
       // Update the character object
       const updatedCharacter = {
         ...character,
         savedQuotes: updatedQuotes
       };
-      
+
       // Save to localStorage
       localStorage.setItem('character', JSON.stringify(updatedCharacter));
-      
+
       // If the character has an ID, also update in the database
       if (character.id) {
         await updateCharacter(updatedCharacter);
       }
-      
+
       // Show success message
       setShowSavedMessage(true);
       setTimeout(() => setShowSavedMessage(false), 3000);
-      
+
     } catch (error) {
       console.error('Error saving quote:', error);
       alert('Failed to save quote. Please try again.');
@@ -133,7 +130,7 @@ const Home = () => {
 
   const content = (
     <div className="home-content-wrapper">
-      {/* Create Artifacts Section - NEW */}
+      {/* Create Artifacts Section */}
       <div className="create-artifacts-section">
         <h2>Create Artifacts, Earn Experience</h2>
         <div className="creative-questions">
@@ -166,7 +163,7 @@ const Home = () => {
           Start Creating Now
         </Button>
       </div>
-      
+
       {user ? (
         <div className="authenticated-content">
           <h2>Your Worlds</h2>
@@ -174,7 +171,7 @@ const Home = () => {
             {/* We'll add the worlds list here later */}
             <p>Your worlds will appear here...</p>
           </div>
-          
+
           {/* Show SecretMessage or buttons based on state */}
           {showSecretMessage ? (
             <SecretMessage />
@@ -202,14 +199,14 @@ const Home = () => {
           </div>
         </div>
       )}
-      
+
       {/* Quotes section */}
       <div className="daily-wisdom-section">
         <h2>Today's Wisdom</h2>
         <p className="wisdom-intro">
           Collect these quotes and add them to your in-game quote collection. Share them with friends or export them as a beautiful quote book.
         </p>
-        
+
         {loading ? (
           <div className="quotes-loading">Loading wisdom...</div>
         ) : (
@@ -219,11 +216,11 @@ const Home = () => {
                 <div className="quote-card-content">
                   <p className="quote-text">"{quote.text}"</p>
                   <p className="quote-source">
-                    {quote.npcType && <span className="quote-npc-type">{quote.npcType}: </span>}
+                    {quote.type && <span className="quote-type">{quote.type}: </span>}
                     {quote.source}
                   </p>
                 </div>
-                <button 
+                <button
                   className="save-quote-button"
                   onClick={() => handleSaveQuote(quote)}
                 >
@@ -233,13 +230,13 @@ const Home = () => {
             ))}
           </div>
         )}
-        
+
         {/* Daily quote component */}
         <div className="daily-quote-container">
           <h3>Quote of the Day</h3>
           <DailyQuote onSave={handleSaveQuote} />
         </div>
-        
+
         {/* Game CTA */}
         <div className="game-cta">
           <h3>Continue Your Journey</h3>
@@ -249,7 +246,7 @@ const Home = () => {
           </Button>
         </div>
       </div>
-      
+
       {/* Saved message notification */}
       {showSavedMessage && (
         <div className="save-notification">

@@ -1,16 +1,12 @@
 import mongoose from 'mongoose';
 import { 
-  fetchWeather, 
-  fetchQuote, 
-  fetchShakespeareQuote, 
-  fetchKeatsQuote, 
-  fetchSocratesQuote, 
-  fetchMichelangeloQuote,
+  fetchQuote,
+  fetchJesusQuote,
   fetchOscarWildeQuote,
   fetchAlexanderPopeQuote,
-  fetchZeusQuote,
-  fetchJesusQuote,
-  fetchJohnMuirQuote
+  fetchJohnMuirQuote,
+  fetchQuoteByAuthor,
+  fetchQuoteByCategory
 } from '../services/apiIntegrations.js';
 
 const NPCSchema = new mongoose.Schema({
@@ -19,163 +15,119 @@ const NPCSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  description: {
+  type: {
     type: String,
     required: true,
-    trim: true
+    enum: ['WRITER', 'PHILOSOPHER', 'ARTIST', 'SCIENTIST', 'EXPLORER', 'MENTOR', 'GUIDE', 'SAGE', 'POET', 'NATURALIST']
   },
   position: {
     x: { type: Number, required: true },
     y: { type: Number, required: true }
   },
-  sprite: {
+  area: {
     type: String,
-    default: '/assets/npcs/default.png'
-  },
-  world: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'World',
-    required: true
-  },
-  apiType: {
-    type: String,
-    enum: [
-      'weather', 
-      'quotes', 
-      'shakespeare', 
-      'socrates', 
-      'michelangelo',
-      'oscar_wilde',
-      'alexander_pope',
-      'zeus',
-      'jesus',
-      'john_muir'
-    ],
-    default: 'quotes'
-  },
-  apiConfig: {
-    type: Object,
-    required: true
-  },
-  personality: {
-    type: String,
-    default: 'friendly'
+    required: true,
+    default: 'Overworld'
   },
   dialogue: [{
     type: String,
     required: true
   }],
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
+  quoteCache: {
+    quotes: [String],
+    lastUpdated: Date
   }
-}, { timestamps: true });
-
-// Update the updatedAt timestamp before saving
-NPCSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
 });
 
-// Method to interact with the NPC's API
+// Method to interact with the NPC
 NPCSchema.methods.interact = async function(prompt) {
   try {
     let response;
-    switch (this.apiType) {
-      case 'weather':
-        response = await fetchWeather(this.apiConfig);
+    switch (this.type) {
+      case 'WRITER':
+        switch (this.name) {
+          case 'Oscar Wilde':
+            response = await fetchOscarWildeQuote();
+            break;
+          case 'Alexander Pope':
+            response = await fetchAlexanderPopeQuote();
+            break;
+          default:
+            response = await fetchQuoteByAuthor(this.name);
+        }
         break;
-      case 'quotes':
-        response = await fetchQuote(this.apiConfig);
+      case 'SAGE':
+        if (this.name === 'Jesus Christ') {
+          response = await fetchJesusQuote();
+        } else {
+          response = await fetchQuoteByCategory('spiritual');
+        }
         break;
-      case 'shakespeare':
-        response = await fetchShakespeareQuote(prompt);
-        // Format the response for client consumption
-        return {
-          response: response.quote,
-          source: `${response.author}, ${response.work || 'Various works'}`,
-          text: response.quote,
-          work: response.work || 'Various works',
-          location: response.location || 'Various locations'
-        };
-      case 'socrates':
-        response = await fetchSocratesQuote(prompt);
-        // Format the response for client consumption
-        return {
-          response: response.quote,
-          source: `${response.author}, ${response.dialogue || 'Various dialogues'}`,
-          text: response.quote,
-          dialogue: response.dialogue || 'Various dialogues',
-          translator: response.translator || 'Various',
-          section: response.section || 'Various sections'
-        };
-      case 'michelangelo':
-        response = await fetchMichelangeloQuote(prompt);
-        // Format the response for client consumption
-        return {
-          response: response.quote,
-          source: `${response.author}, ${response.source || 'Various works'}`,
-          text: response.quote,
-          source: response.source || 'Various works',
-          date: response.date || 'Unknown date',
-          recipient: response.recipient || null,
-          additionalQuotes: response.additionalQuotes || []
-        };
-      case 'oscar_wilde':
-        response = await fetchOscarWildeQuote(prompt);
-        // Format the response for client consumption
-        return {
-          response: response.quote,
-          source: `${response.author}, ${response.work || 'Various works'}`,
-          text: response.quote,
-          work: response.work || 'Various works',
-          date: response.date || 'Unknown date',
-          additionalQuotes: response.additionalQuotes || []
-        };
-      case 'alexander_pope':
-        response = await fetchAlexanderPopeQuote(prompt);
-        // Format the response for client consumption
-        return {
-          response: response.quote,
-          source: `${response.author}, ${response.work || 'Various works'}`,
-          text: response.quote,
-          work: response.work || 'Various works',
-          date: response.date || 'Unknown date',
-          additionalQuotes: response.additionalQuotes || []
-        };
-      case 'zeus':
-        response = await fetchZeusQuote(prompt);
-        // Format the response for client consumption
-        return {
-          response: response.quote,
-          source: `${response.author}, ${response.source || 'Various works'}`,
-          text: response.quote,
-          work: response.work || 'Various works',
-          date: response.date || 'Unknown date',
-          additionalQuotes: response.additionalQuotes || []
-        };
-      case 'john_muir':
-        response = await fetchJohnMuirQuote(prompt);
-        // Format the response for client consumption
-        return {
-          response: response.quote,
-          source: `${response.author}, ${response.work || 'Various works'}`,
-          text: response.quote,
-          work: response.work || 'Various works',
-          date: response.date || 'Unknown date',
-          additionalQuotes: response.additionalQuotes || []
-        };
+      case 'NATURALIST':
+        if (this.name === 'John Muir') {
+          response = await fetchJohnMuirQuote();
+        } else {
+          response = await fetchQuoteByCategory('nature');
+        }
+        break;
       default:
-        throw new Error('Invalid API type');
+        response = await fetchQuote();
     }
-    return response;
+
+    return {
+      text: response.text,
+      author: response.author,
+      type: this.type
+    };
   } catch (error) {
     console.error('NPC interaction error:', error);
-    throw error;
+    return {
+      text: this.dialogue[0],
+      author: this.name,
+      type: this.type
+    };
+  }
+};
+
+// Method to get fresh quotes for the NPC
+NPCSchema.methods.refreshQuotes = async function() {
+  try {
+    let quotes = [];
+    const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+    // Check if cache is valid
+    if (this.quoteCache?.lastUpdated && 
+        (Date.now() - this.quoteCache.lastUpdated) < CACHE_DURATION) {
+      return this.quoteCache.quotes;
+    }
+
+    // Get quotes based on NPC type
+    switch(this.name) {
+      case 'Alexander Pope':
+        const popeQuote = await fetchAlexanderPopeQuote();
+        quotes = [popeQuote.text];
+        break;
+      case 'Jesus Christ':
+        const spiritualQuotes = await fetchQuoteByCategory('spiritual');
+        quotes = [spiritualQuotes.text];
+        break;
+      default:
+        const authorQuotes = await fetchQuoteByAuthor(this.name);
+        quotes = [authorQuotes.text];
+    }
+
+    // Update cache
+    this.quoteCache = {
+      quotes,
+      lastUpdated: new Date()
+    };
+    await this.save();
+
+    return quotes;
+  } catch (error) {
+    console.error(`Error refreshing quotes for NPC ${this.name}:`, error);
+    // Fallback to default dialogue if quote fetching fails
+    return this.dialogue;
   }
 };
 

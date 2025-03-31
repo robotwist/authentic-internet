@@ -1,43 +1,35 @@
 // Artifact Types and Interactions
 export const ARTIFACT_TYPES = {
-  WEAPON: 'weapon',
+  BOOK: 'book',
   SCROLL: 'scroll',
   RELIC: 'relic',
-  KEY: 'key',
-  CONTAINER: 'container',
-  PORTAL: 'portal'
+  TOOL: 'tool',
+  ARTWORK: 'artwork',
+  MANUSCRIPT: 'manuscript',
+  JOURNAL: 'journal',
+  MAP: 'map',
+  LETTER: 'letter',
+  PHOTOGRAPH: 'photograph'
 };
 
 export const ARTIFACT_INTERACTIONS = {
-  COMBINE: 'combine',
-  UNLOCK: 'unlock',
-  REVEAL: 'reveal',
-  TRANSFORM: 'transform'
+  READ: 'read',
+  EXAMINE: 'examine',
+  COLLECT: 'collect',
+  USE: 'use',
+  SHARE: 'share'
 };
 
 // NPC Types and Config
 export const NPC_TYPES = {
-  GUIDE: 'guide',
-  MERCHANT: 'merchant',
-  SCHOLAR: 'scholar',
-  WARRIOR: 'warrior',
-  MYSTIC: 'mystic',
-  MENTOR: 'mentor',  // Added for Hemingway
-  POET: 'scholar',    // For Shakespeare
-  PHILOSOPHER: 'mystic',  // For Socrates
-  WEATHERMAN: 'guide',  // For Zeus
+  WRITER: 'writer',
+  PHILOSOPHER: 'philosopher',
   ARTIST: 'artist',
-  CODER: 'coder',
-  SHAKESPEARE: 'shakespeare',
-  SOCRATES: 'socrates',
-  AUGUSTINE: 'augustine',
-  MICHELANGELO: 'artist',
-  ZORK: 'zork',
-  ADA_LOVELACE: 'ada_lovelace',
-  LORD_BYRON: 'lord_byron',
-  OSCAR_WILDE: 'oscar_wilde',
-  ALEXANDER_POPE: 'alexander_pope',
-  ZEUS: 'zeus',
-  JOHN_MUIR: 'john_muir',
-  JESUS: 'jesus'
+  SCIENTIST: 'scientist',
+  EXPLORER: 'explorer',
+  MENTOR: 'mentor',
+  GUIDE: 'guide',
+  SAGE: 'sage',
+  POET: 'poet',
+  NATURALIST: 'naturalist'
 }; 

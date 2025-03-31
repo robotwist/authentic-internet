@@ -36,6 +36,7 @@ const Artifact = ({
   const [interactionLevel, setInteractionLevel] = useState(0);
   const [soundManager, setSoundManager] = useState(null);
   const [areaLevel, setAreaLevel] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Initialize sound manager
   useEffect(() => {
@@ -330,13 +331,30 @@ const Artifact = ({
     }
   };
 
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (handleInteraction) {
+      handleInteraction();
+    }
+  };
+
   if (!isVisible) return null;
 
   return (
     <div 
-      className={getArtifactClass(artifact)}
+      className={`${getArtifactClass(artifact)} ${isHovered ? 'hovered' : ''}`}
       style={calculatePosition(artifact)}
-      onClick={handleInteraction}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
     >
       <img 
         src={getArtifactImage(artifact)} 

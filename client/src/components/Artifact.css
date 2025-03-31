@@ -7,8 +7,13 @@
   z-index: 1000;
 }
 
-.artifact:hover {
-  transform: scale(1.1);
+.artifact.visible {
+  opacity: 1;
+}
+
+.artifact.hovered {
+  transform: scale(1.2);
+  z-index: 1001;
 }
 
 .artifact-near {
@@ -576,4 +581,64 @@
     font-size: 10px;
     padding: 2px 4px;
   }
+}
+
+.artifact-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  min-width: 200px;
+  max-width: 300px;
+  z-index: 1002;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.artifact-tooltip h3 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  color: #4a90e2;
+}
+
+.artifact-tooltip p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.artifact-message {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-style: italic;
+}
+
+/* Animation for artifact appearance */
+@keyframes artifactAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.artifact.visible {
+  animation: artifactAppear 0.3s ease forwards;
+}
+
+/* Glow effect for interactive artifacts */
+.artifact.interactive {
+  box-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+}
+
+.artifact.interactive.hovered {
+  box-shadow: 0 0 15px rgba(74, 144, 226, 0.8);
 }

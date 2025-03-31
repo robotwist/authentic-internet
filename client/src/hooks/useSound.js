@@ -232,4 +232,41 @@ const useSound = (src, { autoPlay = false, volume = 1, loop = false } = {}) => {
   };
 };
 
+/**
+ * Sound utility functions that don't require a specific sound source
+ */
+export const useSoundUtils = () => {
+  const playSuccess = () => {
+    try {
+      const audio = new Audio('/assets/sounds/level-complete.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(err => console.error('Could not play success sound:', err));
+    } catch (err) {
+      console.error('Error playing success sound:', err);
+    }
+  };
+
+  const playError = () => {
+    try {
+      const audio = new Audio('/assets/sounds/bump.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(err => console.error('Could not play error sound:', err));
+    } catch (err) {
+      console.error('Error playing error sound:', err);
+    }
+  };
+
+  const playNotification = () => {
+    try {
+      const audio = new Audio('/assets/sounds/page-turn.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(err => console.error('Could not play notification sound:', err));
+    } catch (err) {
+      console.error('Error playing notification sound:', err);
+    }
+  };
+
+  return { playSuccess, playError, playNotification };
+};
+
 export default useSound; 

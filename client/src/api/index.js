@@ -6,7 +6,8 @@ export * from './authService';
 export * from './userService';
 export * from './artifactService';
 export * from './messageService';
-export * from './externalApis';
+// Re-enable temporarily to prevent import errors, but mark as deprecated
+export * from './externalApis'; // DEPRECATED - use utils/quoteSystem.js instead
 
 // Also export the base utilities
 export {

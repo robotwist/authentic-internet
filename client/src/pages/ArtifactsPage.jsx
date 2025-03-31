@@ -342,7 +342,7 @@ const ArtifactsPage = () => {
           <div className="artifacts-grid">
             {artifacts.map((artifact) => (
               <ArtifactCard
-                key={artifact._id}
+                key={artifact._id || artifact.id}
                 artifact={artifact}
                 onDelete={handleDeleteArtifact}
                 onEdit={() => {

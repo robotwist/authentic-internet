@@ -57,11 +57,13 @@ export const INVENTORY_ARTIFACTS = [
     exp: 5
   },
   {
-    id: 'shakespeare-manuscript',
-    name: 'Shakespeare\'s Lost Manuscript',
-    description: 'A fragile parchment containing what appears to be an unfinished play',
+    id: 'hemingway-manuscript',
+    name: 'Hemingway\'s Lost Manuscript',
+    description: 'A weathered manuscript containing an unpublished Hemingway story.',
     image: '/assets/items/manuscript.png',
-    type: 'literature',
+    type: 'literary',
+    rarity: 'legendary',
+    area: 'library',
     properties: {
       value: 1000,
       wisdom: 15,

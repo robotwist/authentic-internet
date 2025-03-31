@@ -4,7 +4,9 @@ import {
   fetchArtifacts,
   createArtifact,
   fetchCharacter,
-  updateCharacter
+  updateCharacter,
+  updateArtifact,
+  deleteArtifact
 } from "../api/api";
 import Character from "./Character";
 import Artifact from "./Artifact";
@@ -14,7 +16,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import Map from "./Map";
 import WorldMap from "./WorldMap";
 import FeedbackForm from "./FeedbackForm";
-import useCharacterMovement from "./CharacterMovement";
+import { useCharacterMovement } from "./CharacterMovement";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS, isWalkable } from "./Constants";
 import { MAPS } from "./GameData";
 import { debugNPCSprites } from "../utils/debugTools";
@@ -28,6 +30,8 @@ import RewardModal from "./RewardModal";
 import DialogBox from './DialogBox';
 import TextAdventure from './TextAdventure';
 import SoundManager from "./utils/SoundManager";
+import UserArtifactManager from './UserArtifactManager';
+import ArtifactDiscovery from './ArtifactDiscovery';
 
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
@@ -60,6 +64,15 @@ const GameWorld = () => {
   const [currentSpecialWorld, setCurrentSpecialWorld] = useState(null);
   const [showWorldGuide, setShowWorldGuide] = useState(true);
   const [soundManager, setSoundManager] = useState(null);
+  const [selectedUserArtifact, setSelectedUserArtifact] = useState(null);
+  const [isPlacingArtifact, setIsPlacingArtifact] = useState(false);
+
+  useEffect(() => {
+    // Check if MAPS is correctly loaded
+    if (!Array.isArray(MAPS) || MAPS.length === 0) {
+      console.error("❌ Error: MAPS data is missing or invalid", MAPS);
+    }
+  }, []);
 
   useEffect(() => {
     // Load and apply saved artifact visibility state
@@ -69,7 +82,9 @@ const GameWorld = () => {
       .then((data) => {
         console.log("📦 Loaded Artifacts:", data);
         // Filter out any server artifacts that duplicate artifacts already defined in MAPS
-        const mapArtifacts = MAPS.flatMap(map => map.artifacts.map(art => art.name));
+        const mapArtifacts = Array.isArray(MAPS) 
+          ? MAPS.flatMap(map => (map.artifacts || []).map(art => art.name))
+          : [];
         const filteredServerArtifacts = data.filter(serverArt => 
           !mapArtifacts.includes(serverArt.name) || 
           !serverArt.location // Include artifacts without location (inventory items)
@@ -168,6 +183,7 @@ const GameWorld = () => {
   useEffect(() => {
     // Setup event listeners for navbar button actions
     const handleShowInventory = () => {
+      console.log("Event: showInventory triggered");
       setShowInventory(true);
     };
 
@@ -185,7 +201,12 @@ const GameWorld = () => {
       // Handle inventory toggle with 'i' key
       if (event.key === 'i' || event.key === 'I') {
         event.preventDefault();
-        setShowInventory(prev => !prev);
+        console.log("Key 'i' pressed, toggling inventory");
+        if(character && artifacts) {
+            setShowInventory(prev => !prev);
+        } else {
+            console.warn("Cannot open inventory: Character or artifacts not loaded yet.");
+        }
         return;
       }
       
@@ -237,7 +258,7 @@ const GameWorld = () => {
       window.removeEventListener('showQuotes', handleShowQuotes);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentMapIndex, character]);
+  }, [currentMapIndex, character, artifacts]);
 
   useEffect(() => {
     // Initialize sound manager
@@ -245,6 +266,9 @@ const GameWorld = () => {
       const manager = SoundManager.getInstance();
       await manager.initialize();
       setSoundManager(manager);
+      
+      // Register discovery sound
+      manager.registerSound('discovery', '/assets/sounds/discovery.mp3');
       
       // Start playing the main theme based on current map
       const currentMapName = MAPS[currentMapIndex].name;
@@ -404,9 +428,13 @@ const GameWorld = () => {
     }
     
     // Map-specific portal handling
-    if (MAPS[currentMapIndex].data[row][col] === 5) {
+    if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 5) {
       // Get current map name for better context
-      const currentMapName = MAPS[currentMapIndex].name;
+      const currentMapName = MAPS[currentMapIndex]?.name;
+      if (!currentMapName) {
+        console.error("Current map name not found");
+        return;
+      }
       
       // Define destination based on current map - making progression more logical
       let destinationMap = null;
@@ -415,54 +443,36 @@ const GameWorld = () => {
       // Logical world progression paths
       if (currentMapName === "Overworld") {
         destinationMap = "Overworld 2";
-        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
       } 
       else if (currentMapName === "Overworld 2") {
         destinationMap = "Overworld 3";
-        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
       }
       else if (currentMapName === "Overworld 3") {
         destinationMap = "Desert 1";
-        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
       }
       else if (currentMapName === "Desert 1") {
         destinationMap = "Desert 2";
-        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
       }
       else if (currentMapName === "Desert 2") {
         destinationMap = "Desert 3";
-        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
       }
       else if (currentMapName === "Desert 3") {
-        destinationMap = "Dungeon 1";
-        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+        destinationMap = "Dungeon Level 1";
       }
-      else if (currentMapName === "Dungeon 1") {
-        destinationMap = "Dungeon 2";
-        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+      else if (currentMapName === "Dungeon Level 1") {
+        destinationMap = "Dungeon Level 2";
       }
-      else if (currentMapName === "Dungeon 2") {
-        destinationMap = "Dungeon 3";
-        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
+      else if (currentMapName === "Dungeon Level 2") {
+        destinationMap = "Dungeon Level 3";
       }
-      else if (currentMapName === "Dungeon 3") {
+      else if (currentMapName === "Dungeon Level 3") {
         destinationMap = "Yosemite";
-        spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE };
       }
       
       // Find the index of the destination map
       const destinationIndex = MAPS.findIndex(map => map.name === destinationMap);
       
       if (destinationIndex !== -1) {
-        // Get destination map dimensions
-        const destMap = MAPS[destinationIndex];
-        const destWidth = destMap.data[0].length;
-        const destHeight = destMap.data.length;
-        
-        // Adjust spawn position to be within map bounds
-        spawnPosition.x = Math.min(spawnPosition.x, (destWidth - 1) * TILE_SIZE);
-        spawnPosition.y = Math.min(spawnPosition.y, (destHeight - 1) * TILE_SIZE);
-        
         // Play portal sound
         if (soundManager) soundManager.playSound('portal');
         
@@ -491,11 +501,13 @@ const GameWorld = () => {
             handleLevelCompletion('level1');
           }, 800);
         }
+      } else {
+        console.error(`Destination map "${destinationMap}" not found`);
       }
     }
     
     // Special portal (code 6) handling for Level 4
-    if (MAPS[currentMapIndex].data[row][col] === 6) {
+    if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 6) {
       if (levelCompletion.level3) {
         // Play portal sound for special portal
         if (soundManager) soundManager.playSound('portal');
@@ -625,25 +637,18 @@ const GameWorld = () => {
 
   // Utilities for persisting map artifact visibility
   const applyMapArtifactVisibilityFromStorage = () => {
-    try {
-      const savedState = localStorage.getItem('collectedMapArtifacts');
-      if (!savedState) return;
+    if (!Array.isArray(MAPS)) return;
+    
+    // Apply to all maps
+    MAPS.forEach((map, mapIndex) => {
+      if (!map || !Array.isArray(map.artifacts)) return;
       
-      const collectedIds = JSON.parse(savedState);
-      
-      // Apply to all maps
-      MAPS.forEach((map, mapIndex) => {
-        map.artifacts.forEach((artifact, artifactIndex) => {
-          if (collectedIds.includes(artifact.id)) {
-            MAPS[mapIndex].artifacts[artifactIndex].visible = false;
-          }
-        });
+      map.artifacts.forEach((artifact, artifactIndex) => {
+        if (localStorage.getItem(`artifact-${artifact.id}-found`)) {
+          MAPS[mapIndex].artifacts[artifactIndex].visible = false;
+        }
       });
-      
-      console.log("🔍 Restored artifact visibility state from localStorage");
-    } catch (error) {
-      console.error("❌ Error restoring artifact visibility:", error);
-    }
+    });
   };
   
   const saveMapArtifactVisibilityToStorage = (artifactId) => {
@@ -753,7 +758,7 @@ const GameWorld = () => {
     localStorage.setItem('has-dismissed-world-guide', 'true');
   };
 
-  const handleCreateArtifact = (name, description, messageText) => {
+  const handleCreateArtifact = async (name, description, messageText) => {
     if (!isLoggedIn) {
       alert("You need to be logged in to create artifacts.");
       return;
@@ -774,44 +779,131 @@ const GameWorld = () => {
       description,
       messageText,
       location: { x: playerX, y: playerY },
-      creator: uuidv4(),
+      area: MAPS[currentMapIndex].name,
+      creator: character.id,
       visible: true,
     };
 
-    console.log("✨ Creating artifact at:", newArtifact.location);
-
-    createArtifact(newArtifact)
-      .then((data) => {
-        console.log("✅ Artifact Created:", data);
-        updateArtifactsState(data);
-      })
-      .catch((error) => console.error("❌ Error creating artifact:", error));
-  };
-
-  const updateArtifactsState = (newArtifact) => {
-    setArtifacts((prev) => [...prev, newArtifact]);
-  };
-
-  const refreshArtifacts = async () => {
     try {
-      const updatedArtifacts = await fetchArtifacts();
-      setArtifacts(updatedArtifacts);
+      const createdArtifact = await createArtifact(newArtifact);
+      setArtifacts(prev => [...prev, createdArtifact]);
+      setShowForm(false);
     } catch (error) {
-      console.error("❌ Error refreshing artifacts:", error);
+      console.error("Error creating artifact:", error);
+      alert("Failed to create artifact. Please try again.");
     }
   };
 
-  const findArtifactAtLocation = (x, y) => {
-    return artifacts.find((a) => a?.location?.x === x && a?.location?.y === y);
+  const handleUserArtifactUpdate = async (artifactId, updatedData) => {
+    try {
+      const updatedArtifact = await updateArtifact(artifactId, updatedData);
+      setArtifacts(prev => 
+        prev.map(artifact => 
+          artifact._id === artifactId ? updatedArtifact : artifact
+        )
+      );
+      setSelectedUserArtifact(null);
+    } catch (error) {
+      console.error('Failed to update artifact:', error);
+      throw error;
+    }
   };
 
+  const handleUserArtifactDelete = async (artifactId) => {
+    try {
+      await deleteArtifact(artifactId);
+      setArtifacts(prev => prev.filter(artifact => artifact._id !== artifactId));
+      setSelectedUserArtifact(null);
+    } catch (error) {
+      console.error('Failed to delete artifact:', error);
+      throw error;
+    }
+  };
+
+  const handleUserArtifactPlace = async (artifactId, location) => {
+    try {
+      const updatedArtifact = await updateArtifact(artifactId, { location });
+      setArtifacts(prev => 
+        prev.map(artifact => 
+          artifact._id === artifactId ? updatedArtifact : artifact
+        )
+      );
+      setIsPlacingArtifact(false);
+    } catch (error) {
+      console.error('Failed to place artifact:', error);
+      throw error;
+    }
+  };
+
+  const filterArtifacts = (artifacts) => {
+    // Skip if invalid MAPS data
+    if (!Array.isArray(MAPS) || !MAPS[currentMapIndex]) {
+      return [];
+    }
+    
+    return artifacts.filter(artifact => {
+      return (
+        // If no area is specified, assume it belongs to current map
+        (!artifact.area || artifact.area === MAPS[currentMapIndex].name)
+      );
+    });
+  };
+
+  const refreshArtifactList = async () => {
+    try {
+      const data = await fetchArtifacts();
+      const filteredServerArtifacts = filterArtifacts(data);
+      setArtifacts(filteredServerArtifacts);
+    } catch (error) {
+      console.error('Error fetching artifacts:', error);
+    }
+  };
+
+  const handleArtifactClick = (artifact) => {
+    // Play discovery sound
+    if (soundManager) soundManager.playSound('discovery');
+    
+    // Show artifact details
+    setVisibleArtifact(artifact);
+    
+    // If it's a user artifact, allow management
+    if (artifact.creator === character?.id) {
+      setSelectedUserArtifact(artifact);
+    }
+  };
+
+  // Check if player can walk on a tile
+  const canWalkOnTile = (position) => {
+    const col = Math.floor(position.x / TILE_SIZE);
+    const row = Math.floor(position.y / TILE_SIZE);
+    
+    // Check if position is within map bounds
+    if (!Array.isArray(MAPS) || 
+        !MAPS[currentMapIndex]?.data ||
+        row < 0 || row >= MAPS[currentMapIndex].data.length ||
+        col < 0 || col >= MAPS[currentMapIndex].data[0].length) {
+      return false;
+    }
+    
+    // Check for portal tiles
+    if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 5) {
+      // Portal found - don't call undefined function
+      console.log("Portal detected at", position);
+      return false;
+    }
+    
+    // Check if the tile is walkable
+    return isWalkable(MAPS[currentMapIndex].data[row][col]);
+  };
+
+  // Add the missing handleGainExperience function
   const handleGainExperience = async (points) => {
     setCharacter((prev) => {
       // For unauthenticated users, just update local state
-      if (!prev.id) {
+      if (!prev || !prev.id) {
         return {
           ...prev,
-          experience: prev.experience + points
+          experience: (prev?.experience || 0) + points
         };
       }
 
@@ -839,36 +931,28 @@ const GameWorld = () => {
             className={`game-world ${currentMapIndex === 2 ? 'level-3' : currentMapIndex === 1 ? 'level-2' : 'level-1'}`}
             style={{
               transform: `translate(${-viewport.x}px, ${-viewport.y}px)`,
-              width: `${MAPS[currentMapIndex].data[0].length * TILE_SIZE}px`, // Set width based on map columns
-              height: `${MAPS[currentMapIndex].data.length * TILE_SIZE}px`, // Set height based on map rows
+              width: `${Array.isArray(MAPS) && MAPS[currentMapIndex]?.data?.[0]?.length 
+                ? MAPS[currentMapIndex].data[0].length * TILE_SIZE 
+                : 800}px`,
+              height: `${Array.isArray(MAPS) && MAPS[currentMapIndex]?.data?.length 
+                ? MAPS[currentMapIndex].data.length * TILE_SIZE 
+                : 600}px`,
             }}
           >
             <Map 
-              mapData={MAPS[currentMapIndex].data} 
+              mapData={Array.isArray(MAPS) && MAPS[currentMapIndex]?.data 
+                ? MAPS[currentMapIndex].data 
+                : []}
               viewport={viewport} 
-              mapName={MAPS[currentMapIndex].name}
-              npcs={MAPS[currentMapIndex].npcs.map(npc => {
-                // Ensure each NPC has a proper type that matches available sprites
-                if (typeof npc.type === 'string' && !npc.sprite) {
-                  // If type is a string but no sprite specified, make sure it maps to our sprite assets
-                  // by adding a default sprite path based on type
-                  const npcType = npc.type.toLowerCase();
-                  let extension = 'png'; // Default extension
-                  
-                  // Determine the correct file extension based on NPC type
-                  if (['shakespeare', 'lord_byron'].includes(npcType)) {
-                    extension = 'webp';
-                  } else if (['artist', 'oscar_wilde', 'alexander_pope', 'zeus'].includes(npcType)) {
-                    extension = 'svg';
-                  }
-                  
-                  return {
-                    ...npc,
-                    sprite: `/assets/npcs/${npcType}.${extension}`
-                  };
-                }
-                return npc;
-              })}
+              mapName={Array.isArray(MAPS) && MAPS[currentMapIndex]?.name 
+                ? MAPS[currentMapIndex].name 
+                : "Unknown Area"}
+              npcs={Array.isArray(MAPS) && MAPS[currentMapIndex]?.npcs 
+                ? MAPS[currentMapIndex].npcs.map(npc => {
+                    // If type is a string but no sprite specified, make sure it maps to our sprite assets
+                    return { ...npc };
+                  }) 
+                : []}
               onNPCClick={(npc) => {
                 console.log("🎭 Clicked on NPC:", npc.name);
                 setActiveNPC(npc);
@@ -887,51 +971,63 @@ const GameWorld = () => {
             />
             <ErrorBoundary>
               {/* Render map-defined artifacts */}
-              {MAPS[currentMapIndex].artifacts.map((artifact) =>
-                artifact.visible && artifact.location ? (
-                  <Artifact
-                    key={`map-artifact-${artifact.id}`}
-                    src={artifact.image}
-                    artifact={artifact}
-                    visible={artifact.id === visibleArtifact?.id}
-                    style={{
-                      position: "absolute",
-                      left: `${artifact.location.x * TILE_SIZE}px`,
-                      top: `${artifact.location.y * TILE_SIZE}px`,
-                      width: TILE_SIZE,
-                      height: TILE_SIZE,
-                      zIndex: 10000
-                    }}
-                  />
-                ) : null
-              )}
+              {Array.isArray(MAPS) && MAPS[currentMapIndex]?.artifacts 
+                ? MAPS[currentMapIndex].artifacts.map((artifact) =>
+                  artifact.visible && (
+                    <Artifact
+                      key={artifact.id}
+                      artifact={artifact}
+                      onClick={() => handleArtifactClick(artifact)}
+                      style={{ left: artifact.location.x * TILE_SIZE, top: artifact.location.y * TILE_SIZE }}
+                    />
+                  )
+                ) 
+                : null
+              }
               
               {/* Render server-defined artifacts */}
               {artifacts && artifacts.length > 0 && artifacts
                 .filter(artifact => 
                   artifact && artifact.location && 
-                  // Only show server artifacts on the current map
                   (!artifact.area || artifact.area === MAPS[currentMapIndex].name)
                 )
                 .map((artifact) => {
-                  // Generate a stable key for the artifact
                   const artifactKey = artifact._id || artifact.id || `artifact-${artifact.name}-${artifact.location.x}-${artifact.location.y}`;
                   
                   return (
-                    <Artifact
-                      key={`server-artifact-${artifactKey}`}
-                      src={artifact.image}
-                      artifact={artifact}
-                      visible={artifact.id === visibleArtifact?.id || artifact._id === visibleArtifact?._id}
-                      style={{
-                        position: "absolute",
-                        left: `${artifact.location.x * TILE_SIZE}px`,
-                        top: `${artifact.location.y * TILE_SIZE}px`,
-                        width: TILE_SIZE,
-                        height: TILE_SIZE,
-                        zIndex: 10000
-                      }}
-                    />
+                    <div key={`server-artifact-${artifactKey}`}>
+                      <Artifact
+                        src={artifact.image}
+                        artifact={artifact}
+                        visible={artifact.id === visibleArtifact?.id || artifact._id === visibleArtifact?._id}
+                        style={{
+                          position: "absolute",
+                          left: `${artifact.location.x * TILE_SIZE}px`,
+                          top: `${artifact.location.y * TILE_SIZE}px`,
+                          width: TILE_SIZE,
+                          height: TILE_SIZE,
+                          zIndex: 10000
+                        }}
+                        onClick={() => {
+                          if (artifact.creator === character?.id) {
+                            setSelectedUserArtifact(artifact);
+                          }
+                        }}
+                      />
+                      {selectedUserArtifact?._id === artifact._id && (
+                        <UserArtifactManager
+                          artifact={artifact}
+                          onUpdate={handleUserArtifactUpdate}
+                          onDelete={handleUserArtifactDelete}
+                          onPlace={handleUserArtifactPlace}
+                          currentMapName={MAPS[currentMapIndex].name}
+                          position={{
+                            x: artifact.location.x * TILE_SIZE,
+                            y: artifact.location.y * TILE_SIZE
+                          }}
+                        />
+                      )}
+                    </div>
                   );
                 })}
             </ErrorBoundary>
@@ -981,18 +1077,22 @@ const GameWorld = () => {
           <ArtifactCreation
             position={formPosition}
             onClose={() => setShowForm(false)}
-            refreshArtifacts={refreshArtifacts}
+            refreshArtifacts={refreshArtifactList}
+            currentArea={MAPS[currentMapIndex].name}
           />
         )}
 
-        {showInventory && (
-          <Inventory 
-            artifacts={inventory}
+        {showInventory && character && (
+          <Inventory
             onClose={() => setShowInventory(false)}
-            onUpdateArtifact={handleUpdateArtifact}
-            onGainExperience={handleGainExperience}
-            refreshArtifacts={refreshArtifacts}
-          />      
+            character={character}
+            inventory={character?.inventory || []}
+            artifacts={artifacts}
+            currentArea={Array.isArray(MAPS) && MAPS[currentMapIndex]?.name 
+              ? MAPS[currentMapIndex].name 
+              : "Unknown Area"}
+            onManageUserArtifact={handleUserArtifactUpdate}
+          />
         )}
 
         {showQuotes && character && (
@@ -1030,6 +1130,15 @@ const GameWorld = () => {
             onExit={handleTextAdventureExit}
           />
         )}
+
+        {/* Add ArtifactDiscovery component */}
+        <ArtifactDiscovery
+          artifacts={artifacts}
+          characterPosition={characterPosition}
+          currentMapName={MAPS[currentMapIndex].name}
+          onArtifactFound={handleArtifactClick}
+          character={character}
+        />
       </div>
     </ErrorBoundary>
   );

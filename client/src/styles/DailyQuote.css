@@ -1,0 +1,65 @@
+.daily-quote {
+  background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.daily-quote:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.daily-quote blockquote {
+  margin: 0;
+  padding: 0;
+}
+
+.daily-quote .quote-text {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.daily-quote .quote-author {
+  font-size: 1rem;
+  color: #7f8c8d;
+  text-align: right;
+  margin-top: 8px;
+}
+
+.daily-quote .save-quote-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin-top: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.daily-quote .save-quote-button:hover {
+  background-color: #2980b9;
+}
+
+.daily-quote.loading {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 40px;
+  font-style: italic;
+}
+
+.daily-quote.error {
+  color: #e74c3c;
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #e74c3c;
+  border-radius: 8px;
+  background-color: #fdf3f2;
+} 

@@ -26,33 +26,48 @@ class SoundManager {
       // Initialize Web Audio API context
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-      // Load sound effects
-      await Promise.all([
-        this.loadSound('bump', '/assets/sounds/bump.mp3'),
-        this.loadSound('portal', '/assets/sounds/portal.mp3'),
-        this.loadSound('level_complete', '/assets/sounds/level-complete.mp3'),
-        this.loadSound('pickup', '/assets/sounds/pickup.mp3'),
-        this.loadSound('page_turn', '/assets/sounds/page-turn.mp3'),
-        this.loadSound('artifact_pickup', '/assets/sounds/artifact-pickup.mp3'),
-        this.loadSound('error', '/assets/sounds/error.mp3'),
-        this.loadSound('toilet_flush', '/assets/sounds/toilet-flush.mp3'),
-        this.loadSound('water', '/assets/sounds/water.mp3'),
-        this.loadSound('mountain', '/assets/sounds/mountain.mp3')
-      ]);
+      // List of sounds to load
+      const soundsToLoad = [
+        ['bump', '/assets/sounds/bump.mp3'],
+        ['portal', '/assets/sounds/portal.mp3'],
+        ['level_complete', '/assets/sounds/level-complete.mp3'],
+        ['pickup', '/assets/sounds/pickup.mp3'],
+        ['artifact_create', '/assets/sounds/artifact-pickup.mp3'], // Map to existing sound
+        ['error', '/assets/sounds/bump.mp3'], // Map to existing sound
+        ['page_turn', '/assets/sounds/page-turn.mp3']
+      ];
 
-      // Load music tracks
-      await Promise.all([
-        this.loadMusic('overworld', '/assets/music/overworldTheme.mp3'),
-        this.loadMusic('yosemite', '/assets/music/yosemiteTheme.mp3'),
-        this.loadMusic('terminal', '/assets/music/terminalTheme.mp3'),
-        this.loadMusic('textAdventure', '/assets/music/textAdventureTheme.mp3'),
-        this.loadMusic('hemingway', '/assets/music/hemingwayTheme.mp3')
-      ]);
+      // Only try to load sounds that exist
+      const promises = soundsToLoad.map(([name, path]) => this.loadSound(name, path));
+      await Promise.all(promises.filter(p => p)); // Filter out any null promises
+
+      // Initialize with default sounds for any that are missing
+      if (!this.sounds['error']) {
+        console.log('Creating fallback for error sound');
+        this.sounds['error'] = this.sounds['bump'];
+      }
+
+      if (!this.sounds['artifact_create']) {
+        console.log('Creating fallback for artifact_create sound');
+        this.sounds['artifact_create'] = this.sounds['pickup'] || this.sounds['bump'];
+      }
+
+      // Load music if available
+      try {
+        await Promise.all([
+          this.loadMusic('overworld', '/assets/music/overworldTheme.mp3'),
+          this.loadMusic('yosemite', '/assets/music/yosemiteTheme.mp3')
+        ]);
+      } catch (musicError) {
+        console.warn('Some music tracks could not be loaded:', musicError);
+      }
 
       this.initialized = true;
       console.log('✅ SoundManager initialized successfully');
     } catch (error) {
       console.error('❌ Error initializing SoundManager:', error);
+      // Still mark as initialized to prevent repeated attempts
+      this.initialized = true;
     }
 
     return this;

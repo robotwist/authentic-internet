@@ -3,39 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import Button from './shared/Button';
 import '../styles/ArtifactForm.css';
 
-// Helper function to generate random coordinates
-const generateRandomCoordinates = (area) => {
-  // Define bounds based on area
-  let bounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
-  
-  switch (area) {
-    case 'library':
-      bounds = { minX: 10, maxX: 50, minY: 10, maxY: 50 };
-      break;
-    case 'garden':
-      bounds = { minX: 60, maxX: 100, minY: 10, maxY: 50 };
-      break;
-    case 'tavern':
-      bounds = { minX: 10, maxX: 50, minY: 60, maxY: 100 };
-      break;
-    case 'workshop':
-      bounds = { minX: 60, maxX: 100, minY: 60, maxY: 100 };
-      break;
-    case 'dungeon':
-      bounds = { minX: 30, maxX: 70, minY: 30, maxY: 70 };
-      break;
-    default: // Overworld
-      bounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
-  }
-  
-  // Generate random coordinates within bounds
-  const x = Math.floor(Math.random() * (bounds.maxX - bounds.minX + 1)) + bounds.minX;
-  const y = Math.floor(Math.random() * (bounds.maxY - bounds.minY + 1)) + bounds.minY;
-  
-  return { x, y };
-};
-
-const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {}, isEditing = false }) => {
+const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {}, isEditing = false, currentArea = 'overworld' }) => {
   const { user } = useAuth();
   // Use either initialData or initialValues to support both prop formats
   const initialProps = initialData && Object.keys(initialData).length > 0 ? initialData : initialValues;
@@ -48,66 +16,150 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
     messageText: initialProps.messageText || '',
     riddle: initialProps.riddle || '',
     unlockAnswer: initialProps.unlockAnswer || '',
-    area: initialProps.area || 'Overworld',
+    area: currentArea,
     isExclusive: initialProps.isExclusive || false,
-    location: initialProps.location || generateRandomCoordinates('Overworld'),
     exp: initialProps.exp || 10,
     visible: initialProps.visible !== undefined ? initialProps.visible : true,
     status: initialProps.status || 'dropped',
     type: initialProps.type || 'artifact',
     image: initialProps.image || '/images/default-artifact.png',
     iconPreview: null,
-    iconFile: null
+    iconFile: null,
+    visibility: initialProps.visibility || 'public',
+    allowedUsers: initialProps.allowedUsers || [],
+    tags: initialProps.tags || []
   });
   
   const [attachment, setAttachment] = useState(null);
   const [attachmentPreview, setAttachmentPreview] = useState(initialProps.attachment || null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const [useRandomLocation, setUseRandomLocation] = useState(!initialProps.location);
   const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    if (name === 'area' && useRandomLocation) {
-      // Update location with new random coordinates when area changes
-      const newCoords = generateRandomCoordinates(value);
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value,
-        location: newCoords
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }));
-    }
-  };
-
-  const handleLocationChange = (e) => {
-    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      location: {
-        ...prev.location,
-        [name]: Number(value)
-      }
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
-  const toggleRandomLocation = () => {
-    const newUseRandom = !useRandomLocation;
-    setUseRandomLocation(newUseRandom);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setUploading(true);
     
-    if (newUseRandom) {
-      // Generate new random coordinates
-      const newCoords = generateRandomCoordinates(formData.area);
-      setFormData(prev => ({
-        ...prev,
-        location: newCoords
-      }));
+    try {
+      // Validate the form data
+      if (!formData.name.trim()) {
+        throw new Error('Name is required');
+      }
+      if (!formData.description.trim()) {
+        throw new Error('Description is required');
+      }
+      if (!formData.content.trim()) {
+        // If content is empty, use description as content to meet backend requirements
+        formData.content = formData.description;
+      }
+      
+      // Prepare the data object with consistent formatting
+      const submitData = {
+        ...formData,
+        // Ensure strings are trimmed
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        content: formData.content.trim(),
+        messageText: formData.messageText?.trim() || '',
+        riddle: formData.riddle?.trim() || '',
+        unlockAnswer: formData.unlockAnswer?.trim() || '',
+        // Ensure boolean values
+        isExclusive: Boolean(formData.isExclusive),
+        // Ensure numeric values
+        exp: Number(formData.exp) || 10,
+        // Ensure area is set
+        area: formData.area || currentArea,
+        // Ensure status is set
+        status: formData.status || 'dropped',
+        // Ensure type is set
+        type: formData.type || 'artifact',
+        // Ensure image is set
+        image: formData.image || '/images/default-artifact.png'
+      };
+      
+      // Check if we're using file upload (either attachment or icon)
+      if (attachment || formData.iconFile) {
+        // Create a FormData object for file upload
+        const formDataObj = new FormData();
+        
+        // Add all text fields
+        Object.keys(submitData).forEach(key => {
+          if (key === 'isExclusive') {
+            // Handle boolean
+            formDataObj.append(key, submitData[key] ? 'true' : 'false');
+          } else if (key !== 'iconFile' && key !== 'iconPreview' && submitData[key] !== null && submitData[key] !== undefined) {
+            // Skip the iconFile and iconPreview fields, we'll handle them separately
+            formDataObj.append(key, submitData[key]);
+          }
+        });
+        
+        // Add the file attachment if present
+        if (attachment) {
+          formDataObj.append('attachment', attachment);
+        }
+        
+        // Add the icon file if present
+        if (formData.iconFile) {
+          formDataObj.append('artifactIcon', formData.iconFile);
+        }
+        
+        console.log("Submitting form with file(s)");
+        await onSubmit(formDataObj);
+      } else {
+        // Remove the icon-related fields that don't need to be sent to the server
+        delete submitData.iconFile;
+        delete submitData.iconPreview;
+        
+        console.log("Submitting form data:", submitData);
+        await onSubmit(submitData);
+      }
+      
+      // Reset form if not editing
+      if (!isEditMode) {
+        setFormData({
+          name: '',
+          description: '',
+          content: '',
+          messageText: '',
+          riddle: '',
+          unlockAnswer: '',
+          area: currentArea,
+          isExclusive: false,
+          exp: 10,
+          visible: true,
+          status: 'dropped',
+          type: 'artifact',
+          image: '/images/default-artifact.png',
+          iconPreview: null,
+          iconFile: null,
+          visibility: 'public',
+          allowedUsers: [],
+          tags: []
+        });
+        setAttachment(null);
+        setAttachmentPreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        // Reset the icon upload input
+        if (document.getElementById('icon-upload')) {
+          document.getElementById('icon-upload').value = '';
+        }
+      }
+    } catch (err) {
+      console.error('Error submitting artifact:', err);
+      setError(err.message || 'Failed to save artifact. Please try again.');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -132,123 +184,6 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
   
   const triggerFileInput = () => {
     fileInputRef.current.click();
-  };
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setUploading(true);
-    
-    try {
-      // Validate the form data
-      if (!formData.name.trim()) {
-        throw new Error('Name is required');
-      }
-      if (!formData.description.trim()) {
-        throw new Error('Description is required');
-      }
-      if (!formData.content.trim()) {
-        // If content is empty, use description as content to meet backend requirements
-        formData.content = formData.description;
-      }
-      
-      // Ensure location is properly formatted
-      if (!formData.location || typeof formData.location.x !== 'number' || typeof formData.location.y !== 'number') {
-        throw new Error('Valid location coordinates are required');
-      }
-      
-      // Check if we're using file upload (either attachment or icon)
-      if (attachment || formData.iconFile) {
-        // Create a FormData object for file upload
-        const formDataObj = new FormData();
-        
-        // Add all text fields
-        Object.keys(formData).forEach(key => {
-          if (key === 'location') {
-            // Handle location object specially
-            formDataObj.append('location[x]', formData.location.x);
-            formDataObj.append('location[y]', formData.location.y);
-          } else if (key === 'isExclusive') {
-            // Handle boolean
-            formDataObj.append(key, formData[key] ? 'true' : 'false');
-          } else if (key !== 'iconFile' && key !== 'iconPreview' && formData[key] !== null && formData[key] !== undefined) {
-            // Skip the iconFile and iconPreview fields, we'll handle them separately
-            formDataObj.append(key, formData[key]);
-          }
-        });
-        
-        // Add the file attachment if present
-        if (attachment) {
-          formDataObj.append('attachment', attachment);
-        }
-        
-        // Add the icon file if present
-        if (formData.iconFile) {
-          formDataObj.append('artifactIcon', formData.iconFile);
-        }
-        
-        console.log("Submitting form with file(s)");
-        await onSubmit(formDataObj);
-      } else {
-        // Regular JSON submission - prepare the data object
-        const submitData = {
-          ...formData,
-          // Ensure strings are trimmed
-          name: formData.name.trim(),
-          description: formData.description.trim(),
-          content: formData.content.trim(),
-          // Ensure location is properly formatted as numbers
-          location: {
-            x: Number(formData.location.x),
-            y: Number(formData.location.y)
-          }
-        };
-        
-        // Remove the icon-related fields that don't need to be sent to the server
-        delete submitData.iconFile;
-        delete submitData.iconPreview;
-        
-        console.log("Submitting form data:", submitData);
-        await onSubmit(submitData);
-      }
-      
-      // Reset form if not editing
-      if (!isEditMode) {
-        setFormData({
-          name: '',
-          description: '',
-          content: '',
-          messageText: '',
-          riddle: '',
-          unlockAnswer: '',
-          area: 'Overworld',
-          isExclusive: false,
-          location: generateRandomCoordinates('Overworld'),
-          exp: 10,
-          visible: true,
-          status: 'dropped',
-          type: 'artifact',
-          image: '/images/default-artifact.png',
-          iconPreview: null,
-          iconFile: null
-        });
-        setAttachment(null);
-        setAttachmentPreview(null);
-        setUseRandomLocation(true);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-        // Reset the icon upload input
-        if (document.getElementById('icon-upload')) {
-          document.getElementById('icon-upload').value = '';
-        }
-      }
-    } catch (err) {
-      console.error('Error submitting artifact:', err);
-      setError(err.message || 'Failed to save artifact. Please try again.');
-    } finally {
-      setUploading(false);
-    }
   };
 
   return (
@@ -336,82 +271,82 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
           </div>
         </div>
         
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="area">Area</label>
-            <select
-              id="area"
-              name="area"
-              value={formData.area}
+        <div className="form-group checkbox-group">
+          <label>
+            <input
+              type="checkbox"
+              name="isExclusive"
+              checked={formData.isExclusive}
               onChange={handleChange}
-              required
-            >
-              <option value="Overworld">Overworld</option>
-              <option value="main">Main World</option>
-              <option value="library">Library</option>
-              <option value="garden">Garden</option>
-              <option value="tavern">Tavern</option>
-              <option value="workshop">Workshop</option>
-              <option value="dungeon">Dungeon</option>
-            </select>
-          </div>
-          
-          <div className="form-group checkbox-group">
+            />
+            Exclusive (Only visible to you)
+          </label>
+        </div>
+        
+        <div className="form-group visibility-section">
+          <label>Visibility Settings</label>
+          <div className="visibility-options">
             <label>
               <input
-                type="checkbox"
-                name="isExclusive"
-                checked={formData.isExclusive}
+                type="radio"
+                name="visibility"
+                value="public"
+                checked={formData.visibility === 'public'}
                 onChange={handleChange}
               />
-              Exclusive (Only visible to you)
+              Public (Everyone can see)
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="visibility"
+                value="private"
+                checked={formData.visibility === 'private'}
+                onChange={handleChange}
+              />
+              Private (Only you can see)
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="visibility"
+                value="friends"
+                checked={formData.visibility === 'friends'}
+                onChange={handleChange}
+              />
+              Friends Only
             </label>
           </div>
         </div>
         
-        <div className="form-group location-group">
-          <label>Location</label>
-          <div className="location-controls">
-            <div className="form-row">
-              <div className="form-group half-width">
-                <label htmlFor="location-x">X Coordinate</label>
-                <input
-                  type="number"
-                  id="location-x"
-                  name="x"
-                  value={formData.location?.x || 0}
-                  onChange={handleLocationChange}
-                  disabled={useRandomLocation}
-                  required
-                  min="0"
-                  max="1000"
-                />
-              </div>
-              <div className="form-group half-width">
-                <label htmlFor="location-y">Y Coordinate</label>
-                <input
-                  type="number"
-                  id="location-y"
-                  name="y"
-                  value={formData.location?.y || 0}
-                  onChange={handleLocationChange}
-                  disabled={useRandomLocation}
-                  required
-                  min="0"
-                  max="1000"
-                />
-              </div>
-            </div>
-            <div className="random-location-toggle">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={useRandomLocation}
-                  onChange={toggleRandomLocation}
-                />
-                Use random coordinates for this area
-              </label>
-            </div>
+        <div className="form-group tags-section">
+          <label>Tags (Optional)</label>
+          <input
+            type="text"
+            placeholder="Add tags separated by commas"
+            value={formData.tags.join(', ')}
+            onChange={(e) => {
+              const tags = e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+              setFormData(prev => ({ ...prev, tags }));
+            }}
+          />
+          <div className="tags-preview">
+            {formData.tags.map((tag, index) => (
+              <span key={index} className="tag">
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      tags: prev.tags.filter((_, i) => i !== index)
+                    }));
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
           </div>
         </div>
         
