@@ -151,7 +151,9 @@ const Login = () => {
       console.warn("Using failsafe login method");
       // Direct API call as fallback
       const response = await API.post('/api/auth/login', {
+        // Handle both server-side naming conventions for maximum compatibility
         identifier: formData.username,
+        username: formData.username, // Send both formats to ensure compatibility
         password: formData.password
       });
       

@@ -296,11 +296,11 @@ export const AuthProvider = ({ children }) => {
     // Keep dependencies empty to run only once on mount
   }, []);
 
-  const login = async (identifier, password) => {
+  const login = async (username, password) => {
     try {
       clearMessages();
       setLoading(true);
-      const data = await loginUser(identifier, password);
+      const data = await loginUser(username, password);
       handleAuthSuccess(data);
       setLoading(false);
       return true;

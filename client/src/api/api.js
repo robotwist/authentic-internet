@@ -338,15 +338,24 @@ export const proxyExternalRequest = async (url, options = {}) => {
 /* ────────────────────────────────
    🔹 AUTHENTICATION ENDPOINTS
 ──────────────────────────────── */
-export const loginUser = async (identifier, password) => {
+export const loginUser = async (username, password) => {
   try {
+    // Add logging for debugging
+    console.log(`API Login attempt with username: ${username}`);
+    
     const response = await getApi().post('/api/auth/login', {
-      identifier,
+      identifier: username, // Map username parameter to identifier field for backward compatibility
       password
     });
+    
+    console.log('Login API response:', response.status);
     return response.data;
   } catch (error) {
-    console.error('Login failed:', error);
+    console.error('Login failed details:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
     throw error;
   }
 };

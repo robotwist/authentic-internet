@@ -118,14 +118,20 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     console.log("📝 Login attempt received");
+    console.log("Request body:", JSON.stringify(req.body));
     
-    const { identifier, password } = req.body;
+    // Accept either identifier or username for backward compatibility
+    const identifier = req.body.identifier || req.body.username;
+    const { password } = req.body;
     
     if (!identifier || !password) {
+      console.log("Login failed: Missing credentials");
       return res.status(400).json({ 
         message: "Please provide both username/email and password" 
       });
     }
+    
+    console.log(`Searching for user with identifier: ${identifier.toLowerCase()}`);
     
     // Find user by username or email
     const user = await User.findOne({
@@ -136,13 +142,18 @@ export const login = async (req, res) => {
     });
 
     if (!user) {
+      console.log(`Login failed: No user found with identifier: ${identifier.toLowerCase()}`);
       return res.status(401).json({ 
         message: "Invalid credentials. Please check your username/email and password." 
       });
     }
 
+    console.log(`User found with ID: ${user._id}`);
+    console.log(`Comparing passwords for user: ${user.username}`);
+    
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      console.log(`Login failed: Password mismatch for user: ${user.username}`);
       return res.status(401).json({ 
         message: "Invalid credentials. Please check your username/email and password." 
       });
@@ -154,7 +165,7 @@ export const login = async (req, res) => {
 
     // Generate JWT Token with consistent expiration
     const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: tokenExpiration });
-    console.log(`✅ Login successful for user: ${user.username}`);
+    console.log(`✅ Login successful for user: ${user.username} with token length: ${token.length}`);
 
     res.json({ 
       token, 
