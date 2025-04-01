@@ -144,17 +144,17 @@ const Home = () => {
         </p>
         <div className="creative-steps">
           <div className="creative-step">
-            <div className="step-icon">✨</div>
+            <div className="step-icon"></div>
             <h3>Create</h3>
             <p>Express yourself through meaningful artifacts that reflect your wisdom and creativity.</p>
           </div>
           <div className="creative-step">
-            <div className="step-icon">🌍</div>
+            <div className="step-icon"></div>
             <h3>Share</h3>
             <p>Place your artifacts in the world for others to discover and interact with.</p>
           </div>
           <div className="creative-step">
-            <div className="step-icon">📈</div>
+            <div className="step-icon"></div>
             <h3>Grow</h3>
             <p>Earn experience points when others view, save, and share your creations.</p>
           </div>

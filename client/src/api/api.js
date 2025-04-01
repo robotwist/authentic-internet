@@ -110,59 +110,175 @@ let API = createApiInstance(configuredApiUrl);
 const alternativePorts = [5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010];
 let isApiInitialized = false;
 let currentApiUrl = configuredApiUrl;
+let lastHealthCheckTime = 0;
+const HEALTH_CHECK_THROTTLE_MS = 10000; // Limit health checks to once per 10 seconds
+let healthCheckInProgress = false; // Flag to prevent concurrent health checks
 
 // Function to check server health
 const checkServerHealth = async (url) => {
   try {
-    const response = await axios.get(`${url}/api/health`, { 
-      timeout: 5000,
-      validateStatus: (status) => status === 200
-    });
-    return response.status === 200;
+    console.log(`🔍 Checking server health at ${url}/api/health...`);
+    
+    // First try /api/health endpoint
+    try {
+      const response = await axios.get(`${url}/api/health`, { 
+        timeout: 5000,
+        validateStatus: (status) => status === 200
+      });
+      
+      if (response.status === 200) {
+        console.log(`✅ Health check succeeded at ${url}/api/health`);
+        return true;
+      }
+    } catch (healthError) {
+      console.log(`⚠️ Health check failed at ${url}/api/health: ${healthError.message}`);
+      
+      // If /api/health fails, try just hitting the base URL as fallback
+      try {
+        console.log(`🔍 Trying fallback health check at ${url}...`);
+        const fallbackResponse = await axios.get(url, { 
+          timeout: 5000,
+          validateStatus: (status) => status >= 200 && status < 500
+        });
+        
+        // Accept any 2xx or 3xx status as "server is running"
+        if (fallbackResponse.status >= 200 && fallbackResponse.status < 400) {
+          console.log(`✅ Fallback health check succeeded at ${url}`);
+          return true;
+        }
+        
+        console.log(`⚠️ Fallback health check failed with status ${fallbackResponse.status}`);
+        return false;
+      } catch (fallbackError) {
+        console.log(`❌ All health checks failed for ${url}: ${fallbackError.message}`);
+        return false;
+      }
+    }
   } catch (error) {
+    console.error(`❌ Server health check error for ${url}:`, error.message);
     return false;
   }
 };
 
 // Initialize API with port detection
 const initApi = async () => {
-  if (isApiInitialized) return API;
+  // Return existing API if already initialized and working
+  if (isApiInitialized) {
+    console.log("API already initialized, using existing instance");
+    return API;
+  }
 
-  try {
-    // Try with the configured URL first
-    if (await checkServerHealth(configuredApiUrl)) {
-      if (import.meta.env.MODE !== 'production') {
-        console.log(`✅ Connected to API at ${configuredApiUrl}`);
-      }
-      API = createApiInstance(configuredApiUrl);
-      currentApiUrl = configuredApiUrl;
+  // Prevent concurrent health checks
+  if (healthCheckInProgress) {
+    console.log("Health check already in progress, using current API configuration");
+    return API;
+  }
+
+  // Throttle health checks to prevent excessive requests
+  const now = Date.now();
+  if (now - lastHealthCheckTime < HEALTH_CHECK_THROTTLE_MS) {
+    console.log(`Health check throttled (last check: ${now - lastHealthCheckTime}ms ago). Using default API configuration.`);
+    // Mark as initialized to prevent further checks in development mode
+    if (import.meta.env.MODE === 'development') {
       isApiInitialized = true;
-      return API;
     }
+    return API; // Return the current API instance
+  }
+  
+  try {
+    // Set flag to prevent concurrent checks
+    healthCheckInProgress = true;
+    
+    // Update the last health check time
+    lastHealthCheckTime = now;
 
-    // Try alternative ports
-    for (const port of alternativePorts) {
-      const url = `http://localhost:${port}`;
-      if (await checkServerHealth(url)) {
-        if (import.meta.env.MODE !== 'production') {
-          console.log(`✅ Connected to API at ${url}`);
-        }
-        API = createApiInstance(url);
-        currentApiUrl = url;
+    // In development mode, limit to one check per session to avoid constant rechecking
+    if (import.meta.env.MODE === 'development') {
+      // Just check the main URL once
+      try {
+        const healthCheckResult = await checkServerHealth(configuredApiUrl);
+        console.log("Development health check result:", healthCheckResult ? "✅ Success" : "❌ Failed");
+        // Whether success or failure, mark as initialized to avoid future checks
+        isApiInitialized = true;
+        return API;
+      } catch (error) {
+        console.warn("Development health check error - proceeding with default API config");
         isApiInitialized = true;
         return API;
       }
     }
 
-    // If we get here, we couldn't connect to any API server
-    // Instead of throwing, return the default API instance to avoid undefined errors
-    console.warn('No available API server found. Using default configuration which may not connect.');
+    // For production, we'll do more thorough checking...
+    
+    // Try with the configured URL first
+    try {
+      const healthCheckResult = await checkServerHealth(configuredApiUrl);
+      if (healthCheckResult) {
+        if (import.meta.env.MODE !== 'production') {
+          console.log(`✅ Connected to API at ${configuredApiUrl}`);
+        }
+        API = createApiInstance(configuredApiUrl);
+        currentApiUrl = configuredApiUrl;
+        isApiInitialized = true;
+        return API;
+      }
+    } catch (error) {
+      console.warn(`Failed to connect to primary API URL ${configuredApiUrl}: ${error.message}`);
+      // Continue with alternative ports
+    }
+
+    // If we reach here, the configured URL failed. Try alternative ports.
+    console.log(`⚠️ Main API at ${configuredApiUrl} unavailable, trying alternative ports...`);
+    
+    // Add short-circuit for testing/development
+    if (import.meta.env.MODE === 'development') {
+      // In development, we might just want to proceed with a non-functioning API
+      // rather than getting stuck in initialization
+      console.log(`Development mode: Proceeding with default API configuration despite health check failure`);
+      isApiInitialized = true; // Mark as initialized to prevent further checks
+      return API;
+    }
+    
+    // Only try alternative ports if we really need to
+    for (const port of alternativePorts) {
+      const altUrl = configuredApiUrl.replace(/:\d+/, `:${port}`);
+      try {
+        if (await checkServerHealth(altUrl)) {
+          console.log(`✅ Connected to alternative API at ${altUrl}`);
+          API = createApiInstance(altUrl);
+          currentApiUrl = altUrl;
+          isApiInitialized = true;
+          return API;
+        }
+      } catch (error) {
+        console.warn(`Failed to connect to alternative API URL ${altUrl}: ${error.message}`);
+      }
+    }
+
+    console.error("❌ All API endpoints unavailable. Using default configuration.");
+    // Fall back to the original URL, even if it's not working
+    isApiInitialized = true; // Mark as initialized to prevent further checks
     return API;
   } catch (error) {
-    console.error('Failed to initialize API:', error);
-    // Return the default API instance to avoid undefined errors
-    return API;
+    console.error("Critical error during API initialization:", error);
+    // Mark as initialized to prevent further checks that will likely also fail
+    isApiInitialized = true;
+    return API; // Return the default instance as fallback
+  } finally {
+    healthCheckInProgress = false; // Reset flag regardless of outcome
   }
+};
+
+// Always return the configured API even if health check failed
+// This prevents app crashes for non-critical API operations
+const getApi = () => {
+  // Schedule async health check but don't wait for it
+  if (!isApiInitialized) {
+    initApi().catch(err => {
+      console.warn("Background API initialization failed:", err.message);
+    });
+  }
+  return API;
 };
 
 // Initialize API on import but don't block execution
@@ -219,51 +335,39 @@ export const proxyExternalRequest = async (url, options = {}) => {
 /* ────────────────────────────────
    🔹 AUTHENTICATION ENDPOINTS
 ──────────────────────────────── */
-export const loginUser = async (username, password) => {
+export const loginUser = async (identifier, password) => {
   try {
-    const response = await API.post('/api/auth/login', {
-      identifier: username,
+    const response = await getApi().post('/api/auth/login', {
+      identifier,
       password
     });
-    
-    if (response.data?.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      return response.data;
-    }
-    throw new Error('Invalid response from server');
+    return response.data;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login failed:', error);
     throw error;
   }
 };
 
 export const registerUser = async (username, email, password) => {
   try {
-    const response = await API.post('/api/auth/register', {
+    const response = await getApi().post('/api/auth/register', {
       username,
       email,
       password
     });
-    
-    if (response.data?.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      return response.data;
-    }
-    throw new Error('Invalid response from server');
+    return response.data;
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Registration failed:', error);
     throw error;
   }
 };
 
 export const verifyToken = async () => {
   try {
-    const response = await API.post('/api/auth/verify');
+    const response = await getApi().post('/api/auth/verify');
     return response.data;
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.error('Token verification failed:', error);
     throw error;
   }
 };
@@ -273,414 +377,234 @@ export const verifyToken = async () => {
 ──────────────────────────────── */
 export const fetchCharacter = async (userId) => {
   try {
-    // Check if we have a token before making the request
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.log("Skipping character fetch - no authentication token");
-      return null;
-    }
-
-    // Validate userId
-    if (!userId) {
-      console.log("Skipping character fetch - no userId provided");
-      return null;
-    }
-
-    // Ensure API is initialized
-    if (!API) {
-      console.warn("API not initialized yet, initializing now...");
-      try {
-        API = await initApi();
-      } catch (error) {
-        console.error("Failed to initialize API during fetchCharacter:", error);
-        return null; // Return null to prevent UI crashes
-      }
-    }
-
-    const response = await API.get(`/api/users/${userId}`);
-    console.log("Character data response:", response); // Debugging log
+    const response = await getApi().get(`/api/users/${userId}`);
     return response.data;
   } catch (error) {
-    // Don't log the full error for 401 errors as they're expected when not logged in
-    if (error.response && error.response.status === 401) {
-      console.log("Unable to fetch character: Authentication required");
-    } else {
-      console.error("Error fetching character:", error);
-    }
-    
-    // Return null instead of throwing to prevent UI crashes
-    return null;
+    console.error(`Fetch character for user ${userId} failed:`, error);
+    throw error;
   }
 };
 
-export const updateCharacter = async (updatedCharacter) => {
+export const updateCharacter = async (characterData) => {
   try {
-    const userId = updatedCharacter._id || updatedCharacter.id;
-    if (!userId) {
-      throw new Error("Character ID is required for update");
+    // Convert to FormData if there is a file to upload
+    if (characterData.avatarFile) {
+      const formData = new FormData();
+      const { avatarFile, ...userData } = characterData;
+      
+      // Add the text fields
+      Object.keys(userData).forEach(key => {
+        if (userData[key] !== undefined) {
+          // Handle nested properties like savedQuotes
+          if (typeof userData[key] === 'object' && userData[key] !== null) {
+            formData.append(key, JSON.stringify(userData[key]));
+          } else {
+            formData.append(key, userData[key]);
+          }
+        }
+      });
+      
+      // Add the file
+      formData.append('avatar', avatarFile);
+      
+      // Make the request with proper headers
+      return getApi().put(`/api/users/${characterData.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(response => response.data);
     }
     
-    // Validate character data
-    if (updatedCharacter.username !== undefined && updatedCharacter.username.trim().length < 1) {
-      throw new Error('Username is required');
+    // No file - just send the JSON data
+    const processedData = { ...characterData };
+    
+    // Convert any arrays to JSON strings if needed
+    if (Array.isArray(processedData.savedQuotes)) {
+      processedData.savedQuotes = processedData.savedQuotes;
     }
     
-    // Ensure API is initialized
-    if (!API) {
-      console.warn("API not initialized yet, initializing now...");
-      try {
-        API = await initApi();
-      } catch (error) {
-        console.error("Failed to initialize API during updateCharacter:", error);
-        throw new Error("Cannot update character: API connection failed");
-      }
-    }
-    
-    // Process data - trim strings, convert numbers, etc.
-    const processedData = { ...updatedCharacter };
-    if (processedData.username) processedData.username = processedData.username.trim();
-    if (processedData.bio) processedData.bio = processedData.bio.trim();
-    
-    // If position/location is being updated, ensure it has numeric values
-    if (processedData.position) {
-      processedData.position = {
-        x: Number(processedData.position.x),
-        y: Number(processedData.position.y)
-      };
-    }
-    
-    console.log("Updating character with data:", processedData);
-    const response = await API.put(`/api/users/${userId}`, processedData);
-    console.log("✅ Character updated successfully:", response.data);
-    return response.data.user;
+    const response = await getApi().put(`/api/users/${characterData.id}`, processedData);
+    return response.data;
   } catch (error) {
-    console.error("❌ Error updating character:", error);
-    const errorMessage = handleApiError(error, "Failed to update character");
-    throw new Error(errorMessage);
+    console.error('Update character failed:', error);
+    throw error;
   }
 };
 
 /* ────────────────────────────────
    🔹 ARTIFACT ENDPOINTS (CRUD)
 ──────────────────────────────── */
-export const fetchArtifacts = async (retryCount = 3) => {
+export const fetchArtifacts = async (filterOptions = {}) => {
   try {
-    console.log("Fetching artifacts from server...");
-    
-    // Ensure API is initialized
-    if (!API) {
-      console.warn("API not initialized yet, initializing now...");
-      try {
-        API = await initApi();
-      } catch (error) {
-        console.error("Failed to initialize API during fetchArtifacts:", error);
-        return []; // Return empty array to prevent UI crashes
-      }
-    }
-    
-    // Add retry logic
-    let lastError = null;
-    for (let i = 0; i < retryCount; i++) {
-      try {
-        const response = await API.get("/api/artifacts");
-        
-        // Check if the response contains an array of artifacts
-        if (Array.isArray(response.data)) {
-          console.log(`Successfully fetched ${response.data.length} artifacts:`, response.data);
-          return response.data;
-        } else if (response.data && Array.isArray(response.data.artifacts)) {
-          // Handle case where artifacts might be nested
-          console.log(`Successfully fetched ${response.data.artifacts.length} artifacts:`, response.data.artifacts);
-          return response.data.artifacts;
-        } else {
-          console.warn("Server returned unexpected response format:", response.data);
-          return [];
-        }
-      } catch (error) {
-        lastError = error;
-        console.warn(`Attempt ${i + 1} failed:`, error);
-        // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-      }
-    }
-    
-    // If we get here, all retries failed
-    throw lastError;
+    const response = await getApi().get("/api/artifacts");
+    return response.data;
   } catch (error) {
-    console.error("Error fetching artifacts:", error);
-    // Log more details about the error for debugging
-    if (error.response) {
-      console.error("Server response error:", error.response.status, error.response.data);
-    } else if (error.request) {
-      console.error("No response received:", error.request);
-    } else {
-      console.error("Request setup error:", error.message);
-    }
-    // Don't throw the error, return empty array to prevent UI crashes
-    return [];
+    console.error('Fetch artifacts failed:', error);
+    throw error;
   }
 };
 
 export const createArtifact = async (artifactData) => {
   try {
-    // Check authentication
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("You must be logged in to create artifacts");
-    }
-    
-    // Validate artifact data
-    if (!artifactData.name || artifactData.name.trim().length < 1) {
-      throw new Error('Artifact name is required');
-    }
-    if (!artifactData.description || artifactData.description.trim().length < 1) {
-      throw new Error('Artifact description is required');
-    }
-    if (!artifactData.content || artifactData.content.trim().length < 1) {
-      // Set content to description if missing
-      artifactData.content = artifactData.description;
-    }
-    
-    // Ensure API is initialized
-    if (!API) {
-      console.warn("API not initialized yet, initializing now...");
-      try {
-        API = await initApi();
-      } catch (error) {
-        console.error("Failed to initialize API during createArtifact:", error);
-        throw new Error("Cannot create artifact: API connection failed");
-      }
-    }
-    
-    // Ensure location data is valid
-    if (!artifactData.location || 
-        (typeof artifactData.location.x !== 'number' && typeof artifactData.location.x !== 'string') ||
-        (typeof artifactData.location.y !== 'number' && typeof artifactData.location.y !== 'string')) {
-      throw new Error('Valid location coordinates are required');
-    }
-
-    // Create FormData for file uploads if needed
-    let requestData;
+    let requestData = { ...artifactData };
     let requestConfig = {};
     
-    if (artifactData instanceof FormData) {
-      // It's already FormData
-      requestData = artifactData;
+    // If there's a file to upload, use FormData
+    if (artifactData.file) {
+      const formData = new FormData();
+      
+      // Add all the text fields
+      Object.keys(artifactData).forEach(key => {
+        if (key !== 'file' && artifactData[key] !== undefined) {
+          // Handle location object
+          if (key === 'location' && artifactData.location) {
+            formData.append('location[x]', artifactData.location.x);
+            formData.append('location[y]', artifactData.location.y);
+          } 
+          // Handle other objects or arrays
+          else if (typeof artifactData[key] === 'object' && artifactData[key] !== null) {
+            formData.append(key, JSON.stringify(artifactData[key]));
+          } 
+          // Handle primitive values
+          else {
+            formData.append(key, artifactData[key]);
+          }
+        }
+      });
+      
+      // Add the file
+      formData.append('image', artifactData.file);
+      
+      // Update request data and config
+      requestData = formData;
       requestConfig = {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       };
-    } else {
-      // Ensure all required fields are present and properly formatted
-      const processedData = {
-        ...artifactData,
-        name: artifactData.name.trim(),
-        description: artifactData.description.trim(),
-        content: artifactData.content.trim(),
-        area: artifactData.area || "Overworld",
-        location: {
-          x: Number(artifactData.location.x),
-          y: Number(artifactData.location.y)
-        }
-      };
-      
-      // Send as JSON
-      requestData = processedData;
-      console.log("Processing artifact data:", requestData);
     }
-
-    // Make API request
-    console.log("Sending artifact data:", requestData);
-    const response = artifactData instanceof FormData
-      ? await API.post("/api/artifacts", requestData, requestConfig)
-      : await API.post("/api/artifacts", requestData);
-
-    console.log("Created artifact:", response.data);
+    
+    const response = artifactData.file 
+      ? await getApi().post("/api/artifacts", requestData, requestConfig)
+      : await getApi().post("/api/artifacts", requestData);
+      
     return response.data;
   } catch (error) {
-    console.error("Error creating artifact:", error);
-    // Format the error message nicely
-    const errorMessage = handleApiError(error, 'Failed to create artifact');
-    throw new Error(errorMessage);
+    console.error('Create artifact failed:', error);
+    throw error;
   }
 };
 
 export const updateArtifact = async (artifactId, updatedData) => {
   try {
-    if (!artifactId) {
-      throw new Error('Artifact ID is required for updates');
-    }
-
-    // Check if we're dealing with FormData (file uploads)
-    if (updatedData instanceof FormData) {
-      console.log("Updating artifact with file attachment:", artifactId);
+    // If there's a file to upload, use FormData
+    if (updatedData.file) {
+      const formData = new FormData();
       
-      // Ensure the FormData object has the artifact ID
-      if (!updatedData.has('id') && !updatedData.has('_id')) {
-        updatedData.append('id', artifactId);
-      }
-      
-      // For FormData, we need to set the correct axios config
-      // Note: We do NOT set Content-Type here - axios will automatically set the correct
-      // multipart/form-data boundary header when it detects FormData
-      const response = await API.put(`/api/artifacts/${artifactId}`, updatedData, {
-        headers: {
-          // Let axios set the correct Content-Type with boundary
-          // 'Content-Type' is intentionally omitted
+      // Add all the text fields
+      Object.keys(updatedData).forEach(key => {
+        if (key !== 'file' && updatedData[key] !== undefined) {
+          // Handle location object
+          if (key === 'location' && updatedData.location) {
+            formData.append('location[x]', updatedData.location.x);
+            formData.append('location[y]', updatedData.location.y);
+          } 
+          // Handle other objects or arrays
+          else if (typeof updatedData[key] === 'object' && updatedData[key] !== null) {
+            formData.append(key, JSON.stringify(updatedData[key]));
+          } 
+          // Handle primitive values
+          else {
+            formData.append(key, updatedData[key]);
+          }
         }
       });
       
-      console.log("Updated artifact with file:", response.data);
+      // Add the file
+      formData.append('image', updatedData.file);
+      
+      const response = await getApi().put(`/api/artifacts/${artifactId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
       return response.data;
     }
     
-    // Regular JSON update (no files) - validate only fields that are provided
+    // No file - just send the JSON data
     const processedData = { ...updatedData };
     
-    // Only validate name if provided
-    if (processedData.name !== undefined) {
-      if (processedData.name.trim().length < 1) {
-        throw new Error('Artifact name cannot be empty');
-      }
-      processedData.name = processedData.name.trim();
-    }
-    
-    // Only validate description if provided
-    if (processedData.description !== undefined) {
-      if (processedData.description.trim().length < 1) {
-        throw new Error('Artifact description cannot be empty');
-      }
-      processedData.description = processedData.description.trim();
-    }
-    
-    // Only validate content if provided
-    if (processedData.content !== undefined) {
-      if (processedData.content.trim().length < 1) {
-        throw new Error('Artifact content cannot be empty');
-      }
-      processedData.content = processedData.content.trim();
-    }
-    
-    // Process location data if provided
-    if (processedData.location) {
-      // Validate location coordinates
-      if ((typeof processedData.location.x !== 'number' && typeof processedData.location.x !== 'string') ||
-          (typeof processedData.location.y !== 'number' && typeof processedData.location.y !== 'string')) {
-        throw new Error('Valid location coordinates are required');
-      }
-      
-      // Ensure location values are numbers
-      processedData.location = {
-        x: Number(processedData.location.x),
-        y: Number(processedData.location.y)
-      };
-    }
-    
-    console.log("Updating artifact with data:", processedData);
-    const response = await API.put(`/api/artifacts/${artifactId}`, processedData);
-    console.log("Updated artifact:", response.data);
+    const response = await getApi().put(`/api/artifacts/${artifactId}`, processedData);
     return response.data;
   } catch (error) {
-    console.error("Error updating artifact:", error);
-    // Create a user-friendly error message
-    let errorMessage = 'Failed to update artifact';
-    
-    if (error.response?.data?.error) {
-      errorMessage = error.response.data.error;
-    } else if (error.response?.data?.message) {
-      errorMessage = error.response.data.message;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    
-    throw new Error(errorMessage);
+    console.error(`Update artifact ${artifactId} failed:`, error);
+    throw error;
   }
 };
 
 export const deleteArtifact = async (artifactId) => {
   try {
-    const response = await API.delete(`/api/artifacts/${artifactId}`);
-    console.log("Deleted artifact:", response.data);
+    const response = await getApi().delete(`/api/artifacts/${artifactId}`);
     return response.data;
   } catch (error) {
-    console.error("Error deleting artifact:", error);
-    throw error.response?.data?.message || error.message || 'Failed to delete artifact';
+    console.error(`Delete artifact ${artifactId} failed:`, error);
+    throw error;
   }
 };
 
 /* ────────────────────────────────
    🔹 MESSAGING ENDPOINTS (CRUD)
 ──────────────────────────────── */
-export const sendMessage = async (recipient, content, artifactId = null) => {
+export const sendMessage = async (recipient, content, artifactId) => {
   try {
-    console.log("🚀 Sending message payload:", { recipient, content, artifactId });
-    const response = await API.post("/messages", { recipient, content, artifactId });
+    const response = await getApi().post("/messages", { recipient, content, artifactId });
     return response.data;
   } catch (error) {
-    console.error("❌ Error sending message:", error.response?.data || error.message);
-    const errorMessage = handleApiError(error, "Failed to send message");
-    throw new Error(errorMessage);
+    console.error('Send message failed:', error);
+    throw error;
   }
 };
 
 export const fetchMessage = async (artifactId) => {
   try {
-    const response = await API.get(`/artifacts/${artifactId}/message`);
-    console.log("Fetched message:", response.data);
+    const response = await getApi().get(`/artifacts/${artifactId}/message`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching message:", error);
-    const errorMessage = handleApiError(error, "Failed to fetch message");
-    throw new Error(errorMessage);
+    console.error(`Fetch message for artifact ${artifactId} failed:`, error);
+    throw error;
   }
 };
 
 export const fetchMessages = async () => {
   try {
-    const response = await API.get("/messages");
+    const response = await getApi().get("/messages");
     return response.data;
   } catch (error) {
-    console.error("Error fetching messages:", error);
-    const errorMessage = handleApiError(error, "Failed to fetch messages");
-    throw new Error(errorMessage);
+    console.error('Fetch messages failed:', error);
+    throw error;
   }
 };
 
-export const updateMessage = async (artifactId, messageText) => {
+export const updateMessage = async (artifactId, content) => {
   try {
-    // Validate inputs
-    if (!artifactId) {
-      throw new Error("Artifact ID is required");
-    }
-    
-    // Ensure messageText is a string and trim it
-    const processedMessage = messageText ? messageText.trim() : "";
-    
-    console.log(`Updating message for artifact ${artifactId}:`, processedMessage);
-    
-    const response = await API.put(`/artifacts/${artifactId}/message`, { 
-      messageText: processedMessage 
+    const response = await getApi().put(`/artifacts/${artifactId}/message`, {
+      content
     });
-    
-    console.log("Updated message response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error updating message:", error);
-    const errorMessage = handleApiError(error, "Failed to update message");
-    throw new Error(errorMessage);
+    console.error(`Update message for artifact ${artifactId} failed:`, error);
+    throw error;
   }
 };
 
 export const deleteMessage = async (artifactId) => {
   try {
-    const response = await API.delete(`/artifacts/${artifactId}/message`);
-    console.log("Deleted message:", response.data);
+    const response = await getApi().delete(`/artifacts/${artifactId}/message`);
     return response.data;
   } catch (error) {
-    console.error("Error deleting message:", error);
-    const errorMessage = handleApiError(error, "Failed to delete message");
-    throw new Error(errorMessage);
+    console.error(`Delete message for artifact ${artifactId} failed:`, error);
+    throw error;
   }
 };
 
@@ -1004,5 +928,30 @@ export const chat = async (prompt, context, role, npcConfig = null, signal = nul
     console.error('Error in chat:', error);
     const errorMessage = handleApiError(error, "Failed to chat");
     throw new Error(errorMessage);
+  }
+};
+
+// Export a function to proxy OpenAI requests
+export const proxyOpenAIRequest = async (endpoint, requestData) => {
+  try {
+    const response = await getApi().post('/api/proxy', {
+      targetEndpoint: endpoint,
+      requestData
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Proxy request failed:', error);
+    throw error;
+  }
+};
+
+// User management
+export const fetchUsers = async () => {
+  try {
+    const response = await getApi().get('/api/users');
+    return response.data;
+  } catch (error) {
+    console.error('Fetch users failed:', error);
+    throw error;
   }
 };

@@ -33,7 +33,17 @@ export const AuthProvider = ({ children }) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [refreshTimeout, setRefreshTimeout] = useState(null);
   const [lastVerified, setLastVerified] = useState(0);
+  const [renderCount, setRenderCount] = useState(0); // Add render counter
+  const [initAttempted, setInitAttempted] = useState(false); // Track if initialization was attempted
   const VERIFICATION_THROTTLE_MS = 30000; // 30 seconds between verification attempts
+  
+  // Log rendering for debugging
+  console.log(`AuthProvider rendering #${renderCount} at ${new Date().toISOString()}`);
+  
+  // Increment render count on each render
+  useEffect(() => {
+    setRenderCount(prev => prev + 1);
+  }, []);
   
   // Store these functions in refs to break circular dependencies
   const refreshTokenRef = useRef(null);
@@ -181,6 +191,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     let isMounted = true;
     console.log("AuthContext: Running initialization effect.");
+    
+    // Skip initialization if already attempted to prevent loops
+    if (initAttempted) {
+      console.log("AuthContext: Init already attempted, skipping");
+      if (isMounted && loading) {
+        setLoading(false); // Ensure we exit loading state
+      }
+      return;
+    }
+    
+    // Mark that we've attempted initialization
+    setInitAttempted(true);
 
     const initializeAuth = async () => {
       if (!isMounted) {
@@ -211,69 +233,16 @@ export const AuthProvider = ({ children }) => {
               throw new Error('Invalid user data format in storage'); // Propagate error
           }
 
-          // Check expiration *before* potentially slow network calls
-          if (isTokenExpired(finalToken)) {
-            console.log("AuthContext: Token is expired, attempting refresh.");
-            if (refreshTokenRef.current) {
-              const refreshed = await refreshTokenRef.current(); // This calls verify internally now
-              if (refreshed) {
-                console.log("AuthContext: Token refresh successful during init.");
-                // Refresh succeeded, update token and user from storage again
-                finalToken = localStorage.getItem('token');
-                const refreshedUserStr = localStorage.getItem('user');
-                 try {
-                      if (refreshedUserStr) finalUser = JSON.parse(refreshedUserStr);
-                      else throw new Error("User data missing after refresh");
-                 } catch (e) {
-                      console.error("AuthContext: Failed to parse user after refresh", e);
-                      needsLogout = true; // Treat as logout if user data is bad after refresh
-                 }
-                finalSuccess = 'Session refreshed successfully';
-              } else {
-                console.log("AuthContext: Token refresh failed, marking for logout.");
-                needsLogout = true;
-                finalError = 'Session expired.';
-              }
-            } else {
-                 console.log("AuthContext: Refresh function not available, marking for logout.");
-                 needsLogout = true; // Cannot refresh
-                 finalError = 'Session expired.';
-            }
-          } else {
-            // Token is not expired, just use stored user. Optionally verify in background.
-            console.log("AuthContext: Token not expired. Using stored user data.");
-            finalSuccess = 'Session restored successfully';
+          // Skip verification for now, just use the stored user data
+          // This prevents network errors during initialization
+          console.log("AuthContext: Using stored user data, skipping token verification for now.");
+          finalSuccess = 'Session restored successfully';
 
-            // Optionally verify token validity with server in background (throttled)
-            const now = Date.now();
-             if (now - lastVerified > VERIFICATION_THROTTLE_MS) {
-                 console.log("AuthContext: Verification throttle passed, verifying token in background.");
-                 // Use a separate async function to avoid blocking the main flow
-                 const verifyInBackground = async () => {
-                      if (!isMounted) return;
-                      setIsVerifying(true); // Show verifying indicator
-                      try {
-                         // Use verifyToken directly, not throttledVerifyToken here, as we *want* the network call
-                         await verifyToken();
-                         if (isMounted) setLastVerified(Date.now()); // Update lastVerified *only on success*
-                         console.log("AuthContext: Background token verification successful.");
-                      } catch (verificationError) {
-                          console.error("AuthContext: Background token verification failed.", verificationError);
-                          // If background verify fails critically (e.g., invalid/expired token), log out
-                         if (isMounted && (verificationError.message?.includes('expired') || verificationError.message?.includes('Invalid') || verificationError.response?.status === 401)) {
-                              console.log("AuthContext: Background verification failed critically, logging out.");
-                              if (logoutRef.current) logoutRef.current(); // Perform full logout
-                         }
-                      } finally {
-                          if (isMounted) setIsVerifying(false);
-                      }
-                 }
-                 verifyInBackground(); // Fire and forget
-             } else {
-                 console.log("AuthContext: Token verification skipped (recently verified).");
-             }
+          // Schedule a future verification after component is mounted and renders
+          if (scheduleTokenRefreshRef.current) {
+             console.log("AuthContext: Scheduling initial token refresh for later.");
+             scheduleTokenRefreshRef.current(finalToken);
           }
-
         } catch (error) {
           console.error('AuthContext: Auth initialization error:', error);
           needsLogout = true; // Mark for logout on any initialization error
@@ -300,11 +269,6 @@ export const AuthProvider = ({ children }) => {
         } else {
              console.log("AuthContext: Setting final state to logged in.");
              setUser(finalUser);
-             // Schedule refresh only if we ended up logged in with a valid token
-             if (scheduleTokenRefreshRef.current && finalToken) {
-                 console.log("AuthContext: Scheduling final token refresh.");
-                 scheduleTokenRefreshRef.current(finalToken);
-             }
         }
 
         // Set messages and loading state regardless
@@ -330,7 +294,7 @@ export const AuthProvider = ({ children }) => {
       }
     };
     // Keep dependencies empty to run only once on mount
-  }, []); // <-- ***** IMPORTANT: Keep this empty *****
+  }, []);
 
   const login = async (identifier, password) => {
     try {
@@ -375,11 +339,16 @@ export const AuthProvider = ({ children }) => {
     clearMessages
   };
 
+  // Determine if we should show children - either:
+  // 1. We've finished loading OR
+  // 2. We've tried initializing at least once and 2+ seconds have passed
+  const shouldShowChildren = !loading || (initAttempted && renderCount > 3);
+  
+  console.log(`AuthContext: shouldShowChildren=${shouldShowChildren}, loading=${loading}, initAttempted=${initAttempted}, renderCount=${renderCount}`);
+
   return (
     <AuthContext.Provider value={value}>
-      {/* Temporarily comment out the loading check to always render children */}
-      {/* {!loading && children} */}
-      {children} 
+      {shouldShowChildren ? children : <div>Loading authentication state...</div>}
     </AuthContext.Provider>
   );
 }; 

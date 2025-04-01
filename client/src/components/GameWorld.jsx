@@ -78,21 +78,29 @@ const GameWorld = () => {
     // Load and apply saved artifact visibility state
     applyMapArtifactVisibilityFromStorage();
     
-    fetchArtifacts()
-      .then((data) => {
-        console.log("📦 Loaded Artifacts:", data);
-        // Filter out any server artifacts that duplicate artifacts already defined in MAPS
-        const mapArtifacts = Array.isArray(MAPS) 
-          ? MAPS.flatMap(map => (map.artifacts || []).map(art => art.name))
-          : [];
-        const filteredServerArtifacts = data.filter(serverArt => 
-          !mapArtifacts.includes(serverArt.name) || 
-          !serverArt.location // Include artifacts without location (inventory items)
-        );
-        setArtifacts(filteredServerArtifacts);
-      })
-      .catch((error) => console.error("❌ Error fetching artifacts:", error));
-  }, []);
+    // Only fetch artifacts if we haven't loaded them already
+    if (!artifacts || artifacts.length === 0) {
+      console.log("📦 Loading artifacts from server...");
+      
+      fetchArtifacts()
+        .then((data) => {
+          console.log("📦 Loaded Artifacts:", data ? data.length : 0);
+          // Filter out any server artifacts that duplicate artifacts already defined in MAPS
+          const mapArtifacts = Array.isArray(MAPS) 
+            ? MAPS.flatMap(map => (map.artifacts || []).map(art => art.name))
+            : [];
+          const filteredServerArtifacts = data.filter(serverArt => 
+            !mapArtifacts.includes(serverArt.name) || 
+            !serverArt.location // Include artifacts without location (inventory items)
+          );
+          setArtifacts(filteredServerArtifacts);
+        })
+        .catch((error) => {
+          console.error("❌ Error fetching artifacts:", error);
+          // Don't reset artifacts array if there's an error to prevent constant refetching
+        });
+    }
+  }, []); // Empty dependency array - only fetch artifacts once on mount
 
   useEffect(() => {
     // Check if user has already dismissed the guide
@@ -263,25 +271,57 @@ const GameWorld = () => {
   useEffect(() => {
     // Initialize sound manager
     const initSoundManager = async () => {
-      const manager = SoundManager.getInstance();
-      await manager.initialize();
-      setSoundManager(manager);
-      
-      // Register discovery sound
-      manager.registerSound('discovery', '/assets/sounds/discovery.mp3');
-      
-      // Start playing the main theme based on current map
-      const currentMapName = MAPS[currentMapIndex].name;
-      if (currentMapName.includes('Overworld')) {
-        manager.playMusic('overworld', true);
-      } else if (currentMapName === 'Yosemite') {
-        manager.playMusic('yosemite', true);
-      } else if (currentMapName.includes('Dungeon')) {
-        manager.playMusic('terminal', true);
+      try {
+        // Skip if already initialized
+        if (soundManager) {
+          console.log("🔊 Sound manager already initialized");
+          
+          // Just update the music based on the current map
+          const currentMapName = MAPS[currentMapIndex]?.name || '';
+          if (currentMapName.includes('Overworld')) {
+            soundManager.playMusic('overworld', true);
+          } else if (currentMapName === 'Yosemite') {
+            soundManager.playMusic('yosemite', true);
+          } else if (currentMapName.includes('Dungeon')) {
+            soundManager.playMusic('terminal', true);
+          }
+          
+          return;
+        }
+        
+        console.log("🔊 Initializing sound manager...");
+        const manager = SoundManager.getInstance();
+        
+        try {
+          await manager.initialize();
+          setSoundManager(manager);
+          
+          // Register discovery sound
+          manager.registerSound('discovery', '/assets/sounds/discovery.mp3');
+          
+          // Start playing the main theme based on current map
+          const currentMapName = MAPS[currentMapIndex]?.name || '';
+          if (currentMapName.includes('Overworld')) {
+            manager.playMusic('overworld', true);
+          } else if (currentMapName === 'Yosemite') {
+            manager.playMusic('yosemite', true);
+          } else if (currentMapName.includes('Dungeon')) {
+            manager.playMusic('terminal', true);
+          }
+        } catch (soundError) {
+          // Catch errors during sound initialization to prevent app crashes
+          console.error("🔇 Error initializing sound manager:", soundError);
+          // Set the manager anyway so we don't keep trying to initialize
+          setSoundManager(manager);
+        }
+      } catch (error) {
+        console.error("🔇 Critical error in sound initialization:", error);
+        // Don't throw - just log the error to prevent app crash
       }
     };
+    
     initSoundManager();
-  }, [currentMapIndex]);
+  }, [currentMapIndex, soundManager]); // Only reinitialize when map changes or if soundManager changes
 
   const handleCharacterMove = useCallback((newPosition, targetMapIndex) => {
     // Update character position
@@ -466,7 +506,9 @@ const GameWorld = () => {
         destinationMap = "Dungeon Level 3";
       }
       else if (currentMapName === "Dungeon Level 3") {
-        destinationMap = "Yosemite";
+        // Instead of going to Yosemite directly, handle Text Adventure special world
+        setCurrentSpecialWorld('text_adventure');
+        return; // Skip the rest of the portal logic since we're launching a special world
       }
       
       // Find the index of the destination map
@@ -871,6 +913,7 @@ const GameWorld = () => {
       setSelectedUserArtifact(artifact);
     }
   };
+
 
   // Check if player can walk on a tile
   const canWalkOnTile = (position) => {

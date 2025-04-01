@@ -17,9 +17,19 @@ import TextAdventure from './components/TextAdventure';
 import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 
+// Debug startup
+console.log('App starting at', new Date().toISOString());
+
 function App() {
   const [world, setWorld] = useState('desert1');
   const [user, setUser] = useState(null);
+  const [startupTime] = useState(new Date().toISOString());
+
+  // Debug mount
+  useEffect(() => {
+    console.log('App mounted at', new Date().toISOString(), 'startup was at', startupTime);
+    return () => console.log('App unmounting at', new Date().toISOString());
+  }, [startupTime]);
 
   const handleWorldChange = (worldId) => {
     // ... existing code ...
@@ -41,81 +51,81 @@ function App() {
   };
 
   return (
-    <ErrorBoundary>
+    <div className="app">
+      {/* Apply AuthProvider outside the ErrorBoundary to prevent auth initialization errors from triggering ErrorBoundary */}
       <AuthProvider>
         <Router>
-          <div className="app">
-            <Navbar />
-            <main className="main-content">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/worlds/create"
-                  element={
-                    <ProtectedRoute>
-                      <CreateWorld />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/world/:id"
-                  element={
-                    <ProtectedRoute>
-                      <World />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/artifacts"
-                  element={
-                    <ProtectedRoute>
-                      <ArtifactsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/artifacts/:id"
-                  element={
-                    <ProtectedRoute>
-                      <ArtifactsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/game/:worldId?/:areaId?"
-                  element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <ErrorBoundary>
-                        <GameWorld />
-                      </ErrorBoundary>
-                    </Suspense>
-                  }
-                />
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
-            </main>
-          </div>
+          {/* ErrorBoundary surrounding individual route content, not wrapping Router */}
+          <Navbar />
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<ErrorBoundary><Home /></ErrorBoundary>} />
+              <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
+              <Route path="/register" element={<ErrorBoundary><Register /></ErrorBoundary>} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <ErrorBoundary><Dashboard /></ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/worlds/create"
+                element={
+                  <ProtectedRoute>
+                    <ErrorBoundary><CreateWorld /></ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/world/:id"
+                element={
+                  <ProtectedRoute>
+                    <ErrorBoundary><World /></ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ErrorBoundary><Profile /></ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/artifacts"
+                element={
+                  <ProtectedRoute>
+                    <ErrorBoundary><ArtifactsPage /></ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/artifacts/:id"
+                element={
+                  <ProtectedRoute>
+                    <ErrorBoundary><ArtifactsPage /></ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/game/:worldId?/:areaId?"
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <ErrorBoundary>
+                      <GameWorld />
+                    </ErrorBoundary>
+                  </Suspense>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </main>
         </Router>
       </AuthProvider>
-    </ErrorBoundary>
+    </div>
   );
 }
 
