@@ -1,6 +1,7 @@
 /**
  * Core Quote System
  * Centralized management of all game quotes
+ * Updated to fix Heroku deployment - 2025-04-01
  */
 
 import { LITERARY_QUOTES, WISDOM_QUOTES, NATURE_QUOTES, INSPIRATIONAL_QUOTES } from './fallbackQuotes.js';

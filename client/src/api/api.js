@@ -5,17 +5,20 @@ import { NPC_TYPES } from "../components/Constants";
 const displayBuildInfo = () => {
   const buildDate = new Date().toISOString();
   const buildEnv = import.meta.env.MODE || 'development';
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+  
   console.info(`%cApplication Build Info:
   🔹 Environment: ${buildEnv}
   🔹 Build Date: ${buildDate}
-  🔹 API URL: ${import.meta.env.VITE_API_URL || 'http://localhost:5001'}`,
+  🔹 API URL: ${apiUrl}
+  🔹 Base URL: ${window.location.origin}`,
   'color: #6366F1; font-weight: bold;');
+  
+  return { buildEnv, apiUrl };
 };
 
-// Call this on app initialization (only in non-production)
-if (import.meta.env.MODE !== 'production') {
-  displayBuildInfo();
-}
+// Call this on app initialization (always, not just in development)
+const { buildEnv, apiUrl } = displayBuildInfo();
 
 // Function to create API instance with the given base URL
 const createApiInstance = (baseUrl) => {
