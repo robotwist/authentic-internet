@@ -1,4 +1,4 @@
-import { QUOTE_CATEGORIES, getCharacterQuote, getCategoryQuote, getRandomQuote } from '../../client/src/utils/quoteSystem.js';
+import { QUOTE_CATEGORIES, getCharacterQuote, getCategoryQuote, getRandomQuote } from '../utils/quoteSystem.js';
 
 /**
  * Fetch a quote from Jesus
