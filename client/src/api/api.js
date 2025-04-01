@@ -344,7 +344,8 @@ export const loginUser = async (username, password) => {
     console.log(`API Login attempt with username: ${username}`);
     
     const response = await getApi().post('/api/auth/login', {
-      identifier: username, // Map username parameter to identifier field for backward compatibility
+      identifier: username, // For backward compatibility
+      username: username,   // Add username parameter for new server implementations
       password
     });
     
