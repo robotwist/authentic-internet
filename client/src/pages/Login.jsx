@@ -11,7 +11,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import API from '../api/api';
+import API, { testApiConnection } from '../api/api';
 
 // Custom hook for API health check (for developer debugging only)
 const useApiHealthCheck = () => {
@@ -149,15 +149,24 @@ const Login = () => {
   const attemptFailsafeLogin = async () => {
     try {
       console.warn("Using failsafe login method");
-      // Direct API call as fallback
-      const response = await API.post('/api/auth/login', {
-        // Handle both server-side naming conventions for maximum compatibility
-        identifier: formData.username,
-        username: formData.username, // Send both formats to ensure compatibility
-        password: formData.password
-      });
       
-      console.log("Login response:", response.data);
+      // Show API URL for debugging
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      console.log(`🔍 API URL used: ${apiUrl}`);
+      
+      // Log the data being sent
+      const loginData = {
+        identifier: formData.username, 
+        username: formData.username,
+        password: formData.password
+      };
+      console.log("Sending login data:", { ...loginData, password: '******' });
+      
+      // Direct API call as fallback
+      const response = await API.post('/api/auth/login', loginData);
+      
+      console.log("Login response status:", response.status);
+      console.log("Login response data:", response.data);
       
       // Safely extract token and user data
       const token = response?.data?.token;
@@ -172,17 +181,50 @@ const Login = () => {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      // Verify the token was saved by logging it to console (never do this in production)
-      console.log("Token saved successfully:", localStorage.getItem('token')?.substring(0, 10) + '...');
+      // Verify the token was saved
+      console.log("Token saved:", localStorage.getItem('token')?.substring(0, 10) + '...');
+      console.log("User saved:", localStorage.getItem('user'));
       
       // Reload the page to reset all app state with new authentication
       window.location.href = from;
       return true;
     } catch (error) {
+      // Enhanced error logging
       console.error("Failsafe login failed:", error);
+      
       if (error.response) {
-        console.error("Server response:", error.response.data);
+        console.error("Server response status:", error.response.status);
+        console.error("Server response data:", error.response.data);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        alert("Login failed: Unable to connect to the server. Please check if the API server is running.");
+      } else {
+        console.error("Request setup error:", error.message);
       }
+      
+      // If it's a network error, check if the server is accessible
+      if (error.message.includes('Network Error')) {
+        console.error("Network error detected - API might be down or inaccessible from client");
+        try {
+          // Attempt a basic health check
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+          console.log(`Attempting health check on ${apiUrl}`);
+          
+          fetch(`${apiUrl}/api/health`, { 
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-cache',
+            timeout: 5000
+          }).then(response => {
+            console.log("Health check response:", response.status);
+          }).catch(err => {
+            console.error("Health check failed:", err);
+          });
+        } catch (healthCheckError) {
+          console.error("Health check attempt failed:", healthCheckError);
+        }
+      }
+      
       return false;
     }
   };
@@ -356,6 +398,38 @@ const Login = () => {
           </Link>
         </p>
       </div>
+      
+      {/* Show diagnostic button only in development or if there's an error */}
+      {(import.meta.env.DEV || error) && (
+        <div className="diagnostic-tools" style={{ marginTop: '20px', padding: '10px', border: '1px dashed #ccc' }}>
+          <h3>Diagnostic Tools</h3>
+          <button 
+            onClick={async () => {
+              try {
+                console.log("Testing API connection...");
+                const results = await testApiConnection();
+                console.log("Connection test results:", results);
+                alert(`API Connection Test Results:
+                  API URL: ${results.apiUrl}
+                  Origin: ${results.originUrl}
+                  CORS Test: ${results.corsTest ? '✅' : '❌'} (${results.corsStatus})
+                  Health Test: ${results.healthTest ? '✅' : '❌'} (${results.healthStatus})
+                  ${results.error ? `Error: ${results.error}` : ''}`);
+              } catch (err) {
+                console.error("Connection test failed:", err);
+                alert(`API test failed: ${err.message}`);
+              }
+            }}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.8rem' }}
+          >
+            Test API Connection
+          </button>
+          <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '5px' }}>
+            API URL: {import.meta.env.VITE_API_URL || 'http://localhost:5001'}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

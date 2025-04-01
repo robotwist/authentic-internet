@@ -11,8 +11,19 @@ const displayBuildInfo = () => {
   🔹 Environment: ${buildEnv}
   🔹 Build Date: ${buildDate}
   🔹 API URL: ${apiUrl}
-  🔹 Base URL: ${window.location.origin}`,
+  🔹 Base URL: ${window.location.origin}
+  🔹 Full Path: ${window.location.href}`,
   'color: #6366F1; font-weight: bold;');
+  
+  // Log all environment variables in development mode
+  if (buildEnv === 'development') {
+    console.log('Environment Variables:', {
+      VITE_API_URL: import.meta.env.VITE_API_URL,
+      VITE_API_FALLBACK_URL: import.meta.env.VITE_API_FALLBACK_URL,
+      VITE_SERVER_URL: import.meta.env.VITE_SERVER_URL,
+      // Add other env vars here as needed
+    });
+  }
   
   return { buildEnv, apiUrl };
 };
@@ -966,5 +977,60 @@ export const fetchUsers = async () => {
   } catch (error) {
     console.error('Fetch users failed:', error);
     throw error;
+  }
+};
+
+// Add CORS diagnostic function to test server reachability
+export const testApiConnection = async () => {
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+  const results = {
+    apiUrl,
+    originUrl: window.location.origin,
+    corsTest: false,
+    healthTest: false,
+    error: null
+  };
+  
+  try {
+    // Try a simple CORS preflight with OPTIONS
+    console.log(`Testing CORS preflight to ${apiUrl}/api/health...`);
+    
+    // First test: OPTIONS request
+    const optionsResult = await fetch(`${apiUrl}/api/health`, {
+      method: 'OPTIONS',
+      headers: {
+        'Origin': window.location.origin,
+        'Access-Control-Request-Method': 'GET',
+        'Access-Control-Request-Headers': 'Content-Type,Authorization'
+      }
+    });
+    
+    results.corsTest = optionsResult.ok;
+    results.corsStatus = optionsResult.status;
+    console.log(`CORS preflight result: ${optionsResult.status}`);
+    
+    // Second test: GET request to health endpoint
+    const healthResult = await fetch(`${apiUrl}/api/health`, {
+      method: 'GET',
+      headers: {
+        'Origin': window.location.origin
+      }
+    });
+    
+    results.healthTest = healthResult.ok;
+    results.healthStatus = healthResult.status;
+    
+    if (healthResult.ok) {
+      results.healthData = await healthResult.json();
+      console.log(`Health check passed: ${JSON.stringify(results.healthData)}`);
+    } else {
+      console.error(`Health check failed with status ${healthResult.status}`);
+    }
+    
+    return results;
+  } catch (error) {
+    console.error("API connection test failed:", error);
+    results.error = error.message;
+    return results;
   }
 };
