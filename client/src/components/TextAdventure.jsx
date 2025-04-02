@@ -148,12 +148,36 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
         },
         'examine door': {
           text: 'The door has no handle or keyhole. Instead, there\'s a small brass plate with the inscription: "Speak the theory that reveals truth beneath the surface." Perhaps you could try to speak the password you learned.',
+          dynamicText: (inventory) => {
+            if (inventory.includes('ancient tome')) {
+              return 'The door has no handle or keyhole. Instead, there\'s a small brass plate with the inscription: "Speak the theory that reveals truth beneath the surface." The symbols on the plate look similar to those on your ancient tome. Perhaps you could try to speak the password you learned, or maybe the tome itself might interact with the door somehow.';
+            }
+            return 'The door has no handle or keyhole. Instead, there\'s a small brass plate with the inscription: "Speak the theory that reveals truth beneath the surface." Perhaps you could try to speak the password you learned.';
+          }
         },
         'speak iceberg theory': {
           text: 'You speak the words "Iceberg Theory" clearly, and the door responds with a soft glow. It swings open, revealing the sanctuary beyond.',
           addKnowledge: 'used_password',
           revealExit: 'door',
           prerequisite: 'password'
+        },
+        'recite iceberg theory': {
+          text: 'You recite the words "Iceberg Theory" clearly, and the door responds with a soft glow. It swings open, revealing the sanctuary beyond.',
+          addKnowledge: 'used_password',
+          revealExit: 'door',
+          prerequisite: 'password'
+        },
+        'use tome on door': {
+          text: 'You press the ancient tome against the door. The symbols on the book glow in response, and the words "Iceberg Theory" appear briefly on its pages. The door responds with a soft glow and swings open, revealing the sanctuary beyond.',
+          addKnowledge: 'used_password',
+          revealExit: 'door',
+          prerequisite: ['ancient tome', 'password']
+        },
+        'use book on door': {
+          text: 'You press the ancient tome against the door. The symbols on the book glow in response, and the words "Iceberg Theory" appear briefly on its pages. The door responds with a soft glow and swings open, revealing the sanctuary beyond.',
+          addKnowledge: 'used_password',
+          revealExit: 'door',
+          prerequisite: ['ancient tome', 'password']
         }
       },
       lockedExits: {
@@ -290,7 +314,8 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
       addToHistory('system', '- examine [object]: look at something more closely');
       addToHistory('system', '- take [item]: pick up an item');
       addToHistory('system', '- inventory: see what you\'re carrying');
-      addToHistory('system', '- use [item]: use an item you\'re carrying');
+      addToHistory('system', '- use [item]: use an item');
+      addToHistory('system', '- use [item] on [object]: use an item on something');
       addToHistory('system', '- talk to [character]: interact with someone');
       addToHistory('system', '- read [item]: read something');
       addToHistory('system', '- speak [words]: say something aloud');
@@ -336,20 +361,112 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
       return;
     }
     
+    // Special case for password commands when in secret passage
+    if (currentRoom === 'secretPassage') {
+      // Check for different variations of using the password
+      const passwordCommands = [
+        'speak iceberg theory', 
+        'say iceberg theory', 
+        'iceberg theory',
+        'recite iceberg theory',
+        'whisper iceberg theory',
+        'tell door iceberg theory',
+        'utter iceberg theory'
+      ];
+      
+      if (passwordCommands.includes(command)) {
+        if (GAME_WORLD.library.playerKnowledge?.includes('password')) {
+          addToHistory('system', 'You speak the words "Iceberg Theory" clearly, and the door responds with a soft glow. It swings open, revealing the sanctuary beyond.');
+          // Unlock the exit permanently
+          delete GAME_WORLD.secretPassage.lockedExits.door;
+          handleMovement('door');
+          return;
+        } else {
+          addToHistory('system', 'You speak the words, but nothing happens. Perhaps you need to learn their significance first.');
+          return;
+        }
+      }
+    }
+    
     // Object interactions
     const room = GAME_WORLD[currentRoom];
     
-    // Special case for "speak" command when in secret passage
-    if (currentRoom === 'secretPassage' && 
-       (command === 'speak iceberg theory' || command === 'say iceberg theory' || command === 'iceberg theory')) {
-      if (GAME_WORLD.library.playerKnowledge?.includes('password')) {
-        addToHistory('system', 'You speak the words "Iceberg Theory" clearly, and the door responds with a soft glow. It swings open, revealing the sanctuary beyond.');
-        // Unlock the exit permanently
-        delete GAME_WORLD.secretPassage.lockedExits.door;
-        handleMovement('door');
-        return;
-      } else {
-        addToHistory('system', 'You speak the words, but nothing happens. Perhaps you need to learn their significance first.');
+    // Check for "use X on Y" pattern
+    if (command.startsWith('use ') && command.includes(' on ')) {
+      const parts = command.split(' on ');
+      const item = parts[0].substring(4).trim(); // remove 'use ' prefix
+      const target = parts[1].trim();
+      const interactionKey = `use ${item} on ${target}`;
+      
+      if (room.interactions && room.interactions[interactionKey]) {
+        const interactionData = room.interactions[interactionKey];
+        
+        // Check if prerequisites are met
+        if (interactionData.prerequisite) {
+          if (Array.isArray(interactionData.prerequisite)) {
+            const allMet = interactionData.prerequisite.every(prereq => {
+              return inventory.includes(prereq) || room.completedInteractions?.includes(prereq);
+            });
+            
+            if (!allMet) {
+              addToHistory('system', 'You can\'t do that yet.');
+              return;
+            }
+          } else if (!inventory.includes(interactionData.prerequisite) && 
+                    !room.completedInteractions?.includes(interactionData.prerequisite)) {
+            addToHistory('system', 'You can\'t do that yet.');
+            return;
+          }
+        }
+        
+        // Display interaction text
+        addToHistory('room', interactionData.dynamicText ? interactionData.dynamicText(inventory) : interactionData.text);
+        
+        // Add items to inventory if specified
+        if (interactionData.addItems) {
+          interactionData.addItems.forEach(item => {
+            if (!inventory.includes(item)) {
+              setInventory(prev => [...prev, item]);
+              addToHistory('system', `Added ${item} to inventory.`);
+            }
+          });
+        }
+        
+        // Remove items from room if specified
+        if (interactionData.removeFromRoom) {
+          interactionData.removeFromRoom.forEach(item => {
+            room.items = room.items.filter(i => i !== item);
+          });
+        }
+        
+        // Reveal hidden exits if specified
+        if (interactionData.revealExit) {
+          if (!room.revealedExits) {
+            room.revealedExits = [];
+          }
+          room.revealedExits.push(interactionData.revealExit);
+          addToHistory('system', `You discovered a new exit: ${interactionData.revealExit}.`);
+        }
+        
+        // Add knowledge if specified
+        if (interactionData.addKnowledge) {
+          if (!room.playerKnowledge) {
+            room.playerKnowledge = [];
+          }
+          room.playerKnowledge.push(interactionData.addKnowledge);
+        }
+        
+        // Track completed interactions
+        if (!room.completedInteractions) {
+          room.completedInteractions = [];
+        }
+        room.completedInteractions.push(interactionKey);
+        
+        // Trigger ending if specified
+        if (interactionData.triggerEnding) {
+          handleEnding();
+        }
+        
         return;
       }
     }
@@ -391,7 +508,7 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
           }
           
           // Display interaction text
-          addToHistory('room', interactionData.text);
+          addToHistory('room', interactionData.dynamicText ? interactionData.dynamicText(inventory) : interactionData.text);
           
           // Add items to inventory if specified
           if (interactionData.addItems) {
