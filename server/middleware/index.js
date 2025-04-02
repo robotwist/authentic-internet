@@ -4,8 +4,9 @@ import connectMongo from "connect-mongo";
 import express from "express";
 import errorLogger from "./errorLogger.js";
 import corsUpdater from "./cors-updater.js";
+import { applySecurityHeaders } from "./securityHeaders.js";
 import { configureCorsOptions, configureSessionOptions } from "../config/app-config.js";
-import { configureSecurityHeaders, enforceHttps } from "../utils/security.js";
+import { enforceHttps } from "../utils/security.js";
 import { apiLimiter } from "../utils/rateLimiting.js";
 
 /**
@@ -17,8 +18,8 @@ export const applyMiddleware = (app, allowedOrigins) => {
   // Store allowedOrigins for later access by middleware
   app.set('allowedOrigins', allowedOrigins);
   
-  // Apply security headers using Helmet
-  app.use(configureSecurityHeaders());
+  // Apply security headers
+  app.use(applySecurityHeaders());
   
   // Enforce HTTPS in production
   app.use(enforceHttps);
