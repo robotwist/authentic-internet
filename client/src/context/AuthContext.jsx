@@ -342,7 +342,17 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (error) {
       logPersistentError('AuthContext - Login', error);
-      setError(error.response?.data?.message || 'Login failed. Please check your credentials.');
+      
+      // Extract password requirements message if available
+      let errorMessage = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      
+      setError(errorMessage);
+      
+      // Return password requirements if available
+      if (error.response?.data?.passwordRequirements) {
+        setError(errorMessage + ' ' + error.response.data.passwordRequirements);
+      }
+      
       setLoading(false);
       return false;
     }
@@ -358,7 +368,17 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (error) {
       logPersistentError('AuthContext - Register', error);
-      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+      
+      // Extract password requirements message if available
+      let errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
+      
+      setError(errorMessage);
+      
+      // Return password requirements if available
+      if (error.response?.data?.passwordRequirements) {
+        setError(errorMessage + ' ' + error.response.data.passwordRequirements);
+      }
+      
       setLoading(false);
       return false;
     }

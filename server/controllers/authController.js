@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import { validatePassword, validateUsername, validateEmail, getPasswordRequirementsText } from "../utils/validation.js";
 
 // Validate that JWT_SECRET is properly set
 if (!process.env.JWT_SECRET) {
@@ -12,34 +13,6 @@ if (!process.env.JWT_SECRET) {
 const secretKey = process.env.JWT_SECRET;
 const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
 const tokenExpiration = process.env.JWT_EXPIRES_IN || "24h";
-
-// Password validation helper
-const validatePassword = (password) => {
-  if (password.length < 8) {
-    return { isValid: false, message: "Password must be at least 8 characters long" };
-  }
-  if (!/[A-Z]/.test(password)) {
-    return { isValid: false, message: "Password must contain at least one uppercase letter" };
-  }
-  if (!/[a-z]/.test(password)) {
-    return { isValid: false, message: "Password must contain at least one lowercase letter" };
-  }
-  if (!/[0-9]/.test(password)) {
-    return { isValid: false, message: "Password must contain at least one number" };
-  }
-  return { isValid: true };
-};
-
-// Username validation helper
-const validateUsername = (username) => {
-  if (username.length < 3) {
-    return { isValid: false, message: "Username must be at least 3 characters long" };
-  }
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-    return { isValid: false, message: "Username can only contain letters, numbers, and underscores" };
-  }
-  return { isValid: true };
-};
 
 // ✅ Register a new user
 export const register = async (req, res) => {
@@ -55,12 +28,16 @@ export const register = async (req, res) => {
     // Validate password
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      return res.status(400).json({ message: passwordValidation.message });
+      return res.status(400).json({ 
+        message: passwordValidation.message,
+        passwordRequirements: getPasswordRequirementsText()
+      });
     }
 
     // Validate email
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ message: "Please provide a valid email address" });
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      return res.status(400).json({ message: emailValidation.message });
     }
 
     const normalizedUsername = username.toLowerCase();
@@ -127,7 +104,8 @@ export const login = async (req, res) => {
     if (!identifier || !password) {
       console.log("Login failed: Missing credentials");
       return res.status(400).json({ 
-        message: "Please provide both username/email and password" 
+        message: "Please provide both username/email and password",
+        passwordRequirements: getPasswordRequirementsText()
       });
     }
     
@@ -141,10 +119,13 @@ export const login = async (req, res) => {
       ]
     });
 
+    // For security, don't reveal if username exists or password is wrong
+    // Instead, provide generic message with password requirements
     if (!user) {
       console.log(`Login failed: No user found with identifier: ${identifier.toLowerCase()}`);
       return res.status(401).json({ 
-        message: "Invalid credentials. Please check your username/email and password." 
+        message: "Invalid credentials. Please check your username/email and password.",
+        passwordRequirements: getPasswordRequirementsText()
       });
     }
 
@@ -155,7 +136,8 @@ export const login = async (req, res) => {
     if (!isMatch) {
       console.log(`Login failed: Password mismatch for user: ${user.username}`);
       return res.status(401).json({ 
-        message: "Invalid credentials. Please check your username/email and password." 
+        message: "Invalid credentials. Please check your username/email and password.",
+        passwordRequirements: getPasswordRequirementsText()
       });
     }
 
@@ -183,7 +165,8 @@ export const login = async (req, res) => {
     console.error("❌ Error during login:", error);
     res.status(500).json({ 
       message: "Login failed. Please try again.",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      passwordRequirements: getPasswordRequirementsText()
     });
   }
 };

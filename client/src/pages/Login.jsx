@@ -178,6 +178,14 @@ const Login = () => {
           message: 'Response format invalid',
           response: { data: response.data }
         });
+        
+        // Check for password requirements in response
+        if (response?.data?.passwordRequirements) {
+          setFormErrors({
+            password: response.data.passwordRequirements
+          });
+        }
+        
         return false;
       }
       
@@ -198,6 +206,13 @@ const Login = () => {
       
       // Enhanced error logging
       console.error("Failsafe login failed:", error);
+      
+      // Check for password requirements in response
+      if (error.response?.data?.passwordRequirements) {
+        setFormErrors({
+          password: error.response.data.passwordRequirements
+        });
+      }
       
       if (error.response) {
         console.error("Server response status:", error.response.status);
@@ -288,10 +303,30 @@ const Login = () => {
         setError('Login failed. Please check your credentials.');
       }
     } catch (err) {
+      // Check if the response contains password requirements
+      let errorMessage = 'Login failed. Please check your credentials and try again.';
+      let passwordRequirements = '';
+      
+      if (err.response?.data) {
+        if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+        
+        if (err.response.data.passwordRequirements) {
+          passwordRequirements = err.response.data.passwordRequirements;
+        }
+      }
+      
       // Provide user-friendly error messages
       console.error("Login error:", err);
       logPersistentError('Login Form', err);
-      setError('Login failed. Please check your credentials and try again.');
+      
+      setError(errorMessage);
+      if (passwordRequirements) {
+        setFormErrors({
+          password: passwordRequirements
+        });
+      }
     } finally {
       setIsLoading(false);
     }

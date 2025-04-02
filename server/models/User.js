@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { PASSWORD_REQUIREMENTS } from "../utils/validation.js";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -20,7 +21,7 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters long"],
+      minlength: [PASSWORD_REQUIREMENTS.minLength, `Password must be at least ${PASSWORD_REQUIREMENTS.minLength} characters long`],
     },
     avatar: {
       type: String,
