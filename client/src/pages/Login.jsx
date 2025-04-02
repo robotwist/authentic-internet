@@ -11,7 +11,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import API, { testApiConnection } from '../api/api';
+import API, { testApiConnection, logPersistentError, getPersistentErrors, clearPersistentErrors } from '../api/api';
 
 // Custom hook for API health check (for developer debugging only)
 const useApiHealthCheck = () => {
@@ -174,6 +174,10 @@ const Login = () => {
       
       if (!token || !user) {
         console.error("Invalid login response format:", response.data);
+        logPersistentError('Failsafe Login - Invalid Response', { 
+          message: 'Response format invalid',
+          response: { data: response.data }
+        });
         return false;
       }
       
@@ -189,6 +193,9 @@ const Login = () => {
       window.location.href = from;
       return true;
     } catch (error) {
+      // Enhanced error logging - persist even through app reset
+      logPersistentError('Failsafe Login', error);
+      
       // Enhanced error logging
       console.error("Failsafe login failed:", error);
       
@@ -219,9 +226,11 @@ const Login = () => {
             console.log("Health check response:", response.status);
           }).catch(err => {
             console.error("Health check failed:", err);
+            logPersistentError('Health Check', err);
           });
         } catch (healthCheckError) {
           console.error("Health check attempt failed:", healthCheckError);
+          logPersistentError('Health Check Setup', healthCheckError);
         }
       }
       
@@ -259,6 +268,7 @@ const Login = () => {
           const token = localStorage.getItem('token');
           if (!token) {
             console.warn("Login reported success but no token found");
+            logPersistentError('Context Login', { message: 'Login success but no token found' });
             success = false;
           } else {
             console.log("Token found after login:", token.substring(0, 10) + '...');
@@ -266,6 +276,7 @@ const Login = () => {
         }
       } catch (contextError) {
         console.warn("Context login failed, trying failsafe:", contextError);
+        logPersistentError('Context Login', contextError);
         // If context login fails, try the direct approach
         success = await attemptFailsafeLogin();
       }
@@ -279,6 +290,7 @@ const Login = () => {
     } catch (err) {
       // Provide user-friendly error messages
       console.error("Login error:", err);
+      logPersistentError('Login Form', err);
       setError('Login failed. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
@@ -424,6 +436,41 @@ const Login = () => {
             style={{ fontSize: '0.8rem' }}
           >
             Test API Connection
+          </button>
+          <button 
+            onClick={() => {
+              const errors = getPersistentErrors();
+              if (errors.length === 0) {
+                alert("No errors logged.");
+                return;
+              }
+              
+              // Format errors for display
+              const formattedErrors = errors.map((err, i) => 
+                `Error ${i+1} [${err.timestamp}] from ${err.source}:\n` +
+                `- Message: ${err.message}\n` +
+                `- Status: ${err.status || 'N/A'} - ${err.statusText || 'N/A'}\n` +
+                `- URL: ${err.url || 'N/A'}\n` +
+                (err.data ? `- Response: ${JSON.stringify(err.data).substring(0, 200)}...\n` : '')
+              ).join('\n\n');
+              
+              console.log("Error log:", errors);
+              alert(`Last ${errors.length} errors:\n\n${formattedErrors}`);
+            }}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.8rem', marginLeft: '10px' }}
+          >
+            View Error Log
+          </button>
+          <button 
+            onClick={() => {
+              clearPersistentErrors();
+              alert("Error log cleared.");
+            }}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.8rem', marginLeft: '10px' }}
+          >
+            Clear Errors
           </button>
           <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '5px' }}>
             API URL: {import.meta.env.VITE_API_URL || 'http://localhost:5001'}

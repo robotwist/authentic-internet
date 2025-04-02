@@ -304,6 +304,65 @@ initApi().catch(error => {
   }
 });
 
+// Persistent error logging utility
+export const logPersistentError = (source, error) => {
+  try {
+    // Create a formatted error object
+    const errorObj = {
+      timestamp: new Date().toISOString(),
+      source,
+      message: error.message || 'Unknown error',
+      stack: error.stack,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      url: error.config?.url
+    };
+    
+    // Get existing error log or initialize a new one
+    const existingLog = JSON.parse(localStorage.getItem('apiErrorLog') || '[]');
+    
+    // Add new error to the beginning (most recent first)
+    existingLog.unshift(errorObj);
+    
+    // Keep only last 10 errors to avoid filling localStorage
+    const trimmedLog = existingLog.slice(0, 10);
+    
+    // Save back to localStorage
+    localStorage.setItem('apiErrorLog', JSON.stringify(trimmedLog));
+    
+    // Also log to console
+    console.error(`Persistent Error [${source}]:`, error);
+    
+    return errorObj;
+  } catch (e) {
+    // Fallback if localStorage fails
+    console.error('Failed to log error persistently:', e);
+    return null;
+  }
+};
+
+// Retrieve persistent error log
+export const getPersistentErrors = () => {
+  try {
+    return JSON.parse(localStorage.getItem('apiErrorLog') || '[]');
+  } catch (e) {
+    console.error('Failed to retrieve persistent error log:', e);
+    return [];
+  }
+};
+
+// Clear persistent error log
+export const clearPersistentErrors = () => {
+  try {
+    localStorage.removeItem('apiErrorLog');
+    return true;
+  } catch (e) {
+    console.error('Failed to clear persistent error log:', e);
+    return false;
+  }
+};
+
 export default API;
 
 // Helper function to handle API errors

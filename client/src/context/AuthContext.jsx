@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { loginUser, registerUser, verifyToken } from '../api/api';
+import { loginUser, registerUser, verifyToken, logPersistentError } from '../api/api';
 
 const AuthContext = createContext(null);
 
@@ -36,6 +36,8 @@ export const AuthProvider = ({ children }) => {
   const [renderCount, setRenderCount] = useState(0); // Add render counter
   const [initAttempted, setInitAttempted] = useState(false); // Track if initialization was attempted
   const VERIFICATION_THROTTLE_MS = 30000; // 30 seconds between verification attempts
+  const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
+  const TOKEN_REFRESH_INTERVAL_MS = 300000; // 5 minutes
   
   // Log rendering for debugging
   console.log(`AuthProvider rendering #${renderCount} at ${new Date().toISOString()}`);
@@ -49,6 +51,7 @@ export const AuthProvider = ({ children }) => {
   const refreshTokenRef = useRef(null);
   const scheduleTokenRefreshRef = useRef(null);
   const logoutRef = useRef(null); // Add ref for logout
+  const refreshingRef = useRef(false);
 
   // Function to check if token is expired
   const isTokenExpired = useCallback((token) => {
@@ -144,8 +147,41 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Stable wrapper function for external use
-  const refreshToken = useCallback(async () => {
-    return refreshTokenRef.current ? refreshTokenRef.current() : false;
+  const refreshToken = useCallback(async (force = false) => {
+    try {
+      if (refreshingRef.current) {
+        console.log("Already refreshing token");
+        return;
+      }
+      
+      refreshingRef.current = true;
+      
+      // Skip refresh if not forced and the token is still valid
+      const tokenExpiration = localStorage.getItem('tokenExpiration');
+      const now = Date.now();
+      const timeUntilExpiration = tokenExpiration ? parseInt(tokenExpiration) - now : 0;
+      
+      if (!force && timeUntilExpiration > TOKEN_REFRESH_BUFFER_MS) {
+        console.log(`Token still valid for ${Math.round(timeUntilExpiration / 1000 / 60)} minutes, skipping refresh`);
+        refreshingRef.current = false;
+        return;
+      }
+      
+      const data = await verifyToken();
+      handleAuthSuccess(data);
+      
+      // Set new timeout for next refresh
+      if (refreshTimeout) clearTimeout(refreshTimeout);
+      setRefreshTimeout(setTimeout(() => refreshToken(), TOKEN_REFRESH_INTERVAL_MS));
+      
+      console.log("Token refreshed successfully");
+      refreshingRef.current = false;
+    } catch (error) {
+      logPersistentError('AuthContext - Token Refresh', error);
+      console.error("Failed to refresh token:", error);
+      refreshingRef.current = false;
+      logout();
+    }
   }, []);
 
   // Function to clear messages
@@ -305,6 +341,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return true;
     } catch (error) {
+      logPersistentError('AuthContext - Login', error);
       setError(error.response?.data?.message || 'Login failed. Please check your credentials.');
       setLoading(false);
       return false;
@@ -320,6 +357,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return true;
     } catch (error) {
+      logPersistentError('AuthContext - Register', error);
       setError(error.response?.data?.message || 'Registration failed. Please try again.');
       setLoading(false);
       return false;
