@@ -1,5 +1,3 @@
-import helmet from 'helmet';
-
 /**
  * Security configuration for the application
  * 
@@ -7,45 +5,53 @@ import helmet from 'helmet';
  * common web vulnerabilities.
  */
 
-// Configure security headers with Helmet
+// Configure security headers
 export const configureSecurityHeaders = () => {
-  // Base helmet configuration
-  return helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        connectSrc: ["'self'", 
-          "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com",
-          "https://flourishing-starburst-8cf88b.netlify.app", 
-          "https://*.dicebear.com", 
-          "https://netlify.app",
-          "localhost:*",
-          "ws://localhost:*"
-        ],
-        imgSrc: ["'self'", "data:", "https:", "blob:"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        objectSrc: ["'none'"],
-        upgradeInsecureRequests: []
-      }
-    },
-    crossOriginEmbedderPolicy: false, // Allow embedding of external resources
-    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-    dnsPrefetchControl: { allow: true },
-    // Frame-related headers
-    frameguard: {
-      action: 'sameorigin'
-    },
-    hsts: {
-      maxAge: 31536000,        // Must be at least 1 year to be approved
-      includeSubDomains: true, // Include subdomains
-      preload: true            // Allow browsers to preload HSTS config
-    },
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-    xssFilter: true
-  });
+  return (req, res, next) => {
+    // Content Security Policy
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; " +
+      "connect-src 'self' https://authentic-internet-api-9739ffaa9c5f.herokuapp.com https://flourishing-starburst-8cf88b.netlify.app https://*.dicebear.com https://netlify.app localhost:* ws://localhost:*; " +
+      "img-src 'self' data: https: blob:; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+      "font-src 'self' https://fonts.gstatic.com; " +
+      "object-src 'none';"
+    );
+
+    // Prevent MIME type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+
+    // Prevent iframe embedding (clickjacking protection)
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+
+    // Enable browser XSS protection
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+
+    // Cross-Origin Resource Policy
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+    // Cross-Origin Opener Policy
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+
+    // Set HTTP Strict Transport Security (HSTS)
+    // Only in production to avoid HTTPS issues in development
+    if (process.env.NODE_ENV === 'production') {
+      res.setHeader(
+        'Strict-Transport-Security',
+        'max-age=31536000; includeSubDomains; preload'
+      );
+    }
+
+    // Control referrer information
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    // Remove X-Powered-By header to avoid exposing server info
+    res.removeHeader('X-Powered-By');
+
+    next();
+  };
 };
 
 // Configure CORS options for the application

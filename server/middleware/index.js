@@ -4,9 +4,8 @@ import connectMongo from "connect-mongo";
 import express from "express";
 import errorLogger from "./errorLogger.js";
 import corsUpdater from "./cors-updater.js";
-import { applySecurityHeaders } from "./securityHeaders.js";
 import { configureCorsOptions, configureSessionOptions } from "../config/app-config.js";
-import { enforceHttps } from "../utils/security.js";
+import { configureSecurityHeaders, enforceHttps } from "../utils/security.js";
 import { apiLimiter } from "../utils/rateLimiting.js";
 
 /**
@@ -19,7 +18,7 @@ export const applyMiddleware = (app, allowedOrigins) => {
   app.set('allowedOrigins', allowedOrigins);
   
   // Apply security headers
-  app.use(applySecurityHeaders());
+  app.use(configureSecurityHeaders());
   
   // Enforce HTTPS in production
   app.use(enforceHttps);
