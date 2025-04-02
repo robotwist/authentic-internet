@@ -3,5 +3,7 @@
   "gitHash": "b386bd8f99cbf3ced81e5bfef80b668da9df3821",
   "gitBranch": "main",
   "environment": "development",
-  "netlifyContext": "local"
+  "netlifyContext": "local",
+  "version": "1.0.1",
+  "buildTime": "2025-04-02T04:12:00.000Z"
 }

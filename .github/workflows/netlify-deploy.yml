@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'client/**'
+      - '.github/workflows/netlify-deploy.yml'  # So that changes to this file trigger a deploy
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
 
 jobs:
   deploy:
@@ -13,25 +15,36 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Updated to v4
+        with:
+          fetch-depth: 0  # Fetch complete history for better visibility
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4  # Updated to v4
         with:
-          node-version: '18'
+          node-version: '20'  # Updated to a newer Node version
           cache: 'npm'
           cache-dependency-path: './client/package-lock.json'
 
       - name: Install dependencies
-        run: cd client && npm ci
+        run: |
+          cd client
+          npm ci
+          npm list  # List installed packages for debugging
 
       - name: Build
-        run: cd client && npm run build
+        run: |
+          cd client
+          echo "Starting build process..."
+          npm run build
+          echo "Build completed"
+          ls -la dist  # Verify output files
         env:
           VITE_API_URL: 'https://authentic-internet-api-9739ffaa9c5f.herokuapp.com'
+          NODE_ENV: 'production'
 
       - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v2
+        uses: nwtgck/actions-netlify@v2.0
         with:
           publish-dir: './client/dist'
           production-branch: main
@@ -40,7 +53,8 @@ jobs:
           enable-pull-request-comment: true
           enable-commit-comment: true
           overwrites-pull-request-comment: true
+          fails-without-credentials: true  # Fail if credentials are missing
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        timeout-minutes: 5 
+        timeout-minutes: 10  # Increased timeout 

@@ -1,6 +1,7 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ./client/"
 
 # Handle SPA routing
 [[redirects]]
@@ -24,6 +25,20 @@
 # Environment variables
 [context.production.environment]
   VITE_API_URL = "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com"
+  NODE_VERSION = "20"
 
 [context.deploy-preview.environment]
-  VITE_API_URL = "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com" 
+  VITE_API_URL = "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com"
+  NODE_VERSION = "20"
+
+# Add build plugins for better performance
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+
+# Add specific headers for all pages
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Cache-Control = "public, max-age=3600"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block" 
