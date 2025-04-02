@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import { validatePassword, validateUsername, validateEmail, getPasswordRequirementsText } from "../utils/validation.js";
+import { recordFailedLoginAttempt, resetFailedLoginAttempts, shouldLockout } from "../utils/rateLimiting.js";
 
 // Validate that JWT_SECRET is properly set
 if (!process.env.JWT_SECRET) {
@@ -97,12 +98,29 @@ export const login = async (req, res) => {
     console.log("📝 Login attempt received");
     console.log("Request body:", JSON.stringify(req.body));
     
+    // Get client IP address
+    const ip = req.ip || req.connection.remoteAddress;
+    
+    // Check if the IP is temporarily locked out
+    if (shouldLockout(ip) && process.env.NODE_ENV !== 'development') {
+      console.log(`Login blocked: IP ${ip} is temporarily locked out due to too many failed attempts`);
+      return res.status(429).json({ 
+        message: "Too many failed login attempts. Please try again later.",
+        passwordRequirements: getPasswordRequirementsText(),
+        lockout: true
+      });
+    }
+    
     // Accept either identifier or username for backward compatibility
     const identifier = req.body.identifier || req.body.username;
     const { password } = req.body;
     
     if (!identifier || !password) {
       console.log("Login failed: Missing credentials");
+      
+      // Record the failed attempt
+      recordFailedLoginAttempt(ip);
+      
       return res.status(400).json({ 
         message: "Please provide both username/email and password",
         passwordRequirements: getPasswordRequirementsText()
@@ -123,6 +141,10 @@ export const login = async (req, res) => {
     // Instead, provide generic message with password requirements
     if (!user) {
       console.log(`Login failed: No user found with identifier: ${identifier.toLowerCase()}`);
+      
+      // Record the failed attempt
+      recordFailedLoginAttempt(ip);
+      
       return res.status(401).json({ 
         message: "Invalid credentials. Please check your username/email and password.",
         passwordRequirements: getPasswordRequirementsText()
@@ -135,11 +157,19 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       console.log(`Login failed: Password mismatch for user: ${user.username}`);
+      
+      // Record the failed attempt
+      const attempts = recordFailedLoginAttempt(ip);
+      console.log(`Failed login attempts for IP ${ip}: ${attempts}`);
+      
       return res.status(401).json({ 
         message: "Invalid credentials. Please check your username/email and password.",
         passwordRequirements: getPasswordRequirementsText()
       });
     }
+
+    // Reset failed login attempts on successful login
+    resetFailedLoginAttempts(ip);
 
     // Update last login
     user.lastLogin = new Date();

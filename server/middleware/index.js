@@ -5,6 +5,8 @@ import express from "express";
 import errorLogger from "./errorLogger.js";
 import corsUpdater from "./cors-updater.js";
 import { configureCorsOptions, configureSessionOptions } from "../config/app-config.js";
+import { configureSecurityHeaders, enforceHttps } from "../utils/security.js";
+import { apiLimiter } from "../utils/rateLimiting.js";
 
 /**
  * Apply all middleware to Express app
@@ -14,6 +16,12 @@ import { configureCorsOptions, configureSessionOptions } from "../config/app-con
 export const applyMiddleware = (app, allowedOrigins) => {
   // Store allowedOrigins for later access by middleware
   app.set('allowedOrigins', allowedOrigins);
+  
+  // Apply security headers using Helmet
+  app.use(configureSecurityHeaders());
+  
+  // Enforce HTTPS in production
+  app.use(enforceHttps);
   
   // Apply error logger middleware early to catch all requests
   app.use(errorLogger);
@@ -27,6 +35,9 @@ export const applyMiddleware = (app, allowedOrigins) => {
 
   // Apply CORS configuration
   app.use(cors(configureCorsOptions(allowedOrigins)));
+  
+  // Apply general rate limiting to all routes
+  app.use(apiLimiter);
   
   // Error handling for CORS
   app.use((err, req, res, next) => {

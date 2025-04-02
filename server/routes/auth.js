@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import { register, login, verifyToken } from '../controllers/authController.js';
 import { auth } from '../middleware/auth.js';
 import { PASSWORD_REQUIREMENTS, getPasswordRequirementsText } from '../utils/validation.js';
+import { authLimiter, passwordResetLimiter } from '../utils/rateLimiting.js';
 
 const router = express.Router();
 
@@ -45,9 +46,9 @@ const validateLogin = [
   body('password').exists().withMessage('Password is required')
 ];
 
-// Public routes
-router.post('/register', validateRegistration, register);
-router.post('/login', validateLogin, login);
+// Public routes with rate limiting
+router.post('/register', authLimiter, validateRegistration, register);
+router.post('/login', authLimiter, validateLogin, login);
 
 // Protected routes - verify and refresh token (handle both GET and POST)
 router.get('/verify', auth, verifyToken);

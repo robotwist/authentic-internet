@@ -3,6 +3,7 @@ import { body, validationResult } from "express-validator";
 import { register, login } from "../controllers/authController.js";
 import jwt from "jsonwebtoken";
 import { PASSWORD_REQUIREMENTS, getPasswordRequirementsText } from '../utils/validation.js';
+import { authLimiter, passwordResetLimiter } from '../utils/rateLimiting.js';
 
 const router = express.Router();
 
@@ -34,6 +35,7 @@ const passwordValidator = (value) => {
 // 📌 1️⃣ POST /api/auth/register (Register a new user)
 router.post(
   "/register",
+  authLimiter,
   [
     body("username").notEmpty().withMessage("Username is required"),
     body("password").custom(passwordValidator),
@@ -62,6 +64,7 @@ router.post(
 // 📌 2️⃣ POST /api/auth/login (Login an existing user)
 router.post(
   "/login",
+  authLimiter,
   [
     body("username").notEmpty().withMessage("Username is required"),
     body("password").notEmpty().withMessage("Password is required"),
