@@ -88,6 +88,14 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
           text: 'You pick up the ancient tome. It feels heavy in your hands, and the strange symbols on its cover seem to shift when you\'re not looking directly at them.',
           addItems: ['ancient tome'],
           removeFromRoom: ['ancient tome']
+        },
+        'examine sun also rises': {
+          text: 'You find a section dedicated to "The Sun Also Rises." One passage about Brett Ashley and Jake Barnes catches your eye:\n\n"You don\'t have to say it. I know how it is. It\'s all right. It\'s the way it\'s always been. It\'s the way it\'s going to be."\n\nAnd near it, written in bold, the novel\'s famous closing lines: "Oh, Jake," Brett said, "we could have had such a damned good time together."\nAhead of them lay the boulevard, the streets stretching out in emptiness, the knowledge of what could not be.\n"Yes," Jake replied. "Isn\'t it pretty to think so?"',
+          addKnowledge: 'sun_also_rises'
+        },
+        'examine clean well lighted place': {
+          text: 'You discover a section dedicated to Hemingway\'s short story "A Clean Well-Lighted Place." The passage reads:\n\n"It was a clean, well-lighted place. It was well lighted but it was not the electric light that made it what it was." \n\nFurther down, you see one of the most profound passages from the story:\n\n"What did he fear? It was not fear or dread. It was a nothing that he knew too well. It was all a nothing and a man was nothing too... Some lived in it and never felt it but he knew it all was nada y pues nada y nada y pues nada."',
+          addKnowledge: 'clean_place'
         }
       }
     },
@@ -143,7 +151,7 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
       items: [],
       interactions: {
         'read quotes': {
-          text: 'The quotes are from various authors, but they all share a theme: the struggle and joy of writing. One Hemingway quote stands out: "Write hard and clear about what hurts."',
+          text: 'The quotes are from various authors, but they all share a theme: the struggle and joy of writing. Several Hemingway quotes stand out:\n\n"Write hard and clear about what hurts."\n\n"The world breaks everyone, and afterward, some are strong at the broken places."\n\n"Isn\'t it pretty to think so?" - from the end of The Sun Also Rises\n\n"The aficionado is one who is passionate about the bulls." - on being an aficionado\n\n"It was a clean, well-lighted place. It was well lighted but it was not the electric light that made it what it was." - from A Clean Well Lighted Place',
           addKnowledge: 'writing_truth'
         },
         'examine door': {
@@ -178,6 +186,14 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
           addKnowledge: 'used_password',
           revealExit: 'door',
           prerequisite: ['ancient tome', 'password']
+        },
+        'examine hemingway quotes': {
+          text: 'You focus on the section of quotes from Ernest Hemingway. His sparse, direct style stands out among the other authors. The quotes reveal his insights on courage, truth, writing, and life itself. The depth beneath his simple words reminds you of his famous "iceberg theory" - that the dignity of movement of an iceberg is due to only one-eighth of it being above water.',
+          addKnowledge: 'hemingway_style'
+        },
+        'examine aficionado': {
+          text: 'You find a section with quotes about being an "aficionado" - a passionate enthusiast or devotee. From The Sun Also Rises:\n\n"The aficionado is one who is passionate about the bulls. To love the bull-fight is of course a great pleasure... But to be an aficionado is not merely to like the bullfights... An aficionado is one who understands the ceremony, the ritual, the meaning. The values."\n\nYou reflect on how Hemingway valued authenticity and deep understanding, not just casual appreciation.',
+          addKnowledge: 'aficionado'
         }
       },
       lockedExits: {
