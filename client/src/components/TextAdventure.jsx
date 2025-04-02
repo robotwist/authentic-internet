@@ -76,6 +76,14 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
           text: 'As you read the glowing book, the symbols seem to rearrange themselves. You learn about a hidden sanctuary for writers, where inspiration flows like water. The text mentions a password: "Iceberg Theory".',
           addKnowledge: 'password'
         },
+        'read tome': {
+          text: 'As you read the ancient tome, the symbols seem to rearrange themselves. You learn about a hidden sanctuary for writers, where inspiration flows like water. The text mentions a password: "Iceberg Theory".',
+          addKnowledge: 'password'
+        },
+        'read ancient tome': {
+          text: 'As you read the ancient tome, the symbols seem to rearrange themselves. You learn about a hidden sanctuary for writers, where inspiration flows like water. The text mentions a password: "Iceberg Theory".',
+          addKnowledge: 'password'
+        },
         'take tome': {
           text: 'You pick up the ancient tome. It feels heavy in your hands, and the strange symbols on its cover seem to shift when you\'re not looking directly at them.',
           addItems: ['ancient tome'],
@@ -139,13 +147,19 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
           addKnowledge: 'writing_truth'
         },
         'examine door': {
-          text: 'The door has no handle or keyhole. Instead, there\'s a small brass plate with the inscription: "Speak the theory that reveals truth beneath the surface."',
+          text: 'The door has no handle or keyhole. Instead, there\'s a small brass plate with the inscription: "Speak the theory that reveals truth beneath the surface." Perhaps you could try to speak the password you learned.',
+        },
+        'speak iceberg theory': {
+          text: 'You speak the words "Iceberg Theory" clearly, and the door responds with a soft glow. It swings open, revealing the sanctuary beyond.',
+          addKnowledge: 'used_password',
+          revealExit: 'door',
+          prerequisite: 'password'
         }
       },
       lockedExits: {
         door: {
           password: 'Iceberg Theory',
-          message: 'The door remains closed. Perhaps there\'s a password or phrase needed to open it.',
+          message: 'The door remains closed. Perhaps you should speak the password you learned in the library. (Try: "speak [password]")',
           knowledgeRequired: 'password'
         }
       }
@@ -279,7 +293,9 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
       addToHistory('system', '- use [item]: use an item you\'re carrying');
       addToHistory('system', '- talk to [character]: interact with someone');
       addToHistory('system', '- read [item]: read something');
+      addToHistory('system', '- speak [words]: say something aloud');
       addToHistory('system', '- quit: exit the game');
+      addToHistory('system', 'Tip: If you\'re stuck, try examining objects in the room or reading items.');
       return;
     }
     
@@ -323,6 +339,21 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
     // Object interactions
     const room = GAME_WORLD[currentRoom];
     
+    // Special case for "speak" command when in secret passage
+    if (currentRoom === 'secretPassage' && 
+       (command === 'speak iceberg theory' || command === 'say iceberg theory' || command === 'iceberg theory')) {
+      if (GAME_WORLD.library.playerKnowledge?.includes('password')) {
+        addToHistory('system', 'You speak the words "Iceberg Theory" clearly, and the door responds with a soft glow. It swings open, revealing the sanctuary beyond.');
+        // Unlock the exit permanently
+        delete GAME_WORLD.secretPassage.lockedExits.door;
+        handleMovement('door');
+        return;
+      } else {
+        addToHistory('system', 'You speak the words, but nothing happens. Perhaps you need to learn their significance first.');
+        return;
+      }
+    }
+    
     if (room.interactions) {
       for (const interaction in room.interactions) {
         if (command === interaction || 
@@ -332,6 +363,8 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
             (command.startsWith('read ') && interaction === `read ${command.split(' ')[1]}`) ||
             (command.startsWith('use ') && interaction === `use ${command.split(' ')[1]}`) ||
             (command.startsWith('talk to ') && interaction === `talk to ${command.slice(8)}`) ||
+            (command.startsWith('speak ') && interaction === `speak ${command.split(' ')[1]}`) ||
+            (command.startsWith('say ') && interaction === `speak ${command.split(' ')[1]}`) ||
             (command.startsWith('pull ') && interaction === `pull ${command.split(' ')[1]}`) ||
             (command.startsWith('push ') && interaction === `push ${command.split(' ')[1]}`) ||
             (command.startsWith('open ') && interaction === `open ${command.split(' ')[1]}`) ||
