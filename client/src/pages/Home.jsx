@@ -123,44 +123,43 @@ const Home = () => {
 
   const header = (
     <div className="home-header">
-      <h1>Welcome to Authentic Internet</h1>
-      <p className="subtitle">Your journey through philosophical worlds begins here</p>
+      <h1>Authentic Internet</h1>
+      <p className="subtitle">Enter the place where you are no longer a target for advertisers, manipulators, hucksters and crooks.</p>
     </div>
   );
 
   const content = (
     <div className="home-content-wrapper">
-      {/* Create Artifacts Section */}
+      {/* Main messaging */}
       <div className="create-artifacts-section">
-        <h2>Create Artifacts, Earn Experience</h2>
-        <div className="creative-questions">
-          <p>What do you want to create?</p>
-          <p>What have you already created?</p>
-          <p>What do you dream of creating?</p>
-        </div>
+        <h2>The True, The Good, The Beautiful</h2>
         <p className="creative-description">
-          The Authentic Internet is the place where you leave your creations for others to discover and love.
-          Share your wisdom, inspiration, and creative spirit through artifacts that will touch the lives of others.
+          This is the Authentic Internet. A place where creativity and expression reign supreme, 
+          where your artifacts matter and others' creations matter to you.
+        </p>
+        <p className="creative-description">
+          No one is selling your information, your data, or spamming you with non-existent coins. 
+          When you enter here, you choose what you want to see and strike everything else from your view.
         </p>
         <div className="creative-steps">
           <div className="creative-step">
             <div className="step-icon"></div>
-            <h3>Create</h3>
+            <h3>Freedom</h3>
+            <p>Choose your world free of politics, full of ideas, or filled with only cats, babies and puppies.</p>
+          </div>
+          <div className="creative-step">
+            <div className="step-icon"></div>
+            <h3>Authenticity</h3>
+            <p>Escape a world of influencers, bizfluencers, and manipulative content.</p>
+          </div>
+          <div className="creative-step">
+            <div className="step-icon"></div>
+            <h3>Creation</h3>
             <p>Express yourself through meaningful artifacts that reflect your wisdom and creativity.</p>
-          </div>
-          <div className="creative-step">
-            <div className="step-icon"></div>
-            <h3>Share</h3>
-            <p>Place your artifacts in the world for others to discover and interact with.</p>
-          </div>
-          <div className="creative-step">
-            <div className="step-icon"></div>
-            <h3>Grow</h3>
-            <p>Earn experience points when others view, save, and share your creations.</p>
           </div>
         </div>
         <Button as={Link} to="/game" variant="primary" className="create-button">
-          Start Creating Now
+          Enter for the True, the Good and the Beautiful
         </Button>
       </div>
 
