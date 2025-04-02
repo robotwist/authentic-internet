@@ -23,7 +23,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">Authentic Internet</Link>
+        <Link to="/">Authentic Internet - Deployed!</Link>
       </div>
       
       {/* Mobile menu toggle */}
