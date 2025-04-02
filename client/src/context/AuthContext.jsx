@@ -1,9 +1,126 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { loginUser, registerUser, verifyToken, logPersistentError } from '../api/api';
+import { createContext, useContext, useReducer, useEffect, useRef } from 'react';
+import { loginUser, registerUser, verifyToken, logoutUser, refreshUserToken, logPersistentError } from '../api/api';
 
+// Constants
+const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes before expiry
+
+// Utility functions (defined outside component to avoid circular dependencies)
+const parseJWT = (token) => {
+  try {
+    if (!token) return null;
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Token parsing error:', error);
+    return null;
+  }
+};
+
+const calculateTimeUntilExpiry = (token) => {
+  try {
+    const payload = parseJWT(token);
+    if (!payload || !payload.exp) return 0;
+    
+    const expiryMs = payload.exp * 1000; // Convert to milliseconds
+    const currentMs = Date.now();
+    return Math.max(0, expiryMs - currentMs);
+  } catch (error) {
+    console.error('Error calculating token expiry:', error);
+    return 0;
+  }
+};
+
+// Local storage helpers
+const clearStoredAuthData = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+};
+
+const storeAuthData = (data) => {
+  if (data.token) localStorage.setItem('token', data.token);
+  if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+  if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+};
+
+// Create the Auth Context
 const AuthContext = createContext(null);
 
-// Separate the useAuth hook for better compatibility with Fast Refresh
+// Action types
+const AUTH_ACTIONS = {
+  SET_LOADING: 'SET_LOADING',
+  SET_ERROR: 'SET_ERROR',
+  SET_SUCCESS: 'SET_SUCCESS',
+  SET_USER: 'SET_USER',
+  SET_AUTH_STATUS: 'SET_AUTH_STATUS',
+  CLEAR_MESSAGES: 'CLEAR_MESSAGES',
+  LOGOUT: 'LOGOUT',
+  AUTH_SUCCESS: 'AUTH_SUCCESS',
+  INIT_AUTH: 'INIT_AUTH',
+};
+
+// Initial state
+const initialState = {
+  user: null,
+  loading: true,
+  error: null,
+  success: null,
+  isAuthenticated: false
+};
+
+// Reducer function
+function authReducer(state, action) {
+  switch (action.type) {
+    case AUTH_ACTIONS.SET_LOADING:
+      return { ...state, loading: action.payload };
+    case AUTH_ACTIONS.SET_ERROR:
+      return { ...state, error: action.payload };
+    case AUTH_ACTIONS.SET_SUCCESS:
+      return { ...state, success: action.payload };
+    case AUTH_ACTIONS.SET_USER:
+      return { ...state, user: action.payload };
+    case AUTH_ACTIONS.SET_AUTH_STATUS:
+      return { ...state, isAuthenticated: action.payload };
+    case AUTH_ACTIONS.CLEAR_MESSAGES:
+      return { ...state, error: null, success: null };
+    case AUTH_ACTIONS.LOGOUT:
+      clearStoredAuthData();
+      return { 
+        ...state, 
+        user: null, 
+        isAuthenticated: false, 
+        error: null,
+        success: 'Logged out successfully'
+      };
+    case AUTH_ACTIONS.AUTH_SUCCESS:
+      storeAuthData(action.payload);
+      return {
+        ...state,
+        user: action.payload.user,
+        isAuthenticated: true,
+        error: null,
+        success: action.payload.message || 'Authentication successful!'
+      };
+    case AUTH_ACTIONS.INIT_AUTH:
+      return {
+        ...state,
+        user: action.payload.user,
+        isAuthenticated: action.payload.isAuthenticated,
+        loading: false
+      };
+    default:
+      return state;
+  }
+}
+
+/**
+ * Custom hook to use the auth context
+ * @returns {Object} Auth context value
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -12,401 +129,256 @@ export function useAuth() {
   return context;
 }
 
-// Add a debounce utility to prevent too many API calls
-const debounce = (func, wait) => {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
-
+/**
+ * Auth Provider Component
+ * Manages authentication state and provides auth methods
+ */
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [refreshTimeout, setRefreshTimeout] = useState(null);
-  const [lastVerified, setLastVerified] = useState(0);
-  const [renderCount, setRenderCount] = useState(0); // Add render counter
-  const [initAttempted, setInitAttempted] = useState(false); // Track if initialization was attempted
-  const VERIFICATION_THROTTLE_MS = 30000; // 30 seconds between verification attempts
-  const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
-  const TOKEN_REFRESH_INTERVAL_MS = 300000; // 5 minutes
+  // Use reducer for state management
+  const [state, dispatch] = useReducer(authReducer, initialState);
   
-  // Log rendering for debugging
-  console.log(`AuthProvider rendering #${renderCount} at ${new Date().toISOString()}`);
+  // Refs
+  const refreshTimeoutRef = useRef(null);
+  const refreshInProgressRef = useRef(false);
   
-  // Increment render count on each render
-  useEffect(() => {
-    setRenderCount(prev => prev + 1);
-  }, []);
-  
-  // Store these functions in refs to break circular dependencies
-  const refreshTokenRef = useRef(null);
-  const scheduleTokenRefreshRef = useRef(null);
-  const logoutRef = useRef(null); // Add ref for logout
-  const refreshingRef = useRef(false);
-
-  // Function to check if token is expired
-  const isTokenExpired = useCallback((token) => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expirationTime = payload.exp * 1000;
-      const currentTime = Date.now();
-      const timeUntilExpiry = expirationTime - currentTime;
-      
-      // Return true if token expires in less than 5 minutes
-      return timeUntilExpiry < 300000;
-    } catch (error) {
-      console.error('Error checking token expiration:', error);
-      return true;
+  // Helper to clear refresh timeout
+  const clearRefreshTimeout = () => {
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = null;
     }
-  }, []);
-
-  // Add throttling to token verification with memoization
-  const throttledVerifyToken = useCallback(async () => {
-    const now = Date.now();
-    // Only verify if we haven't verified in the last VERIFICATION_THROTTLE_MS
-    if (now - lastVerified < VERIFICATION_THROTTLE_MS) {
-      console.log("Skipping token verification - throttled");
-      return { token: localStorage.getItem('token') }; // Return existing token
+  };
+  
+  // Schedule token refresh
+  const scheduleTokenRefresh = (token) => {
+    clearRefreshTimeout();
+    
+    const timeUntilExpiry = calculateTimeUntilExpiry(token);
+    if (timeUntilExpiry <= 0) return;
+    
+    const refreshTime = Math.max(1000, timeUntilExpiry - TOKEN_REFRESH_BUFFER_MS);
+    console.log(`Scheduling token refresh in ${Math.floor(refreshTime / 1000 / 60)} minutes`);
+    
+    refreshTimeoutRef.current = setTimeout(async () => {
+      console.log('Auto refreshing token...');
+      await refreshToken(true);
+    }, refreshTime);
+  };
+  
+  // API Functions
+  
+  // Register
+  const register = async (username, email, password) => {
+    try {
+      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: AUTH_ACTIONS.CLEAR_MESSAGES });
+      
+      const data = await registerUser(username, email, password);
+      dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: data });
+      
+      if (data.token) {
+        scheduleTokenRefresh(data.token);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Registration error:', error);
+      logPersistentError('AuthContext - register', error);
+      
+      const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
+      let fullErrorMessage = errorMessage;
+      
+      if (error.response?.data?.passwordRequirements) {
+        fullErrorMessage += ' ' + error.response.data.passwordRequirements;
+      }
+      
+      dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: fullErrorMessage });
+      return false;
+    } finally {
+      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+    }
+  };
+  
+  // Login
+  const login = async (username, password) => {
+    try {
+      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: AUTH_ACTIONS.CLEAR_MESSAGES });
+      
+      const data = await loginUser(username, password);
+      dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: data });
+      
+      if (data.token) {
+        scheduleTokenRefresh(data.token);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      logPersistentError('AuthContext - login', error);
+      
+      const errorMessage = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      let fullErrorMessage = errorMessage;
+      
+      if (error.response?.data?.passwordRequirements) {
+        fullErrorMessage += ' ' + error.response.data.passwordRequirements;
+      }
+      
+      dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: fullErrorMessage });
+      return false;
+    } finally {
+      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+    }
+  };
+  
+  // Logout
+  const logout = async () => {
+    try {
+      clearRefreshTimeout();
+      
+      if (state.isAuthenticated) {
+        const refreshToken = localStorage.getItem('refreshToken');
+        await logoutUser(refreshToken).catch(err => {
+          console.error('Error calling logout API:', err);
+        });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      logPersistentError('AuthContext - logout', error);
+    } finally {
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
+    }
+  };
+  
+  // Refresh token
+  const refreshToken = async (force = false) => {
+    if (refreshInProgressRef.current && !force) {
+      console.log('Token refresh already in progress');
+      return false;
     }
     
-    try {
-      setIsVerifying(true);
-      const result = await verifyToken();
-      // Update last verified time
-      setLastVerified(now);
-      return result;
-    } catch (error) {
-      console.error("Token verification failed:", error);
-      return { token: localStorage.getItem('token') }; // Return existing token on error
-    } finally {
-      setIsVerifying(false);
-    }
-  }, [lastVerified]);
-
-  // Function to schedule token refresh - break circular dependency with useRef
-  scheduleTokenRefreshRef.current = (token) => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expirationTime = payload.exp * 1000;
-      const currentTime = Date.now();
-      const timeUntilExpiry = expirationTime - currentTime;
-      
-      // Clear existing timeout
-      if (refreshTimeout) {
-        clearTimeout(refreshTimeout);
-      }
-
-      // Schedule refresh 5 minutes before expiration or at minimum 30 minutes
-      const refreshTime = Math.max(1800000, Math.min(timeUntilExpiry - 300000, 3600000)); // Between 30-60 minutes
-      console.log(`Scheduling token refresh in ${refreshTime/60000} minutes`);
-      
-      const timeout = setTimeout(async () => {
-        let refreshed = false;
-        if (refreshTokenRef.current) {
-          refreshed = await refreshTokenRef.current();
-        }
-        if (!refreshed && logoutRef.current) {
-          logoutRef.current();
-        }
-      }, refreshTime);
-
-      setRefreshTimeout(timeout);
-    } catch (error) {
-      console.error('Error scheduling token refresh:', error);
-    }
-  };
-
-  // Function to refresh token - break circular dependency with useRef
-  refreshTokenRef.current = async () => {
+    refreshInProgressRef.current = true;
+    
     try {
       const storedToken = localStorage.getItem('token');
-      if (!storedToken) return false;
-
-      const response = await throttledVerifyToken();
-      if (response.token) {
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+      
+      if (!storedToken || !storedRefreshToken) {
+        console.log('No tokens found in storage');
+        dispatch({ type: AUTH_ACTIONS.LOGOUT });
+        return false;
+      }
+      
+      const response = await refreshUserToken(storedRefreshToken);
+      
+      if (response && response.token) {
         localStorage.setItem('token', response.token);
-        if (scheduleTokenRefreshRef.current) {
-          scheduleTokenRefreshRef.current(response.token);
+        scheduleTokenRefresh(response.token);
+        
+        if (!state.isAuthenticated && state.user) {
+          dispatch({ type: AUTH_ACTIONS.SET_AUTH_STATUS, payload: true });
         }
+        
+        console.log('Token refreshed successfully');
         return true;
       }
+      
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
       return false;
     } catch (error) {
       console.error('Token refresh failed:', error);
+      logPersistentError('AuthContext - refreshToken', error);
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
       return false;
+    } finally {
+      refreshInProgressRef.current = false;
     }
   };
-
-  // Stable wrapper function for external use
-  const refreshToken = useCallback(async (force = false) => {
-    try {
-      if (refreshingRef.current) {
-        console.log("Already refreshing token");
-        return;
-      }
-      
-      refreshingRef.current = true;
-      
-      // Skip refresh if not forced and the token is still valid
-      const tokenExpiration = localStorage.getItem('tokenExpiration');
-      const now = Date.now();
-      const timeUntilExpiration = tokenExpiration ? parseInt(tokenExpiration) - now : 0;
-      
-      if (!force && timeUntilExpiration > TOKEN_REFRESH_BUFFER_MS) {
-        console.log(`Token still valid for ${Math.round(timeUntilExpiration / 1000 / 60)} minutes, skipping refresh`);
-        refreshingRef.current = false;
-        return;
-      }
-      
-      const data = await verifyToken();
-      handleAuthSuccess(data);
-      
-      // Set new timeout for next refresh
-      if (refreshTimeout) clearTimeout(refreshTimeout);
-      setRefreshTimeout(setTimeout(() => refreshToken(), TOKEN_REFRESH_INTERVAL_MS));
-      
-      console.log("Token refreshed successfully");
-      refreshingRef.current = false;
-    } catch (error) {
-      logPersistentError('AuthContext - Token Refresh', error);
-      console.error("Failed to refresh token:", error);
-      refreshingRef.current = false;
-      logout();
-    }
-  }, []);
-
-  // Function to clear messages
-  const clearMessages = useCallback(() => {
-    setError(null);
-    setSuccess(null);
-  }, []);
-
-  // Function to handle successful authentication
-  const handleAuthSuccess = useCallback((data) => {
-    setUser(data.user);
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    if (scheduleTokenRefreshRef.current) {
-      scheduleTokenRefreshRef.current(data.token);
-    }
-    setSuccess(data.message || 'Authentication successful!');
-    setError(null);
-  }, []);
-
-  // Logout function - break circular dependency
-  logoutRef.current = () => {
-    if (refreshTimeout) {
-      clearTimeout(refreshTimeout);
-      setRefreshTimeout(null);
-    }
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    setError(null);
-    setSuccess('Logged out successfully');
-    setLastVerified(0);
+  
+  // Clear messages
+  const clearMessages = () => {
+    dispatch({ type: AUTH_ACTIONS.CLEAR_MESSAGES });
   };
-
-  // Stable wrapper for logout
-  const logout = useCallback(() => {
-    if (logoutRef.current) {
-      logoutRef.current();
-    }
-  }, []);
-
-  // Initialize auth only once
+  
+  // Initialize auth
   useEffect(() => {
-    let isMounted = true;
-    console.log("AuthContext: Running initialization effect.");
-    
-    // Skip initialization if already attempted to prevent loops
-    if (initAttempted) {
-      console.log("AuthContext: Init already attempted, skipping");
-      if (isMounted && loading) {
-        setLoading(false); // Ensure we exit loading state
-      }
-      return;
-    }
-    
-    // Mark that we've attempted initialization
-    setInitAttempted(true);
-
     const initializeAuth = async () => {
-      if (!isMounted) {
-          console.log("AuthContext: Initialization aborted, component unmounted.");
+      try {
+        const storedToken = localStorage.getItem('token');
+        const storedRefreshToken = localStorage.getItem('refreshToken');
+        const storedUser = localStorage.getItem('user');
+        
+        if (!storedToken || !storedUser) {
+          console.log('No stored auth data found');
+          dispatch({ type: AUTH_ACTIONS.INIT_AUTH, payload: { user: null, isAuthenticated: false } });
           return;
-      }
-      console.log("AuthContext: Starting initializeAuth function.");
-
-      const storedToken = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
-      let finalUser = null;
-      let finalToken = storedToken;
-      let finalSuccess = null;
-      let finalError = null;
-      let needsLogout = false; // Flag to determine if logout cleanup is needed
-
-      if (finalToken && storedUser) {
-        console.log("AuthContext: Found token and user in storage.");
+        }
+        
+        let parsedUser;
         try {
-          // Attempt to parse user data early
-          try {
-              finalUser = JSON.parse(storedUser);
-              if (!finalUser || !finalUser.id) {
-                  throw new Error('Invalid user data format in storage');
-              }
-          } catch (parseError) {
-              console.error("AuthContext: Failed to parse stored user data.", parseError);
-              throw new Error('Invalid user data format in storage'); // Propagate error
-          }
-
-          // Skip verification for now, just use the stored user data
-          // This prevents network errors during initialization
-          console.log("AuthContext: Using stored user data, skipping token verification for now.");
-          finalSuccess = 'Session restored successfully';
-
-          // Schedule a future verification after component is mounted and renders
-          if (scheduleTokenRefreshRef.current) {
-             console.log("AuthContext: Scheduling initial token refresh for later.");
-             scheduleTokenRefreshRef.current(finalToken);
-          }
+          parsedUser = JSON.parse(storedUser);
         } catch (error) {
-          console.error('AuthContext: Auth initialization error:', error);
-          needsLogout = true; // Mark for logout on any initialization error
-          finalError = 'Failed to initialize session.';
+          console.error('Error parsing stored user:', error);
+          clearStoredAuthData();
+          dispatch({ type: AUTH_ACTIONS.INIT_AUTH, payload: { user: null, isAuthenticated: false } });
+          return;
         }
-      } else {
-        console.log("AuthContext: No token/user found in storage.");
-        needsLogout = true; // No token means logged out state
-      }
-
-      // --- Final State Updates ---
-      if (isMounted) {
-        console.log("AuthContext: Applying final state updates.");
-
-        if (needsLogout) {
-            console.log("AuthContext: Setting final state to logged out.");
-            setUser(null);
-            // Clear storage and timeouts if we determined a logout is needed
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            if (refreshTimeout) clearTimeout(refreshTimeout);
-            setRefreshTimeout(null);
-            setLastVerified(0); // Reset verification time on logout
+        
+        const timeUntilExpiry = calculateTimeUntilExpiry(storedToken);
+        
+        if (timeUntilExpiry <= TOKEN_REFRESH_BUFFER_MS) {
+          console.log('Token expired or expiring soon, attempting refresh');
+          
+          if (storedRefreshToken) {
+            const refreshSuccessful = await refreshToken(true);
+            
+            if (!refreshSuccessful) {
+              console.log('Token refresh failed, clearing auth data');
+              clearStoredAuthData();
+              dispatch({ type: AUTH_ACTIONS.INIT_AUTH, payload: { user: null, isAuthenticated: false } });
+              return;
+            }
+          } else {
+            console.log('No refresh token available');
+            clearStoredAuthData();
+            dispatch({ type: AUTH_ACTIONS.INIT_AUTH, payload: { user: null, isAuthenticated: false } });
+            return;
+          }
         } else {
-             console.log("AuthContext: Setting final state to logged in.");
-             setUser(finalUser);
+          scheduleTokenRefresh(storedToken);
         }
-
-        // Set messages and loading state regardless
-        setError(finalError);
-        setSuccess(finalSuccess);
-        console.log("AuthContext: Setting loading to false.");
-        setLoading(false);
-      } else {
-          console.log("AuthContext: Final state updates skipped, component unmounted.");
+        
+        dispatch({ type: AUTH_ACTIONS.INIT_AUTH, payload: { user: parsedUser, isAuthenticated: true } });
+        console.log('Auth initialized from storage');
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        logPersistentError('AuthContext - initializeAuth', error);
+        clearStoredAuthData();
+        dispatch({ type: AUTH_ACTIONS.INIT_AUTH, payload: { user: null, isAuthenticated: false } });
       }
     };
-
+    
     initializeAuth();
-
-    // Cleanup function
+    
     return () => {
-      console.log("AuthContext: Cleaning up initialization effect.");
-      isMounted = false;
-      // Clear refresh timeout on unmount is important
-      if (refreshTimeout) {
-        clearTimeout(refreshTimeout);
-        console.log("AuthContext: Cleared refresh timeout on unmount.");
-      }
+      clearRefreshTimeout();
     };
-    // Keep dependencies empty to run only once on mount
   }, []);
-
-  const login = async (username, password) => {
-    try {
-      clearMessages();
-      setLoading(true);
-      const data = await loginUser(username, password);
-      handleAuthSuccess(data);
-      setLoading(false);
-      return true;
-    } catch (error) {
-      logPersistentError('AuthContext - Login', error);
-      
-      // Extract password requirements message if available
-      let errorMessage = error.response?.data?.message || 'Login failed. Please check your credentials.';
-      
-      setError(errorMessage);
-      
-      // Return password requirements if available
-      if (error.response?.data?.passwordRequirements) {
-        setError(errorMessage + ' ' + error.response.data.passwordRequirements);
-      }
-      
-      setLoading(false);
-      return false;
-    }
-  };
-
-  const register = async (username, email, password) => {
-    try {
-      clearMessages();
-      setLoading(true);
-      const data = await registerUser(username, email, password);
-      handleAuthSuccess(data);
-      setLoading(false);
-      return true;
-    } catch (error) {
-      logPersistentError('AuthContext - Register', error);
-      
-      // Extract password requirements message if available
-      let errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
-      
-      setError(errorMessage);
-      
-      // Return password requirements if available
-      if (error.response?.data?.passwordRequirements) {
-        setError(errorMessage + ' ' + error.response.data.passwordRequirements);
-      }
-      
-      setLoading(false);
-      return false;
-    }
-  };
-
-  const value = {
-    user,
-    loading,
-    error,
-    success,
-    isAuthenticated: !!user,
+  
+  // Create context value
+  const authContextValue = {
+    ...state,
     login,
     register,
     logout,
     refreshToken,
-    clearMessages
+    clearMessages,
+    getTimeUntilExpiry: calculateTimeUntilExpiry
   };
-
-  // Determine if we should show children - either:
-  // 1. We've finished loading OR
-  // 2. We've tried initializing at least once and 2+ seconds have passed
-  const shouldShowChildren = !loading || (initAttempted && renderCount > 3);
   
-  console.log(`AuthContext: shouldShowChildren=${shouldShowChildren}, loading=${loading}, initAttempted=${initAttempted}, renderCount=${renderCount}`);
-
   return (
-    <AuthContext.Provider value={value}>
-      {shouldShowChildren ? children : <div>Loading authentication state...</div>}
+    <AuthContext.Provider value={authContextValue}>
+      {!state.loading ? children : <div className="global-loading">Loading authentication...</div>}
     </AuthContext.Provider>
   );
 }; 
