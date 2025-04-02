@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './TextAdventure.css';
+import SoundManager from './utils/SoundManager';
 
 const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
   const [currentRoom, setCurrentRoom] = useState('start');
@@ -15,6 +16,7 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
   
   const historyRef = useRef(null);
   const inputRef = useRef(null);
+  const soundManagerRef = useRef(null);
 
   // Game world definition
   const GAME_WORLD = {
@@ -233,8 +235,33 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
     addToHistory('system', 'Type "help" for a list of commands.');
     displayRoomDescription(currentRoom);
     
+    // Initialize sound manager and play Bach's Goldberg Variations
+    const initializeAudio = async () => {
+      try {
+        // Get the sound manager instance
+        soundManagerRef.current = SoundManager.getInstance();
+        
+        // Initialize the sound manager
+        await soundManagerRef.current.initialize();
+        
+        // Load the Bach Goldberg Variations
+        await soundManagerRef.current.loadMusic('goldberg1', '/assets/music/text-adventure/goldberg-variations-8bit.mp3');
+        await soundManagerRef.current.loadMusic('goldberg2', '/assets/music/text-adventure/goldberg-variations-8bit-2.mp3');
+        
+        // Play the music with looping
+        soundManagerRef.current.playMusic('goldberg1', true, 0.3);
+      } catch (error) {
+        console.error('Failed to initialize audio:', error);
+      }
+    };
+    
+    initializeAudio();
+    
     return () => {
-      // Cleanup
+      // Cleanup - stop the music when component unmounts
+      if (soundManagerRef.current) {
+        soundManagerRef.current.stopMusic();
+      }
     };
   }, []);
 
@@ -652,6 +679,11 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
     addToHistory('system', 'The manuscript glows brightly, then transforms into a completed book - your story.');
     addToHistory('system', 'Hemingway hands you the book. "Take this knowledge back to your world. Write true, write clear, write hard."');
     addToHistory('system', 'Congratulations! You have completed The Writer\'s Journey!');
+    
+    // Switch to the second Goldberg Variation for the ending
+    if (soundManagerRef.current) {
+      soundManagerRef.current.playMusic('goldberg2', true, 0.4);
+    }
     
     setGameComplete(true);
   };
