@@ -408,49 +408,210 @@ export const proxyExternalRequest = async (url, options = {}) => {
 /* ────────────────────────────────
    🔹 AUTHENTICATION ENDPOINTS
 ──────────────────────────────── */
-export const loginUser = async (username, password) => {
-  try {
-    // Add logging for debugging
-    console.log(`API Login attempt with username: ${username}`);
-    
-    const response = await getApi().post('/api/auth/login', {
-      identifier: username, // For backward compatibility
-      username: username,   // Add username parameter for new server implementations
-      password
-    });
-    
-    console.log('Login API response:', response.status);
-    return response.data;
-  } catch (error) {
-    console.error('Login failed details:', {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data
-    });
-    throw error;
-  }
-};
 
+/**
+ * Register a new user
+ * @param {string} username - Username
+ * @param {string} email - Email address
+ * @param {string} password - Password
+ * @returns {Promise<Object>} Authentication data
+ */
 export const registerUser = async (username, email, password) => {
   try {
+    // Log registration attempt
+    console.log(`Attempting to register user: ${username}`);
+    
+    // Send registration request
     const response = await getApi().post('/api/auth/register', {
       username,
       email,
       password
     });
+    
+    // Check for success flag in response
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Registration failed');
+    }
+    
+    // Return auth data
     return response.data;
   } catch (error) {
-    console.error('Registration failed:', error);
+    console.error('Registration error:', error);
     throw error;
   }
 };
 
-export const verifyToken = async () => {
+/**
+ * Login a user
+ * @param {string} username - Username or email
+ * @param {string} password - Password
+ * @returns {Promise<Object>} Authentication data
+ */
+export const loginUser = async (username, password) => {
   try {
-    const response = await getApi().post('/api/auth/verify');
+    // Log login attempt
+    console.log(`Attempting login for user: ${username}`);
+    
+    // Send login request
+    const response = await getApi().post('/api/auth/login', {
+      identifier: username, // For backward compatibility
+      username: username,   // Add username parameter for newer implementations
+      password
+    });
+    
+    // Check for success flag in response
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Login failed');
+    }
+    
+    // Return auth data
     return response.data;
   } catch (error) {
-    console.error('Token verification failed:', error);
+    console.error('Login error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Logout a user
+ * @param {string} refreshToken - Refresh token to invalidate
+ * @returns {Promise<Object>} Logout response
+ */
+export const logoutUser = async (refreshToken) => {
+  try {
+    // Get token for auth header
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.log('No token found, already logged out');
+      return { success: true };
+    }
+    
+    // Send logout request
+    const response = await getApi().post('/api/auth/logout', 
+      { refreshToken },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    // Return response
+    return response.data;
+  } catch (error) {
+    console.error('Logout error:', error);
+    // Continue with logout even if API call fails
+    return { success: true };
+  }
+};
+
+/**
+ * Verify auth token
+ * @returns {Promise<Object>} Verification response
+ */
+export const verifyToken = async () => {
+  try {
+    // Get token for auth header
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found');
+    }
+    
+    // Send verification request
+    const response = await getApi().get('/api/auth/verify', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    // Check for success flag in response
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Token verification failed');
+    }
+    
+    // Return verification data
+    return response.data;
+  } catch (error) {
+    console.error('Token verification error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Refresh access token using refresh token
+ * @param {string} refreshToken - Refresh token
+ * @returns {Promise<Object>} Refresh response with new token
+ */
+export const refreshUserToken = async (refreshToken) => {
+  try {
+    // Send refresh request
+    const response = await getApi().post('/api/auth/refresh', { refreshToken });
+    
+    // Check for success flag in response
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Token refresh failed');
+    }
+    
+    // Return new token data
+    return response.data;
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get user's game state
+ * @returns {Promise<Object>} Game state data
+ */
+export const getUserGameState = async () => {
+  try {
+    // Get token for auth header
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found');
+    }
+    
+    // Send game state request
+    const response = await getApi().get('/api/auth/game-state', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    // Check for success flag in response
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to get game state');
+    }
+    
+    // Return game state data
+    return response.data.gameState;
+  } catch (error) {
+    console.error('Get game state error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update user's game state
+ * @param {Object} gameData - Game state data to update
+ * @returns {Promise<Object>} Update response
+ */
+export const updateGameState = async (gameData) => {
+  try {
+    // Get token for auth header
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found');
+    }
+    
+    // Send update request
+    const response = await getApi().post('/api/auth/game-state', 
+      { gameData },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    // Check for success flag in response
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to update game state');
+    }
+    
+    // Return update response
+    return response.data;
+  } catch (error) {
+    console.error('Update game state error:', error);
     throw error;
   }
 };

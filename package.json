@@ -14,5 +14,8 @@
     "node": ">=20.0.0"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.4.1"
+  }
 }

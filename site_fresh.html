@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    
+    <title>Authentic Internet: The Artifact World</title>
+    <meta name="description" content="A digital world where users explore, create, and unlock hidden artifacts.">
+
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- Mobile and iOS PWA metadata -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Authentic Internet" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Splash screens for different iOS devices -->
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-2048-2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1668-2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1536-2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1125-2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-750-1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-640-1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+
+    <meta property="og:title" content="Authentic Internet: The Artifact World" />
+    <meta property="og:description" content="A world of exploration where users leave and discover artifacts." />
+    <meta property="og:image" content="/social-preview.png" />
+    <meta property="og:url" content="https://authentikosinternetikosmaximus.com" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="color-scheme" content="dark light">
+
+    <script type="module" crossorigin src="/assets/index-afhmvSKI.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CiMVtfPt.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    
+    <!-- Register service worker with improved error handling -->
+    <script>
+      // Defer service worker registration to not block rendering
+      setTimeout(() => {
+        if ('serviceWorker' in navigator) {
+          const registerSW = async () => {
+            try {
+              const registration = await Promise.race([
+                navigator.serviceWorker.register('/service-worker.js', {
+                  scope: '/'
+                }),
+                // Add a timeout to prevent infinite waiting
+                new Promise((_, reject) => 
+                  setTimeout(() => reject(new Error('ServiceWorker registration timed out')), 5000)
+                )
+              ]);
+              
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+              
+              // Handle updates
+              registration.onupdatefound = () => {
+                const installingWorker = registration.installing;
+                
+                installingWorker.onstatechange = () => {
+                  if (installingWorker.state === 'installed') {
+                    if (navigator.serviceWorker.controller) {
+                      console.log('New content is available; please refresh the page.');
+                    } else {
+                      console.log('Content is cached for offline use.');
+                    }
+                  }
+                };
+              };
+            } catch (error) {
+              console.error('ServiceWorker registration failed: ', error);
+              // Application continues to work even if service worker registration fails
+            }
+          };
+          
+          // Wait until the page is fully loaded to register the SW
+          if (document.readyState === 'complete') {
+            registerSW();
+          } else {
+            window.addEventListener('load', registerSW);
+          }
+          
+          // Handle communication errors with service worker
+          navigator.serviceWorker.addEventListener('message', event => {
+            console.log('Message from service worker: ', event.data);
+          });
+          
+          navigator.serviceWorker.addEventListener('messageerror', event => {
+            console.error('Error in message from service worker: ', event);
+          });
+        }
+      }, 1000); // Delay service worker registration by 1 second
+    </script>
+  </body>
+</html>

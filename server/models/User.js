@@ -4,46 +4,172 @@ import { PASSWORD_REQUIREMENTS } from "../utils/validation.js";
 
 const UserSchema = new mongoose.Schema(
   {
+    // Basic authentication fields
     username: {
       type: String,
       required: [true, "Username is required"],
       unique: true,
       trim: true,
-      minlength: [3, "Username must be at least 3 characters long"],
+      minlength: [3, "Username must be at least 3 characters long"]
     },
     email: {
       type: String,
       required: true,
       unique: true,
       trim: true,
-      lowercase: true,
+      lowercase: true
     },
     password: {
       type: String,
       required: [true, "Password is required"],
       minlength: [PASSWORD_REQUIREMENTS.minLength, `Password must be at least ${PASSWORD_REQUIREMENTS.minLength} characters long`],
     },
+    
+    // Enhanced user profile
+    displayName: {
+      type: String,
+      trim: true,
+      default: function() { return this.username; }
+    },
     avatar: {
       type: String,
       default: "https://api.dicebear.com/7.x/pixel-art/svg?seed=unknown",
     },
-    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // ✅ Keeping friends system
-
-    // 🔹 New Additions:
-    experience: { type: Number, default: 0 }, // ✅ EXP Progress
-    level: { type: Number, default: 1 }, // ✅ Level Progression
-    inventory: [{ type: mongoose.Schema.Types.ObjectId, ref: "Artifact" }], // ✅ Artifacts Found
-    messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }], // ✅ Persistent Messages
-    createdAt: { type: Date, default: Date.now }, // ✅ Keeps timestamps for history
+    bio: {
+      type: String,
+      default: "",
+      maxlength: [250, "Bio must be less than 250 characters"]
+    },
+    
+    // Social features
+    friends: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "User" 
+    }],
+    blockedUsers: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "User" 
+    }],
+    
+    // Game progression
+    experience: { 
+      type: Number, 
+      default: 0 
+    },
+    level: { 
+      type: Number, 
+      default: 1 
+    },
+    skillPoints: {
+      type: Number,
+      default: 0
+    },
+    achievements: [{
+      id: String,
+      name: String,
+      description: String,
+      unlockedAt: Date
+    }],
+    
+    // Game state
+    inventory: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Artifact" 
+    }],
+    messages: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Message" 
+    }],
+    lastPosition: {
+      worldId: { type: String, default: "overworld" },
+      x: { type: Number, default: 0 },
+      y: { type: Number, default: 0 },
+      facing: { type: String, default: "down" }
+    },
+    gameState: {
+      currentQuest: { type: String, default: "" },
+      completedQuests: [String],
+      discoveredLocations: [String],
+      unlockedAreas: [String],
+      textAdventureProgress: {
+        currentRoom: { type: String, default: "start" },
+        inventory: [String],
+        completedInteractions: [String],
+        knownPasswords: [String]
+      }
+    },
+    
+    // Activity tracking
+    lastLogin: { 
+      type: Date
+    },
+    lastActive: {
+      type: Date,
+      default: Date.now
+    },
+    createdAt: { 
+      type: Date, 
+      default: Date.now 
+    },
     isActive: {
       type: Boolean,
       default: true
+    },
+    
+    // Security and account management
+    accountStatus: {
+      type: String,
+      enum: ["active", "suspended", "banned", "deleted"],
+      default: "active"
+    },
+    role: {
+      type: String,
+      enum: ["user", "moderator", "admin"],
+      default: "user"
+    },
+    refreshTokens: [{
+      token: String,
+      expires: Date,
+      userAgent: String,
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    securitySettings: {
+      twoFactorEnabled: {
+        type: Boolean,
+        default: false
+      },
+      loginNotifications: {
+        type: Boolean,
+        default: true
+      }
     }
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    // Add virtual fields, use them in JSON responses
+    toJSON: { 
+      virtuals: true,
+      transform: function(doc, ret) {
+        delete ret.password; // Don't expose password
+        delete ret.refreshTokens; // Don't expose refresh tokens
+        return ret;
+      }
+    },
+    toObject: { virtuals: true }
+  }
 );
 
-// 🔹 Hash Password Before Saving
+// Virtual for total playtime
+UserSchema.virtual('playtime').get(function() {
+  const created = this.createdAt || new Date();
+  const lastActive = this.lastActive || new Date();
+  return Math.floor((lastActive - created) / (1000 * 60 * 60)); // in hours
+});
+
+// Hash Password Before Saving
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   
@@ -56,10 +182,54 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
-// 🔹 Password Comparison Method
+// Password Comparison Method
 UserSchema.methods.comparePassword = async function (enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
 };
+
+// Method to update last active timestamp
+UserSchema.methods.updateActivity = async function() {
+  this.lastActive = new Date();
+  return this.save();
+};
+
+// Method to save game progress
+UserSchema.methods.saveGameProgress = async function(progressData) {
+  // Update only the fields that are provided
+  if (progressData.experience) this.experience = progressData.experience;
+  if (progressData.level) this.level = progressData.level;
+  if (progressData.position) this.lastPosition = progressData.position;
+  if (progressData.inventory) this.inventory = progressData.inventory;
+  
+  // For nested fields in gameState, use a more careful approach
+  if (progressData.gameState) {
+    // Initialize gameState if it doesn't exist
+    if (!this.gameState) this.gameState = {};
+    
+    // Update specific gameState fields
+    if (progressData.gameState.currentQuest) this.gameState.currentQuest = progressData.gameState.currentQuest;
+    if (progressData.gameState.completedQuests) this.gameState.completedQuests = progressData.gameState.completedQuests;
+    
+    // Text adventure specific progress
+    if (progressData.gameState.textAdventureProgress) {
+      if (!this.gameState.textAdventureProgress) this.gameState.textAdventureProgress = {};
+      
+      const taProgress = progressData.gameState.textAdventureProgress;
+      if (taProgress.currentRoom) this.gameState.textAdventureProgress.currentRoom = taProgress.currentRoom;
+      if (taProgress.inventory) this.gameState.textAdventureProgress.inventory = taProgress.inventory;
+      if (taProgress.completedInteractions) this.gameState.textAdventureProgress.completedInteractions = taProgress.completedInteractions;
+      if (taProgress.knownPasswords) this.gameState.textAdventureProgress.knownPasswords = taProgress.knownPasswords;
+    }
+  }
+  
+  return this.save();
+};
+
+// Create indexes for frequently queried fields
+UserSchema.index({ username: 1 });
+UserSchema.index({ email: 1 });
+UserSchema.index({ 'gameState.currentQuest': 1 });
+UserSchema.index({ level: -1 }); // For leaderboards
 
 const User = mongoose.model("User", UserSchema);
 export default User;

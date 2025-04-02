@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './TextAdventure.css';
 import SoundManager from './utils/SoundManager';
+import { useAuth } from '../context/AuthContext';
+import { getUserGameState, updateGameState } from '../api/api';
 
 const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
   const [currentRoom, setCurrentRoom] = useState('start');
@@ -17,6 +19,12 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
   const historyRef = useRef(null);
   const inputRef = useRef(null);
   const soundManagerRef = useRef(null);
+
+  const { isAuthenticated } = useAuth();
+  const gameStateSavedRef = useRef(false);
+  
+  // Add a stateSaved flag to track if initial progress was loaded
+  const [progressLoaded, setProgressLoaded] = useState(false);
 
   // Game world definition
   const GAME_WORLD = {
@@ -297,6 +305,156 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
     
     return () => clearInterval(typingInterval);
   }, [isTyping, currentRoom]);
+
+  // Load saved game progress when component mounts
+  useEffect(() => {
+    const loadGameProgress = async () => {
+      if (!isAuthenticated) return;
+      
+      try {
+        console.log('Loading saved game progress...');
+        const gameState = await getUserGameState();
+        
+        // Check if there's text adventure progress
+        if (gameState?.gameProgress?.textAdventureProgress) {
+          const taProgress = gameState.gameProgress.textAdventureProgress;
+          
+          // Load room
+          if (taProgress.currentRoom) {
+            setCurrentRoom(taProgress.currentRoom);
+            console.log(`Loaded saved room: ${taProgress.currentRoom}`);
+          }
+          
+          // Load inventory
+          if (taProgress.inventory && taProgress.inventory.length > 0) {
+            setInventory(taProgress.inventory);
+            console.log(`Loaded ${taProgress.inventory.length} inventory items`);
+          }
+          
+          // Apply interactions and knowledge
+          if (taProgress.completedInteractions && taProgress.completedInteractions.length > 0) {
+            // Add completed interactions to each room's state
+            taProgress.completedInteractions.forEach(interaction => {
+              const [roomId, interactionId] = interaction.split('::');
+              if (roomId && interactionId && GAME_WORLD[roomId]) {
+                if (!GAME_WORLD[roomId].completedInteractions) {
+                  GAME_WORLD[roomId].completedInteractions = [];
+                }
+                GAME_WORLD[roomId].completedInteractions.push(interactionId);
+              }
+            });
+            console.log(`Loaded ${taProgress.completedInteractions.length} completed interactions`);
+          }
+          
+          // Load passwords/knowledge
+          if (taProgress.knownPasswords && taProgress.knownPasswords.length > 0) {
+            taProgress.knownPasswords.forEach(knowledge => {
+              const [roomId, knowledgeId] = knowledge.split('::');
+              if (roomId && knowledgeId && GAME_WORLD[roomId]) {
+                if (!GAME_WORLD[roomId].playerKnowledge) {
+                  GAME_WORLD[roomId].playerKnowledge = [];
+                }
+                GAME_WORLD[roomId].playerKnowledge.push(knowledgeId);
+              }
+            });
+            console.log(`Loaded ${taProgress.knownPasswords.length} pieces of knowledge`);
+          }
+          
+          // Add welcome back message
+          addToHistory('system', `Welcome back, ${username}! Your adventure continues...`);
+          
+          // Update history with current room description after loading
+          addToHistory('room', GAME_WORLD[taProgress.currentRoom].description);
+          displayRoomDescription(taProgress.currentRoom);
+          
+          setProgressLoaded(true);
+        } else {
+          console.log('No saved text adventure progress found, starting new game');
+        }
+      } catch (error) {
+        console.error('Error loading game progress:', error);
+        // Continue with new game if loading fails
+      }
+    };
+    
+    loadGameProgress();
+  }, [isAuthenticated, username]);
+  
+  // Save game progress when state changes
+  useEffect(() => {
+    // Don't save until initial progress is loaded
+    if (!isAuthenticated || !progressLoaded) return;
+    
+    // Don't save on first render
+    if (!gameStateSavedRef.current) {
+      gameStateSavedRef.current = true;
+      return;
+    }
+    
+    // Debounce save to avoid too many API calls
+    const saveTimer = setTimeout(() => {
+      saveGameProgress();
+    }, 2000);
+    
+    return () => clearTimeout(saveTimer);
+  }, [currentRoom, inventory, isAuthenticated, progressLoaded]);
+  
+  // Save game progress when component unmounts
+  useEffect(() => {
+    return () => {
+      if (isAuthenticated && progressLoaded) {
+        saveGameProgress();
+      }
+    };
+  }, [isAuthenticated, progressLoaded]);
+  
+  // Function to save game progress
+  const saveGameProgress = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      // Collect all completed interactions
+      const completedInteractions = [];
+      const knownPasswords = [];
+      
+      // Format interactions and knowledge for storage
+      Object.keys(GAME_WORLD).forEach(roomId => {
+        const room = GAME_WORLD[roomId];
+        
+        // Save completed interactions
+        if (room.completedInteractions) {
+          room.completedInteractions.forEach(interaction => {
+            completedInteractions.push(`${roomId}::${interaction}`);
+          });
+        }
+        
+        // Save knowledge
+        if (room.playerKnowledge) {
+          room.playerKnowledge.forEach(knowledge => {
+            knownPasswords.push(`${roomId}::${knowledge}`);
+          });
+        }
+      });
+      
+      // Prepare game state data
+      const gameData = {
+        gameState: {
+          textAdventureProgress: {
+            currentRoom,
+            inventory,
+            completedInteractions,
+            knownPasswords
+          }
+        }
+      };
+      
+      // Save to server
+      await updateGameState(gameData);
+      console.log('Game progress saved successfully');
+    } catch (error) {
+      console.error('Error saving game progress:', error);
+    }
+  };
 
   // Add message to game history
   const addToHistory = (type, text) => {
@@ -673,6 +831,25 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
 
   // Handle game ending
   const handleEnding = () => {
+    // Save progress with completed flag
+    if (isAuthenticated) {
+      const gameData = {
+        gameState: {
+          textAdventureProgress: {
+            currentRoom: 'sanctuary',
+            inventory,
+            completedInteractions: ['complete'],
+            knownPasswords: ['complete']
+          }
+        }
+      };
+      
+      updateGameState(gameData).catch(error => 
+        console.error('Failed to save completion status:', error)
+      );
+    }
+    
+    // Show ending text
     addToHistory('system', 'As you write your truth on the manuscript, the room begins to fill with a warm, golden light.');
     addToHistory('system', 'The spirits of the writers nod in approval, and Hemingway\'s ghost steps forward.');
     addToHistory('system', '"You have found the courage to write honestly," he says. "That is the greatest gift a writer can possess."');
