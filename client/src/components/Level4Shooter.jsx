@@ -4,7 +4,7 @@ import SoundManager from './utils/SoundManager';
 import { TILE_SIZE } from './Constants';
 import './Level4Shooter.css';
 
-const Level4Shooter = ({ onComplete, onExit }) => {
+const Level4Shooter = ({ onComplete, onExit, character }) => {
   // Game state
   const [isGameActive, setIsGameActive] = useState(false);
   const [gameOver, setGameOver] = useState(false);
@@ -1814,7 +1814,8 @@ const Level4Shooter = ({ onComplete, onExit }) => {
 
 Level4Shooter.propTypes = {
   onComplete: PropTypes.func,
-  onExit: PropTypes.func
+  onExit: PropTypes.func,
+  character: PropTypes.object
 };
 
 export default Level4Shooter; 

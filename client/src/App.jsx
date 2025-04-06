@@ -15,6 +15,7 @@ import GameWorld from './components/GameWorld';
 import ArtifactsPage from './pages/ArtifactsPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import TextAdventure from './components/TextAdventure';
+import Level4Shooter from './components/Level4Shooter';
 import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 

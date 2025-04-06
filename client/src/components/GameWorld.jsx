@@ -27,7 +27,6 @@ import "./Character.css";
 import "./Artifact.css";
 import "./Inventory.css";
 import SavedQuotes from "./SavedQuotes";
-import Level4Shooter from "./Level4Shooter";
 import RewardModal from "./RewardModal";
 import DialogBox from './DialogBox';
 import TextAdventure from './TextAdventure';
@@ -37,7 +36,7 @@ import ArtifactDiscovery from './ArtifactDiscovery';
 import XPNotification from './XPNotification';
 import AchievementNotification from './AchievementNotification';
 import Level3Terminal from './Level3Terminal';
-import ShooterAdventure from './ShooterAdventure';
+import Level4Shooter from './Level4Shooter';
 import HemingwayChallenge from './HemingwayChallenge';
 import { useAuth } from '../context/AuthContext';
 import { useAchievements } from '../context/AchievementContext';
@@ -1739,7 +1738,7 @@ const GameWorld = () => {
         )}
         
         {currentSpecialWorld === 'shooter' && (
-          <ShooterAdventure
+          <Level4Shooter
             onComplete={handleShooterComplete}
             onExit={handleShooterExit}
             character={character}
