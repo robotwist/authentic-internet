@@ -1322,3 +1322,55 @@
     display: none;
   }
 }
+
+.portal-notification {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 8px;
+  padding: 15px 25px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  z-index: 100;
+  transition: bottom 0.5s ease-in-out;
+  max-width: 90%;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.portal-notification.active {
+  bottom: 30px;
+  opacity: 1;
+}
+
+.portal-notification-content h3 {
+  font-size: 18px;
+  margin: 0 0 8px 0;
+  color: #50e3c2;
+  text-shadow: 0 0 10px #50e3c2;
+}
+
+.portal-notification-content p {
+  font-size: 14px;
+  margin: 0;
+  color: white;
+  font-weight: normal;
+}
+
+@media (max-width: 768px) {
+  .portal-notification {
+    padding: 10px 15px;
+  }
+  
+  .portal-notification-content h3 {
+    font-size: 16px;
+  }
+  
+  .portal-notification-content p {
+    font-size: 12px;
+  }
+}

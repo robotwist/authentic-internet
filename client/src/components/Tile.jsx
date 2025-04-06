@@ -25,8 +25,14 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
         return '/assets/tiles/sand.png';
       case 4: // dungeon
         return '/assets/tiles/dungeon.webp';
-      case 5: // portal
+      case 5: // standard portal
         return '/assets/tiles/portal.webp';
+      case 6: // terminal portal
+        return '/assets/tiles/portal.webp'; // Base portal image, style overridden by CSS
+      case 7: // shooter portal
+        return '/assets/tiles/portal.webp'; // Base portal image, style overridden by CSS
+      case 8: // text adventure portal
+        return '/assets/tiles/portal.webp'; // Base portal image, style overridden by CSS
       default:
         console.warn(`Unknown tile type: ${type}, defaulting to grass`);
         return '/assets/tiles/piskel_grass.png';
@@ -55,17 +61,24 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
     };
   }, [type]);
 
-  // Determine if this portal leads to a specific area
+  // Get portal destination based on type and coordinates
   const getPortalDestination = () => {
-    if (type !== 5) return null;
+    // Regular portal (type 5) destination
+    if (type === 5) {
+      if (mapName === "Overworld" && x === 8 && y === 11) {
+        return "overworld2";
+      } else if (mapName === "Overworld 2" && x === 8 && y === 6) {
+        return "overworld3";
+      } else if (mapName === "Overworld 3" && x === 8 && y === 1) {
+        return "yosemite";
+      }
+    }
     
-    // Determine where this portal leads based on map and coordinates
-    if (mapName === "Overworld" && x === 8 && y === 11) {
-      return "overworld2";
-    } else if (mapName === "Overworld 2" && x === 8 && y === 6) {
-      return "overworld3";
-    } else if (mapName === "Overworld 3" && x === 8 && y === 1) {
-      return "yosemite";
+    // Special portals in Yosemite
+    if (mapName === "Yosemite") {
+      if (type === 6) return "terminal";
+      if (type === 7) return "shooter";
+      if (type === 8) return "text-adventure";
     }
     
     return null;
@@ -81,7 +94,7 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
   };
 
   // Generate additional classes and attributes for portals
-  const portalDestination = type === 5 ? getPortalDestination() : null;
+  const portalDestination = (type >= 5 && type <= 8) ? getPortalDestination() : null;
   const portalLevel = type === 5 ? getPortalLevel() : null;
   const portalClasses = portalDestination ? `portal-to-${portalDestination}` : '';
   const isYosemitePortal = portalDestination === "yosemite";
@@ -94,7 +107,7 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
         top: `${y * size}px`,
         width: `${size}px`,
         height: `${size}px`,
-        backgroundImage: imageLoaded ? `url(${imagePath})` : 'none'
+        backgroundImage: type >= 6 && type <= 8 ? 'none' : (imageLoaded ? `url(${imagePath})` : 'none')
       }}
       onClick={onClick}
       data-coords={`${x},${y}`}
@@ -107,6 +120,28 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
         <>
           <div className="portal-inner-vortex"></div>
           <div className="portal-glow"></div>
+        </>
+      )}
+      
+      {/* Special portal inner elements */}
+      {type === 6 && (
+        <>
+          <div className="terminal-portal-inner"></div>
+          <div className="portal-glow green-glow"></div>
+        </>
+      )}
+      
+      {type === 7 && (
+        <>
+          <div className="shooter-portal-inner"></div>
+          <div className="portal-glow red-glow"></div>
+        </>
+      )}
+      
+      {type === 8 && (
+        <>
+          <div className="text-portal-inner"></div>
+          <div className="portal-glow blue-glow"></div>
         </>
       )}
     </div>

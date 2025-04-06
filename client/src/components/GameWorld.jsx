@@ -102,6 +102,7 @@ const GameWorld = () => {
   const { updateGameProgress } = useGameState();
   const gameWorldRef = useRef(null);
   const characterRef = useRef(null);
+  const [portalNotificationActive, setPortalNotificationActive] = useState(false);
   
   // Update checkForLevelUpAchievements to use our context
   const checkForLevelUpAchievements = useCallback((experience) => {
@@ -765,14 +766,110 @@ const GameWorld = () => {
         }
       }
       
-      // Special portal (code 6) handling for Level 4
-      if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 6) {
-        if (levelCompletion.level3) {
-          // Play portal sound for special portal
-          if (soundManager) soundManager.playSound('portal');
-          setShowLevel4(true);
-        } else {
-          alert("You must complete Level 3 first to access this portal.");
+      // Handle special portals in Yosemite map
+      const currentMapName = MAPS[currentMapIndex]?.name || '';
+      if (currentMapName === "Yosemite") {
+        // Terminal portal (code 6)
+        if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 6) {
+          // Notify user they're on a terminal portal
+          if (!portalNotificationActive) {
+            showPortalNotification('Terminal Challenge', 'Press SPACE to enter the Terminal Challenge');
+            setPortalNotificationActive(true);
+            
+            // When space is pressed while on this tile, enter the terminal
+            const handleTerminalEnter = (e) => {
+              if (e.code === 'Space' && 
+                  MAPS[currentMapIndex]?.data?.[row]?.[col] === 6 &&
+                  currentMapName === "Yosemite") {
+                // Play portal sound
+                if (soundManager) soundManager.playSound('portal');
+                // Launch terminal special world
+                setCurrentSpecialWorld('terminal');
+                // Remove the event listener
+                window.removeEventListener('keydown', handleTerminalEnter);
+              }
+            };
+            
+            // Add temporary event listener for space key
+            window.addEventListener('keydown', handleTerminalEnter);
+            
+            // Clean up function to remove listener when player moves away
+            return () => {
+              window.removeEventListener('keydown', handleTerminalEnter);
+              setPortalNotificationActive(false);
+            };
+          }
+        }
+        
+        // Shooter portal (code 7)
+        else if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 7) {
+          // Notify user they're on a shooter portal
+          if (!portalNotificationActive) {
+            showPortalNotification('Arcade Shooter', 'Press SPACE to enter the Arcade Shooter');
+            setPortalNotificationActive(true);
+            
+            // When space is pressed while on this tile, enter the shooter
+            const handleShooterEnter = (e) => {
+              if (e.code === 'Space' && 
+                  MAPS[currentMapIndex]?.data?.[row]?.[col] === 7 &&
+                  currentMapName === "Yosemite") {
+                // Play portal sound
+                if (soundManager) soundManager.playSound('portal');
+                // Launch shooter special world
+                setCurrentSpecialWorld('shooter');
+                // Remove the event listener
+                window.removeEventListener('keydown', handleShooterEnter);
+              }
+            };
+            
+            // Add temporary event listener for space key
+            window.addEventListener('keydown', handleShooterEnter);
+            
+            // Clean up function to remove listener when player moves away
+            return () => {
+              window.removeEventListener('keydown', handleShooterEnter);
+              setPortalNotificationActive(false);
+            };
+          }
+        }
+        
+        // Text Adventure portal (code 8)
+        else if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 8) {
+          // Notify user they're on a text adventure portal
+          if (!portalNotificationActive) {
+            showPortalNotification('Text Adventure', 'Press SPACE to enter the Text Adventure');
+            setPortalNotificationActive(true);
+            
+            // When space is pressed while on this tile, enter the text adventure
+            const handleTextEnter = (e) => {
+              if (e.code === 'Space' && 
+                  MAPS[currentMapIndex]?.data?.[row]?.[col] === 8 &&
+                  currentMapName === "Yosemite") {
+                // Play portal sound
+                if (soundManager) soundManager.playSound('portal');
+                // Launch text adventure special world
+                setCurrentSpecialWorld('text_adventure');
+                // Remove the event listener
+                window.removeEventListener('keydown', handleTextEnter);
+              }
+            };
+            
+            // Add temporary event listener for space key
+            window.addEventListener('keydown', handleTextEnter);
+            
+            // Clean up function to remove listener when player moves away
+            return () => {
+              window.removeEventListener('keydown', handleTextEnter);
+              setPortalNotificationActive(false);
+            };
+          }
+        }
+        else {
+          // Reset portal notification when not on a special portal
+          if (portalNotificationActive) {
+            hidePortalNotification();
+            setPortalNotificationActive(false);
+          }
         }
       }
       
@@ -1309,6 +1406,40 @@ const GameWorld = () => {
     
     return true; // Interaction happened
   }, [soundManager, setActiveNPC, setShowNPCDialog]);
+
+  // Show a notification when player steps on a portal
+  const showPortalNotification = (title, message) => {
+    // Create the notification element if it doesn't exist
+    let notification = document.getElementById('portal-notification');
+    
+    if (!notification) {
+      notification = document.createElement('div');
+      notification.id = 'portal-notification';
+      notification.className = 'portal-notification';
+      document.body.appendChild(notification);
+    }
+    
+    // Update notification content
+    notification.innerHTML = `
+      <div class="portal-notification-content">
+        <h3>${title}</h3>
+        <p>${message}</p>
+      </div>
+    `;
+    
+    // Make notification visible
+    setTimeout(() => {
+      notification.classList.add('active');
+    }, 10);
+  };
+  
+  // Hide portal notification
+  const hidePortalNotification = () => {
+    const notification = document.getElementById('portal-notification');
+    if (notification) {
+      notification.classList.remove('active');
+    }
+  };
 
   return (
     <ErrorBoundary>
