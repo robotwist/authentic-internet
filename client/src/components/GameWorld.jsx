@@ -485,13 +485,19 @@ const GameWorld = () => {
           // Play the appropriate music for the current map
           if (currentMapName === 'Yosemite') {
             console.log("🎵 Playing Yosemite music");
-            setTimeout(() => soundManager.playMusic('yosemite', true), 500);
+            soundManager.stopMusic(true); // Stop any existing music first
+            setTimeout(() => {
+              soundManager.playMusic('yosemite', true, 0.3);
+              console.log("🎵 Yosemite music started");
+            }, 500);
           } else if (currentMapName.includes('Overworld')) {
             console.log("🎵 Playing Overworld music");
-            setTimeout(() => soundManager.playMusic('overworld', true), 500);
+            soundManager.stopMusic(true); // Stop any existing music first
+            setTimeout(() => soundManager.playMusic('overworld', true, 0.3), 500);
           } else if (currentMapName.includes('Dungeon')) {
             console.log("🎵 Playing Dungeon music");
-            setTimeout(() => soundManager.playMusic('terminal', true), 500);
+            soundManager.stopMusic(true); // Stop any existing music first
+            setTimeout(() => soundManager.playMusic('terminal', true, 0.3), 500);
           }
           
           return;
@@ -763,85 +769,154 @@ const GameWorld = () => {
       const row = Math.floor(characterPosition.y / TILE_SIZE);
       const col = Math.floor(characterPosition.x / TILE_SIZE);
       
-      // Regular portal (code 5) handling
+      // Handle regular portals (type 5) for any map
       if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 5) {
         // Get the current map's name
         const currentMapName = MAPS[currentMapIndex]?.name || '';
         
-        // Save current position as a checkpoint before transitioning
-        gameStateManager.saveCheckpoint(currentMapName, { ...characterPosition });
-        
-        // Define destination based on current map - making progression more logical
-        let destinationMap = null;
-        let spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE }; // Default spawn
-        
-        // Logical world progression paths
-        if (currentMapName === "Overworld") {
-          destinationMap = "Overworld 2";
-        } 
-        else if (currentMapName === "Overworld 2") {
-          destinationMap = "Overworld 3";
-        }
-        else if (currentMapName === "Overworld 3") {
-          destinationMap = "Desert 1";
-        }
-        else if (currentMapName === "Desert 1") {
-          destinationMap = "Desert 2";
-        }
-        else if (currentMapName === "Desert 2") {
-          destinationMap = "Desert 3";
-        }
-        else if (currentMapName === "Desert 3") {
-          destinationMap = "Dungeon Level 1";
-        }
-        else if (currentMapName === "Dungeon Level 1") {
-          destinationMap = "Dungeon Level 2";
-        }
-        else if (currentMapName === "Dungeon Level 2") {
-          destinationMap = "Dungeon Level 3";
-        }
-        else if (currentMapName === "Dungeon Level 3") {
-          // Change to go to Yosemite instead of directly to Text Adventure
-          destinationMap = "Yosemite";
-          // Remove the Text Adventure special world launch
-          // setCurrentSpecialWorld('text_adventure');
-          // return; // Skip the rest of the portal logic since we're launching a special world
-        }
-        
-        // Find the index of the destination map
-        const destinationIndex = MAPS.findIndex(map => map.name === destinationMap);
-        
-        if (destinationIndex !== -1) {
-          // Play portal sound
-          if (soundManager) soundManager.playSound('portal');
-          
-          // Change map
-          setCurrentMapIndex(destinationIndex);
-          setCharacterPosition(spawnPosition);
-          
-          // Announce the world name
-          const portalAnnouncement = document.createElement('div');
-          portalAnnouncement.className = 'world-announcement';
-          portalAnnouncement.innerHTML = `<h2>Welcome to ${destinationMap}</h2>`;
-          document.body.appendChild(portalAnnouncement);
-          
-          // Remove the announcement after a few seconds
-          setTimeout(() => {
-            portalAnnouncement.classList.add('fade-out');
-            setTimeout(() => {
-              document.body.removeChild(portalAnnouncement);
-            }, 1000);
-          }, 3000);
-          
-          // Check if this is the path to Yosemite (Level 1 completion)
-          if (destinationMap === "Yosemite") {
-            // Add slight delay to show portal transition first
-            setTimeout(() => {
-              handleLevelCompletion('level1');
-            }, 800);
+        // For Yosemite map, handle type 5 portal specially to return to Overworld 3
+        if (currentMapName === "Yosemite") {
+          // Notify user they're on a regular portal
+          if (!portalNotificationActive) {
+            showPortalNotification('Return to Overworld 3', 'Press SPACE to return to Overworld 3');
+            setPortalNotificationActive(true);
+            
+            // When space is pressed while on this tile, go back to Overworld 3
+            const handleRegularPortalEnter = (e) => {
+              if (e.code === 'Space' && 
+                  MAPS[currentMapIndex]?.data?.[row]?.[col] === 5 &&
+                  currentMapName === "Yosemite") {
+                // Play portal sound
+                if (soundManager) {
+                  soundManager.playSound('portal');
+                }
+                
+                // Hide the portal notification
+                hidePortalNotification();
+                setPortalNotificationActive(false);
+                
+                // Find Overworld 3 map index
+                const destinationIndex = MAPS.findIndex(map => map.name === "Overworld 3");
+                if (destinationIndex !== -1) {
+                  // Change map to Overworld 3
+                  setCurrentMapIndex(destinationIndex);
+                  // Set character position near the portal to Yosemite
+                  setCharacterPosition({ x: 8, y: 2 });
+                  
+                  // Announce the world name
+                  const portalAnnouncement = document.createElement('div');
+                  portalAnnouncement.className = 'world-announcement';
+                  portalAnnouncement.innerHTML = '<h2>Welcome back to Overworld 3</h2>';
+                  document.body.appendChild(portalAnnouncement);
+                  
+                  // Remove the announcement after a few seconds
+                  setTimeout(() => {
+                    portalAnnouncement.classList.add('fade-out');
+                    setTimeout(() => {
+                      document.body.removeChild(portalAnnouncement);
+                    }, 1000);
+                  }, 3000);
+                } else {
+                  console.error("Destination map Overworld 3 not found");
+                }
+                
+                // Remove the event listener
+                window.removeEventListener('keydown', handleRegularPortalEnter);
+              }
+            };
+            
+            // Add temporary event listener for space key
+            window.addEventListener('keydown', handleRegularPortalEnter);
+            
+            // Clean up function to remove listener when player moves away
+            return () => {
+              window.removeEventListener('keydown', handleRegularPortalEnter);
+              setPortalNotificationActive(false);
+            };
           }
-        } else {
-          console.error(`Destination map "${destinationMap}" not found`);
+        }
+        // For all other maps, handle type 5 portal with the standard progression
+        else {
+          // Save current position as a checkpoint before transitioning
+          gameStateManager.saveCheckpoint(currentMapName, { ...characterPosition });
+          
+          // Define destination based on current map - making progression more logical
+          let destinationMap = null;
+          let spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE }; // Default spawn
+          
+          // Logical world progression paths
+          if (currentMapName === "Overworld") {
+            destinationMap = "Overworld 2";
+          } 
+          else if (currentMapName === "Overworld 2") {
+            destinationMap = "Overworld 3";
+          }
+          else if (currentMapName === "Overworld 3") {
+            destinationMap = "Yosemite";
+            // Reset the level1 completed flag for testing purposes
+            try {
+              localStorage.removeItem('level-level1-completed');
+              localStorage.removeItem('nkd-man-reward-shown');
+              console.log("🏆 Reset level1 completion flags for testing");
+            } catch (error) {
+              console.error("Error resetting level completion flags:", error);
+            }
+          }
+          else if (currentMapName === "Desert 1") {
+            destinationMap = "Desert 2";
+          }
+          else if (currentMapName === "Desert 2") {
+            destinationMap = "Desert 3";
+          }
+          else if (currentMapName === "Desert 3") {
+            destinationMap = "Dungeon Level 1";
+          }
+          else if (currentMapName === "Dungeon Level 1") {
+            destinationMap = "Dungeon Level 2";
+          }
+          else if (currentMapName === "Dungeon Level 2") {
+            destinationMap = "Dungeon Level 3";
+          }
+          else if (currentMapName === "Dungeon Level 3") {
+            // Change to go to Yosemite instead of directly to Text Adventure
+            destinationMap = "Yosemite";
+          }
+          
+          // Find the index of the destination map
+          const destinationIndex = MAPS.findIndex(map => map.name === destinationMap);
+          
+          if (destinationIndex !== -1) {
+            // Play portal sound
+            if (soundManager) soundManager.playSound('portal');
+            
+            // Change map
+            setCurrentMapIndex(destinationIndex);
+            setCharacterPosition(spawnPosition);
+            
+            // Announce the world name
+            const portalAnnouncement = document.createElement('div');
+            portalAnnouncement.className = 'world-announcement';
+            portalAnnouncement.innerHTML = `<h2>Welcome to ${destinationMap}</h2>`;
+            document.body.appendChild(portalAnnouncement);
+            
+            // Remove the announcement after a few seconds
+            setTimeout(() => {
+              portalAnnouncement.classList.add('fade-out');
+              setTimeout(() => {
+                document.body.removeChild(portalAnnouncement);
+              }, 1000);
+            }, 3000);
+            
+            // Check if this is the path to Yosemite (Level 1 completion)
+            if (destinationMap === "Yosemite") {
+              // Add slight delay to show portal transition first
+              setTimeout(() => {
+                handleLevelCompletion('level1');
+              }, 800);
+            }
+          } else {
+            console.error(`Destination map "${destinationMap}" not found`);
+          }
         }
       }
       

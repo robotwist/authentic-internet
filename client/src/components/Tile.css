@@ -512,6 +512,12 @@
   100% { transform: scale(1); opacity: 0.9; box-shadow: 0 0 15px #33ff33; }
 }
 
+@keyframes standardPortalPulse {
+  0% { transform: scale(1); opacity: 0.9; box-shadow: 0 0 15px #9944aa; }
+  50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 25px #9944aa; }
+  100% { transform: scale(1); opacity: 0.9; box-shadow: 0 0 15px #9944aa; }
+}
+
 @keyframes shooterPortalPulse {
   0% { transform: scale(1); opacity: 0.9; box-shadow: 0 0 15px #ff3333; }
   50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 25px #ff3333; }
@@ -531,4 +537,39 @@
   transform: scale(1.15);
   cursor: pointer;
   z-index: 100;
+}
+
+.tile.standard-portal {
+  background-color: #9944aa;
+  animation: standardPortalPulse 2s infinite;
+  box-shadow: 0 0 15px #9944aa;
+  border: 3px solid #773388;
+  z-index: 25;
+  position: relative;
+  overflow: visible;
+}
+
+.tile.standard-portal::before {
+  content: 'PORTAL';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #773388;
+  color: white;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0.9;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Special label for portal back to Overworld 3 */
+.tile.standard-portal.portal-to-overworld3::before {
+  content: 'OVERWORLD 3';
+  background-color: #1a1acc;
 } 

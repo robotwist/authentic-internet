@@ -71,6 +71,8 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
         return "overworld3";
       } else if (mapName === "Overworld 3" && x === 8 && y === 1) {
         return "yosemite";
+      } else if (mapName === "Yosemite" && x === 8 && y === 8) {
+        return "overworld3"; // Portal in Yosemite leads back to Overworld 3
       }
     }
     
@@ -98,16 +100,27 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
   const portalLevel = type === 5 ? getPortalLevel() : null;
   const portalClasses = portalDestination ? `portal-to-${portalDestination}` : '';
   const isYosemitePortal = portalDestination === "yosemite";
+  
+  // Add specific portal type classes
+  const getPortalTypeClass = () => {
+    if (type === 5) return 'standard-portal';
+    if (type === 6) return 'terminal-portal';
+    if (type === 7) return 'shooter-portal';
+    if (type === 8) return 'text-portal';
+    return '';
+  };
+  
+  const portalTypeClass = getPortalTypeClass();
 
   return (
     <div
-      className={`tile ${TILE_TYPES[type] || 'unknown'} ${imageLoaded ? '' : 'image-loading'} ${className} ${portalClasses} ${isYosemitePortal ? 'yosemite-portal' : ''}`}
+      className={`tile ${TILE_TYPES[type] || 'unknown'} ${imageLoaded ? '' : 'image-loading'} ${className} ${portalClasses} ${isYosemitePortal ? 'yosemite-portal' : ''} ${portalTypeClass}`}
       style={{
         left: `${x * size}px`,
         top: `${y * size}px`,
         width: `${size}px`,
         height: `${size}px`,
-        backgroundImage: type >= 6 && type <= 8 ? 'none' : (imageLoaded ? `url(${imagePath})` : 'none')
+        backgroundImage: type >= 5 && type <= 8 ? 'none' : (imageLoaded ? `url(${imagePath})` : 'none')
       }}
       onClick={onClick}
       data-coords={`${x},${y}`}
@@ -115,7 +128,7 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
       data-portal-destination={portalDestination}
       data-level={portalLevel}
     >
-      {/* Inner elements for immediate portal visibility */}
+      {/* Inner elements for all portal types */}
       {type === 5 && (
         <>
           <div className="portal-inner-vortex"></div>
