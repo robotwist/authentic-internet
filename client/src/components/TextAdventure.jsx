@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import './TextAdventure.css';
 import SoundManager from './utils/SoundManager';
 import { useAuth } from '../context/AuthContext';
-import { getUserGameState, updateGameState } from '../api/api';
+import { useGameState } from '../context/GameStateContext';
 
 const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
   const [currentRoom, setCurrentRoom] = useState('start');
@@ -21,6 +21,7 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
   const soundManagerRef = useRef(null);
 
   const { isAuthenticated } = useAuth();
+  const { updateGameProgress, gameProgress } = useGameState();
   const gameStateSavedRef = useRef(false);
   
   // Add a stateSaved flag to track if initial progress was loaded
@@ -313,11 +314,10 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
       
       try {
         console.log('Loading saved game progress...');
-        const gameState = await getUserGameState();
         
-        // Check if there's text adventure progress
-        if (gameState?.gameProgress?.textAdventureProgress) {
-          const taProgress = gameState.gameProgress.textAdventureProgress;
+        // Check if there's text adventure progress in the GameState context
+        if (gameProgress?.textAdventureProgress) {
+          const taProgress = gameProgress.textAdventureProgress;
           
           // Load room
           if (taProgress.currentRoom) {
@@ -378,7 +378,7 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
     };
     
     loadGameProgress();
-  }, [isAuthenticated, username]);
+  }, [isAuthenticated, username, gameProgress]);
   
   // Save game progress when state changes
   useEffect(() => {
@@ -437,19 +437,15 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
       });
       
       // Prepare game state data
-      const gameData = {
-        gameState: {
-          textAdventureProgress: {
-            currentRoom,
-            inventory,
-            completedInteractions,
-            knownPasswords
-          }
-        }
+      const textAdventureProgress = {
+        currentRoom,
+        inventory,
+        completedInteractions,
+        knownPasswords
       };
       
-      // Save to server
-      await updateGameState(gameData);
+      // Update game progress using the context
+      updateGameProgress({ textAdventureProgress });
       console.log('Game progress saved successfully');
     } catch (error) {
       console.error('Error saving game progress:', error);
@@ -833,20 +829,15 @@ const TextAdventure = ({ onComplete, onExit, username = 'traveler' }) => {
   const handleEnding = () => {
     // Save progress with completed flag
     if (isAuthenticated) {
-      const gameData = {
-        gameState: {
-          textAdventureProgress: {
-            currentRoom: 'sanctuary',
-            inventory,
-            completedInteractions: ['complete'],
-            knownPasswords: ['complete']
-          }
-        }
+      // Update game progress with completion status
+      const textAdventureProgress = {
+        currentRoom: 'sanctuary',
+        inventory,
+        completedInteractions: ['complete'],
+        knownPasswords: ['complete']
       };
       
-      updateGameState(gameData).catch(error => 
-        console.error('Failed to save completion status:', error)
-      );
+      updateGameProgress({ textAdventureProgress });
     }
     
     // Show ending text

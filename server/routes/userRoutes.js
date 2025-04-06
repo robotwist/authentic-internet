@@ -199,4 +199,123 @@ router.put("/:id", authenticateToken, async (req, res) => {
   }
 });
 
+// Get user's game state
+router.get('/game-state', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Get user's full game state from database
+    const gameState = await User.findById(userId).select('gameState');
+    
+    if (!gameState) {
+      return res.status(404).json({ message: 'Game state not found' });
+    }
+    
+    res.json(gameState.gameState || {});
+  } catch (error) {
+    console.error('Error fetching game state:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user's game state
+router.put('/game-state', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const gameState = req.body;
+    
+    // Update user's game state in database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { $set: { gameState } },
+      { new: true }
+    ).select('gameState');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.json(updatedUser.gameState);
+  } catch (error) {
+    console.error('Error updating game state:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user's experience points
+router.put('/experience', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { experience } = req.body;
+    
+    if (typeof experience !== 'number') {
+      return res.status(400).json({ message: 'Experience must be a number' });
+    }
+    
+    // Update user's experience points in database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { $set: { experience } },
+      { new: true }
+    ).select('username email experience level');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error updating experience:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add achievement for user
+router.post('/achievements', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { achievement } = req.body;
+    
+    if (!achievement || !achievement.name || !achievement.description) {
+      return res.status(400).json({ message: 'Invalid achievement data' });
+    }
+    
+    // Get user
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Initialize achievements array if it doesn't exist
+    if (!user.gameState) user.gameState = {};
+    if (!user.gameState.achievements) user.gameState.achievements = [];
+    
+    // Check if achievement already exists
+    const existingAchievement = user.gameState.achievements.find(
+      a => a.id === achievement.id
+    );
+    
+    if (existingAchievement) {
+      return res.json(user.gameState.achievements);
+    }
+    
+    // Add achievement with timestamp
+    const newAchievement = {
+      ...achievement,
+      unlockedAt: new Date().toISOString()
+    };
+    
+    user.gameState.achievements.push(newAchievement);
+    
+    // Save user
+    await user.save();
+    
+    res.json(user.gameState.achievements);
+  } catch (error) {
+    console.error('Error adding achievement:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;

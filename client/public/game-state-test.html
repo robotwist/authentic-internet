@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game State Persistence Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 {
+      color: #2c3e50;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 10px;
+    }
+    #results {
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 5px;
+      padding: 15px;
+      white-space: pre-wrap;
+      font-family: 'Courier New', Courier, monospace;
+      height: 500px;
+      overflow: auto;
+    }
+    .success {
+      color: #28a745;
+    }
+    .error {
+      color: #dc3545;
+    }
+    button {
+      background-color: #3498db;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    input {
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 100%;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Game State Persistence Test</h1>
+  <p>This page tests the game state persistence functionality in the Authentic Internet application.</p>
+  
+  <div class="card">
+    <h2>API Health Check</h2>
+    <button id="healthCheckBtn">Check API Health</button>
+    <div style="margin-top: 10px;">
+      <small>Current API URL: <span id="apiUrlDisplay">http://localhost:5000</span></small>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>User Authentication</h2>
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" placeholder="Enter username">
+    </div>
+    <div>
+      <label for="email">Email:</label>
+      <input type="email" id="email" placeholder="Enter email">
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" placeholder="Enter password">
+    </div>
+    <div style="margin-top: 15px;">
+      <button id="registerBtn">Register</button>
+      <button id="loginBtn">Login</button>
+      <button id="logoutBtn">Logout</button>
+      <button id="verifyToken">Verify Token</button>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>Game State</h2>
+    <div>
+      <label for="experience">Experience Points:</label>
+      <input type="number" id="experience" value="100">
+    </div>
+    <div>
+      <label for="worldId">World ID:</label>
+      <input type="text" id="worldId" value="yosemite">
+    </div>
+    <div>
+      <label for="quest">Current Quest:</label>
+      <input type="text" id="quest" value="find_artifact">
+    </div>
+    <div style="margin-top: 15px;">
+      <button id="saveStateBtn">Save Game State</button>
+      <button id="getStateBtn">Get Game State</button>
+    </div>
+  </div>
+  
+  <h2>Test Results:</h2>
+  <pre id="results">Results will appear here...</pre>
+  
+  <script>
+    // API Configuration
+    const API_URL = 'http://localhost:5000';
+    
+    // DOM Elements
+    const resultsElement = document.getElementById('results');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const experienceInput = document.getElementById('experience');
+    const worldIdInput = document.getElementById('worldId');
+    const questInput = document.getElementById('quest');
+    const apiUrlDisplay = document.getElementById('apiUrlDisplay');
+    
+    // Setup API URL display
+    apiUrlDisplay.textContent = API_URL;
+    
+    // Append to results
+    function appendToResults(message, isError = false) {
+      const className = isError ? 'error' : 'success';
+      resultsElement.innerHTML += `<span class="${className}">${message}</span>\n`;
+      resultsElement.scrollTop = resultsElement.scrollHeight;
+    }
+    
+    // Clear results
+    function clearResults() {
+      resultsElement.innerHTML = '';
+    }
+    
+    // API call helper
+    async function apiCall(endpoint, method = 'GET', data = null) {
+      try {
+        const url = `${API_URL}${endpoint}`;
+        appendToResults(`Making ${method} request to: ${url}`);
+        
+        const options = {
+          method,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+        
+        // Add token if available
+        const token = localStorage.getItem('token');
+        if (token) {
+          options.headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        // Add body if data is provided
+        if (data) {
+          options.body = JSON.stringify(data);
+        }
+        
+        // Make the request
+        const response = await fetch(url, options);
+        let responseData;
+        
+        // Try to parse JSON response
+        try {
+          responseData = await response.json();
+        } catch (e) {
+          appendToResults(`Failed to parse JSON response: ${e.message}`, true);
+          appendToResults(`Response status: ${response.status} ${response.statusText}`);
+          const text = await response.text();
+          appendToResults(`Raw response: ${text.substring(0, 100)}...`, true);
+          throw new Error(`Invalid JSON response: ${e.message}`);
+        }
+        
+        // Check for errors
+        if (!response.ok) {
+          throw new Error(responseData.message || `API request failed with status ${response.status}`);
+        }
+        
+        return responseData;
+      } catch (error) {
+        appendToResults(`API Error: ${error.message}`, true);
+        throw error;
+      }
+    }
+    
+    // Health check
+    document.getElementById('healthCheckBtn').addEventListener('click', async () => {
+      clearResults();
+      appendToResults('Checking API health...');
+      
+      try {
+        const response = await fetch(`${API_URL}/api/health`);
+        if (!response.ok) {
+          throw new Error(`Health check failed with status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        appendToResults(`API Health Status: ${JSON.stringify(data)}`);
+      } catch (error) {
+        appendToResults(`Health check error: ${error.message}`, true);
+      }
+    });
+    
+    // Event Listeners
+    document.getElementById('registerBtn').addEventListener('click', async () => {
+      clearResults();
+      appendToResults('Registering user...');
+      
+      try {
+        const username = usernameInput.value;
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        
+        if (!username || !email || !password) {
+          throw new Error('All fields are required for registration');
+        }
+        
+        const response = await apiCall('/api/auth/register', 'POST', {
+          username,
+          email,
+          password
+        });
+        
+        appendToResults(`Registration successful: ${JSON.stringify(response, null, 2)}`);
+      } catch (error) {
+        appendToResults(`Registration failed: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      clearResults();
+      appendToResults('Logging in...');
+      
+      try {
+        const identifier = usernameInput.value;
+        const password = passwordInput.value;
+        
+        if (!identifier || !password) {
+          throw new Error('Username and password are required for login');
+        }
+        
+        const response = await apiCall('/api/auth/login', 'POST', {
+          identifier,
+          password
+        });
+        
+        // Store token and user data
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('user', JSON.stringify(response.user));
+          appendToResults(`Login successful: User ${response.user.username}`);
+          appendToResults(`Token: ${response.token.substring(0, 20)}...`);
+        } else {
+          throw new Error('No token received');
+        }
+      } catch (error) {
+        appendToResults(`Login failed: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      clearResults();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      appendToResults('Logged out successfully');
+    });
+    
+    document.getElementById('verifyToken').addEventListener('click', async () => {
+      clearResults();
+      appendToResults('Verifying token...');
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No token found. Please login first.');
+        }
+        
+        const response = await apiCall('/api/auth/verify');
+        appendToResults(`Token verified: ${JSON.stringify(response, null, 2)}`);
+      } catch (error) {
+        appendToResults(`Token verification failed: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('saveStateBtn').addEventListener('click', async () => {
+      clearResults();
+      appendToResults('Saving game state...');
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('You must be logged in to save game state');
+        }
+        
+        const gameData = {
+          experience: parseInt(experienceInput.value),
+          lastPosition: {
+            worldId: worldIdInput.value,
+            x: 5,
+            y: 10,
+            facing: "up"
+          },
+          gameState: {
+            currentQuest: questInput.value,
+            textAdventureProgress: {
+              currentRoom: "forest",
+              inventory: ["map", "compass"],
+              completedInteractions: ["talk_to_guide", "examine_tree"],
+              knownPasswords: ["nature_calls"]
+            }
+          }
+        };
+        
+        const response = await apiCall('/api/auth/game-state', 'POST', { gameData });
+        appendToResults(`Game state saved: ${JSON.stringify(response, null, 2)}`);
+      } catch (error) {
+        appendToResults(`Save game state failed: ${error.message}`, true);
+      }
+    });
+    
+    document.getElementById('getStateBtn').addEventListener('click', async () => {
+      clearResults();
+      appendToResults('Getting game state...');
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('You must be logged in to get game state');
+        }
+        
+        const response = await apiCall('/api/auth/game-state');
+        appendToResults(`Game state retrieved: ${JSON.stringify(response.gameState, null, 2)}`);
+      } catch (error) {
+        appendToResults(`Get game state failed: ${error.message}`, true);
+      }
+    });
+    
+    // Check if already logged in on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (user) {
+        appendToResults(`Already logged in as: ${user.username}`);
+      } else {
+        appendToResults('Not logged in');
+      }
+    });
+  </script>
+</body>
+</html> 

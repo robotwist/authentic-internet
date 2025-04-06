@@ -302,4 +302,98 @@
     width: 95%;
     padding: 1.5rem;
   }
+}
+
+/* Character Progress Section Styles */
+.character-progress-section {
+  background: linear-gradient(145deg, var(--bg-secondary), var(--accent-secondary));
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+}
+
+.character-progress-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+.character-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.character-level {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  border: 3px solid var(--accent-primary);
+}
+
+.level-label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
+.level-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--accent-primary);
+}
+
+.experience-container {
+  flex: 1;
+  min-width: 250px;
+}
+
+.experience-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.experience-bar-container {
+  height: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.experience-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  transition: width 0.5s ease-out;
+}
+
+.character-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.character-actions button {
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-primary);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.character-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 } 

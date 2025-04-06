@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Password Reset Test</h1>
+    
+    <div class="form-group">
+        <label for="token">Reset Token:</label>
+        <input type="text" id="token" placeholder="Enter your reset token">
+    </div>
+    
+    <div class="form-group">
+        <label for="password">New Password:</label>
+        <input type="password" id="password" placeholder="Enter new password">
+    </div>
+    
+    <div class="form-group">
+        <button id="validateBtn">Validate Token</button>
+        <button id="resetBtn">Reset Password</button>
+    </div>
+    
+    <h3>Result:</h3>
+    <div class="result" id="result"></div>
+    
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        const tokenInput = document.getElementById('token');
+        const passwordInput = document.getElementById('password');
+        const validateBtn = document.getElementById('validateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultDiv = document.getElementById('result');
+        
+        // Get token from URL if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        if (tokenFromUrl) {
+            tokenInput.value = tokenFromUrl;
+        }
+        
+        // Validate token
+        validateBtn.addEventListener('click', async () => {
+            const token = tokenInput.value.trim();
+            if (!token) {
+                resultDiv.textContent = 'Please enter a reset token';
+                return;
+            }
+            
+            try {
+                resultDiv.textContent = 'Validating token...';
+                const response = await fetch(`${API_URL}/auth/password/validate-token/${token}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        });
+        
+        // Reset password
+        resetBtn.addEventListener('click', async () => {
+            const token = tokenInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!token) {
+                resultDiv.textContent = 'Please enter a reset token';
+                return;
+            }
+            
+            if (!password) {
+                resultDiv.textContent = 'Please enter a new password';
+                return;
+            }
+            
+            try {
+                resultDiv.textContent = 'Resetting password...';
+                const response = await fetch(`${API_URL}/auth/password/reset/${token}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                });
+                
+                const data = await response.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html> 

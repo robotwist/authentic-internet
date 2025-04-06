@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
+    
+    <!-- Performance optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="/assets/fonts/main-font.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/icons/icon-192x192.png" as="image">
     
     <title>Authentic Internet: The Artifact World</title>
     <meta name="description" content="A digital world where users explore, create, and unlock hidden artifacts.">
@@ -11,7 +16,7 @@
     
     <!-- PWA Support -->
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#1a1a1a" />
     <link rel="icon" type="image/png" href="/favicon.png" />
 
     <!-- Mobile and iOS PWA metadata -->
@@ -33,70 +38,84 @@
     <meta property="og:description" content="A world of exploration where users leave and discover artifacts." />
     <meta property="og:image" content="/social-preview.png" />
     <meta property="og:url" content="https://authentikosinternetikosmaximus.com" />
+    <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Authentic Internet: The Artifact World" />
+    <meta name="twitter:description" content="A world of exploration where users leave and discover artifacts." />
+    <meta name="twitter:image" content="/social-preview.png" />
     <meta name="color-scheme" content="dark light">
+
+    <!-- Additional SEO metadata -->
+    <meta name="keywords" content="virtual world, artifacts, exploration, gaming, adventure, digital art" />
+    <meta name="author" content="Authentic Internet Team" />
+    <link rel="canonical" href="https://authentikosinternetikosmaximus.com" />
 
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     
-    <!-- Register service worker with improved error handling -->
-    <script>
-      // Defer service worker registration to not block rendering
-      setTimeout(() => {
-        if ('serviceWorker' in navigator) {
-          const registerSW = async () => {
-            try {
-              const registration = await Promise.race([
-                navigator.serviceWorker.register('/service-worker.js', {
-                  scope: '/'
-                }),
-                // Add a timeout to prevent infinite waiting
-                new Promise((_, reject) => 
-                  setTimeout(() => reject(new Error('ServiceWorker registration timed out')), 5000)
-                )
-              ]);
-              
-              console.log('ServiceWorker registration successful with scope: ', registration.scope);
-              
-              // Handle updates
-              registration.onupdatefound = () => {
-                const installingWorker = registration.installing;
-                
-                installingWorker.onstatechange = () => {
-                  if (installingWorker.state === 'installed') {
-                    if (navigator.serviceWorker.controller) {
-                      console.log('New content is available; please refresh the page.');
-                    } else {
-                      console.log('Content is cached for offline use.');
-                    }
-                  }
-                };
-              };
-            } catch (error) {
-              console.error('ServiceWorker registration failed: ', error);
-              // Application continues to work even if service worker registration fails
-            }
-          };
-          
-          // Wait until the page is fully loaded to register the SW
-          if (document.readyState === 'complete') {
-            registerSW();
-          } else {
-            window.addEventListener('load', registerSW);
-          }
-          
-          // Handle communication errors with service worker
-          navigator.serviceWorker.addEventListener('message', event => {
-            console.log('Message from service worker: ', event.data);
-          });
-          
-          navigator.serviceWorker.addEventListener('messageerror', event => {
-            console.error('Error in message from service worker: ', event);
-          });
+    <!-- Add a loading spinner that gets removed when app loads -->
+    <div id="initial-loader" class="initial-loader">
+      <div class="spinner-container">
+        <div class="spinner"></div>
+      </div>
+      <div class="loader-text">Loading Authentic Internet...</div>
+    </div>
+    
+    <style>
+      .initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #1a1a1a;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+      }
+      .spinner-container {
+        margin-bottom: 20px;
+      }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #6366F1;
+        animation: spin 1s ease-in-out infinite;
+      }
+      .loader-text {
+        color: #f5f5f5;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 16px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
-      }, 1000); // Delay service worker registration by 1 second
+      }
+    </style>
+    
+    <script>
+      // Remove the loader when the app is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        const loader = document.getElementById('initial-loader');
+        if (loader) {
+          setTimeout(() => {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+              if (loader.parentNode) {
+                loader.parentNode.removeChild(loader);
+              }
+            }, 300);
+          }, 500); // Minimum display time of 500ms
+        }
+      });
     </script>
   </body>
 </html>

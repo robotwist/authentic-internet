@@ -85,6 +85,9 @@ export const auth = async (req, res, next) => {
   }
 };
 
+// Add an alias of auth as authenticate for backward compatibility
+export const authenticate = auth;
+
 /**
  * Role-based access control middleware
  * Checks if user has required role(s)

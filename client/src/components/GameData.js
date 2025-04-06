@@ -370,10 +370,10 @@ export const MAPS = [
       [2, 0, 2, 2, 2, 2, 2, 2, 0, 2],
       [2, 0, 2, 0, 6, 0, 7, 2, 0, 2],
       [2, 0, 2, 0, 2, 2, 0, 2, 0, 2],
-      [2, 0, 2, 0, 2, 2, 8, 2, 0, 2],
-      [2, 0, 2, 0, 0, 0, 0, 2, 0, 2],
+      [2, 0, 0, 0, 2, 2, 8, 2, 0, 2],
+      [2, 0, 0, 0, 0, 0, 0, 2, 0, 2],
       [2, 0, 2, 2, 2, 2, 2, 2, 0, 2],
-      [2, 0, 0, 0, 0, 0, 0, 0, 5, 2],
+      [2, 0, 2, 2, 0, 0, 0, 0, 5, 2],
       [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
     ],
     specialPortals: [
@@ -748,13 +748,13 @@ export const WORLD_MAP = {
     // New dungeon levels
     { id: 'dungeon1', name: 'Dungeon Level 1', x: 200, y: 250, connections: ['overworld', 'dungeon2'], type: 'dungeon' },
     { id: 'dungeon2', name: 'Dungeon Level 2', x: 150, y: 350, connections: ['dungeon1', 'dungeon3'], type: 'dungeon' },
-    { id: 'dungeon3', name: 'Dungeon Level 3', x: 250, y: 450, connections: ['dungeon2', 'text_adventure'], type: 'dungeon' },
+    { id: 'dungeon3', name: 'Dungeon Level 3', x: 250, y: 450, connections: ['dungeon2', 'yosemite'], type: 'dungeon' },
     
     // Hemingway's adventure
     { id: 'hemingway', name: 'Hemingway\'s Adventure', x: 800, y: 300, connections: ['desert1'], type: 'special' },
     
     // Text-based adventure
-    { id: 'text_adventure', name: 'Text Adventure', x: 400, y: 450, connections: ['dungeon3'], type: 'text' }
+    { id: 'text_adventure', name: 'Text Adventure', x: 400, y: 450, connections: ['yosemite'], type: 'text' }
   ],
   mapToId: {
     'Overworld': 'overworld',

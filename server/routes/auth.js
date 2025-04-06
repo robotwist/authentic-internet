@@ -1,9 +1,11 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { register, login, verifyToken, logout, refreshToken, getUserGameState, updateGameState } from '../controllers/authController.js';
+import { register, login, verifyToken, logout, refreshToken, getUserGameState, updateGameState, requestPasswordReset, resetPassword, verifyEmail } from '../controllers/authController.js';
 import { auth } from '../middleware/auth.js';
 import { PASSWORD_REQUIREMENTS, getPasswordRequirementsText } from '../utils/validation.js';
 import { authLimiter, passwordResetLimiter } from '../utils/rateLimiting.js';
+import { validateResetToken } from "../controllers/passwordResetController.js";
+import { sendVerificationEmail } from "../controllers/emailVerificationController.js";
 
 const router = express.Router();
 
@@ -184,5 +186,14 @@ router.post('/game-state', auth, async (req, res) => {
     });
   }
 });
+
+// Add password reset routes
+router.post("/password/reset-request", passwordResetLimiter, requestPasswordReset);
+router.get("/password/validate-token/:token", validateResetToken);
+router.post("/password/reset/:token", passwordResetLimiter, resetPassword);
+
+// Add email verification routes
+router.post("/email/send-verification", auth, sendVerificationEmail);
+router.get("/email/verify/:token", verifyEmail);
 
 export default router; 

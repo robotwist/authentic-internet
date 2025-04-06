@@ -25,6 +25,24 @@ const UserSchema = new mongoose.Schema(
       minlength: [PASSWORD_REQUIREMENTS.minLength, `Password must be at least ${PASSWORD_REQUIREMENTS.minLength} characters long`],
     },
     
+    // Password reset and email verification
+    resetPasswordToken: {
+      type: String,
+      default: null
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null
+    },
+    emailVerificationToken: {
+      type: String,
+      default: null
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false
+    },
+    
     // Enhanced user profile
     displayName: {
       type: String,
@@ -52,13 +70,13 @@ const UserSchema = new mongoose.Schema(
     }],
     
     // Game progression
-    experience: { 
-      type: Number, 
-      default: 0 
+    experience: {
+      type: Number,
+      default: 0
     },
-    level: { 
-      type: Number, 
-      default: 1 
+    level: {
+      type: Number,
+      default: 1
     },
     skillPoints: {
       type: Number,
@@ -87,15 +105,21 @@ const UserSchema = new mongoose.Schema(
       facing: { type: String, default: "down" }
     },
     gameState: {
-      currentQuest: { type: String, default: "" },
-      completedQuests: [String],
-      discoveredLocations: [String],
-      unlockedAreas: [String],
-      textAdventureProgress: {
-        currentRoom: { type: String, default: "start" },
-        inventory: [String],
-        completedInteractions: [String],
-        knownPasswords: [String]
+      type: Object,
+      default: {
+        inventory: [],
+        viewedArtifacts: [],
+        achievements: [],
+        gameProgress: {
+          currentQuest: null,
+          completedQuests: [],
+          discoveredLocations: []
+        },
+        lastPosition: {
+          worldId: null,
+          x: 0,
+          y: 0
+        }
       }
     },
     
@@ -174,6 +198,12 @@ UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   
   try {
+    // Check if the password is already hashed (starts with $2a$, $2b$, or $2y$ for bcrypt)
+    if (this.password.startsWith('$2a$') || this.password.startsWith('$2b$') || this.password.startsWith('$2y$')) {
+      console.log('Password appears to already be hashed, skipping hashing');
+      return next();
+    }
+    
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
@@ -225,9 +255,16 @@ UserSchema.methods.saveGameProgress = async function(progressData) {
   return this.save();
 };
 
+// Pre-save middleware to calculate level based on experience
+UserSchema.pre('save', function(next) {
+  if (this.isModified('experience')) {
+    this.level = Math.floor(this.experience / 100) + 1;
+  }
+  next();
+});
+
 // Create indexes for frequently queried fields
-UserSchema.index({ username: 1 });
-UserSchema.index({ email: 1 });
+// Remove the username and email indexes since they're already defined with unique: true
 UserSchema.index({ 'gameState.currentQuest': 1 });
 UserSchema.index({ level: -1 }); // For leaderboards
 

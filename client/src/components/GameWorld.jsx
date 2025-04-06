@@ -6,7 +6,9 @@ import {
   fetchCharacter,
   updateCharacter,
   updateArtifact,
-  deleteArtifact
+  deleteArtifact,
+  updateUserExperience,
+  addUserAchievement
 } from "../api/api";
 import Character from "./Character";
 import Artifact from "./Artifact";
@@ -32,6 +34,16 @@ import TextAdventure from './TextAdventure';
 import SoundManager from "./utils/SoundManager";
 import UserArtifactManager from './UserArtifactManager';
 import ArtifactDiscovery from './ArtifactDiscovery';
+import XPNotification from './XPNotification';
+import AchievementNotification from './AchievementNotification';
+import Level3Terminal from './Level3Terminal';
+import ShooterAdventure from './ShooterAdventure';
+import HemingwayChallenge from './HemingwayChallenge';
+import { useAuth } from '../context/AuthContext';
+import { useAchievements } from '../context/AchievementContext';
+import { useGameState } from '../context/GameStateContext';
+import gameStateManager from "../utils/gameStateManager";
+import { IconButton } from '@mui/material';
 
 const GameWorld = () => {
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
@@ -66,6 +78,199 @@ const GameWorld = () => {
   const [soundManager, setSoundManager] = useState(null);
   const [selectedUserArtifact, setSelectedUserArtifact] = useState(null);
   const [isPlacingArtifact, setIsPlacingArtifact] = useState(false);
+  const [viewedArtifacts, setViewedArtifacts] = useState([]);
+  const [notification, setNotification] = useState(null);
+  const [achievementNotification, setAchievementNotification] = useState(null);
+  const [mapZoom, setMapZoom] = useState(1);
+  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
+  const [xpNotifications, setXpNotifications] = useState([]);
+  const [achievementNotifications, setAchievementNotifications] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [showArtifactsOnMap, setShowArtifactsOnMap] = useState(true);
+  const [isMoving, setIsMoving] = useState(false);
+  const [direction, setDirection] = useState('down');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [characterStyle, setCharacterStyle] = useState({
+    left: 64,
+    top: 64,
+    width: TILE_SIZE,
+    height: TILE_SIZE,
+    transition: 'left 0.2s, top 0.2s'
+  });
+  const { user, updateUser } = useAuth();
+  const { unlockAchievement, checkLevelAchievements, checkDiscoveryAchievements, checkCollectionAchievements } = useAchievements();
+  const { updateGameProgress } = useGameState();
+  const gameWorldRef = useRef(null);
+  const characterRef = useRef(null);
+  
+  // Update checkForLevelUpAchievements to use our context
+  const checkForLevelUpAchievements = useCallback((experience) => {
+    const level = Math.floor(experience / 100) + 1;
+    checkLevelAchievements(level);
+  }, [checkLevelAchievements]);
+
+  // Function to add XP and show notification  
+  const addExperiencePoints = useCallback((amount, reason) => {
+    // Update local experience state
+    const newExperience = (user?.experience || 0) + amount;
+    
+    // Create a unique ID for this notification
+    const notificationId = Date.now().toString();
+    
+    // Add the notification to state
+    setXpNotifications(prev => [
+      ...prev,
+      { id: notificationId, amount, reason }
+    ]);
+    
+    // Update user context
+    if (user) {
+      const updatedUser = { ...user, experience: newExperience };
+      updateUser(updatedUser);
+      
+      // Also update in database if user is logged in
+      try {
+        updateUserExperience(newExperience).catch(err => 
+          console.error('Failed to update experience in database:', err)
+        );
+      } catch (error) {
+        console.error('Error updating experience:', error);
+      }
+    }
+    
+    // Check for level-up achievements
+    checkForLevelUpAchievements(newExperience);
+    
+    return notificationId;
+  }, [user, updateUser, setXpNotifications, checkForLevelUpAchievements]);
+
+  // Award XP and show notification - moved up to avoid TDZ issues
+  const awardXP = useCallback((amount, reason) => {
+    // Use our new addExperiencePoints function
+    return addExperiencePoints(amount, reason);
+  }, [addExperiencePoints]);
+
+  // Function to handle updating character in both state and backend
+  const handleUpdateCharacter = useCallback((updatedCharacter) => {
+    if (!updatedCharacter) return;
+    
+    // Update local state
+    setCharacter(updatedCharacter);
+    
+    // Update backend if character has an ID
+    if (updatedCharacter.id) {
+      updateCharacter(updatedCharacter)
+        .then(() => console.log("✅ Character updated in backend"))
+        .catch(err => console.error("❌ Failed to update character:", err));
+    } else {
+      console.warn("🚨 Character ID missing. Cannot update backend.");
+    }
+  }, []);
+
+  // Function to show inventory - moved to the top of component to avoid temporal dead zone
+  const handleShowInventory = useCallback(() => {
+    console.log("Event: showInventory triggered");
+    setShowInventory(true);
+  }, []);
+
+  // Function to show quotes - moved to the top of component to avoid temporal dead zone
+  const handleShowQuotes = useCallback(() => {
+    setShowQuotes(true);
+  }, []);
+
+  // Function to handle level completion - moved to the top of component to avoid temporal dead zone
+  const handleLevelCompletion = useCallback((level) => {
+    if (levelCompletion[level]) return;
+    
+    setLevelCompletion(prev => ({
+      ...prev,
+      [level]: true
+    }));
+    
+    // Save level completion to localStorage so we don't show rewards again
+    try {
+      localStorage.setItem(`level-${level}-completed`, 'true');
+    } catch (error) {
+      console.error("Error saving level completion to localStorage:", error);
+    }
+    
+    let message = '';
+    switch(level) {
+      case 'level1':
+        message = 'Congratulations! You have completed Level 1 - The Digital Wilderness!';
+        // Show the NKD Man Extension reward after the win notification closes
+        setTimeout(() => {
+          // Check if we've already shown this reward by checking localStorage
+          const rewardShown = localStorage.getItem('nkd-man-reward-shown');
+          if (!rewardShown) {
+            setCurrentAchievement('level1');
+            setShowRewardModal(true);
+            try {
+              // Mark this reward as shown so we don't show it again
+              localStorage.setItem('nkd-man-reward-shown', 'true');
+            } catch (error) {
+              console.error("Error saving reward state to localStorage:", error);
+            }
+          }
+        }, 5500); // Wait slightly longer than the win notification
+        break;
+      case 'level2':
+        message = 'Magnificent! You have completed Level 2 - The Realm of Shadows!';
+        break;
+      case 'level3':
+        message = 'Extraordinary! You have completed Level 3 - The Terminal Void!';
+        setTimeout(() => {
+          const goToLevel4 = window.confirm('You have unlocked Level 4: The Hemingway Challenge! Ready to enter?');
+          if (goToLevel4) {
+            // Play random portal sound with higher chance of toilet flush for special portal
+            if (soundManager) {
+              if (Math.random() < 0.6) {
+                soundManager.playSound('toilet_flush', 0.5);
+              } else {
+                soundManager.playSound('portal', 0.5);
+              }
+            }
+            setShowLevel4(true);
+          }
+        }, 3000);
+        break;
+      case 'level4':
+        message = 'Amazing! You have completed Level 4 - The Hemingway Challenge!';
+        break;
+      default:
+        message = 'Level completed!';
+    }
+    
+    // Play level complete sound
+    if (soundManager) soundManager.playSound('level_complete');
+    
+    // Using awardXP instead of the undefined handleGainExperience
+    awardXP(level === 'level3' ? 20 : level === 'level4' ? 30 : 10, `Completed ${level}`);
+    
+    setWinMessage(message);
+    setShowWinNotification(true);
+    
+    setTimeout(() => {
+      setShowWinNotification(false);
+    }, 5000);
+  }, [levelCompletion, soundManager, awardXP, setCurrentAchievement, setShowRewardModal, setWinMessage, setShowWinNotification, setShowLevel4]);
+
+  // Handler for Level 4 completion
+  const handleLevel4Complete = useCallback((score) => {
+    handleLevelCompletion('level4');
+    setShowLevel4(false);
+    
+    const bonusExp = Math.floor(score / 100);
+    if (bonusExp > 0) {
+      awardXP(bonusExp, `Level 4 Score: ${score}`);
+      alert(`You earned ${bonusExp} bonus experience points from your score!`);
+    }
+  }, [handleLevelCompletion, setShowLevel4, awardXP]);
+
+  // Handler for Level 4 exit
+  const handleLevel4Exit = useCallback(() => {
+    setShowLevel4(false);
+  }, [setShowLevel4]);
 
   useEffect(() => {
     // Check if MAPS is correctly loaded
@@ -190,15 +395,6 @@ const GameWorld = () => {
 
   useEffect(() => {
     // Setup event listeners for navbar button actions
-    const handleShowInventory = () => {
-      console.log("Event: showInventory triggered");
-      setShowInventory(true);
-    };
-
-    const handleShowQuotes = () => {
-      setShowQuotes(true);
-    };
-
     // Add development keyboard shortcuts for testing
     const handleKeyDown = (event) => {
       // Skip if input is focused
@@ -260,13 +456,13 @@ const GameWorld = () => {
       characterLevel: character?.level || 1
     };
 
-    // Clean up event listeners on component unmount
+    // Remove event listeners on cleanup
     return () => {
       window.removeEventListener('showInventory', handleShowInventory);
       window.removeEventListener('showQuotes', handleShowQuotes);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentMapIndex, character, artifacts]);
+  }, [handleShowInventory, handleShowQuotes, handleLevelCompletion, character, artifacts]);
 
   useEffect(() => {
     // Initialize sound manager
@@ -419,17 +615,40 @@ const GameWorld = () => {
     handleCharacterMove
   );
 
+  // Update characterStyle and movement state when position or direction changes
+  useEffect(() => {
+    // Update character position in the style
+    setCharacterStyle(prev => ({
+      ...prev,
+      left: characterPosition.x,
+      top: characterPosition.y
+    }));
+
+    // Update movement state based on movementDirection
+    if (movementDirection) {
+      setDirection(movementDirection);
+      setIsMoving(true);
+      
+      // Reset isMoving after animation completes
+      const timeout = setTimeout(() => {
+        setIsMoving(false);
+      }, 200);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [characterPosition, movementDirection]);
+
   useEffect(() => {
     // Check for both map artifacts and server artifacts at the player's position
     const checkBothArtifactSources = () => {
-      if (!characterPosition) return;
+      if (!characterPosition || !MAPS || !MAPS[currentMapIndex]) return;
       
       const playerX = characterPosition.x / TILE_SIZE;
       const playerY = characterPosition.y / TILE_SIZE;
       
-      // Check map artifacts
-      const mapArtifact = MAPS[currentMapIndex].artifacts.find(
-        artifact => artifact.location && 
+      // Check if the current map and its artifacts property exist before accessing them
+      const mapArtifact = MAPS[currentMapIndex]?.artifacts?.find(
+        artifact => artifact?.location && 
         artifact.visible && 
         artifact.location.x === playerX && 
         artifact.location.y === playerY
@@ -440,7 +659,7 @@ const GameWorld = () => {
         artifact => artifact && artifact.location && 
         artifact.location.x === playerX && 
         artifact.location.y === playerY &&
-        (!artifact.area || artifact.area === MAPS[currentMapIndex].name)
+        (!artifact.area || artifact.area === MAPS[currentMapIndex]?.name)
       ) : null;
       
       // Prioritize server artifacts (they might be more up-to-date)
@@ -457,225 +676,199 @@ const GameWorld = () => {
   }, [characterPosition, currentMapIndex, artifacts]);
 
   useEffect(() => {
-    const row = Math.floor(characterPosition.y / TILE_SIZE);
-    const col = Math.floor(characterPosition.x / TILE_SIZE);
-    
-    // Safety check for map data
-    if (!MAPS[currentMapIndex]?.data || 
-        row < 0 || row >= MAPS[currentMapIndex].data.length ||
-        col < 0 || col >= MAPS[currentMapIndex].data[0].length) {
-      return;
-    }
-    
-    // Map-specific portal handling
-    if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 5) {
-      // Get current map name for better context
-      const currentMapName = MAPS[currentMapIndex]?.name;
-      if (!currentMapName) {
-        console.error("Current map name not found");
-        return;
-      }
+    // Subscribe to position changes to detect and handle portals
+    const checkPortalCollisions = () => {
+      if (!characterPosition) return;
       
-      // Define destination based on current map - making progression more logical
-      let destinationMap = null;
-      let spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE }; // Default spawn
+      const row = Math.floor(characterPosition.y / TILE_SIZE);
+      const col = Math.floor(characterPosition.x / TILE_SIZE);
       
-      // Logical world progression paths
-      if (currentMapName === "Overworld") {
-        destinationMap = "Overworld 2";
-      } 
-      else if (currentMapName === "Overworld 2") {
-        destinationMap = "Overworld 3";
-      }
-      else if (currentMapName === "Overworld 3") {
-        destinationMap = "Desert 1";
-      }
-      else if (currentMapName === "Desert 1") {
-        destinationMap = "Desert 2";
-      }
-      else if (currentMapName === "Desert 2") {
-        destinationMap = "Desert 3";
-      }
-      else if (currentMapName === "Desert 3") {
-        destinationMap = "Dungeon Level 1";
-      }
-      else if (currentMapName === "Dungeon Level 1") {
-        destinationMap = "Dungeon Level 2";
-      }
-      else if (currentMapName === "Dungeon Level 2") {
-        destinationMap = "Dungeon Level 3";
-      }
-      else if (currentMapName === "Dungeon Level 3") {
-        // Instead of going to Yosemite directly, handle Text Adventure special world
-        setCurrentSpecialWorld('text_adventure');
-        return; // Skip the rest of the portal logic since we're launching a special world
-      }
-      
-      // Find the index of the destination map
-      const destinationIndex = MAPS.findIndex(map => map.name === destinationMap);
-      
-      if (destinationIndex !== -1) {
-        // Play portal sound
-        if (soundManager) soundManager.playSound('portal');
+      // Regular portal (code 5) handling
+      if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 5) {
+        // Get the current map's name
+        const currentMapName = MAPS[currentMapIndex]?.name || '';
         
-        // Change map
-        setCurrentMapIndex(destinationIndex);
-        setCharacterPosition(spawnPosition);
+        // Save current position as a checkpoint before transitioning
+        gameStateManager.saveCheckpoint(currentMapName, { ...characterPosition });
         
-        // Announce the world name
-        const portalAnnouncement = document.createElement('div');
-        portalAnnouncement.className = 'world-announcement';
-        portalAnnouncement.innerHTML = `<h2>Welcome to ${destinationMap}</h2>`;
-        document.body.appendChild(portalAnnouncement);
+        // Define destination based on current map - making progression more logical
+        let destinationMap = null;
+        let spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE }; // Default spawn
         
-        // Remove the announcement after a few seconds
-        setTimeout(() => {
-          portalAnnouncement.classList.add('fade-out');
-          setTimeout(() => {
-            document.body.removeChild(portalAnnouncement);
-          }, 1000);
-        }, 3000);
-        
-        // Check if this is the path to Yosemite (Level 1 completion)
-        if (destinationMap === "Yosemite") {
-          // Add slight delay to show portal transition first
-          setTimeout(() => {
-            handleLevelCompletion('level1');
-          }, 800);
+        // Logical world progression paths
+        if (currentMapName === "Overworld") {
+          destinationMap = "Overworld 2";
+        } 
+        else if (currentMapName === "Overworld 2") {
+          destinationMap = "Overworld 3";
         }
-      } else {
-        console.error(`Destination map "${destinationMap}" not found`);
+        else if (currentMapName === "Overworld 3") {
+          destinationMap = "Desert 1";
+        }
+        else if (currentMapName === "Desert 1") {
+          destinationMap = "Desert 2";
+        }
+        else if (currentMapName === "Desert 2") {
+          destinationMap = "Desert 3";
+        }
+        else if (currentMapName === "Desert 3") {
+          destinationMap = "Dungeon Level 1";
+        }
+        else if (currentMapName === "Dungeon Level 1") {
+          destinationMap = "Dungeon Level 2";
+        }
+        else if (currentMapName === "Dungeon Level 2") {
+          destinationMap = "Dungeon Level 3";
+        }
+        else if (currentMapName === "Dungeon Level 3") {
+          // Change to go to Yosemite instead of directly to Text Adventure
+          destinationMap = "Yosemite";
+          // Remove the Text Adventure special world launch
+          // setCurrentSpecialWorld('text_adventure');
+          // return; // Skip the rest of the portal logic since we're launching a special world
+        }
+        
+        // Find the index of the destination map
+        const destinationIndex = MAPS.findIndex(map => map.name === destinationMap);
+        
+        if (destinationIndex !== -1) {
+          // Play portal sound
+          if (soundManager) soundManager.playSound('portal');
+          
+          // Change map
+          setCurrentMapIndex(destinationIndex);
+          setCharacterPosition(spawnPosition);
+          
+          // Announce the world name
+          const portalAnnouncement = document.createElement('div');
+          portalAnnouncement.className = 'world-announcement';
+          portalAnnouncement.innerHTML = `<h2>Welcome to ${destinationMap}</h2>`;
+          document.body.appendChild(portalAnnouncement);
+          
+          // Remove the announcement after a few seconds
+          setTimeout(() => {
+            portalAnnouncement.classList.add('fade-out');
+            setTimeout(() => {
+              document.body.removeChild(portalAnnouncement);
+            }, 1000);
+          }, 3000);
+          
+          // Check if this is the path to Yosemite (Level 1 completion)
+          if (destinationMap === "Yosemite") {
+            // Add slight delay to show portal transition first
+            setTimeout(() => {
+              handleLevelCompletion('level1');
+            }, 800);
+          }
+        } else {
+          console.error(`Destination map "${destinationMap}" not found`);
+        }
       }
-    }
-    
-    // Special portal (code 6) handling for Level 4
-    if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 6) {
-      if (levelCompletion.level3) {
-        // Play portal sound for special portal
-        if (soundManager) soundManager.playSound('portal');
-        setShowLevel4(true);
-      } else {
-        alert("You must complete Level 3 first to access this portal.");
+      
+      // Special portal (code 6) handling for Level 4
+      if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 6) {
+        if (levelCompletion.level3) {
+          // Play portal sound for special portal
+          if (soundManager) soundManager.playSound('portal');
+          setShowLevel4(true);
+        } else {
+          alert("You must complete Level 3 first to access this portal.");
+        }
       }
-    }
+      
+      // Legacy level completion logic (for backwards compatibility)
+      if (currentMapIndex === 1 && row === 0 && col === 19) {
+        handleLevelCompletion('level2');
+      } else if (currentMapIndex === 2 && !levelCompletion.level3 && character?.qualifyingArtifacts?.level3) {
+        handleLevelCompletion('level3');
+      }
+    };
     
-    // Legacy level completion logic (for backwards compatibility)
-    if (currentMapIndex === 1 && row === 0 && col === 19) {
-      handleLevelCompletion('level2');
-    } else if (currentMapIndex === 2 && !levelCompletion.level3 && character?.qualifyingArtifacts?.level3) {
-      handleLevelCompletion('level3');
-    }
+    checkPortalCollisions();
   }, [characterPosition, currentMapIndex, character, levelCompletion]);
 
-  const handleDeleteQuote = (index) => {
-    if (character && character.savedQuotes) {
-      const updatedQuotes = [...character.savedQuotes];
-      updatedQuotes.splice(index, 1);
-      
-      const updatedCharacter = {
-        ...character,
-        savedQuotes: updatedQuotes
-      };
-      
-      setCharacter(updatedCharacter);
-      
-      if (updatedCharacter.id) {
-        updateCharacter(updatedCharacter)
-          .then(() => console.log("✅ Quote deleted successfully"))
-          .catch(err => console.error("❌ Failed to update character after quote deletion:", err));
-      }
-    }
-  };
+  // Close NPC dialog
+  const handleCloseNPCDialog = useCallback(() => {
+    setShowNPCDialog(false);
+    setActiveNPC(null);
+  }, []);
 
-  const handleLevelCompletion = (level) => {
-    if (levelCompletion[level]) return;
-    
-    setLevelCompletion(prev => ({
-      ...prev,
-      [level]: true
-    }));
-    
-    // Save level completion to localStorage so we don't show rewards again
-    try {
-      localStorage.setItem(`level-${level}-completed`, 'true');
-    } catch (error) {
-      console.error("Error saving level completion to localStorage:", error);
+  // Add a handler for the World Map node click
+  const handleWorldMapNodeClick = useCallback((worldId) => {
+    // Check if it's a special world type
+    if (worldId === 'hemingway') {
+      setCurrentSpecialWorld('hemingway');
+      setShowWorldMap(false);
+    } else if (worldId === 'text_adventure') {
+      setCurrentSpecialWorld('text_adventure');
+      setShowWorldMap(false);
+    } else {
+      // Handle normal world navigation here
+      // (This would depend on your existing world navigation logic)
+      setShowWorldMap(false);
     }
-    
-    let message = '';
-    switch(level) {
-      case 'level1':
-        message = 'Congratulations! You have completed Level 1 - The Digital Wilderness!';
-        // Show the NKD Man Extension reward after the win notification closes
-        setTimeout(() => {
-          // Check if we've already shown this reward by checking localStorage
-          const rewardShown = localStorage.getItem('nkd-man-reward-shown');
-          if (!rewardShown) {
-            setCurrentAchievement('level1');
-            setShowRewardModal(true);
-            try {
-              // Mark this reward as shown so we don't show it again
-              localStorage.setItem('nkd-man-reward-shown', 'true');
-            } catch (error) {
-              console.error("Error saving reward state to localStorage:", error);
-            }
-          }
-        }, 5500); // Wait slightly longer than the win notification
-        break;
-      case 'level2':
-        message = 'Magnificent! You have completed Level 2 - The Realm of Shadows!';
-        break;
-      case 'level3':
-        message = 'Extraordinary! You have completed Level 3 - The Terminal Void!';
-        setTimeout(() => {
-          const goToLevel4 = window.confirm('You have unlocked Level 4: The Hemingway Challenge! Ready to enter?');
-          if (goToLevel4) {
-            // Play random portal sound with higher chance of toilet flush for special portal
-            if (soundManager) {
-              if (Math.random() < 0.6) {
-                soundManager.playSound('toilet_flush', 0.5);
-              } else {
-                soundManager.playSound('portal', 0.5);
-              }
-            }
-            setShowLevel4(true);
-          }
-        }, 3000);
-        break;
-      case 'level4':
-        message = 'Amazing! You have completed Level 4 - The Hemingway Challenge!';
-        break;
-      default:
-        message = 'Level completed!';
-    }
-    
-    // Play level complete sound
-    if (soundManager) soundManager.playSound('level_complete');
-    
-    handleGainExperience(level === 'level3' ? 20 : level === 'level4' ? 30 : 10);
-    
-    setWinMessage(message);
-    setShowWinNotification(true);
-    
-    setTimeout(() => {
-      setShowWinNotification(false);
-    }, 5000);
-  };
+  }, [setCurrentSpecialWorld, setShowWorldMap]);
 
-  const handleLevel4Complete = (score) => {
-    handleLevelCompletion('level4');
-    setShowLevel4(false);
-    
-    const bonusExp = Math.floor(score / 100);
-    if (bonusExp > 0) {
-      handleGainExperience(bonusExp);
-      alert(`You earned ${bonusExp} bonus experience points from your score!`);
-    }
-  };
+  // Add handlers for exiting special worlds
+  const handleHemingwayComplete = useCallback(() => {
+    setCurrentSpecialWorld(null);
+    // Give rewards, etc.
+    setCurrentAchievement('Completed Hemingway\'s Adventure');
+    setShowRewardModal(true);
+  }, [setCurrentSpecialWorld, setCurrentAchievement, setShowRewardModal]);
 
-  const handleLevel4Exit = () => {
-    setShowLevel4(false);
-  };
+  const handleHemingwayExit = useCallback(() => {
+    setCurrentSpecialWorld(null);
+  }, [setCurrentSpecialWorld]);
+
+  const handleTextAdventureComplete = useCallback(() => {
+    setCurrentSpecialWorld(null);
+    // Give rewards, etc.
+    setCurrentAchievement('Completed The Writer\'s Journey');
+    setShowRewardModal(true);
+  }, [setCurrentSpecialWorld, setCurrentAchievement, setShowRewardModal]);
+
+  const handleTextAdventureExit = useCallback(() => {
+    setCurrentSpecialWorld(null);
+  }, [setCurrentSpecialWorld]);
+
+  // Handle dismissing the world guide
+  const handleDismissWorldGuide = useCallback(() => {
+    setShowWorldGuide(false);
+    // Possibly save this preference to localStorage or user profile
+    localStorage.setItem('has-dismissed-world-guide', 'true');
+  }, [setShowWorldGuide]);
+
+  // Handle showing the world guide
+  const handleShowWorldGuide = useCallback(() => {
+    setShowWorldGuide(true);
+  }, [setShowWorldGuide]);
+
+  // Handle showing the world map
+  const handleShowWorldMap = useCallback(() => {
+    setShowWorldMap(true);
+  }, [setShowWorldMap]);
+
+  // Handle deleting a quote from savedQuotes
+  const handleDeleteQuote = useCallback((quoteIndex) => {
+    if (!character || !character.savedQuotes) return;
+    
+    // Create a copy of the savedQuotes array without the quote to delete
+    const updatedQuotes = [...character.savedQuotes];
+    updatedQuotes.splice(quoteIndex, 1);
+    
+    // Update the character with the new quotes array
+    const updatedCharacter = {
+      ...character,
+      savedQuotes: updatedQuotes
+    };
+    
+    // Update state and save to backend
+    setCharacter(updatedCharacter);
+    handleUpdateCharacter(updatedCharacter);
+    
+    console.log(`🗑️ Deleted quote at index ${quoteIndex}`);
+  }, [character, handleUpdateCharacter]);
 
   // Utilities for persisting map artifact visibility
   const applyMapArtifactVisibilityFromStorage = () => {
@@ -740,7 +933,7 @@ const GameWorld = () => {
   const handleNPCInteraction = useCallback(() => {
     const closestNPC = findClosestNPC();
     if (closestNPC) {
-      console.log("🗣️ Interacting with NPC:", closestNPC.name);
+      console.log("🎭 Clicked on NPC:", closestNPC.name);
       setActiveNPC(closestNPC);
       setShowNPCDialog(true);
       return true; // Interaction happened
@@ -748,217 +941,374 @@ const GameWorld = () => {
     return false; // No interaction happened
   }, [findClosestNPC]);
   
-  // Close NPC dialog
-  const handleCloseNPCDialog = () => {
-    setShowNPCDialog(false);
-    setActiveNPC(null);
-  };
-
-  // Add a handler for the World Map node click
-  const handleWorldMapNodeClick = (worldId) => {
-    // Check if it's a special world type
-    if (worldId === 'hemingway') {
-      setCurrentSpecialWorld('hemingway');
-      setShowWorldMap(false);
-    } else if (worldId === 'text_adventure') {
-      setCurrentSpecialWorld('text_adventure');
-      setShowWorldMap(false);
-    } else {
-      // Handle normal world navigation here
-      // (This would depend on your existing world navigation logic)
-      setShowWorldMap(false);
-    }
-  };
-
-  // Add handlers for exiting special worlds
-  const handleHemingwayComplete = () => {
-    setCurrentSpecialWorld(null);
-    // Give rewards, etc.
-    setCurrentAchievement('Completed Hemingway\'s Adventure');
-    setShowRewardModal(true);
-  };
-
-  const handleHemingwayExit = () => {
-    setCurrentSpecialWorld(null);
-  };
-
-  const handleTextAdventureComplete = () => {
-    setCurrentSpecialWorld(null);
-    // Give rewards, etc.
-    setCurrentAchievement('Completed The Writer\'s Journey');
-    setShowRewardModal(true);
-  };
-
-  const handleTextAdventureExit = () => {
-    setCurrentSpecialWorld(null);
-  };
-
-  // Handle dismissing the world guide
-  const handleDismissWorldGuide = () => {
-    setShowWorldGuide(false);
-    // Possibly save this preference to localStorage or user profile
-    localStorage.setItem('has-dismissed-world-guide', 'true');
-  };
-
-  const handleCreateArtifact = async (name, description, messageText) => {
-    if (!isLoggedIn) {
-      alert("You need to be logged in to create artifacts.");
-      return;
-    }
-
-    // Check if the current position is walkable before creating an artifact
-    const playerX = characterPosition.x / TILE_SIZE;
-    const playerY = characterPosition.y / TILE_SIZE;
-    const currentMapData = MAPS[currentMapIndex]?.data;
-    
-    if (!isWalkable(characterPosition.x, characterPosition.y, currentMapData)) {
-      alert("You cannot place artifacts on unwalkable tiles. Please move to a grass, sand, or portal tile.");
-      return;
-    }
-
-    const newArtifact = {
-      name,
-      description,
-      messageText,
-      location: { x: playerX, y: playerY },
-      area: MAPS[currentMapIndex].name,
-      creator: character.id,
-      visible: true,
-    };
-
-    try {
-      const createdArtifact = await createArtifact(newArtifact);
-      setArtifacts(prev => [...prev, createdArtifact]);
-      setShowForm(false);
-    } catch (error) {
-      console.error("Error creating artifact:", error);
-      alert("Failed to create artifact. Please try again.");
-    }
-  };
-
-  const handleUserArtifactUpdate = async (artifactId, updatedData) => {
-    try {
-      const updatedArtifact = await updateArtifact(artifactId, updatedData);
-      setArtifacts(prev => 
-        prev.map(artifact => 
-          artifact._id === artifactId ? updatedArtifact : artifact
-        )
-      );
-      setSelectedUserArtifact(null);
-    } catch (error) {
-      console.error('Failed to update artifact:', error);
-      throw error;
-    }
-  };
-
-  const handleUserArtifactDelete = async (artifactId) => {
-    try {
-      await deleteArtifact(artifactId);
-      setArtifacts(prev => prev.filter(artifact => artifact._id !== artifactId));
-      setSelectedUserArtifact(null);
-    } catch (error) {
-      console.error('Failed to delete artifact:', error);
-      throw error;
-    }
-  };
-
-  const handleUserArtifactPlace = async (artifactId, location) => {
-    try {
-      const updatedArtifact = await updateArtifact(artifactId, { location });
-      setArtifacts(prev => 
-        prev.map(artifact => 
-          artifact._id === artifactId ? updatedArtifact : artifact
-        )
-      );
-      setIsPlacingArtifact(false);
-    } catch (error) {
-      console.error('Failed to place artifact:', error);
-      throw error;
-    }
-  };
-
-  const filterArtifacts = (artifacts) => {
-    // Skip if invalid MAPS data
-    if (!Array.isArray(MAPS) || !MAPS[currentMapIndex]) {
-      return [];
+  // Function to handle and save gained achievements
+  const handleAchievementUnlocked = useCallback((achievementId, title, description) => {
+    // Check if character already has this achievement
+    if (character && character.achievements && 
+        character.achievements.some(a => a.id === achievementId)) {
+      return; // Already has this achievement
     }
     
-    return artifacts.filter(artifact => {
-      return (
-        // If no area is specified, assume it belongs to current map
-        (!artifact.area || artifact.area === MAPS[currentMapIndex].name)
-      );
+    // Show achievement notification
+    setAchievementNotification({
+      title,
+      description
     });
+    
+    // Add achievement to character record
+    if (character && character.id) {
+      const newAchievement = {
+        id: achievementId,
+        name: title,
+        description,
+        unlockedAt: new Date()
+      };
+      
+      // Update local state
+      setCharacter(prev => {
+        const updatedAchievements = [...(prev.achievements || []), newAchievement];
+        const updatedCharacter = {
+          ...prev,
+          achievements: updatedAchievements
+        };
+        
+        // Save to backend
+        if (updatedCharacter.id) {
+          updateCharacter(updatedCharacter)
+            .then(() => console.log("✅ Achievement saved to backend"))
+            .catch(err => console.error("❌ Failed to save achievement:", err));
+        }
+        
+        return updatedCharacter;
+      });
+      
+      // Save to local storage for offline access
+      try {
+        const storedAchievements = JSON.parse(localStorage.getItem('achievements') || '[]');
+        if (!storedAchievements.some(a => a.id === achievementId)) {
+          localStorage.setItem('achievements', JSON.stringify([
+            ...storedAchievements,
+            newAchievement
+          ]));
+        }
+      } catch (err) {
+        console.error("Failed to save achievement to localStorage:", err);
+      }
+    }
+  }, [character]);
+
+  // Load achievements from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedAchievements = JSON.parse(localStorage.getItem('achievements') || '[]');
+      setAchievements(savedAchievements);
+    } catch (error) {
+      console.error('Error loading achievements:', error);
+    }
+  }, []);
+
+  // Update checkForArtifactAchievements to use our context
+  const checkForArtifactAchievements = (updatedInventory) => {
+    checkCollectionAchievements(updatedInventory.length);
   };
 
-  const refreshArtifactList = async () => {
+  // Update the handleCreateArtifact function to include achievements
+  const handleCreateArtifact = async (artifactData) => {
+    try {
+      const newArtifact = await createArtifact({
+        ...artifactData,
+        createdAt: new Date().toISOString(),
+      });
+      
+      setArtifacts((prevArtifacts) => [...prevArtifacts, newArtifact]);
+      
+      // Award XP for creating an artifact
+      awardXP(50, "Created a new artifact");
+      
+      // Check for creator achievement
+      if (character && character.id) {
+        const createdCount = artifacts.filter(a => a.createdBy === character.id).length + 1;
+        if (createdCount >= 5) {
+          handleAchievementUnlocked(
+            'creator5',
+            'Master Creator',
+            'Created 5 artifacts to shape the Authentic Internet'
+          );
+        } else if (createdCount === 1) {
+          handleAchievementUnlocked(
+            'creator1',
+            'Creator',
+            'Created your first artifact in the world'
+          );
+        }
+      }
+      
+      return newArtifact;
+    } catch (error) {
+      console.error("❌ Error creating artifact:", error);
+      throw error;
+    }
+  };
+
+  // Update the handleArtifactClick function to include achievements
+  const handleArtifactClick = useCallback((artifactId) => {
+    // Find the clicked artifact
+    const clickedArtifact = artifacts.find(artifact => artifact.id === artifactId);
+    if (!clickedArtifact) return;
+    
+    // Check if this artifact was already viewed
+    const isFirstView = !viewedArtifacts.includes(artifactId);
+    
+    // Update viewed artifacts
+    if (isFirstView) {
+      const updatedViewedArtifacts = [...viewedArtifacts, artifactId];
+      setViewedArtifacts(updatedViewedArtifacts);
+      localStorage.setItem('viewedArtifacts', JSON.stringify(updatedViewedArtifacts));
+      
+      // Award XP for discovering a new artifact
+      addExperiencePoints(15, `Discovered ${clickedArtifact.name}`);
+      
+      // Check for discovery achievements
+      checkDiscoveryAchievements(updatedViewedArtifacts.length);
+    } else {
+      // Award smaller XP for revisiting an artifact
+      awardXP(2, "Revisited an artifact");
+    }
+    
+    // Select the artifact to display details
+    setVisibleArtifact(clickedArtifact);
+    
+    // Save game state if user is logged in
+    if (user) {
+      const gameState = {
+        inventory,
+        viewedArtifacts,
+        lastPosition: { x: characterPosition.x, y: characterPosition.y, worldId: MAPS[currentMapIndex].name },
+        gameProgress: {
+          currentQuest: 'Artifact Exploration',
+          completedQuests: [],
+          discoveredLocations: [MAPS[currentMapIndex].name]
+        }
+      };
+      
+      updateGameProgress(gameState);
+    }
+  }, [artifacts, viewedArtifacts, setViewedArtifacts, addExperiencePoints, checkDiscoveryAchievements, awardXP, setVisibleArtifact, user, inventory, characterPosition, currentMapIndex, updateGameProgress]);
+
+  // Remove an XP notification
+  const removeXpNotification = (id) => {
+    setXpNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
+  
+  // Remove an achievement notification
+  const removeAchievementNotification = (id) => {
+    setAchievementNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
+
+  // Handle tile clicks for game interactions
+  const handleTileClick = useCallback((x, y, tileType) => {
+    console.log(`Tile clicked at (${x}, ${y}), type: ${tileType}`);
+    
+    // Try NPC interaction first
+    const npcInteracted = handleNPCInteraction();
+    if (npcInteracted) return;
+    
+    // Check for artifacts at this position
+    const tileX = Math.floor(x / TILE_SIZE);
+    const tileY = Math.floor(y / TILE_SIZE);
+    
+    const clickedArtifact = artifacts.find(artifact => 
+      artifact.location && 
+      Math.floor(artifact.location.x) === tileX && 
+      Math.floor(artifact.location.y) === tileY
+    );
+    
+    if (clickedArtifact) {
+      handleArtifactClick(clickedArtifact.id);
+      return;
+    }
+    
+    // Handle special tile types
+    if (tileType === 3) { // Special interaction tile
+      console.log("Special interaction tile clicked");
+      // Show a dialog or trigger an event
+    } else if (tileType === 4) { // Quest tile
+      console.log("Quest tile clicked");
+      // Trigger quest dialog or advancement
+    }
+  }, [artifacts, handleNPCInteraction, handleArtifactClick]);
+
+  // Handle tile clicks with the correct tileType
+  const handleMapTileClick = useCallback((x, y) => {
+    if (currentMapIndex < 0 || currentMapIndex >= MAPS.length) {
+      console.error("Invalid map index:", currentMapIndex);
+      return;
+    }
+    
+    const mapData = MAPS[currentMapIndex];
+    if (!mapData || !mapData.tiles) {
+      console.error("Invalid map data or tiles:", mapData);
+      return;
+    }
+    
+    // Calculate the tile position in the map data
+    const tileX = Math.floor(x / TILE_SIZE);
+    const tileY = Math.floor(y / TILE_SIZE);
+    
+    // Check if coordinates are valid
+    if (tileX < 0 || tileX >= MAP_COLS || tileY < 0 || tileY >= MAP_ROWS) {
+      console.error("Tile coordinates out of bounds:", tileX, tileY);
+      return;
+    }
+    
+    // Get the tile type from the map data
+    const tileIndex = tileY * MAP_COLS + tileX;
+    const tileType = mapData.tiles[tileIndex];
+    
+    // Call the tile click handler with tile type
+    handleTileClick(x, y, tileType);
+  }, [currentMapIndex, handleTileClick]);
+
+  // Handle terminal adventure completion
+  const handleTerminalComplete = useCallback((score) => {
+    // Award XP and show notification
+    awardXP(100, "Completed Terminal Adventure!");
+    
+    // Grant achievement
+    handleAchievementUnlocked(
+      'terminal_master',
+      'Terminal Master',
+      'Successfully navigated through the command line challenges'
+    );
+    
+    // Exit the terminal adventure
+    setCurrentSpecialWorld(null);
+  }, [awardXP, handleAchievementUnlocked]);
+
+  // Handle terminal adventure exit
+  const handleTerminalExit = useCallback(() => {
+    setCurrentSpecialWorld(null);
+  }, []);
+  
+  // Handle shooter adventure completion
+  const handleShooterComplete = useCallback((score) => {
+    // Award XP based on score
+    const xpAmount = Math.min(200, score * 2);
+    awardXP(xpAmount, `Shooter Score: ${score}`);
+    
+    // Grant achievement based on score
+    if (score >= 1000) {
+      handleAchievementUnlocked(
+        'shooter_expert',
+        'Pixel Sharpshooter',
+        'Achieved an incredible score in the arcade shooter'
+      );
+    } else if (score >= 500) {
+      handleAchievementUnlocked(
+        'shooter_adept',
+        'Arcade Adept',
+        'Proved your skills in the arcade shooter challenge'
+      );
+    }
+    
+    // Exit the shooter adventure
+    setCurrentSpecialWorld(null);
+  }, [awardXP, handleAchievementUnlocked]);
+
+  // Handle shooter adventure exit
+  const handleShooterExit = useCallback(() => {
+    setCurrentSpecialWorld(null);
+  }, []);
+
+  // Update the saveGameProgress method to use context
+  const saveGameProgress = () => {
+    if (isLoggedIn && character?.id) {
+      const gameState = {
+        experience: character.experience || 0,
+        avatar: character.avatar,
+        inventory,
+        viewedArtifacts,
+        lastPosition: { x: characterPosition.x, y: characterPosition.y, worldId: MAPS[currentMapIndex].name },
+        gameProgress: {
+          currentQuest: 'Artifact Exploration',
+          completedQuests: [],
+          discoveredLocations: [MAPS[currentMapIndex].name]
+        }
+      };
+      
+      updateGameProgress(gameState);
+    }
+  };
+
+  // Function to refresh the artifacts list
+  const refreshArtifactList = useCallback(async () => {
     try {
       const data = await fetchArtifacts();
-      const filteredServerArtifacts = filterArtifacts(data);
-      setArtifacts(filteredServerArtifacts);
-    } catch (error) {
-      console.error('Error fetching artifacts:', error);
-    }
-  };
-
-  const handleArtifactClick = (artifact) => {
-    // Play discovery sound
-    if (soundManager) soundManager.playSound('discovery');
-    
-    // Show artifact details
-    setVisibleArtifact(artifact);
-    
-    // If it's a user artifact, allow management
-    if (artifact.creator === character?.id) {
-      setSelectedUserArtifact(artifact);
-    }
-  };
-
-
-  // Check if player can walk on a tile
-  const canWalkOnTile = (position) => {
-    const col = Math.floor(position.x / TILE_SIZE);
-    const row = Math.floor(position.y / TILE_SIZE);
-    
-    // Check if position is within map bounds
-    if (!Array.isArray(MAPS) || 
-        !MAPS[currentMapIndex]?.data ||
-        row < 0 || row >= MAPS[currentMapIndex].data.length ||
-        col < 0 || col >= MAPS[currentMapIndex].data[0].length) {
-      return false;
-    }
-    
-    // Check for portal tiles
-    if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 5) {
-      // Portal found - don't call undefined function
-      console.log("Portal detected at", position);
-      return false;
-    }
-    
-    // Check if the tile is walkable
-    return isWalkable(MAPS[currentMapIndex].data[row][col]);
-  };
-
-  // Add the missing handleGainExperience function
-  const handleGainExperience = async (points) => {
-    setCharacter((prev) => {
-      // For unauthenticated users, just update local state
-      if (!prev || !prev.id) {
-        return {
-          ...prev,
-          experience: (prev?.experience || 0) + points
-        };
+      console.log("📦 Refreshed Artifacts:", data ? data.length : 0);
+      
+      if (data && Array.isArray(data)) {
+        const mapArtifacts = Array.isArray(MAPS) 
+          ? MAPS.flatMap(map => (map.artifacts || []).map(art => art.name))
+          : [];
+        
+        const filteredServerArtifacts = data.filter(serverArt => 
+          !mapArtifacts.includes(serverArt.name) || 
+          !serverArt.location
+        );
+        
+        setArtifacts(filteredServerArtifacts);
       }
+    } catch (error) {
+      console.error("❌ Error refreshing artifacts:", error);
+    }
+  }, []);
 
-      // For authenticated users, update backend
-      const updatedCharacter = { ...prev, experience: prev.experience + points };
-      updateCharacter(updatedCharacter)
-        .then(() => console.log("✅ XP Updated on Backend"))
-        .catch((err) => console.error("❌ Failed to update XP:", err));
+  // Function to handle user artifact management
+  const handleUserArtifactUpdate = useCallback(async (artifact, action) => {
+    try {
+      if (action === 'place') {
+        setSelectedUserArtifact(artifact);
+        setIsPlacingArtifact(true);
+        setShowInventory(false);
+      } else if (action === 'update' && artifact._id) {
+        await updateArtifact(artifact);
+        refreshArtifactList();
+      } else if (action === 'delete' && artifact._id) {
+        await deleteArtifact(artifact._id);
+        setInventory(prev => prev.filter(item => item._id !== artifact._id));
+        refreshArtifactList();
+      }
+    } catch (error) {
+      console.error(`❌ Error ${action}ing artifact:`, error);
+    }
+  }, [refreshArtifactList]);
 
-      return updatedCharacter;
-    });
+  // Function to toggle artifacts visibility
+  const toggleArtifactsVisibility = () => {
+    setShowArtifactsOnMap(prev => !prev);
   };
+
+  // Calculate artifacts to show based on current map
+  const artifactsToShow = artifacts.filter(artifact => 
+    artifact.location && 
+    Array.isArray(MAPS) && 
+    MAPS[currentMapIndex] && 
+    artifact.location.mapName === MAPS[currentMapIndex].name
+  );
+  
+  // Handle NPC click from the Map component
+  const handleNPCClick = useCallback((npc) => {
+    console.log("NPC clicked:", npc.name);
+    setActiveNPC(npc);
+    setShowNPCDialog(true);
+    
+    // Play interaction sound if available
+    if (soundManager) {
+      soundManager.playSound('interact');
+    }
+    
+    return true; // Interaction happened
+  }, [soundManager, setActiveNPC, setShowNPCDialog]);
 
   return (
     <ErrorBoundary>
@@ -982,106 +1332,46 @@ const GameWorld = () => {
                 : 600}px`,
             }}
           >
-            <Map 
-              mapData={Array.isArray(MAPS) && MAPS[currentMapIndex]?.data 
-                ? MAPS[currentMapIndex].data 
-                : []}
-              viewport={viewport} 
-              mapName={Array.isArray(MAPS) && MAPS[currentMapIndex]?.name 
-                ? MAPS[currentMapIndex].name 
-                : "Unknown Area"}
-              npcs={Array.isArray(MAPS) && MAPS[currentMapIndex]?.npcs 
-                ? MAPS[currentMapIndex].npcs.map(npc => {
-                    // If type is a string but no sprite specified, make sure it maps to our sprite assets
-                    return { ...npc };
-                  }) 
-                : []}
-              onNPCClick={(npc) => {
-                console.log("🎭 Clicked on NPC:", npc.name);
-                setActiveNPC(npc);
-                setShowNPCDialog(true);
-              }}
-            />
-            <Character 
-              x={characterPosition.x} 
-              y={characterPosition.y} 
-              exp={character?.experience || 0}
-              level={character?.level || 1}
-              avatar={character?.avatar}
-              isBumping={isBumping}
-              bumpDirection={bumpDirection}
-              movementDirection={movementDirection}
-            />
-            <ErrorBoundary>
-              {/* Render map-defined artifacts */}
-              {Array.isArray(MAPS) && MAPS[currentMapIndex]?.artifacts 
-                ? MAPS[currentMapIndex].artifacts.map((artifact) =>
-                  artifact.visible && (
-                    <Artifact
-                      key={artifact.id}
-                      artifact={artifact}
-                      onClick={() => handleArtifactClick(artifact)}
-                      style={{ left: artifact.location.x * TILE_SIZE, top: artifact.location.y * TILE_SIZE }}
-                    />
-                  )
-                ) 
-                : null
-              }
-              
-              {/* Render server-defined artifacts */}
-              {artifacts && artifacts.length > 0 && artifacts
-                .filter(artifact => 
-                  artifact && artifact.location && 
-                  (!artifact.area || artifact.area === MAPS[currentMapIndex].name)
-                )
-                .map((artifact) => {
-                  const artifactKey = artifact._id || artifact.id || `artifact-${artifact.name}-${artifact.location.x}-${artifact.location.y}`;
-                  
-                  return (
-                    <div key={`server-artifact-${artifactKey}`}>
-                      <Artifact
-                        src={artifact.image}
-                        artifact={artifact}
-                        visible={artifact.id === visibleArtifact?.id || artifact._id === visibleArtifact?._id}
-                        style={{
-                          position: "absolute",
-                          left: `${artifact.location.x * TILE_SIZE}px`,
-                          top: `${artifact.location.y * TILE_SIZE}px`,
-                          width: TILE_SIZE,
-                          height: TILE_SIZE,
-                          zIndex: 10000
-                        }}
-                        onClick={() => {
-                          if (artifact.creator === character?.id) {
-                            setSelectedUserArtifact(artifact);
-                          }
-                        }}
-                      />
-                      {selectedUserArtifact?._id === artifact._id && (
-                        <UserArtifactManager
-                          artifact={artifact}
-                          onUpdate={handleUserArtifactUpdate}
-                          onDelete={handleUserArtifactDelete}
-                          onPlace={handleUserArtifactPlace}
-                          currentMapName={MAPS[currentMapIndex].name}
-                          position={{
-                            x: artifact.location.x * TILE_SIZE,
-                            y: artifact.location.y * TILE_SIZE
-                          }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-            </ErrorBoundary>
-            
-            {/* Add the DialogBox for NPC interaction */}
-            {showNPCDialog && activeNPC && (
-              <DialogBox 
-                npc={activeNPC} 
-                onClose={handleCloseNPCDialog}
+            {MAPS[currentMapIndex] && (
+              <Map 
+                mapData={MAPS[currentMapIndex].data} 
+                npcs={MAPS[currentMapIndex].npcs?.filter(npc => npc && npc.position) || []} 
+                artifacts={!showArtifactsOnMap ? [] : artifactsToShow}
+                onTileClick={handleTileClick}
+                onNPCClick={handleNPCClick}
+                onArtifactClick={handleArtifactClick}
+                mapName={MAPS[currentMapIndex].name}
               />
             )}
+            
+            {/* Player Character */}
+            <div 
+              className={`character ${isMoving ? 'walking' : ''} ${direction}`} 
+              style={characterStyle}
+              ref={characterRef}
+            />
+            
+            {/* Environment Modifiers */}
+            {isDarkMode && <div className="darkmode-overlay" />}
+            
+            {/* Buttons Menu */}
+            <div className="game-controls">
+              <IconButton onClick={handleShowInventory} tooltip="Inventory">
+                <i className="fas fa-briefcase"></i>
+              </IconButton>
+              <IconButton onClick={handleShowWorldMap} tooltip="World Map">
+                <i className="fas fa-map"></i>
+              </IconButton>
+              <IconButton onClick={handleShowQuotes} tooltip="Saved Quotes">
+                <i className="fas fa-quote-right"></i>
+              </IconButton>
+              <IconButton onClick={handleShowWorldGuide} tooltip="World Guide">
+                <i className="fas fa-compass"></i>
+              </IconButton>
+              <IconButton onClick={toggleArtifactsVisibility} tooltip={showArtifactsOnMap ? "Hide Artifacts" : "Show Artifacts"}>
+                <i className={`fas fa-${showArtifactsOnMap ? 'eye-slash' : 'eye'}`}></i>
+              </IconButton>
+            </div>
           </div>
         </div>
         
@@ -1182,6 +1472,84 @@ const GameWorld = () => {
           onArtifactFound={handleArtifactClick}
           character={character}
         />
+
+        {notification && (
+          <XPNotification
+            message={notification.message}
+            type={notification.type}
+            duration={notification.duration}
+            onClose={() => setNotification(null)}
+          />
+        )}
+
+        {/* Achievement Notification */}
+        {achievementNotification && (
+          <AchievementNotification
+            title={achievementNotification.title}
+            description={achievementNotification.description}
+            duration={5000}
+            onClose={() => setAchievementNotification(null)}
+          />
+        )}
+
+        {/* Special Worlds */}
+        {currentSpecialWorld === 'textAdventure' && (
+          <TextAdventure
+            onComplete={handleTextAdventureComplete}
+            onExit={handleTextAdventureExit}
+            character={character}
+          />
+        )}
+        
+        {currentSpecialWorld === 'terminal' && (
+          <Level3Terminal
+            onComplete={handleTerminalComplete}
+            onExit={handleTerminalExit}
+            character={character}
+            artifacts={artifacts}
+            username={character?.username || 'User'}
+            inventory={inventory}
+          />
+        )}
+        
+        {currentSpecialWorld === 'shooter' && (
+          <ShooterAdventure
+            onComplete={handleShooterComplete}
+            onExit={handleShooterExit}
+            character={character}
+          />
+        )}
+        
+        {currentSpecialWorld === 'hemingway' && (
+          <HemingwayChallenge
+            onComplete={handleHemingwayComplete}
+            onExit={handleHemingwayExit}
+            character={character}
+          />
+        )}
+
+        {/* XP Notifications */}
+        <div className="notification-container">
+          {xpNotifications.map(notification => (
+            <XPNotification
+              key={notification.id}
+              amount={notification.amount}
+              reason={notification.reason}
+              onClose={() => removeXpNotification(notification.id)}
+            />
+          ))}
+        </div>
+        
+        {/* Achievement Notifications */}
+        <div className="achievement-notification-container">
+          {achievementNotifications.map(notification => (
+            <AchievementNotification
+              key={notification.id}
+              achievement={notification.achievement}
+              onClose={() => removeAchievementNotification(notification.id)}
+            />
+          ))}
+        </div>
       </div>
     </ErrorBoundary>
   );

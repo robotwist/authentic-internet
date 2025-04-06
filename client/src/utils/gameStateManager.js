@@ -5,6 +5,7 @@
 
 const STORAGE_KEY = 'game_state';
 const BACKUP_KEY = 'game_state_backup';
+const CHECKPOINT_KEY = 'last_checkpoint';
 
 class GameStateManager {
   constructor() {
@@ -12,6 +13,7 @@ class GameStateManager {
     this.lastSavedState = null;
     this.saveInterval = null;
     this.initialized = false;
+    this.lastCheckpoint = null;
   }
 
   init() {
@@ -21,8 +23,11 @@ class GameStateManager {
       // Try to load the main state
       this.state = this.loadState();
       
+      // Load last checkpoint
+      this.lastCheckpoint = this.loadCheckpoint();
+      
       // Set up automatic saving
-      this.saveInterval = setInterval(() => this.saveState(), 30000); // Save every 30 seconds
+      this.saveInterval = setInterval(() => this.saveState(), 300000); // Save every 5 minutes
       
       this.initialized = true;
     } catch (error) {
@@ -62,6 +67,31 @@ class GameStateManager {
     }
   }
 
+  // Save checkpoint when player uses a portal
+  saveCheckpoint(mapName, position) {
+    try {
+      const checkpoint = { mapName, position };
+      localStorage.setItem(CHECKPOINT_KEY, JSON.stringify(checkpoint));
+      this.lastCheckpoint = checkpoint;
+      console.log(`Portal checkpoint saved: ${mapName} at position (${position.x}, ${position.y})`);
+    } catch (error) {
+      console.error('Error saving checkpoint:', error);
+    }
+  }
+
+  // Load saved checkpoint
+  loadCheckpoint() {
+    try {
+      const savedCheckpoint = localStorage.getItem(CHECKPOINT_KEY);
+      if (!savedCheckpoint) return null;
+      
+      return JSON.parse(savedCheckpoint);
+    } catch (error) {
+      console.error('Error loading checkpoint:', error);
+      return null;
+    }
+  }
+
   recoverFromBackup() {
     try {
       const backup = localStorage.getItem(BACKUP_KEY);
@@ -87,9 +117,14 @@ class GameStateManager {
   }
 
   getInitialState() {
+    // Use checkpoint position if available
+    const startPosition = this.lastCheckpoint ? 
+      { ...this.lastCheckpoint.position } : 
+      { x: 0, y: 0 };
+      
     return {
       player: {
-        position: { x: 0, y: 0 },
+        position: startPosition,
         inventory: [],
         health: 100,
         experience: 0
@@ -128,6 +163,7 @@ class GameStateManager {
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(BACKUP_KEY);
+      // Don't remove checkpoint when resetting
       this.state = this.getInitialState();
     } catch (error) {
       console.error('Error clearing game state:', error);

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentic Internet - Offline</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #1a1a1a;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    
+    .container {
+      max-width: 600px;
+      padding: 2rem;
+      background-color: #2a2a2a;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #6366F1;
+    }
+    
+    p {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    
+    .logo {
+      width: 150px;
+      height: 150px;
+      margin-bottom: 2rem;
+      border-radius: 50%;
+      background-color: #4a4a4a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: bold;
+      color: #6366F1;
+    }
+    
+    .retry-button {
+      background-color: #6366F1;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    .retry-button:hover {
+      background-color: #4F46E5;
+    }
+    
+    .offline-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .features {
+      display: flex;
+      justify-content: space-around;
+      margin: 2rem 0;
+    }
+    
+    .feature {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #6366F1;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        width: 90%;
+        padding: 1.5rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      p {
+        font-size: 1rem;
+      }
+      
+      .features {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">AI</div>
+    <div class="offline-icon">📡</div>
+    <h1>You're Offline</h1>
+    <p>It looks like you lost your connection to the Internet. Don't worry, some parts of Authentic Internet still work offline!</p>
+    
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">💾</div>
+        <p>Saved artifacts still available</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🏆</div>
+        <p>Your achievements are safe</p>
+      </div>
+    </div>
+    
+    <p>Check your connection and try again.</p>
+    <button class="retry-button" onclick="window.location.reload()">Reconnect</button>
+  </div>
+
+  <script>
+    // Listen for online status changes
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+    
+    // Check connection status periodically
+    setInterval(() => {
+      if (navigator.onLine) {
+        window.location.reload();
+      }
+    }, 5000);
+  </script>
+</body>
+</html> 

@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import http from "http";
 import connectDB from "./config/db.js";
 import { initSocketService } from "./services/socketService.js";
-import { applyMiddleware, applySessionMiddleware, applyErrorHandlingMiddleware } from "./middleware/index.js";
+import { applyMiddleware, applySessionMiddleware, applyErrorHandlingMiddleware, applyCsrfProtection } from "./middleware/index.js";
 import { applyRoutes } from "./routes/index.js";
 import { 
   configureAllowedOrigins, 
@@ -38,6 +38,9 @@ const allowedOrigins = configureAllowedOrigins();
 applyMiddleware(app, allowedOrigins);
 applySessionMiddleware(app);
 
+// Comment out CSRF protection for now to isolate issues
+// applyCsrfProtection(app);
+
 // Apply routes
 applyRoutes(app);
 
@@ -49,6 +52,10 @@ applyErrorHandlingMiddleware(app);
  */
 const startServer = async () => {
   try {
+    console.log('Starting server.mjs...');
+    console.log('Inside startServer function...');
+    console.log('Checking environment variables...');
+
     // Connect to MongoDB but don't crash if it fails
     console.log("🔄 Attempting to connect to MongoDB with URI:", 
       process.env.MONGO_URI ? 

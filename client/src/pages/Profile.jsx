@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useGameState } from '../context/GameStateContext';
 import Layout from '../components/shared/Layout';
 import Form from '../components/shared/Form';
 import Button from '../components/shared/Button';
 import { fetchCharacter } from '../api/api';
 import AvatarUpload from '../components/AvatarUpload';
 import '../styles/Profile.css';
+import { Link } from 'react-router-dom';
 
 const Profile = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, isAuthenticated, logout } = useAuth();
+  const { gameProgress } = useGameState();
   const [formData, setFormData] = useState({
     username: user?.username || '',
     email: user?.email || '',
@@ -26,6 +29,7 @@ const Profile = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef(null);
   const [hasCompletedFinalDungeon, setHasCompletedFinalDungeon] = useState(false);
+  const [gameState, setGameState] = useState(null);
 
   useEffect(() => {
     const loadCharacter = async () => {
@@ -54,6 +58,28 @@ const Profile = () => {
 
     loadCharacter();
   }, [user]);
+
+  useEffect(() => {
+    const fetchUserGameData = async () => {
+      if (!isAuthenticated) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        // Use gameProgress from GameState context instead of API call
+        setGameState(gameProgress || {});
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch game state:', err);
+        setError('Failed to load your game data. Please try again later.');
+        setLoading(false);
+      }
+    };
+
+    fetchUserGameData();
+  }, [isAuthenticated, gameProgress]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -198,6 +224,15 @@ const Profile = () => {
     if (quotesCount >= 7) achievements.push({ name: "Historian", description: "Saved 7 historical quotes", icon: "📚" });
     
     return achievements;
+  };
+
+  // Calculate progress to next level
+  const calculateLevelProgress = () => {
+    if (!user) return 0;
+    
+    const { experience, level } = user;
+    const requiredXP = level * 10;
+    return Math.min(100, Math.floor((experience / requiredXP) * 100));
   };
 
   const renderProfileTab = () => (
@@ -454,6 +489,19 @@ const Profile = () => {
       <p>Manage your account and view your adventure statistics</p>
     </div>
   );
+
+  if (!isAuthenticated) {
+    return (
+      <div className="profile-container auth-required">
+        <h1>Profile</h1>
+        <p>Please log in to view your profile.</p>
+        <div className="auth-buttons">
+          <Link to="/login" className="button primary">Login</Link>
+          <Link to="/register" className="button secondary">Register</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Layout className="profile-container" header={header}>

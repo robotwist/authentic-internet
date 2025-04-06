@@ -1,5 +1,8 @@
 import axios from "axios";
 import { NPC_TYPES } from "../components/Constants";
+import cacheManager from '../utils/cacheManager';
+import { createErrorHandler, ERROR_CATEGORIES } from '../utils/errorTracker';
+const { withCache, createCacheKey, cacheDurations } = cacheManager;
 
 // Display build information in console for tracking deployments
 const displayBuildInfo = () => {
@@ -64,14 +67,29 @@ const createApiInstance = (baseUrl) => {
     async (error) => {
       if (error.response) {
         const { status, data } = error.response;
+        const requestUrl = error.config.url;
         
-        // Handle 401 Unauthorized
+        // Handle 401 Unauthorized - but ignore during login/register attempts
         if (status === 401) {
-          console.warn('Session expired or invalid token');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-          return Promise.reject(new Error('Session expired. Please log in again.'));
+          // Check if this is a login or register endpoint
+          const isAuthEndpoint = requestUrl && 
+            (requestUrl.includes('/api/auth/login') || 
+             requestUrl.includes('/api/auth/register'));
+          
+          if (!isAuthEndpoint) {
+            // Only handle as session expiration if NOT a login/register request
+            console.warn('Session expired or invalid token');
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('isAuthenticated');
+            window.location.href = '/login';
+            return Promise.reject(new Error('Session expired. Please log in again.'));
+          } else {
+            // For login/register endpoints, pass through the original error
+            console.log('Authentication failed - this is normal during login attempts');
+            return Promise.reject(new Error(data?.message || 'Authentication failed'));
+          }
         }
         
         // Handle 400 Bad Request
@@ -125,11 +143,16 @@ const alternativePorts = [5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010];
 let isApiInitialized = false;
 let currentApiUrl = configuredApiUrl;
 let lastHealthCheckTime = 0;
-const HEALTH_CHECK_THROTTLE_MS = 10000; // Limit health checks to once per 10 seconds
+const HEALTH_CHECK_THROTTLE_MS = 60000; // Limit health checks to once per minute (increased from 10 seconds)
 let healthCheckInProgress = false; // Flag to prevent concurrent health checks
 
 // Function to check server health
 const checkServerHealth = async (url) => {
+  // Bypass health checks to prevent reload loops
+  console.log(`🔍 Health check bypassed for ${url} to prevent reload loops`);
+  return true;
+  
+  /* Original implementation commented out
   try {
     console.log(`🔍 Checking server health at ${url}/api/health...`);
     
@@ -172,6 +195,7 @@ const checkServerHealth = async (url) => {
     console.error(`❌ Server health check error for ${url}:`, error.message);
     return false;
   }
+  */
 };
 
 // Initialize API with port detection
@@ -286,8 +310,12 @@ const initApi = async () => {
 // Always return the configured API even if health check failed
 // This prevents app crashes for non-critical API operations
 const getApi = () => {
-  // Schedule async health check but don't wait for it
+  // Only do one health check on initial load, not on every API call
   if (!isApiInitialized) {
+    // Set as initialized immediately to prevent future checks
+    isApiInitialized = true;
+    
+    // Run the initialization once but don't wait for it
     initApi().catch(err => {
       console.warn("Background API initialization failed:", err.message);
     });
@@ -458,16 +486,34 @@ export const loginUser = async (username, password) => {
       username: username,   // Add username parameter for newer implementations
       password
     });
-    
+
     // Check for success flag in response
     if (!response.data.success) {
       throw new Error(response.data.message || 'Login failed');
     }
-    
+
+    // Set the Authorization header for future requests
+    const api = getApi();
+    api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+
     // Return auth data
     return response.data;
   } catch (error) {
     console.error('Login error:', error);
+    
+    // If we have a response from the server, prioritize that message
+    if (error.response && error.response.data) {
+      if (error.response.data.message) {
+        throw new Error(error.response.data.message);
+      }
+    }
+    
+    // If it's a network error, provide a clearer message
+    if (error.message && error.message.includes('Network Error')) {
+      throw new Error('Unable to connect to the authentication server. Please check your network connection.');
+    }
+    
+    // Otherwise pass through the error
     throw error;
   }
 };
@@ -538,11 +584,24 @@ export const verifyToken = async () => {
  */
 export const refreshUserToken = async (refreshToken) => {
   try {
+    // Basic validation - don't even try if token looks invalid
+    if (!refreshToken || refreshToken.length < 10) {
+      console.warn('Invalid refresh token format - too short or missing');
+      throw new Error('Invalid refresh token format');
+    }
+    
+    // Log refresh attempt (without showing token)
+    console.log(`Attempting to refresh token (${refreshToken.substring(0, 5)}...)`);
+    
     // Send refresh request
     const response = await getApi().post('/api/auth/refresh', { refreshToken });
     
     // Check for success flag in response
     if (!response.data.success) {
+      // Throw a more specific error for session expiration
+      if (response.data.message && response.data.message.includes('expired')) {
+        throw new Error('Session expired. Please log in again.');
+      }
       throw new Error(response.data.message || 'Token refresh failed');
     }
     
@@ -550,68 +609,175 @@ export const refreshUserToken = async (refreshToken) => {
     return response.data;
   } catch (error) {
     console.error('Token refresh error:', error);
+    
+    // If the error is related to network issues or server not responding,
+    // provide a clearer message
+    if (error.request && !error.response) {
+      throw new Error('Unable to connect to authentication server. Please try again later.');
+    }
+    
+    // If it's an expired token or invalid token error from the server
+    if (error.response && (
+        error.response.status === 401 || 
+        error.response.status === 403 ||
+        (error.response.data && error.response.data.message && 
+         (error.response.data.message.includes('expired') || 
+          error.response.data.message.includes('invalid')))
+    )) {
+      // Clear auth data to force a fresh login
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('isAuthenticated');
+      
+      throw new Error('Session expired. Please log in again.');
+    }
+    
     throw error;
   }
 };
 
 /**
- * Get user's game state
- * @returns {Promise<Object>} Game state data
+ * Fetch the user's game state including achievements, inventory, and progress
+ * @returns {Promise<Object>} The user's game state
  */
-export const getUserGameState = async () => {
+export const getUserGameState = withCache(
+  async (idToken) => {
+    try {
+      if (!idToken) {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          throw new Error('Authentication required');
+        }
+        idToken = token;
+      }
+      
+      const response = await fetch(`${API_URL}/api/users/game-state`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch game state');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching game state:', error);
+      throw error;
+    }
+  },
+  { 
+    duration: cacheDurations.gameState,
+    keyFn: () => `gameState:${localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).id : 'guest'}`
+  }
+);
+
+/**
+ * Update the user's experience points in the database
+ * @param {number} experience - The new experience points total
+ * @returns {Promise<Object>} Updated user data
+ */
+export const updateUserExperience = async (experience) => {
   try {
-    // Get token for auth header
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
+    
     if (!token) {
-      throw new Error('No token found');
+      throw new Error('Authentication required');
     }
     
-    // Send game state request
-    const response = await getApi().get('/api/auth/game-state', {
-      headers: { Authorization: `Bearer ${token}` }
+    const response = await fetch(`${API_URL}/api/users/experience`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ experience })
     });
     
-    // Check for success flag in response
-    if (!response.data.success) {
-      throw new Error(response.data.message || 'Failed to get game state');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update experience');
     }
     
-    // Return game state data
-    return response.data.gameState;
+    return await response.json();
   } catch (error) {
-    console.error('Get game state error:', error);
+    console.error('Error updating experience:', error);
     throw error;
   }
 };
 
 /**
- * Update user's game state
- * @param {Object} gameData - Game state data to update
- * @returns {Promise<Object>} Update response
+ * Add a new achievement for the user
+ * @param {Object} achievement - The achievement to add
+ * @param {string} achievement.name - The name of the achievement
+ * @param {string} achievement.description - Description of the achievement
+ * @param {string} achievement.type - Type of achievement (discovery, completion, etc.)
+ * @returns {Promise<Object>} The updated achievements array
  */
-export const updateGameState = async (gameData) => {
+export const addUserAchievement = async (achievement) => {
   try {
-    // Get token for auth header
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
+    
     if (!token) {
-      throw new Error('No token found');
+      throw new Error('Authentication required');
     }
     
-    // Send update request
-    const response = await getApi().post('/api/auth/game-state', 
-      { gameData },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const response = await fetch(`${API_URL}/api/users/achievements`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ achievement })
+    });
     
-    // Check for success flag in response
-    if (!response.data.success) {
-      throw new Error(response.data.message || 'Failed to update game state');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to add achievement');
     }
     
-    // Return update response
-    return response.data;
+    return await response.json();
   } catch (error) {
-    console.error('Update game state error:', error);
+    console.error('Error adding achievement:', error);
+    throw error;
+  }
+};
+
+/**
+ * Save the entire game state to the server
+ * @param {Object} gameState - The complete game state object
+ * @returns {Promise<Object>} The saved game state
+ */
+export const saveGameState = async (gameState) => {
+  try {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
+    const response = await fetch(`${API_URL}/api/users/game-state`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(gameState)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to save game state');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error saving game state:', error);
     throw error;
   }
 };
@@ -619,15 +785,21 @@ export const updateGameState = async (gameData) => {
 /* ────────────────────────────────
    🔹 CHARACTER ENDPOINTS
 ──────────────────────────────── */
-export const fetchCharacter = async (userId) => {
-  try {
-    const response = await getApi().get(`/api/users/${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Fetch character for user ${userId} failed:`, error);
-    throw error;
+export const fetchCharacter = withCache(
+  async (id) => {
+    try {
+      const response = await getApi().get(`/api/users/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching character:', error);
+      throw error;
+    }
+  },
+  { 
+    duration: cacheDurations.character,
+    keyFn: (id) => `character:${id}`
   }
-};
+);
 
 export const updateCharacter = async (characterData) => {
   try {
@@ -678,15 +850,18 @@ export const updateCharacter = async (characterData) => {
 /* ────────────────────────────────
    🔹 ARTIFACT ENDPOINTS (CRUD)
 ──────────────────────────────── */
-export const fetchArtifacts = async (filterOptions = {}) => {
-  try {
-    const response = await getApi().get("/api/artifacts");
-    return response.data;
-  } catch (error) {
-    console.error('Fetch artifacts failed:', error);
-    throw error;
-  }
-};
+export const fetchArtifacts = withCache(
+  async () => {
+    try {
+      const response = await getApi().get("/api/artifacts");
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching artifacts:', error);
+      throw error;
+    }
+  },
+  { duration: cacheDurations.artifacts }
+);
 
 export const createArtifact = async (artifactData) => {
   try {
@@ -1252,5 +1427,29 @@ export const testApiConnection = async () => {
     console.error("API connection test failed:", error);
     results.error = error.message;
     return results;
+  }
+};
+
+// Add a function to clear specific cache entries
+export const clearCacheFor = (type, id = null) => {
+  switch (type) {
+    case 'artifacts':
+      cacheManager.clear('artifacts');
+      break;
+    case 'character':
+      if (id) {
+        cacheManager.clear(`character:${id}`);
+      } else {
+        cacheManager.clear('character:');
+      }
+      break;
+    case 'gameState':
+      cacheManager.clear('gameState:');
+      break;
+    case 'all':
+      cacheManager.clear();
+      break;
+    default:
+      console.warn(`Unknown cache type: ${type}`);
   }
 };

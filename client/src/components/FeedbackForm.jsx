@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './FeedbackForm.css';
+import { useAuth } from '../context/AuthContext'; // Import Auth context to get user info if logged in
 
 // Updated for automatic deployment testing - Added GitHub repository secrets
 const FeedbackForm = ({ onClose }) => {
+  const { user } = useAuth(); // Get current authenticated user if available
   const [feedback, setFeedback] = useState({
     gameplay: '',
     bugs: '',
@@ -15,6 +17,7 @@ const FeedbackForm = ({ onClose }) => {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showExportInstructions, setShowExportInstructions] = useState(false);
+  const [serverSubmitSuccess, setServerSubmitSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,17 +50,42 @@ const FeedbackForm = ({ onClose }) => {
         deviceInfo
       };
 
-      // Log the feedback data to console
-      console.log("📝 Feedback submitted:", feedbackData);
-      
-      // Save to localStorage 
+      // If user is authenticated, add their name and email
+      if (user) {
+        if (!feedbackData.name) feedbackData.name = user.username;
+        if (!feedbackData.email) feedbackData.email = user.email;
+      }
+
+      // Save to localStorage as backup
       const existingFeedback = JSON.parse(localStorage.getItem('gameFeedback') || '[]');
       localStorage.setItem('gameFeedback', JSON.stringify([...existingFeedback, feedbackData]));
 
+      // Submit to server API
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include auth token if user is logged in
+          ...(localStorage.getItem('authToken') && {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          })
+        },
+        body: JSON.stringify(feedbackData)
+      });
+
+      if (response.ok) {
+        console.log("📝 Feedback submitted to server successfully");
+        setServerSubmitSuccess(true);
+      } else {
+        console.warn("Server submission failed, but feedback saved locally");
+        // Don't show error to user since we saved locally
+      }
+      
       setSubmitted(true);
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      alert("There was an error submitting your feedback. Please try again.");
+      // Still mark as submitted if saved to localStorage
+      setSubmitted(true);
     } finally {
       setIsSubmitting(false);
     }

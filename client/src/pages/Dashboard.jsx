@@ -5,6 +5,7 @@ import API from '../api/api';
 import { MAPS } from '../components/Constants';
 import DailyQuote from '../components/DailyQuote';
 import '../styles/Dashboard.css';
+import { useAchievements, ACHIEVEMENTS } from '../context/AchievementContext';
 
 const Dashboard = () => {
   const [mainWorld, setMainWorld] = useState(null);
@@ -17,12 +18,44 @@ const Dashboard = () => {
     description: '',
     mapType: ''
   });
+  const [character, setCharacter] = useState(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { unlockAchievement } = useAchievements();
 
   useEffect(() => {
     fetchWorlds();
+    fetchCharacter();
   }, []);
+
+  const fetchCharacter = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await API.get(`/api/characters/${user.id}`);
+      setCharacter(response.data);
+    } catch (error) {
+      console.error('Failed to load character data:', error);
+    }
+  };
+
+  // Calculate level and progress based on experience
+  const calculateLevel = (exp) => {
+    if (!exp && exp !== 0) return { level: 1, progress: 0, nextLevelAt: 100 };
+    
+    const level = exp >= 1000 ? 5 : 
+                exp >= 750 ? 4 : 
+                exp >= 500 ? 3 : 
+                exp >= 250 ? 2 : 1;
+    
+    const levelThresholds = [0, 250, 500, 750, 1000];
+    const currentThreshold = levelThresholds[level - 1];
+    const nextThreshold = level < 5 ? levelThresholds[level] : levelThresholds[4] + 250;
+    
+    const progress = Math.min(100, Math.floor(((exp - currentThreshold) / (nextThreshold - currentThreshold)) * 100));
+    
+    return { level, progress, nextLevelAt: nextThreshold };
+  };
 
   const fetchWorlds = async () => {
     try {
@@ -102,7 +135,17 @@ const Dashboard = () => {
     }
   };
 
+  const testAchievement = () => {
+    // Unlock a random achievement for testing
+    const achievementKeys = Object.keys(ACHIEVEMENTS);
+    const randomKey = achievementKeys[Math.floor(Math.random() * achievementKeys.length)];
+    unlockAchievement(randomKey);
+  };
+
   if (loading) return <div className="loading">Loading worlds...</div>;
+
+  // Calculate character level and progress
+  const { level, progress, nextLevelAt } = calculateLevel(character?.exp || 0);
 
   return (
     <div className="dashboard">
@@ -111,6 +154,32 @@ const Dashboard = () => {
         {/* Daily Quote Display */}
         <div className="daily-quote-container">
           <DailyQuote />
+        </div>
+      </div>
+      
+      {/* Character Progress Section */}
+      <div className="character-progress-section">
+        <h2>Your Journey</h2>
+        <div className="character-stats">
+          <div className="character-level">
+            <span className="level-label">Level</span>
+            <span className="level-value">{level}</span>
+          </div>
+          
+          <div className="experience-container">
+            <div className="experience-info">
+              <span>Experience: {character?.exp || 0} / {nextLevelAt}</span>
+              <span>{progress}% to Level {level + 1}</span>
+            </div>
+            <div className="experience-bar-container">
+              <div className="experience-bar" style={{ width: `${progress}%` }}></div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="character-actions">
+          <button onClick={() => navigate('/profile')}>View Profile</button>
+          <button onClick={() => navigate('/game')}>Continue Adventure</button>
         </div>
       </div>
       
@@ -225,6 +294,17 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      <section className="dashboard-section">
+        <h2>Game Features</h2>
+        <div className="feature-cards">
+          <div className="feature-card">
+            <h3>Test Achievement</h3>
+            <p>Unlock a random achievement to test the notification system.</p>
+            <button onClick={testAchievement} className="primary-button">Unlock Achievement</button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

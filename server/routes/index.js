@@ -5,6 +5,8 @@ import messageRoutes from "./messageRoutes.js";
 import worldRoutes from "./worlds.js";
 import npcRoutes from "./npcs.js";
 import proxyRoutes from "./proxy.js";
+import progressRoutes from "./progressRoutes.js";
+import feedbackRoutes from "./feedbackRoutes.js";
 
 /**
  * Apply all routes to Express app
@@ -24,6 +26,8 @@ export const applyRoutes = (app) => {
   app.use("/api/worlds", worldRoutes);
   app.use("/api/npcs", npcRoutes);
   app.use("/api/proxy", proxyRoutes);
+  app.use("/api/progress", progressRoutes);
+  app.use("/api/feedback", feedbackRoutes);
 
   // WebSocket route for testing
   app.get("/api/socket-test", (req, res) => {
@@ -48,6 +52,8 @@ export const applyRoutes = (app) => {
         "/api/worlds",
         "/api/npcs",
         "/api/proxy",
+        "/api/progress",
+        "/api/feedback",
         "/api/socket-test"
       ],
       documentation: "See documentation for endpoint usage details"

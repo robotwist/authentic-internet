@@ -30,7 +30,7 @@ const useApiHealthCheck = () => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000);
         
-        const response = await API.get('/health', {
+        const response = await API.get("/api/health", {
           signal: controller.signal
         }).catch(e => {
           // Silently fail if request times out or fails
@@ -148,54 +148,76 @@ const Login = () => {
   // Add a failsafe login method as backup
   const attemptFailsafeLogin = async () => {
     try {
-      console.warn("Using failsafe login method");
+      // Clear existing auth data first
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
       
-      // Show API URL for debugging
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-      console.log(`🔍 API URL used: ${apiUrl}`);
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      console.log(`Attempting direct login to ${apiUrl}/api/auth/login`);
       
-      // Log the data being sent
-      const loginData = {
-        identifier: formData.username, 
-        username: formData.username,
-        password: formData.password
-      };
-      console.log("Sending login data:", { ...loginData, password: '******' });
+      // Make direct fetch request instead of going through context
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          identifier: formData.username,
+          username: formData.username,
+          password: formData.password
+        })
+      });
       
-      // Direct API call as fallback
-      const response = await API.post('/api/auth/login', loginData);
-      
-      console.log("Login response status:", response.status);
-      console.log("Login response data:", response.data);
-      
-      // Safely extract token and user data
-      const token = response?.data?.token;
-      const user = response?.data?.user;
-      
-      if (!token || !user) {
-        console.error("Invalid login response format:", response.data);
-        logPersistentError('Failsafe Login - Invalid Response', { 
-          message: 'Response format invalid',
-          response: { data: response.data }
-        });
+      if (!response.ok) {
+        // Log valuable debugging info
+        console.error(`Login failed with status: ${response.status}`);
         
-        // Check for password requirements in response
-        if (response?.data?.passwordRequirements) {
-          setFormErrors({
-            password: response.data.passwordRequirements
+        // Try to parse JSON response
+        try {
+          const errorData = await response.json();
+          logPersistentError('Failsafe Login - Error Response', errorData);
+          
+          // Display more specific error to the user
+          if (errorData.message) {
+            throw new Error(errorData.message);
+          }
+        } catch (parseError) {
+          // If we can't parse the JSON, log the raw response text
+          const rawText = await response.text().catch(() => 'Unable to extract response text');
+          console.error('Raw error response:', rawText);
+          logPersistentError('Failsafe Login - Invalid Response', {
+            message: 'Server returned invalid response',
+            status: response.status,
+            text: rawText
           });
         }
         
-        return false;
+        // Generic error if parsing failed
+        throw new Error(`Login failed with status code: ${response.status}`);
       }
       
-      // Save token and user data
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // Parse successful response
+      const data = await response.json();
       
-      // Verify the token was saved
-      console.log("Token saved:", localStorage.getItem('token')?.substring(0, 10) + '...');
-      console.log("User saved:", localStorage.getItem('user'));
+      if (!data.success || !data.token) {
+        console.error('Login response missing token or success flag');
+        throw new Error('Invalid login response from server');
+      }
+      
+      // Manually store auth data
+      localStorage.setItem('token', data.token);
+      
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+      
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      // Set isAuthenticated flag for immediate UI update
+      localStorage.setItem('isAuthenticated', 'true');
       
       // Reload the page to reset all app state with new authentication
       window.location.href = from;
@@ -206,6 +228,12 @@ const Login = () => {
       
       // Enhanced error logging
       console.error("Failsafe login failed:", error);
+      
+      // Ensure auth data is cleared after failed attempt
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('isAuthenticated');
       
       // Check for password requirements in response
       if (error.response?.data?.passwordRequirements) {
@@ -225,7 +253,7 @@ const Login = () => {
       }
       
       // If it's a network error, check if the server is accessible
-      if (error.message.includes('Network Error')) {
+      if (error.message && error.message.includes('Network Error')) {
         console.error("Network error detected - API might be down or inaccessible from client");
         try {
           // Attempt a basic health check
@@ -255,8 +283,17 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Clear all previous errors and data
     setError('');
     setFormErrors({});
+    clearPersistentErrors(); // Clear error log to make debugging cleaner
+    
+    // Clear any previous auth data first to prevent "Session expired" errors
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('isAuthenticated');
     
     // Basic validation - just ensure fields aren't empty
     if (!formData.username || !formData.password) {
@@ -272,6 +309,7 @@ const Login = () => {
     try {
       // Attempt login with credentials
       let success = false;
+      let contextError = null;
       
       try {
         // Try normal login through context first
@@ -289,18 +327,35 @@ const Login = () => {
             console.log("Token found after login:", token.substring(0, 10) + '...');
           }
         }
-      } catch (contextError) {
-        console.warn("Context login failed, trying failsafe:", contextError);
-        logPersistentError('Context Login', contextError);
+      } catch (error) {
+        console.warn("Context login failed:", error);
+        logPersistentError('Context Login', error);
+        contextError = error;
+        
+        // If the error message is reasonable, display it to the user
+        if (error.message && 
+            !error.message.includes('[object') && 
+            !error.message.includes('undefined')) {
+          setError(error.message);
+        }
+        
         // If context login fails, try the direct approach
-        success = await attemptFailsafeLogin();
+        try {
+          success = await attemptFailsafeLogin();
+        } catch (failsafeError) {
+          console.error("Failsafe login also failed:", failsafeError);
+          logPersistentError('Failsafe Login', failsafeError);
+        }
       }
       
       if (success) {
         // Force a full page reload to ensure all components recognize the new auth state
         window.location.href = from;
       } else {
-        setError('Login failed. Please check your credentials.');
+        // If no more specific error has been set, provide a generic one
+        if (!error) {
+          setError(contextError?.message || 'Login failed. Please check your credentials and try again.');
+        }
       }
     } catch (err) {
       // Check if the response contains password requirements
@@ -315,6 +370,8 @@ const Login = () => {
         if (err.response.data.passwordRequirements) {
           passwordRequirements = err.response.data.passwordRequirements;
         }
+      } else if (err.message) {
+        errorMessage = err.message;
       }
       
       // Provide user-friendly error messages

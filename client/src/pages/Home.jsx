@@ -124,7 +124,8 @@ const Home = () => {
   const header = (
     <div className="home-header">
       <h1>Authentic Internet</h1>
-      <p className="subtitle">Enter the place where you are no longer a target for advertisers, manipulators, hucksters and crooks.</p>
+      <p className="subtitle">Enter the place where you are free to experience the goodness of the internet. 
+        Here you can experience a site with nothing glaring in the way. You get to see creativity in an unadulterated form.</p>
     </div>
   );
 
@@ -138,19 +139,19 @@ const Home = () => {
           where your artifacts matter and others' creations matter to you.
         </p>
         <p className="creative-description">
-          No one is selling your information, your data, or spamming you with non-existent coins. 
+          No one is selling your information, your data, or spamming you with false products, ideas or things. 
           When you enter here, you choose what you want to see and strike everything else from your view.
         </p>
         <div className="creative-steps">
           <div className="creative-step">
             <div className="step-icon"></div>
             <h3>Freedom</h3>
-            <p>Choose your world free of politics, full of ideas, or filled with only cats, babies and puppies.</p>
+            <p>Choose your world that you want to see.</p>
           </div>
           <div className="creative-step">
             <div className="step-icon"></div>
             <h3>Authenticity</h3>
-            <p>Escape a world of influencers, bizfluencers, and manipulative content.</p>
+            <p>Escape a world of the manipulative.</p>
           </div>
           <div className="creative-step">
             <div className="step-icon"></div>
@@ -159,7 +160,7 @@ const Home = () => {
           </div>
         </div>
         <Button as={Link} to="/game" variant="primary" className="create-button">
-          Enter for the True, the Good and the Beautiful
+          Enter A New World
         </Button>
       </div>
 

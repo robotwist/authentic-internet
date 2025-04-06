@@ -1,0 +1,136 @@
+.achievement-notification {
+  position: fixed;
+  bottom: 30px;
+  right: -400px;
+  z-index: 1000;
+  width: 350px;
+  transition: right 0.5s ease-in-out, opacity 0.5s ease;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.achievement-notification.visible {
+  right: 30px;
+  opacity: 1;
+}
+
+.achievement-notification.closing {
+  right: -400px;
+  opacity: 0;
+}
+
+.achievement-notification-content {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+  border-left: 4px solid var(--accent-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-notification-content::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%, 100% {
+    transform: translateX(100%);
+  }
+}
+
+.achievement-notification-icon {
+  font-size: 2.5rem;
+  margin-right: 16px;
+  background: linear-gradient(135deg, var(--accent-color) 0%, #ffd700 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.achievement-notification-text {
+  flex: 1;
+}
+
+.achievement-notification-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.achievement-notification-name {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+.achievement-notification-description {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.achievement-notification-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+
+.achievement-notification-close:hover {
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .achievement-notification {
+    bottom: 20px;
+    width: calc(100% - 40px);
+    max-width: 350px;
+  }
+  
+  .achievement-notification.visible {
+    right: 20px;
+  }
+} 

@@ -10,12 +10,28 @@ import rateLimit from 'express-rate-limit';
 // General API rate limiter - applies to all routes unless overridden
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 500, // Increased from 100 to 500 requests per windowMs
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: {
     status: 429,
     message: 'Too many requests, please try again later.'
+  },
+  // Skip rate limiting for health check endpoints
+  skip: (req) => {
+    return req.path === '/health' || req.path === '/api/health';
+  }
+});
+
+// Health check endpoints specific limiter with higher limits
+export const healthCheckLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60, // 60 requests per minute (1 per second)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    message: 'Too many health check requests, please try again later.'
   }
 });
 
@@ -108,7 +124,12 @@ export const resetFailedLoginAttempts = (ip) => {
 export const authLimiter = (req, res, next) => {
   const ip = req.ip || req.connection.remoteAddress;
   
-  if (shouldLockout(ip) && process.env.NODE_ENV !== 'development') {
+  // Skip rate limiting completely in development
+  if (process.env.NODE_ENV === 'development') {
+    return next();
+  }
+  
+  if (shouldLockout(ip)) {
     console.log(`Request blocked: IP ${ip} is temporarily locked out`);
     return res.status(429).json({
       message: "Too many requests. Please try again later.",

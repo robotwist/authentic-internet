@@ -2,11 +2,13 @@ import cors from "cors";
 import session from "express-session";
 import connectMongo from "connect-mongo";
 import express from "express";
+import cookieParser from "cookie-parser";
 import errorLogger from "./errorLogger.js";
 import corsUpdater from "./cors-updater.js";
+import { csrfProtection, handleCsrfError, provideCsrfToken } from "./csrf.js";
 import { configureCorsOptions, configureSessionOptions } from "../config/app-config.js";
 import { configureSecurityHeaders, enforceHttps } from "../utils/security.js";
-import { apiLimiter } from "../utils/rateLimiting.js";
+import { apiLimiter, healthCheckLimiter } from "../utils/rateLimiting.js";
 
 /**
  * Apply all middleware to Express app
@@ -32,11 +34,18 @@ export const applyMiddleware = (app, allowedOrigins) => {
   // Basic Express middleware
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  
+  // Add cookie parser for handling HTTP-only cookies
+  app.use(cookieParser(process.env.COOKIE_SECRET || process.env.JWT_SECRET));
 
   // Apply CORS configuration
   app.use(cors(configureCorsOptions(allowedOrigins)));
   
-  // Apply general rate limiting to all routes
+  // Apply rate limiters for different endpoints
+  // Apply health check rate limiter only to health endpoints
+  app.use(['/health', '/api/health'], healthCheckLimiter);
+  
+  // Apply general rate limiting to all other routes
   app.use(apiLimiter);
   
   // Error handling for CORS
@@ -76,6 +85,47 @@ export const applySessionMiddleware = (app) => {
     // Fallback to memory sessions
     app.use(session(configureSessionOptions()));
   }
+};
+
+/**
+ * Apply CSRF protection middleware to sensitive routes
+ * This should be applied AFTER session and cookie middleware
+ * @param {Object} app - Express app instance
+ */
+export const applyCsrfProtection = (app) => {
+  if (process.env.NODE_ENV === 'test') {
+    console.log("⚠️ CSRF protection disabled in test environment");
+    return;
+  }
+  
+  // Apply CSRF protection to sensitive routes
+  const protectedRoutes = [
+    '/api/auth/login',
+    '/api/auth/register',
+    '/api/auth/password/*',
+    '/api/progress/*',
+    '/api/users/*',
+    '/api/artifacts/*',
+    '/api/messages/*'
+  ];
+  
+  // Create CSRF token endpoint
+  app.get('/api/auth/csrf-token', csrfProtection, (req, res) => {
+    res.json({ 
+      success: true, 
+      csrfToken: req.csrfToken() 
+    });
+  });
+  
+  // Apply CSRF protection to specified routes
+  protectedRoutes.forEach(route => {
+    app.use(route, csrfProtection, provideCsrfToken);
+  });
+  
+  // Handle CSRF errors
+  app.use(handleCsrfError);
+  
+  console.log("✅ CSRF Protection enabled for sensitive routes");
 };
 
 /**

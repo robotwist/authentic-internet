@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import { loginUser, registerUser, verifyToken, logoutUser, refreshUserToken, logPersistentError } from '../api/api';
+import API from '../api/api';
 
 // Constants
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes before expiry
@@ -129,6 +130,58 @@ export function useAuth() {
   return context;
 }
 
+// Set up axios interceptor for attaching Authorization header
+const setupAxiosInterceptors = (token) => {
+  // Request interceptor to add the auth token
+  API.interceptors.request.use(
+    (config) => {
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  // Response interceptor to handle 401 errors (token expired)
+  API.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+      
+      // If the error is 401 and we haven't tried refreshing the token yet
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        
+        try {
+          // Call refresh token endpoint (uses HTTP-only cookie automatically)
+          const response = await API.post('/api/auth/refresh');
+          
+          if (response.data.token) {
+            // Store the new token
+            localStorage.setItem('token', response.data.token);
+            
+            // Update Authorization header for the original request
+            originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
+            
+            // Update the Authorization header for future requests
+            API.defaults.headers.common.Authorization = `Bearer ${response.data.token}`;
+            
+            // Retry the original request
+            return API(originalRequest);
+          }
+        } catch (refreshError) {
+          // If refreshing failed, logout the user
+          logout();
+          return Promise.reject(refreshError);
+        }
+      }
+      
+      return Promise.reject(error);
+    }
+  );
+};
+
 /**
  * Auth Provider Component
  * Manages authentication state and provides auth methods
@@ -202,10 +255,26 @@ export const AuthProvider = ({ children }) => {
   // Login
   const login = async (username, password) => {
     try {
+      // Clear any previous session data before attempting new login
+      clearStoredAuthData();
+      
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_MESSAGES });
       
       const data = await loginUser(username, password);
+      
+      // Verify the response data has the expected structure
+      if (!data || !data.token || !data.user) {
+        throw new Error('Invalid response from server. Please try again.');
+      }
+      
+      // Store token in localStorage (access token only)
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Set up axios interceptors for Authorization headers
+      setupAxiosInterceptors(data.token);
+      
       dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: data });
       
       if (data.token) {
@@ -217,9 +286,27 @@ export const AuthProvider = ({ children }) => {
       console.error('Login error:', error);
       logPersistentError('AuthContext - login', error);
       
-      const errorMessage = error.response?.data?.message || 'Login failed. Please check your credentials.';
-      let fullErrorMessage = errorMessage;
+      // Clear any partial auth data that might exist
+      clearStoredAuthData();
       
+      // Try to provide a user-friendly error message
+      let errorMessage = 'Login failed. Please check your credentials.';
+      
+      // If the error has a specific message, use that
+      if (error.message) {
+        // Improve common error messages
+        if (error.message.includes('401') || error.message.includes('unauthorized')) {
+          errorMessage = 'Invalid username or password. Please try again.';
+        } else if (error.message.includes('connect')) {
+          errorMessage = 'Unable to connect to the server. Please check your internet connection.';
+        } else {
+          // Use the actual error message
+          errorMessage = error.message;
+        }
+      }
+      
+      // Check for password requirements
+      let fullErrorMessage = errorMessage;
       if (error.response?.data?.passwordRequirements) {
         fullErrorMessage += ' ' + error.response.data.passwordRequirements;
       }
@@ -363,6 +450,14 @@ export const AuthProvider = ({ children }) => {
     return () => {
       clearRefreshTimeout();
     };
+  }, []);
+  
+  // Effect to set up interceptors when the context mounts or when token changes
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setupAxiosInterceptors(token);
+    }
   }, []);
   
   // Create context value

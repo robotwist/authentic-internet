@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from "prop-types";
 import "./Artifact.css";
 import SoundManager from './utils/SoundManager';
@@ -38,6 +38,22 @@ const Artifact = ({
   const [areaLevel, setAreaLevel] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Define isNearCharacter function first before using it in any hooks
+  const isNearCharacter = () => {
+    if (!characterPosition || !artifact) return false;
+    
+    const characterX = characterPosition.x;
+    const characterY = characterPosition.y;
+    const artifactX = artifact.x * TILE_SIZE;
+    const artifactY = artifact.y * TILE_SIZE;
+    
+    // Check if character is within 2 tiles of the artifact
+    const distanceX = Math.abs(characterX - artifactX);
+    const distanceY = Math.abs(characterY - artifactY);
+    
+    return distanceX <= TILE_SIZE * 2 && distanceY <= TILE_SIZE * 2;
+  };
+
   // Initialize sound manager
   useEffect(() => {
     const initSoundManager = async () => {
@@ -60,24 +76,44 @@ const Artifact = ({
     };
   }, []);
 
-  // Handle keyboard input for pickup
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.key.toLowerCase() === 'p' && isNearCharacter() && !isAnimating) {
-        handlePickup();
+  // Define handlePickup and handlePickupAnimation with useCallback
+  const handlePickup = useCallback(async () => {
+    if (!isNearCharacter() || isAnimating) return;
+    
+    try {
+      // Track save interaction
+      await trackArtifactInteraction(artifact._id, 'save');
+      
+      // Update local interaction count
+      if (artifact.interactions) {
+        artifact.interactions.saves = (artifact.interactions.saves || 0) + 1;
+      } else {
+        artifact.interactions = { saves: 1 };
       }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isNearCharacter(), isAnimating]);
-
-  useEffect(() => {
-    if (isPickedUp) {
+      
+      // Play pickup sound and start animation
+      if (soundManager) {
+        soundManager.playSound('artifact_pickup');
+        // Play level complete sound if this is the first save
+        if (artifact.interactions.saves === 1) {
+          soundManager.playSound('level_complete');
+        }
+      }
       handlePickupAnimation();
+    } catch (error) {
+      console.error("Failed to track pickup:", error);
+      if (soundManager) soundManager.playSound('error');
     }
-  }, [isPickedUp]);
-  
+  }, [artifact, isAnimating, soundManager, isNearCharacter]);
+
+  const handlePickupAnimation = useCallback(async () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      setIsVisible(false);
+      if (onPickup) onPickup(artifact);
+    }, 500);
+  }, [artifact, onPickup]);
+
   // Handle area progression
   useEffect(() => {
     if (artifact.area && artifact.area !== currentArea) {
@@ -156,7 +192,7 @@ const Artifact = ({
     };
     
     trackViewInteraction();
-  }, [characterPosition, artifact, hasTrackedView, soundManager]);
+  }, [characterPosition, artifact, hasTrackedView, soundManager, isNearCharacter]);
   
   // Get creator name if available
   useEffect(() => {
@@ -167,58 +203,25 @@ const Artifact = ({
     }
   }, [artifact]);
 
-  const handlePickup = async () => {
-    if (!isNearCharacter() || isAnimating) return;
-    
-    try {
-      // Track save interaction
-      await trackArtifactInteraction(artifact._id, 'save');
-      
-      // Update local interaction count
-      if (artifact.interactions) {
-        artifact.interactions.saves = (artifact.interactions.saves || 0) + 1;
-      } else {
-        artifact.interactions = { saves: 1 };
+  // Update the useEffect for handleKeyPress to depend on handlePickup
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key.toLowerCase() === 'p' && isNearCharacter() && !isAnimating) {
+        handlePickup();
       }
-      
-      // Play pickup sound and start animation
-      if (soundManager) {
-        soundManager.playSound('artifact_pickup');
-        // Play level complete sound if this is the first save
-        if (artifact.interactions.saves === 1) {
-          soundManager.playSound('level_complete');
-        }
-      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [handlePickup, isNearCharacter]);
+
+  // Update the useEffect for isPickedUp to use the memoized handlePickupAnimation
+  useEffect(() => {
+    if (isPickedUp) {
       handlePickupAnimation();
-    } catch (error) {
-      console.error("Failed to track pickup:", error);
-      if (soundManager) soundManager.playSound('error');
     }
-  };
-
-  const handlePickupAnimation = async () => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      setIsVisible(false);
-      if (onPickup) onPickup(artifact);
-    }, 500);
-  };
-
-  const isNearCharacter = () => {
-    if (!characterPosition || !artifact) return false;
-    
-    const characterX = characterPosition.x;
-    const characterY = characterPosition.y;
-    const artifactX = artifact.x * TILE_SIZE;
-    const artifactY = artifact.y * TILE_SIZE;
-    
-    // Check if character is within 2 tiles of the artifact
-    const distanceX = Math.abs(characterX - artifactX);
-    const distanceY = Math.abs(characterY - artifactY);
-    
-    return distanceX <= TILE_SIZE * 2 && distanceY <= TILE_SIZE * 2;
-  };
-
+  }, [isPickedUp, handlePickupAnimation]);
+  
   const isUserCreated = () => {
     return artifact.creator && artifact.creator === localStorage.getItem('userId');
   };
@@ -250,7 +253,8 @@ const Artifact = ({
     };
   };
 
-  const handlePortalInteraction = () => {
+  // Update handlePortalInteraction to keep all its original functionality
+  const handlePortalInteraction = useCallback(() => {
     if (!isNearCharacter() || isAnimating) return;
 
     const portalType = artifact.portalType;
@@ -288,7 +292,7 @@ const Artifact = ({
         }
       }
     }
-  };
+  }, [artifact, isAnimating, soundManager, onPortalEnter, onAreaChange, isNearCharacter]);
 
   const handleInteraction = async () => {
     if (!isNearCharacter()) return;
