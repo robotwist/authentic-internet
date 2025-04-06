@@ -97,6 +97,9 @@ const GameWorld = () => {
     height: TILE_SIZE,
     transition: 'left 0.2s, top 0.2s'
   });
+  const [movementTransition, setMovementTransition] = useState(null);
+  const [verticalDirection, setVerticalDirection] = useState(null);
+  const [horizontalDirection, setHorizontalDirection] = useState(null);
   const { user, updateUser } = useAuth();
   const { unlockAchievement, checkLevelAchievements, checkDiscoveryAchievements, checkCollectionAchievements } = useAchievements();
   const { updateGameProgress } = useGameState();
@@ -475,12 +478,21 @@ const GameWorld = () => {
           
           // Just update the music based on the current map
           const currentMapName = MAPS[currentMapIndex]?.name || '';
-          if (currentMapName.includes('Overworld')) {
-            soundManager.playMusic('overworld', true);
-          } else if (currentMapName === 'Yosemite') {
-            soundManager.playMusic('yosemite', true);
+          
+          // Always stop current music before starting new map music
+          // This ensures clean transitions between map themes
+          soundManager.stopMusic(true);
+          
+          // Play the appropriate music for the current map
+          if (currentMapName === 'Yosemite') {
+            console.log("🎵 Playing Yosemite music");
+            setTimeout(() => soundManager.playMusic('yosemite', true), 500);
+          } else if (currentMapName.includes('Overworld')) {
+            console.log("🎵 Playing Overworld music");
+            setTimeout(() => soundManager.playMusic('overworld', true), 500);
           } else if (currentMapName.includes('Dungeon')) {
-            soundManager.playMusic('terminal', true);
+            console.log("🎵 Playing Dungeon music");
+            setTimeout(() => soundManager.playMusic('terminal', true), 500);
           }
           
           return;
@@ -498,10 +510,10 @@ const GameWorld = () => {
           
           // Start playing the main theme based on current map
           const currentMapName = MAPS[currentMapIndex]?.name || '';
-          if (currentMapName.includes('Overworld')) {
-            manager.playMusic('overworld', true);
-          } else if (currentMapName === 'Yosemite') {
+          if (currentMapName === 'Yosemite') {
             manager.playMusic('yosemite', true);
+          } else if (currentMapName.includes('Overworld')) {
+            manager.playMusic('overworld', true);
           } else if (currentMapName.includes('Dungeon')) {
             manager.playMusic('terminal', true);
           }
@@ -543,6 +555,30 @@ const GameWorld = () => {
     const viewportY = Math.max(
       0,
       Math.min(newPosition.y - viewportHeight / 2, mapHeight - viewportHeight)
+    );
+    
+    setViewport({
+      x: viewportX,
+      y: viewportY
+    });
+  }, [currentMapIndex]);
+
+  const adjustViewport = useCallback((position) => {
+    if (!position || !MAPS[currentMapIndex]?.data) return;
+
+    const mapWidth = MAPS[currentMapIndex].data[0].length * TILE_SIZE;
+    const mapHeight = MAPS[currentMapIndex].data.length * TILE_SIZE;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    const viewportX = Math.max(
+      0,
+      Math.min(position.x - viewportWidth / 2, mapWidth - viewportWidth)
+    );
+    
+    const viewportY = Math.max(
+      0,
+      Math.min(position.y - viewportHeight / 2, mapHeight - viewportHeight)
     );
     
     setViewport({
@@ -602,7 +638,7 @@ const GameWorld = () => {
   }, [currentMapIndex, characterPosition, soundManager]);
 
   // Now we can safely use handleCharacterMove in the hook
-  const { isBumping, bumpDirection, movementDirection } = useCharacterMovement(
+  const { isBumping, bumpDirection, movementDirection, diagonalMovement } = useCharacterMovement(
     characterPosition, 
     handleCharacterMove,
     currentMapIndex, 
@@ -612,8 +648,8 @@ const GameWorld = () => {
     handleArtifactPickup, 
     setShowForm, 
     setFormPosition, 
-    setShowInventory, 
-    handleCharacterMove
+    setShowInventory,
+    adjustViewport
   );
 
   // Update characterStyle and movement state when position or direction changes
@@ -627,17 +663,61 @@ const GameWorld = () => {
 
     // Update movement state based on movementDirection
     if (movementDirection) {
+      // Set primary direction
       setDirection(movementDirection);
-      setIsMoving(true);
       
-      // Reset isMoving after animation completes
-      const timeout = setTimeout(() => {
-        setIsMoving(false);
+      // Track vertical and horizontal components separately
+      if (movementDirection === 'up' || movementDirection === 'down') {
+        setVerticalDirection(movementDirection);
+      } else if (movementDirection === 'left' || movementDirection === 'right') {
+        setHorizontalDirection(movementDirection);
+      }
+      
+      // Process diagonal movement from useCharacterMovement
+      if (diagonalMovement) {
+        if (diagonalMovement.y < 0) {
+          setVerticalDirection('up');
+        } else if (diagonalMovement.y > 0) {
+          setVerticalDirection('down');
+        }
+        
+        if (diagonalMovement.x < 0) {
+          setHorizontalDirection('left');
+        } else if (diagonalMovement.x > 0) {
+          setHorizontalDirection('right');
+        }
+      }
+      
+      // Animation sequence: start moving -> walking -> stop moving
+      setMovementTransition('start-move');
+      
+      // After start animation, set to walking
+      setTimeout(() => {
+        setIsMoving(true);
+        setMovementTransition(null);
       }, 200);
+      
+      // Reset isMoving after animation completes with stop animation
+      const timeout = setTimeout(() => {
+        setMovementTransition('stop-move');
+        
+        // After stop animation, reset to idle
+        setTimeout(() => {
+          setIsMoving(false);
+          setMovementTransition(null);
+          
+          // Reset directions after movement stops fully
+          if (!diagonalMovement || (diagonalMovement.x === 0 && diagonalMovement.y === 0)) {
+            // Only reset directions if we're actually stopping and not continuing to move
+            setVerticalDirection(null);
+            setHorizontalDirection(null);
+          }
+        }, 200);
+      }, 400);
       
       return () => clearTimeout(timeout);
     }
-  }, [characterPosition, movementDirection]);
+  }, [characterPosition, movementDirection, diagonalMovement]);
 
   useEffect(() => {
     // Check for both map artifacts and server artifacts at the player's position
@@ -782,7 +862,12 @@ const GameWorld = () => {
                   MAPS[currentMapIndex]?.data?.[row]?.[col] === 6 &&
                   currentMapName === "Yosemite") {
                 // Play portal sound
-                if (soundManager) soundManager.playSound('portal');
+                if (soundManager) {
+                  // Stop Yosemite music first
+                  soundManager.stopMusic(true);
+                  // Play portal sound
+                  soundManager.playSound('portal');
+                }
                 // Launch terminal special world
                 setCurrentSpecialWorld('terminal');
                 // Remove the event listener
@@ -814,7 +899,12 @@ const GameWorld = () => {
                   MAPS[currentMapIndex]?.data?.[row]?.[col] === 7 &&
                   currentMapName === "Yosemite") {
                 // Play portal sound
-                if (soundManager) soundManager.playSound('portal');
+                if (soundManager) {
+                  // Stop Yosemite music first
+                  soundManager.stopMusic(true);
+                  // Play portal sound
+                  soundManager.playSound('portal');
+                }
                 // Launch shooter special world
                 setCurrentSpecialWorld('shooter');
                 // Remove the event listener
@@ -846,7 +936,12 @@ const GameWorld = () => {
                   MAPS[currentMapIndex]?.data?.[row]?.[col] === 8 &&
                   currentMapName === "Yosemite") {
                 // Play portal sound
-                if (soundManager) soundManager.playSound('portal');
+                if (soundManager) {
+                  // Stop Yosemite music first
+                  soundManager.stopMusic(true);
+                  // Play portal sound
+                  soundManager.playSound('portal');
+                }
                 // Launch text adventure special world
                 setCurrentSpecialWorld('text_adventure');
                 // Remove the event listener
@@ -1477,7 +1572,7 @@ const GameWorld = () => {
             
             {/* Player Character */}
             <div 
-              className={`character ${isMoving ? 'walking' : ''} ${direction}`} 
+              className={`character ${isMoving ? 'walking' : ''} ${direction} ${verticalDirection !== direction && verticalDirection ? verticalDirection : ''} ${horizontalDirection !== direction && horizontalDirection ? horizontalDirection : ''} ${movementTransition || ''}`}
               style={characterStyle}
               ref={characterRef}
             />

@@ -5,11 +5,270 @@
   background: url("../assets/character.png") no-repeat center center;
   background-size: cover;
   image-rendering: pixelated; /* Ensures crisp pixels */
-  transition: transform 0.1s ease-in-out;
-  animation: float 2s ease-in-out infinite;
   transform-origin: center;
+  z-index: 10;
+  /* Changed from using float animation by default to a subtle bobbing for idle state */
+  animation: idle-bob 2s ease-in-out infinite;
+  transition: transform 0.05s ease, left 0.2s cubic-bezier(0.33, 1, 0.68, 1), top 0.2s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
+/* Improved idle animation with subtle breathing effect */
+@keyframes idle-bob {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.03);
+  }
+}
+
+/* Enhanced walking animations with more realistic movement */
+.character.walking {
+  animation: none; /* Remove default animation */
+}
+
+.character.walking.up {
+  animation: walk-up 0.4s steps(4) infinite;
+}
+
+.character.walking.down {
+  animation: walk-down 0.4s steps(4) infinite;
+}
+
+.character.walking.left {
+  animation: walk-left 0.4s steps(4) infinite;
+}
+
+.character.walking.right {
+  animation: walk-right 0.4s steps(4) infinite;
+}
+
+/* Add diagonal movement classes and animations */
+.character.walking.up.left {
+  animation: walk-up-left 0.4s steps(4) infinite;
+}
+
+.character.walking.up.right {
+  animation: walk-up-right 0.4s steps(4) infinite;
+}
+
+.character.walking.down.left {
+  animation: walk-down-left 0.4s steps(4) infinite;
+}
+
+.character.walking.down.right {
+  animation: walk-down-right 0.4s steps(4) infinite;
+}
+
+/* Improved walking animations with more realistic physics */
+@keyframes walk-up {
+  0% {
+    transform: translateY(0) translateX(-1px);
+  }
+  25% {
+    transform: translateY(-2px) translateX(1px) scale(0.98);
+  }
+  50% {
+    transform: translateY(-1px) translateX(-1px);
+  }
+  75% {
+    transform: translateY(-2px) translateX(1px) scale(0.98);
+  }
+  100% {
+    transform: translateY(0) translateX(-1px);
+  }
+}
+
+@keyframes walk-down {
+  0% {
+    transform: translateY(0) translateX(-1px);
+  }
+  25% {
+    transform: translateY(2px) translateX(1px) scale(1.02);
+  }
+  50% {
+    transform: translateY(1px) translateX(-1px);
+  }
+  75% {
+    transform: translateY(2px) translateX(1px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) translateX(-1px);
+  }
+}
+
+@keyframes walk-left {
+  0% {
+    transform: translateX(0) translateY(0) rotate(-1deg);
+  }
+  25% {
+    transform: translateX(-2px) translateY(-1px) scale(0.98) rotate(-2deg);
+  }
+  50% {
+    transform: translateX(-1px) translateY(1px) rotate(-1deg);
+  }
+  75% {
+    transform: translateX(-2px) translateY(-1px) scale(0.98) rotate(-2deg);
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotate(-1deg);
+  }
+}
+
+@keyframes walk-right {
+  0% {
+    transform: translateX(0) translateY(0) rotate(1deg);
+  }
+  25% {
+    transform: translateX(2px) translateY(-1px) scale(0.98) rotate(2deg);
+  }
+  50% {
+    transform: translateX(1px) translateY(1px) rotate(1deg);
+  }
+  75% {
+    transform: translateX(2px) translateY(-1px) scale(0.98) rotate(2deg);
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotate(1deg);
+  }
+}
+
+/* Diagonal walking animations with dynamic rotation and scaling */
+@keyframes walk-up-left {
+  0% {
+    transform: translateY(0) translateX(0) rotate(-5deg);
+  }
+  25% {
+    transform: translateY(-3px) translateX(-3px) scale(0.97) rotate(-7deg);
+  }
+  50% {
+    transform: translateY(-1px) translateX(-1px) rotate(-5deg);
+  }
+  75% {
+    transform: translateY(-3px) translateX(-3px) scale(0.97) rotate(-7deg);
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(-5deg);
+  }
+}
+
+@keyframes walk-up-right {
+  0% {
+    transform: translateY(0) translateX(0) rotate(5deg);
+  }
+  25% {
+    transform: translateY(-3px) translateX(3px) scale(0.97) rotate(7deg);
+  }
+  50% {
+    transform: translateY(-1px) translateX(1px) rotate(5deg);
+  }
+  75% {
+    transform: translateY(-3px) translateX(3px) scale(0.97) rotate(7deg);
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(5deg);
+  }
+}
+
+@keyframes walk-down-left {
+  0% {
+    transform: translateY(0) translateX(0) rotate(-5deg);
+  }
+  25% {
+    transform: translateY(3px) translateX(-3px) scale(1.03) rotate(-7deg);
+  }
+  50% {
+    transform: translateY(1px) translateX(-1px) rotate(-5deg);
+  }
+  75% {
+    transform: translateY(3px) translateX(-3px) scale(1.03) rotate(-7deg);
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(-5deg);
+  }
+}
+
+@keyframes walk-down-right {
+  0% {
+    transform: translateY(0) translateX(0) rotate(5deg);
+  }
+  25% {
+    transform: translateY(3px) translateX(3px) scale(1.03) rotate(7deg);
+  }
+  50% {
+    transform: translateY(1px) translateX(1px) rotate(5deg);
+  }
+  75% {
+    transform: translateY(3px) translateX(3px) scale(1.03) rotate(7deg);
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(5deg);
+  }
+}
+
+/* Add walking shadow effect */
+.character.walking::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 20px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  z-index: -1;
+  animation: shadow-pulse 0.4s infinite alternate;
+}
+
+@keyframes shadow-pulse {
+  0% {
+    opacity: 0.3;
+    transform: translateX(-50%) scale(0.8);
+  }
+  100% {
+    opacity: 0.5;
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+/* Add start/stop movement transitions */
+.character.start-move {
+  animation: start-moving 0.2s ease-out;
+}
+
+.character.stop-move {
+  animation: stop-moving 0.2s ease-in;
+}
+
+@keyframes start-moving {
+  0% {
+    transform: scale(0.9) translateY(0);
+  }
+  40% {
+    transform: scale(1.1) translateY(-3px);
+  }
+  70% {
+    transform: scale(0.95) translateY(1px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes stop-moving {
+  0% {
+    transform: scale(1.05) translateY(-1px);
+  }
+  60% {
+    transform: scale(0.95) translateY(2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Preserve existing character-container styles */
 .character-container {
   position: relative;
   width: 32px;
@@ -17,6 +276,7 @@
   z-index: 10;
 }
 
+/* Preserve existing character-sprite styles with enhanced animations */
 .character-sprite {
   position: absolute;
   width: 100%;
@@ -26,7 +286,7 @@
   background-position: center;
   z-index: 2;
   image-rendering: pixelated;
-  animation: float 2s ease-in-out infinite;
+  animation: idle-bob 2s ease-in-out infinite;
 }
 
 /* NKD Man specific styles */
@@ -153,10 +413,6 @@
   100% { transform: translateY(400px); }
 }
 
-.character.walking {
-  animation: characterMove 0.4s infinite alternate ease-in-out;
-}
-
 /* Idle State - Stronger Pulse Effect */
 .character.idle {
   animation: idleGlow 0.8s infinite alternate ease-in-out;
@@ -168,15 +424,6 @@
   }
   100% { 
     filter: brightness(1.5) drop-shadow(0px 0px 8px rgba(255, 255, 100, 0.8)); 
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
   }
 }
 
