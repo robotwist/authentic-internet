@@ -151,6 +151,7 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
   
   // Add soundManager state
   const [soundManager, setSoundManager] = useState(null);
+  const [showIntro, setShowIntro] = useState(true);
 
   // Add useEffect for sound initialization
   useEffect(() => {
@@ -162,59 +163,101 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
     initSoundManager();
   }, []);
 
+  // Helper function to preload a sound
+  const preloadSound = (id, url) => {
+    if (!soundManager) return;
+    try {
+      soundManager.registerSound(id, url);
+    } catch (err) {
+      console.warn(`Failed to preload sound ${id}:`, err);
+    }
+  };
+  
+  // Helper function to preload music
+  const preloadMusic = (id, url) => {
+    if (!soundManager) return;
+    try {
+      soundManager.registerMusic(id, url);
+    } catch (err) {
+      console.warn(`Failed to preload music ${id}:`, err);
+    }
+  };
+  
+  // Helper function to play music
+  const playMusic = (id, volume = 0.3) => {
+    if (!soundManager) return;
+    try {
+      soundManager.playMusic(id, true, volume);
+    } catch (err) {
+      console.warn(`Failed to play music ${id}:`, err);
+    }
+  };
+
   // Initialize game
   useEffect(() => {
-    // Preload all game sounds
-    preloadSound('hemingway-shoot', '/assets/sounds/hemingway/shoot.mp3');
-    preloadSound('hemingway-special-shoot', '/assets/sounds/hemingway/special-shoot.mp3');
-    preloadSound('hemingway-jump', '/assets/sounds/hemingway/jump.mp3');
-    preloadSound('hemingway-player-hit', '/assets/sounds/hemingway/player-hit.mp3');
-    preloadSound('hemingway-companion-hit', '/assets/sounds/hemingway/companion-hit.mp3');
+    // Check for Escape key to exit the game
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (onExit) onExit();
+      }
+    };
     
-    preloadSound('hemingway-enemy-hit', '/assets/sounds/hemingway/enemy-hit.mp3');
-    preloadSound('hemingway-critical-hit', '/assets/sounds/hemingway/critical-hit.mp3');
-    preloadSound('hemingway-boss-hit', '/assets/sounds/hemingway/boss-hit.mp3');
-    preloadSound('hemingway-boss-critical', '/assets/sounds/hemingway/boss-critical.mp3');
-    
-    preloadSound('hemingway-health-pickup', '/assets/sounds/hemingway/health-pickup.mp3');
-    preloadSound('hemingway-weapon-pickup', '/assets/sounds/hemingway/weapon-pickup.mp3');
-    preloadSound('hemingway-ammo-pickup', '/assets/sounds/hemingway/ammo-pickup.mp3');
-    preloadSound('hemingway-manuscript-pickup', '/assets/sounds/hemingway/manuscript-pickup.mp3');
-    preloadSound('hemingway-powerup-pickup', '/assets/sounds/hemingway/powerup-pickup.mp3');
-    
-    preloadSound('hemingway-level-up', '/assets/sounds/hemingway/level-up.mp3');
-    preloadSound('hemingway-game-over', '/assets/sounds/hemingway/game-over.mp3');
-    preloadSound('hemingway-victory', '/assets/sounds/hemingway/victory.mp3');
-    preloadSound('hemingway-boss-defeated', '/assets/sounds/hemingway/boss-defeated.mp3');
-    
-    // Preload background music
-    preloadMusic('hemingway-menu-music', '/assets/sounds/hemingway/menu-music.mp3');
-    preloadMusic('hemingway-paris-music', '/assets/sounds/hemingway/paris-music.mp3');
-    preloadMusic('hemingway-spain-music', '/assets/sounds/hemingway/spain-music.mp3');
-    preloadMusic('hemingway-africa-music', '/assets/sounds/hemingway/africa-music.mp3');
-    preloadMusic('hemingway-boss-music', '/assets/sounds/hemingway/boss-music.mp3');
-    preloadMusic('hemingway-victory-music', '/assets/sounds/hemingway/victory-music.mp3');
-    preloadMusic('hemingway-gameover-music', '/assets/sounds/hemingway/gameover-music.mp3');
-    
-    // Create platforms based on current level
-    initializeLevelDesign();
-    
-    // Create initial items
-    const initialItems = generateItems();
-    setItems(initialItems);
-    
-    // Set up initial enemy spawn
-    spawnEnemies();
-    
-    // Set up event listeners for keyboard
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
     
-    // Play menu music initially
-    playMusic(MUSIC_MAPPING.menu, 0.3);
-    
-    // Start the game
-    startGame();
+    // Only try to preload sounds if soundManager is initialized
+    if (soundManager) {
+      // Preload all game sounds
+      preloadSound('hemingway-shoot', '/assets/sounds/hemingway/shoot.mp3');
+      preloadSound('hemingway-special-shoot', '/assets/sounds/hemingway/special-shoot.mp3');
+      preloadSound('hemingway-jump', '/assets/sounds/hemingway/jump.mp3');
+      preloadSound('hemingway-player-hit', '/assets/sounds/hemingway/player-hit.mp3');
+      preloadSound('hemingway-companion-hit', '/assets/sounds/hemingway/companion-hit.mp3');
+      
+      preloadSound('hemingway-enemy-hit', '/assets/sounds/hemingway/enemy-hit.mp3');
+      preloadSound('hemingway-critical-hit', '/assets/sounds/hemingway/critical-hit.mp3');
+      preloadSound('hemingway-boss-hit', '/assets/sounds/hemingway/boss-hit.mp3');
+      preloadSound('hemingway-boss-critical', '/assets/sounds/hemingway/boss-critical.mp3');
+      
+      preloadSound('hemingway-health-pickup', '/assets/sounds/hemingway/health-pickup.mp3');
+      preloadSound('hemingway-weapon-pickup', '/assets/sounds/hemingway/weapon-pickup.mp3');
+      preloadSound('hemingway-ammo-pickup', '/assets/sounds/hemingway/ammo-pickup.mp3');
+      preloadSound('hemingway-manuscript-pickup', '/assets/sounds/hemingway/manuscript-pickup.mp3');
+      preloadSound('hemingway-powerup-pickup', '/assets/sounds/hemingway/powerup-pickup.mp3');
+      
+      preloadSound('hemingway-level-up', '/assets/sounds/hemingway/level-up.mp3');
+      preloadSound('hemingway-game-over', '/assets/sounds/hemingway/game-over.mp3');
+      preloadSound('hemingway-victory', '/assets/sounds/hemingway/victory.mp3');
+      preloadSound('hemingway-boss-defeated', '/assets/sounds/hemingway/boss-defeated.mp3');
+      
+      // Preload background music
+      preloadMusic('hemingway-menu-music', '/assets/sounds/hemingway/menu-music.mp3');
+      preloadMusic('hemingway-paris-music', '/assets/sounds/hemingway/paris-music.mp3');
+      preloadMusic('hemingway-spain-music', '/assets/sounds/hemingway/spain-music.mp3');
+      preloadMusic('hemingway-africa-music', '/assets/sounds/hemingway/africa-music.mp3');
+      preloadMusic('hemingway-boss-music', '/assets/sounds/hemingway/boss-music.mp3');
+      preloadMusic('hemingway-victory-music', '/assets/sounds/hemingway/victory-music.mp3');
+      preloadMusic('hemingway-gameover-music', '/assets/sounds/hemingway/gameover-music.mp3');
+      
+      // Create platforms based on current level
+      initializeLevelDesign();
+      
+      // Create initial items
+      const initialItems = generateItems();
+      setItems(initialItems);
+      
+      // Set up initial enemy spawn
+      spawnEnemies();
+      
+      // Set up event listeners for keyboard
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+      
+      // Play menu music initially
+      playMusic(MUSIC_MAPPING.menu, 0.3);
+      
+      // Start the game
+      startGame();
+    }
     
     return () => {
       // Clean up event listeners and game loop
@@ -227,7 +270,7 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
         soundManager.stopMusic();
       }
     };
-  }, [currentLevel, soundManager]); // Re-initialize when level changes
+  }, [currentLevel, soundManager, onExit]);
 
   // Handle level change effects including music
   useEffect(() => {

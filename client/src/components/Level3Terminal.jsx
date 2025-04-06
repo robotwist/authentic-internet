@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import SoundManager from './utils/SoundManager';
 import './Level3Terminal.css';
 
 // Define narrative structure for the terminal experience
@@ -201,8 +202,30 @@ const Level3Terminal = ({ character, artifacts, onExit, username, inventory }) =
   const [waitingForInput, setWaitingForInput] = useState(false);
   const [showChoices, setShowChoices] = useState(false);
   const [qualifyingArtifact, setQualifyingArtifact] = useState(null);
+  const [soundManager, setSoundManager] = useState(null);
   const inputRef = useRef(null);
   const terminalRef = useRef(null);
+
+  // Initialize sound manager
+  useEffect(() => {
+    const initSoundManager = async () => {
+      try {
+        const manager = SoundManager.getInstance();
+        await manager.initialize();
+        
+        // Register keyboard typing sound if not already registered
+        if (!manager.sounds['keyboard_typing']) {
+          manager.registerSound('keyboard_typing', '/assets/sounds/keyboard_typing.mp3');
+        }
+        
+        setSoundManager(manager);
+      } catch (error) {
+        console.error("Failed to initialize sound manager:", error);
+      }
+    };
+    
+    initSoundManager();
+  }, []);
 
   // Find the qualifying artifact that granted level 3 access
   useEffect(() => {
@@ -217,7 +240,20 @@ const Level3Terminal = ({ character, artifacts, onExit, username, inventory }) =
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+    
+    // Add event listener for Escape key to exit
+    const handleEscapeKey = (e) => {
+      if (e.key === 'Escape') {
+        onExit();
+      }
+    };
+    
+    window.addEventListener('keydown', handleEscapeKey);
+    
+    return () => {
+      window.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [onExit]);
 
   // Blinking cursor effect
   useEffect(() => {
@@ -249,7 +285,13 @@ const Level3Terminal = ({ character, artifacts, onExit, username, inventory }) =
     setDisplayedText('');
     
     // Type out the text character by character
+    const typingSpeed = narrative.typingSpeed || 50;
     const typingInterval = setInterval(() => {
+      // Play typing sound occasionally (not for every character to avoid sound overload)
+      if (index % 3 === 0 && soundManager) {
+        soundManager.playSound('keyboard_typing', 0.15);
+      }
+      
       if (index < processedText.length) {
         setDisplayedText(prev => prev + processedText.charAt(index));
         index++;
@@ -257,33 +299,22 @@ const Level3Terminal = ({ character, artifacts, onExit, username, inventory }) =
         clearInterval(typingInterval);
         setTypingComplete(true);
         
-        // Auto advance to next narrative if no choices
-        if (narrative.next && !narrative.choices) {
-          const nextTimer = setTimeout(() => {
-            // Add current text to history
-            setTerminalHistory(prev => [...prev, { 
-              type: 'system', 
-              text: processedText 
-            }]);
-            
-            // Special case for exit
-            if (NARRATIVE_PATHS[narrative.next]?.isExit) {
-              // Short delay then exit
-              setTimeout(() => {
-                onExit();
-              }, 2000);
-            }
-            
-            setCurrentNarrative(narrative.next);
-          }, 1500);
-          
-          return () => clearTimeout(nextTimer);
-        } else if (narrative.choices) {
-          setWaitingForInput(true);
+        // Show choices or wait for input if needed
+        if (narrative.choices) {
           setShowChoices(true);
+          setWaitingForInput(true);
+        } else if (narrative.next) {
+          // Auto-advance after delay if no choices
+          setTimeout(() => {
+            if (narrative.isExit) {
+              onExit();
+            } else {
+              setCurrentNarrative(narrative.next);
+            }
+          }, 1500);
         }
       }
-    }, narrative.typingSpeed || 50);
+    }, typingSpeed);
     
     // Play eerie typing sound
     if (narrative.typingSpeed > 30) {
@@ -305,7 +336,7 @@ const Level3Terminal = ({ character, artifacts, onExit, username, inventory }) =
     }
     
     return () => clearInterval(typingInterval);
-  }, [currentNarrative, username, artifacts, qualifyingArtifact]);
+  }, [currentNarrative, username, artifacts, qualifyingArtifact, soundManager]);
 
   // Auto-scroll to bottom of terminal
   useEffect(() => {
@@ -316,9 +347,19 @@ const Level3Terminal = ({ character, artifacts, onExit, username, inventory }) =
 
   const handleUserInput = (e) => {
     setUserInput(e.target.value);
+    
+    // Play typing sound
+    if (soundManager && e.target.value.length > userInput.length) {
+      soundManager.playSound('keyboard_typing', 0.2);
+    }
   };
 
   const handleKeyDown = (e) => {
+    // Play typing sound for special keys
+    if (e.key === 'Enter' && soundManager) {
+      soundManager.playSound('keyboard_typing', 0.3);
+    }
+    
     if (e.key === 'Enter' && typingComplete && waitingForInput) {
       processUserCommand(userInput);
       setUserInput('');
@@ -447,9 +488,9 @@ const Level3Terminal = ({ character, artifacts, onExit, username, inventory }) =
   return (
     <div className="terminal-container">
       <div className="terminal-header">
-        <div className="terminal-title">AUTHENTIC INTERNET TERMINAL V3.0</div>
-        <div className="terminal-status">SECURE CONNECTION: FALSE</div>
-        <button className="terminal-exit" onClick={onExit}>EXIT</button>
+        <div className="terminal-title">AUTHENTIC INTERNET TERMINAL v1.0</div>
+        <div className="terminal-status">CONNECTIVITY: LIMITED</div>
+        <button className="terminal-exit" onClick={onExit}>EXIT TERMINAL [ESC]</button>
       </div>
       
       <div className="terminal-screen" ref={terminalRef}>
@@ -482,6 +523,11 @@ const Level3Terminal = ({ character, artifacts, onExit, username, inventory }) =
             ))}
           </div>
         )}
+        
+        {/* Exit reminder */}
+        <div className="terminal-exit-reminder">
+          Press ESC key at any time to exit the terminal
+        </div>
       </div>
       
       <div className="terminal-input-area">

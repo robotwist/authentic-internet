@@ -867,6 +867,9 @@ const GameWorld = () => {
                   // Play portal sound
                   soundManager.playSound('portal');
                 }
+                // Hide the portal notification before launching terminal
+                hidePortalNotification();
+                setPortalNotificationActive(false);
                 // Launch terminal special world
                 setCurrentSpecialWorld('terminal');
                 // Remove the event listener
@@ -904,6 +907,9 @@ const GameWorld = () => {
                   // Play portal sound
                   soundManager.playSound('portal');
                 }
+                // Hide the portal notification before launching shooter
+                hidePortalNotification();
+                setPortalNotificationActive(false);
                 // Launch shooter special world
                 setCurrentSpecialWorld('shooter');
                 // Remove the event listener
@@ -941,6 +947,9 @@ const GameWorld = () => {
                   // Play portal sound
                   soundManager.playSound('portal');
                 }
+                // Hide the portal notification before launching text adventure
+                hidePortalNotification();
+                setPortalNotificationActive(false);
                 // Launch text adventure special world
                 setCurrentSpecialWorld('text_adventure');
                 // Remove the event listener
@@ -1020,6 +1029,10 @@ const GameWorld = () => {
   }, [setCurrentSpecialWorld, setCurrentAchievement, setShowRewardModal]);
 
   const handleTextAdventureExit = useCallback(() => {
+    // Hide any remaining portal notification
+    hidePortalNotification();
+    setPortalNotificationActive(false);
+    
     setCurrentSpecialWorld(null);
   }, [setCurrentSpecialWorld]);
 
@@ -1362,6 +1375,10 @@ const GameWorld = () => {
 
   // Handle terminal adventure completion
   const handleTerminalComplete = useCallback((score) => {
+    // Hide any remaining portal notification
+    hidePortalNotification();
+    setPortalNotificationActive(false);
+    
     // Award XP and show notification
     awardXP(100, "Completed Terminal Adventure!");
     
@@ -1378,6 +1395,10 @@ const GameWorld = () => {
 
   // Handle terminal adventure exit
   const handleTerminalExit = useCallback(() => {
+    // Hide any remaining portal notification
+    hidePortalNotification();
+    setPortalNotificationActive(false);
+    
     setCurrentSpecialWorld(null);
   }, []);
   
@@ -1408,6 +1429,10 @@ const GameWorld = () => {
 
   // Handle shooter adventure exit
   const handleShooterExit = useCallback(() => {
+    // Hide any remaining portal notification
+    hidePortalNotification();
+    setPortalNotificationActive(false);
+    
     setCurrentSpecialWorld(null);
   }, []);
 
