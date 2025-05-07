@@ -13,6 +13,29 @@ import feedbackRoutes from "./feedbackRoutes.js";
  * @param {Object} app - Express app instance
  */
 export const applyRoutes = (app) => {
+  /**
+   * @swagger
+   * /api/health:
+   *   get:
+   *     summary: Server health check
+   *     description: Returns the current status of the API server
+   *     tags: [System]
+   *     responses:
+   *       200:
+   *         description: Server is operational
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: string
+   *                   example: OK
+   *                 serverTime:
+   *                   type: string
+   *                   format: date-time
+   *                   example: 2023-06-12T14:35:42.123Z
+   */
   // Health check endpoint
   app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'OK', serverTime: new Date().toISOString() });
@@ -29,6 +52,29 @@ export const applyRoutes = (app) => {
   app.use("/api/progress", progressRoutes);
   app.use("/api/feedback", feedbackRoutes);
 
+  /**
+   * @swagger
+   * /api/socket-test:
+   *   get:
+   *     summary: WebSocket test endpoint
+   *     description: Validates that the WebSocket server is running
+   *     tags: [System]
+   *     responses:
+   *       200:
+   *         description: WebSocket server is operational
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: string
+   *                   example: ok
+   *                 message:
+   *                   type: string
+   *                 instructions:
+   *                   type: string
+   */
   // WebSocket route for testing
   app.get("/api/socket-test", (req, res) => {
     res.status(200).json({
@@ -38,6 +84,33 @@ export const applyRoutes = (app) => {
     });
   });
   
+  /**
+   * @swagger
+   * /api:
+   *   get:
+   *     summary: API root endpoint
+   *     description: Lists all available API endpoints
+   *     tags: [System]
+   *     responses:
+   *       200:
+   *         description: List of available endpoints
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: string
+   *                   example: ok
+   *                 message:
+   *                   type: string
+   *                 availableEndpoints:
+   *                   type: array
+   *                   items:
+   *                     type: string
+   *                 documentation:
+   *                   type: string
+   */
   // Catchall route for /api to show available endpoints
   app.get("/api", (req, res) => {
     res.status(200).json({
@@ -56,7 +129,7 @@ export const applyRoutes = (app) => {
         "/api/feedback",
         "/api/socket-test"
       ],
-      documentation: "See documentation for endpoint usage details"
+      documentation: "See /api-docs for detailed API documentation"
     });
   });
 }; 

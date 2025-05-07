@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-const { ValidationError } = mongoose;
+import { AppError } from '../utils/errors.js';
+const { ValidationError: MongooseValidationError } = mongoose;
 
 /**
  * Standardized error response format for the API
@@ -9,13 +10,24 @@ const errorHandler = (err, req, res, next) => {
   // Default to internal server error
   let statusCode = err.statusCode || 500;
   let errorMessage = err.message || 'Internal Server Error';
-  let errorDetails = null;
+  let errorDetails = err.details || null;
   let errorCode = err.code || 'server_error';
   
-  console.error(`Error in ${req.method} ${req.path}:`, err);
+  // Log the error (but not in test environment)
+  if (process.env.NODE_ENV !== 'test') {
+    console.error(`Error in ${req.method} ${req.path}:`, err);
+  }
   
+  // If this is already an AppError instance, use its properties directly
+  if (err instanceof AppError) {
+    // Use properties from the AppError instance
+    statusCode = err.statusCode;
+    errorMessage = err.message;
+    errorDetails = err.details;
+    errorCode = err.code;
+  } 
   // Handle different types of errors
-  if (err.name === 'ValidationError') {
+  else if (err instanceof MongooseValidationError) {
     // Mongoose validation error
     statusCode = 400;
     errorCode = 'validation_error';

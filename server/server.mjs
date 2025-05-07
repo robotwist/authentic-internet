@@ -13,6 +13,7 @@ import {
   cleanupPort 
 } from "./config/app-config.js";
 import { startServerWithPortResolution, gracefulShutdown, setupGlobalErrorHandlers } from "./utils/serverUtils.js";
+import setupSwagger from "./config/swagger.js";
 import fs from 'fs';
 
 // Load environment variables
@@ -40,6 +41,9 @@ applySessionMiddleware(app);
 
 // Comment out CSRF protection for now to isolate issues
 // applyCsrfProtection(app);
+
+// Set up Swagger documentation (before routes)
+setupSwagger(app);
 
 // Apply routes
 applyRoutes(app);

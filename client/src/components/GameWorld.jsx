@@ -852,14 +852,24 @@ const GameWorld = () => {
             destinationMap = "Overworld 3";
           }
           else if (currentMapName === "Overworld 3") {
-            destinationMap = "Yosemite";
-            // Reset the level1 completed flag for testing purposes
-            try {
-              localStorage.removeItem('level-level1-completed');
-              localStorage.removeItem('nkd-man-reward-shown');
-              console.log("🏆 Reset level1 completion flags for testing");
-            } catch (error) {
-              console.error("Error resetting level completion flags:", error);
+            // Need to check for specific portal coordinates to determine destination
+            const portalX = Math.floor(characterPosition.x / TILE_SIZE);
+            const portalY = Math.floor(characterPosition.y / TILE_SIZE);
+            
+            // Special Yosemite portal is at x=8, y=1 in Overworld 3
+            if (portalX === 8 && portalY === 1) {
+              destinationMap = "Yosemite";
+              // Reset the level1 completed flag for testing purposes
+              try {
+                localStorage.removeItem('level-level1-completed');
+                localStorage.removeItem('nkd-man-reward-shown');
+                console.log("🏆 Reset level1 completion flags for testing");
+              } catch (error) {
+                console.error("Error resetting level completion flags:", error);
+              }
+            } else {
+              // Default portal in Overworld 3 goes to Desert 1
+              destinationMap = "Desert 1";
             }
           }
           else if (currentMapName === "Desert 1") {
