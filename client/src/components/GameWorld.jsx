@@ -510,8 +510,8 @@ const GameWorld = () => {
           await manager.initialize();
           setSoundManager(manager);
           
-          // Register discovery sound
-          manager.registerSound('discovery', '/assets/sounds/discovery.mp3');
+          // Load discovery sound
+          await manager.loadSound('discovery', '/assets/sounds/discovery.mp3');
           
           // Start playing the main theme based on current map
           const currentMapName = MAPS[currentMapIndex]?.name || '';
@@ -985,18 +985,24 @@ const GameWorld = () => {
               if (e.code === 'Space' && 
                   MAPS[currentMapIndex]?.data?.[row]?.[col] === 7 &&
                   currentMapName === "Yosemite") {
+                console.log("SHOOTER PORTAL: Space key pressed on shooter portal");
+                
                 // Play portal sound
                 if (soundManager) {
                   // Stop Yosemite music first
                   soundManager.stopMusic(true);
                   // Play portal sound
                   soundManager.playSound('portal');
+                  console.log("SHOOTER PORTAL: Portal sound played");
                 }
                 // Hide the portal notification before launching shooter
                 hidePortalNotification();
                 setPortalNotificationActive(false);
                 // Launch shooter special world
+                console.log("SHOOTER PORTAL: Setting currentSpecialWorld to 'shooter'");
                 setCurrentSpecialWorld('shooter');
+                console.log("SHOOTER PORTAL: State updated, should render Level4Shooter now");
+                
                 // Remove the event listener
                 window.removeEventListener('keydown', handleShooterEnter);
               }
@@ -1784,13 +1790,6 @@ const GameWorld = () => {
           </div>
         )}
 
-        {currentSpecialWorld === 'hemingway' && (
-          <Level4Shooter 
-            onComplete={handleHemingwayComplete}
-            onExit={handleHemingwayExit}
-          />
-        )}
-
         {currentSpecialWorld === 'text_adventure' && (
           <TextAdventure 
             username={character?.username || 'traveler'}
@@ -1848,11 +1847,14 @@ const GameWorld = () => {
         )}
         
         {currentSpecialWorld === 'shooter' && (
-          <Level4Shooter
-            onComplete={handleShooterComplete}
-            onExit={handleShooterExit}
-            character={character}
-          />
+          <>
+            {console.log("GameWorld: Rendering Level4Shooter component")}
+            <Level4Shooter
+              onComplete={handleShooterComplete}
+              onExit={handleShooterExit}
+              character={character}
+            />
+          </>
         )}
         
         {currentSpecialWorld === 'hemingway' && (
@@ -1862,6 +1864,21 @@ const GameWorld = () => {
             character={character}
           />
         )}
+
+        {/* Debug overlay to show currentSpecialWorld state */}
+        <div className="debug-overlay" style={{
+          position: 'fixed',
+          top: '10px',
+          left: '10px',
+          background: 'rgba(0,0,0,0.8)',
+          color: '#00ff00',
+          padding: '10px',
+          zIndex: 9999,
+          pointerEvents: 'none',
+          fontFamily: 'monospace'
+        }}>
+          currentSpecialWorld: "{currentSpecialWorld}"
+        </div>
 
         {/* XP Notifications */}
         <div className="notification-container">

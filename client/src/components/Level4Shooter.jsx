@@ -1,546 +1,624 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import SoundManager from './utils/SoundManager';
-import { TILE_SIZE } from './Constants';
 import './Level4Shooter.css';
 
 const Level4Shooter = ({ onComplete, onExit, character }) => {
+  console.log("Level4Shooter component initializing");
+  
   // Game state
   const [isGameActive, setIsGameActive] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
-  const [victory, setVictory] = useState(false);
-  const [currentLevel, setCurrentLevel] = useState(1);
-  
-  // Progression system
-  const [playerXP, setPlayerXP] = useState(0);
-  const [playerLevel, setPlayerLevel] = useState(1);
-  const [levelThresholds] = useState([0, 100, 250, 450, 700, 1000, 1350, 1750, 2200, 2700]);
-  const [showLevelUp, setShowLevelUp] = useState(false);
-  const [currentQuote, setCurrentQuote] = useState('');
+  const [currentLevel, setCurrentLevel] = useState('paris'); // 'paris', 'spain', 'africa'
+  const [storyProgress, setStoryProgress] = useState(0); // Track story progress
   const [showQuote, setShowQuote] = useState(false);
+  const [currentQuote, setCurrentQuote] = useState({ text: '', author: '' });
   
   // Player state
   const [playerPosition, setPlayerPosition] = useState({ x: 100, y: 300 });
+  const [playerVelocity, setPlayerVelocity] = useState({ x: 0, y: 0 });
   const [playerHealth, setPlayerHealth] = useState(100);
-  const [playerDirection, setPlayerDirection] = useState('right');
-  const [isShooting, setIsShooting] = useState(false);
   const [isJumping, setIsJumping] = useState(false);
-  const [isCrouching, setIsCrouching] = useState(false);
-  const [playerPowerups, setPlayerPowerups] = useState({
-    rapidFire: { active: false, timeLeft: 0 },
-    shield: { active: false, timeLeft: 0 },
-    speedBoost: { active: false, timeLeft: 0 }
-  });
+  const [isFacingRight, setIsFacingRight] = useState(true);
+  const [playerLevelDanger, setPlayerLevelDanger] = useState(1);
   
-  // Hemingway (companion) state
+  // Hemingway companion state
+  const [hemingwayActive, setHemingwayActive] = useState(false);
   const [hemingwayPosition, setHemingwayPosition] = useState({ x: 150, y: 300 });
   const [hemingwayHealth, setHemingwayHealth] = useState(100);
-  const [hemingwayDirection, setHemingwayDirection] = useState('right');
-  const [hemingwayIsShooting, setHemingwayIsShooting] = useState(false);
-  const [hemingwayMode, setHemingwayMode] = useState('follow'); // follow, defend, attack
+  const [hemingwayDialog, setHemingwayDialog] = useState('');
+  const [showHemingwayDialog, setShowHemingwayDialog] = useState(false);
+  
+  // Camera and world state
+  const [cameraOffset, setCameraOffset] = useState(0);
+  const [levelWidth, setLevelWidth] = useState(3000); // Total level width
   
   // Game objects
-  const [bullets, setBullets] = useState([]);
-  const [enemies, setEnemies] = useState([]);
-  const [platforms, setPlatforms] = useState([]);
-  const [items, setItems] = useState([]);
-  const [bossActive, setBossActive] = useState(false);
-  const [bossHealth, setBossHealth] = useState(500);
-  const [bossPosition, setBossPosition] = useState({ x: 1800, y: 250 });
-  const [bossType, setBossType] = useState(null);
+  const [platforms, setPlatforms] = useState([
+    { x: 0, y: 350, width: 1000, height: 50, type: 'ground' },
+    { x: 300, y: 250, width: 200, height: 20, type: 'platform' },
+    { x: 700, y: 200, width: 150, height: 20, type: 'platform' },
+    { x: 1100, y: 280, width: 100, height: 20, type: 'platform' },
+    { x: 1500, y: 220, width: 250, height: 20, type: 'platform' },
+    { x: 1800, y: 300, width: 100, height: 20, type: 'platform' },
+    { x: 2200, y: 250, width: 120, height: 20, type: 'platform' },
+    { x: 2500, y: 200, width: 200, height: 20, type: 'platform' },
+    { x: 2800, y: 300, width: 200, height: 50, type: 'end-platform' }
+  ]);
   
-  // Refs for animation frame and game loop
-  const gameLoopRef = useRef(null);
-  const canvasRef = useRef(null);
-  const lastFrameTimeRef = useRef(0);
-  const keysPressed = useRef({});
+  // Collectibles and items
+  const [collectibles, setCollectibles] = useState([
+    { id: 1, x: 400, y: 230, type: 'health', collected: false },
+    { id: 2, x: 800, y: 180, type: 'manuscript', collected: false },
+    { id: 3, x: 1200, y: 260, type: 'weapon', collected: false },
+    { id: 4, x: 1600, y: 200, type: 'manuscript', collected: false },
+    { id: 5, x: 2000, y: 280, type: 'health', collected: false },
+    { id: 6, x: 2400, y: 180, type: 'manuscript', collected: false }
+  ]);
   
   // Game settings
   const GRAVITY = 0.5;
   const JUMP_FORCE = -12;
   const PLAYER_SPEED = 5;
-  const SCROLL_SPEED = 2;
-  const ENEMY_SPAWN_RATE = 2000; // ms
-  const BULLET_SPEED = 10;
-  const HEMINGWAY_AI_DELAY = 500; // ms
-  const LEVEL_WIDTH = 2500; // Total level width
+  const SCROLL_MARGIN = 300; // Distance from edge of screen to start scrolling
   
-  // Sound mapping - maps game events to sound IDs
-  const SOUND_MAPPING = {
-    // Player actions
-    'shoot': 'hemingway-shoot',
-    'special-shoot': 'hemingway-special-shoot',
-    'jump': 'hemingway-jump',
-    'playerHit': 'hemingway-player-hit',
-    'hemingwayHit': 'hemingway-companion-hit',
-    
-    // Enemy sounds
-    'hit': 'hemingway-enemy-hit',
-    'criticalHit': 'hemingway-critical-hit',
-    'bossHit': 'hemingway-boss-hit',
-    'boss-criticalHit': 'hemingway-boss-critical',
-    
-    // Item pickups
-    'healthPickup': 'hemingway-health-pickup',
-    'weaponPickup': 'hemingway-weapon-pickup',
-    'ammoPickup': 'hemingway-ammo-pickup',
-    'manuscriptPickup': 'hemingway-manuscript-pickup',
-    'powerupPickup': 'hemingway-powerup-pickup',
-    
-    // Game state changes
-    'levelUp': 'hemingway-level-up',
-    'gameOver': 'hemingway-game-over',
-    'victory': 'hemingway-victory',
-    'bossDefeated': 'hemingway-boss-defeated'
-  };
+  // Refs for animation frame and game loop
+  const canvasRef = useRef(null);
+  const gameLoopRef = useRef(null);
+  const lastFrameTimeRef = useRef(0);
+  const keysPressed = useRef({});
   
-  // Music mapping - maps level/state to music IDs
-  const MUSIC_MAPPING = {
-    'menu': 'hemingway-menu-music',
-    'level1': 'hemingway-paris-music',
-    'level2': 'hemingway-spain-music',
-    'level3': 'hemingway-africa-music',
-    'boss': 'hemingway-boss-music',
-    'victory': 'hemingway-victory-music',
-    'gameOver': 'hemingway-gameover-music'
-  };
+  // Sound effects
+  const playerImageRef = useRef(null);
+  const hemingwayImageRef = useRef(null);
   
-  // Hemingway quotes collection
+  // Story quotes from Hemingway
   const hemingwayQuotes = [
-    "Courage is grace under pressure.",
-    "There is nothing to writing. All you do is sit down at a typewriter and bleed.",
-    "The world breaks everyone, and afterward, some are strong at the broken places.",
-    "Never mistake motion for action.",
-    "The first draft of anything is shit.",
-    "All you have to do is write one true sentence.",
-    "There is no hunting like the hunting of man, and those who have hunted armed men long enough and liked it, never care for anything else thereafter.",
-    "Every man's life ends the same way. It is only the details of how he lived and how he died that distinguish one man from another.",
-    "Always do sober what you said you'd do drunk. That will teach you to keep your mouth shut.",
-    "Happiness in intelligent people is the rarest thing I know.",
-    "All things truly wicked start from innocence.",
-    "The best way to find out if you can trust somebody is to trust them.",
-    "I drink to make other people more interesting.",
-    "Write hard and clear about what hurts.",
-    "The most painful thing is losing yourself in the process of loving someone too much, and forgetting that you are special too."
+    { 
+      text: "The world breaks everyone and afterward many are strong at the broken places.", 
+      author: "Ernest Hemingway, A Farewell to Arms" 
+    },
+    { 
+      text: "There is nothing to writing. All you do is sit down at a typewriter and bleed.", 
+      author: "Ernest Hemingway" 
+    },
+    { 
+      text: "But man is not made for defeat. A man can be destroyed but not defeated.", 
+      author: "Ernest Hemingway, The Old Man and the Sea" 
+    },
+    { 
+      text: "All things truly wicked start from innocence.", 
+      author: "Ernest Hemingway, A Moveable Feast" 
+    }
   ];
   
-  // Quotes for specific gameplay moments
-  const contextQuotes = {
-    levelUp: [
-      "All good books are alike in that they are truer than if they had really happened.",
-      "Write drunk; edit sober.",
-      "The shortest answer is doing the thing."
-    ],
-    criticalHit: [
-      "Never think that war, no matter how necessary, nor how justified, is not a crime.",
-      "There is nothing else than now. There is neither yesterday, certainly, nor is there any tomorrow.",
-      "No weapon has ever settled a moral problem."
-    ],
-    lowHealth: [
-      "A man can be destroyed but not defeated.",
-      "If people bring so much courage to this world the world has to kill them to break them.",
-      "The world breaks everyone and afterward many are strong at the broken places."
-    ],
-    victory: [
-      "But man is not made for defeat. A man can be destroyed but not defeated.",
-      "Every day is a new day. It is better to be lucky. But I would rather be exact.",
-      "There is nothing noble in being superior to your fellow man; true nobility is being superior to your former self."
-    ]
+  // Level descriptions
+  const levelDescriptions = {
+    paris: "Paris, 1920s - The Lost Generation",
+    spain: "Spain, 1930s - The Spanish Civil War",
+    africa: "Africa, 1950s - The Final Safari"
   };
   
-  // Add soundManager state
-  const [soundManager, setSoundManager] = useState(null);
-  const [showIntro, setShowIntro] = useState(true);
-
-  // Add useEffect for sound initialization
+  // Initialize canvas
+  const initializeCanvas = () => {
+    try {
+      if (!canvasRef.current) {
+        console.error("Canvas ref is null");
+        return null;
+      }
+      
+      const ctx = canvasRef.current.getContext('2d');
+      if (!ctx) {
+        console.error("Failed to get 2D context");
+        return null;
+      }
+      
+      return ctx;
+    } catch (error) {
+      console.error("Error initializing canvas:", error);
+      return null;
+    }
+  };
+  
+  // Main game loop with performance timing
+  const gameLoop = (timestamp) => {
+    try {
+      // Calculate delta time for smooth animation at any frame rate
+      const deltaTime = timestamp - lastFrameTimeRef.current;
+      const delta = Math.min(deltaTime / 16.67, 2); // Normalize to ~60 FPS (16.67ms per frame), cap at 2x
+      lastFrameTimeRef.current = timestamp;
+      
+      if (isGameActive && !gameOver) {
+        // Update game state
+        updateGameState(delta);
+      }
+      
+      // Render the game (always render even if game is not active to show current state)
+      renderGame();
+      
+      // Continue the game loop
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    } catch (error) {
+      console.error("Error in game loop:", error);
+      // Try to recover
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    }
+  };
+  
+  // Initialize images
   useEffect(() => {
-    const initSoundManager = async () => {
-      const manager = SoundManager.getInstance();
-      await manager.initialize();
-      setSoundManager(manager);
+    console.log("Initializing game resources...");
+    
+    // Emergency backup tick to ensure updates happen even if requestAnimationFrame fails
+    let backupInterval = null;
+    
+    // Preload player image
+    playerImageRef.current = new Image();
+    playerImageRef.current.src = '/assets/player.png';
+    playerImageRef.current.onload = () => console.log("Player image loaded successfully");
+    playerImageRef.current.onerror = (e) => {
+      console.error("Error loading player image:", e);
+      // Try alternate path
+      playerImageRef.current.src = '/public/assets/player.png';
     };
-    initSoundManager();
-  }, []);
-
-  // Helper function to preload a sound
-  const preloadSound = (id, url) => {
-    if (!soundManager) return;
-    try {
-      soundManager.registerSound(id, url);
-    } catch (err) {
-      console.warn(`Failed to preload sound ${id}:`, err);
-    }
-  };
-  
-  // Helper function to preload music
-  const preloadMusic = (id, url) => {
-    if (!soundManager) return;
-    try {
-      soundManager.registerMusic(id, url);
-    } catch (err) {
-      console.warn(`Failed to preload music ${id}:`, err);
-    }
-  };
-  
-  // Helper function to play music
-  const playMusic = (id, volume = 0.3) => {
-    if (!soundManager) return;
-    try {
-      soundManager.playMusic(id, true, volume);
-    } catch (err) {
-      console.warn(`Failed to play music ${id}:`, err);
-    }
-  };
-
-  // Initialize game
-  useEffect(() => {
-    // Check for Escape key to exit the game
+    
+    // Preload Hemingway image
+    hemingwayImageRef.current = new Image();
+    hemingwayImageRef.current.src = '/assets/hemingway.png';
+    hemingwayImageRef.current.onload = () => console.log("Hemingway image loaded successfully");
+    hemingwayImageRef.current.onerror = (e) => {
+      console.error("Error loading Hemingway image:", e);
+      // Try alternate path
+      hemingwayImageRef.current.src = '/public/assets/hemingway.png';
+    };
+    
+    // Setup keyboard events
     const handleKeyDown = (e) => {
+      console.log(`Key pressed: ${e.key}`);
+      keysPressed.current[e.key] = true;
+      
+      // Handle jump
+      if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && !isJumping) {
+        jump();
+      }
+      
+      // Handle escape to exit
       if (e.key === 'Escape') {
-        if (onExit) onExit();
+        handleExit();
+      }
+      
+      // Debug left/right movement
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        console.log("LEFT pressed - should move left");
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        console.log("RIGHT pressed - should move right");
       }
     };
     
-    window.addEventListener('keydown', handleKeyDown);
+    const handleKeyUp = (e) => {
+      keysPressed.current[e.key] = false;
+    };
     
-    // Only try to preload sounds if soundManager is initialized
-    if (soundManager) {
-      // Preload all game sounds
-      preloadSound('hemingway-shoot', '/assets/sounds/hemingway/shoot.mp3');
-      preloadSound('hemingway-special-shoot', '/assets/sounds/hemingway/special-shoot.mp3');
-      preloadSound('hemingway-jump', '/assets/sounds/hemingway/jump.mp3');
-      preloadSound('hemingway-player-hit', '/assets/sounds/hemingway/player-hit.mp3');
-      preloadSound('hemingway-companion-hit', '/assets/sounds/hemingway/companion-hit.mp3');
-      
-      preloadSound('hemingway-enemy-hit', '/assets/sounds/hemingway/enemy-hit.mp3');
-      preloadSound('hemingway-critical-hit', '/assets/sounds/hemingway/critical-hit.mp3');
-      preloadSound('hemingway-boss-hit', '/assets/sounds/hemingway/boss-hit.mp3');
-      preloadSound('hemingway-boss-critical', '/assets/sounds/hemingway/boss-critical.mp3');
-      
-      preloadSound('hemingway-health-pickup', '/assets/sounds/hemingway/health-pickup.mp3');
-      preloadSound('hemingway-weapon-pickup', '/assets/sounds/hemingway/weapon-pickup.mp3');
-      preloadSound('hemingway-ammo-pickup', '/assets/sounds/hemingway/ammo-pickup.mp3');
-      preloadSound('hemingway-manuscript-pickup', '/assets/sounds/hemingway/manuscript-pickup.mp3');
-      preloadSound('hemingway-powerup-pickup', '/assets/sounds/hemingway/powerup-pickup.mp3');
-      
-      preloadSound('hemingway-level-up', '/assets/sounds/hemingway/level-up.mp3');
-      preloadSound('hemingway-game-over', '/assets/sounds/hemingway/game-over.mp3');
-      preloadSound('hemingway-victory', '/assets/sounds/hemingway/victory.mp3');
-      preloadSound('hemingway-boss-defeated', '/assets/sounds/hemingway/boss-defeated.mp3');
-      
-      // Preload background music
-      preloadMusic('hemingway-menu-music', '/assets/sounds/hemingway/menu-music.mp3');
-      preloadMusic('hemingway-paris-music', '/assets/sounds/hemingway/paris-music.mp3');
-      preloadMusic('hemingway-spain-music', '/assets/sounds/hemingway/spain-music.mp3');
-      preloadMusic('hemingway-africa-music', '/assets/sounds/hemingway/africa-music.mp3');
-      preloadMusic('hemingway-boss-music', '/assets/sounds/hemingway/boss-music.mp3');
-      preloadMusic('hemingway-victory-music', '/assets/sounds/hemingway/victory-music.mp3');
-      preloadMusic('hemingway-gameover-music', '/assets/sounds/hemingway/gameover-music.mp3');
-      
-      // Create platforms based on current level
-      initializeLevelDesign();
-      
-      // Create initial items
-      const initialItems = generateItems();
-      setItems(initialItems);
-      
-      // Set up initial enemy spawn
-      spawnEnemies();
-      
-      // Set up event listeners for keyboard
-      window.addEventListener('keydown', handleKeyDown);
-      window.addEventListener('keyup', handleKeyUp);
-      
-      // Play menu music initially
-      playMusic(MUSIC_MAPPING.menu, 0.3);
-      
+    // Add event listeners
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    
+    // Ensure canvas is initialized before starting the game
+    const ctx = initializeCanvas();
+    if (ctx) {
+      console.log("Canvas initialized successfully!");
       // Start the game
       startGame();
+      
+      // Set backup interval to ensure updates happen
+      backupInterval = setInterval(() => {
+        if (isGameActive && !gameOver) {
+          // Force an update if we haven't seen one in a while
+          updateGameState(1);
+          renderGame();
+          console.log("Backup game tick executed");
+        }
+      }, 100); // Check 10 times per second
+    } else {
+      console.error("Canvas initialization failed! Trying again in 100ms...");
+      // Try to initialize again after a short delay
+      setTimeout(() => {
+        const retryCtx = initializeCanvas();
+        if (retryCtx) {
+          console.log("Canvas initialized successfully on retry!");
+          startGame();
+        } else {
+          console.error("Canvas initialization failed on retry!");
+        }
+      }, 100);
     }
     
+    // Cleanup function
     return () => {
-      // Clean up event listeners and game loop
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      cancelAnimationFrame(gameLoopRef.current);
       
-      // Stop all music when component unmounts
-      if (soundManager) {
-        soundManager.stopMusic();
+      // Cancel animation frame
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
+        gameLoopRef.current = null;
+      }
+      
+      // Clear backup interval
+      if (backupInterval) {
+        clearInterval(backupInterval);
       }
     };
-  }, [currentLevel, soundManager, onExit]);
-
-  // Handle level change effects including music
+  }, []);
+  
+  // For debugging
   useEffect(() => {
-    if (!soundManager) return;
-
-    if (isGameActive) {
-      // Play the appropriate music for the current level
-      switch(currentLevel) {
-        case 1:
-          soundManager.playMusic('hemingway-paris-music', true, 0.3);
-          break;
-        case 2:
-          soundManager.playMusic('hemingway-spain-music', true, 0.3);
-          break;
-        case 3:
-          soundManager.playMusic('hemingway-africa-music', true, 0.3);
-          break;
-        default:
-          soundManager.playMusic('hemingway-paris-music', true, 0.3);
-      }
-    }
-  }, [currentLevel, isGameActive, soundManager]);
-  
-  // Handle boss encounter effects
-  useEffect(() => {
-    if (!soundManager) return;
-    
-    if (bossActive) {
-      soundManager.playMusic('hemingway-boss-music', true, 0.4);
-      
-      // Display a boss-specific quote
-      displayRandomQuote('boss');
-    }
-  }, [bossActive, soundManager]);
-  
-  // Handle game over and victory effects
-  useEffect(() => {
-    if (!soundManager) return;
-    
-    if (gameOver) {
-      soundManager.playMusic('hemingway-gameover-music', true, 0.3);
-      
-      // Display a game over quote
-      displayRandomQuote('lowHealth');
-    } else if (victory) {
-      soundManager.playMusic('hemingway-victory-music', true, 0.3);
-      
-      // Display a victory quote
-      displayRandomQuote('victory');
-    }
-  }, [gameOver, victory, soundManager]);
-  
-  // Initialize level design based on current level
-  const initializeLevelDesign = () => {
-    let levelPlatforms = [];
-    let levelBackground = '';
-    
-    switch(currentLevel) {
-      case 1: // Intro level - Paris cafes
-        levelPlatforms = [
-          { x: 0, y: 350, width: LEVEL_WIDTH, height: 50, type: 'ground' },
-          { x: 300, y: 250, width: 200, height: 20, type: 'platform' },
-          { x: 600, y: 200, width: 150, height: 20, type: 'platform' },
-          { x: 900, y: 280, width: 100, height: 20, type: 'platform' },
-          { x: 1200, y: 220, width: 250, height: 20, type: 'platform' },
-          { x: 1500, y: 300, width: 100, height: 20, type: 'platform' },
-          { x: 1700, y: 250, width: 120, height: 20, type: 'platform' },
-          { x: 2000, y: 200, width: 200, height: 20, type: 'platform' },
-          { x: 2300, y: 300, width: 200, height: 50, type: 'end-platform' }
-        ];
-        levelBackground = 'paris-background';
-        break;
-        
-      case 2: // Spanish Civil War
-        levelPlatforms = [
-          { x: 0, y: 350, width: LEVEL_WIDTH, height: 50, type: 'ground' },
-          { x: 200, y: 280, width: 150, height: 20, type: 'platform' },
-          { x: 400, y: 230, width: 120, height: 20, type: 'platform' },
-          { x: 600, y: 180, width: 100, height: 20, type: 'platform' },
-          { x: 850, y: 230, width: 100, height: 20, type: 'platform' },
-          { x: 1000, y: 250, width: 80, height: 20, type: 'platform' },
-          // Trench section
-          { x: 1200, y: 320, width: 300, height: 30, type: 'trench' },
-          { x: 1600, y: 270, width: 100, height: 20, type: 'platform' },
-          { x: 1800, y: 220, width: 120, height: 20, type: 'platform' },
-          { x: 2100, y: 180, width: 150, height: 20, type: 'platform' },
-          { x: 2300, y: 300, width: 200, height: 50, type: 'end-platform' }
-        ];
-        levelBackground = 'spain-background';
-        break;
-        
-      case 3: // African Safari
-        levelPlatforms = [
-          { x: 0, y: 350, width: LEVEL_WIDTH, height: 50, type: 'ground' },
-          // Uneven terrain
-          { x: 300, y: 320, width: 200, height: 30, type: 'hill' },
-          { x: 600, y: 300, width: 250, height: 50, type: 'hill' },
-          // Tree platforms
-          { x: 400, y: 230, width: 80, height: 15, type: 'tree-platform' },
-          { x: 550, y: 180, width: 60, height: 15, type: 'tree-platform' },
-          { x: 750, y: 200, width: 70, height: 15, type: 'tree-platform' },
-          { x: 900, y: 250, width: 100, height: 20, type: 'platform' },
-          { x: 1100, y: 220, width: 120, height: 20, type: 'platform' },
-          // River section with stepping stones
-          { x: 1300, y: 330, width: 400, height: 20, type: 'water' },
-          { x: 1350, y: 310, width: 40, height: 20, type: 'stone' },
-          { x: 1450, y: 310, width: 40, height: 20, type: 'stone' },
-          { x: 1550, y: 310, width: 40, height: 20, type: 'stone' },
-          { x: 1650, y: 310, width: 40, height: 20, type: 'stone' },
-          
-          { x: 1800, y: 280, width: 150, height: 20, type: 'platform' },
-          { x: 2000, y: 230, width: 120, height: 20, type: 'platform' },
-          { x: 2200, y: 180, width: 100, height: 20, type: 'platform' },
-          { x: 2300, y: 300, width: 200, height: 50, type: 'boss-platform' }
-        ];
-        levelBackground = 'africa-background';
-        break;
-    }
-    
-    setPlatforms(levelPlatforms);
-    
-    // Update boss platform position
-    if (currentLevel === 3) {
-      setBossPosition({ x: 2350, y: 250 });
-    }
-    
-    // Set level background class
-    document.querySelector('.game-canvas-container').className = 
-      `game-canvas-container ${levelBackground}`;
-  };
-  
-  // Generate items based on level
-  const generateItems = () => {
-    const levelItems = [];
-    
-    // Basic health items
-    levelItems.push(
-      { x: 350, y: 220, type: 'health', collected: false },
-      { x: 1250, y: 190, type: 'health', collected: false }
-    );
-    
-    // Level specific items
-    switch(currentLevel) {
-      case 1:
-        levelItems.push(
-          { x: 700, y: 170, type: 'weapon', collected: false, variant: 'typewriter' },
-          { x: 1600, y: 270, type: 'manuscript', collected: false }
-        );
-        break;
-      case 2:
-        levelItems.push(
-          { x: 500, y: 200, type: 'weapon', collected: false, variant: 'rifle' },
-          { x: 1300, y: 290, type: 'ammo', collected: false },
-          { x: 1900, y: 190, type: 'health', collected: false }
-        );
-        break;
-      case 3:
-        levelItems.push(
-          { x: 800, y: 170, type: 'weapon', collected: false, variant: 'hunting-rifle' },
-          { x: 1500, y: 280, type: 'powerup', collected: false, variant: 'speed' },
-          { x: 2100, y: 150, type: 'health', collected: false },
-          { x: 2250, y: 150, type: 'ammo', collected: false }
-        );
-        break;
-    }
-    
-    return levelItems;
-  };
+    console.log("Player position updated:", playerPosition.x, playerPosition.y);
+  }, [playerPosition]);
   
   // Start the game
   const startGame = () => {
+    console.log("Starting game...");
     setIsGameActive(true);
-    setShowIntro(false);
     setGameOver(false);
-    setVictory(false);
     
-    // Reset game state
-    setPlayerHealth(100);
-    setHemingwayHealth(100);
-    setBullets([]);
-    setEnemies([]);
-    setItems([]);
+    // Initialize player position
+    setPlayerPosition({ x: 100, y: 300 });
+    setPlayerVelocity({ x: 0, y: 0 });
     
-    // Initialize level with appropriate values
-    initializeLevelDesign(currentLevel);
+    // Reset camera
+    setCameraOffset(0);
     
-    // Spawn initial enemies
-    spawnEnemies();
+    // Show initial Hemingway quote
+    setTimeout(() => {
+      showHemingwayQuote(0);
+    }, 1000);
     
-    // Play the appropriate level music
-    switch(currentLevel) {
-      case 1:
-        soundManager.playMusic('hemingway-paris-music', true, 0.3);
+    // Introduce Hemingway after a delay
+    setTimeout(() => {
+      setHemingwayActive(true);
+      setHemingwayDialog("Let's collect manuscripts and fight through the memories of my life.");
+      setShowHemingwayDialog(true);
+      
+      // Hide dialog after a few seconds
+      setTimeout(() => {
+        setShowHemingwayDialog(false);
+      }, 4000);
+    }, 3000);
+    
+    // Start the game loop
+    if (gameLoopRef.current) {
+      cancelAnimationFrame(gameLoopRef.current);
+    }
+    
+    lastFrameTimeRef.current = performance.now();
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+    
+    // Play background music for current level
+    playSound(`${currentLevel}-music`);
+  };
+  
+  // Update game state based on input and physics
+  const updateGameState = (delta) => {
+    if (!isGameActive || gameOver) return;
+    
+    // Store previous position for comparison
+    const prevX = playerPosition.x;
+    const prevY = playerPosition.y;
+    
+    // Update player position based on input
+    updatePlayerPosition(delta);
+    
+    // Log movement for debugging
+    if (prevX !== playerPosition.x || prevY !== playerPosition.y) {
+      console.log(`Player moved: ${prevX.toFixed(2)},${prevY.toFixed(2)} → ${playerPosition.x.toFixed(2)},${playerPosition.y.toFixed(2)}`);
+    }
+    
+    // Update Hemingway companion position (follow player with a delay)
+    if (hemingwayActive) {
+      updateHemingwayPosition();
+    }
+    
+    // Update camera for side-scrolling
+    updateCamera();
+    
+    // Check collisions with collectibles
+    checkCollectibleCollisions();
+    
+    // Check collisions with platforms
+    checkCollisions();
+  };
+  
+  // Update player position based on input and physics
+  const updatePlayerPosition = (delta) => {
+    // Start with current velocity
+    let velocityX = playerVelocity.x;
+    let velocityY = playerVelocity.y;
+    
+    // Apply horizontal movement based on keyboard input
+    const leftPressed = keysPressed.current.ArrowLeft || keysPressed.current.a;
+    const rightPressed = keysPressed.current.ArrowRight || keysPressed.current.d;
+    
+    if (leftPressed) {
+      velocityX = -PLAYER_SPEED;
+      setIsFacingRight(false);
+    } else if (rightPressed) {
+      velocityX = PLAYER_SPEED;
+      setIsFacingRight(true);
+    } else {
+      // Decelerate when no keys are pressed
+      velocityX = 0;
+    }
+    
+    // For debugging keyboard issues
+    if (leftPressed || rightPressed) {
+      console.log(`Movement keys: left=${leftPressed}, right=${rightPressed}, velocity=${velocityX}`);
+    }
+    
+    // Apply gravity
+    velocityY += GRAVITY * delta;
+    
+    // Calculate new position
+    let newX = playerPosition.x + velocityX * delta;
+    let newY = playerPosition.y + velocityY * delta;
+    
+    // Log position before constraints
+    console.log(`New position before constraints: x=${newX}, y=${newY}`);
+    
+    // Check platform collisions
+    const onGround = checkOnGround({...playerPosition, y: newY});
+    if (onGround && velocityY > 0) {
+      velocityY = 0;
+      newY = onGround.y - 50; // Set player on top of platform (player height = 50)
+      setIsJumping(false);
+    }
+    
+    // Update player position - use direct assignment to avoid React batching issues
+    playerPosition.x = newX;
+    playerPosition.y = newY;
+    playerVelocity.x = velocityX;
+    playerVelocity.y = velocityY;
+    
+    // Also update state for React to trigger re-renders
+    setPlayerPosition({ x: newX, y: newY });
+    setPlayerVelocity({ x: velocityX, y: velocityY });
+    
+    // Check level boundaries
+    if (newX < 0) {
+      playerPosition.x = 0;
+      setPlayerPosition(prev => ({ ...prev, x: 0 }));
+    } else if (newX > levelWidth - 40) { // Player width = 40
+      playerPosition.x = levelWidth - 40;
+      setPlayerPosition(prev => ({ ...prev, x: levelWidth - 40 }));
+    }
+    
+    // Check if player fell off the level
+    if (newY > 500) {
+      handlePlayerDeath();
+    }
+    
+    // Check if player reached the end of the level
+    if (newX > levelWidth - 250) {
+      handleLevelComplete();
+    }
+  };
+  
+  // Update Hemingway companion position to follow player
+  const updateHemingwayPosition = () => {
+    // Hemingway follows the player with a delay, staying a bit behind
+    const targetX = playerPosition.x - 70; // Stay 70px behind the player
+    const targetY = playerPosition.y; // Same height as player
+    
+    // Move towards target position with direct assignment
+    const dx = targetX - hemingwayPosition.x;
+    const dy = targetY - hemingwayPosition.y;
+    
+    // Update position directly
+    hemingwayPosition.x += dx * 0.05;
+    hemingwayPosition.y = targetY;
+    
+    // Also update state for React to trigger re-renders
+    setHemingwayPosition({
+      x: hemingwayPosition.x,
+      y: hemingwayPosition.y
+    });
+  };
+  
+  // Update camera position for side-scrolling
+  const updateCamera = () => {
+    const screenWidth = 800; // Canvas width
+    
+    // If player gets too close to right edge, scroll right
+    if (playerPosition.x - cameraOffset > screenWidth - SCROLL_MARGIN) {
+      setCameraOffset(playerPosition.x - (screenWidth - SCROLL_MARGIN));
+    }
+    
+    // If player gets too close to left edge, scroll left
+    if (playerPosition.x - cameraOffset < SCROLL_MARGIN) {
+      setCameraOffset(playerPosition.x - SCROLL_MARGIN);
+    }
+    
+    // Ensure camera doesn't go outside level boundaries
+    if (cameraOffset < 0) {
+      setCameraOffset(0);
+    } else if (cameraOffset > levelWidth - screenWidth) {
+      setCameraOffset(levelWidth - screenWidth);
+    }
+  };
+  
+  // Check if player is on a platform
+  const checkOnGround = (position) => {
+    for (const platform of platforms) {
+      if (
+        position.x + 40 >= platform.x && 
+        position.x <= platform.x + platform.width &&
+        position.y + 50 >= platform.y && 
+        position.y + 50 <= platform.y + 10 // Check if feet are just above platform
+      ) {
+        return platform;
+      }
+    }
+    return null;
+  };
+  
+  // Check for collisions with collectibles
+  const checkCollectibleCollisions = () => {
+    setCollectibles(prev => prev.map(item => {
+      // If already collected, skip
+      if (item.collected) return item;
+      
+      // Check for collision with player
+      if (
+        playerPosition.x + 40 >= item.x && 
+        playerPosition.x <= item.x + 30 &&
+        playerPosition.y + 50 >= item.y && 
+        playerPosition.y <= item.y + 30
+      ) {
+        // Handle collectible based on type
+        handleCollectible(item.type);
+        
+        // Play sound effect
+        playSound(`${item.type}-pickup`);
+        
+        // Mark as collected
+        return { ...item, collected: true };
+      }
+      
+      return item;
+    }));
+  };
+  
+  // Handle collectible pickup
+  const handleCollectible = (type) => {
+    switch (type) {
+      case 'health':
+        setPlayerHealth(prev => Math.min(prev + 20, 100));
+        setScore(prev => prev + 50);
         break;
-      case 2:
-        soundManager.playMusic('hemingway-spain-music', true, 0.3);
+      case 'weapon':
+        // Upgrade weapon logic will go here
+        setScore(prev => prev + 100);
+        // Show weapon pickup dialog
+        setHemingwayDialog("A typewriter! Now we're armed with words!");
+        setShowHemingwayDialog(true);
+        setTimeout(() => { setShowHemingwayDialog(false); }, 3000);
         break;
-      case 3:
-        soundManager.playMusic('hemingway-africa-music', true, 0.3);
+      case 'manuscript':
+        setScore(prev => prev + 200);
+        // Progress the story
+        progressStory();
         break;
       default:
-        soundManager.playMusic('hemingway-paris-music', true, 0.3);
+        break;
+    }
+  };
+  
+  // Progress the story based on collectibles
+  const progressStory = () => {
+    // Increment story progress
+    setStoryProgress(prev => {
+      const newProgress = prev + 1;
+      
+      // Show different quotes based on story progress
+      if (newProgress === 1) {
+        setHemingwayDialog("That's one of my manuscripts. These are the stories that defined me.");
+        setShowHemingwayDialog(true);
+        setTimeout(() => { setShowHemingwayDialog(false); }, 3000);
+        setTimeout(() => { showHemingwayQuote(1); }, 4000);
+      } else if (newProgress === 3) {
+        setHemingwayDialog("You're helping me reclaim my life's work. We're halfway there.");
+        setShowHemingwayDialog(true);
+        setTimeout(() => { setShowHemingwayDialog(false); }, 3000);
+        setTimeout(() => { showHemingwayQuote(2); }, 4000);
+      } else if (newProgress === 5) {
+        setHemingwayDialog("Just one more manuscript to find. Then I can rest.");
+        setShowHemingwayDialog(true);
+        setTimeout(() => { setShowHemingwayDialog(false); }, 3000);
+      }
+      
+      return newProgress;
+    });
+  };
+  
+  // Check for collisions between game objects
+  const checkCollisions = () => {
+    // Future collision logic will go here
+  };
+  
+  // Handle player death
+  const handlePlayerDeath = () => {
+    console.log("Player died");
+    setGameOver(true);
+    setPlayerHealth(0);
+    playSound('game-over');
+  };
+  
+  // Handle level completion
+  const handleLevelComplete = () => {
+    // Check if we've collected all manuscripts before allowing level completion
+    const remainingManuscripts = collectibles.filter(
+      item => item.type === 'manuscript' && !item.collected
+    );
+    
+    if (remainingManuscripts.length === 0) {
+      // If it's the final level, complete the game
+      if (currentLevel === 'africa') {
+        handleGameVictory();
+      } else {
+        // Otherwise, go to the next level
+        progressToNextLevel();
+      }
+    } else {
+      // If manuscripts remain, show a hint
+      setHemingwayDialog(`We need to find ${remainingManuscripts.length} more manuscripts before moving on.`);
+      setShowHemingwayDialog(true);
+      setTimeout(() => { setShowHemingwayDialog(false); }, 3000);
+    }
+  };
+  
+  // Progress to the next level
+  const progressToNextLevel = () => {
+    // Determine the next level
+    let nextLevel = 'spain';
+    if (currentLevel === 'spain') {
+      nextLevel = 'africa';
     }
     
-    // Display a random Hemingway quote on start
+    // Show level complete message
+    setHemingwayDialog(`We've made it through ${levelDescriptions[currentLevel]}. Now on to ${levelDescriptions[nextLevel]}.`);
+    setShowHemingwayDialog(true);
+    
+    // Update level after a delay
     setTimeout(() => {
-      displayRandomQuote('random');
-    }, 2000);
+      setShowHemingwayDialog(false);
+      setCurrentLevel(nextLevel);
+      
+      // Reset player position and scroll
+      setPlayerPosition({ x: 100, y: 300 });
+      setCameraOffset(0);
+      
+      // Reset collectibles for the new level (would typically load new ones)
+      setCollectibles(prev => prev.map(item => ({ ...item, collected: false })));
+      
+      // Show quote for the new level
+      showHemingwayQuote();
+      
+      // Play music for new level
+      playSound(`${nextLevel}-music`);
+    }, 4000);
   };
   
-  // Main game loop
-  const gameLoop = () => {
-    const currentTime = performance.now();
-    const deltaTime = (currentTime - lastFrameTimeRef.current) / 16.67; // normalize to ~60fps
+  // Handle game victory
+  const handleGameVictory = () => {
+    console.log("Game Victory!");
+    setGameOver(true);
+    playSound('victory');
     
-    updateGameState(deltaTime);
-    renderGame();
-    
-    // Random Hemingway quotes during gameplay (no more than once every 30 seconds)
-    const currentTimeForQuotes = Date.now();
-    if (currentTimeForQuotes - lastFrameTimeRef.current > 30000 && Math.random() < 0.02) {
-      displayRandomQuote('random');
-      lastFrameTimeRef.current = currentTimeForQuotes;
-    }
-    
-    // Update the XP bar calculation
-    const xpBar = document.querySelector('.xp-bar-inner');
-    if (xpBar) {
-      const nextLevelThreshold = levelThresholds[playerLevel];
-      const currentLevelThreshold = levelThresholds[playerLevel - 1] || 0;
-      const percentage = ((playerXP - currentLevelThreshold) / (nextLevelThreshold - currentLevelThreshold)) * 100;
-      xpBar.style.width = `${Math.min(100, percentage)}%`;
-    }
-    
-    lastFrameTimeRef.current = currentTime;
-    gameLoopRef.current = requestAnimationFrame(gameLoop);
-  };
-  
-  // Handle player keyboard input
-  const handleKeyDown = (e) => {
-    keysPressed.current[e.key] = true;
-    
-    // Shooting
-    if (e.key === ' ' || e.key === 'Control') {
-      shootBullet('player');
-      setIsShooting(true);
-    }
-    
-    // Jumping
-    if ((e.key === 'ArrowUp' || e.key === 'w') && !isJumping) {
-      jump();
-    }
-    
-    // Crouching
-    if (e.key === 'ArrowDown' || e.key === 's') {
-      setIsCrouching(true);
-    }
-  };
-  
-  const handleKeyUp = (e) => {
-    keysPressed.current[e.key] = false;
-    
-    // Stop shooting
-    if (e.key === ' ' || e.key === 'Control') {
-      setIsShooting(false);
-    }
-    
-    // Stop crouching
-    if (e.key === 'ArrowDown' || e.key === 's') {
-      setIsCrouching(false);
+    // Complete the quest if callback provided
+    if (onComplete) {
+      setTimeout(() => {
+        onComplete();
+      }, 5000);
     }
   };
   
@@ -548,1262 +626,393 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
   const jump = () => {
     if (!isJumping) {
       setIsJumping(true);
-      setPlayerPosition(prev => ({ ...prev, velocityY: JUMP_FORCE }));
       
-      // Play jump sound
-      playGameSound('jump', 0.4);
+      // Apply jump force directly to ensure immediate effect
+      playerVelocity.y = JUMP_FORCE;
+      setPlayerVelocity(prev => ({ ...prev, y: JUMP_FORCE }));
+      
+      console.log("Jump initiated! Velocity:", JUMP_FORCE);
+      playSound('jump');
     }
   };
   
-  // Spawn enemies
-  const spawnEnemies = () => {
-    // Create enemies based on level
-    const enemyCount = Math.min(5 + currentLevel, 10);
-    
-    const newEnemies = [];
-    for (let i = 0; i < enemyCount; i++) {
-      let enemyType = 'grunt'; // Default type
-      
-      // Vary enemy types by level
-      const typeRoll = Math.random();
-      if (currentLevel === 1) {
-        // Level 1: Mostly grunts with a few soldiers
-        enemyType = typeRoll > 0.8 ? 'soldier' : 'grunt';
-      } else if (currentLevel === 2) {
-        // Level 2: More soldiers and introduce snipers
-        if (typeRoll > 0.6) enemyType = 'soldier';
-        else if (typeRoll > 0.85) enemyType = 'sniper';
-        else enemyType = 'grunt';
-      } else if (currentLevel === 3) {
-        // Level 3: All types with more challenging ones
-        if (typeRoll > 0.5) enemyType = 'soldier';
-        else if (typeRoll > 0.75) enemyType = 'sniper';
-        else if (typeRoll > 0.9) enemyType = 'tank';
-        else enemyType = 'grunt';
+  // Render game to canvas
+  const renderGame = () => {
+    try {
+      const ctx = initializeCanvas();
+      if (!ctx) {
+        console.error("No canvas context available for rendering");
+        return;
       }
       
-      // Create enemy object with type-specific properties
-      const enemy = {
-        id: `enemy-${Date.now()}-${i}`,
-        x: 800 + Math.random() * 1000,
-        y: 300 - Math.random() * 150,
-        health: enemyType === 'tank' ? 100 : 
-                enemyType === 'soldier' ? 40 : 
-                enemyType === 'sniper' ? 20 : 30,
-        type: enemyType,
-        direction: Math.random() > 0.5 ? 'left' : 'right',
-        // Type-specific properties
-        shootRange: enemyType === 'sniper' ? 500 : 300,
-        moveSpeed: enemyType === 'tank' ? 1 : 
-                   enemyType === 'sniper' ? 0.5 : 2,
-        shootCooldown: enemyType === 'sniper' ? 3000 : 
-                      enemyType === 'tank' ? 2000 : 1500,
-        lastShot: 0
-      };
+      // Clear canvas
+      ctx.clearRect(0, 0, 800, 400);
       
-      newEnemies.push(enemy);
-    }
-    
-    setEnemies(newEnemies);
-    
-    // Activate boss at level milestone
-    if (currentLevel >= 3 && !bossActive) {
-      setBossActive(true);
+      // Draw background based on current level
+      drawBackground(ctx);
       
-      // Select boss type based on level
-      setBossType(currentLevel === 3 ? 'lion' : 'general');
+      // Apply camera offset to all world elements
+      ctx.save();
+      console.log("Camera offset:", cameraOffset);
+      ctx.translate(-Math.floor(cameraOffset), 0); // Floor for pixel-perfect rendering
+      
+      // Debug grid (for development)
+      drawDebugGrid(ctx);
+      
+      // Draw platforms
+      drawPlatforms(ctx);
+      
+      // Draw collectibles
+      drawCollectibles(ctx);
+      
+      // Draw Hemingway companion if active
+      if (hemingwayActive) {
+        drawHemingway(ctx);
+      }
+      
+      // Draw player
+      drawPlayer(ctx);
+      
+      // Restore normal translation
+      ctx.restore();
+      
+      // Draw HUD (not affected by camera)
+      drawHUD(ctx);
+      
+      // Draw dialog if active
+      if (showHemingwayDialog) {
+        drawDialog(ctx, hemingwayDialog);
+      }
+      
+      // Draw quote if active
+      if (showQuote) {
+        drawQuote(ctx);
+      }
+      
+      // Draw debug info
+      drawDebugInfo(ctx);
+      
+    } catch (error) {
+      console.error("Error rendering game:", error);
     }
   };
   
-  // Handle shooting
-  const shootBullet = (shooter, special = false) => {
-    let bulletX, bulletY, bulletDirection, bulletSpeed, bulletDamage, bulletClass;
-    
-    // Default bullet properties
-    bulletSpeed = BULLET_SPEED;
-    bulletDamage = 10;
-    bulletClass = '';
-    
-    if (shooter === 'player') {
-      bulletX = playerDirection === 'right' ? playerPosition.x + 50 : playerPosition.x - 10;
-      bulletY = playerPosition.y + 25;
-      bulletDirection = playerDirection;
-      
-      // Apply powerups
-      if (playerPowerups.rapidFire.active) {
-        bulletSpeed *= 1.5;
-      }
-      
-      if (special) {
-        bulletClass = 'special';
-        bulletDamage = 30;
-      }
-      
-      // Add experience for player shooting
-      setPlayerXP(prev => prev + 1);
-      
-    } else if (shooter === 'hemingway') {
-      bulletX = hemingwayDirection === 'right' ? hemingwayPosition.x + 50 : hemingwayPosition.x - 10;
-      bulletY = hemingwayPosition.y + 25;
-      bulletDirection = hemingwayDirection;
-      
-      // Hemingway's shots are stronger
-      bulletDamage = 15;
-      
-      if (special) {
-        bulletClass = 'hemingway-special';
-        bulletDamage = 40;
-      }
-      
-    } else if (shooter.startsWith('enemy-')) {
-      // Find enemy by ID
-      const enemy = enemies.find(e => e.id === shooter);
-      if (enemy) {
-        bulletX = enemy.direction === 'right' ? enemy.x + 30 : enemy.x - 10;
-        bulletY = enemy.y + 20;
-        bulletDirection = enemy.direction;
-        
-        // Enemy-specific bullet properties
-        if (enemy.type === 'sniper') {
-          bulletSpeed *= 1.5;
-          bulletDamage = 20;
-          bulletClass = 'sniper';
-        } else if (enemy.type === 'tank') {
-          bulletSpeed *= 0.8;
-          bulletDamage = 25;
-          bulletClass = 'tank';
-        }
-      }
-    } else if (shooter === 'boss') {
-      bulletX = bossPosition.x;
-      bulletY = bossPosition.y + 40;
-      bulletDirection = 'left';
-      bulletDamage = 25;
-      bulletClass = 'boss';
-      
-      if (special) {
-        bulletClass = 'boss-special';
-        bulletDamage = 40;
-        bulletSpeed *= 0.7;
-      }
+  // Draw background based on current level
+  const drawBackground = (ctx) => {
+    switch (currentLevel) {
+      case 'paris':
+        ctx.fillStyle = '#6CA0DC'; // Paris blue sky
+        break;
+      case 'spain':
+        ctx.fillStyle = '#E1BC92'; // Spain sepia tone
+        break;
+      case 'africa':
+        ctx.fillStyle = '#FFD700'; // Africa golden savanna
+        break;
+      default:
+        ctx.fillStyle = '#87CEEB'; // Default sky blue
     }
+    ctx.fillRect(0, 0, 800, 400);
     
-    const newBullet = {
-      id: `bullet-${Date.now()}-${Math.random()}`,
-      x: bulletX,
-      y: bulletY,
-      direction: bulletDirection,
-      shooter,
-      speed: bulletSpeed,
-      damage: bulletDamage,
-      class: bulletClass
-    };
-    
-    setBullets(prev => [...prev, newBullet]);
-    
-    // Play sound effect
-    playGameSound(special ? 'special-shoot' : 'shoot');
+    // Draw far background elements based on level
+    // (clouds, mountains, etc. - will be added later)
   };
   
-  // Update game state
-  const updateGameState = (deltaTime) => {
-    if (!isGameActive || gameOver) return;
-    
-    // Update player position based on input
-    updatePlayerPosition(deltaTime);
-    
-    // Update Hemingway AI
-    updateHemingwayAI(deltaTime);
-    
-    // Update bullets
-    updateBullets(deltaTime);
-    
-    // Update enemies
-    updateEnemies(deltaTime);
-    
-    // Check collisions
-    checkCollisions();
-    
-    // Check level completion
-    checkLevelCompletion();
-    
-    // Check game over conditions
-    if (playerHealth <= 0) {
-      setGameOver(true);
-    }
-    
-    // Check for low health to trigger quote
-    if (playerHealth <= 25 && Math.random() < 0.005) {
-      displayRandomQuote('lowHealth');
-    }
-  };
-  
-  // Update player position based on input
-  const updatePlayerPosition = (deltaTime) => {
-    let dx = 0;
-    let dy = 0;
-    
-    // Horizontal movement
-    if (keysPressed.current['ArrowLeft'] || keysPressed.current['a']) {
-      dx -= PLAYER_SPEED * deltaTime;
-      setPlayerDirection('left');
-    }
-    if (keysPressed.current['ArrowRight'] || keysPressed.current['d']) {
-      dx += PLAYER_SPEED * deltaTime;
-      setPlayerDirection('right');
-    }
-    
-    // Apply gravity
-    dy += GRAVITY * deltaTime;
-    
-    // Check platform collisions for player
-    const onGround = checkOnGround(playerPosition);
-    const platformType = getStandingPlatformType(playerPosition);
-    
-    // Special platform effects
-    if (platformType === 'water' && !onGround) {
-      // Slow down in water
-      dx *= 0.5;
-      dy *= 0.7;
-      // Gradual health reduction in water
-      if (Math.random() < 0.05) {
-        setPlayerHealth(prev => Math.max(0, prev - 1));
-      }
-    } else if (platformType === 'trench') {
-      // Provide cover in trenches
-      if (isCrouching) {
-        // Reduced chance of being hit when crouched in trench
-        // This is handled in bullet collision detection
-      }
-    }
-    
-    if (onGround && dy > 0) {
-      dy = 0;
-    }
-    
-    // Update player position with level boundary checking
-    setPlayerPosition(prev => ({
-      x: Math.max(0, Math.min(800, prev.x + dx)),
-      y: Math.max(0, Math.min(350, prev.y + dy))
-    }));
-  };
-  
-  // Get the type of platform the entity is standing on
-  const getStandingPlatformType = (position) => {
-    for (const platform of platforms) {
-      if (
-        position.y + 50 >= platform.y && 
-        position.y + 50 <= platform.y + 10 &&
-        position.x + 30 >= platform.x && 
-        position.x <= platform.x + platform.width
-      ) {
-        return platform.type;
-      }
-    }
-    return null;
-  };
-  
-  // Update Hemingway AI
-  const updateHemingwayAI = (deltaTime) => {
-    // Hemingway follows the player with a delay
-    const targetX = playerPosition.x - 70;
-    const dx = (targetX - hemingwayPosition.x) * 0.05 * deltaTime;
-    
-    // Update direction
-    if (dx < 0) {
-      setHemingwayDirection('left');
-    } else if (dx > 0) {
-      setHemingwayDirection('right');
-    }
-    
-    // Apply gravity
-    let dy = GRAVITY * deltaTime;
-    
-    // Check platform collisions for Hemingway
-    const onGround = checkOnGround(hemingwayPosition);
-    
-    if (onGround && dy > 0) {
-      dy = 0;
-    }
-    
-    // Update Hemingway position
-    setHemingwayPosition(prev => ({
-      x: Math.max(0, Math.min(800, prev.x + dx)),
-      y: Math.max(0, Math.min(350, prev.y + dy))
-    }));
-    
-    // Hemingway sometimes shoots at enemies
-    if (Math.random() < 0.02 && enemies.length > 0) {
-      shootBullet('hemingway');
-      setHemingwayIsShooting(true);
-      
-      // Reset shooting animation
-      setTimeout(() => {
-        setHemingwayIsShooting(false);
-      }, 200);
-    }
-  };
-  
-  // Update bullets
-  const updateBullets = (deltaTime) => {
-    setBullets(prev => prev.map(bullet => {
-      // Use bullet's custom speed if available, otherwise default
-      const speed = bullet.speed || BULLET_SPEED;
-      const dx = bullet.direction === 'right' ? speed * deltaTime : -speed * deltaTime;
-      
-      // Special bullet effects
-      if (bullet.class === 'boss-special') {
-        // Boss special bullets follow the player
-        let targetX = playerPosition.x;
-        let targetY = playerPosition.y + 25;
-        
-        // Calculate angle to player
-        const angle = Math.atan2(targetY - bullet.y, targetX - bullet.x);
-        
-        // Move bullet toward player with slight homing effect
-        return { 
-          ...bullet, 
-          x: bullet.x + Math.cos(angle) * speed * 0.5 * deltaTime,
-          y: bullet.y + Math.sin(angle) * speed * 0.5 * deltaTime
-        };
-      }
-      
-      return { ...bullet, x: bullet.x + dx };
-    }).filter(bullet => bullet.x > -20 && bullet.x < 820 && bullet.y > 0 && bullet.y < 400));
-  };
-  
-  // Update enemies
-  const updateEnemies = (deltaTime) => {
-    setEnemies(prev => prev.map(enemy => {
-      // Enemy type-specific behavior
-      let dx = 0;
-      let dy = 0;
-      const playerInRange = Math.abs(enemy.x - playerPosition.x) < enemy.shootRange;
-      const timeToShoot = Date.now() - (enemy.lastShot || 0) > enemy.shootCooldown;
-      
-      // Movement based on enemy type
-      switch(enemy.type) {
-        case 'grunt':
-          // Basic movement - approach player when in range
-          if (playerInRange) {
-            dx = enemy.x > playerPosition.x ? -1 : 1;
-            enemy.direction = dx > 0 ? 'right' : 'left';
-            
-            // Occasionally shoot at player
-            if (timeToShoot && Math.random() < 0.3) {
-              shootBullet(enemy.id);
-              enemy.lastShot = Date.now();
-            }
-          } else {
-            // Random movement
-            dx = enemy.direction === 'right' ? 1 : -1;
-            
-            // Randomly change direction
-            if (Math.random() < 0.01) {
-              enemy.direction = enemy.direction === 'right' ? 'left' : 'right';
-            }
-          }
+  // Draw platforms
+  const drawPlatforms = (ctx) => {
+    platforms.forEach(platform => {
+      switch(platform.type) {
+        case 'end-platform':
+          ctx.fillStyle = '#FFD700'; // Gold
           break;
-          
-        case 'soldier':
-          // More tactical - keeps distance and shoots more frequently
-          if (playerInRange) {
-            // Keep optimal distance
-            const distanceToPlayer = Math.abs(enemy.x - playerPosition.x);
-            if (distanceToPlayer < 150) {
-              // Back away
-              dx = enemy.x > playerPosition.x ? 1 : -1;
-            } else if (distanceToPlayer > 250) {
-              // Get closer
-              dx = enemy.x > playerPosition.x ? -1 : 1;
-            }
-            enemy.direction = playerPosition.x > enemy.x ? 'right' : 'left';
-            
-            // Shoot more frequently
-            if (timeToShoot && Math.random() < 0.5) {
-              shootBullet(enemy.id);
-              enemy.lastShot = Date.now();
-            }
-          } else {
-            // Patrol behavior
-            dx = enemy.direction === 'right' ? 1 : -1;
-            
-            // Change direction at obstacles or randomly
-            if (Math.random() < 0.02) {
-              enemy.direction = enemy.direction === 'right' ? 'left' : 'right';
-            }
-          }
+        case 'platform':
+          ctx.fillStyle = '#8B4513'; // Brown
           break;
-          
-        case 'sniper':
-          // Stays still when player in range, high damage shots
-          if (playerInRange) {
-            dx = 0; // Don't move when targeting
-            enemy.direction = playerPosition.x > enemy.x ? 'right' : 'left';
-            
-            // Take careful shots
-            if (timeToShoot && Math.random() < 0.7) {
-              shootBullet(enemy.id);
-              enemy.lastShot = Date.now();
-            }
-          } else {
-            // Move to find good position
-            dx = enemy.direction === 'right' ? 0.5 : -0.5;
-            
-            // Change direction occasionally
-            if (Math.random() < 0.03) {
-              enemy.direction = enemy.direction === 'right' ? 'left' : 'right';
-            }
-          }
+        case 'ground':
+        default:
+          ctx.fillStyle = '#3A5F0B'; // Grass green
+      }
+      ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+    });
+  };
+  
+  // Draw collectibles
+  const drawCollectibles = (ctx) => {
+    collectibles.forEach(item => {
+      if (item.collected) return; // Skip if already collected
+      
+      switch (item.type) {
+        case 'health':
+          ctx.fillStyle = '#FF0000'; // Red for health
           break;
-          
-        case 'tank':
-          // Slow but powerful, fires heavy shots
-          dx = enemy.direction === 'right' ? 0.5 : -0.5;
-          
-          if (playerInRange) {
-            enemy.direction = playerPosition.x > enemy.x ? 'right' : 'left';
-            
-            // Heavy shots at intervals
-            if (timeToShoot) {
-              shootBullet(enemy.id, true); // Special bullet
-              enemy.lastShot = Date.now();
-            }
-          }
-          
-          // Rarely changes direction
-          if (Math.random() < 0.01) {
-            enemy.direction = enemy.direction === 'right' ? 'left' : 'right';
-          }
+        case 'weapon':
+          ctx.fillStyle = '#964B00'; // Brown for typewriter
           break;
+        case 'manuscript':
+          ctx.fillStyle = '#FFFFFF'; // White for manuscript
+          break;
+        default:
+          ctx.fillStyle = '#FFFF00'; // Yellow for unknown items
       }
       
-      // Apply gravity
-      dy += GRAVITY * deltaTime;
+      ctx.fillRect(item.x, item.y, 30, 30); // Simple rectangle for now
+    });
+  };
+  
+  // Draw player character
+  const drawPlayer = (ctx) => {
+    try {
+      console.log(`Drawing player at: x=${Math.floor(playerPosition.x)}, y=${Math.floor(playerPosition.y)}, facing: ${isFacingRight ? 'right' : 'left'}`);
       
-      // Check platform collisions
-      const onGround = checkOnGround({ x: enemy.x, y: enemy.y });
-      if (onGround && dy > 0) {
-        dy = 0;
+      // Draw a more visible rectangle regardless of image loading
+      ctx.strokeStyle = '#FF0000'; // Red border
+      ctx.lineWidth = 2;
+      ctx.strokeRect(playerPosition.x, playerPosition.y, 40, 50);
+      
+      if (playerImageRef.current && playerImageRef.current.complete) {
+        // Draw player image
+        if (!isFacingRight) {
+          ctx.save();
+          ctx.scale(-1, 1);
+          ctx.drawImage(playerImageRef.current, -playerPosition.x - 40, playerPosition.y, 40, 50);
+          ctx.restore();
+        } else {
+          ctx.drawImage(playerImageRef.current, playerPosition.x, playerPosition.y, 40, 50);
+        }
+        console.log("Player image drawn successfully");
+      } else {
+        // Fallback to rectangle if image not loaded
+        console.log("Using fallback rectangle for player (image not loaded)");
+        ctx.fillStyle = '#FF0000'; // Red
+        ctx.fillRect(playerPosition.x, playerPosition.y, 40, 50);
       }
       
-      // Apply movement with type-specific speed
-      return { 
-        ...enemy, 
-        x: enemy.x + dx * enemy.moveSpeed * deltaTime,
-        y: Math.max(0, Math.min(350, enemy.y + dy))
-      };
-    }));
-    
-    // Update boss if active
-    if (bossActive) {
-      updateBoss(deltaTime);
+      // Draw a debug marker at player center
+      ctx.fillStyle = '#FFFF00'; // Yellow dot
+      ctx.beginPath();
+      ctx.arc(playerPosition.x + 20, playerPosition.y + 25, 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+    } catch (error) {
+      console.error("Error drawing player:", error);
+      // Fallback drawing
+      ctx.fillStyle = '#FF0000'; // Red
+      ctx.fillRect(playerPosition.x, playerPosition.y, 40, 50);
     }
   };
   
-  // Update boss behavior
-  const updateBoss = (deltaTime) => {
-    // Boss movement pattern based on phase and boss type
-    const bossPhase = Math.floor((bossHealth / 100) * 3); // 0-2 phases based on health
-    let dx = 0;
-    let dy = 0;
-    
-    const bossBehaviors = {
-      lion: [
-        // Phase 1: Regular movement
-        () => {
-          if (Date.now() % 6000 < 3000) {
-            dx = -1; // Move left
-          } else {
-            dx = 1; // Move right
-          }
-          
-          // Jump occasionally
-          if (Date.now() % 4000 < 50) {
-            setBossJumping(true);
-            bossVelocityY = -15;
-          }
-          
-          // Standard attack pattern
-          if (Date.now() % 2000 < 50) {
-            shootBullet('boss');
-          }
-        },
-        // Phase 2: More aggressive
-        () => {
-          // More erratic movement
-          dx = Math.sin(Date.now() / 500) * 2;
-          
-          // Jump more often
-          if (Date.now() % 3000 < 50) {
-            setBossJumping(true);
-            bossVelocityY = -15;
-          }
-          
-          // Attack more frequently
-          if (Date.now() % 1500 < 50) {
-            shootBullet('boss');
-          }
-        },
-        // Phase 3: Desperate attacks
-        () => {
-          // Rapid movement
-          dx = Math.sin(Date.now() / 300) * 3;
-          
-          // Frequent jumps
-          if (Date.now() % 2000 < 50) {
-            setBossJumping(true);
-            bossVelocityY = -15;
-          }
-          
-          // Special attacks
-          if (Date.now() % 4000 < 100) {
-            // Burst fire
-            setTimeout(() => shootBullet('boss'), 0);
-            setTimeout(() => shootBullet('boss'), 200);
-            setTimeout(() => shootBullet('boss'), 400);
-          }
-          
-          // Occasional special attack
-          if (Date.now() % 8000 < 50) {
-            shootBullet('boss', true);
-          }
-        }
-      ],
-      general: [
-        // Different patterns for the general boss
-        // Phase 1
-        () => {
-          // Strategic movement
-          if (playerPosition.x < bossPosition.x - 100) {
-            dx = -0.5; // Advance toward player
-          } else if (playerPosition.x > bossPosition.x + 100) {
-            dx = 0.5; // Back away from player
-          }
-          
-          // Standard attack pattern
-          if (Date.now() % 2500 < 50) {
-            shootBullet('boss');
-          }
-        },
-        // Phase 2
-        () => {
-          // Call reinforcements
-          if (Date.now() % 10000 < 50 && enemies.length < 5) {
-            // Spawn a supporting enemy
-            setEnemies(prev => [...prev, {
-              id: `enemy-${Date.now()}`,
-              x: bossPosition.x,
-              y: bossPosition.y + 50,
-              health: 30,
-              type: 'soldier',
-              direction: 'left',
-              shootRange: 300,
-              moveSpeed: 2,
-              shootCooldown: 1500,
-              lastShot: 0
-            }]);
-          }
-          
-          // Tactical movement
-          dx = Math.sin(Date.now() / 800);
-          
-          // Targeted attacks
-          if (Date.now() % 2000 < 50) {
-            shootBullet('boss');
-          }
-        },
-        // Phase 3
-        () => {
-          // Erratic movement
-          dx = Math.sin(Date.now() / 400) * 1.5;
-          
-          // Heavy attacks
-          if (Date.now() % 3000 < 50) {
-            shootBullet('boss', true);
-          }
-          
-          // Regular attacks
-          if (Date.now() % 1000 < 50) {
-            shootBullet('boss');
-          }
-        }
-      ]
-    };
-    
-    // Call the appropriate behavior function based on boss type and phase
-    const bossType = bossType || 'lion';
-    bossBehaviors[bossType][Math.min(bossPhase, 2)]();
-    
-    // Apply boss movement
-    setBossPosition(prev => ({
-      x: Math.max(1600, Math.min(1900, prev.x + dx * deltaTime)),
-      y: Math.max(200, Math.min(300, prev.y + dy * deltaTime))
-    }));
+  // Draw Hemingway companion
+  const drawHemingway = (ctx) => {
+    if (hemingwayImageRef.current && hemingwayImageRef.current.complete) {
+      // Draw Hemingway image
+      ctx.drawImage(hemingwayImageRef.current, hemingwayPosition.x, hemingwayPosition.y, 40, 50);
+    } else {
+      // Fallback to rectangle if image not loaded
+      ctx.fillStyle = '#0000FF'; // Blue
+      ctx.fillRect(hemingwayPosition.x, hemingwayPosition.y, 40, 50);
+    }
   };
   
-  // Check if entity is on ground or platform
-  const checkOnGround = (position) => {
-    return platforms.some(platform => 
-      position.y + 50 >= platform.y && 
-      position.y + 50 <= platform.y + 10 &&
-      position.x + 30 >= platform.x && 
-      position.x <= platform.x + platform.width
-    );
+  // Draw HUD
+  const drawHUD = (ctx) => {
+    // Draw score
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '16px Courier New';
+    ctx.fillText(`Score: ${score}`, 20, 30);
+    
+    // Draw health bar
+    ctx.fillStyle = '#333333';
+    ctx.fillRect(20, 40, 150, 15); // Background
+    
+    // Health fill
+    const healthWidth = (playerHealth / 100) * 150;
+    ctx.fillStyle = playerHealth > 50 ? '#00FF00' : playerHealth > 25 ? '#FFFF00' : '#FF0000';
+    ctx.fillRect(20, 40, healthWidth, 15);
+    
+    // Draw level name
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '14px Courier New';
+    ctx.fillText(levelDescriptions[currentLevel], 20, 70);
+    
+    // Draw manuscripts collected
+    const collectedCount = collectibles.filter(item => item.type === 'manuscript' && item.collected).length;
+    const totalCount = collectibles.filter(item => item.type === 'manuscript').length;
+    ctx.fillText(`Manuscripts: ${collectedCount}/${totalCount}`, 20, 90);
   };
   
-  // Check collisions
-  const checkCollisions = () => {
-    // Check bullet collisions with enemies
-    bullets.forEach(bullet => {
-      if (bullet.shooter === 'player' || bullet.shooter === 'hemingway') {
-        // Check against enemies
-        enemies.forEach(enemy => {
-          if (
-            bullet.x >= enemy.x && 
-            bullet.x <= enemy.x + 40 && 
-            bullet.y >= enemy.y && 
-            bullet.y <= enemy.y + 40
-          ) {
-            // Remove bullet
-            setBullets(prev => prev.filter(b => b.id !== bullet.id));
-            
-            // Calculate damage based on bullet type
-            let damage = bullet.damage || 10;
-            
-            // Apply player level bonus
-            damage += Math.floor(playerLevel / 2);
-            
-            // Critical hits for special bullets
-            const isCritical = bullet.class?.includes('special') && Math.random() < 0.3;
-            if (isCritical) {
-              damage *= 2;
-              // Visual effect for critical hit could be added here
-              
-              // Chance to display quote on critical hit
-              if (Math.random() < 0.3) {
-                displayRandomQuote('criticalHit');
-              }
-            }
-            
-            // Damage enemy
-            setEnemies(prev => prev.map(e => {
-              if (e.id === enemy.id) {
-                return { ...e, health: e.health - damage };
-              }
-              return e;
-            }).filter(e => e.health > 0));
-            
-            // Grant XP for hit
-            setPlayerXP(prev => prev + 5);
-            
-            // If enemy is defeated, grant additional XP
-            if (enemy.health - damage <= 0) {
-              setPlayerXP(prev => prev + 10 + (enemy.type === 'tank' ? 20 : enemy.type === 'sniper' ? 15 : enemy.type === 'soldier' ? 10 : 5));
-            }
-            
-            // Increase score based on damage
-            setScore(prev => prev + Math.floor(damage));
-            
-            // Play hit sound
-            playGameSound(isCritical ? 'criticalHit' : 'hit');
-          }
-        });
-        
-        // Check against boss
-        if (bossActive && 
-            bullet.x >= bossPosition.x && 
-            bullet.x <= bossPosition.x + 100 && 
-            bullet.y >= bossPosition.y && 
-            bullet.y <= bossPosition.y + 100
-        ) {
-          // Remove bullet
-          setBullets(prev => prev.filter(b => b.id !== bullet.id));
-          
-          // Calculate damage with level bonus
-          let damage = (bullet.damage || 5) + Math.floor(playerLevel / 3);
-          
-          // If this is the first hit on the boss, show a quote
-          if (bossHealth === 500) {
-            displayRandomQuote('boss');
-          }
-          
-          // Critical hits
-          const isCritical = bullet.class?.includes('special') && Math.random() < 0.2;
-          if (isCritical) {
-            damage *= 1.5;
-            
-            // Chance to display quote on critical hit
-            if (Math.random() < 0.3) {
-              displayRandomQuote('criticalHit');
-            }
-          }
-          
-          // Damage boss
-          setBossHealth(prev => Math.max(0, prev - damage));
-          
-          // Grant XP for boss hit
-          setPlayerXP(prev => prev + 10);
-          
-          // Increase score
-          setScore(prev => prev + Math.floor(damage));
-          
-          // Play hit sound
-          playGameSound(isCritical ? 'boss-criticalHit' : 'bossHit');
-          
-          // Check if boss is defeated
-          if (bossHealth - damage <= 0) {
-            setBossActive(false);
-            setScore(prev => prev + 500);
-            setPlayerXP(prev => prev + 300); // Big XP bonus for defeating boss
-            setVictory(true);
-            
-            // Victory quote
-            displayRandomQuote('victory');
-            
-            // Play victory sound
-            playGameSound('bossDefeated');
-          }
-        }
-      } else if (bullet.shooter === 'boss' || bullet.shooter.startsWith('enemy-')) {
-        // Check against player
-        if (
-          bullet.x >= playerPosition.x && 
-          bullet.x <= playerPosition.x + 40 && 
-          bullet.y >= playerPosition.y && 
-          bullet.y <= playerPosition.y + 50
-        ) {
-          // Remove bullet
-          setBullets(prev => prev.filter(b => b.id !== bullet.id));
-          
-          // Calculate damage
-          let damage = bullet.damage || 10;
-          
-          // Reduce damage if player has shield powerup
-          if (playerPowerups.shield.active) {
-            damage = Math.floor(damage * 0.5);
-            // Visual shield effect
-          }
-          
-          // Apply damage to player
-          setPlayerHealth(prev => Math.max(0, prev - damage));
-          
-          // Play hit sound
-          playGameSound('playerHit');
-        }
-        
-        // Check against Hemingway
-        if (
-          bullet.x >= hemingwayPosition.x && 
-          bullet.x <= hemingwayPosition.x + 40 && 
-          bullet.y >= hemingwayPosition.y && 
-          bullet.y <= hemingwayPosition.y + 50
-        ) {
-          // Remove bullet
-          setBullets(prev => prev.filter(b => b.id !== bullet.id));
-          
-          // Damage Hemingway
-          setHemingwayHealth(prev => Math.max(0, prev - (bullet.damage || 5)));
-          
-          // Play hit sound
-          playGameSound('hemingwayHit');
-        }
+  // Draw dialog bubble
+  const drawDialog = (ctx, text) => {
+    const x = 400; // Center of screen
+    const y = 100; // Near top of screen
+    
+    // Draw bubble
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    
+    // Round rectangle
+    ctx.beginPath();
+    ctx.roundRect(x - 150, y - 30, 300, 60, 10);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Draw text
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '12px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, x, y);
+    ctx.fillText("- Hemingway", x + 80, y + 20);
+    ctx.textAlign = 'left'; // Reset text alignment
+  };
+  
+  // Draw quote
+  const drawQuote = (ctx) => {
+    const x = 400; // Center of screen
+    const y = 200; // Middle of screen
+    
+    // Draw quote background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.strokeStyle = '#999999';
+    ctx.lineWidth = 2;
+    
+    // Round rectangle
+    ctx.beginPath();
+    ctx.roundRect(x - 200, y - 40, 400, 80, 15);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Draw quote text
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '14px Courier New';
+    ctx.textAlign = 'center';
+    
+    // Split text into multiple lines if needed
+    const words = currentQuote.text.split(' ');
+    let line = '';
+    let lines = [];
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i] + ' ';
+      if (ctx.measureText(testLine).width > 380) {
+        lines.push(line);
+        line = words[i] + ' ';
+      } else {
+        line = testLine;
       }
+    }
+    lines.push(line);
+    
+    // Draw each line
+    lines.forEach((line, index) => {
+      ctx.fillText(line, x, y - 15 + (index * 20));
     });
     
-    // Check item collisions with player
-    setItems(prev => prev.map(item => {
-      if (
-        !item.collected &&
-        playerPosition.x + 30 >= item.x && 
-        playerPosition.x <= item.x + 30 && 
-        playerPosition.y + 50 >= item.y && 
-        playerPosition.y <= item.y + 30
-      ) {
-        // Apply item effect
-        switch (item.type) {
-          case 'health':
-            setPlayerHealth(prev => Math.min(100, prev + 20));
-            playGameSound('healthPickup');
-            break;
-          case 'weapon':
-            // Activate rapid fire powerup
-            setPlayerPowerups(prev => ({...prev, rapidFire: { active: true, timeLeft: 15 }}));
-            setTimeout(() => {
-              setPlayerPowerups(prev => ({...prev, rapidFire: { active: false, timeLeft: 0 }}));
-            }, 15000); // 15 seconds
-            playGameSound('weaponPickup');
-            setPlayerXP(prev => prev + 15); // XP for weapon pickup
-            break;
-          case 'ammo':
-            // Create a special shot
-            setTimeout(() => shootBullet('player', true), 100);
-            playGameSound('ammoPickup');
-            setPlayerXP(prev => prev + 5); // XP for ammo pickup
-            break;
-          case 'manuscript':
-            // Increase score and XP
-            setScore(prev => prev + 100);
-            setPlayerXP(prev => prev + 25); // XP for manuscript pickup
-            playGameSound('manuscriptPickup');
-            break;
-          case 'powerup':
-            // Apply specific powerup and grant XP
-            if (item.variant === 'speed') {
-              setPlayerPowerups(prev => ({...prev, speedBoost: { active: true, timeLeft: 10 }}));
-              setTimeout(() => {
-                setPlayerPowerups(prev => ({...prev, speedBoost: { active: false, timeLeft: 0 }}));
-              }, 10000); // 10 seconds
-            } else if (item.variant === 'shield') {
-              setPlayerPowerups(prev => ({...prev, shield: { active: true, timeLeft: 10 }}));
-              setTimeout(() => {
-                setPlayerPowerups(prev => ({...prev, shield: { active: false, timeLeft: 0 }}));
-              }, 10000); // 10 seconds
-            }
-            setPlayerXP(prev => prev + 20); // XP for powerup pickup
-            playGameSound('powerupPickup');
-            break;
-        }
-        
-        return { ...item, collected: true };
-      }
-      return item;
-    }));
+    // Draw attribution
+    ctx.font = 'italic 12px Courier New';
+    ctx.fillText(currentQuote.author, x, y + 30);
+    
+    ctx.textAlign = 'left'; // Reset text alignment
   };
   
-  // Check level completion
-  const checkLevelCompletion = () => {
-    // Level is complete when all enemies are defeated or boss is defeated
-    if (enemies.length === 0 && !bossActive) {
-      if (currentLevel < 3) {
-        // Move to next level
-        setCurrentLevel(prev => prev + 1);
-        
-        // Grant XP for completing level
-        setPlayerXP(prev => prev + 100 * currentLevel);
-        
-        // Spawn new enemies
-        spawnEnemies();
-      } else if (!victory) {
-        // Game complete
-        setVictory(true);
-        
-        // Final XP bonus
-        setPlayerXP(prev => prev + 500);
-      }
+  // Draw debug grid (helps visualize movement)
+  const drawDebugGrid = (ctx) => {
+    // Only in development mode
+    if (process.env.NODE_ENV !== 'development') return;
+    
+    const gridSize = 100;
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    
+    // Vertical lines
+    for (let x = 0; x < levelWidth; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, 400);
+      ctx.stroke();
+    }
+    
+    // Horizontal lines
+    for (let y = 0; y < 400; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(levelWidth, y);
+      ctx.stroke();
     }
   };
   
-  // Render game (this would typically use canvas or DOM elements)
-  const renderGame = () => {
-    // This is a placeholder for actual rendering
-    console.log('Rendering game frame');
-  };
-  
-  // Handle level completion
-  const handleComplete = () => {
-    if (onComplete) {
-      onComplete(score);
-    }
+  // Draw debug info
+  const drawDebugInfo = (ctx) => {
+    // Only in development mode
+    if (process.env.NODE_ENV !== 'development') return;
+    
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(600, 10, 190, 100);
+    
+    ctx.fillStyle = '#00ff00';
+    ctx.font = '12px monospace';
+    ctx.fillText(`Player: X:${Math.floor(playerPosition.x)} Y:${Math.floor(playerPosition.y)}`, 610, 30);
+    ctx.fillText(`Velocity: X:${playerVelocity.x.toFixed(2)} Y:${playerVelocity.y.toFixed(2)}`, 610, 50);
+    ctx.fillText(`Facing: ${isFacingRight ? 'Right' : 'Left'}`, 610, 70);
+    ctx.fillText(`Jumping: ${isJumping ? 'Yes' : 'No'}`, 610, 90);
   };
   
   // Handle exit
   const handleExit = () => {
-    if (onExit) {
-      onExit();
+    if (onExit) onExit();
+  };
+
+  // Play sound effect with robust error handling
+  const playSound = (soundName) => {
+    // Skip sounds if we're having issues with the sound system
+    try {
+      // Try to find a working path but don't throw errors if it fails
+      const audio = new Audio();
+      
+      // Set up error handling before setting src to prevent unhandled rejections
+      audio.onerror = () => {
+        // Silently fail - we don't want sound issues to break the game
+        console.log(`Could not load sound: ${soundName} - continuing without sound`);
+      };
+      
+      // Try with the most likely path
+      audio.src = `/assets/sounds/hemingway/${soundName}.mp3`;
+      
+      // Set volume and play with catch for browser autoplay restrictions
+      audio.volume = 0.3; // Lower volume to be less intrusive
+      
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          // Silently fail on autoplay restrictions or other issues
+          console.log(`Couldn't play sound ${soundName}: ${error.message}`);
+        });
+      }
+    } catch (error) {
+      // Completely silent catch - sounds are non-essential
+      console.log(`Sound system error with ${soundName}: ${error.message}`);
     }
   };
-  
-  // Check for player level ups
-  useEffect(() => {
-    // Check if player has enough XP to level up
-    if (playerLevel < levelThresholds.length - 1 && playerXP >= levelThresholds[playerLevel]) {
-      // Level up
-      setPlayerLevel(prev => prev + 1);
-      setShowLevelUp(true);
-      
-      // Play level up sound
-      playGameSound('levelUp');
-      
-      // Display a random Hemingway quote
-      displayRandomQuote('levelUp');
-      
-      // Hide level up message after a delay
-      setTimeout(() => {
-        setShowLevelUp(false);
-      }, 4000);
-      
-      // Grant level up bonus
-      applyLevelUpBonus();
-    }
-  }, [playerXP, playerLevel]);
-  
-  // Apply level up bonuses
-  const applyLevelUpBonus = () => {
-    // Play level up sound
-    playGameSound('levelUp');
-    
-    // Determine bonus based on current level
-    const bonusType = Math.floor(Math.random() * 3);
-    
-    switch(bonusType) {
-      case 0:
-        // Health bonus
-        setPlayerHealth(prev => Math.min(100, prev + 25));
-        setPlayerMessage("Health boost!");
-        break;
-      case 1:
-        // Temporary power-up - rapid fire
-        setPlayerPowerups(prev => ({
-          ...prev,
-          rapidFire: { active: true, timeLeft: 10000 }
-        }));
-        setPlayerMessage("Rapid fire activated!");
-        break;
-      case 2:
-        // Temporary shield
-        setPlayerPowerups(prev => ({
-          ...prev,
-          shield: { active: true, timeLeft: 8000 }
-        }));
-        setPlayerMessage("Shield activated!");
-        break;
-    }
-    
-    // Give extra ammo
-    setSpecialAmmo(prev => prev + 2);
-    
-    // Show message for a while
-    setTimeout(() => {
-      setPlayerMessage("");
-    }, 3000);
-  };
-  
-  // Handle player death
-  const handlePlayerDeath = () => {
-    if (!gameOver) {
-      // Play game over sound
-      playGameSound('gameOver');
-      
-      // Display death quote
-      displayRandomQuote('lowHealth');
-      
-      // Set game over after a short delay
-      setTimeout(() => {
-        setGameOver(true);
-      }, 1500);
-    }
-  };
-  
-  // Update player health check in the game loop to use handlePlayerDeath
-  useEffect(() => {
-    if (playerHealth <= 0 && !gameOver) {
-      handlePlayerDeath();
-    }
-    
-    // Health low warning quote
-    if (playerHealth < 30 && !showQuote && Math.random() < 0.02) {
-      displayRandomQuote('lowHealth');
-    }
-  }, [playerHealth, gameOver, showQuote]);
-  
-  // Display a random Hemingway quote based on game event
-  const displayRandomQuote = (context) => {
-    let relevantQuotes = [];
-    
-    // Select quotes based on context
-    switch(context) {
-      case 'levelUp':
-        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('triumph') || q.themes.includes('courage'));
-        break;
-      case 'criticalHit':
-        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('battle') || q.themes.includes('blood'));
-        // Play critical hit sound for quotes about battle
-        playGameSound('criticalHit', 0.4);
-        break;
-      case 'lowHealth':
-        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('death') || q.themes.includes('pain'));
-        break;
-      case 'death':
-        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('death') || q.themes.includes('loss'));
-        break;
-      case 'victory':
-        relevantQuotes = hemingwayQuotes.filter(q => q.themes.includes('triumph') || q.themes.includes('victory'));
-        // Play victory sound for victory quotes
-        playGameSound('victory', 0.6);
-        break;
-      default:
-        relevantQuotes = hemingwayQuotes;
-    }
-    
-    // Select a random quote from relevant ones or fallback to any quote
-    const selectedQuote = relevantQuotes.length > 0
-      ? relevantQuotes[Math.floor(Math.random() * relevantQuotes.length)]
-      : hemingwayQuotes[Math.floor(Math.random() * hemingwayQuotes.length)];
-      
-    // Display the quote
-    setCurrentQuote(selectedQuote);
+
+  // Show a Hemingway quote
+  const showHemingwayQuote = (index = -1) => {
+    const quoteIndex = index >= 0 ? index : Math.floor(Math.random() * hemingwayQuotes.length);
+    setCurrentQuote(hemingwayQuotes[quoteIndex]);
     setShowQuote(true);
     
-    // Hide quote after 5 seconds
+    // Hide quote after a few seconds
     setTimeout(() => {
       setShowQuote(false);
     }, 5000);
   };
   
-  // Update the playGameSound function
-  const playGameSound = (type, volume = 0.5) => {
-    if (!soundManager) return;
-    
-    const soundId = SOUND_MAPPING[type];
-    if (soundId) {
-      soundManager.playSound(soundId, volume);
-    } else {
-      console.log(`No sound mapping found for: ${type}`);
-    }
-  };
-  
-  // Update enemy defeated handler to award XP
-  const handleEnemyDefeated = (enemy) => {
-    // Award XP based on enemy type
-    let xpGain = 0;
-    switch(enemy.type) {
-      case 'grunt':
-        xpGain = 10;
-        setScore(prevScore => prevScore + 10);
-        break;
-      case 'soldier':
-        xpGain = 20;
-        setScore(prevScore => prevScore + 20);
-        break;
-      case 'sniper':
-        xpGain = 30;
-        setScore(prevScore => prevScore + 30);
-        break;
-      case 'tank':
-        xpGain = 50;
-        setScore(prevScore => prevScore + 50);
-        break;
-      default:
-        xpGain = 10;
-        setScore(prevScore => prevScore + 10);
-    }
-    
-    // Play defeat sound
-    playGameSound('hit', 0.4);
-    
-    // Award XP
-    setPlayerXP(prevXP => prevXP + xpGain);
-    
-    // Random chance for Hemingway quote after defeating enemy
-    if (Math.random() < 0.2) {
-      displayRandomQuote('criticalHit');
-    }
-    
-    // Update enemy counter
-    setEnemiesDefeated(prevCount => prevCount + 1);
-  };
-  
-  // Update the boss defeated handler 
-  const handleBossDefeated = () => {
-    // Award XP and score for boss defeat
-    const bossBonus = 500;
-    setScore(prevScore => prevScore + bossBonus);
-    setPlayerXP(prevXP => prevXP + bossBonus);
-    
-    // Play boss defeated sound
-    playGameSound('bossDefeated', 0.7);
-    
-    // Stop boss music and play victory music
-    playGameSound('victory', 0.4);
-    
-    // Display victory message
-    displayRandomQuote('victory');
-    
-    // Set the victory state
-    setTimeout(() => {
-      setVictory(true);
-    }, 2000);
-  };
-  
-  // Add helper function to get level name
-  const getLevelName = (level) => {
-    switch(level) {
-      case 1: 
-        return "Paris Cafes";
-      case 2: 
-        return "Spanish Civil War";
-      case 3: 
-        return "African Safari";
-      default: 
-        return `Level ${level}`;
-    }
-  };
-  
-  // Add a function to handle level completion
-  const handleLevelCompletion = () => {
-    // Calculate score bonus based on health, time, etc.
-    const healthBonus = playerHealth * 2;
-    setScore(prevScore => prevScore + healthBonus);
-    
-    // Award XP for level completion
-    const levelBonus = currentLevel * 100;
-    setPlayerXP(prevXP => prevXP + levelBonus);
-    
-    // Play level complete sound
-    playGameSound('levelUp', 0.6);
-    
-    // Pause for dramatic effect
-    setTimeout(() => {
-      if (currentLevel < 3) {
-        // Move to next level
-        setCurrentLevel(prevLevel => prevLevel + 1);
-      } else {
-        // Game victory
-        setVictory(true);
-        playGameSound('victory', 0.7);
-      }
-    }, 2000);
-  };
-  
-  // Add a reset level elements function
-  const resetLevelElements = () => {
-    // Reset game state for new level but keep progression
-    setBullets([]);
-    setEnemies([]);
-    setItems([]);
-    setPlatforms([]);
-    setBossActive(false);
-    setBossHealth(0);
-    
-    // Reset positions
-    setPlayerPosition({x: 100, y: 300});
-    setHemingwayPosition({x: 150, y: 300});
-    
-    // Restore some health
-    setPlayerHealth(prevHealth => Math.min(prevHealth + 20, 100));
-    setHemingwayHealth(prevHealth => Math.min(prevHealth + 20, 100));
-    
-    // Initialize new level
-    initializeLevelDesign(currentLevel + 1);
-    
-    // Show brief intro for new level
-    setShowIntro(true);
-    setTimeout(() => setShowIntro(false), 3000);
-  };
-  
+  // Component render
   return (
     <div className="level4-shooter">
       <div className="game-hud">
-        <div className="health-bar">
-          <div className="health-label">HEALTH</div>
-          <div className="health-bar-outer">
-            <div
-              className="health-bar-inner"
-              style={{
-                width: `${(playerHealth / 100) * 100}%`,
-                backgroundColor: playerHealth > 60
-                  ? '#3f3'
-                  : playerHealth > 30
-                    ? '#ff3'
-                    : '#f33'
-              }}
-            />
-          </div>
-        </div>
-        
-        <div className="player-level">
-          WRITER LVL: {playerLevel}
-        </div>
-        
-        <div className="xp-bar">
-          <div
-            className="xp-bar-inner"
-            style={{
-              width: playerLevel < levelThresholds.length - 1
-                ? `${((playerXP - levelThresholds[playerLevel - 1] || 0) / 
-                    (levelThresholds[playerLevel] - (levelThresholds[playerLevel - 1] || 0))) * 100}%`
-                : '100%'
-            }}
-          />
-        </div>
-        
-        <div className="score-display">
-          SCORE: {score}
-        </div>
-        
-        <div className="level-display">
-          AREA: {currentLevel}
-        </div>
-        
-        <div className="level-name">
-          {getLevelName(currentLevel)}
-        </div>
-        
-        {Object.keys(playerPowerups).filter(powerup => playerPowerups[powerup].active).length > 0 && (
-          <div className="powerups">
-            {playerPowerups.rapidFire.active && (
-              <div className="powerup-icon rapid-fire" title="Rapid Fire">🔥</div>
-            )}
-            {playerPowerups.shield.active && (
-              <div className="powerup-icon shield" title="Shield">🛡️</div>
-            )}
-            {playerPowerups.speedBoost.active && (
-              <div className="powerup-icon speed" title="Speed Boost">⚡</div>
-            )}
-          </div>
-        )}
-        
-        {bossActive && (
-          <div className="boss-health-bar">
-            <div className="health-label">BOSS: {bossType === 'lion' ? 'LION' : 'GENERAL'}</div>
-            <div className="health-bar-outer boss">
-              <div
-                className="health-bar-inner"
-                style={{
-                  width: `${(bossHealth / 500) * 100}%`,
-                  backgroundColor: bossHealth > 300
-                    ? '#f33'
-                    : bossHealth > 150
-                      ? '#f63'
-                      : '#f93'
-                }}
-              />
-            </div>
-          </div>
-        )}
+        <div className="score-display">SCORE: {score}</div>
+        <div className="health-display">HEALTH: {playerHealth}</div>
       </div>
       
-      <div
-        className={`game-canvas-container ${
-          currentLevel === 1
-            ? 'paris-background'
-            : currentLevel === 2
-              ? 'spain-background'
-              : 'africa-background'
-        }`}
-        ref={canvasRef}
-      >
-        {/* Display quote bubble when a quote is shown */}
-        {showQuote && currentQuote && (
-          <div className="quote-container">
-            <div className="quote-bubble">
-              <p className="quote-text">"{currentQuote}"</p>
-              <p className="quote-attribution">- Ernest Hemingway</p>
-            </div>
-          </div>
-        )}
-
-        {/* Level up notification */}
-        {showLevelUp && (
-          <div className="level-up-notification">
-            <div className="level-up-content">
-              <h3>LEVEL UP!</h3>
-              <p>Your writing prowess has reached level {playerLevel}</p>
-            </div>
-          </div>
-        )}
-
+      <div className={`game-canvas-container ${currentLevel}-background`}>
         <canvas
           ref={canvasRef}
           width={800}
@@ -1812,45 +1021,24 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
         />
       </div>
       
-      {/* Rest of the game overlays */}
-      {!isGameActive && !gameOver && !victory && (
-        <div className="intro-overlay">
-          <div className="intro-content">
-            <h2>Hemingway's Adventure</h2>
-            <p>Join Ernest Hemingway through the battlefields of his life!</p>
-            <p>MOVEMENT: Arrow keys / WASD</p>
-            <p>SHOOT: Space bar</p>
-            <p>JUMP: Up arrow / W</p>
-            <p>CROUCH: Down arrow / S (in trenches for cover)</p>
-            <button onClick={startGame}>Begin Adventure</button>
-          </div>
-        </div>
-      )}
-      
       {gameOver && (
         <div className="game-over-overlay">
           <div className="game-over-content">
-            <h2>The End</h2>
-            <p>"But man is not made for defeat. A man can be destroyed but not defeated."</p>
-            <p>Final Score: {score}</p>
-            <p>Writer Level: {playerLevel}</p>
-            <button onClick={handleExit}>Exit</button>
+            <h2>{playerHealth <= 0 ? "Game Over" : "Victory!"}</h2>
+            <p>Your score: {score}</p>
+            {playerHealth <= 0 ? (
+              <button onClick={startGame}>Try Again</button>
+            ) : (
+              <p>"Throughout his life, Hemingway sought adventure and meaning in his travels, capturing the essence of the human experience through his writing."</p>
+            )}
+            <button onClick={handleExit}>Exit Game</button>
           </div>
         </div>
       )}
       
-      {victory && (
-        <div className="victory-overlay">
-          <div className="victory-content">
-            <h2>Victory!</h2>
-            <p>"There is nothing to writing. All you do is sit down at a typewriter and bleed."</p>
-            <p>Writer Level: {playerLevel}</p>
-            <p>XP Earned: {playerXP}</p>
-            <p>Final Score: {score}</p>
-            <button onClick={handleComplete}>Continue</button>
-          </div>
-        </div>
-      )}
+      <div className="controls-info">
+        <p>Use ARROW KEYS or WASD to move | UP or SPACE to jump | ESC to exit</p>
+      </div>
     </div>
   );
 };

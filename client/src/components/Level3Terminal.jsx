@@ -213,10 +213,8 @@ const Level3Terminal = ({ character, artifacts, onExit, username, inventory }) =
         const manager = SoundManager.getInstance();
         await manager.initialize();
         
-        // Register keyboard typing sound if not already registered
-        if (!manager.sounds['keyboard_typing']) {
-          manager.registerSound('keyboard_typing', '/assets/sounds/keyboard_typing.mp3');
-        }
+        // Load keyboard typing sound
+        await manager.loadSound('keyboard_typing', '/assets/sounds/keyboard_typing.mp3');
         
         setSoundManager(manager);
       } catch (error) {
