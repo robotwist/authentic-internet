@@ -38,6 +38,7 @@ import AchievementNotification from './AchievementNotification';
 import Level3Terminal from './Level3Terminal';
 import Level4Shooter from './Level4Shooter';
 import HemingwayChallenge from './HemingwayChallenge';
+import FeedbackDisplay from './shared/FeedbackDisplay';
 import { useAuth } from '../context/AuthContext';
 import { useAchievements } from '../context/AchievementContext';
 import { useGameState } from '../context/GameStateContext';
@@ -643,7 +644,7 @@ const GameWorld = () => {
   }, [currentMapIndex, characterPosition, soundManager]);
 
   // Now we can safely use handleCharacterMove in the hook
-  const { isBumping, bumpDirection, movementDirection, diagonalMovement } = useCharacterMovement(
+  const { isBumping, bumpDirection, movementDirection, diagonalMovement, feedbackMessage } = useCharacterMovement(
     characterPosition, 
     handleCharacterMove,
     currentMapIndex, 
@@ -1694,6 +1695,9 @@ const GameWorld = () => {
             
             {/* Environment Modifiers */}
             {isDarkMode && <div className="darkmode-overlay" />}
+            
+            {/* Feedback Message Display */}
+            <FeedbackDisplay message={feedbackMessage} type="info" />
             
             {/* Buttons Menu */}
             <div className="game-controls">

@@ -94,12 +94,7 @@ export const MAPS = [
         type: NPC_TYPES.JOHN_MUIR,
         name: 'John Muir',
         position: { x: 5 * TILE_SIZE, y: 14 * TILE_SIZE },
-        patrolArea: {
-          startX: 3,
-          startY: 13,
-          width: 10,
-          height: 4
-        },
+        isPatrolling: false, // Fixed position NPC to avoid conflicts
         dialogue: [
           "The mountains are calling and I must go. (Letter to his sister Sarah Muir, 1873)",
           "In every walk with nature one receives far more than he seeks. (Unpublished journals, circa 1877)",
@@ -167,7 +162,8 @@ export const MAPS = [
         name: "Zeus the Weatherman",
         type: NPC_TYPES.ZEUS,
         apiType: 'zeus',
-        position: { x: 3 * TILE_SIZE, y: 3 * TILE_SIZE },
+        position: { x: 4 * TILE_SIZE, y: 3 * TILE_SIZE }, // Moved to walkable tile (x=4,y=3 is tile value 0)
+        isPatrolling: false, // Fixed position to avoid movement conflicts
         dialogue: [
           "By my thunderbolts! Today's forecast calls for partly cloudy with a chance of divine intervention!",
           "Expect high-pressure systems over Mount Olympus, with occasional lightning strikes... those are mine, by the way.",
