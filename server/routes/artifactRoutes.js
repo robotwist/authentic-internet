@@ -1,7 +1,11 @@
 import express from "express";
+import { body, validationResult } from "express-validator";
 import Artifact from "../models/Artifact.js";
 import User from "../models/User.js";
 import authenticateToken from "../middleware/authMiddleware.js";
+import { apiLimiter } from "../utils/rateLimiting.js";
+import { validateFileUpload } from "../middleware/fileValidation.js";
+import rateLimit from "express-rate-limit";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -82,15 +86,106 @@ const uploadFields = upload.fields([
   { name: 'artifactIcon', maxCount: 1 }
 ]);
 
+// Validation middleware for artifact creation
+const validateArtifactCreation = [
+  body('name')
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Name must be between 1 and 100 characters')
+    .matches(/^[a-zA-Z0-9\s\-_.,!?()]+$/)
+    .withMessage('Name contains invalid characters')
+    .escape(),
+  
+  body('description')
+    .trim()
+    .isLength({ min: 1, max: 500 })
+    .withMessage('Description must be between 1 and 500 characters')
+    .escape(),
+    
+  body('content')
+    .trim()
+    .isLength({ min: 1, max: 2000 })
+    .withMessage('Content must be between 1 and 2000 characters')
+    .escape(),
+    
+  body('area')
+    .trim()
+    .isIn(['world', 'forest', 'mountains', 'village', 'dungeon', 'castle'])
+    .withMessage('Invalid area specified'),
+    
+  body('riddle')
+    .optional()
+    .trim()
+    .isLength({ max: 1000 })
+    .withMessage('Riddle must not exceed 1000 characters')
+    .escape(),
+    
+  body('unlockAnswer')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Unlock answer must not exceed 100 characters')
+    .escape(),
+    
+  body('isExclusive')
+    .optional()
+    .isBoolean()
+    .withMessage('isExclusive must be a boolean'),
+    
+  body('location.x')
+    .isNumeric()
+    .withMessage('Location X must be a number')
+    .isFloat({ min: -1000, max: 1000 })
+    .withMessage('Location X must be between -1000 and 1000'),
+    
+  body('location.y')
+    .isNumeric()
+    .withMessage('Location Y must be a number')
+    .isFloat({ min: -1000, max: 1000 })
+    .withMessage('Location Y must be between -1000 and 1000')
+];
+
+// Enhanced rate limiter for artifact creation
+const artifactCreationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each user to 5 artifact creations per windowMs
+  message: {
+    error: 'RATE_LIMITED',
+    message: 'Too many artifacts created. Please wait before creating more.',
+    retryAfter: 15 * 60
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Key generator to rate limit per user
+  keyGenerator: (req) => req.user?.userId || req.ip,
+  skip: (req) => process.env.NODE_ENV === 'development' && req.ip === '127.0.0.1'
+});
+
 /* ────────────────────────────────
    🔹 CREATE ARTIFACT (WITH MESSAGE)
 ──────────────────────────────── */
-router.post("/", authenticateToken, uploadFields, async (req, res) => {
+router.post("/", artifactCreationLimiter, authenticateToken, validateArtifactCreation, uploadFields, validateFileUpload, async (req, res) => {
   try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        success: false,
+        error: "VALIDATION_ERROR",
+        message: "Invalid input data provided",
+        details: errors.array()
+      });
+    }
+
     const { name, description, content, riddle, unlockAnswer, area, isExclusive, location } = req.body;
 
-    if (!name || !description || !content || !area || !location) {
-      return res.status(400).json({ error: "All required fields must be provided." });
+    // Additional business logic validation
+    if (isExclusive && (!riddle || !unlockAnswer)) {
+      return res.status(400).json({ 
+        success: false,
+        error: "BUSINESS_LOGIC_ERROR",
+        message: "Exclusive artifacts must have both riddle and unlock answer" 
+      });
     }
 
     const newArtifact = new Artifact({
@@ -100,8 +195,11 @@ router.post("/", authenticateToken, uploadFields, async (req, res) => {
       riddle,
       unlockAnswer,
       area,
-      isExclusive,
-      location,
+      isExclusive: isExclusive === true || isExclusive === 'true',
+      location: {
+        x: parseFloat(location.x),
+        y: parseFloat(location.y)
+      },
       creator: req.user.userId,
     });
 
@@ -133,10 +231,51 @@ router.post("/", authenticateToken, uploadFields, async (req, res) => {
     }
 
     await newArtifact.save();
-    res.status(201).json({ message: "Artifact created successfully!", artifact: newArtifact });
+    
+    // Success response with consistent format
+    res.status(201).json({ 
+      success: true,
+      message: "Artifact created successfully!", 
+      data: {
+        artifact: {
+          id: newArtifact._id,
+          name: newArtifact.name,
+          description: newArtifact.description,
+          area: newArtifact.area,
+          location: newArtifact.location,
+          isExclusive: newArtifact.isExclusive,
+          createdAt: newArtifact.createdAt
+        }
+      }
+    });
   } catch (error) {
     console.error("Error creating artifact:", error);
-    res.status(500).json({ error: "Failed to create artifact." });
+    
+    // Handle specific error types
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        success: false,
+        error: "DATABASE_VALIDATION_ERROR",
+        message: "Artifact data validation failed",
+        details: Object.values(error.errors).map(err => err.message)
+      });
+    }
+    
+    if (error.code === 11000) { // MongoDB duplicate key error
+      return res.status(409).json({ 
+        success: false,
+        error: "DUPLICATE_ERROR",
+        message: "An artifact with similar properties already exists"
+      });
+    }
+    
+    // Generic server error
+    res.status(500).json({ 
+      success: false,
+      error: "INTERNAL_SERVER_ERROR",
+      message: "Failed to create artifact due to server error",
+      ...(process.env.NODE_ENV === 'development' && { details: error.message })
+    });
   }
 });
 
