@@ -1,718 +1,349 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import DialogBox from '../DialogBox';
-import QuestLogContext from '../../context/QuestLogContext';
-import { NPC_TYPES } from '../../components/Constants';
 import './NPCInteraction.css';
 
-/**
- * Component for handling NPC interactions
- * Displays dialog, quest information, and handles dialog choices
- */
-const NPCInteraction = ({ 
-  npc,
-  onClose,
-  onQuestAccept,
-  onQuestComplete
-}) => {
-  const [currentDialogIndex, setCurrentDialogIndex] = useState(0);
-  const [dialogOptions, setDialogOptions] = useState([]);
-  const [dialogHistory, setDialogHistory] = useState([]);
-  const [isComplete, setIsComplete] = useState(false);
+const NPCInteraction = ({ npc, onClose, context = {} }) => {
   const { user } = useContext(AuthContext);
-  const { addQuest, completeQuest, quests } = useContext(QuestLogContext);
-  
-  // Initialize dialog based on NPC type and quest status
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [relationship, setRelationship] = useState('stranger');
+  const [interactionCount, setInteractionCount] = useState(0);
+  const [currentQuest, setCurrentQuest] = useState(null);
+  const [npcState, setNpcState] = useState({
+    mood: 'neutral',
+    knowledge: []
+  });
+
   useEffect(() => {
-    if (!npc) return;
-    
-    // Reset state when NPC changes
-    setCurrentDialogIndex(0);
-    setDialogOptions([]);
-    setDialogHistory([]);
-    setIsComplete(false);
-    
-    // Add initial greeting
-    const greeting = npc.greeting || `Greetings, traveler! I am ${npc.name}.`;
-    setDialogHistory([{
-      speaker: npc.name,
-      text: greeting
-    }]);
-    
-    // Check if this NPC has an active quest for the player
-    const activeQuest = quests.find(q => 
-      q.assignedBy === npc.id && !q.completed
-    );
-    
-    // Set initial dialog options based on NPC type and quest status
-    const initialOptions = [];
-    
-    if (activeQuest) {
-      initialOptions.push({
-        text: "About my quest...",
-        action: () => handleQuestDiscussion(activeQuest)
+    // Initialize conversation with contextual greeting
+    initializeConversation();
+  }, [npc]);
+
+  const initializeConversation = async () => {
+    try {
+      const response = await fetch(`/api/npcs/${npc._id}/interact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: '',
+          userId: user?._id,
+          context: {
+            location: context.area || 'overworld',
+            weather: context.weather || 'sunny',
+            timeOfDay: new Date().getHours() < 12 ? 'morning' : 
+                      new Date().getHours() < 18 ? 'afternoon' : 'evening'
+          }
+        })
       });
-    } else if (npc.availableQuests && npc.availableQuests.length > 0) {
-      initialOptions.push({
-        text: "Do you need any help?",
-        action: () => handleQuestOffer(npc.availableQuests[0])
-      });
-    }
-    
-    // Add NPC type-specific dialog options
-    switch(npc.type) {
-      case NPC_TYPES.MERCHANT:
-        initialOptions.push({
-          text: "Show me your wares",
-          action: () => handleMerchantInteraction()
-        });
-        break;
-      case NPC_TYPES.SCHOLAR:
-      case NPC_TYPES.POET:
-      case NPC_TYPES.SAGE:
-      case NPC_TYPES.PHILOSOPHER:
-        initialOptions.push({
-          text: "I seek knowledge",
-          action: () => handleScholarInteraction()
-        });
-        break;
-      case NPC_TYPES.CRAFTSMAN:
-        initialOptions.push({
-          text: "Can you craft something for me?",
-          action: () => handleCraftsmanInteraction()
-        });
-        break;
-      case NPC_TYPES.GUIDE:
-      case NPC_TYPES.WEATHERMAN:
-        initialOptions.push({
-          text: "Tell me about this place",
-          action: () => handleGuideInteraction()
-        });
-        break;
-      case NPC_TYPES.ARTIST:
-      case NPC_TYPES.MICHELANGELO:
-        initialOptions.push({
-          text: "Tell me about your art",
-          action: () => handleArtistInteraction()
-        });
-        break;
-      case NPC_TYPES.SHAKESPEARE:
-      case NPC_TYPES.OSCAR_WILDE:
-      case NPC_TYPES.ALEXANDER_POPE:
-      case NPC_TYPES.LORD_BYRON:
-        initialOptions.push({
-          text: "Recite something for me",
-          action: () => handleLiteraryInteraction()
-        });
-        break;
-      case NPC_TYPES.JOHN_MUIR:
-        initialOptions.push({
-          text: "Tell me about nature",
-          action: () => handleNaturalistInteraction()
-        });
-        break;
-      case NPC_TYPES.CODER:
-      case NPC_TYPES.ADA_LOVELACE:
-        initialOptions.push({
-          text: "Tell me about programming",
-          action: () => handleCoderInteraction()
-        });
-        break;
-      case NPC_TYPES.ZEUS:
-        initialOptions.push({
-          text: "How's the weather, mighty Zeus?",
-          action: () => handleZeusInteraction()
-        });
-        break;
-      case NPC_TYPES.MYSTIC:
-      case NPC_TYPES.JESUS:
-      case NPC_TYPES.AUGUSTINE:
-      case NPC_TYPES.SOCRATES:
-        initialOptions.push({
-          text: "Share your wisdom",
-          action: () => handleMysticInteraction()
-        });
-        break;
-      default:
-        initialOptions.push({
-          text: "Tell me about yourself",
-          action: () => handleGenericInteraction()
-        });
-        break;
-    }
-    
-    // Always add a farewell option
-    initialOptions.push({
-      text: "Goodbye",
-      action: () => handleFarewell()
-    });
-    
-    setDialogOptions(initialOptions);
-    
-  }, [npc, quests]);
-  
-  const handleQuestDiscussion = (quest) => {
-    // Check if quest is complete
-    const isQuestComplete = quest.objectives.every(obj => obj.completed);
-    
-    if (isQuestComplete) {
-      // Quest completion dialog
-      setDialogHistory([...dialogHistory, {
-        speaker: user.username || "Player",
-        text: "About my quest..."
-      }, {
-        speaker: npc.name,
-        text: `You've completed all the objectives for ${quest.title}! Well done!`
-      }]);
+
+      const data = await response.json();
       
-      // Add reward dialog
-      if (quest.rewards) {
-        setDialogHistory(prev => [...prev, {
-          speaker: npc.name,
-          text: `As promised, here's your reward: ${quest.rewards.map(r => r.description).join(', ')}`
+      if (data.success) {
+        setMessages([{
+          type: 'npc',
+          text: data.response.text,
+          author: data.response.author,
+          timestamp: new Date()
         }]);
-      }
-      
-      // Mark quest as complete
-      if (onQuestComplete) {
-        onQuestComplete(quest.id);
-      }
-      
-      completeQuest(quest.id);
-      
-      // Set follow-up options
-      setDialogOptions([
-        {
-          text: "Thank you!",
-          action: () => handleFarewell()
+        
+        setRelationship(data.response.relationship || 'stranger');
+        setInteractionCount(data.response.context?.interactionCount || 0);
+        
+        // Check for available quests
+        if (data.response.availableQuests) {
+          setCurrentQuest(data.response.availableQuests[0]);
         }
-      ]);
-    } else {
-      // In-progress quest dialog
-      setDialogHistory([...dialogHistory, {
-        speaker: user.username || "Player",
-        text: "About my quest..."
-      }, {
-        speaker: npc.name,
-        text: `How's your progress on ${quest.title}? You still need to ${quest.objectives.filter(obj => !obj.completed).map(obj => obj.description).join(', ')}.`
+      }
+    } catch (error) {
+      console.error('Error initializing conversation:', error);
+      setMessages([{
+        type: 'npc',
+        text: npc.dialogue?.[0] || "Hello there, traveler!",
+        author: npc.name,
+        timestamp: new Date()
       }]);
-      
-      // Set follow-up options
-      setDialogOptions([
-        {
-          text: "I'm working on it",
-          action: () => {
-            setDialogHistory(prev => [...prev, {
-              speaker: user.username || "Player",
-              text: "I'm working on it."
-            }, {
-              speaker: npc.name,
-              text: "Good luck then! Let me know when you're done."
-            }]);
-            
-            setDialogOptions([
-              {
-                text: "Goodbye",
-                action: () => handleFarewell()
-              }
-            ]);
-          }
-        },
-        {
-          text: "Can you remind me what to do?",
-          action: () => {
-            setDialogHistory(prev => [...prev, {
-              speaker: user.username || "Player",
-              text: "Can you remind me what to do?"
-            }, {
-              speaker: npc.name,
-              text: quest.description
-            }]);
-            
-            setDialogOptions([
-              {
-                text: "I'll get to it",
-                action: () => handleFarewell()
-              }
-            ]);
-          }
-        }
-      ]);
     }
   };
-  
-  const handleQuestOffer = (quest) => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Do you need any help?"
-    }, {
-      speaker: npc.name,
-      text: `Indeed I do! ${quest.description}`
-    }]);
-    
-    setDialogOptions([
-      {
-        text: "I'll help you",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "I'll help you."
-          }, {
-            speaker: npc.name,
-            text: "Excellent! Return to me when you're done."
-          }]);
-          
-          // Accept the quest
-          if (onQuestAccept) {
-            onQuestAccept(quest.id);
+
+  const handleSendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = {
+      type: 'user',
+      text: input,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`/api/npcs/${npc._id}/interact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: input,
+          userId: user?._id,
+          context: {
+            location: context.area || 'overworld',
+            weather: context.weather || 'sunny',
+            timeOfDay: new Date().getHours() < 12 ? 'morning' : 
+                      new Date().getHours() < 18 ? 'afternoon' : 'evening',
+            previousMessages: messages.slice(-5) // Send last 5 messages for context
           }
-          
-          addQuest({
-            ...quest,
-            assignedBy: npc.id,
-            dateAccepted: new Date()
-          });
-          
-          setDialogOptions([
-            {
-              text: "I'll be on my way",
-              action: () => handleFarewell()
-            }
-          ]);
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        const npcResponse = {
+          type: 'npc',
+          text: data.response.text,
+          author: data.response.author,
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, npcResponse]);
+        setRelationship(data.response.relationship || relationship);
+        setInteractionCount(data.response.context?.interactionCount || interactionCount + 1);
+        
+        // Update quest status if applicable
+        if (data.response.questUpdate) {
+          setCurrentQuest(data.response.questUpdate);
         }
-      },
-      {
-        text: "Not interested",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "I'm not interested right now."
-          }, {
-            speaker: npc.name,
-            text: "I understand. The offer stands if you change your mind."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "Goodbye",
-              action: () => handleFarewell()
-            }
-          ]);
+
+        // Update NPC state based on response
+        if (data.response.mood) {
+          setNpcState(prev => ({
+            ...prev,
+            mood: data.response.mood
+          }));
         }
       }
-    ]);
-  };
-  
-  const handleMerchantInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Show me your wares."
-    }, {
-      speaker: npc.name,
-      text: npc.merchantDialog || "Certainly! Take a look at my finest goods."
-    }]);
-    
-    // Here we would normally show a shop interface
-    // For now, just a placeholder dialog
-    
-    setDialogOptions([
-      {
-        text: "Maybe later",
-        action: () => handleFarewell()
-      }
-    ]);
-  };
-  
-  const handleScholarInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "I seek knowledge."
-    }, {
-      speaker: npc.name,
-      text: npc.scholarDialog || npc.loreText || "The secrets of this world are many. What do you wish to learn?"
-    }]);
-    
-    setDialogOptions([
-      {
-        text: "Tell me more",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "Tell me more."
-          }, {
-            speaker: npc.name,
-            text: npc.additionalLore || "There are ancient powers at work here. The authentic internet is more than just a concept - it's a state of being."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "Fascinating",
-              action: () => handleFarewell()
-            }
-          ]);
-        }
-      },
-      {
-        text: "Enough philosophy",
-        action: () => handleFarewell()
-      }
-    ]);
-  };
-  
-  const handleCraftsmanInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Can you craft something for me?"
-    }, {
-      speaker: npc.name,
-      text: npc.craftsmanDialog || "I'd be happy to! But I'll need the right materials first."
-    }]);
-    
-    // Here we would normally show a crafting interface
-    // For now, just a placeholder dialog
-    
-    setDialogOptions([
-      {
-        text: "I'll gather materials",
-        action: () => handleFarewell()
-      }
-    ]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setMessages(prev => [...prev, {
+        type: 'npc',
+        text: "I seem to be having trouble understanding you right now. Perhaps we could speak again later?",
+        author: npc.name,
+        timestamp: new Date()
+      }]);
+    } finally {
+      setIsLoading(false);
+      setInput('');
+    }
   };
 
-  const handleGuideInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Tell me about this place."
-    }, {
-      speaker: npc.name,
-      text: npc.guideDialog || npc.aboutLocation || "This area is part of the Authentic Internet, a place where truth and sources matter."
-    }]);
-    
-    setDialogOptions([
-      {
-        text: "What should I do here?",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "What should I do here?"
-          }, {
-            speaker: npc.name,
-            text: npc.advice || "Explore, collect artifacts, and speak with the inhabitants. Each interaction may teach you something valuable."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "Thank you",
-              action: () => handleFarewell()
-            }
-          ]);
-        }
-      },
-      {
-        text: "That's helpful",
-        action: () => handleFarewell()
-      }
-    ]);
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
-  const handleArtistInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Tell me about your art."
-    }, {
-      speaker: npc.name,
-      text: npc.artistDialog || "Art is the divine expression of the human spirit, capturing eternal beauty in mortal form."
-    }]);
-    
-    setDialogOptions([
-      {
-        text: "What inspires you?",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "What inspires you?"
-          }, {
-            speaker: npc.name,
-            text: npc.inspiration || "I find inspiration in nature, in the human form, and in the divine mysteries that surround us all."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "Your work is magnificent",
-              action: () => handleFarewell()
-            }
-          ]);
-        }
-      },
-      {
-        text: "I must go",
-        action: () => handleFarewell()
-      }
-    ]);
+  const getRelationshipColor = (relationship) => {
+    const colors = {
+      stranger: '#6b7280',
+      acquaintance: '#3b82f6',
+      friend: '#10b981',
+      confidant: '#8b5cf6',
+      mentor_student: '#f59e0b'
+    };
+    return colors[relationship] || colors.stranger;
   };
 
-  const handleLiteraryInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Recite something for me."
-    }, {
-      speaker: npc.name,
-      text: npc.quote || npc.literaryDialog || "Words are the vessels of thought, ships sailing on the sea of human consciousness."
-    }]);
-    
-    setDialogOptions([
-      {
-        text: "That was beautiful",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "That was beautiful."
-          }, {
-            speaker: npc.name,
-            text: npc.response || "Thank you. The power of language is in its ability to transcend time and space."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "I shall remember your words",
-              action: () => handleFarewell()
-            }
-          ]);
-        }
-      },
-      {
-        text: "I must depart",
-        action: () => handleFarewell()
-      }
-    ]);
+  const getRelationshipIcon = (relationship) => {
+    const icons = {
+      stranger: '👋',
+      acquaintance: '🤝',
+      friend: '😊',
+      confidant: '💫',
+      mentor_student: '📚'
+    };
+    return icons[relationship] || icons.stranger;
   };
 
-  const handleNaturalistInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Tell me about nature."
-    }, {
-      speaker: npc.name,
-      text: npc.naturalistDialog || "In every walk with nature one receives far more than one seeks. The mountains are calling and I must go."
-    }]);
+  const getPersonalityTraits = () => {
+    if (!npc.personality?.traits) return [];
     
-    setDialogOptions([
-      {
-        text: "What should we preserve?",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "What should we preserve?"
-          }, {
-            speaker: npc.name,
-            text: npc.conservationAdvice || "The wilderness. We must preserve these temples of nature for future generations."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "I will respect the wild",
-              action: () => handleFarewell()
-            }
-          ]);
-        }
-      },
-      {
-        text: "I must continue my journey",
-        action: () => handleFarewell()
-      }
-    ]);
+    return Object.entries(npc.personality.traits)
+      .filter(([trait, value]) => value > 70)
+      .map(([trait, value]) => ({ trait, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 3);
   };
 
-  const handleCoderInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Tell me about programming."
-    }, {
-      speaker: npc.name,
-      text: npc.coderDialog || "Programming is the art of algorithm and logic. The analytical engine weaves algebraic patterns just as the Jacquard loom weaves flowers and leaves."
-    }]);
-    
-    setDialogOptions([
-      {
-        text: "What's your favorite algorithm?",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "What's your favorite algorithm?"
-          }, {
-            speaker: npc.name,
-            text: npc.algorithmResponse || "I am particularly fond of recursive functions, which mirror the elegant self-similarity found in nature."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "Fascinating perspective",
-              action: () => handleFarewell()
-            }
-          ]);
-        }
-      },
-      {
-        text: "I shall compile this knowledge",
-        action: () => handleFarewell()
-      }
-    ]);
+  const formatTimestamp = (timestamp) => {
+    return new Date(timestamp).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   };
 
-  const handleZeusInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "How's the weather, mighty Zeus?"
-    }, {
-      speaker: npc.name,
-      text: npc.zeusDialog || "The skies obey my command, mortal! Today I decree fair weather, but cross me and you may face my thunderbolts!"
-    }]);
-    
-    setDialogOptions([
-      {
-        text: "I bow to your power",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "I bow to your power."
-          }, {
-            speaker: npc.name,
-            text: npc.zeusResponse || "Wise choice! Perhaps you deserve a blessing from Olympus after all."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "Thank you, Lord of the Sky",
-              action: () => handleFarewell()
-            }
-          ]);
-        }
-      },
-      {
-        text: "I must attend to mortal matters",
-        action: () => handleFarewell()
-      }
-    ]);
-  };
-
-  const handleMysticInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Share your wisdom."
-    }, {
-      speaker: npc.name,
-      text: npc.mysticDialog || "The path to wisdom begins with acknowledging how little we truly know."
-    }]);
-    
-    setDialogOptions([
-      {
-        text: "What is the meaning of life?",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "What is the meaning of life?"
-          }, {
-            speaker: npc.name,
-            text: npc.philosophicalAnswer || "The examined life is worth living. Find truth by questioning assumptions and seeking authentic understanding."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "I will reflect on this",
-              action: () => handleFarewell()
-            }
-          ]);
-        }
-      },
-      {
-        text: "I must continue my journey",
-        action: () => handleFarewell()
-      }
-    ]);
-  };
-
-  const handleGenericInteraction = () => {
-    setDialogHistory([...dialogHistory, {
-      speaker: user.username || "Player",
-      text: "Tell me about yourself."
-    }, {
-      speaker: npc.name,
-      text: npc.aboutSelf || `I am ${npc.name}, a resident of this digital realm. How may I assist you on your journey?`
-    }]);
-    
-    setDialogOptions([
-      {
-        text: "What do you do here?",
-        action: () => {
-          setDialogHistory(prev => [...prev, {
-            speaker: user.username || "Player",
-            text: "What do you do here?"
-          }, {
-            speaker: npc.name,
-            text: npc.roleDescription || "I play my part in maintaining the balance of this world."
-          }]);
-          
-          setDialogOptions([
-            {
-              text: "Interesting",
-              action: () => handleFarewell()
-            }
-          ]);
-        }
-      },
-      {
-        text: "I should be going",
-        action: () => handleFarewell()
-      }
-    ]);
-  };
-  
-  const handleFarewell = () => {
-    setDialogHistory(prev => [...prev, {
-      speaker: user.username || "Player",
-      text: "Goodbye."
-    }, {
-      speaker: npc.name,
-      text: npc.farewellText || "Farewell! Stay authentic out there."
-    }]);
-    
-    setIsComplete(true);
-    
-    // Close the dialog after a brief delay
-    setTimeout(() => {
-      if (onClose) onClose();
-    }, 2000);
-  };
-  
-  // Generate dialog component
   return (
-    <div className={`npc-interaction npc-type-${npc?.type?.toLowerCase()}`}>
-      {npc && (
-        <>
-          <div className="npc-portrait">
-            {npc.portrait || npc.avatar ? (
-              <img src={npc.portrait || npc.avatar} alt={npc.name} />
-            ) : (
-              <div className="npc-avatar">{npc.name.charAt(0)}</div>
-            )}
+    <div className="npc-interaction-overlay">
+      <div className="npc-interaction-container">
+        {/* Header */}
+        <div className="npc-header">
+          <div className="npc-info">
+            <h2>{npc.name}</h2>
+            <div className="npc-meta">
+              <span className="npc-type">{npc.type.replace('_', ' ')}</span>
+              <span className="npc-location">{npc.area}</span>
+            </div>
           </div>
           
-          <DialogBox
-            npcName={npc.name}
-            dialogHistory={dialogHistory}
-            dialogOptions={!isComplete ? dialogOptions : []}
-            onOptionSelected={(option) => {
-              if (option.action) {
-                setDialogHistory(prev => [...prev, {
-                  speaker: user.username || "Player",
-                  text: option.text
-                }]);
-                option.action();
-              }
-            }}
-          />
-        </>
-      )}
+          {/* Relationship Status */}
+          <div className="relationship-status">
+            <div 
+              className="relationship-badge"
+              style={{ backgroundColor: getRelationshipColor(relationship) }}
+            >
+              <span className="relationship-icon">{getRelationshipIcon(relationship)}</span>
+              <span className="relationship-text">
+                {relationship.charAt(0).toUpperCase() + relationship.slice(1).replace('_', ' ')}
+              </span>
+            </div>
+            <div className="interaction-count">
+              Conversations: {interactionCount}
+            </div>
+          </div>
+          
+          <button className="close-button" onClick={onClose}>×</button>
+        </div>
+
+        {/* Personality Traits */}
+        {getPersonalityTraits().length > 0 && (
+          <div className="personality-display">
+            <h4>Prominent Traits:</h4>
+            <div className="traits-list">
+              {getPersonalityTraits().map(({ trait, value }) => (
+                <div key={trait} className="trait-item">
+                  <span className="trait-name">
+                    {trait.charAt(0).toUpperCase() + trait.slice(1)}
+                  </span>
+                  <div className="trait-bar">
+                    <div 
+                      className="trait-fill"
+                      style={{ width: `${value}%` }}
+                    />
+                  </div>
+                  <span className="trait-value">{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Current Quest */}
+        {currentQuest && (
+          <div className="current-quest">
+            <h4>📜 Available Quest</h4>
+            <div className="quest-info">
+              <h5>{currentQuest.title}</h5>
+              <p>{currentQuest.description}</p>
+              {currentQuest.stages && currentQuest.stages.length > 0 && (
+                <div className="quest-progress">
+                  <strong>Next Step:</strong> {currentQuest.stages[0].task}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Conversation Area */}
+        <div className="conversation-area">
+          {messages.map((message, index) => (
+            <div key={index} className={`message ${message.type}`}>
+              <div className="message-content">
+                <div className="message-author">
+                  {message.type === 'npc' ? message.author : 'You'}
+                </div>
+                <div className="message-text">{message.text}</div>
+                <div className="message-timestamp">
+                  {formatTimestamp(message.timestamp)}
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {isLoading && (
+            <div className="message npc">
+              <div className="message-content">
+                <div className="message-author">{npc.name}</div>
+                <div className="typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input Area */}
+        <div className="input-area">
+          <div className="input-container">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={`Say something to ${npc.name}...`}
+              disabled={isLoading}
+              rows={2}
+            />
+            <button 
+              onClick={handleSendMessage}
+              disabled={!input.trim() || isLoading}
+              className="send-button"
+            >
+              Send
+            </button>
+          </div>
+          
+          {/* Quick Actions */}
+          <div className="quick-actions">
+            <button 
+              onClick={() => setInput("Tell me about yourself")}
+              disabled={isLoading}
+            >
+              Ask About Themselves
+            </button>
+            <button 
+              onClick={() => setInput("What wisdom do you have for me?")}
+              disabled={isLoading}
+            >
+              Seek Wisdom
+            </button>
+            {currentQuest && (
+              <button 
+                onClick={() => setInput("Tell me more about this quest")}
+                disabled={isLoading}
+              >
+                Ask About Quest
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Context Display */}
+        <div className="context-display">
+          <div className="context-item">
+            📍 {context.area || 'Unknown Location'}
+          </div>
+          {context.weather && (
+            <div className="context-item">
+              🌤️ {context.weather}
+            </div>
+          )}
+          <div className="context-item">
+            🕐 {new Date().getHours() < 12 ? 'Morning' : 
+                new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
