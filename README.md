@@ -244,8 +244,32 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 This project is organized with:
 - Frontend code in the `/client` directory
 - Backend code in the `/server` directory
+- Comprehensive documentation in the `/docs` directory
 
 Do not add server files to the root directory.
+
+## 📚 Documentation
+
+**Complete documentation is available in the [`/docs`](./docs/) folder**, maintained by Docsmith - The Documentation Alchemist 🧙‍♂️
+
+### Quick Links:
+- **[📖 Full Documentation Index](./docs/README.md)** - Start here for complete documentation
+- **[🧩 Component Guide](./docs/component-docs.md)** - React components and architecture
+- **[🌐 API Reference](./docs/api-endpoints.md)** - Complete REST API documentation  
+- **[🎮 Gameplay Features](./docs/gameplay-features.md)** - Game mechanics and features
+- **[📝 Recent Changes](./docs/changelog.md)** - Latest updates and improvements
+
+### Docsmith Commands:
+```bash
+# Scan recent commits for documentation updates
+node scripts/docsmith.js scan
+
+# Update all documentation
+node scripts/docsmith.js update
+
+# Check if documentation is outdated  
+node scripts/docsmith.js check
+```
 
 ## Deployment Status
 

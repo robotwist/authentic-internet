@@ -8,7 +8,11 @@
     "dev": "node scripts/dev.js",
     "build": "cd client && npm run build",
     "test": "cd server && npm run test && cd ../client && npm run test",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "docs:scan": "node scripts/docsmith.js scan",
+    "docs:update": "node scripts/docsmith.js update",
+    "docs:check": "node scripts/docsmith.js check",
+    "docs:consolidate": "node scripts/docsmith.js consolidate"
   },
   "engines": {
     "node": ">=20.0.0"
