@@ -227,6 +227,63 @@ export const MAPS = [
           riddle: true,
           properties: ["magic", "visionRange"]
         }
+      },
+      {
+        id: uuidv4(),
+        name: "Compass of True North",
+        description: "A mystical compass that always points toward your destination",
+        content: "This enchanted compass not only shows direction but also reveals the shortest path to your goal.",
+        location: { x: 7, y: 5 },
+        exp: 20,
+        visible: true,
+        area: "Overworld",
+        type: ARTIFACT_TYPES.KEY,
+        interactions: [
+          {
+            type: ARTIFACT_INTERACTIONS.REVEAL,
+            condition: "nearPortal",
+            revealedContent: "The compass needle points toward hidden passages..."
+          }
+        ],
+        properties: {
+          magic: 8,
+          navigation: 15,
+          element: "spirit"
+        },
+        userModifiable: {
+          riddle: true,
+          properties: ["magic", "navigation"]
+        }
+      }
+    ],
+    npcs: [
+      {
+        id: uuidv4(),
+        name: "Old Hermit",
+        type: NPC_TYPES.GUIDE,
+        location: { x: 4, y: 14 },
+        dialogue: [
+          "Few travelers make it this far into the wilderness, young one.",
+          "The deserts ahead test both body and spirit - are you prepared?",
+          "I have lived here for decades, watching the seasons change and the paths evolve.",
+          "Take this wisdom: the hardest battles are often fought within oneself.",
+          "That compass you found? It will serve you well in the trials ahead."
+        ],
+        quest: {
+          id: uuidv4(),
+          title: "Hermit's Wisdom",
+          description: "The Old Hermit seeks someone worthy to carry on his knowledge",
+          objectives: [
+            "Find the Ancient Tome",
+            "Discover the Compass of True North",
+            "Prove your understanding of both items",
+            "Return to the Old Hermit"
+          ],
+          reward: {
+            exp: 50,
+            item: "Hermit's Blessing"
+          }
+        }
       }
     ]
   },
@@ -676,6 +733,90 @@ export const MAPS = [
         visible: true,
         area: "Dungeon",
         type: ARTIFACT_TYPES.SCROLL
+      },
+      {
+        id: uuidv4(),
+        name: "Dungeon Torch",
+        description: "A mystical torch that never extinguishes",
+        content: "This torch illuminates hidden passages and reveals ancient secrets.",
+        location: { x: 2, y: 3 },
+        exp: 15,
+        visible: true,
+        area: "Dungeon",
+        type: ARTIFACT_TYPES.CONTAINER,
+        interactions: [
+          {
+            type: ARTIFACT_INTERACTIONS.REVEAL,
+            condition: "nearDarkness",
+            revealedContent: "The torch reveals hidden inscriptions on the walls..."
+          }
+        ],
+        properties: {
+          magic: 5,
+          visionRange: 3,
+          element: "fire"
+        },
+        userModifiable: {
+          riddle: true,
+          properties: ["magic", "visionRange"]
+        }
+      },
+      {
+        id: uuidv4(),
+        name: "Guardian's Seal",
+        description: "A protective seal left by the dungeon's ancient guardian",
+        content: "The seal pulses with protective energy, warding off evil spirits.",
+        location: { x: 7, y: 6 },
+        exp: 20,
+        visible: true,
+        area: "Dungeon",
+        type: ARTIFACT_TYPES.KEY,
+        interactions: [
+          {
+            type: ARTIFACT_INTERACTIONS.UNLOCK,
+            targetArtifact: "Ancient Barrier",
+            result: "Protection against dungeon curses"
+          }
+        ],
+        properties: {
+          magic: 15,
+          protection: 10,
+          element: "divine"
+        },
+        userModifiable: {
+          riddle: true,
+          properties: ["magic", "protection"]
+        }
+      }
+    ],
+    npcs: [
+      {
+        id: uuidv4(),
+        name: "Ethereal Scholar",
+        type: NPC_TYPES.GUIDE,
+        location: { x: 3, y: 6 },
+        dialogue: [
+          "Greetings, brave adventurer. I am the keeper of this dungeon's ancient knowledge.",
+          "These halls once housed a great library of mystical texts and artifacts.",
+          "The scroll you seek contains clues to the deepest chambers where the ultimate treasure lies.",
+          "Beware the guardians below - they do not easily give up their secrets.",
+          "Take this wisdom: 'The path to enlightenment is often through the darkest passages.'"
+        ],
+        quest: {
+          id: uuidv4(),
+          title: "Scholar's Research",
+          description: "Help the Ethereal Scholar document the dungeon's magical artifacts",
+          objectives: [
+            "Collect the Ancient Scroll",
+            "Find the Guardian's Seal",
+            "Light the Dungeon Torch",
+            "Return to the Scholar"
+          ],
+          reward: {
+            exp: 40,
+            item: "Tome of Dungeon Lore"
+          }
+        }
       }
     ]
   },
