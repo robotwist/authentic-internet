@@ -177,6 +177,12 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
       console.log(`Key pressed: ${e.key}`);
       keysPressed.current[e.key] = true;
       
+      // Prevent default behavior and stop propagation for game controls
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', ' '].includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
       // Handle jump
       if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && !isJumping) {
         jump();
@@ -373,34 +379,28 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
       setIsJumping(false);
     }
     
-    // Update player position - use direct assignment to avoid React batching issues
-    playerPosition.x = newX;
-    playerPosition.y = newY;
-    playerVelocity.x = velocityX;
-    playerVelocity.y = velocityY;
-    
-    // Also update state for React to trigger re-renders
-    setPlayerPosition({ x: newX, y: newY });
-    setPlayerVelocity({ x: velocityX, y: velocityY });
-    
     // Check level boundaries
     if (newX < 0) {
-      playerPosition.x = 0;
-      setPlayerPosition(prev => ({ ...prev, x: 0 }));
+      newX = 0;
     } else if (newX > levelWidth - 40) { // Player width = 40
-      playerPosition.x = levelWidth - 40;
-      setPlayerPosition(prev => ({ ...prev, x: levelWidth - 40 }));
+      newX = levelWidth - 40;
     }
     
     // Check if player fell off the level
     if (newY > 500) {
       handlePlayerDeath();
+      return;
     }
     
     // Check if player reached the end of the level
     if (newX > levelWidth - 250) {
       handleLevelComplete();
+      return;
     }
+    
+    // Update player position and velocity using setState to trigger re-renders
+    setPlayerPosition({ x: newX, y: newY });
+    setPlayerVelocity({ x: velocityX, y: velocityY });
   };
   
   // Update Hemingway companion position to follow player

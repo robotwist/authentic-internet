@@ -228,6 +228,21 @@ export const MAPS = [
           properties: ["magic", "visionRange"]
         }
       }
+    ],
+    npcs: [
+      {
+        id: uuidv4(),
+        name: "William Shakespeare",
+        type: NPC_TYPES.SHAKESPEARE,
+        position: { x: 5 * TILE_SIZE, y: 7 * TILE_SIZE },
+        dialogue: [
+          "All the world's a stage, and all the men and women merely players.",
+          "To be, or not to be, that is the question.",
+          "Cowards die many times before their deaths; the valiant never taste of death but once.",
+          "We know what we are, but know not what we may be.",
+          "Better three hours too soon than a minute too late."
+        ]
+      }
     ]
   },
   {
@@ -365,32 +380,39 @@ export const MAPS = [
   {
     name: "Yosemite",
     data: [
-      [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-      [2, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-      [2, 0, 2, 2, 2, 2, 2, 2, 0, 2],
-      [2, 0, 2, 0, 6, 0, 7, 2, 0, 2],
-      [2, 0, 2, 0, 2, 2, 0, 2, 0, 2],
-      [2, 0, 0, 0, 2, 2, 8, 2, 0, 2],
-      [2, 0, 0, 0, 0, 0, 0, 2, 0, 2],
-      [2, 0, 2, 2, 2, 2, 2, 2, 0, 2],
-      [2, 0, 2, 2, 0, 0, 0, 0, 5, 2],
-      [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+      [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+      [2, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 2],
+      [2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 2],
+      [2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2],
+      [2, 0, 2, 0, 0, 6, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 7, 2, 0, 2],
+      [2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2],
+      [2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 2],
+      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+      [2, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 2],
+      [2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 2, 0, 2],
+      [2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2],
+      [2, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 2],
+      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2],
+      [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
     ],
     specialPortals: [
       {
-        position: { x: 4, y: 3 },
+        position: { x: 5, y: 5 },
         type: "terminal",
         destination: "Terminal3",
         tileType: 6
       },
       {
-        position: { x: 6, y: 3 },
+        position: { x: 16, y: 5 },
         type: "shooter",
         destination: "Level4Shooter",
         tileType: 7
       },
       {
-        position: { x: 6, y: 5 },
+        position: { x: 10, y: 11 },
         type: "text",
         destination: "Text Adventure",
         tileType: 8
@@ -401,7 +423,7 @@ export const MAPS = [
         id: uuidv4(),
         name: "John Muir",
         type: NPC_TYPES.GUIDE,
-        location: { x: 2, y: 2 },
+        position: { x: 3 * TILE_SIZE, y: 3 * TILE_SIZE },
         dialogue: [
           "Welcome to Yosemite Valley! The grandeur of these peaks never ceases to amaze me.",
           "Have you noticed how the valley seems to tell its own story through its formations?",

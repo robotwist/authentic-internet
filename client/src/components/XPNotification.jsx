@@ -2,9 +2,19 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import './XPNotification.css';
 
-const XPNotification = ({ message, type = 'success', duration = 3000, onClose }) => {
+const XPNotification = ({ 
+  message, 
+  amount, 
+  reason, 
+  type = 'success', 
+  duration = 3000, 
+  onClose 
+}) => {
   const [isVisible, setIsVisible] = useState(true);
   const [animation, setAnimation] = useState('slide-in');
+
+  // Determine the display message
+  const displayMessage = message || (amount && reason ? `+${amount} XP - ${reason}` : 'XP Gained!');
 
   useEffect(() => {
     // Set a timeout to start the slide-out animation
@@ -23,7 +33,7 @@ const XPNotification = ({ message, type = 'success', duration = 3000, onClose })
       clearTimeout(slideOutTimer);
       clearTimeout(hideTimer);
     };
-  }, [duration, onClose, message]);
+  }, [duration, onClose, displayMessage]);
 
   if (!isVisible) return null;
 
@@ -33,14 +43,17 @@ const XPNotification = ({ message, type = 'success', duration = 3000, onClose })
         {type === 'success' && <span className="xp-icon">✨</span>}
         {type === 'info' && <span className="xp-icon">ℹ️</span>}
         {type === 'warning' && <span className="xp-icon">⚠️</span>}
-        <span className="xp-message">{message}</span>
+        {amount && <span className="xp-icon">🌟</span>}
+        <span className="xp-message">{displayMessage}</span>
       </div>
     </div>
   );
 };
 
 XPNotification.propTypes = {
-  message: PropTypes.string.isRequired,
+  message: PropTypes.string,
+  amount: PropTypes.number,
+  reason: PropTypes.string,
   type: PropTypes.oneOf(['success', 'info', 'warning']),
   duration: PropTypes.number,
   onClose: PropTypes.func
