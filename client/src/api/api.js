@@ -1453,3 +1453,176 @@ export const clearCacheFor = (type, id = null) => {
       console.warn(`Unknown cache type: ${type}`);
   }
 };
+
+// Artifact Game System APIs
+export const updateUserProgress = async (userId, progressData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}/progress`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify({ progress: progressData })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to update user progress: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating user progress:', error);
+    throw error;
+  }
+};
+
+export const awardPlayerPowers = async (userId, powers) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}/powers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify({ powers })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to award powers: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error awarding powers:', error);
+    throw error;
+  }
+};
+
+export const unlockAreas = async (userId, areas) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}/areas`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify({ areas })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to unlock areas: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error unlocking areas:', error);
+    throw error;
+  }
+};
+
+export const getArtifactProgress = async (artifactId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/artifacts/${artifactId}/progress`, {
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to get artifact progress: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting artifact progress:', error);
+    throw error;
+  }
+};
+
+export const saveArtifactProgress = async (artifactId, progress) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/artifacts/${artifactId}/progress`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify({ progress })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to save artifact progress: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error saving artifact progress:', error);
+    throw error;
+  }
+};
+
+export const completeArtifact = async (artifactId, completionData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/artifacts/${artifactId}/complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify(completionData)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to complete artifact: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error completing artifact:', error);
+    throw error;
+  }
+};
+
+export const getArtifactHint = async (artifactId, hintLevel = 0) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/artifacts/${artifactId}/hint`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify({ hintLevel })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to get hint: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting hint:', error);
+    throw error;
+  }
+};
+
+export const seedGameArtifacts = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/artifacts/admin/seed`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to seed artifacts: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error seeding artifacts:', error);
+    throw error;
+  }
+};

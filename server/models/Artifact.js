@@ -115,6 +115,63 @@ const ArtifactSchema = new mongoose.Schema({
   name: { type: String, required: true, maxlength: 100 },
   description: { type: String, maxlength: 1000 },
   
+  // Game Artifact specific fields
+  gameType: { type: String }, // For game artifacts
+  category: { type: String }, // For categorization
+  difficulty: { type: String, enum: ['beginner', 'intermediate', 'advanced', 'expert'] },
+  estimatedDuration: { type: String, enum: ['short', 'medium', 'long', 'epic'] },
+  
+  // Position in world (pixel coordinates for precise placement)
+  position: {
+    x: { type: Number },
+    y: { type: Number },
+    z: { type: Number, default: 0 }
+  },
+  
+  // Discovery and progression
+  discovered: { type: Boolean, default: false },
+  requiresUnlock: { type: Boolean, default: false },
+  unlockConditions: [{ type: String }],
+  
+  // Game data for interactive artifacts
+  gameData: { type: mongoose.Schema.Types.Mixed },
+  
+  // Social engagement
+  rating: { type: Number, min: 0, max: 5, default: 0 },
+  ratingsCount: { type: Number, default: 0 },
+  likes: { type: Number, default: 0 },
+  comments: [{ 
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    text: { type: String, maxlength: 500 },
+    createdAt: { type: Date, default: Date.now }
+  }],
+  
+  // Screenshot gallery for games
+  screenshots: [{ type: String }],
+  
+  // Completion statistics for games
+  completionStats: {
+    totalAttempts: { type: Number, default: 0 },
+    totalCompletions: { type: Number, default: 0 },
+    averageScore: { type: Number, default: 0 },
+    topScore: { type: Number, default: 0 },
+    averagePlayTime: { type: Number, default: 0 }
+  },
+  
+  // User progress tracking for game artifacts
+  userProgress: [{
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    progressData: { type: mongoose.Schema.Types.Mixed },
+    completed: { type: Boolean, default: false },
+    completedAt: { type: Date },
+    completionData: { type: mongoose.Schema.Types.Mixed },
+    attempts: { type: Number, default: 0 },
+    bestScore: { type: Number, default: 0 },
+    totalPlayTime: { type: Number, default: 0 },
+    lastSaved: { type: Date },
+    startedAt: { type: Date, default: Date.now }
+  }],
+  
   // Content Type and Configuration
   contentType: {
     type: String,

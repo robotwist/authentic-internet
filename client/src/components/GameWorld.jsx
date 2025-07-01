@@ -38,6 +38,7 @@ import AchievementNotification from './AchievementNotification';
 import Level3Terminal from './Level3Terminal';
 import Level4Shooter from './Level4Shooter';
 import HemingwayChallenge from './HemingwayChallenge';
+import ArtifactGameLauncher from './ArtifactGameLauncher';
 import { useAuth } from '../context/AuthContext';
 import { useAchievements } from '../context/AchievementContext';
 import { useGameState } from '../context/GameStateContext';
@@ -106,6 +107,10 @@ const GameWorld = () => {
   const characterRef = useRef(null);
   const [portalNotificationActive, setPortalNotificationActive] = useState(false);
   
+  // Artifact Game Launcher state
+  const [currentGameArtifact, setCurrentGameArtifact] = useState(null);
+  const [showGameLauncher, setShowGameLauncher] = useState(false);
+  
   // Update checkForLevelUpAchievements to use our context
   const checkForLevelUpAchievements = useCallback((experience) => {
     const level = Math.floor(experience / 100) + 1;
@@ -152,6 +157,48 @@ const GameWorld = () => {
     // Use our new addExperiencePoints function
     return addExperiencePoints(amount, reason);
   }, [addExperiencePoints]);
+
+  // Artifact Game Launcher handlers
+  const handleGameComplete = useCallback((completionData) => {
+    console.log('🎉 Game completed:', completionData);
+    
+    // Resume background music
+    if (soundManager) {
+      const currentMapName = MAPS[currentMapIndex]?.name || '';
+      soundManager.playMusic(currentMapName);
+    }
+    
+    // Close game launcher
+    setShowGameLauncher(false);
+    setCurrentGameArtifact(null);
+    
+    // Show completion notification
+    if (completionData.artifact) {
+      showPortalNotification(
+        'Quest Complete!', 
+        `You completed ${completionData.artifact.name}!`
+      );
+      
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        hidePortalNotification();
+      }, 3000);
+    }
+  }, [soundManager, currentMapIndex]);
+
+  const handleGameExit = useCallback(() => {
+    console.log('🚪 Exiting game launcher');
+    
+    // Resume background music
+    if (soundManager) {
+      const currentMapName = MAPS[currentMapIndex]?.name || '';
+      soundManager.playMusic(currentMapName);
+    }
+    
+    // Close game launcher
+    setShowGameLauncher(false);
+    setCurrentGameArtifact(null);
+  }, [soundManager, currentMapIndex]);
 
   // Function to handle updating character in both state and backend
   const handleUpdateCharacter = useCallback((updatedCharacter) => {
@@ -758,11 +805,88 @@ const GameWorld = () => {
       }
     };
     
+    // Check for both regular portals and artifact game interactions
+    checkArtifactGameInteractions();
     checkBothArtifactSources();
   }, [characterPosition, currentMapIndex, artifacts]);
 
   useEffect(() => {
-    // Subscribe to position changes to detect and handle portals
+    // Subscribe to position changes to detect and handle artifact interactions
+    const checkArtifactGameInteractions = () => {
+      if (!characterPosition || !artifacts?.length) return;
+      
+      const currentMapName = MAPS[currentMapIndex]?.name || '';
+      
+      // Find game artifacts in the current area that the character is near
+      const gameArtifacts = artifacts.filter(artifact => 
+        artifact.area === currentMapName &&
+        ['shooter_experience', 'text_adventure_world', 'terminal_challenge'].includes(artifact.type) &&
+        artifact.isInteractive
+      );
+      
+      // Check if character is close enough to any game artifact
+      for (const artifact of gameArtifacts) {
+        if (!artifact.position) continue;
+        
+        const artifactX = artifact.position.x;
+        const artifactY = artifact.position.y;
+        const distance = Math.sqrt(
+          Math.pow(characterPosition.x - artifactX, 2) + 
+          Math.pow(characterPosition.y - artifactY, 2)
+        );
+        
+        // If within interaction range (approximately 1.5 tiles)
+        if (distance <= TILE_SIZE * 1.5) {
+          // Show interaction notification
+          if (!portalNotificationActive) {
+            showPortalNotification(
+              artifact.name, 
+              `Press SPACE to play ${artifact.name}`
+            );
+            setPortalNotificationActive(true);
+            
+            // Handle space key press to launch the game
+            const handleGameLaunch = (e) => {
+              if (e.code === 'Space' && distance <= TILE_SIZE * 1.5) {
+                // Play interaction sound
+                if (soundManager) {
+                  soundManager.playSound('portal');
+                }
+                
+                // Hide notification
+                hidePortalNotification();
+                setPortalNotificationActive(false);
+                
+                // Set current game artifact and show launcher
+                setCurrentGameArtifact(artifact);
+                setShowGameLauncher(true);
+                
+                // Stop background music for immersive game experience
+                if (soundManager) {
+                  soundManager.stopMusic(true);
+                }
+                
+                // Remove event listener
+                window.removeEventListener('keydown', handleGameLaunch);
+              }
+            };
+            
+            // Add event listener
+            window.addEventListener('keydown', handleGameLaunch);
+            
+            // Cleanup function
+            return () => {
+              window.removeEventListener('keydown', handleGameLaunch);
+              setPortalNotificationActive(false);
+            };
+          }
+          
+          // Break once we find an artifact in range
+          break;
+        }
+      }
+    };
+    
     const checkPortalCollisions = () => {
       if (!characterPosition) return;
       
@@ -1862,6 +1986,19 @@ const GameWorld = () => {
             onComplete={handleHemingwayComplete}
             onExit={handleHemingwayExit}
             character={character}
+          />
+        )}
+
+        {/* Artifact Game Launcher */}
+        {showGameLauncher && currentGameArtifact && (
+          <ArtifactGameLauncher
+            artifact={currentGameArtifact}
+            character={character}
+            onComplete={handleGameComplete}
+            onExit={handleGameExit}
+            onProgressUpdate={(progress) => {
+              console.log('Game progress update:', progress);
+            }}
           />
         )}
 

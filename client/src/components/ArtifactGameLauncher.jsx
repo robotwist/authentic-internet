@@ -1,9 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import { AuthContext } from '../context/AuthContext';
+import { GameStateContext } from '../context/GameStateContext';
 import Level4Shooter from './Level4Shooter';
 import TextAdventure from './TextAdventure';
-import Terminal from './Terminal';
+import Level3Terminal from './Level3Terminal';
 import InteractivePuzzleArtifact from './InteractivePuzzleArtifact';
+import { 
+  GAME_TYPES, 
+  ARTIFACT_TYPES, 
+  INTERACTIVE_ARTIFACT_PROPERTIES,
+  PLAYER_POWERS,
+  UNLOCKABLE_AREAS 
+} from './GameConstants';
+import { updateUserProgress, awardPlayerPowers, unlockAreas } from '../api/api';
 import './ArtifactGameLauncher.css';
 
 /**
@@ -14,475 +24,496 @@ const ArtifactGameLauncher = ({
   artifact, 
   onComplete, 
   onExit, 
-  onProgressUpdate,
-  isOpen = false 
+  character,
+  onProgressUpdate 
 }) => {
-  const { user } = useAuth();
-  const [gameState, setGameState] = useState('loading');
-  const [progress, setProgress] = useState(null);
-  const [rewards, setRewards] = useState(null);
+  const { user, updateUser } = useContext(AuthContext);
+  const { addExperiencePoints } = useContext(GameStateContext);
+  
+  // Game state management
+  const [gameState, setGameState] = useState('loading'); // loading, playing, paused, completed, failed
+  const [gameProgress, setGameProgress] = useState(null);
+  const [completionData, setCompletionData] = useState(null);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [error, setError] = useState(null);
-  const [startTime] = useState(Date.now());
-  const progressIntervalRef = useRef(null);
+  
+  // Auto-save progress
+  const [lastSaveTime, setLastSaveTime] = useState(Date.now());
+  const AUTO_SAVE_INTERVAL = 30000; // 30 seconds
 
-  // Game states: 'loading', 'ready', 'playing', 'paused', 'completed', 'failed'
-
+  // Initialize game on mount
   useEffect(() => {
-    if (isOpen && artifact) {
-      initializeGame();
-    }
+    initializeGame();
     
+    // Set up auto-save interval
+    const saveInterval = setInterval(() => {
+      if (gameState === 'playing' && gameProgress) {
+        saveGameProgress();
+      }
+    }, AUTO_SAVE_INTERVAL);
+
     return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
+      clearInterval(saveInterval);
+      // Save progress on unmount
+      if (gameState === 'playing' && gameProgress) {
+        saveGameProgress();
       }
     };
-  }, [isOpen, artifact]);
+  }, [artifact.id]);
 
   const initializeGame = async () => {
-    setGameState('loading');
-    setError(null);
-
     try {
+      setGameState('loading');
+      
       // Load existing progress if available
-      await loadProgress();
+      const existingProgress = await loadGameProgress();
+      if (existingProgress) {
+        setGameProgress(existingProgress);
+      } else {
+        // Initialize new game progress
+        setGameProgress({
+          artifactId: artifact.id,
+          userId: user?.id,
+          startTime: new Date(),
+          attempts: 1,
+          currentLevel: 1,
+          score: 0,
+          achievements: [],
+          gameSpecificData: {}
+        });
+      }
       
-      // Initialize auto-save
-      startProgressTracking();
-      
-      setGameState('ready');
+      setGameState('playing');
     } catch (err) {
-      console.error('Error initializing game:', err);
-      setError('Failed to initialize game');
+      console.error('Failed to initialize game:', err);
+      setError('Failed to initialize game. Please try again.');
       setGameState('failed');
     }
   };
 
-  const loadProgress = async () => {
-    if (!artifact.isInteractive || !user?.token) return;
-
+  const loadGameProgress = async () => {
     try {
-      const response = await fetch(`/api/artifacts/${artifact._id}/progress`, {
+      const response = await fetch(`/api/artifacts/${artifact.id}/progress`, {
         headers: {
-          'Authorization': `Bearer ${user.token}`
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
         }
       });
-
+      
       if (response.ok) {
-        const progressData = await response.json();
-        setProgress(progressData);
+        const data = await response.json();
+        return data.progress;
       }
-    } catch (error) {
-      console.error('Error loading progress:', error);
+      return null;
+    } catch (err) {
+      console.error('Failed to load game progress:', err);
+      return null;
     }
   };
 
-  const saveProgress = async (progressData, completed = false) => {
-    if (!artifact.isInteractive || !user?.token) return;
-
+  const saveGameProgress = async () => {
+    if (!gameProgress || !user) return;
+    
     try {
-      const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-      
-      const response = await fetch(`/api/artifacts/${artifact._id}/progress`, {
+      await fetch(`/api/artifacts/${artifact.id}/progress`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          currentState: progressData,
-          completed,
-          timeSpent,
-          attempts: (progress?.attempts || 0) + (completed ? 1 : 0)
+          progress: {
+            ...gameProgress,
+            lastSaved: new Date()
+          }
         })
       });
+      
+      setLastSaveTime(Date.now());
+    } catch (err) {
+      console.error('Failed to save game progress:', err);
+    }
+  };
 
-      if (response.ok) {
-        const result = await response.json();
-        setProgress(result.progress);
-        
-        if (completed && result.rewards) {
-          setRewards(result.rewards);
-          handleGameComplete(result.rewards);
-        }
-        
-        if (onProgressUpdate) {
-          onProgressUpdate(result.progress);
-        }
+  const handleGameComplete = useCallback(async (completionData) => {
+    try {
+      // Calculate final score and rewards
+      const finalData = {
+        ...completionData,
+        completedAt: new Date(),
+        totalPlayTime: Date.now() - new Date(gameProgress.startTime).getTime(),
+        finalScore: completionData.score || gameProgress.score
+      };
+      
+      setCompletionData(finalData);
+      setGameState('completed');
+      
+      // Award experience points
+      const baseXP = artifact.completionRewards?.xp || 50;
+      const bonusXP = Math.floor(finalData.finalScore / 100);
+      const totalXP = baseXP + bonusXP;
+      
+      if (addExperiencePoints) {
+        addExperiencePoints(totalXP, `Completed ${artifact.name}`);
       }
-    } catch (error) {
-      console.error('Error saving progress:', error);
+      
+      // Award powers and unlock areas
+      await awardCompletionRewards(finalData);
+      
+      // Update artifact completion stats
+      await updateArtifactStats(finalData);
+      
+      // Show completion modal
+      setShowCompletionModal(true);
+      
+    } catch (err) {
+      console.error('Error handling game completion:', err);
+      setError('Failed to save completion data. Please try again.');
     }
-  };
+  }, [artifact, gameProgress, addExperiencePoints]);
 
-  const startProgressTracking = () => {
-    // Auto-save every 30 seconds
-    progressIntervalRef.current = setInterval(() => {
-      if (gameState === 'playing') {
-        const currentProgress = getCurrentGameState();
-        if (currentProgress) {
-          saveProgress(currentProgress, false);
-        }
+  const awardCompletionRewards = async (completionData) => {
+    if (!artifact.completionRewards || !user) return;
+    
+    try {
+      // Award powers
+      if (artifact.completionRewards.powers?.length > 0) {
+        await awardPlayerPowers(user.id, artifact.completionRewards.powers);
+        
+        // Update user context with new powers
+        const updatedUser = {
+          ...user,
+          unlockedPowers: [
+            ...(user.unlockedPowers || []),
+            ...artifact.completionRewards.powers
+          ]
+        };
+        updateUser(updatedUser);
       }
-    }, 30000);
-  };
-
-  const getCurrentGameState = () => {
-    // Get current state from the active game component
-    // This would be implemented differently for each game type
-    switch (artifact.gameConfig?.gameType || artifact.contentType) {
-      case 'shooter':
-        return getShooterState();
-      case 'textAdventure':
-        return getTextAdventureState();
-      case 'terminal':
-        return getTerminalState();
-      default:
-        return { timestamp: Date.now() };
+      
+      // Unlock areas
+      if (artifact.completionRewards.unlockedAreas?.length > 0) {
+        await unlockAreas(user.id, artifact.completionRewards.unlockedAreas);
+        
+        // Update user context with unlocked areas
+        const updatedUser = {
+          ...user,
+          unlockedAreas: [
+            ...(user.unlockedAreas || []),
+            ...artifact.completionRewards.unlockedAreas
+          ]
+        };
+        updateUser(updatedUser);
+      }
+      
+    } catch (err) {
+      console.error('Failed to award completion rewards:', err);
     }
   };
 
-  const getShooterState = () => {
-    // Extract state from Level4Shooter component
-    return {
-      level: 1, // Would get from game component
-      score: 0,
-      health: 100,
-      timestamp: Date.now()
-    };
-  };
-
-  const getTextAdventureState = () => {
-    // Extract state from TextAdventure component
-    return {
-      currentRoom: 'start',
-      inventory: [],
-      gameHistory: [],
-      timestamp: Date.now()
-    };
-  };
-
-  const getTerminalState = () => {
-    // Extract state from Terminal component
-    return {
-      currentDirectory: '/',
-      completedCommands: [],
-      timestamp: Date.now()
-    };
-  };
-
-  const handleGameStart = () => {
-    setGameState('playing');
-  };
-
-  const handleGamePause = () => {
-    setGameState('paused');
-    const currentProgress = getCurrentGameState();
-    if (currentProgress) {
-      saveProgress(currentProgress, false);
-    }
-  };
-
-  const handleGameResume = () => {
-    setGameState('playing');
-  };
-
-  const handleGameComplete = (gameRewards = null) => {
-    setGameState('completed');
-    
-    // Save final progress
-    const finalProgress = getCurrentGameState();
-    saveProgress(finalProgress, true);
-    
-    // Process rewards and power unlocks
-    if (artifact.completionRewards) {
-      processRewards(artifact.completionRewards);
-    }
-    
-    if (onComplete) {
-      onComplete({
-        artifact,
-        rewards: gameRewards || artifact.completionRewards,
-        finalState: finalProgress
+  const updateArtifactStats = async (completionData) => {
+    try {
+      await fetch(`/api/artifacts/${artifact.id}/complete`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          completionData,
+          score: completionData.finalScore,
+          playTime: completionData.totalPlayTime
+        })
       });
+    } catch (err) {
+      console.error('Failed to update artifact stats:', err);
     }
   };
 
-  const handleGameFail = () => {
-    setGameState('failed');
-    const finalProgress = getCurrentGameState();
-    saveProgress(finalProgress, false);
-  };
-
-  const handleGameExit = () => {
+  const handleGameExit = useCallback(() => {
     // Save progress before exiting
-    if (gameState === 'playing') {
-      const currentProgress = getCurrentGameState();
-      if (currentProgress) {
-        saveProgress(currentProgress, false);
-      }
+    if (gameState === 'playing' && gameProgress) {
+      saveGameProgress();
     }
     
     if (onExit) {
       onExit();
     }
-  };
+  }, [gameState, gameProgress, onExit]);
 
-  const processRewards = async (rewardData) => {
-    if (!user?.token || !rewardData) return;
+  const handleProgressUpdate = useCallback((newProgress) => {
+    setGameProgress(prev => ({
+      ...prev,
+      ...newProgress
+    }));
+    
+    if (onProgressUpdate) {
+      onProgressUpdate(newProgress);
+    }
+  }, [onProgressUpdate]);
 
-    try {
-      // Grant experience
-      if (rewardData.experience) {
-        // This would update the user's experience
-        console.log(`Granted ${rewardData.experience} experience`);
-      }
+  const renderGameComponent = () => {
+    const gameType = artifact.gameType || inferGameTypeFromArtifact(artifact);
+    
+    const commonProps = {
+      character,
+      onComplete: handleGameComplete,
+      onExit: handleGameExit,
+      onProgressUpdate: handleProgressUpdate,
+      initialProgress: gameProgress,
+      artifact
+    };
 
-      // Unlock powers
-      if (rewardData.powers && rewardData.powers.length > 0) {
-        for (const power of rewardData.powers) {
-          // This would unlock the power for the user
-          console.log(`Unlocked power: ${power}`);
-        }
-      }
-
-      // Unlock areas
-      if (rewardData.areas && rewardData.areas.length > 0) {
-        for (const area of rewardData.areas) {
-          // This would unlock the area for the user
-          console.log(`Unlocked area: ${area}`);
-        }
-      }
-
-      // Grant achievements
-      if (rewardData.achievements && rewardData.achievements.length > 0) {
-        for (const achievement of rewardData.achievements) {
-          // This would grant the achievement
-          console.log(`Unlocked achievement: ${achievement}`);
-        }
-      }
-    } catch (error) {
-      console.error('Error processing rewards:', error);
+    switch (gameType) {
+      case GAME_TYPES.SHOOTER:
+        return <Level4Shooter {...commonProps} />;
+        
+      case GAME_TYPES.TEXT_ADVENTURE:
+        return (
+          <TextAdventure 
+            {...commonProps}
+            username={character?.username || 'Player'}
+          />
+        );
+        
+      case GAME_TYPES.TERMINAL:
+        return (
+          <Level3Terminal
+            {...commonProps}
+            username={character?.username || 'User'}
+            inventory={character?.inventory || []}
+            artifacts={[]} // Pass relevant artifacts if needed
+          />
+        );
+        
+      case GAME_TYPES.PUZZLE:
+        return (
+          <InteractivePuzzleArtifact
+            {...commonProps}
+            puzzleData={artifact.gameData}
+          />
+        );
+        
+      default:
+        return (
+          <div className="game-error">
+            <h3>Unsupported Game Type</h3>
+            <p>Game type "{gameType}" is not yet supported.</p>
+            <button onClick={handleGameExit}>Exit</button>
+          </div>
+        );
     }
   };
 
-  const renderGameContent = () => {
-    if (!artifact || gameState === 'loading') {
-      return (
-        <div className="game-loading">
-          <div className="loading-spinner"></div>
-          <p>Loading {artifact?.name || 'game'}...</p>
-        </div>
-      );
-    }
+  const inferGameTypeFromArtifact = (artifact) => {
+    // Infer game type from artifact properties
+    if (artifact.type === ARTIFACT_TYPES.SHOOTER_EXPERIENCE) return GAME_TYPES.SHOOTER;
+    if (artifact.type === ARTIFACT_TYPES.TEXT_ADVENTURE_WORLD) return GAME_TYPES.TEXT_ADVENTURE;
+    if (artifact.type === ARTIFACT_TYPES.TERMINAL_CHALLENGE) return GAME_TYPES.TERMINAL;
+    if (artifact.type === ARTIFACT_TYPES.PUZZLE_GAME) return GAME_TYPES.PUZZLE;
+    
+    // Fallback based on name/description
+    const name = artifact.name.toLowerCase();
+    if (name.includes('shooter') || name.includes('hemingway')) return GAME_TYPES.SHOOTER;
+    if (name.includes('text') || name.includes('adventure')) return GAME_TYPES.TEXT_ADVENTURE;
+    if (name.includes('terminal') || name.includes('command')) return GAME_TYPES.TERMINAL;
+    
+    return GAME_TYPES.PUZZLE; // Default fallback
+  };
 
-    if (gameState === 'failed' || error) {
-      return (
-        <div className="game-error">
-          <h3>⚠️ Game Error</h3>
-          <p>{error || 'Failed to load game'}</p>
-          <button onClick={handleGameExit} className="exit-btn">Exit</button>
-        </div>
-      );
-    }
-
-    if (gameState === 'completed') {
-      return (
-        <div className="game-completed">
-          <div className="completion-celebration">
-            <h2>🎉 Congratulations!</h2>
-            <p>You've completed <strong>{artifact.name}</strong></p>
-            
-            {rewards && (
-              <div className="rewards-display">
-                <h3>Rewards Earned:</h3>
-                {rewards.experience && (
-                  <div className="reward-item">
-                    ⭐ {rewards.experience} Experience Points
-                  </div>
-                )}
-                {rewards.powers && rewards.powers.map(power => (
-                  <div key={power} className="reward-item">
-                    ⚡ Unlocked Power: {power}
-                  </div>
-                ))}
-                {rewards.areas && rewards.areas.map(area => (
-                  <div key={area} className="reward-item">
-                    🗺️ Unlocked Area: {area}
-                  </div>
-                ))}
-                {rewards.achievements && rewards.achievements.map(achievement => (
-                  <div key={achievement} className="reward-item">
-                    🏆 Achievement: {achievement}
+  const renderCompletionModal = () => {
+    if (!showCompletionModal || !completionData) return null;
+    
+    return (
+      <div className="completion-modal-overlay">
+        <div className="completion-modal">
+          <div className="completion-header">
+            <h2>🎉 Quest Complete!</h2>
+            <h3>{artifact.name}</h3>
+          </div>
+          
+          <div className="completion-stats">
+            <div className="stat-item">
+              <span className="stat-label">Final Score:</span>
+              <span className="stat-value">{completionData.finalScore?.toLocaleString() || 0}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Play Time:</span>
+              <span className="stat-value">{formatPlayTime(completionData.totalPlayTime)}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">XP Earned:</span>
+              <span className="stat-value">+{(artifact.completionRewards?.xp || 50) + Math.floor((completionData.finalScore || 0) / 100)}</span>
+            </div>
+          </div>
+          
+          {/* Powers Unlocked */}
+          {artifact.completionRewards?.powers?.length > 0 && (
+            <div className="rewards-section">
+              <h4>✨ Powers Unlocked</h4>
+              <div className="powers-list">
+                {artifact.completionRewards.powers.map(power => (
+                  <div key={power} className="power-item">
+                    {formatPowerName(power)}
                   </div>
                 ))}
               </div>
-            )}
-            
-            <button onClick={handleGameExit} className="continue-btn">
-              Continue Exploring
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    // Render the appropriate game component
-    switch (artifact.gameConfig?.gameType || artifact.contentType) {
-      case 'shooter':
-        return (
-          <Level4Shooter
-            onComplete={handleGameComplete}
-            onExit={handleGameExit}
-            character={user}
-            initialState={progress?.currentState}
-            artifactMode={true}
-          />
-        );
-
-      case 'textAdventure':
-        return (
-          <TextAdventure
-            onComplete={handleGameComplete}
-            onExit={handleGameExit}
-            username={user?.username || 'player'}
-            initialState={progress?.currentState}
-            artifactMode={true}
-          />
-        );
-
-      case 'terminal':
-        return (
-          <Terminal
-            onComplete={handleGameComplete}
-            onExit={handleGameExit}
-            character={user}
-            initialState={progress?.currentState}
-            artifactMode={true}
-          />
-        );
-
-      case 'puzzle':
-        return (
-          <InteractivePuzzleArtifact
-            artifact={artifact}
-            onComplete={handleGameComplete}
-            onClose={handleGameExit}
-            isOpen={true}
-          />
-        );
-
-      default:
-        return (
-          <div className="unsupported-game">
-            <h3>🚧 Game Type Not Supported</h3>
-            <p>Game type: {artifact.gameConfig?.gameType || artifact.contentType}</p>
-            <button onClick={handleGameExit} className="exit-btn">Exit</button>
-          </div>
-        );
-    }
-  };
-
-  const renderGameHUD = () => {
-    if (!isOpen || gameState === 'loading' || gameState === 'failed') return null;
-
-    return (
-      <div className="game-hud">
-        <div className="hud-left">
-          <div className="game-title">{artifact.name}</div>
-          <div className="game-info">
-            {artifact.gameConfig?.difficulty && (
-              <span className="difficulty">Difficulty: {artifact.gameConfig.difficulty}</span>
-            )}
-            {artifact.gameConfig?.estimatedPlayTime && (
-              <span className="playtime">~{artifact.gameConfig.estimatedPlayTime}min</span>
-            )}
-          </div>
-        </div>
-        
-        <div className="hud-right">
-          {gameState === 'playing' && (
-            <button onClick={handleGamePause} className="hud-btn pause-btn">
-              ⏸️ Pause
-            </button>
+            </div>
           )}
-          {gameState === 'paused' && (
-            <button onClick={handleGameResume} className="hud-btn resume-btn">
-              ▶️ Resume
-            </button>
+          
+          {/* Areas Unlocked */}
+          {artifact.completionRewards?.unlockedAreas?.length > 0 && (
+            <div className="rewards-section">
+              <h4>🗺️ Areas Unlocked</h4>
+              <div className="areas-list">
+                {artifact.completionRewards.unlockedAreas.map(area => (
+                  <div key={area} className="area-item">
+                    {formatAreaName(area)}
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
-          <button onClick={handleGameExit} className="hud-btn exit-btn">
-            🚪 Exit
-          </button>
+          
+          <div className="completion-actions">
+            <button 
+              className="play-again-btn"
+              onClick={() => {
+                setShowCompletionModal(false);
+                initializeGame();
+              }}
+            >
+              Play Again
+            </button>
+            <button 
+              className="continue-btn"
+              onClick={() => {
+                setShowCompletionModal(false);
+                if (onComplete) onComplete(completionData);
+              }}
+            >
+              Continue Adventure
+            </button>
+          </div>
         </div>
       </div>
     );
   };
 
-  if (!isOpen) return null;
+  const formatPlayTime = (milliseconds) => {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds % 60}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
+
+  const formatPowerName = (power) => {
+    return power.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  const formatAreaName = (area) => {
+    return area.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  if (error) {
+    return (
+      <div className="game-launcher-error">
+        <h3>Error Loading Game</h3>
+        <p>{error}</p>
+        <button onClick={handleGameExit}>Return to World</button>
+      </div>
+    );
+  }
+
+  if (gameState === 'loading') {
+    return (
+      <div className="game-launcher-loading">
+        <div className="loading-spinner"></div>
+        <h3>Loading {artifact.name}...</h3>
+        <p>Preparing your adventure...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="artifact-game-launcher">
-      <div className="game-container">
-        {renderGameHUD()}
-        <div className="game-viewport">
-          {renderGameContent()}
+      {/* Game Info Header */}
+      <div className="game-info-header">
+        <div className="game-title">
+          <h2>{artifact.name}</h2>
+          <span className="game-type">{formatGameType(artifact.gameType)}</span>
+        </div>
+        <div className="game-controls">
+          <button className="save-btn" onClick={saveGameProgress}>
+            💾 Save
+          </button>
+          <button className="exit-btn" onClick={handleGameExit}>
+            ↩️ Exit
+          </button>
         </div>
       </div>
       
-      {gameState === 'ready' && (
-        <div className="game-start-overlay">
-          <div className="start-screen">
-            <h2>{artifact.name}</h2>
-            <p>{artifact.description}</p>
-            
-            {artifact.gameConfig?.difficulty && (
-              <div className="game-details">
-                <div className="detail-item">
-                  <span className="label">Difficulty:</span>
-                  <span className="value">{artifact.gameConfig.difficulty}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Estimated Time:</span>
-                  <span className="value">{artifact.gameConfig?.estimatedPlayTime || 10} minutes</span>
-                </div>
-                {artifact.completionRewards?.experience && (
-                  <div className="detail-item">
-                    <span className="label">Reward:</span>
-                    <span className="value">{artifact.completionRewards.experience} XP</span>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {progress?.completed ? (
-              <div className="completed-notice">
-                ✅ You've already completed this artifact!
-                <p>You can replay it to improve your score.</p>
-              </div>
-            ) : progress?.attempts > 0 ? (
-              <div className="progress-notice">
-                📊 Continue your progress (Attempt #{progress.attempts + 1})
-              </div>
-            ) : (
-              <div className="first-time-notice">
-                🌟 First time playing this artifact!
-              </div>
-            )}
-            
-            <div className="start-actions">
-              <button onClick={handleGameStart} className="start-btn">
-                {progress?.attempts > 0 ? '🔄 Continue' : '🚀 Start Game'}
-              </button>
-              <button onClick={handleGameExit} className="cancel-btn">
-                Cancel
-              </button>
-            </div>
-          </div>
+      {/* Progress Indicator */}
+      {gameProgress && (
+        <div className="progress-indicator">
+          <span>Score: {gameProgress.score?.toLocaleString() || 0}</span>
+          <span>•</span>
+          <span>Level: {gameProgress.currentLevel || 1}</span>
+          <span>•</span>
+          <span className="save-status">
+            {Date.now() - lastSaveTime < 60000 ? '✅ Saved' : '⏳ Saving...'}
+          </span>
         </div>
       )}
+      
+      {/* Game Content */}
+      <div className="game-content">
+        {renderGameComponent()}
+      </div>
+      
+      {/* Completion Modal */}
+      {renderCompletionModal()}
     </div>
   );
+};
+
+const formatGameType = (gameType) => {
+  if (!gameType) return 'Interactive Experience';
+  return gameType.split('_').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+};
+
+ArtifactGameLauncher.propTypes = {
+  artifact: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    gameType: PropTypes.string,
+    type: PropTypes.string,
+    completionRewards: PropTypes.shape({
+      xp: PropTypes.number,
+      powers: PropTypes.arrayOf(PropTypes.string),
+      unlockedAreas: PropTypes.arrayOf(PropTypes.string),
+      achievements: PropTypes.arrayOf(PropTypes.string)
+    }),
+    gameData: PropTypes.object
+  }).isRequired,
+  onComplete: PropTypes.func,
+  onExit: PropTypes.func.isRequired,
+  character: PropTypes.object,
+  onProgressUpdate: PropTypes.func
 };
 
 export default ArtifactGameLauncher; 

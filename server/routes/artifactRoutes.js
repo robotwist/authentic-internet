@@ -181,6 +181,255 @@ router.get("/", async (req, res) => {
 });
 
 /* ────────────────────────────────
+   🔹 GAME ARTIFACT PROGRESS TRACKING
+──────────────────────────────── */
+
+// Get game progress for an artifact
+router.get("/:id/progress", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId;
+    
+    const artifact = await Artifact.findById(id);
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
+    }
+    
+    // Find existing progress for this user and artifact
+    const progressEntry = artifact.userProgress?.find(
+      p => p.userId.toString() === userId.toString()
+    );
+    
+    res.json({ 
+      progress: progressEntry?.progressData || null,
+      completed: progressEntry?.completed || false,
+      attempts: progressEntry?.attempts || 0,
+      bestScore: progressEntry?.bestScore || 0
+    });
+  } catch (error) {
+    console.error('Error fetching game progress:', error);
+    res.status(500).json({ error: 'Failed to fetch progress' });
+  }
+});
+
+// Save game progress for an artifact
+router.post("/:id/progress", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId;
+    const { progress } = req.body;
+    
+    const artifact = await Artifact.findById(id);
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
+    }
+    
+    // Initialize userProgress array if it doesn't exist
+    if (!artifact.userProgress) {
+      artifact.userProgress = [];
+    }
+    
+    // Find existing progress entry or create new one
+    let progressEntry = artifact.userProgress.find(
+      p => p.userId.toString() === userId.toString()
+    );
+    
+    if (progressEntry) {
+      progressEntry.progressData = progress;
+      progressEntry.lastSaved = new Date();
+    } else {
+      progressEntry = {
+        userId,
+        progressData: progress,
+        attempts: 1,
+        completed: false,
+        lastSaved: new Date(),
+        startedAt: new Date()
+      };
+      artifact.userProgress.push(progressEntry);
+    }
+    
+    await artifact.save();
+    res.json({ success: true, progress: progressEntry });
+  } catch (error) {
+    console.error('Error saving game progress:', error);
+    res.status(500).json({ error: 'Failed to save progress' });
+  }
+});
+
+// Mark artifact as completed and award rewards
+router.post("/:id/complete", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId;
+    const { completionData, score, playTime } = req.body;
+    
+    const artifact = await Artifact.findById(id);
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
+    }
+    
+    // Initialize userProgress array if it doesn't exist
+    if (!artifact.userProgress) {
+      artifact.userProgress = [];
+    }
+    
+    // Find existing progress entry
+    let progressEntry = artifact.userProgress.find(
+      p => p.userId.toString() === userId.toString()
+    );
+    
+    if (progressEntry) {
+      progressEntry.completed = true;
+      progressEntry.completedAt = new Date();
+      progressEntry.completionData = completionData;
+      if (score > (progressEntry.bestScore || 0)) {
+        progressEntry.bestScore = score;
+      }
+      if (playTime) {
+        progressEntry.totalPlayTime = (progressEntry.totalPlayTime || 0) + playTime;
+      }
+    } else {
+      progressEntry = {
+        userId,
+        completed: true,
+        completedAt: new Date(),
+        completionData,
+        bestScore: score || 0,
+        totalPlayTime: playTime || 0,
+        attempts: 1
+      };
+      artifact.userProgress.push(progressEntry);
+    }
+    
+    // Update artifact completion stats
+    if (!artifact.completionStats) {
+      artifact.completionStats = {
+        totalAttempts: 0,
+        totalCompletions: 0,
+        averageScore: 0,
+        topScore: 0,
+        averagePlayTime: 0
+      };
+    }
+    
+    artifact.completionStats.totalCompletions += 1;
+    if (score > artifact.completionStats.topScore) {
+      artifact.completionStats.topScore = score;
+    }
+    
+    // Recalculate averages
+    const allCompletions = artifact.userProgress.filter(p => p.completed);
+    const totalScores = allCompletions.reduce((sum, p) => sum + (p.bestScore || 0), 0);
+    const totalPlayTimes = allCompletions.reduce((sum, p) => sum + (p.totalPlayTime || 0), 0);
+    
+    artifact.completionStats.averageScore = Math.round(totalScores / allCompletions.length);
+    artifact.completionStats.averagePlayTime = Math.round(totalPlayTimes / allCompletions.length);
+    
+    await artifact.save();
+    
+    res.json({ 
+      success: true, 
+      rewards: artifact.completionRewards,
+      stats: artifact.completionStats
+    });
+  } catch (error) {
+    console.error('Error completing artifact:', error);
+    res.status(500).json({ error: 'Failed to complete artifact' });
+  }
+});
+
+// Get hint for puzzle artifact
+router.post("/:id/hint", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { hintLevel } = req.body;
+    
+    const artifact = await Artifact.findById(id);
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
+    }
+    
+    // Generate context-aware hints based on artifact type
+    let hint = '';
+    const gameType = artifact.gameType || artifact.type;
+    
+    switch (gameType) {
+      case 'shooter':
+      case 'shooter_experience':
+        const shooterHints = [
+          "Use arrow keys or WASD to move and jump",
+          "Press spacebar to shoot at enemies",
+          "Watch out for boss attacks - they have patterns!",
+          "Collect power-ups to increase your damage",
+          "Try to stay moving to avoid enemy fire"
+        ];
+        hint = shooterHints[hintLevel % shooterHints.length];
+        break;
+        
+      case 'text_adventure':
+      case 'text_adventure_world':
+        const textHints = [
+          "Type 'look' to examine your surroundings",
+          "Try 'inventory' to see what you're carrying",
+          "Use 'go [direction]' to move around",
+          "Many objects can be 'examined' for more details",
+          "Save your progress frequently with 'save'"
+        ];
+        hint = textHints[hintLevel % textHints.length];
+        break;
+        
+      case 'terminal':
+      case 'terminal_challenge':
+        const terminalHints = [
+          "Start with 'ls' to list directory contents",
+          "Use 'cd' to change directories",
+          "Try 'grep' to search for specific text in files",
+          "The 'find' command can locate files by name",
+          "Read files with 'cat' or 'head'"
+        ];
+        hint = terminalHints[hintLevel % terminalHints.length];
+        break;
+        
+      default:
+        hint = "Explore and experiment - every artifact has its secrets!";
+    }
+    
+    res.json({ hint, hintLevel: hintLevel + 1 });
+  } catch (error) {
+    console.error('Error getting hint:', error);
+    res.status(500).json({ error: 'Failed to get hint' });
+  }
+});
+
+/* ────────────────────────────────
+   🔹 SEED GAME ARTIFACTS
+──────────────────────────────── */
+router.post("/admin/seed", async (req, res) => {
+  try {
+    // Import the seeding function
+    const { seedArtifacts } = await import('../seed/artifacts.js');
+    
+    // Run the seeding
+    const insertedArtifacts = await seedArtifacts(Artifact);
+    
+    res.json({ 
+      message: `Successfully seeded ${insertedArtifacts.length} artifacts`,
+      artifacts: insertedArtifacts.map(a => ({ 
+        id: a._id, 
+        name: a.name, 
+        type: a.type, 
+        area: a.area,
+        position: a.position 
+      }))
+    });
+  } catch (error) {
+    console.error('Error seeding artifacts:', error);
+    res.status(500).json({ error: 'Failed to seed artifacts: ' + error.message });
+  }
+});
+
+/* ────────────────────────────────
    🔹 FETCH A SINGLE ARTIFACT BY ID
 ──────────────────────────────── */
 router.get("/:id", async (req, res) => {
