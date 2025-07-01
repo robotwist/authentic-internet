@@ -529,31 +529,103 @@ const NPCInteraction = ({
       text: "Tell me about programming."
     }, {
       speaker: npc.name,
-      text: npc.coderDialog || "Programming is the art of algorithm and logic. The analytical engine weaves algebraic patterns just as the Jacquard loom weaves flowers and leaves."
+      text: npc.coderDialog || "Programming! What a delightful modern term for what I called 'the science of operations.' The Analytical Engine was to be instructed through precise sequences—what you might call algorithms. But here's what fascinates me: these mechanical operations could transcend mere calculation and achieve something approaching... thought."
     }]);
     
     setDialogOptions([
       {
-        text: "What's your favorite algorithm?",
+        text: "How did you envision computer programs?",
         action: () => {
           setDialogHistory(prev => [...prev, {
             speaker: user.username || "Player",
-            text: "What's your favorite algorithm?"
+            text: "How did you envision computer programs?"
           }, {
             speaker: npc.name,
-            text: npc.algorithmResponse || "I am particularly fond of recursive functions, which mirror the elegant self-similarity found in nature."
+            text: "Ah! Consider this: the Analytical Engine has no pretensions whatever to originate anything. It can do whatever we know how to order it to perform. But imagine—what if we could teach it to weave patterns of thought as the Jacquard loom weaves flowers? I wrote the first algorithm, you know—instructions for calculating Bernoulli numbers."
           }]);
           
           setDialogOptions([
             {
-              text: "Fascinating perspective",
+              text: "What would you think of modern programming?",
+              action: () => {
+                setDialogHistory(prev => [...prev, {
+                  speaker: user.username || "Player",
+                  text: "What would you think of modern programming?"
+                }, {
+                  speaker: npc.name,
+                  text: "Marvelous! Though I wonder—do your modern engines truly think, or do they merely execute our thoughts with extraordinary speed? The question that captivates me remains: can the machine transcend its programming to achieve genuine creativity?"
+                }]);
+                
+                setDialogOptions([
+                  {
+                    text: "Your vision was remarkable",
+                    action: () => handleFarewell()
+                  }
+                ]);
+              }
+            },
+            {
+              text: "Tell me about the first algorithm",
+              action: () => {
+                setDialogHistory(prev => [...prev, {
+                  speaker: user.username || "Player",
+                  text: "Tell me about the first algorithm."
+                }, {
+                  speaker: npc.name,
+                  text: "My Note G! I designed a sequence of operations for generating Bernoulli numbers—quite complex, requiring loops and conditional operations. Charles called it brilliant, though I suspect he was simply pleased someone understood his engine well enough to make it dance to mathematical music."
+                }]);
+                
+                setDialogOptions([
+                  {
+                    text: "Mathematical music—I like that phrase",
+                    action: () => handleFarewell()
+                  }
+                ]);
+              }
+            }
+          ]);
+        }
+      },
+      {
+        text: "What's your favorite mathematical concept?",
+        action: () => {
+          setDialogHistory(prev => [...prev, {
+            speaker: user.username || "Player",
+            text: "What's your favorite mathematical concept?"
+          }, {
+            speaker: npc.name,
+            text: npc.algorithmResponse || "I am quite enchanted by mathematical induction—the way one proven step leads inevitably to infinite steps beyond. Rather like a well-crafted argument that builds upon itself, wouldn't you say? It's the mathematical equivalent of poetry—beautiful, inevitable, and surprisingly powerful."
+          }]);
+          
+          setDialogOptions([
+            {
+              text: "Mathematics as poetry—fascinating",
               action: () => handleFarewell()
             }
           ]);
         }
       },
       {
-        text: "I shall compile this knowledge",
+        text: "Tell me about your famous father",
+        action: () => {
+          setDialogHistory(prev => [...prev, {
+            speaker: user.username || "Player",
+            text: "Tell me about your famous father."
+          }, {
+            speaker: npc.name,
+            text: "Ah, Lord Byron! I inherited his rebellious spirit but applied it to mathematics rather than poetry. Though perhaps there's more poetry in a well-constructed algorithm than Byron ever imagined. He gave me passion; I gave it precision."
+          }]);
+          
+          setDialogOptions([
+            {
+              text: "A perfect combination",
+              action: () => handleFarewell()
+            }
+          ]);
+        }
+      },
+      {
+        text: "I should let you return to your calculations",
         action: () => handleFarewell()
       }
     ]);
@@ -668,12 +740,17 @@ const NPCInteraction = ({
   };
   
   const handleFarewell = () => {
+    // Ada Lovelace gets a special farewell message
+    const farewellMessage = npc.type === 'ada_lovelace' || npc.name === 'Ada Lovelace' 
+      ? "Until we meet again in the realm of mathematical possibility! Remember—the engine of intellect requires both logic and imagination to achieve its full potential."
+      : npc.farewellText || "Farewell! Stay authentic out there.";
+    
     setDialogHistory(prev => [...prev, {
       speaker: user.username || "Player",
       text: "Goodbye."
     }, {
       speaker: npc.name,
-      text: npc.farewellText || "Farewell! Stay authentic out there."
+      text: farewellMessage
     }]);
     
     setIsComplete(true);

@@ -348,7 +348,7 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
   const getCharacterSpecificErrorMessage = useCallback((npcType) => {
     const messages = {
       [NPC_TYPES.SHAKESPEARE]: "The fool doth think he is wise, but the wise man knows himself to be a fool. (As You Like It, Act V, Scene I)",
-      [NPC_TYPES.ADA_LOVELACE]: "The science of operations, as derived from mathematics more especially, is a science of itself, and has its own abstract truth and value. (Notes on the Analytical Engine, 1843)",
+      [NPC_TYPES.ADA_LOVELACE]: "One moment—I must trace through this calculation. As I often tell Charles Babbage, precision in thought requires precision in expression. The engine of my mind needs proper fuel!",
       [NPC_TYPES.LORD_BYRON]: "There is a pleasure in the pathless woods, there is a rapture on the lonely shore. (Childe Harold's Pilgrimage, Canto IV, Stanza 178)",
       [NPC_TYPES.ARTIST]: "The art speaks for itself, but sometimes it needs a translator.",
       [NPC_TYPES.MICHELANGELO]: "The greater danger for most of us lies not in setting our aim too high and falling short, but in setting our aim too low and achieving our mark.",
@@ -382,7 +382,7 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
   // Memoize greetings to avoid recreating the mapping on each render
   const greetings = useMemo(() => ({
     [NPC_TYPES.SHAKESPEARE]: "What's in a name? That which we call a rose by any other word would smell as sweet. (Romeo and Juliet, Act II, Scene II)",
-    [NPC_TYPES.ADA_LOVELACE]: "That brain of mine is something more than merely mortal; as time will show. (Letter to her mother, 1843)",
+    [NPC_TYPES.ADA_LOVELACE]: "I perceive you seek discourse with one who dwells in the realm of numbers and engines. I am Ada Lovelace—though you may know me as the mathematician who dared to envision what Babbage's machine might truly accomplish.",
     [NPC_TYPES.LORD_BYRON]: "She walks in beauty, like the night of cloudless climes and starry skies. (She Walks in Beauty, 1814)",
     [NPC_TYPES.ARTIST]: "Welcome! Let us explore the intersection of art and technology.",
     [NPC_TYPES.MICHELANGELO]: "I saw the angel in the marble and carved until I set him free. (Letter to Benedetto Varchi, 1549)",
