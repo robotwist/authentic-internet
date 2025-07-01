@@ -5,8 +5,11 @@ import authenticateToken from "../middleware/authMiddleware.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from 'url';
 
 const router = express.Router();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configure multer for artifact attachments and icons
 const storage = multer.diskStorage({
@@ -145,11 +148,35 @@ router.post("/", authenticateToken, uploadFields, async (req, res) => {
 ──────────────────────────────── */
 router.get("/", async (req, res) => {
   try {
-    const artifacts = await Artifact.find({ type: "artifact" }).populate("creator");
-    res.json(artifacts);
+    const { area, type, creator, visibility, page = 1, limit = 20 } = req.query;
+    
+    const filter = {};
+    if (area) filter.area = area;
+    if (type) filter.type = type;
+    if (creator) filter.creator = creator;
+    if (visibility) filter.visibility = visibility;
+
+    const artifacts = await Artifact.find(filter)
+      .populate('creator', 'username email')
+      .populate('comments.user', 'username')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .lean();
+
+    const total = await Artifact.countDocuments(filter);
+
+    res.json({
+      artifacts,
+      pagination: {
+        current: parseInt(page),
+        pages: Math.ceil(total / limit),
+        total
+      }
+    });
   } catch (error) {
-    console.error("Error fetching artifacts:", error);
-    res.status(500).json({ error: "Failed to fetch artifacts." });
+    console.error('Error fetching artifacts:', error);
+    res.status(500).json({ error: 'Failed to fetch artifacts' });
   }
 });
 
@@ -158,14 +185,22 @@ router.get("/", async (req, res) => {
 ──────────────────────────────── */
 router.get("/:id", async (req, res) => {
   try {
-    const artifact = await Artifact.findById(req.params.id).populate("creator");
-    if (!artifact || artifact.type !== "artifact") {
-      return res.status(404).json({ error: "Artifact not found." });
+    const artifact = await Artifact.findById(req.params.id)
+      .populate('creator', 'username email')
+      .populate('comments.user', 'username');
+
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
     }
+
+    // Increment view count
+    artifact.views += 1;
+    await artifact.save();
+
     res.json(artifact);
   } catch (error) {
-    console.error("Error fetching artifact:", error);
-    res.status(500).json({ error: "Failed to fetch artifact." });
+    console.error('Error fetching artifact:', error);
+    res.status(500).json({ error: 'Failed to fetch artifact' });
   }
 });
 
@@ -638,5 +673,708 @@ router.post("/:id/interact", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Failed to record interaction." });
   }
 });
+
+/* ────────────────────────────────
+   🔹 GET PLAYER'S PROGRESS ON ARTIFACT
+──────────────────────────────── */
+router.get('/:id/progress', authenticateToken, async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+    
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
+    }
+
+    if (!artifact.isInteractive) {
+      return res.status(400).json({ error: 'This artifact is not interactive' });
+    }
+
+    const playerProgress = artifact.getPlayerProgress(req.user.id);
+    
+    if (!playerProgress) {
+      return res.status(404).json({ error: 'No progress found' });
+    }
+
+    res.json(playerProgress);
+  } catch (error) {
+    console.error('Error fetching progress:', error);
+    res.status(500).json({ error: 'Failed to fetch progress' });
+  }
+});
+
+/* ────────────────────────────────
+   🔹 SAVE PLAYER'S PROGRESS ON ARTIFACT
+──────────────────────────────── */
+router.post('/:id/progress', authenticateToken, async (req, res) => {
+  try {
+    const { currentState, completed, timeSpent, attempts } = req.body;
+    const artifact = await Artifact.findById(req.params.id);
+    
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
+    }
+
+    if (!artifact.isInteractive) {
+      return res.status(400).json({ error: 'This artifact is not interactive' });
+    }
+
+    // Check if player can attempt
+    if (!artifact.canPlayerAttempt(req.user.id)) {
+      return res.status(403).json({ error: 'Maximum attempts exceeded' });
+    }
+
+    // Find existing progress or create new
+    let playerProgress = artifact.playerProgress.find(p => p.playerId.toString() === req.user.id);
+    
+    if (!playerProgress) {
+      playerProgress = {
+        playerId: req.user.id,
+        attempts: 0,
+        currentState: {},
+        completed: false,
+        hintsUsed: 0,
+        timeSpent: 0,
+        lastAttempt: new Date()
+      };
+      artifact.playerProgress.push(playerProgress);
+    }
+
+    // Update progress
+    playerProgress.currentState = currentState;
+    playerProgress.completed = completed;
+    playerProgress.timeSpent += timeSpent || 0;
+    playerProgress.attempts = attempts || playerProgress.attempts;
+    playerProgress.lastAttempt = new Date();
+
+    if (completed) {
+      playerProgress.completedAt = new Date();
+      
+      // Grant rewards
+      if (artifact.completionRewards) {
+        const user = await User.findById(req.user.id);
+        
+        // Grant experience
+        if (artifact.completionRewards.experience) {
+          user.experience = (user.experience || 0) + artifact.completionRewards.experience;
+        }
+
+        // Grant achievements
+        if (artifact.completionRewards.achievements) {
+          artifact.completionRewards.achievements.forEach(achievementId => {
+            if (!user.achievements) user.achievements = [];
+            if (!user.achievements.some(a => a.id === achievementId)) {
+              user.achievements.push({
+                id: achievementId,
+                unlockedAt: new Date(),
+                artifactId: artifact._id
+              });
+            }
+          });
+        }
+
+        await user.save();
+      }
+    }
+
+    // Update completion stats
+    artifact.updateCompletionStats();
+    await artifact.save();
+
+    res.json({ 
+      success: true, 
+      progress: playerProgress,
+      rewards: completed ? artifact.completionRewards : null
+    });
+  } catch (error) {
+    console.error('Error saving progress:', error);
+    res.status(500).json({ error: 'Failed to save progress' });
+  }
+});
+
+/* ────────────────────────────────
+   🔹 GET HINT FOR ARTIFACT
+──────────────────────────────── */
+router.post('/:id/hint', authenticateToken, async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+    
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
+    }
+
+    if (!artifact.isInteractive || !artifact.gameConfig.hintsEnabled) {
+      return res.status(400).json({ error: 'Hints not available for this artifact' });
+    }
+
+    let playerProgress = artifact.playerProgress.find(p => p.playerId.toString() === req.user.id);
+    
+    if (!playerProgress) {
+      return res.status(404).json({ error: 'No progress found' });
+    }
+
+    if (playerProgress.completed) {
+      return res.status(400).json({ error: 'Puzzle already completed' });
+    }
+
+    // Generate hint based on puzzle type
+    let hint = '';
+    switch (artifact.puzzleType) {
+      case 'riddle':
+        const answer = artifact.unlockAnswer.toLowerCase();
+        if (playerProgress.hintsUsed === 0) {
+          hint = `The answer has ${answer.length} letters.`;
+        } else if (playerProgress.hintsUsed === 1) {
+          hint = `The answer starts with "${answer.charAt(0).toUpperCase()}".`;
+        } else {
+          hint = `The answer contains the letter "${answer.charAt(Math.floor(answer.length / 2))}".`;
+        }
+        break;
+      case 'textAdventure':
+        hint = 'Try examining objects and interacting with your environment.';
+        break;
+      case 'dialogChallenge':
+        hint = 'Think carefully about your conversation choices.';
+        break;
+      default:
+        hint = 'Think about the problem from a different angle.';
+    }
+
+    playerProgress.hintsUsed += 1;
+    await artifact.save();
+
+    res.json({ hint, hintsUsed: playerProgress.hintsUsed });
+  } catch (error) {
+    console.error('Error getting hint:', error);
+    res.status(500).json({ error: 'Failed to get hint' });
+  }
+});
+
+// Content Creation - Create new creative artifact with media upload
+router.post('/', authenticateToken, upload.array('media', 10), async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      contentType,
+      area,
+      visibility,
+      tags,
+      location,
+      content,
+      writingConfig,
+      artConfig,
+      musicConfig,
+      gameConfig,
+      completionRewards
+    } = req.body;
+
+    // Parse JSON fields
+    const parsedLocation = JSON.parse(location || '{"x": 0, "y": 0}');
+    const parsedTags = JSON.parse(tags || '[]');
+    const parsedCompletionRewards = JSON.parse(completionRewards || '{}');
+    
+    // Parse content-specific configs
+    let typeConfig = {};
+    if (contentType === 'writing' && writingConfig) {
+      typeConfig.writingConfig = JSON.parse(writingConfig);
+    } else if (contentType === 'art' && artConfig) {
+      typeConfig.artConfig = JSON.parse(artConfig);
+    } else if (contentType === 'music' && musicConfig) {
+      typeConfig.musicConfig = JSON.parse(musicConfig);
+    } else if (contentType === 'game' && gameConfig) {
+      typeConfig.gameConfig = JSON.parse(gameConfig);
+    }
+
+    // Process uploaded media files
+    const mediaFiles = req.files?.map(file => ({
+      type: file.mimetype.startsWith('image/') ? 'image' : 
+            file.mimetype.startsWith('audio/') ? 'audio' : 
+            file.mimetype.startsWith('video/') ? 'video' : 'document',
+      url: `/uploads/${file.filename}`,
+      filename: file.filename,
+      description: file.originalname
+    })) || [];
+
+    // Create artifact
+    const artifact = new Artifact({
+      name,
+      description,
+      contentType,
+      area,
+      visibility,
+      tags: parsedTags,
+      location: parsedLocation,
+      content,
+      creator: req.user.id,
+      completionRewards: parsedCompletionRewards,
+      media: mediaFiles,
+      isInteractive: contentType === 'game',
+      allowsUserProgress: contentType === 'game',
+      ...typeConfig
+    });
+
+    await artifact.save();
+
+    // Update user creator stats
+    const user = await User.findById(req.user.id);
+    user.isCreator = true;
+    if (!user.creatorStats) {
+      user.creatorStats = {
+        totalArtifacts: 0,
+        totalPlays: 0,
+        totalRatings: 0,
+        averageRating: 0,
+        totalFavorites: 0,
+        featuredCount: 0
+      };
+    }
+    user.creatorStats.totalArtifacts += 1;
+    user.creatorStats.lastPublished = new Date();
+    await user.save();
+
+    // Grant creator achievement
+    user.addAchievement('content_creator', 'Content Creator', 'Published your first creation', '🎨', 'common', artifact._id);
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      artifact: await artifact.populate('creator', 'username displayName avatar'),
+      message: 'Content published successfully!'
+    });
+
+  } catch (error) {
+    console.error('Error creating artifact:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create artifact',
+      error: error.message
+    });
+  }
+});
+
+// Power Progression - Complete artifact and unlock rewards
+router.post('/:id/complete', authenticateToken, async (req, res) => {
+  try {
+    const { score = 0, attempts = 1, timeSpent = 0 } = req.body;
+    const artifactId = req.params.id;
+    const userId = req.user.id;
+
+    const artifact = await Artifact.findById(artifactId);
+    if (!artifact) {
+      return res.status(404).json({
+        success: false,
+        message: 'Artifact not found'
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    // Record completion
+    const completionResult = user.completeArtifact(artifactId, score, attempts, timeSpent);
+    
+    // Grant experience
+    const expResult = user.addExperience(artifact.completionRewards?.experience || 10);
+    
+    // Unlock powers
+    const unlockedPowers = [];
+    if (artifact.completionRewards?.powers) {
+      for (const powerId of artifact.completionRewards.powers) {
+        const powerResult = user.unlockPower(
+          powerId,
+          getPowerName(powerId),
+          getPowerDescription(powerId),
+          artifact.name
+        );
+        if (powerResult.unlocked || powerResult.upgraded) {
+          unlockedPowers.push(powerResult.power);
+        }
+      }
+    }
+
+    // Unlock areas
+    const unlockedAreas = [];
+    if (artifact.completionRewards?.areas) {
+      for (const areaId of artifact.completionRewards.areas) {
+        const areaResult = user.unlockArea(areaId, `Completed ${artifact.name}`);
+        if (areaResult.unlocked) {
+          unlockedAreas.push(areaId);
+        }
+      }
+    }
+
+    // Grant achievements
+    const newAchievements = [];
+    if (artifact.completionRewards?.achievements) {
+      for (const achievementId of artifact.completionRewards.achievements) {
+        const achievement = user.addAchievement(
+          achievementId,
+          getAchievementName(achievementId),
+          getAchievementDescription(achievementId),
+          getAchievementIcon(achievementId),
+          'common',
+          artifactId
+        );
+        if (achievement.unlocked) {
+          newAchievements.push(achievement.achievement);
+        }
+      }
+    }
+
+    await user.save();
+
+    // Update artifact completion stats
+    artifact.views += 1;
+    artifact.updateCompletionStats();
+    await artifact.save();
+
+    res.json({
+      success: true,
+      completion: completionResult,
+      rewards: {
+        experience: expResult,
+        powers: unlockedPowers,
+        areas: unlockedAreas,
+        achievements: newAchievements
+      },
+      message: 'Artifact completed successfully!'
+    });
+
+  } catch (error) {
+    console.error('Error completing artifact:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to complete artifact',
+      error: error.message
+    });
+  }
+});
+
+// Social Features - Rate and review artifact
+router.post('/:id/rate', authenticateToken, async (req, res) => {
+  try {
+    const { rating, review = '' } = req.body;
+    const artifactId = req.params.id;
+    const userId = req.user.id;
+
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rating must be between 1 and 5'
+      });
+    }
+
+    const artifact = await Artifact.findById(artifactId);
+    if (!artifact) {
+      return res.status(404).json({
+        success: false,
+        message: 'Artifact not found'
+      });
+    }
+
+    // Add or update rating
+    artifact.addRating(userId, rating, review);
+    await artifact.save();
+
+    // Update creator stats
+    const creator = await User.findById(artifact.creator);
+    if (creator && creator.creatorStats) {
+      creator.updateCreatorStats();
+      await creator.save();
+    }
+
+    res.json({
+      success: true,
+      averageRating: artifact.averageRating,
+      totalRatings: artifact.totalRatings,
+      message: 'Rating submitted successfully!'
+    });
+
+  } catch (error) {
+    console.error('Error rating artifact:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to rate artifact',
+      error: error.message
+    });
+  }
+});
+
+// Discovery Features - Get featured content
+router.get('/featured', async (req, res) => {
+  try {
+    const { contentType, limit = 10, page = 1 } = req.query;
+    
+    const query = {
+      visibility: 'public',
+      $or: [
+        { featured: true },
+        { averageRating: { $gte: 4.0 }, totalRatings: { $gte: 5 } },
+        { views: { $gte: 100 } }
+      ]
+    };
+
+    if (contentType && contentType !== 'all') {
+      query.contentType = contentType;
+    }
+
+    const artifacts = await Artifact.find(query)
+      .populate('creator', 'username displayName avatar')
+      .sort({ featuredAt: -1, averageRating: -1, views: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit));
+
+    const total = await Artifact.countDocuments(query);
+
+    res.json({
+      success: true,
+      artifacts,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching featured content:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch featured content',
+      error: error.message
+    });
+  }
+});
+
+// Discovery Features - Search and filter content
+router.get('/search', async (req, res) => {
+  try {
+    const { 
+      q = '', 
+      contentType, 
+      tags, 
+      creator, 
+      minRating, 
+      sortBy = 'newest',
+      limit = 20, 
+      page = 1 
+    } = req.query;
+
+    const query = { visibility: 'public' };
+
+    // Text search
+    if (q) {
+      query.$or = [
+        { name: { $regex: q, $options: 'i' } },
+        { description: { $regex: q, $options: 'i' } },
+        { tags: { $in: [new RegExp(q, 'i')] } }
+      ];
+    }
+
+    // Filters
+    if (contentType && contentType !== 'all') {
+      query.contentType = contentType;
+    }
+
+    if (tags) {
+      const tagArray = Array.isArray(tags) ? tags : tags.split(',');
+      query.tags = { $in: tagArray };
+    }
+
+    if (creator) {
+      const creatorUser = await User.findOne({ username: creator });
+      if (creatorUser) {
+        query.creator = creatorUser._id;
+      }
+    }
+
+    if (minRating) {
+      query.averageRating = { $gte: parseFloat(minRating) };
+    }
+
+    // Sorting
+    let sort = {};
+    switch (sortBy) {
+      case 'newest':
+        sort = { createdAt: -1 };
+        break;
+      case 'oldest':
+        sort = { createdAt: 1 };
+        break;
+      case 'rating':
+        sort = { averageRating: -1, totalRatings: -1 };
+        break;
+      case 'popular':
+        sort = { views: -1, plays: -1 };
+        break;
+      case 'name':
+        sort = { name: 1 };
+        break;
+      default:
+        sort = { createdAt: -1 };
+    }
+
+    const artifacts = await Artifact.find(query)
+      .populate('creator', 'username displayName avatar')
+      .sort(sort)
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit));
+
+    const total = await Artifact.countDocuments(query);
+
+    res.json({
+      success: true,
+      artifacts,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      },
+      query: {
+        searchTerm: q,
+        contentType,
+        tags,
+        creator,
+        minRating,
+        sortBy
+      }
+    });
+
+  } catch (error) {
+    console.error('Error searching artifacts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to search artifacts',
+      error: error.message
+    });
+  }
+});
+
+// Collections - Add artifact to user's collection
+router.post('/:id/collect', authenticateToken, async (req, res) => {
+  try {
+    const { collectionName = 'Favorites', tags = [], notes = '' } = req.body;
+    const artifactId = req.params.id;
+    const userId = req.user.id;
+
+    const artifact = await Artifact.findById(artifactId);
+    if (!artifact) {
+      return res.status(404).json({
+        success: false,
+        message: 'Artifact not found'
+      });
+    }
+
+    const user = await User.findById(userId);
+    
+    // Find or create collection
+    let collection = user.collections.find(c => c.name === collectionName);
+    if (!collection) {
+      collection = user.createCollection(collectionName, '', false);
+    }
+
+    // Add to collection
+    const result = user.addToCollection(
+      user.collections.indexOf(collection),
+      artifactId
+    );
+
+    // Also add to artifact's collections
+    artifact.addToCollection(userId, collectionName, tags, notes);
+
+    await user.save();
+    await artifact.save();
+
+    res.json({
+      success: true,
+      collection,
+      message: 'Added to collection successfully!'
+    });
+
+  } catch (error) {
+    console.error('Error adding to collection:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add to collection',
+      error: error.message
+    });
+  }
+});
+
+// Helper functions for power and achievement systems
+function getPowerName(powerId) {
+  const powerNames = {
+    'speed_boost': 'Speed Boost',
+    'double_jump': 'Double Jump',
+    'wall_climb': 'Wall Climbing',
+    'invisibility': 'Invisibility',
+    'flight': 'Flight',
+    'time_manipulation': 'Time Manipulation',
+    'elemental_control': 'Elemental Control',
+    'telepathy': 'Telepathy',
+    'shape_shifting': 'Shape Shifting',
+    'energy_projection': 'Energy Projection'
+  };
+  return powerNames[powerId] || powerId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function getPowerDescription(powerId) {
+  const powerDescriptions = {
+    'speed_boost': 'Move 50% faster through the world',
+    'double_jump': 'Jump twice in mid-air',
+    'wall_climb': 'Scale vertical surfaces',
+    'invisibility': 'Become invisible to enemies for 10 seconds',
+    'flight': 'Fly freely through any area',
+    'time_manipulation': 'Slow down time for 5 seconds',
+    'elemental_control': 'Control fire, water, earth, and air',
+    'telepathy': 'Read NPC thoughts and unlock hidden dialogue',
+    'shape_shifting': 'Transform into different creatures',
+    'energy_projection': 'Fire energy blasts at obstacles'
+  };
+  return powerDescriptions[powerId] || 'A mysterious power awaits...';
+}
+
+function getAchievementName(achievementId) {
+  const achievementNames = {
+    'first_completion': 'First Steps',
+    'speed_runner': 'Speed Runner',
+    'perfectionist': 'Perfectionist',
+    'explorer': 'Explorer',
+    'content_creator': 'Content Creator',
+    'social_butterfly': 'Social Butterfly',
+    'critic': 'Critic',
+    'collector': 'Collector'
+  };
+  return achievementNames[achievementId] || achievementId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function getAchievementDescription(achievementId) {
+  const descriptions = {
+    'first_completion': 'Complete your first artifact',
+    'speed_runner': 'Complete an artifact in under 2 minutes',
+    'perfectionist': 'Complete an artifact with a perfect score',
+    'explorer': 'Discover 10 different areas',
+    'content_creator': 'Publish your first creation',
+    'social_butterfly': 'Follow 5 other creators',
+    'critic': 'Rate 10 different artifacts',
+    'collector': 'Add 20 artifacts to your collections'
+  };
+  return descriptions[achievementId] || 'A special achievement';
+}
+
+function getAchievementIcon(achievementId) {
+  const icons = {
+    'first_completion': '🎯',
+    'speed_runner': '⚡',
+    'perfectionist': '💎',
+    'explorer': '🗺️',
+    'content_creator': '🎨',
+    'social_butterfly': '👥',
+    'critic': '⭐',
+    'collector': '📚'
+  };
+  return icons[achievementId] || '🏆';
+}
 
 export default router;

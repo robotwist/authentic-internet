@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ArtifactDetails.css';
+import InteractivePuzzleArtifact from './InteractivePuzzleArtifact';
 
 /**
  * ArtifactDetails component displays detailed information about an artifact
@@ -19,7 +20,33 @@ const ArtifactDetails = ({
   showCloseButton = true
 }) => {
   const [expanded, setExpanded] = useState(false);
-  
+  const [showInteractivePuzzle, setShowInteractivePuzzle] = useState(false);
+  const [puzzleProgress, setPuzzleProgress] = useState(null);
+
+  // Fetch puzzle progress for interactive artifacts
+  useEffect(() => {
+    const fetchPuzzleProgress = async () => {
+      if (artifact?.isInteractive && user?.token) {
+        try {
+          const response = await fetch(`/api/artifacts/${artifact._id}/progress`, {
+            headers: {
+              'Authorization': `Bearer ${user.token}`
+            }
+          });
+          
+          if (response.ok) {
+            const progress = await response.json();
+            setPuzzleProgress(progress);
+          }
+        } catch (error) {
+          console.error('Error fetching puzzle progress:', error);
+        }
+      }
+    };
+
+    fetchPuzzleProgress();
+  }, [artifact?._id, artifact?.isInteractive, user?.token]);
+
   if (!artifact) return null;
   
   const handleCollect = () => {
@@ -56,6 +83,26 @@ const ArtifactDetails = ({
     });
   };
   
+  const handleStartPuzzle = () => {
+    setShowInteractivePuzzle(true);
+  };
+
+  const handlePuzzleComplete = (rewards) => {
+    setShowInteractivePuzzle(false);
+    // Refresh progress
+    setPuzzleProgress(prev => ({
+      ...prev,
+      completed: true,
+      completedAt: new Date()
+    }));
+    
+    // Show completion notification
+    if (rewards && rewards.experience) {
+      // Show XP gained notification
+      console.log('Puzzle completed! XP gained:', rewards.experience);
+    }
+  };
+
   return (
     <div className="artifact-details-container">
       <div className="artifact-details-card">
@@ -137,7 +184,76 @@ const ArtifactDetails = ({
             </button>
           )}
         </div>
+
+        {/* Interactive Puzzle Section */}
+        {artifact.isInteractive && (
+          <div className="interactive-section">
+            <h3>🧩 Interactive Puzzle</h3>
+            <div className="puzzle-info">
+              <div className="puzzle-stats">
+                <span className="puzzle-type">
+                  Type: {artifact.puzzleType === 'riddle' ? 'Riddle' : 
+                         artifact.puzzleType === 'textAdventure' ? 'Text Adventure' :
+                         artifact.puzzleType === 'dialogChallenge' ? 'Dialog Challenge' :
+                         artifact.puzzleType === 'terminalPuzzle' ? 'Terminal Puzzle' :
+                         artifact.puzzleType === 'apiQuiz' ? 'API Quiz' :
+                         artifact.puzzleType === 'logicChallenge' ? 'Logic Challenge' : 'Unknown'}
+                </span>
+                <span className="puzzle-difficulty">
+                  Difficulty: {artifact.gameConfig?.difficulty || 'Medium'}
+                </span>
+                <span className="puzzle-reward">
+                  Reward: {artifact.completionRewards?.experience || 10} XP
+                </span>
+              </div>
+              
+              {puzzleProgress && (
+                <div className="puzzle-progress">
+                  {puzzleProgress.completed ? (
+                    <div className="completed-status">
+                      ✅ Completed on {new Date(puzzleProgress.completedAt).toLocaleDateString()}
+                      <span className="completion-time">
+                        Time: {Math.round(puzzleProgress.timeSpent / 60)}m
+                      </span>
+                      <span className="completion-attempts">
+                        Attempts: {puzzleProgress.attempts}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="in-progress-status">
+                      📊 Progress: {puzzleProgress.attempts} attempts
+                      {puzzleProgress.hintsUsed > 0 && (
+                        <span className="hints-used">
+                          💡 {puzzleProgress.hintsUsed} hints used
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <button 
+                className="start-puzzle-btn"
+                onClick={handleStartPuzzle}
+                disabled={puzzleProgress?.completed}
+              >
+                {puzzleProgress?.completed ? '🏆 Completed' : 
+                 puzzleProgress?.attempts > 0 ? '🔄 Continue Puzzle' : 
+                 '🚀 Start Puzzle'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {showInteractivePuzzle && artifact.isInteractive && (
+        <InteractivePuzzleArtifact
+          artifact={artifact}
+          isOpen={showInteractivePuzzle}
+          onClose={() => setShowInteractivePuzzle(false)}
+          onComplete={handlePuzzleComplete}
+        />
+      )}
     </div>
   );
 };

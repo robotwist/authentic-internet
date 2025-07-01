@@ -7,6 +7,7 @@ import "./ArtifactCreation.css";
 import { useAuth } from '../context/AuthContext';
 import ArtifactForm from './ArtifactForm';
 import { useSoundUtils } from '../hooks/useSound';
+import PuzzleArtifactCreator from './PuzzleArtifactCreator';
 
 const ARTIFACT_THEMES = [
   { value: 'wisdom', label: 'Wisdom & Philosophy' },
@@ -28,6 +29,7 @@ const ArtifactCreation = ({ position, onClose, onSuccess, refreshArtifacts, isFi
     content: ''
   });
   const { playSuccess, playError } = useSoundUtils();
+  const [showPuzzleCreator, setShowPuzzleCreator] = useState(false);
 
   // Initialize sound manager
   useEffect(() => {
@@ -114,20 +116,99 @@ const ArtifactCreation = ({ position, onClose, onSuccess, refreshArtifacts, isFi
     onClose?.();
   };
 
+  const handlePuzzleArtifactSubmit = async (puzzleData) => {
+    try {
+      const response = await fetch('/api/artifacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify(puzzleData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create puzzle artifact');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setNotification({
+          type: 'success',
+          message: `Interactive puzzle "${result.artifact.name}" created successfully! Other players can now discover and solve it.`
+        });
+        setShowPuzzleCreator(false);
+        onClose();
+        // Refresh artifacts list if available
+        if (typeof window !== 'undefined' && window.refreshArtifacts) {
+          window.refreshArtifacts();
+        }
+      }
+    } catch (error) {
+      console.error('Error creating puzzle artifact:', error);
+      setNotification({
+        type: 'error',
+        message: error.message || 'Failed to create puzzle artifact'
+      });
+    }
+  };
+
   return (
-    <div className="artifact-creation" style={{ left: position.x, top: position.y }}>
-      <h2>Create New Artifact</h2>
-      {error && <div className="error-message">{error}</div>}
-      <ArtifactForm
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        currentArea={currentArea}
-        isFirstArtifact={isFirstArtifact}
-        loading={isSubmitting}
-        formData={formData}
-        setFormData={setFormData}
-      />
-    </div>
+    <>
+      <div className="artifact-creation-overlay">
+        <div className="artifact-creation-modal">
+          <div className="modal-header">
+            <h2>Create New Artifact</h2>
+            <button className="close-button" onClick={onClose}>×</button>
+          </div>
+
+          <div className="creation-options">
+            <button 
+              className="creation-option-btn"
+              onClick={() => setShowForm(true)}
+            >
+              <div className="option-icon">📜</div>
+              <h3>Standard Artifact</h3>
+              <p>Create a traditional artifact with text, images, or files</p>
+            </button>
+            
+            <button 
+              className="creation-option-btn puzzle-option"
+              onClick={() => setShowPuzzleCreator(true)}
+            >
+              <div className="option-icon">🧩</div>
+              <h3>Interactive Puzzle</h3>
+              <p>Create an interactive puzzle or game for other players to solve</p>
+              <span className="new-badge">NEW!</span>
+            </button>
+          </div>
+
+          {showForm && (
+            <div className="artifact-form">
+              {error && <div className="error-message">{error}</div>}
+              <ArtifactForm
+                onSubmit={handleSubmit}
+                onClose={handleCancel}
+                currentArea={currentArea}
+                isFirstArtifact={isFirstArtifact}
+                loading={isSubmitting}
+                formData={formData}
+                setFormData={setFormData}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showPuzzleCreator && (
+        <PuzzleArtifactCreator
+          onSubmit={handlePuzzleArtifactSubmit}
+          onClose={() => setShowPuzzleCreator(false)}
+          currentArea={currentArea}
+        />
+      )}
+    </>
   );
 };
 

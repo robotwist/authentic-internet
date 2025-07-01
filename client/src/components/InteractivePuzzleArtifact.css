@@ -1,0 +1,454 @@
+.interactive-puzzle-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.interactive-puzzle-container {
+  width: 90%;
+  max-width: 1200px;
+  height: 90%;
+  max-height: 800px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 15px;
+  border: 2px solid #f0c75e;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.puzzle-header {
+  background: linear-gradient(90deg, #0f0f1e 0%, #1a1a2e 100%);
+  padding: 20px;
+  border-bottom: 2px solid #f0c75e;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.puzzle-header h2 {
+  color: #f0c75e;
+  margin: 0;
+  font-size: 1.8rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.puzzle-info {
+  display: flex;
+  gap: 20px;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.puzzle-info span {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 15px;
+  border: 1px solid rgba(240, 199, 94, 0.3);
+}
+
+.puzzle-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  color: #fff;
+}
+
+.puzzle-actions {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px 20px;
+  border-top: 1px solid rgba(240, 199, 94, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hint-button, .close-puzzle-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.hint-button {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+}
+
+.hint-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+}
+
+.close-puzzle-button {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.close-puzzle-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+.puzzle-loading, .puzzle-completed {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: #f0c75e;
+  text-align: center;
+}
+
+.puzzle-completed {
+  flex-direction: column;
+  gap: 20px;
+}
+
+.puzzle-completed::before {
+  content: '🎉';
+  font-size: 3rem;
+}
+
+/* Riddle Puzzle Styles */
+.riddle-puzzle {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.riddle-text {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 15px;
+  border: 2px solid #f0c75e;
+  margin-bottom: 30px;
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.riddle-puzzle form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.riddle-puzzle input {
+  padding: 15px;
+  border: 2px solid #f0c75e;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1.1rem;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.riddle-puzzle input:focus {
+  outline: none;
+  box-shadow: 0 0 15px rgba(240, 199, 94, 0.5);
+}
+
+.riddle-puzzle button {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #f0c75e 0%, #d4af37 100%);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(240, 199, 94, 0.3);
+}
+
+.riddle-puzzle button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 20px rgba(240, 199, 94, 0.4);
+}
+
+.feedback {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.feedback:contains("Correct") {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+  border: 1px solid #2ecc71;
+}
+
+.feedback:contains("Not quite") {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+}
+
+.attempts {
+  margin-top: 15px;
+  color: #95a5a6;
+  font-size: 0.9rem;
+}
+
+/* API Quiz Styles */
+.api-quiz-puzzle {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.quiz-progress {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+  color: #f0c75e;
+}
+
+.question {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 25px;
+  border-radius: 15px;
+  border: 1px solid rgba(240, 199, 94, 0.3);
+}
+
+.question h3 {
+  color: #f0c75e;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+}
+
+.api-data {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid #333;
+  overflow-x: auto;
+}
+
+.api-data pre {
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.question input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #f0c75e;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.question button {
+  padding: 10px 25px;
+  background: linear-gradient(135deg, #f0c75e 0%, #d4af37 100%);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Logic Challenge Styles */
+.logic-challenge-puzzle {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.challenge-description {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 25px;
+  border-radius: 15px;
+  border: 2px solid #f0c75e;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.challenge-description h3 {
+  color: #f0c75e;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.challenge-data {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border: 1px solid #333;
+  overflow-x: auto;
+}
+
+.challenge-data pre {
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  margin: 0;
+}
+
+.logic-challenge-puzzle input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #f0c75e;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.logic-challenge-puzzle button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #f0c75e 0%, #d4af37 100%);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Hints Overlay */
+.hints-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+}
+
+.hints-content {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 30px;
+  border-radius: 15px;
+  border: 2px solid #f0c75e;
+  max-width: 500px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.hints-content h3 {
+  color: #f0c75e;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.hints-content button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  float: right;
+  margin-top: 20px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.puzzle-loading {
+  animation: pulse 2s infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .interactive-puzzle-container {
+    width: 95%;
+    height: 95%;
+  }
+  
+  .puzzle-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .puzzle-info {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .puzzle-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .hint-button, .close-puzzle-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .puzzle-content {
+    padding: 15px;
+  }
+  
+  .riddle-text {
+    font-size: 1.1rem;
+    padding: 20px;
+  }
+  
+  .riddle-puzzle input {
+    font-size: 1rem;
+  }
+  
+  .api-data pre {
+    font-size: 0.8rem;
+  }
+} 
