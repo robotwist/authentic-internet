@@ -32,19 +32,19 @@ export const MAPS = [
         id: uuidv4(), 
         name: "Ancient Sword", 
         description: "A legendary blade that once belonged to a great warrior", 
+        type: "WEAPON",
         content: "The sword pulses with ancient power, its edge never dulling.", 
         media: ["/assets/artifacts/ancient_sword.png"],
         location: { x: 3, y: 2, mapName: "Overworld" },
         exp: 15, 
         visible: true, 
         area: "Overworld",
-        type: ARTIFACT_TYPES.WEAPON,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.COMBINE,
+            type: "COMBINE",
             targetArtifact: "Crystal Shard",
             result: "Crystal Sword",
-            description: "The sword resonates with the crystal's energy..."
+            revealedContent: "The sword resonates with the crystal's energy..."
           }
         ],
         properties: {
@@ -57,9 +57,9 @@ export const MAPS = [
           content: true,
           properties: ["damage", "element"]
         },
-        createdBy: "user-001",
-        createdAt: "2024-06-01T12:00:00Z",
-        updatedAt: "2024-06-01T12:00:00Z",
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
         tags: ["legendary", "weapon", "warrior"],
         rating: 4.7,
         reviews: [
@@ -76,14 +76,16 @@ export const MAPS = [
         id: uuidv4(),
         name: "Mystic Orb",
         description: "A glowing orb filled with swirling energy.",
+        type: "MAGIC",
         content: "It hums with an ancient power, revealing secrets to those who are worthy.",
-        riddle: "What has roots as nobody sees, is taller than trees?",
-        unlockAnswer: "mountain",
+        media: ["/assets/artifacts/mystic_orb.png"],
+        location: { x: 7, y: 13, mapName: "Overworld" },
+        exp: 20,
+        visible: true,
         area: "Overworld",
-        type: ARTIFACT_TYPES.RELIC,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
+            type: "REVEAL",
             condition: "nearWater",
             revealedContent: "The orb shows visions of an ancient underwater city..."
           }
@@ -94,13 +96,17 @@ export const MAPS = [
           element: "arcane"
         },
         userModifiable: {
-          riddle: true,
-          unlockAnswer: true,
+          description: true,
+          content: true,
           properties: ["magic", "visionRange"]
         },
-        exp: 20,
-        visible: true,
-        location: { x: 7, y: 13 }
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["mystic", "orb", "magic"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       },
     ],
     npcs: [
@@ -152,15 +158,16 @@ export const MAPS = [
         id: uuidv4(), 
         name: "Enchanted Mirror", 
         description: "A mysterious mirror that seems to reflect more than just light", 
+        type: "ARTIFACT",
         content: "Whispers of ancient wisdom echo from its surface, waiting to be discovered.", 
-        location: { x: 3, y: 3 }, 
+        media: ["/assets/artifacts/enchanted_mirror.png"],
+        location: { x: 3, y: 3, mapName: "Overworld 2" }, 
         exp: 18, 
         visible: true, 
         area: "Overworld",
-        type: ARTIFACT_TYPES.CONTAINER,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
+            type: "REVEAL",
             condition: "nearWater",
             revealedContent: "The mirror shows visions of an ancient underwater city..."
           }
@@ -171,9 +178,17 @@ export const MAPS = [
           element: "arcane"
         },
         userModifiable: {
-          riddle: true,
+          description: true,
+          content: true,
           properties: ["magic", "visionRange"]
-        }
+        },
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["mirror", "enchanted", "arcane"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       }
     ],
     npcs: [
@@ -220,15 +235,16 @@ export const MAPS = [
         id: uuidv4(), 
         name: "Ancient Tome", 
         description: "A weathered book bound in mysterious materials", 
+        type: "SCROLL",
         content: "The pages contain knowledge of artifact creation and manipulation, with spaces for users to add their own discoveries.", 
-        location: { x: 3, y: 7 }, 
+        media: ["/assets/artifacts/ancient_tome.png"],
+        location: { x: 3, y: 7, mapName: "Overworld 3" }, 
         exp: 30, 
         visible: true, 
         area: "Overworld",
-        type: ARTIFACT_TYPES.SCROLL,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
+            type: "REVEAL",
             condition: "nearWater",
             revealedContent: "The tome shows visions of an ancient underwater city..."
           }
@@ -239,9 +255,17 @@ export const MAPS = [
           element: "arcane"
         },
         userModifiable: {
-          riddle: true,
+          description: true,
+          content: true,
           properties: ["magic", "visionRange"]
-        }
+        },
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["tome", "ancient", "knowledge"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       }
     ],
     npcs: [
@@ -279,15 +303,16 @@ export const MAPS = [
         id: uuidv4(), 
         name: "Golden Idol", 
         description: "An ancient idol that seems to radiate power", 
+        type: "TREASURE",
         content: "This golden idol was worshipped by an ancient desert civilization.", 
-        location: { x: 4, y: 6 }, 
+        media: ["/assets/artifacts/golden_idol.png"],
+        location: { x: 4, y: 6, mapName: "Desert 1" }, 
         exp: 20, 
         visible: true, 
         area: "Desert",
-        type: ARTIFACT_TYPES.CONTAINER,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
+            type: "REVEAL",
             condition: "nearWater",
             revealedContent: "The idol shows visions of an ancient underwater city..."
           }
@@ -298,9 +323,17 @@ export const MAPS = [
           element: "arcane"
         },
         userModifiable: {
-          riddle: true,
+          description: true,
+          content: true,
           properties: ["magic", "visionRange"]
-        }
+        },
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["golden", "idol", "desert"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       }
     ]
   },
@@ -323,15 +356,16 @@ export const MAPS = [
         id: uuidv4(), 
         name: "Desert Compass", 
         description: "An ancient navigation device that points to something other than north", 
+        type: "TOOL",
         content: "The needle spins wildly when near certain artifacts, perhaps it can help locate hidden treasures.", 
-        location: { x: 1, y: 7 }, 
+        media: ["/assets/artifacts/desert_compass.png"],
+        location: { x: 1, y: 7, mapName: "Desert 2" }, 
         exp: 20, 
         visible: true, 
         area: "Desert",
-        type: ARTIFACT_TYPES.KEY,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
+            type: "REVEAL",
             condition: "nearWater",
             revealedContent: "The compass shows visions of an ancient underwater city..."
           }
@@ -342,9 +376,17 @@ export const MAPS = [
           element: "arcane"
         },
         userModifiable: {
-          riddle: true,
+          description: true,
+          content: true,
           properties: ["magic", "visionRange"]
-        }
+        },
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["compass", "desert", "navigation"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       }
     ]
   },
@@ -367,15 +409,16 @@ export const MAPS = [
         id: uuidv4(), 
         name: "Sandstone Tablet", 
         description: "A tablet covered in mysterious hieroglyphs", 
+        type: "SCROLL",
         content: "The inscriptions tell of a great civilization and their powerful artifacts, now scattered across the lands.", 
-        location: { x: 2, y: 6 }, 
+        media: ["/assets/artifacts/sandstone_tablet.png"],
+        location: { x: 2, y: 6, mapName: "Desert 3" }, 
         exp: 25, 
         visible: true, 
         area: "Desert",
-        type: ARTIFACT_TYPES.SCROLL,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
+            type: "REVEAL",
             condition: "nearWater",
             revealedContent: "The tablet shows visions of an ancient underwater city..."
           }
@@ -386,9 +429,17 @@ export const MAPS = [
           element: "arcane"
         },
         userModifiable: {
-          riddle: true,
+          description: true,
+          content: true,
           properties: ["magic", "visionRange"]
-        }
+        },
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["tablet", "sandstone", "desert"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       }
     ]
   },
@@ -628,15 +679,16 @@ export const MAPS = [
         id: uuidv4(), 
         name: "Hemingway's Typewriter", 
         description: "A battle-worn typewriter that has seen many stories", 
+        type: "WEAPON",
         content: "The keys still hold the echoes of countless adventures.", 
-        location: { x: 4, y: 4 }, 
+        media: ["/assets/artifacts/hemingway_typewriter.png"],
+        location: { x: 4, y: 4, mapName: "Level4Shooter" }, 
         exp: 40, 
         visible: true, 
         area: "Shooter",
-        type: ARTIFACT_TYPES.WEAPON,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.REVEAL,
+            type: "REVEAL",
             condition: "nearBattle",
             revealedContent: "The typewriter resonates with the spirit of adventure..."
           }
@@ -647,9 +699,17 @@ export const MAPS = [
           element: "combat"
         },
         userModifiable: {
-          riddle: true,
+          description: true,
+          content: true,
           properties: ["magic", "visionRange"]
-        }
+        },
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["hemingway", "typewriter", "shooter"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       }
     ]
   },
@@ -672,19 +732,32 @@ export const MAPS = [
         id: uuidv4(),
         name: "Dungeon Key",
         description: "A key that unlocks deeper dungeon levels",
+        type: "KEY",
         content: "This key seems to resonate with the deeper levels of the dungeon.",
-        location: { x: 4, y: 4 },
+        media: ["/assets/artifacts/dungeon_key.png"],
+        location: { x: 4, y: 4, mapName: "Dungeon Level 1" },
         exp: 20,
         visible: true,
         area: "Dungeon",
-        type: ARTIFACT_TYPES.KEY,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.UNLOCK,
+            type: "UNLOCK",
             targetArtifact: "Dungeon Door",
             result: "Access to Dungeon Level 2"
           }
-        ]
+        ],
+        properties: {},
+        userModifiable: {
+          description: true,
+          content: true
+        },
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["dungeon", "key"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       }
     ]
   },
@@ -707,12 +780,26 @@ export const MAPS = [
         id: uuidv4(),
         name: "Ancient Scroll",
         description: "A scroll containing knowledge of the dungeon's history",
+        type: "SCROLL",
         content: "The scroll tells of a powerful artifact hidden in the deepest level.",
-        location: { x: 4, y: 4 },
+        media: ["/assets/artifacts/ancient_scroll.png"],
+        location: { x: 4, y: 4, mapName: "Dungeon Level 2" },
         exp: 25,
         visible: true,
         area: "Dungeon",
-        type: ARTIFACT_TYPES.SCROLL
+        interactions: [],
+        properties: {},
+        userModifiable: {
+          description: true,
+          content: true
+        },
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["scroll", "ancient", "dungeon"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       }
     ]
   },
@@ -735,19 +822,32 @@ export const MAPS = [
         id: uuidv4(),
         name: "Terminal Key",
         description: "A key that unlocks access to the terminal realm",
+        type: "KEY",
         content: "This key seems to resonate with digital energy.",
-        location: { x: 4, y: 4 },
+        media: ["/assets/artifacts/terminal_key.png"],
+        location: { x: 4, y: 4, mapName: "Dungeon Level 3" },
         exp: 30,
         visible: true,
         area: "Dungeon",
-        type: ARTIFACT_TYPES.KEY,
         interactions: [
           {
-            type: ARTIFACT_INTERACTIONS.UNLOCK,
+            type: "UNLOCK",
             targetArtifact: "Terminal Portal",
             result: "Access to Terminal3"
           }
-        ]
+        ],
+        properties: {},
+        userModifiable: {
+          description: true,
+          content: true
+        },
+        createdBy: "system",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        tags: ["terminal", "key", "dungeon"],
+        rating: 0,
+        reviews: [],
+        remixOf: null
       }
     ]
   }

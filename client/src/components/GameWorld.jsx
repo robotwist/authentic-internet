@@ -201,69 +201,160 @@ const GameWorld = () => {
     const createLevelArtifact = async () => {
       const levelArtifacts = {
         level1: {
+          id: `level1-trophy-${Date.now()}`,
           name: "Digital Wilderness Trophy",
           description: "A crystalline trophy commemorating your conquest of the Digital Wilderness",
-          content: "This artifact pulses with digital energy, a testament to your mastery of the first level. It contains fragments of the wilderness's code and echoes of the challenges you overcame.",
           type: "TROPHY",
+          content: "This artifact pulses with digital energy, a testament to your mastery of the first level. It contains fragments of the wilderness's code and echoes of the challenges you overcame.",
+          media: ["/assets/artifacts/digital_wilderness_trophy.png"],
+          location: { x: 0, y: 0, mapName: "level-completion" },
           exp: 25,
+          visible: true,
+          area: "level-completion",
+          interactions: [
+            {
+              type: "REVEAL",
+              condition: "Level 1 completion",
+              revealedContent: "The trophy resonates with your digital mastery...",
+              action: "Unlock digital powers"
+            }
+          ],
           properties: {
             digitalMastery: 10,
             wildernessKnowledge: 5,
             element: "digital"
-          }
+          },
+          userModifiable: {
+            description: true,
+            content: true,
+            properties: ["digitalMastery", "wildernessKnowledge", "element"]
+          },
+          createdBy: "system",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tags: ["trophy", "digital", "wilderness", "level1"],
+          rating: 0,
+          reviews: [],
+          remixOf: null
         },
         level2: {
+          id: `level2-medallion-${Date.now()}`,
           name: "Shadow Realm Medallion",
           description: "A dark medallion that absorbs light, symbolizing your triumph over shadows",
-          content: "The medallion seems to contain swirling shadows within its depths. It whispers secrets of the shadow realm and grants insight into hidden truths.",
           type: "MEDALLION",
+          content: "The medallion seems to contain swirling shadows within its depths. It whispers secrets of the shadow realm and grants insight into hidden truths.",
+          media: ["/assets/artifacts/shadow_realm_medallion.png"],
+          location: { x: 0, y: 0, mapName: "level-completion" },
           exp: 30,
+          visible: true,
+          area: "level-completion",
+          interactions: [
+            {
+              type: "REVEAL",
+              condition: "Level 2 completion",
+              revealedContent: "The medallion grants you shadow affinity...",
+              action: "Unlock shadow powers"
+            }
+          ],
           properties: {
             shadowAffinity: 15,
             stealthBonus: 8,
             element: "shadow"
-          }
+          },
+          userModifiable: {
+            description: true,
+            content: true,
+            properties: ["shadowAffinity", "stealthBonus", "element"]
+          },
+          createdBy: "system",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tags: ["medallion", "shadow", "realm", "level2"],
+          rating: 0,
+          reviews: [],
+          remixOf: null
         },
         level3: {
+          id: `level3-crystal-${Date.now()}`,
           name: "Terminal Void Crystal",
           description: "A geometric crystal that hums with terminal energy and digital wisdom",
-          content: "This crystal contains the essence of the terminal void, with lines of code flowing through its facets like liquid light.",
           type: "CRYSTAL",
+          content: "This crystal contains the essence of the terminal void, with lines of code flowing through its facets like liquid light.",
+          media: ["/assets/artifacts/terminal_void_crystal.png"],
+          location: { x: 0, y: 0, mapName: "level-completion" },
           exp: 35,
+          visible: true,
+          area: "level-completion",
+          interactions: [
+            {
+              type: "REVEAL",
+              condition: "Level 3 completion",
+              revealedContent: "The crystal grants you terminal wisdom...",
+              action: "Unlock terminal powers"
+            }
+          ],
           properties: {
             terminalWisdom: 20,
             codeMastery: 12,
             element: "digital"
-          }
+          },
+          userModifiable: {
+            description: true,
+            content: true,
+            properties: ["terminalWisdom", "codeMastery", "element"]
+          },
+          createdBy: "system",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tags: ["crystal", "terminal", "void", "level3"],
+          rating: 0,
+          reviews: [],
+          remixOf: null
         },
         level4: {
+          id: `level4-crown-${Date.now()}`,
           name: "Hemingway's Challenge Crown",
           description: "A crown forged from the courage and clarity of Hemingway's literary challenge",
-          content: "This crown represents the ultimate test of courage and writing prowess. It carries the weight of Hemingway's legacy and the power of clear, honest expression.",
           type: "CROWN",
+          content: "This crown represents the ultimate test of courage and writing prowess. It carries the weight of Hemingway's legacy and the power of clear, honest expression.",
+          media: ["/assets/artifacts/hemingway_challenge_crown.png"],
+          location: { x: 0, y: 0, mapName: "level-completion" },
           exp: 50,
+          visible: true,
+          area: "level-completion",
+          interactions: [
+            {
+              type: "REVEAL",
+              condition: "Level 4 completion",
+              revealedContent: "The crown grants you Hemingway's courage...",
+              action: "Unlock literary powers"
+            }
+          ],
           properties: {
             courage: 25,
             writingMastery: 20,
             graceUnderPressure: 15,
             element: "wisdom"
-          }
+          },
+          userModifiable: {
+            description: true,
+            content: true,
+            properties: ["courage", "writingMastery", "graceUnderPressure", "element"]
+          },
+          createdBy: "system",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tags: ["crown", "hemingway", "challenge", "level4"],
+          rating: 0,
+          reviews: [],
+          remixOf: null
         }
       };
       
       const artifactData = levelArtifacts[level];
       if (artifactData) {
         try {
-          const newArtifact = await createArtifact({
-            ...artifactData,
-            area: "level-completion",
-            visible: true,
-            userModifiable: {
-              description: true,
-              content: true,
-              properties: Object.keys(artifactData.properties)
-            }
-          });
+          const newArtifact = await createArtifact(artifactData);
           
           // Add to local artifacts array
           setArtifacts(prev => [...prev, newArtifact]);

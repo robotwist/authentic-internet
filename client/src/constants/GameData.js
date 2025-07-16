@@ -10,79 +10,216 @@ export const INVENTORY_ARTIFACTS = [
     id: 'ancient-sword',
     name: 'Ancient Sword',
     description: 'A weathered sword that has seen many battles',
-    image: '/assets/items/sword.png',
-    type: 'weapon',
+    type: 'WEAPON',
+    content: 'This ancient blade bears the marks of countless battles. Its steel has been tempered by time and its edge sharpened by history.',
+    media: ['/assets/items/sword.png'],
+    location: { x: 0, y: 0, mapName: 'Inventory' },
+    exp: 5,
+    visible: true,
+    area: 'Inventory',
+    interactions: [
+      {
+        type: 'COLLECT',
+        condition: 'Found in world',
+        revealedContent: 'You have acquired an ancient weapon of great power.',
+        action: 'Add to inventory'
+      }
+    ],
     properties: {
       damage: 5,
       durability: 80,
       value: 100
     },
-    exp: 5
+    userModifiable: {
+      description: true,
+      content: true
+    },
+    createdBy: 'system',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    tags: ['ancient', 'weapon', 'sword'],
+    rating: 0,
+    reviews: [],
+    remixOf: null
   },
   {
     id: 'mystic-orb',
     name: 'Mystic Orb',
     description: 'A glowing orb that seems to contain ancient knowledge',
-    image: '/assets/items/orb.png',
-    type: 'magic',
+    type: 'MAGIC',
+    content: 'This mystic orb pulses with arcane energy, containing fragments of ancient wisdom and magical power.',
+    media: ['/assets/items/orb.png'],
+    location: { x: 0, y: 0, mapName: 'Inventory' },
+    exp: 10,
+    visible: true,
+    area: 'Inventory',
+    interactions: [
+      {
+        type: 'COLLECT',
+        condition: 'Found in world',
+        revealedContent: 'The orb\'s energy resonates with your own magical potential.',
+        action: 'Add to inventory'
+      }
+    ],
     properties: {
       magic: 10,
       wisdom: 8,
       value: 250
     },
-    exp: 10
+    userModifiable: {
+      description: true,
+      content: true
+    },
+    createdBy: 'system',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    tags: ['mystic', 'orb', 'magic'],
+    rating: 0,
+    reviews: [],
+    remixOf: null
   },
   {
     id: 'golden-idol',
     name: 'Golden Idol',
     description: 'A small golden statue of an unknown deity',
-    image: '/assets/items/idol.png',
-    type: 'treasure',
+    type: 'TREASURE',
+    content: 'This golden idol radiates with divine energy, representing an ancient deity whose name has been lost to time.',
+    media: ['/assets/items/idol.png'],
+    location: { x: 0, y: 0, mapName: 'Inventory' },
+    exp: 15,
+    visible: true,
+    area: 'Inventory',
+    interactions: [
+      {
+        type: 'COLLECT',
+        condition: 'Found in world',
+        revealedContent: 'The idol\'s divine presence fills you with awe and reverence.',
+        action: 'Add to inventory'
+      }
+    ],
     properties: {
       value: 500,
       luck: 3
     },
-    exp: 15
+    userModifiable: {
+      description: true,
+      content: true
+    },
+    createdBy: 'system',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    tags: ['golden', 'idol', 'treasure'],
+    rating: 0,
+    reviews: [],
+    remixOf: null
   },
   {
     id: 'dungeon-key',
     name: 'Dungeon Key',
     description: 'An ornate key that unlocks mysterious doors',
-    image: '/assets/items/key.png',
-    type: 'key',
+    type: 'KEY',
+    content: 'This ornate key is crafted with intricate designs and seems to pulse with ancient power.',
+    media: ['/assets/items/key.png'],
+    location: { x: 0, y: 0, mapName: 'Inventory' },
+    exp: 5,
+    visible: true,
+    area: 'Inventory',
+    interactions: [
+      {
+        type: 'UNLOCK',
+        condition: 'Use at locked door',
+        revealedContent: 'The key fits perfectly into the lock mechanism.',
+        action: 'Unlock dungeon access'
+      }
+    ],
     properties: {
       value: 50,
       access: 'dungeon'
     },
-    exp: 5
+    userModifiable: {
+      description: true,
+      content: true
+    },
+    createdBy: 'system',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    tags: ['dungeon', 'key', 'access'],
+    rating: 0,
+    reviews: [],
+    remixOf: null
   },
   {
     id: 'hemingway-manuscript',
     name: 'Hemingway\'s Lost Manuscript',
     description: 'A weathered manuscript containing an unpublished Hemingway story.',
-    image: '/assets/items/manuscript.png',
-    type: 'literary',
-    rarity: 'legendary',
-    area: 'library',
+    type: 'LITERARY',
+    content: 'This manuscript contains an unpublished story by Ernest Hemingway, its pages yellowed with age but the words still vibrant with the author\'s distinctive style.',
+    media: ['/assets/items/manuscript.png'],
+    location: { x: 0, y: 0, mapName: 'Inventory' },
+    exp: 25,
+    visible: true,
+    area: 'Library',
+    interactions: [
+      {
+        type: 'REVEAL',
+        condition: 'Read manuscript',
+        revealedContent: 'The story unfolds with Hemingway\'s characteristic clarity and courage.',
+        action: 'Gain literary insight'
+      }
+    ],
     properties: {
       value: 1000,
       wisdom: 15,
-      inspiration: 20
+      inspiration: 20,
+      rarity: 'legendary'
     },
-    exp: 25
+    userModifiable: {
+      description: true,
+      content: true
+    },
+    createdBy: 'system',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    tags: ['hemingway', 'manuscript', 'literary', 'legendary'],
+    rating: 0,
+    reviews: [],
+    remixOf: null
   },
   {
     id: 'quill-pen',
     name: 'Quill Pen of Inspiration',
     description: 'A quill pen that once belonged to a famous author',
-    image: '/assets/items/quill.png',
-    type: 'tool',
+    type: 'TOOL',
+    content: 'This quill pen seems to carry the creative spirit of its previous owner, ready to channel inspiration into written words.',
+    media: ['/assets/items/quill.png'],
+    location: { x: 0, y: 0, mapName: 'Inventory' },
+    exp: 8,
+    visible: true,
+    area: 'Inventory',
+    interactions: [
+      {
+        type: 'USE',
+        condition: 'Write with pen',
+        revealedContent: 'Words flow effortlessly as the pen guides your hand.',
+        action: 'Enhance writing ability'
+      }
+    ],
     properties: {
       creativity: 10,
       communication: 8,
       value: 120
     },
-    exp: 8
+    userModifiable: {
+      description: true,
+      content: true
+    },
+    createdBy: 'system',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    tags: ['quill', 'pen', 'tool', 'inspiration'],
+    rating: 0,
+    reviews: [],
+    remixOf: null
   }
 ];
 
