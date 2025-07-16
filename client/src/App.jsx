@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import CreateWorld from './pages/CreateWorld';
 import GameWorld from './components/GameWorld';
 import ArtifactsPage from './pages/ArtifactsPage';
+import CollaborationPage from './pages/CollaborationPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import TextAdventure from './components/TextAdventure';
 import Level4Shooter from './components/Level4Shooter';
@@ -108,6 +109,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ErrorBoundary><ArtifactsPage /></ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/collaboration"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary><CollaborationPage /></ErrorBoundary>
                 </ProtectedRoute>
               }
             />
