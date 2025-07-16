@@ -7,6 +7,7 @@ import npcRoutes from "./npcs.js";
 import proxyRoutes from "./proxy.js";
 import progressRoutes from "./progressRoutes.js";
 import feedbackRoutes from "./feedbackRoutes.js";
+import recommendationRoutes from "./recommendations.js";
 
 /**
  * Apply all routes to Express app
@@ -51,6 +52,7 @@ export const applyRoutes = (app) => {
   app.use("/api/proxy", proxyRoutes);
   app.use("/api/progress", progressRoutes);
   app.use("/api/feedback", feedbackRoutes);
+  app.use("/api/recommendations", recommendationRoutes);
 
   /**
    * @swagger

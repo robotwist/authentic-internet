@@ -6,6 +6,7 @@ import ArtifactForm from '../components/ArtifactForm';
 import AdvancedSearch from '../components/AdvancedSearch';
 import DiscoveryEngine from '../components/DiscoveryEngine';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
+import RecommendationEngine from '../components/RecommendationEngine';
 import Button from '../components/shared/Button';
 import { useAuth } from '../context/AuthContext';
 import { fetchArtifacts as apiFetchArtifacts, deleteArtifact, updateArtifact, createArtifact as apiCreateArtifact } from '../api/api';
@@ -21,7 +22,7 @@ const ArtifactsPage = () => {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingArtifact, setEditingArtifact] = useState(null);
-  const [viewMode, setViewMode] = useState('browse'); // browse, search, discovery, analytics
+  const [viewMode, setViewMode] = useState('browse'); // browse, search, discovery, analytics, recommendations
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
@@ -294,6 +295,14 @@ const ArtifactsPage = () => {
           />
         );
 
+      case 'recommendations':
+        return (
+          <RecommendationEngine
+            artifacts={artifacts}
+            loading={loading}
+          />
+        );
+
       default: // browse
         return (
           <div className="artifacts-grid">
@@ -364,6 +373,13 @@ const ArtifactsPage = () => {
             startIcon={<span>📊</span>}
           >
             Analytics
+          </Button>
+          <Button
+            variant={viewMode === 'recommendations' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('recommendations')}
+            startIcon={<span>👍</span>}
+          >
+            Recommendations
           </Button>
         </div>
 

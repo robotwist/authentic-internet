@@ -1,0 +1,597 @@
+/* Recommendation Engine Styles */
+.recommendation-engine {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.recommendation-engine.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+/* Settings Card */
+.settings-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.settings-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="ai-grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23ai-grain)"/></svg>');
+  opacity: 0.3;
+}
+
+.settings-card .MuiCardContent-root {
+  position: relative;
+  z-index: 1;
+}
+
+.settings-card .MuiTypography-root {
+  color: #ffffff;
+}
+
+.settings-card .MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.settings-card .MuiOutlinedInput-root {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.settings-card .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.settings-card .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.settings-card .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #ffffff;
+}
+
+.settings-card .MuiSelect-select {
+  color: #ffffff;
+}
+
+.settings-card .MuiSelect-icon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.settings-card .MuiSlider-root {
+  color: #ffffff;
+}
+
+.settings-card .MuiSlider-track {
+  background: #ffffff;
+}
+
+.settings-card .MuiSlider-rail {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.settings-card .MuiSlider-thumb {
+  background: #ffffff;
+  border: 2px solid #667eea;
+}
+
+.settings-card .MuiSlider-mark {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.settings-card .MuiSlider-markLabel {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.settings-card .MuiFormControlLabel-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* Tabs Card */
+.recommendation-tabs-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  margin-bottom: 24px;
+}
+
+.recommendation-tabs {
+  background: transparent;
+}
+
+.recommendation-tabs .MuiTabs-indicator {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  height: 3px;
+  border-radius: 2px;
+}
+
+.recommendation-tab {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  text-transform: none;
+  min-height: 64px;
+  transition: all 0.3s ease;
+}
+
+.recommendation-tab:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.recommendation-tab.Mui-selected {
+  color: #667eea;
+}
+
+.recommendation-tab .MuiSvgIcon-root {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
+
+/* Content Card */
+.recommendation-content-card {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  min-height: 400px;
+}
+
+.tab-content {
+  padding: 8px 0;
+}
+
+.section-title {
+  color: #667eea;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-title .MuiSvgIcon-root {
+  font-size: 1.5rem;
+}
+
+.section-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+/* Recommendation Header */
+.recommendation-header {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.algorithm-info {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.algorithm-info .MuiChip-root {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+}
+
+/* Recommendation Cards */
+.recommendation-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.recommendation-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.recommendation-card:hover::before {
+  transform: scaleX(1);
+}
+
+.recommendation-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.recommendation-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.algorithm-tag {
+  background: rgba(102, 126, 234, 0.2);
+  color: #667eea;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+.contributing-algorithms {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem;
+  font-style: italic;
+}
+
+.feedback-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.feedback-buttons .MuiIconButton-root {
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.feedback-buttons .MuiIconButton-root:hover {
+  transform: scale(1.1);
+}
+
+.feedback-buttons .MuiIconButton-root:first-child:hover {
+  color: #4caf50;
+}
+
+.feedback-buttons .MuiIconButton-root:last-child:hover {
+  color: #f44336;
+}
+
+/* Insight Cards */
+.insight-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.insight-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+}
+
+.insight-card .MuiTypography-h6 {
+  color: #667eea;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.insight-card .MuiTypography-body2 {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+/* Learning Controls */
+.learning-controls {
+  margin-top: 24px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.learning-controls .MuiButton-root {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  border: none;
+  text-transform: none;
+  font-weight: 600;
+  padding: 12px 24px;
+}
+
+.learning-controls .MuiButton-root:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+}
+
+.learning-controls .MuiButton-root:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.learning-progress {
+  margin-top: 16px;
+}
+
+.learning-progress .MuiLinearProgress-root {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  height: 8px;
+}
+
+.learning-progress .MuiLinearProgress-bar {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+}
+
+.learning-progress .MuiTypography-root {
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Feedback Cards */
+.feedback-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.feedback-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.feedback-header .MuiTypography-body1 {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.feedback-header .MuiTypography-caption {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.feedback-card .MuiTypography-body2 {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* AI-themed animations */
+@keyframes aiPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+  }
+}
+
+.recommendation-card:hover {
+  animation: aiPulse 2s infinite;
+}
+
+/* Neural network pattern background */
+.recommendation-engine::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(102, 126, 234, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Loading State */
+.recommendation-engine.loading .MuiCircularProgress-root {
+  color: #667eea;
+}
+
+.recommendation-engine.loading .MuiTypography-root {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .recommendation-header {
+    padding: 16px;
+  }
+  
+  .algorithm-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .recommendation-meta {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .recommendation-engine {
+    padding: 10px;
+  }
+  
+  .recommendation-tab {
+    min-height: 48px;
+    font-size: 0.9rem;
+  }
+  
+  .recommendation-tab .MuiSvgIcon-root {
+    font-size: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+  }
+  
+  .feedback-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .recommendation-engine {
+    padding: 5px;
+  }
+  
+  .settings-card,
+  .recommendation-tabs-card,
+  .recommendation-content-card {
+    border-radius: 12px;
+  }
+  
+  .section-title {
+    font-size: 1rem;
+  }
+  
+  .section-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .algorithm-info .MuiChip-root {
+    font-size: 0.7rem;
+  }
+}
+
+/* Focus States for Accessibility */
+.recommendation-tab:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.recommendation-card:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.feedback-buttons .MuiIconButton-root:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .settings-card,
+  .recommendation-tabs-card,
+  .recommendation-content-card {
+    border: 2px solid #ffffff;
+  }
+  
+  .recommendation-tab {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .recommendation-card,
+  .insight-card,
+  .feedback-card {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .recommendation-tab,
+  .recommendation-card,
+  .insight-card,
+  .feedback-card {
+    transition: none;
+  }
+  
+  .recommendation-card:hover,
+  .insight-card:hover,
+  .feedback-card:hover {
+    transform: none;
+  }
+  
+  .recommendation-card:hover {
+    animation: none;
+  }
+  
+  .feedback-buttons .MuiIconButton-root:hover {
+    transform: none;
+  }
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  .recommendation-tabs-card,
+  .recommendation-content-card {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .recommendation-engine {
+    display: none;
+  }
+}
+
+/* Custom Scrollbar */
+.recommendation-engine::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.recommendation-engine::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.recommendation-engine::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+  border-radius: 4px;
+}
+
+.recommendation-engine::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.7);
+} 
