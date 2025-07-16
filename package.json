@@ -14,6 +14,12 @@
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:artifacts": "jest --testPathPattern=artifact --coverage",
+    "test:ui": "jest --testPathPattern=ui-components --coverage",
+    "test:backend": "jest --testPathPattern=backend-schema --coverage",
+    "test:unified": "jest --testPathPattern=unified-model --coverage",
+    "test:validation": "jest --testPathPattern=validation --coverage",
+    "test:legacy": "jest --testPathPattern=legacy --coverage",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install"
   },
   "engines": {
