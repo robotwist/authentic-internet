@@ -17,6 +17,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import TextAdventure from './components/TextAdventure';
 import Level4Shooter from './components/Level4Shooter';
 import LoadingScreen from './components/LoadingScreen';
+import OnboardingTrigger from './components/OnboardingTrigger';
 import './App.css';
 
 // Debug startup
@@ -123,6 +124,9 @@ function App() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
+        
+        {/* Onboarding System */}
+        <OnboardingTrigger />
       </AchievementProvider>
     </div>
   );
