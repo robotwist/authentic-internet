@@ -27,7 +27,11 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
     iconFile: null,
     visibility: initialProps.visibility || 'public',
     allowedUsers: initialProps.allowedUsers || [],
-    tags: initialProps.tags || []
+    tags: initialProps.tags || [],
+    media: initialProps.media || [],
+    rating: initialProps.rating || 0,
+    reviews: initialProps.reviews || [],
+    remixOf: initialProps.remixOf || null
   });
   
   const [attachment, setAttachment] = useState(null);
@@ -143,7 +147,11 @@ const ArtifactForm = ({ onSubmit, onClose, initialValues = {}, initialData = {},
           iconFile: null,
           visibility: 'public',
           allowedUsers: [],
-          tags: []
+          tags: [],
+          media: [],
+          rating: 0,
+          reviews: [],
+          remixOf: null
         });
         setAttachment(null);
         setAttachmentPreview(null);

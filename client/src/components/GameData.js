@@ -33,7 +33,8 @@ export const MAPS = [
         name: "Ancient Sword", 
         description: "A legendary blade that once belonged to a great warrior", 
         content: "The sword pulses with ancient power, its edge never dulling.", 
-        location: { x: 3, y: 2 },
+        media: ["/assets/artifacts/ancient_sword.png"],
+        location: { x: 3, y: 2, mapName: "Overworld" },
         exp: 15, 
         visible: true, 
         area: "Overworld",
@@ -55,7 +56,21 @@ export const MAPS = [
           description: true,
           content: true,
           properties: ["damage", "element"]
-        }
+        },
+        createdBy: "user-001",
+        createdAt: "2024-06-01T12:00:00Z",
+        updatedAt: "2024-06-01T12:00:00Z",
+        tags: ["legendary", "weapon", "warrior"],
+        rating: 4.7,
+        reviews: [
+          {
+            userId: "user-002",
+            rating: 5,
+            comment: "Incredible artifact!",
+            createdAt: "2024-06-02T10:00:00Z"
+          }
+        ],
+        remixOf: null
       },
       { 
         id: uuidv4(),
@@ -93,7 +108,7 @@ export const MAPS = [
         id: 'john_muir1',
         type: NPC_TYPES.JOHN_MUIR,
         name: 'John Muir',
-        position: { x: 5 * TILE_SIZE, y: 14 * TILE_SIZE },
+        position: { x: 5, y: 14 },
         patrolArea: {
           startX: 3,
           startY: 13,
@@ -107,7 +122,7 @@ export const MAPS = [
           "When one tugs at a single thing in nature, he finds it attached to the rest of the world. (My First Summer in the Sierra, 1911)",
           "The world is big and I want to have a good look at it before it gets dark. (Letter to his sister, 1873)"
         ]
-      },
+      }
     ]
   },
   {
@@ -167,7 +182,7 @@ export const MAPS = [
         name: "Zeus the Weatherman",
         type: NPC_TYPES.ZEUS,
         apiType: 'zeus',
-        position: { x: 3 * TILE_SIZE, y: 3 * TILE_SIZE },
+        position: { x: 3, y: 3 },
         dialogue: [
           "By my thunderbolts! Today's forecast calls for partly cloudy with a chance of divine intervention!",
           "Expect high-pressure systems over Mount Olympus, with occasional lightning strikes... those are mine, by the way.",
@@ -234,7 +249,7 @@ export const MAPS = [
         id: uuidv4(),
         name: "William Shakespeare",
         type: NPC_TYPES.SHAKESPEARE,
-        position: { x: 5 * TILE_SIZE, y: 7 * TILE_SIZE },
+        position: { x: 5, y: 7 },
         dialogue: [
           "All the world's a stage, and all the men and women merely players.",
           "To be, or not to be, that is the question.",
@@ -380,23 +395,23 @@ export const MAPS = [
   {
     name: "Yosemite",
     data: [
-      [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-      [2, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 2],
-      [2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 2],
-      [2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2],
-      [2, 0, 2, 0, 0, 6, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 7, 2, 0, 2],
-      [2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2],
-      [2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 2],
-      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-      [2, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 2],
-      [2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 2, 0, 2],
-      [2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2],
-      [2, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 2],
-      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2],
-      [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0],
+      [0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0],
+      [0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0],
+      [0, 0, 2, 0, 0, 6, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 7, 2, 0, 0],
+      [0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0],
+      [0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0],
+      [0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 2, 0, 0],
+      [0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0],
+      [0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ],
     specialPortals: [
       {
@@ -423,7 +438,7 @@ export const MAPS = [
         id: uuidv4(),
         name: "John Muir",
         type: NPC_TYPES.GUIDE,
-        position: { x: 3 * TILE_SIZE, y: 3 * TILE_SIZE },
+        position: { x: 3, y: 3 },
         dialogue: [
           "Welcome to Yosemite Valley! The grandeur of these peaks never ceases to amaze me.",
           "Have you noticed how the valley seems to tell its own story through its formations?",
@@ -496,7 +511,7 @@ export const MAPS = [
         id: 'hemingway1',
         type: NPC_TYPES.WRITER,
         name: 'Ernest Hemingway',
-        position: { x: 128, y: 128 },
+        position: { x: 2, y: 2 },
         sprite: '/assets/npcs/hemingway.png',
         dialogue: [
           "Write hard and clear about what hurts.",

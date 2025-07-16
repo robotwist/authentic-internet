@@ -85,13 +85,22 @@ const validateEnv = () => {
   const missingVars = requiredVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
-    console.error(`ERROR: Missing required environment variables: ${missingVars.join(', ')}`);
-    console.error("These are critical security settings. Fix this before continuing.");
+    console.warn(`⚠️ Missing environment variables: ${missingVars.join(', ')}`);
+    
     if (process.env.NODE_ENV === 'production') {
       console.error("Exiting process due to missing security variables in production");
       process.exit(1);
+    } else {
+      // In development, provide default values
+      console.log("🔧 Using default development values for missing environment variables");
+      if (!process.env.JWT_SECRET) {
+        process.env.JWT_SECRET = 'dev-jwt-secret-key-change-in-production';
+      }
+      if (!process.env.SESSION_SECRET) {
+        process.env.SESSION_SECRET = 'dev-session-secret-key-change-in-production';
+      }
+      console.log("✅ Environment variables configured for development");
     }
-    return false;
   }
   return true;
 };

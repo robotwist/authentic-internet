@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS, MAPS, isWalkable } from "./Constants";
 import SoundManager from "./utils/SoundManager";
 
+// Add movement speed constant for smoother movement
+const MOVEMENT_STEP_SIZE = TILE_SIZE / 2; // This will make movement smoother - 32px instead of 64px
+
 const useCharacterMovement = (
   characterPosition, 
   handleCharacterMove,
@@ -91,24 +94,19 @@ const useCharacterMovement = (
     const mapWidth = currentMapData[0].length * TILE_SIZE;
     const mapHeight = currentMapData.length * TILE_SIZE;
 
-    // Calculate new position based on direction and diagonal movement
+    // Calculate new position based on direction using smaller step size
     switch (direction) {
       case "up":
-        newPosition.y -= TILE_SIZE;
-        // Remove diagonal offset to prevent double movement
-        // We'll still show diagonal animation but only move one tile
+        newPosition.y -= MOVEMENT_STEP_SIZE;
         break;
       case "down":
-        newPosition.y += TILE_SIZE;
-        // Remove diagonal offset to prevent double movement
+        newPosition.y += MOVEMENT_STEP_SIZE;
         break;
       case "left":
-        newPosition.x -= TILE_SIZE;
-        // Remove diagonal offset to prevent double movement
+        newPosition.x -= MOVEMENT_STEP_SIZE;
         break;
       case "right":
-        newPosition.x += TILE_SIZE;
-        // Remove diagonal offset to prevent double movement
+        newPosition.x += MOVEMENT_STEP_SIZE;
         break;
       default:
         return;
@@ -200,18 +198,20 @@ const useCharacterMovement = (
       return;
     }
 
-    // Update movement direction for animation
-    setMovementDirection(direction);
-
-    // Move character
+    // If we can move, update position and handle map transitions
     handleCharacterMove(newPosition, targetMapIndex);
     
-    // Set movement cooldown
-    setMovementCooldown(true);
-    setTimeout(() => {
-      setMovementCooldown(false);
-    }, 150); // Slightly faster movement cooldown for more responsive feel
-  }, [characterPosition, currentMapIndex, handleCharacterMove, movementCooldown, triggerBump, diagonalMovement]);
+    // Update viewport
+    if (adjustViewport) {
+      adjustViewport(newPosition);
+    }
+
+    // Play movement sound
+    if (soundManager) {
+      soundManager.playSound('step', 0.2);
+    }
+
+  }, [characterPosition, currentMapIndex, movementCooldown, handleCharacterMove, adjustViewport, soundManager, triggerBump]);
 
   // Process multiple key presses for diagonal movement
   const processKeyPresses = useCallback(() => {

@@ -782,6 +782,35 @@ export const saveGameState = async (gameState) => {
   }
 };
 
+export const updateGameState = async (gameState) => {
+  try {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
+    const response = await fetch(`${API_URL}/api/users/game-state`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(gameState)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update game state');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating game state:', error);
+    throw error;
+  }
+};
+
 /* ────────────────────────────────
    🔹 CHARACTER ENDPOINTS
 ──────────────────────────────── */

@@ -197,10 +197,94 @@ const GameWorld = () => {
       console.error("Error saving level completion to localStorage:", error);
     }
     
+    // Create level completion artifact
+    const createLevelArtifact = async () => {
+      const levelArtifacts = {
+        level1: {
+          name: "Digital Wilderness Trophy",
+          description: "A crystalline trophy commemorating your conquest of the Digital Wilderness",
+          content: "This artifact pulses with digital energy, a testament to your mastery of the first level. It contains fragments of the wilderness's code and echoes of the challenges you overcame.",
+          type: "TROPHY",
+          exp: 25,
+          properties: {
+            digitalMastery: 10,
+            wildernessKnowledge: 5,
+            element: "digital"
+          }
+        },
+        level2: {
+          name: "Shadow Realm Medallion",
+          description: "A dark medallion that absorbs light, symbolizing your triumph over shadows",
+          content: "The medallion seems to contain swirling shadows within its depths. It whispers secrets of the shadow realm and grants insight into hidden truths.",
+          type: "MEDALLION",
+          exp: 30,
+          properties: {
+            shadowAffinity: 15,
+            stealthBonus: 8,
+            element: "shadow"
+          }
+        },
+        level3: {
+          name: "Terminal Void Crystal",
+          description: "A geometric crystal that hums with terminal energy and digital wisdom",
+          content: "This crystal contains the essence of the terminal void, with lines of code flowing through its facets like liquid light.",
+          type: "CRYSTAL",
+          exp: 35,
+          properties: {
+            terminalWisdom: 20,
+            codeMastery: 12,
+            element: "digital"
+          }
+        },
+        level4: {
+          name: "Hemingway's Challenge Crown",
+          description: "A crown forged from the courage and clarity of Hemingway's literary challenge",
+          content: "This crown represents the ultimate test of courage and writing prowess. It carries the weight of Hemingway's legacy and the power of clear, honest expression.",
+          type: "CROWN",
+          exp: 50,
+          properties: {
+            courage: 25,
+            writingMastery: 20,
+            graceUnderPressure: 15,
+            element: "wisdom"
+          }
+        }
+      };
+      
+      const artifactData = levelArtifacts[level];
+      if (artifactData) {
+        try {
+          const newArtifact = await createArtifact({
+            ...artifactData,
+            area: "level-completion",
+            visible: true,
+            userModifiable: {
+              description: true,
+              content: true,
+              properties: Object.keys(artifactData.properties)
+            }
+          });
+          
+          // Add to local artifacts array
+          setArtifacts(prev => [...prev, newArtifact]);
+          
+          // Add to inventory
+          setInventory(prev => [...prev, newArtifact]);
+          
+          console.log(`🎖️ Created level completion artifact: ${artifactData.name}`);
+        } catch (error) {
+          console.error("Error creating level completion artifact:", error);
+        }
+      }
+    };
+    
+    // Create the artifact
+    createLevelArtifact();
+    
     let message = '';
     switch(level) {
       case 'level1':
-        message = 'Congratulations! You have completed Level 1 - The Digital Wilderness!';
+        message = 'Congratulations! You have completed Level 1 - The Digital Wilderness! You have earned the Digital Wilderness Trophy!';
         // Show the NKD Man Extension reward after the win notification closes
         setTimeout(() => {
           // Check if we've already shown this reward by checking localStorage
@@ -218,10 +302,10 @@ const GameWorld = () => {
         }, 5500); // Wait slightly longer than the win notification
         break;
       case 'level2':
-        message = 'Magnificent! You have completed Level 2 - The Realm of Shadows!';
+        message = 'Magnificent! You have completed Level 2 - The Realm of Shadows! You have earned the Shadow Realm Medallion!';
         break;
       case 'level3':
-        message = 'Extraordinary! You have completed Level 3 - The Terminal Void!';
+        message = 'Extraordinary! You have completed Level 3 - The Terminal Void! You have earned the Terminal Void Crystal!';
         setTimeout(() => {
           const goToLevel4 = window.confirm('You have unlocked Level 4: The Hemingway Challenge! Ready to enter?');
           if (goToLevel4) {
@@ -238,7 +322,7 @@ const GameWorld = () => {
         }, 3000);
         break;
       case 'level4':
-        message = 'Amazing! You have completed Level 4 - The Hemingway Challenge!';
+        message = 'Amazing! You have completed Level 4 - The Hemingway Challenge! You have earned Hemingway\'s Challenge Crown!';
         break;
       default:
         message = 'Level completed!';
@@ -256,7 +340,7 @@ const GameWorld = () => {
     setTimeout(() => {
       setShowWinNotification(false);
     }, 5000);
-  }, [levelCompletion, soundManager, awardXP, setCurrentAchievement, setShowRewardModal, setWinMessage, setShowWinNotification, setShowLevel4]);
+  }, [levelCompletion, soundManager, awardXP, setCurrentAchievement, setShowRewardModal, setWinMessage, setShowWinNotification, setShowLevel4, createArtifact, setArtifacts, setInventory]);
 
   // Handler for Level 4 completion
   const handleLevel4Complete = useCallback((score) => {

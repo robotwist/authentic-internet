@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Tile from './Tile';
 import Artifact from './Artifact';
 import { TILE_SIZE } from './Constants';
+import { NPC_TYPES } from './GameConstants';
 import './Map.css';
 
 // Add a default placeholder sprite as a data URI
@@ -94,6 +95,24 @@ const Map = ({
     );
   };
 
+  // NPC sprite mapping
+  const npcImages = useMemo(() => ({
+    [NPC_TYPES.SHAKESPEARE]: '/assets/npcs/shakespeare.webp',
+    [NPC_TYPES.ARTIST]: '/assets/npcs/artist.svg',
+    [NPC_TYPES.MICHELANGELO]: '/assets/npcs/michelangelo.svg',
+    [NPC_TYPES.ADA_LOVELACE]: '/assets/npcs/ada_lovelace.png',
+    [NPC_TYPES.LORD_BYRON]: '/assets/npcs/lord_byron.webp',
+    [NPC_TYPES.OSCAR_WILDE]: '/assets/npcs/oscar_wilde.svg',
+    [NPC_TYPES.ALEXANDER_POPE]: '/assets/npcs/alexander_pope.svg',
+    [NPC_TYPES.ZEUS]: '/assets/npcs/zeus.svg',
+    [NPC_TYPES.JOHN_MUIR]: '/assets/npcs/john_muir.png',
+    [NPC_TYPES.JESUS]: '/assets/npcs/jesus.png'
+  }), []);
+
+  const getNPCImage = useCallback((npcType) => {
+    return npcImages[npcType] || `/assets/npcs/${npcType}.svg`;
+  }, [npcImages]);
+
   // Memoize NPC rendering to avoid unnecessary re-renders
   const renderNPCs = useMemo(() => {
     if (!npcs || !Array.isArray(npcs)) return null;
@@ -101,7 +120,7 @@ const Map = ({
     return npcs.map(npc => {
       if (!npc || !npc.position) return null;
       
-      const actualSprite = npc.sprite || DEFAULT_NPC_SPRITE;
+      const actualSprite = npc.sprite || getNPCImage(npc.type) || DEFAULT_NPC_SPRITE;
       const spriteStyle = {
         position: 'absolute',
         left: `${npc.position.x * TILE_SIZE}px`,
@@ -138,7 +157,7 @@ const Map = ({
         </div>
       );
     });
-  }, [npcs, onNPCClick]);
+  }, [npcs, onNPCClick, getNPCImage]);
 
   // Check if mapData is valid before rendering
   if (!mapData || !Array.isArray(mapData) || mapData.length === 0) {
