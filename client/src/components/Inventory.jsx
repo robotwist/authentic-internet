@@ -260,6 +260,26 @@ const Inventory = ({
     }
   };
 
+  // Add helper function for type display
+  const getTypeDisplay = (type) => {
+    const typeMap = {
+      'artifact': 'General Artifact',
+      'WEAPON': 'Weapon',
+      'SCROLL': 'Scroll/Text',
+      'ART': 'Visual Art',
+      'MUSIC': 'Music/Audio',
+      'GAME': 'Game',
+      'PUZZLE': 'Puzzle',
+      'STORY': 'Story',
+      'TOOL': 'Tool',
+      'TREASURE': 'Treasure',
+      'PORTAL': 'Portal',
+      'NPC': 'NPC',
+      'ENVIRONMENT': 'Environment'
+    };
+    return typeMap[type] || type;
+  };
+
   return (
     <div className="inventory-overlay">
       <div className="inventory-container">
@@ -289,10 +309,35 @@ const Inventory = ({
                     <div className="artifact-info">
                       <h4>{artifact.name}</h4>
                       <p>{artifact.description}</p>
-                      {artifact.attachment && (
-                        <div className="attachment-badge" title="Has attachment">📎</div>
+                      
+                      {/* Display artifact type */}
+                      {artifact.type && (
+                        <span className="artifact-type">{getTypeDisplay(artifact.type)}</span>
                       )}
+                      
+                      {/* Display experience reward */}
+                      {artifact.exp > 0 && (
+                        <span className="artifact-exp">+{artifact.exp} XP</span>
+                      )}
+                      
+                      {/* Display tags */}
+                      {artifact.tags && artifact.tags.length > 0 && (
+                        <div className="artifact-tags">
+                          {artifact.tags.slice(0, 3).map((tag, index) => (
+                            <span key={index} className="tag">{tag}</span>
+                          ))}
+                          {artifact.tags.length > 3 && (
+                            <span className="tag-more">+{artifact.tags.length - 3}</span>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Check for media or attachment */}
+                      {(artifact.media && artifact.media.length > 0) || artifact.attachment ? (
+                        <div className="attachment-badge" title="Has attachment">📎</div>
+                      ) : null}
                     </div>
+                    
                     {(selectedArtifact?.id === artifact.id || selectedArtifact?._id === artifact._id) && !actionMode && (
                       <div className="artifact-actions">
                         <button onClick={(e) => {

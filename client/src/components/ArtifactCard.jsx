@@ -17,14 +17,40 @@ const ArtifactCard = ({ artifact, onVote, onComment, onView, onShare, onDelete, 
   // Check if user has already voted
   const hasVoted = artifact.voters?.includes(user?.id);
 
+  // Check if current user is the creator of the artifact
+  const isCreator = () => {
+    return user && (artifact.createdBy === user.id || artifact.creator?.id === user.id || artifact.creator === user.id);
+  };
+
   // Format date
   const formatDate = (dateString) => {
+    if (!dateString) return 'Unknown date';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  // Get artifact type display name
+  const getTypeDisplay = (type) => {
+    const typeMap = {
+      'artifact': 'General Artifact',
+      'WEAPON': 'Weapon',
+      'SCROLL': 'Scroll/Text',
+      'ART': 'Visual Art',
+      'MUSIC': 'Music/Audio',
+      'GAME': 'Game',
+      'PUZZLE': 'Puzzle',
+      'STORY': 'Story',
+      'TOOL': 'Tool',
+      'TREASURE': 'Treasure',
+      'PORTAL': 'Portal',
+      'NPC': 'NPC',
+      'ENVIRONMENT': 'Environment'
+    };
+    return typeMap[type] || type;
   };
 
   // Handle vote
@@ -74,64 +100,41 @@ const ArtifactCard = ({ artifact, onVote, onComment, onView, onShare, onDelete, 
     }
   };
 
-  // Check if current user is the creator of the artifact
-  const isCreator = () => {
-    if (!user) return false;
-    
-    // Check different possible creator ID formats
-    return (
-      (artifact.creator?._id && artifact.creator._id === user.id) || 
-      (artifact.creator?.id && artifact.creator.id === user.id) ||
-      (artifact.creator === user.id)
-    );
-  };
-
-  // Render attachment if present
+  // Render attachment/media
   const renderAttachment = () => {
-    if (!artifact.attachment) return null;
-
-    const isImage = artifact.attachmentType === 'image';
-    const isAudio = artifact.attachmentType === 'audio';
-    const isVideo = artifact.attachmentType === 'video';
-
-    if (isImage) {
-      return (
-        <img 
-          src={artifact.attachment} 
-          alt={artifact.attachmentOriginalName || 'Artifact attachment'} 
-          className="artifact-attachment-image"
-        />
+    // Check for media array first (unified model)
+    if (artifact.media && artifact.media.length > 0) {
+      const imageMedia = artifact.media.find(url => 
+        url.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i)
       );
+      if (imageMedia) {
+        return (
+          <div className="artifact-media">
+            <img src={imageMedia} alt={artifact.name} className="artifact-image" />
+          </div>
+        );
+      }
     }
-
-    if (isAudio) {
-      return (
-        <audio controls className="artifact-attachment-audio">
-          <source src={artifact.attachment} type="audio/mpeg" />
-          Your browser does not support the audio element.
-        </audio>
-      );
+    
+    // Check for legacy attachment field
+    if (artifact.attachment) {
+      if (artifact.attachment.startsWith('data:image')) {
+        return (
+          <div className="artifact-media">
+            <img src={artifact.attachment} alt={artifact.name} className="artifact-image" />
+          </div>
+        );
+      } else {
+        return (
+          <div className="artifact-attachment">
+            <span className="attachment-icon">📎</span>
+            <span className="attachment-name">{artifact.attachment}</span>
+          </div>
+        );
+      }
     }
-
-    if (isVideo) {
-      return (
-        <video controls className="artifact-attachment-video">
-          <source src={artifact.attachment} type="video/mp4" />
-          Your browser does not support the video element.
-        </video>
-      );
-    }
-
-    // For other types, show a download link
-    return (
-      <a 
-        href={artifact.attachment} 
-        download={artifact.attachmentOriginalName}
-        className="artifact-attachment-download"
-      >
-        📎 Download {artifact.attachmentOriginalName || 'attachment'}
-      </a>
-    );
+    
+    return null;
   };
 
   return (
@@ -139,14 +142,41 @@ const ArtifactCard = ({ artifact, onVote, onComment, onView, onShare, onDelete, 
       <div className="artifact-header">
         <h3 onClick={handleView}>{artifact.name}</h3>
         <div className="artifact-meta">
-          <span>By {artifact.creator?.username || 'Unknown'}</span>
+          <span className="artifact-type">{getTypeDisplay(artifact.type)}</span>
+          <span>By {artifact.creator?.username || artifact.createdBy || 'Unknown'}</span>
           <span>{formatDate(artifact.createdAt)}</span>
         </div>
       </div>
 
       {isExpanded ? (
         <div className="artifact-content">
-          <p>{artifact.description}</p>
+          <p className="artifact-description">{artifact.description}</p>
+          
+          {/* Display experience reward */}
+          {artifact.exp > 0 && (
+            <div className="artifact-exp">
+              <span className="exp-label">Reward:</span>
+              <span className="exp-value">+{artifact.exp} XP</span>
+            </div>
+          )}
+          
+          {/* Display tags */}
+          {artifact.tags && artifact.tags.length > 0 && (
+            <div className="artifact-tags">
+              {artifact.tags.map((tag, index) => (
+                <span key={index} className="tag">{tag}</span>
+              ))}
+            </div>
+          )}
+          
+          {/* Display rating */}
+          {artifact.rating > 0 && (
+            <div className="artifact-rating">
+              <span className="rating-label">Rating:</span>
+              <span className="rating-value">{artifact.rating.toFixed(1)} ⭐</span>
+            </div>
+          )}
+          
           {renderAttachment()}
           
           <div className="artifact-actions">

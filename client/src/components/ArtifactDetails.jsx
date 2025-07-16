@@ -60,29 +60,98 @@ const ArtifactDetails = ({
   const formatProperties = (properties) => {
     if (!properties || typeof properties !== 'object') return null;
     
-    return Object.entries(properties).map(([key, value]) => {
-      // Format the property key for display (capitalize, replace underscores)
-      const formattedKey = key
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
-      
-      // Format the value based on its type
-      let formattedValue = value;
-      if (typeof value === 'boolean') {
-        formattedValue = value ? 'Yes' : 'No';
-      } else if (typeof value === 'number') {
-        formattedValue = value.toLocaleString();
-      }
-      
+    return Object.entries(properties).map(([key, value]) => (
+      <div key={key} className="property-item">
+        <span className="property-name">{key}:</span>
+        <span className="property-value">{value.toString()}</span>
+      </div>
+    ));
+  };
+
+  // Get artifact type display name
+  const getTypeDisplay = (type) => {
+    const typeMap = {
+      'artifact': 'General Artifact',
+      'WEAPON': 'Weapon',
+      'SCROLL': 'Scroll/Text',
+      'ART': 'Visual Art',
+      'MUSIC': 'Music/Audio',
+      'GAME': 'Game',
+      'PUZZLE': 'Puzzle',
+      'STORY': 'Story',
+      'TOOL': 'Tool',
+      'TREASURE': 'Treasure',
+      'PORTAL': 'Portal',
+      'NPC': 'NPC',
+      'ENVIRONMENT': 'Environment'
+    };
+    return typeMap[type] || type;
+  };
+
+  // Render media content
+  const renderMedia = () => {
+    // Check for media array first (unified model)
+    if (artifact.media && artifact.media.length > 0) {
       return (
-        <div key={key} className="artifact-property">
-          <span className="property-name">{formattedKey}:</span>
-          <span className="property-value">{formattedValue}</span>
+        <div className="artifact-media-section">
+          <h4>Media</h4>
+          <div className="media-gallery">
+            {artifact.media.map((mediaUrl, index) => {
+              if (mediaUrl.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i)) {
+                return (
+                  <div key={index} className="media-item">
+                    <img src={mediaUrl} alt={`${artifact.name} media ${index + 1}`} />
+                  </div>
+                );
+              } else if (mediaUrl.match(/\.(mp3|wav|ogg|m4a)$/i)) {
+                return (
+                  <div key={index} className="media-item">
+                    <audio controls>
+                      <source src={mediaUrl} />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
+                );
+              } else if (mediaUrl.match(/\.(mp4|webm|ogg)$/i)) {
+                return (
+                  <div key={index} className="media-item">
+                    <video controls>
+                      <source src={mediaUrl} />
+                      Your browser does not support the video element.
+                    </video>
+                  </div>
+                );
+              } else {
+                return (
+                  <div key={index} className="media-item">
+                    <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
+                      📎 Media File {index + 1}
+                    </a>
+                  </div>
+                );
+              }
+            })}
+          </div>
         </div>
       );
-    });
+    }
+    
+    // Check for legacy image field
+    if (artifact.image) {
+      return (
+        <div className="artifact-image-container">
+          <img 
+            src={artifact.image} 
+            alt={artifact.name} 
+            className="artifact-image" 
+          />
+        </div>
+      );
+    }
+    
+    return null;
   };
-  
+
   const handleStartPuzzle = () => {
     setShowInteractivePuzzle(true);
   };
@@ -113,29 +182,55 @@ const ArtifactDetails = ({
         <div className="artifact-header">
           <h2 className="artifact-name">{artifact.name || 'Unknown Artifact'}</h2>
           {artifact.type && (
-            <span className="artifact-type">{artifact.type}</span>
+            <span className="artifact-type">{getTypeDisplay(artifact.type)}</span>
           )}
         </div>
         
         <div className="artifact-content">
-          {artifact.image && (
-            <div className="artifact-image-container">
-              <img 
-                src={artifact.image} 
-                alt={artifact.name} 
-                className="artifact-image" 
-              />
-            </div>
-          )}
+          {renderMedia()}
           
           <div className="artifact-info">
             <p className="artifact-description">
               {artifact.description || 'No description available.'}
             </p>
             
+            {/* Display experience reward */}
             {artifact.exp > 0 && (
               <div className="artifact-exp">
                 Experience: <span className="exp-value">+{artifact.exp} XP</span>
+              </div>
+            )}
+            
+            {/* Display tags */}
+            {artifact.tags && artifact.tags.length > 0 && (
+              <div className="artifact-tags-section">
+                <h4>Tags</h4>
+                <div className="tags-list">
+                  {artifact.tags.map((tag, index) => (
+                    <span key={index} className="tag">{tag}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Display rating */}
+            {artifact.rating > 0 && (
+              <div className="artifact-rating">
+                Rating: <span className="rating-value">{artifact.rating.toFixed(1)} ⭐</span>
+              </div>
+            )}
+            
+            {/* Display creator */}
+            {artifact.createdBy && (
+              <div className="artifact-creator">
+                Created by: <span className="creator-name">{artifact.createdBy}</span>
+              </div>
+            )}
+            
+            {/* Display creation date */}
+            {artifact.createdAt && (
+              <div className="artifact-date">
+                Created: <span className="date-value">{new Date(artifact.createdAt).toLocaleDateString()}</span>
               </div>
             )}
             

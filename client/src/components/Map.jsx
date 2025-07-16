@@ -202,13 +202,18 @@ const Map = ({
         ))}
         
         {/* Render artifacts */}
-        {artifacts?.map(artifact => (
-          <Artifact
-            key={artifact.id || artifact._id || `artifact-${artifact.name || ''}-${artifact.location?.x || 0}-${artifact.location?.y || 0}-${Math.random().toString(36).substr(2, 5)}`}
-            artifact={artifact}
-            onInteract={() => onArtifactClick?.(artifact)}
-          />
-        ))}
+        {artifacts?.map(artifact => {
+          // Support both unified model location and legacy x/y coordinates
+          const artifactKey = artifact.id || artifact._id || `artifact-${artifact.name || ''}-${artifact.location?.x || artifact.x || 0}-${artifact.location?.y || artifact.y || 0}-${Math.random().toString(36).substr(2, 5)}`;
+          
+          return (
+            <Artifact
+              key={artifactKey}
+              artifact={artifact}
+              onInteract={() => onArtifactClick?.(artifact)}
+            />
+          );
+        })}
 
         {/* Render NPCs with improved visibility and interaction indicators */}
         {renderNPCs}

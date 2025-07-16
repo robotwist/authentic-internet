@@ -228,7 +228,7 @@ const Artifact = ({
 
   const getArtifactClass = (artifact) => {
     const baseClass = 'artifact';
-    const typeClass = artifact.type ? `artifact-${artifact.type}` : '';
+    const typeClass = artifact.type ? `artifact-${artifact.type.toLowerCase()}` : '';
     const levelClass = interactionLevel > 0 ? `artifact-level-${interactionLevel}` : '';
     const areaClass = artifact.area ? `artifact-area-${artifact.area}` : '';
     const animationClass = isAnimating ? 'artifact-pickup-animation' : '';
@@ -239,16 +239,37 @@ const Artifact = ({
   };
 
   const getArtifactImage = (artifact) => {
-    if (!artifact || !artifact.type) return IMAGE_PATHS.default;
-    return IMAGE_PATHS[artifact.type] || IMAGE_PATHS.default;
+    if (!artifact) return IMAGE_PATHS.default;
+    
+    // Check for custom media first
+    if (artifact.media && artifact.media.length > 0) {
+      const imageMedia = artifact.media.find(url => 
+        url.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i)
+      );
+      if (imageMedia) return imageMedia;
+    }
+    
+    // Check for image field
+    if (artifact.image) return artifact.image;
+    
+    // Check for type-based image
+    if (artifact.type && IMAGE_PATHS[artifact.type]) {
+      return IMAGE_PATHS[artifact.type];
+    }
+    
+    return IMAGE_PATHS.default;
   };
 
   const calculatePosition = (artifact) => {
     if (!artifact) return {};
     
+    // Support both location object and direct x/y coordinates
+    const x = artifact.location?.x ?? artifact.x ?? 0;
+    const y = artifact.location?.y ?? artifact.y ?? 0;
+    
     return {
-      left: `${artifact.x * TILE_SIZE}px`,
-      top: `${artifact.y * TILE_SIZE}px`,
+      left: `${x * TILE_SIZE}px`,
+      top: `${y * TILE_SIZE}px`,
       transform: `translate(${TILE_SIZE/2}px, ${TILE_SIZE/2}px)`
     };
   };
@@ -380,7 +401,34 @@ const Artifact = ({
         <div className="artifact-details">
           <h3>{artifact.name}</h3>
           <p>{artifact.description}</p>
+          
+          {/* Display artifact type */}
+          {artifact.type && (
+            <p className="artifact-type">Type: {getTypeDisplay(artifact.type)}</p>
+          )}
+          
+          {/* Display experience reward */}
+          {artifact.exp > 0 && (
+            <p className="artifact-exp">Reward: +{artifact.exp} XP</p>
+          )}
+          
+          {/* Display tags */}
+          {artifact.tags && artifact.tags.length > 0 && (
+            <div className="artifact-tags">
+              {artifact.tags.map((tag, index) => (
+                <span key={index} className="tag">{tag}</span>
+              ))}
+            </div>
+          )}
+          
+          {/* Display rating if available */}
+          {artifact.rating > 0 && (
+            <p className="artifact-rating">Rating: {artifact.rating.toFixed(1)} ⭐</p>
+          )}
+          
           <p className="creator">Created by: {creatorName}</p>
+          
+          {/* Legacy fields for backward compatibility */}
           {artifact.messageText && (
             <p className="message">{artifact.messageText}</p>
           )}
@@ -433,14 +481,47 @@ const getAreaDisplay = (area) => {
   return areaMap[area] || area;
 };
 
+const getTypeDisplay = (type) => {
+  const typeMap = {
+    'artifact': 'General Artifact',
+    'WEAPON': 'Weapon',
+    'SCROLL': 'Scroll/Text',
+    'ART': 'Visual Art',
+    'MUSIC': 'Music/Audio',
+    'GAME': 'Game',
+    'PUZZLE': 'Puzzle',
+    'STORY': 'Story',
+    'TOOL': 'Tool',
+    'TREASURE': 'Treasure',
+    'PORTAL': 'Portal',
+    'NPC': 'NPC',
+    'ENVIRONMENT': 'Environment'
+  };
+  return typeMap[type] || type;
+};
+
 Artifact.propTypes = {
   artifact: PropTypes.shape({
     _id: PropTypes.string,
     name: PropTypes.string,
     description: PropTypes.string,
     type: PropTypes.string,
-    x: PropTypes.number,
-    y: PropTypes.number,
+    content: PropTypes.string,
+    media: PropTypes.arrayOf(PropTypes.string),
+    location: PropTypes.shape({
+      x: PropTypes.number,
+      y: PropTypes.number,
+      mapName: PropTypes.string
+    }),
+    x: PropTypes.number, // Legacy support
+    y: PropTypes.number, // Legacy support
+    exp: PropTypes.number,
+    visible: PropTypes.bool,
+    area: PropTypes.string,
+    tags: PropTypes.arrayOf(PropTypes.string),
+    rating: PropTypes.number,
+    reviews: PropTypes.array,
+    remixOf: PropTypes.string,
     creator: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     messageText: PropTypes.string,
     theme: PropTypes.string,
@@ -452,7 +533,10 @@ Artifact.propTypes = {
       saves: PropTypes.number,
       shares: PropTypes.number
     }),
-    area: PropTypes.oneOf(['overworld', 'desert', 'dungeon', 'yosemite'])
+    image: PropTypes.string,
+    createdBy: PropTypes.string,
+    createdAt: PropTypes.string,
+    updatedAt: PropTypes.string
   }).isRequired,
   onPickup: PropTypes.func,
   characterPosition: PropTypes.shape({

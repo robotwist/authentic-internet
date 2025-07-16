@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   moduleNameMapping: {
@@ -8,7 +8,8 @@ module.exports = {
   },
   testMatch: [
     '<rootDir>/tests/unit/**/*.test.js',
-    '<rootDir>/tests/integration/**/*.test.js'
+    '<rootDir>/tests/integration/**/*.test.js',
+    '<rootDir>/tests/ui-components.test.js'
   ],
   collectCoverageFrom: [
     'client/src/**/*.{js,jsx}',
@@ -38,5 +39,9 @@ module.exports = {
     'ts-jest': {
       tsconfig: 'tsconfig.json'
     }
-  }
+  },
+  extensionsToTreatAsEsm: ['.js', '.jsx'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$))'
+  ]
 }; 
