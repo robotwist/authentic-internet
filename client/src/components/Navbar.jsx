@@ -40,6 +40,7 @@ const Navbar = () => {
           <>
             <Link to="/dashboard">Dashboard</Link>
             <Link to="/artifacts">Artifacts</Link>
+            <Link to="/collaboration">Collaboration</Link>
             <Link to="/profile">Profile</Link>
             
             {/* Game-specific quick access buttons */}
