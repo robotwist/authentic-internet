@@ -1,0 +1,488 @@
+/* Discovery Engine Styles */
+.discovery-engine {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.discovery-engine.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+/* Header Card */
+.discovery-header-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.discovery-header-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
+}
+
+.discovery-title {
+  color: #ffffff;
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.discovery-title .MuiSvgIcon-root {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.discovery-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+
+/* Tabs Card */
+.discovery-tabs-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  margin-bottom: 24px;
+}
+
+.discovery-tabs {
+  background: transparent;
+}
+
+.discovery-tabs .MuiTabs-indicator {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  height: 3px;
+  border-radius: 2px;
+}
+
+.discovery-tab {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  text-transform: none;
+  min-height: 64px;
+  transition: all 0.3s ease;
+}
+
+.discovery-tab:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.discovery-tab.Mui-selected {
+  color: #667eea;
+}
+
+.discovery-tab .MuiSvgIcon-root {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
+
+/* Content Card */
+.discovery-content-card {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  min-height: 400px;
+}
+
+.tab-content {
+  padding: 8px 0;
+}
+
+.section-title {
+  color: #667eea;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-title .MuiSvgIcon-root {
+  font-size: 1.5rem;
+}
+
+.section-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+/* Creator Cards */
+.creator-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.creator-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.creator-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.creator-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 56px;
+  height: 56px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.creator-info {
+  flex: 1;
+}
+
+.creator-name {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.creator-stats {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.creator-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.creator-actions .MuiButton-root {
+  color: #667eea;
+  border-color: rgba(102, 126, 234, 0.3);
+  text-transform: none;
+  font-weight: 600;
+}
+
+.creator-actions .MuiButton-root:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: #667eea;
+}
+
+/* Topics Container */
+.topics-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.topic-chip {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 8px 16px;
+}
+
+.topic-chip:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.topic-chip .MuiSvgIcon-root {
+  color: #ff6b6b;
+  margin-right: 4px;
+}
+
+/* Enhanced Artifact Cards */
+.discovery-content-card .artifact-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.discovery-content-card .artifact-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.discovery-content-card .artifact-card:hover::before {
+  transform: scaleX(1);
+}
+
+.discovery-content-card .artifact-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+/* Recommendation Score Badge */
+.recommendation-score {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  z-index: 2;
+}
+
+/* Trending Rank Badge */
+.trending-rank {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  z-index: 2;
+}
+
+/* New Badge */
+.new-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  z-index: 2;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Engagement Score Display */
+.engagement-score {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+.engagement-score .MuiSvgIcon-root {
+  color: #ff6b6b;
+  font-size: 1rem;
+}
+
+/* Alert Styling */
+.discovery-content-card .MuiAlert-root {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.discovery-content-card .MuiAlert-icon {
+  color: #667eea;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .discovery-engine {
+    padding: 10px;
+  }
+  
+  .discovery-title {
+    font-size: 1.5rem;
+  }
+  
+  .discovery-tab {
+    min-height: 48px;
+    font-size: 0.9rem;
+  }
+  
+  .discovery-tab .MuiSvgIcon-root {
+    font-size: 1rem;
+  }
+  
+  .creator-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .topics-container {
+    justify-content: center;
+  }
+  
+  .topic-chip {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .discovery-engine {
+    padding: 5px;
+  }
+  
+  .discovery-header-card,
+  .discovery-tabs-card,
+  .discovery-content-card {
+    border-radius: 12px;
+  }
+  
+  .discovery-title {
+    font-size: 1.2rem;
+  }
+  
+  .discovery-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+  }
+  
+  .creator-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+  }
+}
+
+/* Loading Animation */
+.discovery-engine.loading .MuiCircularProgress-root {
+  color: #667eea;
+}
+
+.discovery-engine.loading .MuiTypography-root {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+/* Focus States for Accessibility */
+.discovery-tab:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.creator-card:focus-visible,
+.topic-chip:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .discovery-header-card,
+  .discovery-tabs-card,
+  .discovery-content-card {
+    border: 2px solid #ffffff;
+  }
+  
+  .discovery-tab {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .creator-card,
+  .topic-chip {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .discovery-tab,
+  .creator-card,
+  .topic-chip,
+  .discovery-content-card .artifact-card {
+    transition: none;
+  }
+  
+  .discovery-content-card .artifact-card:hover,
+  .creator-card:hover,
+  .topic-chip:hover {
+    transform: none;
+  }
+  
+  .new-badge {
+    animation: none;
+  }
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  .discovery-tabs-card,
+  .discovery-content-card {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .discovery-engine {
+    display: none;
+  }
+} 

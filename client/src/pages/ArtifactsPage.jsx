@@ -3,25 +3,36 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/shared/Layout';
 import ArtifactCard from '../components/ArtifactCard';
 import ArtifactForm from '../components/ArtifactForm';
+import AdvancedSearch from '../components/AdvancedSearch';
+import DiscoveryEngine from '../components/DiscoveryEngine';
+import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import Button from '../components/shared/Button';
 import { useAuth } from '../context/AuthContext';
 import { fetchArtifacts as apiFetchArtifacts, deleteArtifact, updateArtifact, createArtifact as apiCreateArtifact } from '../api/api';
 import '../styles/ArtifactsPage.css';
+import { Typography } from '@mui/material';
 
 const ArtifactsPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [artifacts, setArtifacts] = useState([]);
+  const [filteredArtifacts, setFilteredArtifacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingArtifact, setEditingArtifact] = useState(null);
-  const [filter, setFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState('browse'); // browse, search, discovery, analytics
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   useEffect(() => {
     fetchArtifacts();
-  }, [filter, sortBy]);
+  }, []);
+
+  // Update filtered artifacts when artifacts change
+  useEffect(() => {
+    setFilteredArtifacts(artifacts);
+  }, [artifacts]);
 
   const fetchArtifacts = async (retryCount = 0) => {
     try {
@@ -30,10 +41,6 @@ const ArtifactsPage = () => {
       
       // Build query parameters
       const queryParams = new URLSearchParams();
-      if (filter !== 'all') {
-        queryParams.append('filter', filter);
-      }
-      queryParams.append('sort', sortBy);
       
       console.log("Fetching artifacts with params:", queryParams.toString());
       
@@ -55,29 +62,11 @@ const ArtifactsPage = () => {
     } catch (err) {
       console.error('Error fetching artifacts:', err);
       
-      // Implement retry logic for network errors (3 retries max)
-      if (retryCount < 3 && (err.message.includes('offline') || err.message.includes('network') || !err.response)) {
-        console.log(`Retrying fetch artifacts (Attempt ${retryCount + 1}/3)...`);
-        setTimeout(() => fetchArtifacts(retryCount + 1), 1500 * (retryCount + 1)); // Exponential backoff
-        return;
-      }
-      
-      setError(`Failed to load artifacts: ${err.message}`);
-      // Don't clear artifacts if we already have some
-      if (artifacts.length === 0) {
-        // Set sample artifacts as fallback so the UI isn't empty
-        setArtifacts([
-          {
-            _id: 'sample1',
-            name: 'Sample Artifact',
-            description: 'This is a sample artifact shown when network is unavailable',
-            content: 'Sample content - real artifacts will appear when connection is restored',
-            location: { x: 0, y: 0 },
-            creator: { username: 'System' },
-            createdAt: new Date().toISOString(),
-            isSample: true
-          }
-        ]);
+      if (retryCount < 3) {
+        console.log(`Retrying fetch (attempt ${retryCount + 1})...`);
+        setTimeout(() => fetchArtifacts(retryCount + 1), 2000 * (retryCount + 1));
+      } else {
+        setError(err.message || 'Failed to load artifacts. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -88,82 +77,20 @@ const ArtifactsPage = () => {
     try {
       setLoading(true);
       setError('');
+
+      const newArtifact = await apiCreateArtifact(formData);
       
-      console.log("Creating artifact with data:", formData);
+      // Add the new artifact to the list
+      setArtifacts(prev => [newArtifact, ...prev]);
       
-      // Handle FormData differently than JSON data
-      let result;
-      
-      if (formData instanceof FormData) {
-        // Create a proper FormData object for file upload
-        const token = localStorage.getItem('token');
-        
-        // Make the API request with FormData
-        const response = await fetch('/api/artifacts', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formData
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || errorData.error || `Error ${response.status}: Failed to create artifact`);
-        }
-        
-        result = await response.json();
-      } else {
-        // Ensure required fields are present and properly formatted
-        if (!formData.name || formData.name.trim().length < 1) {
-          throw new Error('Artifact name is required');
-        }
-        if (!formData.description || formData.description.trim().length < 1) {
-          throw new Error('Artifact description is required');
-        }
-        
-        // Make sure content is set (use description if content is missing)
-        if (!formData.content || formData.content.trim().length < 1) {
-          formData.content = formData.description;
-        }
-        
-        // Make sure area is set
-        if (!formData.area) {
-          formData.area = 'Overworld';
-        }
-        
-        // Ensure location is properly formatted
-        if (!formData.location || typeof formData.location.x === 'undefined' || typeof formData.location.y === 'undefined') {
-          // Generate random coordinates if not provided
-          formData.location = {
-            x: Math.floor(Math.random() * 100),
-            y: Math.floor(Math.random() * 100)
-          };
-        }
-        
-        // Set default values for other required fields
-        formData.exp = formData.exp || 10;
-        formData.visible = formData.visible !== undefined ? formData.visible : true;
-        formData.status = formData.status || 'dropped';
-        formData.type = formData.type || 'artifact';
-        
-        // Use the API function for JSON data
-        result = await apiCreateArtifact(formData);
-      }
-      
-      console.log("Artifact created successfully:", result);
-      
-      // Add the new artifact to state
-      const newArtifact = result.artifact || result;
-      setArtifacts(prevArtifacts => [newArtifact, ...prevArtifacts]);
-      
-      // Close the form
+      // Reset form state
       setShowForm(false);
-      
+
       // Show success message
       alert('Artifact created successfully!');
     } catch (err) {
       console.error('Error creating artifact:', err);
+      setError(err.message || 'Failed to create artifact. Please try again.');
       alert(`Failed to create artifact: ${err.message}`);
     } finally {
       setLoading(false);
@@ -171,10 +98,6 @@ const ArtifactsPage = () => {
   };
 
   const handleUpdateArtifact = async (formData) => {
-    if (!editingArtifact?._id) {
-      throw new Error('No artifact selected for editing');
-    }
-
     try {
       setLoading(true);
       setError('');
@@ -300,6 +223,99 @@ const ArtifactsPage = () => {
     }
   };
 
+  // Handle search results
+  const handleSearchResults = (results) => {
+    setSearchResults(results);
+    setViewMode('search');
+  };
+
+  // Handle search change
+  const handleSearchChange = (searchData) => {
+    setSearchLoading(searchData.loading || false);
+  };
+
+  // Handle artifact selection from discovery
+  const handleArtifactSelect = (artifact) => {
+    // Navigate to artifact details or show in modal
+    console.log('Selected artifact:', artifact);
+  };
+
+  // Render view mode content
+  const renderViewMode = () => {
+    switch (viewMode) {
+      case 'search':
+        return (
+          <div className="search-results">
+            <div className="search-results-header">
+              <Button 
+                onClick={() => setViewMode('browse')}
+                variant="outlined"
+                size="small"
+              >
+                ← Back to Browse
+              </Button>
+              <Typography variant="h6">
+                Search Results ({searchResults.length})
+              </Typography>
+            </div>
+            <div className="artifacts-grid">
+              {searchResults.map((artifact) => (
+                <ArtifactCard
+                  key={artifact._id || artifact.id}
+                  artifact={artifact}
+                  onDelete={handleDeleteArtifact}
+                  onEdit={() => {
+                    setEditingArtifact(artifact);
+                    setShowForm(true);
+                  }}
+                  onVote={() => handleVote(artifact._id)}
+                  onComment={(text) => handleComment(artifact._id, text)}
+                  currentUser={user}
+                />
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'discovery':
+        return (
+          <DiscoveryEngine
+            artifacts={artifacts}
+            onArtifactSelect={handleArtifactSelect}
+            loading={loading}
+          />
+        );
+
+      case 'analytics':
+        return (
+          <AnalyticsDashboard
+            artifacts={artifacts}
+            loading={loading}
+          />
+        );
+
+      default: // browse
+        return (
+          <div className="artifacts-grid">
+            {filteredArtifacts.map((artifact) => (
+              <ArtifactCard
+                key={artifact._id || artifact.id}
+                artifact={artifact}
+                onDelete={handleDeleteArtifact}
+                onEdit={() => {
+                  setEditingArtifact(artifact);
+                  setShowForm(true);
+                }}
+                onVote={() => handleVote(artifact._id)}
+                onComment={(text) => handleComment(artifact._id, text)}
+                currentUser={user}
+              />
+            ))}
+          </div>
+        );
+    }
+  };
+
   return (
     <Layout>
       <div className="artifacts-page">
@@ -319,42 +335,55 @@ const ArtifactsPage = () => {
           </p>
         </div>
 
-        <div className="artifacts-filters">
-          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="all">All Artifacts</option>
-            <option value="mine">My Artifacts</option>
-            <option value="others">Other's Artifacts</option>
-          </select>
-
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="mostVoted">Most Voted</option>
-            <option value="mostCommented">Most Commented</option>
-          </select>
+        {/* View Mode Tabs */}
+        <div className="view-mode-tabs">
+          <Button
+            variant={viewMode === 'browse' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('browse')}
+            startIcon={<span>📚</span>}
+          >
+            Browse
+          </Button>
+          <Button
+            variant={viewMode === 'search' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('search')}
+            startIcon={<span>🔍</span>}
+          >
+            Search
+          </Button>
+          <Button
+            variant={viewMode === 'discovery' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('discovery')}
+            startIcon={<span>🌟</span>}
+          >
+            Discover
+          </Button>
+          <Button
+            variant={viewMode === 'analytics' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('analytics')}
+            startIcon={<span>📊</span>}
+          >
+            Analytics
+          </Button>
         </div>
+
+        {/* Advanced Search Component */}
+        {viewMode === 'search' && (
+          <AdvancedSearch
+            artifacts={artifacts}
+            onSearchResults={handleSearchResults}
+            onSearchChange={handleSearchChange}
+            loading={searchLoading}
+            showAdvanced={true}
+          />
+        )}
 
         {error && <div className="error-message">{error}</div>}
 
         {loading ? (
           <div className="loading">Loading artifacts...</div>
         ) : (
-          <div className="artifacts-grid">
-            {artifacts.map((artifact) => (
-              <ArtifactCard
-                key={artifact._id || artifact.id}
-                artifact={artifact}
-                onDelete={handleDeleteArtifact}
-                onEdit={() => {
-                  setEditingArtifact(artifact);
-                  setShowForm(true);
-                }}
-                onVote={() => handleVote(artifact._id)}
-                onComment={(text) => handleComment(artifact._id, text)}
-                currentUser={user}
-              />
-            ))}
-          </div>
+          renderViewMode()
         )}
 
         {showForm && (

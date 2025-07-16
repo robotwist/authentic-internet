@@ -1,0 +1,432 @@
+/* Advanced Search Styles */
+.advanced-search {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Search Bar Card */
+.search-bar-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  margin-bottom: 20px;
+}
+
+.search-input-container {
+  position: relative;
+}
+
+.search-input {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.search-input .MuiOutlinedInput-root {
+  color: #ffffff;
+}
+
+.search-input .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.search-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.search-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #64b5f6;
+}
+
+.search-input .MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.search-input .MuiInputLabel-root.Mui-focused {
+  color: #64b5f6;
+}
+
+.search-icon {
+  color: rgba(255, 255, 255, 0.7);
+  margin-right: 8px;
+}
+
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-actions .MuiIconButton-root {
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.3s ease;
+}
+
+.search-actions .MuiIconButton-root:hover {
+  color: #64b5f6;
+}
+
+.search-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-stats .MuiTypography-root {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.search-actions .MuiButton-root {
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+  text-transform: none;
+  font-weight: 500;
+}
+
+.search-actions .MuiButton-root:hover {
+  color: #64b5f6;
+  border-color: #64b5f6;
+  background: rgba(100, 181, 246, 0.1);
+}
+
+/* Filters Card */
+.filters-card {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  margin-bottom: 20px;
+}
+
+.filter-section-title {
+  color: #64b5f6;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-section-title .MuiSvgIcon-root {
+  font-size: 1.2rem;
+}
+
+/* Form Controls */
+.filters-card .MuiFormControl-root {
+  margin-bottom: 16px;
+}
+
+.filters-card .MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.filters-card .MuiOutlinedInput-root {
+  color: #ffffff;
+}
+
+.filters-card .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.filters-card .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.filters-card .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #64b5f6;
+}
+
+.filters-card .MuiInputLabel-root.Mui-focused {
+  color: #64b5f6;
+}
+
+.filters-card .MuiSelect-select {
+  color: #ffffff;
+}
+
+.filters-card .MuiSelect-icon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Slider Styles */
+.filters-card .MuiSlider-root {
+  color: #64b5f6;
+}
+
+.filters-card .MuiSlider-track {
+  background: #64b5f6;
+}
+
+.filters-card .MuiSlider-rail {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.filters-card .MuiSlider-thumb {
+  background: #64b5f6;
+  border: 2px solid #ffffff;
+}
+
+.filters-card .MuiSlider-mark {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.filters-card .MuiSlider-markLabel {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Autocomplete Styles */
+.filters-card .MuiAutocomplete-root .MuiOutlinedInput-root {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.filters-card .MuiChip-root {
+  background: rgba(100, 181, 246, 0.2);
+  color: #64b5f6;
+  border: 1px solid rgba(100, 181, 246, 0.3);
+}
+
+.filters-card .MuiChip-deleteIcon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.filters-card .MuiChip-deleteIcon:hover {
+  color: #ff6b6b;
+}
+
+/* Switch Styles */
+.filters-card .MuiSwitch-root {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.filters-card .MuiSwitch-switchBase {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.filters-card .MuiSwitch-switchBase.Mui-checked {
+  color: #64b5f6;
+}
+
+.filters-card .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+  background: rgba(100, 181, 246, 0.5);
+}
+
+.filters-card .MuiFormControlLabel-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+/* Divider */
+.filters-card .MuiDivider-root {
+  background: rgba(255, 255, 255, 0.1);
+  margin: 24px 0;
+}
+
+/* Saved Searches Card */
+.saved-searches-card {
+  background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  margin-bottom: 20px;
+}
+
+.saved-searches-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.saved-searches-list .MuiChip-root {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.saved-searches-list .MuiChip-root:hover {
+  background: rgba(100, 181, 246, 0.2);
+  border-color: #64b5f6;
+  transform: translateY(-2px);
+}
+
+.saved-searches-list .MuiChip-root.active {
+  background: rgba(100, 181, 246, 0.3);
+  border-color: #64b5f6;
+  color: #ffffff;
+}
+
+.saved-searches-list .MuiChip-deleteIcon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.saved-searches-list .MuiChip-deleteIcon:hover {
+  color: #ff6b6b;
+}
+
+/* Search History Card */
+.search-history-card {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  margin-bottom: 20px;
+}
+
+.search-history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.search-history-list .MuiChip-root {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.search-history-list .MuiChip-root:hover {
+  background: rgba(100, 181, 246, 0.1);
+  border-color: rgba(100, 181, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Loading State */
+.search-actions .MuiCircularProgress-root {
+  color: #64b5f6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .advanced-search {
+    padding: 10px;
+  }
+  
+  .search-stats {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .search-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .filters-card .MuiGrid-container {
+    gap: 16px;
+  }
+  
+  .saved-searches-list,
+  .search-history-list {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .advanced-search {
+    padding: 5px;
+  }
+  
+  .search-bar-card,
+  .filters-card,
+  .saved-searches-card,
+  .search-history-card {
+    border-radius: 12px;
+  }
+  
+  .filter-section-title {
+    font-size: 1rem;
+  }
+  
+  .saved-searches-list .MuiChip-root,
+  .search-history-list .MuiChip-root {
+    font-size: 0.7rem;
+  }
+}
+
+/* Animation for filter expansion */
+.filters-card {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus states for accessibility */
+.search-input .MuiOutlinedInput-root:focus-within {
+  box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.3);
+}
+
+.filters-card .MuiOutlinedInput-root:focus-within {
+  box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.3);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .search-bar-card,
+  .filters-card,
+  .saved-searches-card,
+  .search-history-card {
+    border: 2px solid #ffffff;
+  }
+  
+  .search-input .MuiOutlinedInput-notchedOutline,
+  .filters-card .MuiOutlinedInput-notchedOutline {
+    border-color: #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .filters-card,
+  .saved-searches-list .MuiChip-root,
+  .search-history-list .MuiChip-root {
+    animation: none;
+    transition: none;
+  }
+  
+  .saved-searches-list .MuiChip-root:hover,
+  .search-history-list .MuiChip-root:hover {
+    transform: none;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .search-bar-card,
+  .filters-card,
+  .saved-searches-card,
+  .search-history-card {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+}
+
+/* Print styles */
+@media print {
+  .advanced-search {
+    display: none;
+  }
+} 

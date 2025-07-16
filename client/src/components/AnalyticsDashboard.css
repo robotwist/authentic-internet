@@ -1,0 +1,509 @@
+/* Analytics Dashboard Styles */
+.analytics-dashboard {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.analytics-dashboard.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+/* Header Card */
+.dashboard-header-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.dashboard-header-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="analytics-grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23analytics-grain)"/></svg>');
+  opacity: 0.3;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-title-section {
+  flex: 1;
+}
+
+.dashboard-title {
+  color: #ffffff;
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-title .MuiSvgIcon-root {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.dashboard-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.dashboard-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.dashboard-controls .MuiFormControl-root {
+  min-width: 150px;
+}
+
+.dashboard-controls .MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-controls .MuiOutlinedInput-root {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-controls .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dashboard-controls .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dashboard-controls .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #ffffff;
+}
+
+.dashboard-controls .MuiSelect-select {
+  color: #ffffff;
+}
+
+.dashboard-controls .MuiSelect-icon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-controls .MuiButton-root {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+  text-transform: none;
+  font-weight: 600;
+}
+
+.dashboard-controls .MuiButton-root:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dashboard-controls .MuiButton-contained {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.dashboard-controls .MuiButton-contained:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Metrics Grid */
+.metrics-grid {
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.metric-title {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-icon {
+  color: #667eea;
+  font-size: 1.5rem;
+}
+
+.metric-value {
+  color: #ffffff;
+  font-weight: 800;
+  margin-bottom: 8px;
+  font-size: 2.5rem;
+}
+
+.metric-change {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric-change.positive {
+  color: #4caf50;
+}
+
+.metric-change.negative {
+  color: #f44336;
+}
+
+.metric-change .MuiSvgIcon-root {
+  font-size: 1rem;
+}
+
+/* Charts Grid */
+.charts-grid {
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  height: 100%;
+}
+
+.chart-title {
+  color: #667eea;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-title .MuiSvgIcon-root {
+  font-size: 1.2rem;
+}
+
+/* Recharts Customization */
+.recharts-wrapper {
+  font-family: inherit;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: rgba(255, 255, 255, 0.7) !important;
+  font-size: 12px !important;
+}
+
+.recharts-cartesian-axis-line {
+  stroke: rgba(255, 255, 255, 0.2) !important;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+}
+
+.recharts-legend-item-text {
+  fill: rgba(255, 255, 255, 0.8) !important;
+  font-size: 12px !important;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+/* Top Content Card */
+.top-content-card {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+}
+
+.content-item-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  height: 100%;
+}
+
+.content-item-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.content-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.content-item-title {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.3;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.rank-chip {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.7rem;
+  min-width: 32px;
+}
+
+.content-item-type {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+  text-transform: capitalize;
+}
+
+.content-item-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.content-item-stats .MuiTypography-root {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+}
+
+.content-item-score {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 4px 8px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 4px;
+}
+
+/* Loading State */
+.analytics-dashboard.loading .MuiCircularProgress-root {
+  color: #667eea;
+}
+
+.analytics-dashboard.loading .MuiTypography-root {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .dashboard-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .metric-value {
+    font-size: 2rem;
+  }
+  
+  .content-item-stats {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-dashboard {
+    padding: 10px;
+  }
+  
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .dashboard-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .dashboard-controls .MuiFormControl-root {
+    width: 100%;
+  }
+  
+  .metric-value {
+    font-size: 1.8rem;
+  }
+  
+  .chart-card {
+    margin-bottom: 16px;
+  }
+  
+  .content-item-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .rank-chip {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-dashboard {
+    padding: 5px;
+  }
+  
+  .dashboard-header-card,
+  .metric-card,
+  .chart-card,
+  .top-content-card {
+    border-radius: 12px;
+  }
+  
+  .dashboard-title {
+    font-size: 1.2rem;
+  }
+  
+  .metric-value {
+    font-size: 1.5rem;
+  }
+  
+  .chart-title {
+    font-size: 1rem;
+  }
+  
+  .content-item-title {
+    font-size: 0.9rem;
+  }
+}
+
+/* Focus States for Accessibility */
+.metric-card:focus-visible,
+.content-item-card:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.dashboard-controls .MuiButton-root:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .dashboard-header-card,
+  .metric-card,
+  .chart-card,
+  .top-content-card {
+    border: 2px solid #ffffff;
+  }
+  
+  .dashboard-controls .MuiOutlinedInput-notchedOutline {
+    border-color: #ffffff;
+  }
+  
+  .metric-card,
+  .content-item-card {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .metric-card,
+  .content-item-card {
+    transition: none;
+  }
+  
+  .metric-card:hover,
+  .content-item-card:hover {
+    transform: none;
+  }
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  .chart-card,
+  .top-content-card {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .analytics-dashboard {
+    display: none;
+  }
+}
+
+/* Custom Scrollbar for Charts */
+.recharts-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.recharts-wrapper::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.recharts-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+  border-radius: 4px;
+}
+
+.recharts-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.7);
+} 
