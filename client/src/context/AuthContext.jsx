@@ -49,7 +49,7 @@ const storeAuthData = (data) => {
 };
 
 // Create the Auth Context
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 // Action types
 const AUTH_ACTIONS = {
