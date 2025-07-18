@@ -259,93 +259,18 @@ const GameWorld = () => {
           ],
           properties: {
             shadowAffinity: 15,
-            stealthBonus: 8,
+            stealthMastery: 8,
             element: "shadow"
           },
           userModifiable: {
             description: true,
             content: true,
-            properties: ["shadowAffinity", "stealthBonus", "element"]
+            properties: ["shadowAffinity", "stealthMastery", "element"]
           },
           createdBy: "system",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          tags: ["medallion", "shadow", "realm", "level2"],
-          rating: 0,
-          reviews: [],
-          remixOf: null
-        },
-        level3: {
-          id: `level3-crystal-${Date.now()}`,
-          name: "Terminal Void Crystal",
-          description: "A geometric crystal that hums with terminal energy and digital wisdom",
-          type: "CRYSTAL",
-          content: "This crystal contains the essence of the terminal void, with lines of code flowing through its facets like liquid light.",
-          media: ["/assets/artifacts/terminal_void_crystal.png"],
-          location: { x: 0, y: 0, mapName: "level-completion" },
-          exp: 35,
-          visible: true,
-          area: "level-completion",
-          interactions: [
-            {
-              type: "REVEAL",
-              condition: "Level 3 completion",
-              revealedContent: "The crystal grants you terminal wisdom...",
-              action: "Unlock terminal powers"
-            }
-          ],
-          properties: {
-            terminalWisdom: 20,
-            codeMastery: 12,
-            element: "digital"
-          },
-          userModifiable: {
-            description: true,
-            content: true,
-            properties: ["terminalWisdom", "codeMastery", "element"]
-          },
-          createdBy: "system",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tags: ["crystal", "terminal", "void", "level3"],
-          rating: 0,
-          reviews: [],
-          remixOf: null
-        },
-        level4: {
-          id: `level4-crown-${Date.now()}`,
-          name: "Hemingway's Challenge Crown",
-          description: "A crown forged from the courage and clarity of Hemingway's literary challenge",
-          type: "CROWN",
-          content: "This crown represents the ultimate test of courage and writing prowess. It carries the weight of Hemingway's legacy and the power of clear, honest expression.",
-          media: ["/assets/artifacts/hemingway_challenge_crown.png"],
-          location: { x: 0, y: 0, mapName: "level-completion" },
-          exp: 50,
-          visible: true,
-          area: "level-completion",
-          interactions: [
-            {
-              type: "REVEAL",
-              condition: "Level 4 completion",
-              revealedContent: "The crown grants you Hemingway's courage...",
-              action: "Unlock literary powers"
-            }
-          ],
-          properties: {
-            courage: 25,
-            writingMastery: 20,
-            graceUnderPressure: 15,
-            element: "wisdom"
-          },
-          userModifiable: {
-            description: true,
-            content: true,
-            properties: ["courage", "writingMastery", "graceUnderPressure", "element"]
-          },
-          createdBy: "system",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tags: ["crown", "hemingway", "challenge", "level4"],
+          tags: ["medallion", "shadow", "stealth", "level2"],
           rating: 0,
           reviews: [],
           remixOf: null
@@ -355,101 +280,30 @@ const GameWorld = () => {
       const artifactData = levelArtifacts[level];
       if (artifactData) {
         try {
-          const newArtifact = await createArtifact(artifactData);
-          
-          // Add to local artifacts array
-          setArtifacts(prev => [...prev, newArtifact]);
-          
-          // Add to inventory
-          setInventory(prev => [...prev, newArtifact]);
-          
-          console.log(`🎖️ Created level completion artifact: ${artifactData.name}`);
+          await createArtifact(artifactData);
+          console.log(`✅ Level ${level} completion artifact created`);
         } catch (error) {
-          console.error("Error creating level completion artifact:", error);
+          console.error(`❌ Failed to create level ${level} completion artifact:`, error);
         }
       }
     };
     
-    // Create the artifact
     createLevelArtifact();
+  }, [levelCompletion]);
+
+  // Handle NPC click - moved here to avoid temporal dead zone
+  const handleNPCClick = useCallback((npc) => {
+    console.log("NPC clicked:", npc.name);
+    setActiveNPC(npc);
+    setShowNPCDialog(true);
     
-    let message = '';
-    switch(level) {
-      case 'level1':
-        message = 'Congratulations! You have completed Level 1 - The Digital Wilderness! You have earned the Digital Wilderness Trophy!';
-        // Show the NKD Man Extension reward after the win notification closes
-        setTimeout(() => {
-          // Check if we've already shown this reward by checking localStorage
-          const rewardShown = localStorage.getItem('nkd-man-reward-shown');
-          if (!rewardShown) {
-            setCurrentAchievement('level1');
-            setShowRewardModal(true);
-            try {
-              // Mark this reward as shown so we don't show it again
-              localStorage.setItem('nkd-man-reward-shown', 'true');
-            } catch (error) {
-              console.error("Error saving reward state to localStorage:", error);
-            }
-          }
-        }, 5500); // Wait slightly longer than the win notification
-        break;
-      case 'level2':
-        message = 'Magnificent! You have completed Level 2 - The Realm of Shadows! You have earned the Shadow Realm Medallion!';
-        break;
-      case 'level3':
-        message = 'Extraordinary! You have completed Level 3 - The Terminal Void! You have earned the Terminal Void Crystal!';
-        setTimeout(() => {
-          const goToLevel4 = window.confirm('You have unlocked Level 4: The Hemingway Challenge! Ready to enter?');
-          if (goToLevel4) {
-            // Play random portal sound with higher chance of toilet flush for special portal
-            if (soundManager) {
-              if (Math.random() < 0.6) {
-                soundManager.playSound('toilet_flush', 0.5);
-              } else {
-                soundManager.playSound('portal', 0.5);
-              }
-            }
-            setShowLevel4(true);
-          }
-        }, 3000);
-        break;
-      case 'level4':
-        message = 'Amazing! You have completed Level 4 - The Hemingway Challenge! You have earned Hemingway\'s Challenge Crown!';
-        break;
-      default:
-        message = 'Level completed!';
+    // Play interaction sound if available
+    if (soundManager) {
+      soundManager.playSound('interact');
     }
     
-    // Play level complete sound
-    if (soundManager) soundManager.playSound('level_complete');
-    
-    // Using awardXP instead of the undefined handleGainExperience
-    awardXP(level === 'level3' ? 20 : level === 'level4' ? 30 : 10, `Completed ${level}`);
-    
-    setWinMessage(message);
-    setShowWinNotification(true);
-    
-    setTimeout(() => {
-      setShowWinNotification(false);
-    }, 5000);
-  }, [levelCompletion, soundManager, awardXP, setCurrentAchievement, setShowRewardModal, setWinMessage, setShowWinNotification, setShowLevel4, createArtifact, setArtifacts, setInventory]);
-
-  // Handler for Level 4 completion
-  const handleLevel4Complete = useCallback((score) => {
-    handleLevelCompletion('level4');
-    setShowLevel4(false);
-    
-    const bonusExp = Math.floor(score / 100);
-    if (bonusExp > 0) {
-      awardXP(bonusExp, `Level 4 Score: ${score}`);
-      alert(`You earned ${bonusExp} bonus experience points from your score!`);
-    }
-  }, [handleLevelCompletion, setShowLevel4, awardXP]);
-
-  // Handler for Level 4 exit
-  const handleLevel4Exit = useCallback(() => {
-    setShowLevel4(false);
-  }, [setShowLevel4]);
+    return true; // Interaction happened
+  }, [soundManager]);
 
   useEffect(() => {
     // Check if MAPS is correctly loaded
@@ -1809,20 +1663,6 @@ const GameWorld = () => {
     artifact.location.mapName === MAPS[currentMapIndex].name
   );
   
-  // Handle NPC click from the Map component
-  const handleNPCClick = useCallback((npc) => {
-    console.log("NPC clicked:", npc.name);
-    setActiveNPC(npc);
-    setShowNPCDialog(true);
-    
-    // Play interaction sound if available
-    if (soundManager) {
-      soundManager.playSound('interact');
-    }
-    
-    return true; // Interaction happened
-  }, [soundManager, setActiveNPC, setShowNPCDialog]);
-
   // Show a notification when player steps on a portal
   const showPortalNotification = (title, message) => {
     // Create the notification element if it doesn't exist
