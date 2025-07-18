@@ -5,6 +5,7 @@ import User from "../models/User.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 
 const router = express.Router();
 
@@ -200,7 +201,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
 });
 
 // Get user's game state
-router.get('/game-state', authenticateToken, async (req, res) => {
+router.get('/game-state', authenticateToken, gameStateReadLimiter, async (req, res) => {
   try {
     const userId = req.user.id;
     
@@ -219,7 +220,7 @@ router.get('/game-state', authenticateToken, async (req, res) => {
 });
 
 // Update user's game state
-router.put('/game-state', authenticateToken, async (req, res) => {
+router.put('/game-state', authenticateToken, gameStateWriteLimiter, async (req, res) => {
   try {
     const userId = req.user.id;
     const gameState = req.body;

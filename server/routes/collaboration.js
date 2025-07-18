@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticateToken } from '../middleware/auth.js';
+import authenticateToken from '../middleware/authMiddleware.js';
 import Collaboration from '../models/Collaboration.js';
 import Artifact from '../models/Artifact.js';
 import User from '../models/User.js';

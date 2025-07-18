@@ -11,10 +11,10 @@ const artifacts = [
     type: "WEAPON",
     content: "This ancient blade bears the marks of countless battles. Its steel has been tempered by time and its edge sharpened by history. The hilt is adorned with mysterious runes that seem to glow faintly in the presence of worthy warriors.",
     media: ["/assets/ancient_sword.png"],
-    location: { x: 3, y: 2, mapName: "Overworld" },
+    location: { x: 3, y: 2, mapName: "overworld" },
     exp: 10,
     visible: true,
-    area: "Overworld",
+    area: "overworld",
     interactions: [
       {
         type: "SOLVE",
@@ -42,13 +42,13 @@ const artifacts = [
     id: "mystic-orb",
     name: "Mystic Orb",
     description: "A mysterious orb",
-    type: "MAGIC",
+    type: "artifact",
     content: "This is a mystic orb.",
     media: ["/assets/mystic_orb.png"],
-    location: { x: 7, y: 5, mapName: "Overworld" },
+    location: { x: 7, y: 5, mapName: "overworld" },
     exp: 15,
     visible: true,
-    area: "Overworld",
+    area: "overworld",
     interactions: [
       {
         type: "SOLVE",
@@ -79,10 +79,10 @@ const artifacts = [
     type: "TREASURE",
     content: "This is a golden idol.",
     media: ["/assets/golden_idol.png"],
-    location: { x: 4, y: 6, mapName: "Desert" },
+    location: { x: 4, y: 6, mapName: "desert" },
     exp: 20,
     visible: true,
-    area: "Desert",
+    area: "desert",
     interactions: [
       {
         type: "SOLVE",
@@ -110,13 +110,13 @@ const artifacts = [
     id: "dungeon-key",
     name: "Dungeon Key",
     description: "A key to the dungeon",
-    type: "KEY",
+    type: "TOOL",
     content: "This is a dungeon key.",
     media: ["/assets/dungeon_key.png"],
-    location: { x: 5, y: 5, mapName: "Dungeon" },
+    location: { x: 5, y: 5, mapName: "dungeon" },
     exp: 25,
     visible: true,
-    area: "Dungeon",
+    area: "dungeon",
     interactions: [
       {
         type: "SOLVE",
@@ -144,13 +144,13 @@ const artifacts = [
     id: "enchanted-mirror",
     name: "Enchanted Mirror",
     description: "A silver mirror that whispers secrets.",
-    type: "ARTIFACT",
+    type: "artifact",
     content: "Gazing into the mirror reveals glimpses of forgotten memories.",
     media: ["/assets/enchanted_mirror.png"],
-    location: { x: 8, y: 3, mapName: "Overworld" },
+    location: { x: 8, y: 3, mapName: "overworld" },
     exp: 30,
     visible: true,
-    area: "Overworld",
+    area: "overworld",
     interactions: [
       {
         type: "SOLVE",

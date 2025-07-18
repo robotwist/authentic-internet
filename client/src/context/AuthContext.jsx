@@ -207,14 +207,41 @@ export const AuthProvider = ({ children }) => {
     clearRefreshTimeout();
     
     const timeUntilExpiry = calculateTimeUntilExpiry(token);
-    if (timeUntilExpiry <= 0) return;
+    if (timeUntilExpiry <= 0) {
+      console.log('Token already expired, attempting immediate refresh');
+      refreshToken(true);
+      return;
+    }
     
+    // Calculate exact refresh time using Date.now() instead of setTimeout duration
     const refreshTime = Math.max(1000, timeUntilExpiry - TOKEN_REFRESH_BUFFER_MS);
-    console.log(`Scheduling token refresh in ${Math.floor(refreshTime / 1000 / 60)} minutes`);
+    const refreshTimestamp = Date.now() + refreshTime;
+    
+    console.log(`Scheduling token refresh at ${new Date(refreshTimestamp).toISOString()} (in ${Math.floor(refreshTime / 1000 / 60)} minutes)`);
+    
+    // Store the target refresh timestamp for verification
+    localStorage.setItem('tokenRefreshTimestamp', refreshTimestamp.toString());
     
     refreshTimeoutRef.current = setTimeout(async () => {
       console.log('Auto refreshing token...');
-      await refreshToken(true);
+      
+      // Verify we're still on schedule (device might have been asleep)
+      const storedTimestamp = localStorage.getItem('tokenRefreshTimestamp');
+      const currentTime = Date.now();
+      const scheduledTime = storedTimestamp ? parseInt(storedTimestamp) : 0;
+      
+      // If we're more than 5 minutes off schedule, log a warning
+      if (Math.abs(currentTime - scheduledTime) > 5 * 60 * 1000) {
+        console.warn('Token refresh significantly off schedule - device may have been asleep');
+      }
+      
+      const success = await refreshToken(true);
+      
+      if (!success) {
+        console.error('Automatic token refresh failed, will retry in 1 minute');
+        // Retry in 1 minute if refresh failed
+        setTimeout(() => refreshToken(true), 60 * 1000);
+      }
     }, refreshTime);
   };
   
@@ -413,8 +440,9 @@ export const AuthProvider = ({ children }) => {
         
         const timeUntilExpiry = calculateTimeUntilExpiry(storedToken);
         
+        // Check if token is expired or expiring soon
         if (timeUntilExpiry <= TOKEN_REFRESH_BUFFER_MS) {
-          console.log('Token expired or expiring soon, attempting refresh');
+          console.log(`Token expired or expiring soon (${Math.floor(timeUntilExpiry / 1000)}s remaining), attempting refresh`);
           
           if (storedRefreshToken) {
             const refreshSuccessful = await refreshToken(true);
@@ -426,17 +454,22 @@ export const AuthProvider = ({ children }) => {
               return;
             }
           } else {
-            console.log('No refresh token available');
+            console.log('No refresh token available, clearing auth data');
             clearStoredAuthData();
             dispatch({ type: AUTH_ACTIONS.INIT_AUTH, payload: { user: null, isAuthenticated: false } });
             return;
           }
         } else {
+          // Token is still valid, schedule refresh
+          console.log(`Token valid for ${Math.floor(timeUntilExpiry / 1000 / 60)} minutes, scheduling refresh`);
           scheduleTokenRefresh(storedToken);
         }
         
+        // Set up axios interceptors for the current token
+        setupAxiosInterceptors(storedToken);
+        
         dispatch({ type: AUTH_ACTIONS.INIT_AUTH, payload: { user: parsedUser, isAuthenticated: true } });
-        console.log('Auth initialized from storage');
+        console.log('Auth initialized from storage successfully');
       } catch (error) {
         console.error('Error initializing auth:', error);
         logPersistentError('AuthContext - initializeAuth', error);

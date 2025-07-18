@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator';
 import { register, login, verifyToken, logout, refreshToken, getUserGameState, updateGameState, requestPasswordReset, resetPassword, verifyEmail } from '../controllers/authController.js';
 import { auth } from '../middleware/auth.js';
 import { PASSWORD_REQUIREMENTS, getPasswordRequirementsText } from '../utils/validation.js';
-import { authLimiter, passwordResetLimiter } from '../utils/rateLimiting.js';
+import { authLimiter, passwordResetLimiter, gameStateReadLimiter, gameStateWriteLimiter } from '../utils/rateLimiting.js';
 import { validateResetToken } from "../controllers/passwordResetController.js";
 import { sendVerificationEmail } from "../controllers/emailVerificationController.js";
 
@@ -162,7 +162,7 @@ router.post('/logout', auth, async (req, res) => {
 });
 
 // Get user game state route
-router.get('/game-state', auth, async (req, res) => {
+router.get('/game-state', auth, gameStateReadLimiter, async (req, res) => {
   try {
     await getUserGameState(req, res);
   } catch (error) {
@@ -175,7 +175,7 @@ router.get('/game-state', auth, async (req, res) => {
 });
 
 // Update user game state route
-router.post('/game-state', auth, async (req, res) => {
+router.post('/game-state', auth, gameStateWriteLimiter, async (req, res) => {
   try {
     await updateGameState(req, res);
   } catch (error) {

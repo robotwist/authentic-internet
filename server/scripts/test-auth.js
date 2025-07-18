@@ -27,35 +27,61 @@ const loadEnvConfig = () => {
   // Try loading from .env file in current directory
   if (fs.existsSync(resolve(__dirname, '../.env'))) {
     dotenv.config({ path: resolve(__dirname, '../.env') });
-    console.log('Loaded environment from ../env');
+    console.log('✅ Loaded environment from ../.env');
   }
   // Try loading from .env file in parent directory
   else if (fs.existsSync(resolve(__dirname, '../../.env'))) {
     dotenv.config({ path: resolve(__dirname, '../../.env') });
-    console.log('Loaded environment from ../../.env');
+    console.log('✅ Loaded environment from ../../.env');
   }
   else {
-    console.log('No .env file found, using defaults');
+    console.log('⚠️ No .env file found, using defaults');
     dotenv.config();
   }
 
-  // Set fallback values for testing if not in environment
-  if (!process.env.MONGODB_URI) {
-    console.warn('⚠️ MONGODB_URI not found in environment variables. Using fallback for testing.');
-    process.env.MONGODB_URI = 'mongodb://localhost:27017/auth_test';
-  }
+  // Set comprehensive fallback values for testing if not in environment
+  const fallbackValues = {
+    MONGODB_URI: 'mongodb://localhost:27017/auth_test',
+    JWT_SECRET: 'test_jwt_secret_do_not_use_in_production_very_long_key_for_testing',
+    JWT_EXPIRES_IN: '24h',
+    REFRESH_TOKEN_EXPIRES_IN: '7d',
+    SALT_ROUNDS: '10',
+    PORT: '5001',
+    NODE_ENV: 'test',
+    CLIENT_URL: 'http://localhost:5173',
+    COOKIE_SECRET: 'test_cookie_secret_do_not_use_in_production'
+  };
 
-  if (!process.env.JWT_SECRET) {
-    console.warn('⚠️ JWT_SECRET not found in environment variables. Using fallback for testing.');
-    process.env.JWT_SECRET = 'test_jwt_secret_do_not_use_in_production';
-  }
+  let missingVars = [];
+  
+  // Check and set fallback values for each required variable
+  Object.entries(fallbackValues).forEach(([key, fallbackValue]) => {
+    if (!process.env[key]) {
+      console.warn(`⚠️ ${key} not found in environment variables. Using fallback for testing.`);
+      process.env[key] = fallbackValue;
+      missingVars.push(key);
+    }
+  });
 
   // Log status of critical environment variables
-  console.log('Environment configuration:');
-  console.log(`- MONGODB_URI: ${process.env.MONGODB_URI ? '✓ Set' : '✗ Missing'}`);
-  console.log(`- JWT_SECRET: ${process.env.JWT_SECRET ? '✓ Set' : '✗ Missing'}`);
+  console.log('\n📋 Environment configuration:');
+  console.log('=======================================');
+  console.log(`- MONGODB_URI: ${process.env.MONGODB_URI ? '✅ Set' : '❌ Missing'}`);
+  console.log(`- JWT_SECRET: ${process.env.JWT_SECRET ? '✅ Set' : '❌ Missing'}`);
   console.log(`- JWT_EXPIRES_IN: ${process.env.JWT_EXPIRES_IN || '24h (default)'}`);
   console.log(`- REFRESH_TOKEN_EXPIRES_IN: ${process.env.REFRESH_TOKEN_EXPIRES_IN || '7d (default)'}`);
+  console.log(`- SALT_ROUNDS: ${process.env.SALT_ROUNDS || '10 (default)'}`);
+  console.log(`- NODE_ENV: ${process.env.NODE_ENV || 'test (default)'}`);
+  console.log(`- PORT: ${process.env.PORT || '5001 (default)'}`);
+  
+  if (missingVars.length > 0) {
+    console.log(`\n⚠️ Using fallback values for: ${missingVars.join(', ')}`);
+    console.log('💡 For production, ensure all environment variables are properly set.');
+  } else {
+    console.log('\n✅ All environment variables are properly configured');
+  }
+  
+  console.log('=======================================\n');
 };
 
 // Load env configuration before proceeding

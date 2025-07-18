@@ -18,13 +18,13 @@ export default defineConfig({
     hmr: {
       protocol: 'ws',
       host: 'localhost',
-      port: 5174, // Use a different port for HMR to avoid conflicts
+      port: 5175, // Use the same port as the server to avoid conflicts
       overlay: false, // Disable overlay to prevent intrusive error reporting
       timeout: 120000 // Increase HMR timeout to 120 seconds for more stability
     },
     host: 'localhost',
-    port: 5173,
-    strictPort: false, // Allow fallback to another port if 5173 is in use
+    port: 5175,
+    strictPort: false, // Allow fallback to another port if 5175 is in use
     cors: true,
     watch: {
       usePolling: true, // Enable polling for more reliable file watching

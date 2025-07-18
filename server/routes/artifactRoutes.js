@@ -147,9 +147,6 @@ router.post("/",
       const newArtifact = new Artifact(artifactData);
       await newArtifact.save();
 
-      // Populate creator information
-      await newArtifact.populate('creator', 'username email');
-
       res.status(201).json({ 
         success: true,
         message: "Artifact created successfully!", 
@@ -184,7 +181,6 @@ router.get("/", ensureUnifiedResponse, async (req, res) => {
     }
 
     const artifacts = await Artifact.find(filter)
-      .populate('creator', 'username email')
       .populate('comments.user', 'username')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
@@ -262,8 +258,7 @@ router.get("/:id", ensureUnifiedResponse, async (req, res) => {
         { _id: req.params.id.match(/^[0-9a-fA-F]{24}$/) ? req.params.id : null },
         { id: req.params.id }
       ]
-    }).populate('creator', 'username email')
-      .populate('comments.user', 'username');
+    }).populate('comments.user', 'username');
 
     if (!artifact) {
       return res.status(404).json({ 

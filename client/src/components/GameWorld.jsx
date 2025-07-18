@@ -38,6 +38,7 @@ import AchievementNotification from './AchievementNotification';
 import Level3Terminal from './Level3Terminal';
 import Level4Shooter from './Level4Shooter';
 import HemingwayChallenge from './HemingwayChallenge';
+import NPCInteraction from './NPCs/NPCInteraction';
 import { useAuth } from '../context/AuthContext';
 import { useAchievements } from '../context/AchievementContext';
 import { useGameState } from '../context/GameStateContext';
@@ -592,12 +593,42 @@ const GameWorld = () => {
         return;
       }
       
-      // Toggle world map with 'M' key
+      // Handle NPC interaction with 't' key
+      if (event.key === 't' || event.key === 'T') {
+        event.preventDefault();
+        console.log("Key 'T' pressed, attempting NPC interaction");
+        
+        // Find nearby NPCs
+        const currentMap = MAPS[currentMapIndex];
+        if (currentMap && currentMap.npcs) {
+          const nearbyNPC = currentMap.npcs.find(npc => {
+            if (!npc || !npc.position) return false;
+            
+            const distance = Math.sqrt(
+              Math.pow(characterPosition.x - npc.position.x * TILE_SIZE, 2) + 
+              Math.pow(characterPosition.y - npc.position.y * TILE_SIZE, 2)
+            );
+            
+            // NPC is nearby if within 2 tiles
+            return distance <= TILE_SIZE * 2;
+          });
+          
+          if (nearbyNPC) {
+            console.log("Found nearby NPC:", nearbyNPC.name);
+            handleNPCClick(nearbyNPC);
+          } else {
+            console.log("No NPCs nearby");
+          }
+        }
+        return;
+      }
+      
+      // Toggle world map with 'm' key
       if (event.key === 'm' || event.key === 'M') {
         setShowWorldMap(prev => !prev);
       }
 
-      // Toggle feedback form with 'F' key
+      // Toggle feedback form with 'f' key
       if (event.key === 'f' || event.key === 'F') {
         setShowFeedback(prev => !prev);
       }
@@ -640,7 +671,7 @@ const GameWorld = () => {
       window.removeEventListener('showQuotes', handleShowQuotes);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleShowInventory, handleShowQuotes, handleLevelCompletion, character, artifacts]);
+  }, [handleShowInventory, handleShowQuotes, handleLevelCompletion, character, artifacts, handleNPCClick, characterPosition, currentMapIndex]);
 
   useEffect(() => {
     // Initialize sound manager
@@ -1952,6 +1983,22 @@ const GameWorld = () => {
           />      
         )}
 
+        {/* NPC Interaction Dialog */}
+        {showNPCDialog && activeNPC && (
+          <NPCInteraction
+            npc={activeNPC}
+            onClose={() => {
+              setShowNPCDialog(false);
+              setActiveNPC(null);
+            }}
+            context={{
+              area: MAPS[currentMapIndex]?.name || 'Unknown',
+              weather: 'sunny', // Could be enhanced with real weather
+              timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'
+            }}
+          />
+        )}
+
         {/* Feedback button */}
         <div className="feedback-button" onClick={() => setShowFeedback(true)}>
           <span role="img" aria-label="Feedback">💬</span>
@@ -1959,9 +2006,9 @@ const GameWorld = () => {
         </div>
 
         {/* Map key hint - only shown when there's no other overlay */}
-        {!showInventory && !showForm && !showQuotes && !showWorldMap && !showWinNotification && !showRewardModal && !showLevel4 && !showFeedback && (
+        {!showInventory && !showForm && !showQuotes && !showWorldMap && !showWinNotification && !showRewardModal && !showLevel4 && !showFeedback && !showNPCDialog && (
           <div className="map-key-hint">
-            Press 'M' to view World Map | Press 'F' for Feedback
+            PressM to view World Map | Press Fr Feedback | Press T to talk to NPCs
           </div>
         )}
 

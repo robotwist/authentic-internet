@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import auth from '../middleware/authMiddleware.js';
+import Artifact from '../models/Artifact.js';
+import User from '../models/User.js';
+
 const router = express.Router();
-const auth = require('../middleware/auth');
-const Artifact = require('../models/Artifact');
-const User = require('../models/User');
 
 /**
  * Recommendation Engine API
@@ -846,4 +847,4 @@ const calculateRecommendationAccuracy = (userData) => {
   return positiveFeedback / feedbackInteractions.length;
 };
 
-module.exports = router; 
+export default router; 
