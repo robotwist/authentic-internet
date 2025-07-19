@@ -626,11 +626,9 @@ UserSchema.pre('save', function(next) {
 });
 
 // Create indexes for frequently queried fields
-// Remove the username and email indexes since they're already defined with unique: true
+// Indexes for performance optimization
 UserSchema.index({ 'gameState.currentQuest': 1 });
 UserSchema.index({ level: -1 }); // For leaderboards
-UserSchema.index({ username: 1 });
-UserSchema.index({ email: 1 });
 UserSchema.index({ level: -1, experience: -1 });
 UserSchema.index({ 'creatorStats.averageRating': -1, 'creatorStats.totalRatings': -1 });
 UserSchema.index({ followers: 1 });
