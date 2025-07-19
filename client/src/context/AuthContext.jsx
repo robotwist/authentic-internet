@@ -413,7 +413,16 @@ export const AuthProvider = ({ children }) => {
   const clearMessages = () => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_MESSAGES });
   };
-  
+
+  // Update user data
+  const updateUser = (updatedUser) => {
+    // Update local storage
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Update state
+    dispatch({ type: AUTH_ACTIONS.SET_USER, payload: updatedUser });
+  };
+
   // Initialize auth
   useEffect(() => {
     const initializeAuth = async () => {
@@ -501,6 +510,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     refreshToken,
     clearMessages,
+    updateUser,
     getTimeUntilExpiry: calculateTimeUntilExpiry
   };
   
