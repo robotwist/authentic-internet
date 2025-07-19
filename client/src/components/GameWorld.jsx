@@ -106,6 +106,7 @@ const GameWorld = () => {
   const gameWorldRef = useRef(null);
   const characterRef = useRef(null);
   const [portalNotificationActive, setPortalNotificationActive] = useState(false);
+  const [databaseNPCs, setDatabaseNPCs] = useState([]);
   
   // Update checkForLevelUpAchievements to use our context
   const checkForLevelUpAchievements = useCallback((experience) => {
@@ -338,6 +339,26 @@ const GameWorld = () => {
           // Don't reset artifacts array if there's an error to prevent constant refetching
         });
     }
+
+    // Fetch NPCs from database
+    const fetchNPCs = async () => {
+      try {
+        console.log("👥 Loading NPCs from server...");
+        const response = await fetch('/api/npcs');
+        const data = await response.json();
+        
+        if (data.success) {
+          console.log("👥 Loaded NPCs:", data.npcs.length);
+          setDatabaseNPCs(data.npcs);
+        } else {
+          console.error("❌ Error fetching NPCs:", data.message);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching NPCs:", error);
+      }
+    };
+
+    fetchNPCs();
   }, []); // Empty dependency array - only fetch artifacts once on mount
 
   useEffect(() => {
@@ -452,27 +473,25 @@ const GameWorld = () => {
         event.preventDefault();
         console.log("Key 'T' pressed, attempting NPC interaction");
         
-        // Find nearby NPCs
-        const currentMap = MAPS[currentMapIndex];
-        if (currentMap && currentMap.npcs) {
-          const nearbyNPC = currentMap.npcs.find(npc => {
-            if (!npc || !npc.position) return false;
-            
-            const distance = Math.sqrt(
-              Math.pow(characterPosition.x - npc.position.x * TILE_SIZE, 2) + 
-              Math.pow(characterPosition.y - npc.position.y * TILE_SIZE, 2)
-            );
-            
-            // NPC is nearby if within 2 tiles
-            return distance <= TILE_SIZE * 2;
-          });
+        // Find nearby NPCs from database
+        const currentMapName = MAPS[currentMapIndex]?.name || 'Unknown';
+        const nearbyNPC = databaseNPCs.find(npc => {
+          if (!npc || !npc.position || npc.area !== currentMapName) return false;
           
-          if (nearbyNPC) {
-            console.log("Found nearby NPC:", nearbyNPC.name);
-            handleNPCClick(nearbyNPC);
-          } else {
-            console.log("No NPCs nearby");
-          }
+          const distance = Math.sqrt(
+            Math.pow(characterPosition.x - npc.position.x * TILE_SIZE, 2) + 
+            Math.pow(characterPosition.y - npc.position.y * TILE_SIZE, 2)
+          );
+          
+          // NPC is nearby if within 2 tiles
+          return distance <= TILE_SIZE * 2;
+        });
+        
+        if (nearbyNPC) {
+          console.log("Found nearby NPC:", nearbyNPC.name, "ID:", nearbyNPC._id);
+          handleNPCClick(nearbyNPC);
+        } else {
+          console.log("No NPCs nearby in", currentMapName);
         }
         return;
       }
@@ -525,7 +544,7 @@ const GameWorld = () => {
       window.removeEventListener('showQuotes', handleShowQuotes);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleShowInventory, handleShowQuotes, handleLevelCompletion, character, artifacts, handleNPCClick, characterPosition, currentMapIndex]);
+  }, [handleShowInventory, handleShowQuotes, handleLevelCompletion, character, artifacts, handleNPCClick, characterPosition, currentMapIndex, databaseNPCs]);
 
   useEffect(() => {
     // Initialize sound manager
