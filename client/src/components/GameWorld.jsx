@@ -1675,13 +1675,65 @@ const GameWorld = () => {
   };
 
   // Calculate artifacts to show based on current map
-  const artifactsToShow = artifacts.filter(artifact => 
-    artifact.location && 
-    Array.isArray(MAPS) && 
-    MAPS[currentMapIndex] && 
-    artifact.location.mapName === MAPS[currentMapIndex].name
-  );
+  const artifactsToShow = artifacts.filter(artifact => {
+    if (!artifact.location || !Array.isArray(MAPS) || !MAPS[currentMapIndex]) {
+      return false;
+    }
+    
+    const currentMapName = MAPS[currentMapIndex].name;
+    const artifactMapName = artifact.location.mapName;
+    
+    // Debug logging
+    console.log(`🔍 Checking artifact: ${artifact.name} (mapName: ${artifactMapName}) vs current map: ${currentMapName}`);
+    
+    // Handle different naming conventions between MAPS and database
+    if (artifactMapName === currentMapName) {
+      console.log(`✅ Exact match for ${artifact.name}`);
+      return true;
+    }
+    
+    // Handle case-insensitive matching
+    if (artifactMapName.toLowerCase() === currentMapName.toLowerCase()) {
+      console.log(`✅ Case-insensitive match for ${artifact.name}`);
+      return true;
+    }
+    
+    // Handle specific mappings
+    const mapMappings = {
+      'overworld': 'Overworld',
+      'desert': 'Desert 1',
+      'dungeon': 'Dungeon Level 1'
+    };
+    
+    if (mapMappings[artifactMapName] === currentMapName) {
+      console.log(`✅ Mapped match for ${artifact.name}`);
+      return true;
+    }
+    
+    // Handle reverse mappings
+    const reverseMappings = {
+      'Overworld': 'overworld',
+      'Desert 1': 'desert',
+      'Dungeon Level 1': 'dungeon'
+    };
+    
+    if (reverseMappings[currentMapName] === artifactMapName) {
+      console.log(`✅ Reverse mapped match for ${artifact.name}`);
+      return true;
+    }
+    
+    console.log(`❌ No match for ${artifact.name}`);
+    return false;
+  });
   
+  // Debug logging for artifact visibility
+  console.log(`🎯 Current map: ${MAPS[currentMapIndex]?.name}, Artifacts to show: ${artifactsToShow.length}, Show artifacts: ${showArtifactsOnMap}`);
+  if (artifactsToShow.length > 0) {
+    artifactsToShow.forEach(artifact => {
+      console.log(`📍 Artifact: ${artifact.name} at (${artifact.location.x}, ${artifact.location.y})`);
+    });
+  }
+
   // Show a notification when player steps on a portal
   const showPortalNotification = (title, message) => {
     // Create the notification element if it doesn't exist
