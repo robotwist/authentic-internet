@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { NPC_TYPES } from './GameConstants';
 import Tile from './Tile';
 import Artifact from './Artifact';
-import { TILE_SIZE } from './Constants';
-import { NPC_TYPES } from './GameConstants';
 import './Map.css';
 
-// Add a default placeholder sprite as a data URI
-const DEFAULT_NPC_SPRITE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="20" r="16" fill="%23ffd700"/><rect x="16" y="36" width="32" height="28" fill="%23228b22"/></svg>';
+// Constants
+const TILE_SIZE = 64;
+const DEFAULT_NPC_SPRITE = '/assets/npcs/guide.png';
 
 const Map = ({ 
   mapData, 
@@ -25,11 +25,7 @@ const Map = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [mapOffset, setMapOffset] = useState(offset);
 
-  useEffect(() => {
-    // Set the tile size CSS variable
-    document.documentElement.style.setProperty('--tile-size', `${TILE_SIZE}px`);
-  }, []);
-
+  // Mouse event handlers for map dragging
   const handleMouseDown = (e) => {
     setIsDragging(true);
     setDragStart({
@@ -39,12 +35,16 @@ const Map = ({
   };
 
   const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    
-    setMapOffset({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y
-    });
+    if (isDragging) {
+      const newOffset = {
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      };
+      setMapOffset(newOffset);
+      if (onZoomChange) {
+        onZoomChange(newOffset);
+      }
+    }
   };
 
   const handleMouseUp = () => {
@@ -53,9 +53,7 @@ const Map = ({
 
   const handleWheel = (e) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    const newZoom = Math.max(0.5, Math.min(2, zoom + delta));
-    onZoomChange?.(newZoom);
+    // Zoom functionality can be added here
   };
 
   // Function to determine if a tile is part of Half Dome
@@ -95,7 +93,7 @@ const Map = ({
     );
   };
 
-  // NPC sprite mapping
+  // Enhanced NPC sprite mapping with fallbacks
   const npcImages = useMemo(() => ({
     [NPC_TYPES.SHAKESPEARE]: '/assets/npcs/shakespeare.webp',
     [NPC_TYPES.ARTIST]: '/assets/npcs/artist.svg',
@@ -106,21 +104,70 @@ const Map = ({
     [NPC_TYPES.ALEXANDER_POPE]: '/assets/npcs/alexander_pope.svg',
     [NPC_TYPES.ZEUS]: '/assets/npcs/zeus.svg',
     [NPC_TYPES.JOHN_MUIR]: '/assets/npcs/john_muir.png',
-    [NPC_TYPES.JESUS]: '/assets/npcs/jesus.png'
+    [NPC_TYPES.JESUS]: '/assets/npcs/jesus.png',
+    [NPC_TYPES.GUIDE]: '/assets/npcs/guide.png',
+    [NPC_TYPES.WRITER]: '/assets/npcs/shakespeare.webp', // Fallback for writers
+    [NPC_TYPES.PHILOSOPHER]: '/assets/npcs/alexander_pope.svg', // Fallback for philosophers
+    [NPC_TYPES.SCIENTIST]: '/assets/npcs/ada_lovelace.png', // Fallback for scientists
+    [NPC_TYPES.EXPLORER]: '/assets/npcs/john_muir.png', // Fallback for explorers
+    [NPC_TYPES.MENTOR]: '/assets/npcs/guide.png', // Fallback for mentors
+    [NPC_TYPES.SAGE]: '/assets/npcs/zeus.svg', // Fallback for sages
+    [NPC_TYPES.POET]: '/assets/npcs/lord_byron.webp', // Fallback for poets
+    [NPC_TYPES.NATURALIST]: '/assets/npcs/john_muir.png', // Fallback for naturalists
   }), []);
 
   const getNPCImage = useCallback((npcType) => {
-    return npcImages[npcType] || `/assets/npcs/${npcType}.svg`;
+    if (!npcType) return DEFAULT_NPC_SPRITE;
+    
+    // First try exact match
+    if (npcImages[npcType]) {
+      return npcImages[npcType];
+    }
+    
+    // Try lowercase match
+    const lowerType = npcType.toLowerCase();
+    if (npcImages[lowerType]) {
+      return npcImages[lowerType];
+    }
+    
+    // Try to find a partial match
+    const matchingKey = Object.keys(npcImages).find(key => 
+      key.toLowerCase().includes(lowerType) || lowerType.includes(key.toLowerCase())
+    );
+    
+    if (matchingKey) {
+      return npcImages[matchingKey];
+    }
+    
+    // Final fallback
+    return DEFAULT_NPC_SPRITE;
   }, [npcImages]);
 
-  // Memoize NPC rendering to avoid unnecessary re-renders
+  // Enhanced NPC rendering with better error handling
   const renderNPCs = useMemo(() => {
-    if (!npcs || !Array.isArray(npcs)) return null;
+    if (!npcs || !Array.isArray(npcs)) {
+      console.log('No NPCs provided or invalid format:', npcs);
+      return null;
+    }
     
-    return npcs.map(npc => {
-      if (!npc || !npc.position) return null;
+    console.log(`Rendering ${npcs.length} NPCs for map: ${mapName}`);
+    
+    return npcs.map((npc, index) => {
+      if (!npc) {
+        console.warn(`NPC at index ${index} is null or undefined`);
+        return null;
+      }
       
+      if (!npc.position) {
+        console.warn(`NPC ${npc.name || 'Unknown'} missing position:`, npc);
+        return null;
+      }
+      
+      // Get the sprite with fallback logic
       const actualSprite = npc.sprite || getNPCImage(npc.type) || DEFAULT_NPC_SPRITE;
+      
+      console.log(`NPC ${npc.name} (${npc.type}) using sprite: ${actualSprite}`);
+      
       const spriteStyle = {
         position: 'absolute',
         left: `${npc.position.x * TILE_SIZE}px`,
@@ -134,11 +181,16 @@ const Map = ({
         zIndex: 20,
         cursor: 'pointer',
         filter: 'drop-shadow(0 0 5px rgba(255,255,100,0.5))',
-        transition: 'all 0.2s ease'
+        transition: 'all 0.2s ease',
+        // Add debugging styles in development
+        ...(process.env.NODE_ENV === 'development' && {
+          border: '2px solid red',
+          backgroundColor: 'rgba(255, 0, 0, 0.1)'
+        })
       };
       
       // Create a stable, unique key with multiple fallbacks for reliability
-      const npcKey = npc._id || npc.id || `npc-${npc.name || ''}-${npc.type || ''}-${npc.position.x}-${npc.position.y}`;
+      const npcKey = npc._id || npc.id || `npc-${npc.name || ''}-${npc.type || ''}-${npc.position.x}-${npc.position.y}-${index}`;
       
       return (
         <div 
@@ -147,6 +199,8 @@ const Map = ({
           style={spriteStyle}
           onClick={() => onNPCClick?.(npc)}
           data-npc-type={npc.type?.toLowerCase?.() || 'generic'}
+          data-npc-name={npc.name || 'Unknown'}
+          title={`${npc.name || 'NPC'} - Press 'T' to talk`}
         >
           {/* Enhanced interaction indicator */}
           <div className="npc-interaction-indicator">
@@ -156,8 +210,8 @@ const Map = ({
           <div className="npc-name-label">{npc.name || 'NPC'}</div>
         </div>
       );
-    });
-  }, [npcs, onNPCClick, getNPCImage]);
+    }).filter(Boolean); // Remove any null entries
+  }, [npcs, onNPCClick, getNPCImage, mapName]);
 
   // Check if mapData is valid before rendering
   if (!mapData || !Array.isArray(mapData) || mapData.length === 0) {

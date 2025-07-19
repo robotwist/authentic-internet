@@ -488,8 +488,9 @@ export const MAPS = [
       {
         id: uuidv4(),
         name: "John Muir",
-        type: NPC_TYPES.GUIDE,
-        position: { x: 3, y: 3 },
+        type: NPC_TYPES.JOHN_MUIR,
+        position: { x: 3, y: 17 },
+        sprite: '/assets/npcs/john_muir.png',
         dialogue: [
           "Welcome to Yosemite Valley! The grandeur of these peaks never ceases to amaze me.",
           "Have you noticed how the valley seems to tell its own story through its formations?",
