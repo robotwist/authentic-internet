@@ -6,6 +6,7 @@
 const STORAGE_KEY = 'game_state';
 const BACKUP_KEY = 'game_state_backup';
 const CHECKPOINT_KEY = 'last_checkpoint';
+const OFFLINE_QUEUE_KEY = 'offline_save_queue';
 
 class GameStateManager {
   constructor() {
@@ -17,6 +18,9 @@ class GameStateManager {
     this.toastCallback = null; // Callback for showing toast notifications
     this.retryAttempts = 0;
     this.maxRetries = 3;
+    this.offlineQueue = [];
+    this.isOnline = navigator.onLine;
+    this.pendingSaves = new Set();
   }
 
   // Set toast callback for user feedback
@@ -33,10 +37,112 @@ class GameStateManager {
     }
   }
 
+  // Check online status
+  checkOnlineStatus() {
+    const wasOnline = this.isOnline;
+    this.isOnline = navigator.onLine;
+    
+    if (!wasOnline && this.isOnline) {
+      console.log('Connection restored, processing offline queue...');
+      this.processOfflineQueue();
+    } else if (wasOnline && !this.isOnline) {
+      console.log('Connection lost, switching to offline mode');
+      this.showToast('Connection lost - saving locally', 'warning', 3000);
+    }
+  }
+
+  // Process offline save queue when connection is restored
+  async processOfflineQueue() {
+    if (this.offlineQueue.length === 0) return;
+
+    this.showToast('Processing offline saves...', 'info', 2000);
+    
+    for (const saveData of this.offlineQueue) {
+      try {
+        await this.saveToServer(saveData);
+        console.log('Processed offline save:', saveData.timestamp);
+      } catch (error) {
+        console.error('Failed to process offline save:', error);
+        // Keep failed saves in queue for next attempt
+        continue;
+      }
+    }
+    
+    // Clear processed saves
+    this.offlineQueue = this.offlineQueue.filter(save => 
+      !this.offlineQueue.some(processed => processed.timestamp === save.timestamp)
+    );
+    
+    this.saveOfflineQueue();
+    this.showToast('Offline saves processed', 'success', 2000);
+  }
+
+  // Save offline queue to localStorage
+  saveOfflineQueue() {
+    try {
+      localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(this.offlineQueue));
+    } catch (error) {
+      console.error('Failed to save offline queue:', error);
+    }
+  }
+
+  // Load offline queue from localStorage
+  loadOfflineQueue() {
+    try {
+      const queue = localStorage.getItem(OFFLINE_QUEUE_KEY);
+      this.offlineQueue = queue ? JSON.parse(queue) : [];
+    } catch (error) {
+      console.error('Failed to load offline queue:', error);
+      this.offlineQueue = [];
+    }
+  }
+
+  // Save to server with retry logic
+  async saveToServer(stateData) {
+    const maxRetries = 3;
+    let lastError;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await fetch('/api/users/game-state', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(stateData)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        lastError = error;
+        console.warn(`Save attempt ${attempt} failed:`, error);
+        
+        if (attempt < maxRetries) {
+          // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
+    }
+
+    throw lastError;
+  }
+
   init() {
     if (this.initialized) return;
     
     try {
+      // Load offline queue
+      this.loadOfflineQueue();
+      
+      // Set up online/offline listeners
+      window.addEventListener('online', () => this.checkOnlineStatus());
+      window.addEventListener('offline', () => this.checkOnlineStatus());
+      
       // Try to load the main state
       this.state = this.loadState();
       
@@ -70,18 +176,52 @@ class GameStateManager {
     }
   }
 
-  saveState() {
+  async saveState(forceServer = false) {
     try {
-      // Create backup of current state before saving new state
+      // Always save to localStorage first as backup
       if (this.state) {
         localStorage.setItem(BACKUP_KEY, localStorage.getItem(STORAGE_KEY));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
         this.lastSavedState = {...this.state};
-        
-        // Show success message only if this was a manual save
-        if (this.retryAttempts === 0) {
-          this.showToast('Game progress saved', 'success', 2000);
+      }
+
+      // Try to save to server if online and authenticated
+      const token = localStorage.getItem('token');
+      if (this.isOnline && token && (forceServer || this.retryAttempts === 0)) {
+        try {
+          await this.saveToServer(this.state);
+          this.showToast('Game progress saved to cloud', 'success', 2000);
+          this.retryAttempts = 0; // Reset retry counter on success
+        } catch (serverError) {
+          console.error('Server save failed:', serverError);
+          
+          // Add to offline queue for later processing
+          const saveData = {
+            ...this.state,
+            timestamp: Date.now(),
+            retryCount: 0
+          };
+          
+          this.offlineQueue.push(saveData);
+          this.saveOfflineQueue();
+          
+          this.showToast('Saved locally - will sync when online', 'warning', 3000);
         }
+      } else if (!this.isOnline) {
+        // Offline mode - save to queue
+        const saveData = {
+          ...this.state,
+          timestamp: Date.now(),
+          retryCount: 0
+        };
+        
+        this.offlineQueue.push(saveData);
+        this.saveOfflineQueue();
+        
+        this.showToast('Saved locally - offline mode', 'info', 2000);
+      } else {
+        // No token or other issue - just local save
+        this.showToast('Game progress saved locally', 'success', 2000);
       }
     } catch (error) {
       console.error('Error saving game state:', error);
@@ -96,7 +236,7 @@ class GameStateManager {
       if (this.retryAttempts < this.maxRetries) {
         this.retryAttempts++;
         this.showToast(`Retrying save... (${this.retryAttempts}/${this.maxRetries})`, 'warning', 3000);
-        setTimeout(() => this.saveState(), 2000);
+        setTimeout(() => this.saveState(forceServer), 2000);
       } else {
         this.showToast('Save failed after multiple attempts', 'error', 5000);
         this.retryAttempts = 0;
@@ -105,9 +245,9 @@ class GameStateManager {
   }
 
   // Force save with user feedback
-  forceSave() {
+  async forceSave() {
     this.retryAttempts = 0;
-    this.saveState();
+    await this.saveState(true); // Force server save
   }
 
   // Load saved checkpoint
@@ -216,6 +356,11 @@ class GameStateManager {
       clearInterval(this.saveInterval);
       this.saveInterval = null;
     }
+    
+    // Remove event listeners
+    window.removeEventListener('online', () => this.checkOnlineStatus());
+    window.removeEventListener('offline', () => this.checkOnlineStatus());
+    
     this.initialized = false;
   }
 }

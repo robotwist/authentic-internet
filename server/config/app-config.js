@@ -1,13 +1,10 @@
-import dotenv from "dotenv";
 import fs from 'fs';
 import path from 'path';
 import { configureCorsOptions as securityCorsOptions } from "../utils/security.js";
-
-// Load environment variables from .env file
-dotenv.config();
+import { getEnv, getRequiredEnv, validateEnvironment } from "./envManager.js";
 
 // Port management
-const PORT = parseInt(process.env.PORT) || 5001;
+const PORT = parseInt(getEnv('PORT')) || 5001;
 const PORT_FILE = path.join(process.cwd(), '.server_pid');
 
 const managePort = () => {
@@ -48,9 +45,9 @@ const cleanupPort = () => {
 
 // CORS configuration
 const configureAllowedOrigins = () => {
-  return process.env.NODE_ENV === 'development' 
+  return getEnv('NODE_ENV') === 'development' 
     ? ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://127.0.0.1:5175', 'http://localhost:5176', 'http://localhost:5177', 'http://localhost:5178', 'http://localhost:5179', 'http://localhost:5180', 'http://localhost:5181', 'http://localhost:5004', 'http://localhost:8080']
-    : [process.env.CLIENT_URL, 'https://flourishing-starburst-8cf88b.netlify.app'];
+    : [getEnv('CLIENT_URL'), 'https://flourishing-starburst-8cf88b.netlify.app'];
 };
 
 // CORS options - use our centralized security configuration
@@ -61,11 +58,11 @@ const configureCorsOptions = (allowedOrigins) => {
 // Session configuration
 const configureSessionOptions = (mongoStore) => {
   const baseOptions = {
-    secret: process.env.SESSION_SECRET,
+    secret: getRequiredEnv('SESSION_SECRET'),
     resave: false,
     saveUninitialized: false,
     cookie: { 
-      secure: process.env.NODE_ENV === 'production',
+      secure: getEnv('NODE_ENV') === 'production',
       httpOnly: true, 
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: 'lax' // Provides some CSRF protection
@@ -81,28 +78,30 @@ const configureSessionOptions = (mongoStore) => {
 
 // Validate critical environment variables
 const validateEnv = () => {
-  const requiredVars = ['JWT_SECRET', 'SESSION_SECRET'];
-  const missingVars = requiredVars.filter(varName => !process.env[varName]);
+  const validation = validateEnvironment();
   
-  if (missingVars.length > 0) {
-    console.warn(`⚠️ Missing environment variables: ${missingVars.join(', ')}`);
+  if (validation.warnings.length > 0) {
+    console.warn("⚠️ Environment warnings:");
+    validation.warnings.forEach(warning => console.warn(`  ${warning}`));
+  }
+  
+  if (validation.errors.length > 0) {
+    console.error("❌ Environment errors:");
+    validation.errors.forEach(error => console.error(`  ${error}`));
     
-    if (process.env.NODE_ENV === 'production') {
-      console.error("Exiting process due to missing security variables in production");
+    if (validation.isProduction) {
+      console.error("Exiting process due to missing required environment variables in production");
       process.exit(1);
-    } else {
-      // In development, provide default values
-      console.log("🔧 Using default development values for missing environment variables");
-      if (!process.env.JWT_SECRET) {
-        process.env.JWT_SECRET = 'dev-jwt-secret-key-change-in-production';
-      }
-      if (!process.env.SESSION_SECRET) {
-        process.env.SESSION_SECRET = 'dev-session-secret-key-change-in-production';
-      }
-      console.log("✅ Environment variables configured for development");
     }
   }
-  return true;
+  
+  if (validation.isValid) {
+    console.log("✅ Environment validation passed");
+  } else if (!validation.isProduction) {
+    console.log("🔧 Using default values for missing environment variables");
+  }
+  
+  return validation.isValid;
 };
 
 export {

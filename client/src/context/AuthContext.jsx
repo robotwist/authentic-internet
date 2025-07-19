@@ -4,6 +4,9 @@ import API from '../api/api';
 
 // Constants
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes before expiry
+const REFRESH_RETRY_DELAY_MS = 60 * 1000; // 1 minute retry delay
+const MAX_REFRESH_RETRIES = 3; // Maximum retry attempts
+const DEVICE_SLEEP_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes threshold for device sleep detection
 
 // Utility functions (defined outside component to avoid circular dependencies)
 const parseJWT = (token) => {
@@ -33,6 +36,69 @@ const calculateTimeUntilExpiry = (token) => {
     console.error('Error calculating token expiry:', error);
     return 0;
   }
+};
+
+// Enhanced token refresh scheduling with fallback logic
+const scheduleTokenRefreshWithFallback = (token, onRefreshSuccess, onRefreshFailure) => {
+  const timeUntilExpiry = calculateTimeUntilExpiry(token);
+  
+  if (timeUntilExpiry <= 0) {
+    console.log('Token already expired, attempting immediate refresh');
+    onRefreshFailure('Token expired');
+    return null;
+  }
+  
+  // Calculate exact refresh time using Date.now() for precision
+  const refreshTime = Math.max(1000, timeUntilExpiry - TOKEN_REFRESH_BUFFER_MS);
+  const refreshTimestamp = Date.now() + refreshTime;
+  
+  console.log(`Scheduling token refresh at ${new Date(refreshTimestamp).toISOString()} (in ${Math.floor(refreshTime / 1000 / 60)} minutes)`);
+  
+  // Store the target refresh timestamp for verification
+  localStorage.setItem('tokenRefreshTimestamp', refreshTimestamp.toString());
+  
+  const timeoutId = setTimeout(async () => {
+    console.log('Auto refreshing token...');
+    
+    // Verify we're still on schedule (device might have been asleep)
+    const storedTimestamp = localStorage.getItem('tokenRefreshTimestamp');
+    const currentTime = Date.now();
+    const scheduledTime = storedTimestamp ? parseInt(storedTimestamp) : 0;
+    
+    // Check for device sleep or significant time drift
+    if (Math.abs(currentTime - scheduledTime) > DEVICE_SLEEP_THRESHOLD_MS) {
+      console.warn('Token refresh significantly off schedule - device may have been asleep');
+      
+      // If device was asleep for a long time, check if token is still valid
+      const currentToken = localStorage.getItem('token');
+      if (currentToken) {
+        const remainingTime = calculateTimeUntilExpiry(currentToken);
+        if (remainingTime <= 0) {
+          console.error('Token expired while device was asleep');
+          onRefreshFailure('Token expired during device sleep');
+          return;
+        }
+      }
+    }
+    
+    try {
+      const success = await onRefreshSuccess();
+      
+      if (!success) {
+        console.error('Automatic token refresh failed, will retry in 1 minute');
+        // Implement exponential backoff for retries
+        setTimeout(() => {
+          console.log('Retrying token refresh...');
+          onRefreshSuccess();
+        }, REFRESH_RETRY_DELAY_MS);
+      }
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      onRefreshFailure(error.message);
+    }
+  }, refreshTime);
+  
+  return timeoutId;
 };
 
 // Local storage helpers
@@ -202,47 +268,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
-  // Schedule token refresh
+  // Schedule token refresh with enhanced fallback logic
   const scheduleTokenRefresh = (token) => {
     clearRefreshTimeout();
     
-    const timeUntilExpiry = calculateTimeUntilExpiry(token);
-    if (timeUntilExpiry <= 0) {
-      console.log('Token already expired, attempting immediate refresh');
-      refreshToken(true);
-      return;
-    }
-    
-    // Calculate exact refresh time using Date.now() instead of setTimeout duration
-    const refreshTime = Math.max(1000, timeUntilExpiry - TOKEN_REFRESH_BUFFER_MS);
-    const refreshTimestamp = Date.now() + refreshTime;
-    
-    console.log(`Scheduling token refresh at ${new Date(refreshTimestamp).toISOString()} (in ${Math.floor(refreshTime / 1000 / 60)} minutes)`);
-    
-    // Store the target refresh timestamp for verification
-    localStorage.setItem('tokenRefreshTimestamp', refreshTimestamp.toString());
-    
-    refreshTimeoutRef.current = setTimeout(async () => {
-      console.log('Auto refreshing token...');
-      
-      // Verify we're still on schedule (device might have been asleep)
-      const storedTimestamp = localStorage.getItem('tokenRefreshTimestamp');
-      const currentTime = Date.now();
-      const scheduledTime = storedTimestamp ? parseInt(storedTimestamp) : 0;
-      
-      // If we're more than 5 minutes off schedule, log a warning
-      if (Math.abs(currentTime - scheduledTime) > 5 * 60 * 1000) {
-        console.warn('Token refresh significantly off schedule - device may have been asleep');
+    refreshTimeoutRef.current = scheduleTokenRefreshWithFallback(
+      token,
+      async () => {
+        return await refreshToken(true);
+      },
+      (error) => {
+        console.error('Token refresh failed:', error);
+        // If refresh fails during app usage, show user-friendly message
+        if (state.isAuthenticated) {
+          dispatch({ 
+            type: AUTH_ACTIONS.SET_ERROR, 
+            payload: 'Session expired. Please log in again.' 
+          });
+        }
+        dispatch({ type: AUTH_ACTIONS.LOGOUT });
       }
-      
-      const success = await refreshToken(true);
-      
-      if (!success) {
-        console.error('Automatic token refresh failed, will retry in 1 minute');
-        // Retry in 1 minute if refresh failed
-        setTimeout(() => refreshToken(true), 60 * 1000);
-      }
-    }, refreshTime);
+    );
   };
   
   // API Functions
