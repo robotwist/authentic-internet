@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import OptimizedImage from './OptimizedImage';
 import PropTypes from "prop-types";
 import "./Artifact.css";
 import SoundManager from './utils/SoundManager';

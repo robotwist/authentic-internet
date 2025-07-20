@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import OptimizedImage from './OptimizedImage';
 import { chat, updateCharacter } from '../api/api';
 import './NPC.css';
 import { TILE_SIZE, NPC_TYPES, isWalkable } from './Constants';
@@ -372,7 +373,7 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
     [NPC_TYPES.ALEXANDER_POPE]: '/assets/npcs/alexander_pope.svg',
     [NPC_TYPES.ZEUS]: '/assets/npcs/zeus.svg',
     [NPC_TYPES.JOHN_MUIR]: '/assets/npcs/john_muir.png',
-    [NPC_TYPES.JESUS]: '/assets/npcs/jesus.png'
+    [NPC_TYPES.JESUS]: '/assets/npcs/jesus.webp'
   }), []);
 
   const getNPCImage = useCallback(() => {

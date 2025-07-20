@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import OptimizedImage from './OptimizedImage';
 import PropTypes from 'prop-types';
 import { TILE_TYPES } from './Constants';
 import './Tile.css';

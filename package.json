@@ -11,6 +11,8 @@
     "test:unit": "jest --testPathPattern=unit --coverage",
     "test:integration": "jest --testPathPattern=integration",
     "test:e2e": "playwright test",
+    "test:images": "node run-image-tests.js",
+    "test:image-optimization": "playwright test image-optimization.test.js",
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -20,6 +22,7 @@
     "test:unified": "jest --testPathPattern=unified-model --coverage",
     "test:validation": "jest --testPathPattern=validation --coverage",
     "test:legacy": "jest --testPathPattern=legacy --coverage",
+    "optimize:images": "node optimize-images.js",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install"
   },
   "engines": {

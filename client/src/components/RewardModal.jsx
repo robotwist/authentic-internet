@@ -1,4 +1,5 @@
 import React from 'react';
+import OptimizedImage from './OptimizedImage';
 import './RewardModal.css';
 
 const RewardModal = ({ visible, onClose, achievement }) => {
