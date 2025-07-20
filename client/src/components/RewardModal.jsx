@@ -19,7 +19,7 @@ const RewardModal = ({ visible, onClose, achievement }) => {
         
         <div className="reward-item">
           <img 
-            src="/assets/npcs/nkd-man-extension.png" 
+            src="/assets/npcs/nkd-man-extension.svg" 
             alt="NKD Man Chrome Extension" 
             className="reward-image" 
             onError={(e) => {
