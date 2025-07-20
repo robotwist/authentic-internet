@@ -7,6 +7,7 @@ const STORAGE_KEY = 'game_state';
 const BACKUP_KEY = 'game_state_backup';
 const CHECKPOINT_KEY = 'last_checkpoint';
 const OFFLINE_QUEUE_KEY = 'offline_save_queue';
+const SYNC_LOCK_KEY = 'sync_lock';
 
 class GameStateManager {
   constructor() {
@@ -15,20 +16,20 @@ class GameStateManager {
     this.saveInterval = null;
     this.initialized = false;
     this.lastCheckpoint = null;
-    this.toastCallback = null; // Callback for showing toast notifications
+    this.toastCallback = null;
     this.retryAttempts = 0;
     this.maxRetries = 3;
     this.offlineQueue = [];
     this.isOnline = navigator.onLine;
     this.pendingSaves = new Set();
+    this.syncInProgress = false;
+    this.eventListeners = new Map();
   }
 
-  // Set toast callback for user feedback
   setToastCallback(callback) {
     this.toastCallback = callback;
   }
 
-  // Show toast notification
   showToast(message, type = 'info', duration = 5000) {
     if (this.toastCallback) {
       this.toastCallback(message, type, duration);
@@ -37,67 +38,79 @@ class GameStateManager {
     }
   }
 
-  // Check online status
   checkOnlineStatus() {
     const wasOnline = this.isOnline;
     this.isOnline = navigator.onLine;
     
     if (!wasOnline && this.isOnline) {
-      console.log('Connection restored, processing offline queue...');
+      this.showToast('Connection restored - syncing game state', 'success', 3000);
       this.processOfflineQueue();
     } else if (wasOnline && !this.isOnline) {
-      console.log('Connection lost, switching to offline mode');
       this.showToast('Connection lost - saving locally', 'warning', 3000);
     }
   }
 
   // Process offline save queue when connection is restored
   async processOfflineQueue() {
-    if (this.offlineQueue.length === 0) return;
+    if (this.offlineQueue.length === 0 || this.syncInProgress) return;
 
+    this.syncInProgress = true;
     this.showToast('Processing offline saves...', 'info', 2000);
     
-    for (const saveData of this.offlineQueue) {
-      try {
-        await this.saveToServer(saveData);
-        console.log('Processed offline save:', saveData.timestamp);
-      } catch (error) {
-        console.error('Failed to process offline save:', error);
-        // Keep failed saves in queue for next attempt
-        continue;
+    try {
+      const queueCopy = [...this.offlineQueue];
+      let processedCount = 0;
+      
+      for (const saveData of queueCopy) {
+        try {
+          await this.saveToServer(saveData);
+          this.offlineQueue = this.offlineQueue.filter(item => item.timestamp !== saveData.timestamp);
+          processedCount++;
+        } catch (error) {
+          console.error('Failed to process offline save:', error);
+          // Keep failed saves in queue for next attempt
+          continue;
+        }
       }
+      
+      this.saveOfflineQueue();
+      
+      if (processedCount > 0) {
+        this.showToast(`Synced ${processedCount} offline saves`, 'success', 3000);
+      }
+    } catch (error) {
+      console.error('Error processing offline queue:', error);
+      this.showToast('Failed to sync offline saves', 'error', 5000);
+    } finally {
+      this.syncInProgress = false;
     }
-    
-    // Clear processed saves
-    this.offlineQueue = this.offlineQueue.filter(save => 
-      !this.offlineQueue.some(processed => processed.timestamp === save.timestamp)
-    );
-    
-    this.saveOfflineQueue();
-    this.showToast('Offline saves processed', 'success', 2000);
   }
 
-  // Save offline queue to localStorage
   saveOfflineQueue() {
     try {
       localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(this.offlineQueue));
     } catch (error) {
-      console.error('Failed to save offline queue:', error);
+      console.error('Error saving offline queue:', error);
     }
   }
 
-  // Load offline queue from localStorage
   loadOfflineQueue() {
     try {
-      const queue = localStorage.getItem(OFFLINE_QUEUE_KEY);
-      this.offlineQueue = queue ? JSON.parse(queue) : [];
+      const savedQueue = localStorage.getItem(OFFLINE_QUEUE_KEY);
+      if (savedQueue) {
+        this.offlineQueue = JSON.parse(savedQueue);
+        // Clean up old entries (older than 7 days)
+        const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        this.offlineQueue = this.offlineQueue.filter(item => item.timestamp > weekAgo);
+        this.saveOfflineQueue();
+      }
     } catch (error) {
-      console.error('Failed to load offline queue:', error);
+      console.error('Error loading offline queue:', error);
       this.offlineQueue = [];
     }
   }
 
-  // Save to server with retry logic
+  // Save to server with retry logic and proper error handling
   async saveToServer(stateData) {
     const maxRetries = 3;
     let lastError;
@@ -114,17 +127,25 @@ class GameStateManager {
         });
 
         if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`Server error: ${response.status} - ${errorData.message || 'Unknown error'}`);
         }
 
-        return await response.json();
+        const result = await response.json();
+        
+        // Validate server response
+        if (!result.success) {
+          throw new Error(result.message || 'Server returned unsuccessful response');
+        }
+
+        return result;
       } catch (error) {
         lastError = error;
         console.warn(`Save attempt ${attempt} failed:`, error);
         
         if (attempt < maxRetries) {
           // Exponential backoff
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
         }
       }
     }
@@ -139,9 +160,16 @@ class GameStateManager {
       // Load offline queue
       this.loadOfflineQueue();
       
-      // Set up online/offline listeners
-      window.addEventListener('online', () => this.checkOnlineStatus());
-      window.addEventListener('offline', () => this.checkOnlineStatus());
+      // Set up online/offline listeners with proper cleanup
+      const onlineHandler = () => this.checkOnlineStatus();
+      const offlineHandler = () => this.checkOnlineStatus();
+      
+      window.addEventListener('online', onlineHandler);
+      window.addEventListener('offline', offlineHandler);
+      
+      // Store references for cleanup
+      this.eventListeners.set('online', onlineHandler);
+      this.eventListeners.set('offline', offlineHandler);
       
       // Try to load the main state
       this.state = this.loadState();
@@ -177,6 +205,14 @@ class GameStateManager {
   }
 
   async saveState(forceServer = false) {
+    // Prevent concurrent saves
+    if (this.pendingSaves.has('saveState')) {
+      console.log('Save already in progress, skipping...');
+      return;
+    }
+
+    this.pendingSaves.add('saveState');
+    
     try {
       // Always save to localStorage first as backup
       if (this.state) {
@@ -241,6 +277,8 @@ class GameStateManager {
         this.showToast('Save failed after multiple attempts', 'error', 5000);
         this.retryAttempts = 0;
       }
+    } finally {
+      this.pendingSaves.delete('saveState');
     }
   }
 
@@ -256,7 +294,8 @@ class GameStateManager {
       const savedCheckpoint = localStorage.getItem(CHECKPOINT_KEY);
       if (!savedCheckpoint) return null;
       
-      return JSON.parse(savedCheckpoint);
+      const checkpoint = JSON.parse(savedCheckpoint);
+      return this.validateState(checkpoint) ? checkpoint : null;
     } catch (error) {
       console.error('Error loading checkpoint:', error);
       this.showToast('Error loading checkpoint', 'error', 5000);
@@ -265,11 +304,18 @@ class GameStateManager {
   }
 
   // Save checkpoint
-  saveCheckpoint() {
+  saveCheckpoint(mapName = null, position = null) {
     try {
       if (this.state) {
-        localStorage.setItem(CHECKPOINT_KEY, JSON.stringify(this.state));
-        this.lastCheckpoint = {...this.state};
+        const checkpointData = {
+          ...this.state,
+          checkpointMap: mapName,
+          checkpointPosition: position,
+          checkpointTime: Date.now()
+        };
+        
+        localStorage.setItem(CHECKPOINT_KEY, JSON.stringify(checkpointData));
+        this.lastCheckpoint = {...checkpointData};
         this.showToast('Checkpoint saved', 'success', 2000);
       }
     } catch (error) {
@@ -282,13 +328,18 @@ class GameStateManager {
     try {
       const backup = localStorage.getItem(BACKUP_KEY);
       if (backup) {
-        this.state = JSON.parse(backup);
-        console.log('Recovered from backup state');
-        this.showToast('Recovered from backup', 'warning', 4000);
-      } else {
-        this.state = this.getInitialState();
-        this.showToast('Starting with fresh game state', 'info', 4000);
+        const backupState = JSON.parse(backup);
+        if (this.validateState(backupState)) {
+          this.state = backupState;
+          console.log('Recovered from backup state');
+          this.showToast('Recovered from backup', 'warning', 4000);
+          return;
+        }
       }
+      
+      // If no valid backup, start fresh
+      this.state = this.getInitialState();
+      this.showToast('Starting with fresh game state', 'info', 4000);
     } catch (error) {
       console.error('Failed to recover from backup:', error);
       this.state = this.getInitialState();
@@ -304,12 +355,15 @@ class GameStateManager {
       userArtifacts: [],
       modifiedArtifacts: [],
       exp: 0,
+      level: 1,
+      achievements: [],
+      quests: [],
       lastSaved: new Date().toISOString()
     };
   }
 
   validateState(state) {
-    if (!state) return false;
+    if (!state || typeof state !== 'object') return false;
 
     const requiredFields = [
       'characterPosition',
@@ -325,6 +379,16 @@ class GameStateManager {
 
     // Validate character position
     if (!state.characterPosition?.x || !state.characterPosition?.y) return false;
+    
+    // Validate arrays
+    if (!Array.isArray(state.inventory) || !Array.isArray(state.userArtifacts) || !Array.isArray(state.modifiedArtifacts)) {
+      return false;
+    }
+
+    // Validate numeric fields
+    if (typeof state.currentMapIndex !== 'number' || typeof state.exp !== 'number') {
+      return false;
+    }
 
     return true;
   }
@@ -337,7 +401,8 @@ class GameStateManager {
     try {
       this.state = {
         ...this.state,
-        ...newState
+        ...newState,
+        lastSaved: new Date().toISOString()
       };
       this.saveState();
     } catch (error) {
@@ -350,16 +415,22 @@ class GameStateManager {
     }
   }
 
-  // Cleanup method
+  // Cleanup method with proper event listener removal
   cleanup() {
     if (this.saveInterval) {
       clearInterval(this.saveInterval);
       this.saveInterval = null;
     }
     
-    // Remove event listeners
-    window.removeEventListener('online', () => this.checkOnlineStatus());
-    window.removeEventListener('offline', () => this.checkOnlineStatus());
+    // Remove all event listeners
+    this.eventListeners.forEach((handler, event) => {
+      window.removeEventListener(event, handler);
+    });
+    this.eventListeners.clear();
+    
+    // Clear pending operations
+    this.pendingSaves.clear();
+    this.syncInProgress = false;
     
     this.initialized = false;
   }

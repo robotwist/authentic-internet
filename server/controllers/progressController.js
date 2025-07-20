@@ -170,7 +170,15 @@ export const discoverArtifact = async (req, res) => {
 export const saveGameState = async (req, res) => {
   try {
     const { userId } = req.user;
-    const { position, gameState, inventory } = req.body;
+    const gameStateData = req.body;
+    
+    // Validate request body
+    if (!gameStateData || typeof gameStateData !== 'object') {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid game state data"
+      });
+    }
     
     // Find user
     const user = await User.findById(userId);
@@ -181,53 +189,97 @@ export const saveGameState = async (req, res) => {
       });
     }
     
-    // Prepare update data
-    const updateData = {};
+    // Prepare update data with comprehensive state handling
+    const updateData = {
+      lastSaved: new Date(),
+      lastActive: new Date()
+    };
     
-    // Update position if provided
-    if (position) {
-      updateData.lastPosition = position;
+    // Handle character position
+    if (gameStateData.characterPosition) {
+      updateData.lastPosition = gameStateData.characterPosition;
     }
     
-    // Update game state if provided, using deep merge to preserve existing data
-    if (gameState) {
+    // Handle current map index
+    if (typeof gameStateData.currentMapIndex === 'number') {
+      updateData.currentMapIndex = gameStateData.currentMapIndex;
+    }
+    
+    // Handle experience and level
+    if (typeof gameStateData.exp === 'number') {
+      updateData.experience = gameStateData.exp;
+      // Calculate level based on experience
+      updateData.level = Math.floor(Math.sqrt(gameStateData.exp / 100)) + 1;
+    }
+    
+    // Handle inventory
+    if (Array.isArray(gameStateData.inventory)) {
+      updateData.inventory = gameStateData.inventory;
+    }
+    
+    // Handle user artifacts
+    if (Array.isArray(gameStateData.userArtifacts)) {
+      updateData.userArtifacts = gameStateData.userArtifacts;
+    }
+    
+    // Handle modified artifacts
+    if (Array.isArray(gameStateData.modifiedArtifacts)) {
+      updateData.modifiedArtifacts = gameStateData.modifiedArtifacts;
+    }
+    
+    // Handle achievements
+    if (Array.isArray(gameStateData.achievements)) {
+      updateData.achievements = gameStateData.achievements;
+    }
+    
+    // Handle quests
+    if (Array.isArray(gameStateData.quests)) {
+      updateData.quests = gameStateData.quests;
+    }
+    
+    // Handle game state object (for backward compatibility)
+    if (gameStateData.gameState && typeof gameStateData.gameState === 'object') {
       // Initialize gameState if it doesn't exist
       if (!user.gameState) user.gameState = {};
       
       // Deep merge new state with existing state
       updateData.gameState = {
         ...user.gameState,
-        ...gameState,
+        ...gameStateData.gameState,
         // Merge nested objects if they exist
         gameProgress: {
-          ...(user.gameState.gameProgress || {}),
-          ...(gameState.gameProgress || {})
+          ...(user.gameState?.gameProgress || {}),
+          ...(gameStateData.gameState?.gameProgress || {})
         }
       };
     }
     
-    // Update inventory if provided
-    if (inventory) {
-      updateData.inventory = inventory;
-    }
-    
-    // Update user
+    // Update user with comprehensive data
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updateData },
-      { new: true }
+      { new: true, runValidators: true }
     );
     
-    // Return success
+    // Validate the update was successful
+    if (!updatedUser) {
+      throw new Error('Failed to update user data');
+    }
+    
+    // Return success with comprehensive response
     res.json({
       success: true,
       message: "Game state saved successfully",
+      timestamp: new Date().toISOString(),
       user: {
         id: updatedUser._id,
         username: updatedUser.username,
-        lastPosition: updatedUser.lastPosition,
+        level: updatedUser.level,
         experience: updatedUser.experience,
-        level: updatedUser.level
+        lastPosition: updatedUser.lastPosition,
+        currentMapIndex: updatedUser.currentMapIndex,
+        lastSaved: updatedUser.lastSaved,
+        lastActive: updatedUser.lastActive
       }
     });
   } catch (error) {
