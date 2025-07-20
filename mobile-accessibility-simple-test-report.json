@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-07-20T00:59:39.735Z",
+  "summary": {
+    "totalTests": 24,
+    "passed": 24,
+    "failed": 0,
+    "successRate": "100.0%"
+  },
+  "details": {
+    "mobile": {
+      "touchControls": {
+        "componentExists": true,
+        "hasTouchHandlers": true
+      },
+      "touchControlsCSS": {
+        "exists": true,
+        "hasMobileStyles": true
+      }
+    },
+    "accessibility": {
+      "utilities": {
+        "errorTracking": true,
+        "debugTools": true
+      },
+      "components": {
+        "totalComponents": 63,
+        "componentsWithAccessibility": 4,
+        "accessibilityCoverage": "6.3%"
+      }
+    },
+    "css": {
+      "gameWorld": {
+        "mobileMediaQueries": true,
+        "highContrastMode": true,
+        "reducedMotionMode": true,
+        "mobileControlsCSS": true,
+        "focusIndicators": true,
+        "screenReaderStyles": true
+      },
+      "index": {
+        "mobileResponsiveness": true,
+        "touchOptimizations": true,
+        "iosStyles": true
+      },
+      "npc": {
+        "mobileResponsiveness": true,
+        "keyboardHandling": true,
+        "touchFriendly": true
+      }
+    },
+    "components": {
+      "gameWorld": {
+        "mobileState": true,
+        "accessibilityState": true,
+        "ariaLabels": true,
+        "screenReaderSupport": true,
+        "mobileControls": true,
+        "keyboardNavigation": true
+      }
+    }
+  }
+}
