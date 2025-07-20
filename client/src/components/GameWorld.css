@@ -237,20 +237,78 @@
 /* Portal Transition Effects */
 .portal-transition {
   animation: portalSpin 1s ease-in-out;
+  pointer-events: none;
 }
 
 @keyframes portalSpin {
   0% {
     transform: scale(1) rotate(0deg);
-    filter: brightness(1);
+    filter: brightness(1) blur(0);
+  }
+  25% {
+    transform: scale(1.2) rotate(90deg);
+    filter: brightness(1.5) blur(2px);
   }
   50% {
-    transform: scale(1.5) rotate(180deg);
-    filter: brightness(2);
+    transform: scale(0.8) rotate(180deg);
+    filter: brightness(2) blur(4px);
+  }
+  75% {
+    transform: scale(1.1) rotate(270deg);
+    filter: brightness(1.8) blur(2px);
   }
   100% {
     transform: scale(1) rotate(360deg);
-    filter: brightness(1);
+    filter: brightness(1) blur(0);
+  }
+}
+
+/* World announcement styling */
+.world-announcement {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 2000;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  animation: announcementFadeIn 0.5s ease-out;
+}
+
+.world-announcement h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.world-announcement.fade-out {
+  animation: announcementFadeOut 1s ease-in forwards;
+}
+
+@keyframes announcementFadeIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes announcementFadeOut {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
   }
 }
 
