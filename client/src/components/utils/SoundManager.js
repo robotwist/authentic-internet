@@ -1,6 +1,6 @@
 /**
- * SoundManager.js
- * A utility for managing game sounds and music
+ * Enhanced SoundManager.js
+ * A robust utility for managing game sounds and music with fallbacks and error handling
  */
 
 class SoundManager {
@@ -13,10 +13,13 @@ class SoundManager {
     this.musicVolume = 0.3;
     this.initialized = false;
     this.audioContext = null;
+    this.userInteracted = false;
+    this.fallbackSounds = {};
+    this.loadingPromises = new Map();
   }
 
   /**
-   * Initialize the sound manager
+   * Initialize the sound manager with user interaction detection
    * @returns {Promise} - Promise that resolves when all sounds are loaded
    */
   async initialize() {
@@ -26,37 +29,45 @@ class SoundManager {
       // Initialize Web Audio API context
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-      // List of sounds to load
+      // Set up user interaction detection for autoplay restrictions
+      this.setupUserInteractionDetection();
+
+      // List of sounds to load with fallbacks
       const soundsToLoad = [
         ['bump', '/assets/sounds/bump.mp3'],
         ['portal', '/assets/sounds/portal.mp3'],
         ['level_complete', '/assets/sounds/level-complete.mp3'],
-        ['pickup', '/assets/sounds/pickup.mp3'],
-        ['artifact_create', '/assets/sounds/artifact-pickup.mp3'], // Map to existing sound
-        ['error', '/assets/sounds/bump.mp3'], // Map to existing sound
-        ['page_turn', '/assets/sounds/page-turn.mp3']
+        ['pickup', '/assets/sounds/artifact-pickup.mp3'], // Use existing artifact-pickup.mp3
+        ['artifact_create', '/assets/sounds/artifact-pickup.mp3'],
+        ['error', '/assets/sounds/bump.mp3'], // Use bump as error sound
+        ['page_turn', '/assets/sounds/page-turn.mp3'],
+        ['discovery', '/assets/sounds/artifact-pickup.mp3'], // Use artifact-pickup for discovery
+        ['portal_standard', '/assets/sounds/portal.mp3'], // Use existing portal.mp3
+        ['typing', '/assets/sounds/page-turn.mp3'], // Use page-turn for typing
+        ['whisper', '/assets/sounds/page-turn.mp3'], // Use page-turn for whisper
+        ['digital_transition', '/assets/sounds/portal.mp3'], // Use portal for digital transition
+        ['toilet_flush', '/assets/sounds/water.mp3'], // Use water for toilet flush
+        ['poof', '/assets/sounds/poof.mp3']
       ];
 
-      // Only try to load sounds that exist
-      const promises = soundsToLoad.map(([name, path]) => this.loadSound(name, path));
-      await Promise.all(promises.filter(p => p)); // Filter out any null promises
+      // Load sounds with fallback strategy
+      const loadPromises = soundsToLoad.map(([name, path]) => 
+        this.loadSoundWithFallback(name, path)
+      );
+      
+      await Promise.allSettled(loadPromises);
 
-      // Initialize with default sounds for any that are missing
-      if (!this.sounds['error']) {
-        console.log('Creating fallback for error sound');
-        this.sounds['error'] = this.sounds['bump'];
-      }
-
-      if (!this.sounds['artifact_create']) {
-        console.log('Creating fallback for artifact_create sound');
-        this.sounds['artifact_create'] = this.sounds['pickup'] || this.sounds['bump'];
-      }
+      // Create fallback sounds for any that failed to load
+      this.createFallbackSounds();
 
       // Load music if available
       try {
-        await Promise.all([
-          this.loadMusic('overworld', '/assets/music/overworldTheme.mp3'),
-          this.loadMusic('yosemite', '/assets/music/yosemiteTheme.mp3')
+        await Promise.allSettled([
+          this.loadMusicWithFallback('overworld', '/assets/music/overworldTheme.mp3'),
+          this.loadMusicWithFallback('yosemite', '/assets/music/yosemiteTheme.mp3'),
+          this.loadMusicWithFallback('terminal', '/assets/music/terminalTheme.mp3'),
+          this.loadMusicWithFallback('textAdventure', '/assets/music/textAdventureTheme.mp3'),
+          this.loadMusicWithFallback('hemingway', '/assets/music/hemingwayTheme.mp3')
         ]);
       } catch (musicError) {
         console.warn('Some music tracks could not be loaded:', musicError);
@@ -71,6 +82,60 @@ class SoundManager {
     }
 
     return this;
+  }
+
+  /**
+   * Set up user interaction detection for autoplay restrictions
+   */
+  setupUserInteractionDetection() {
+    const interactionEvents = ['click', 'touchstart', 'keydown', 'mousedown'];
+    
+    const handleUserInteraction = () => {
+      if (!this.userInteracted) {
+        this.userInteracted = true;
+        console.log('🔊 User interaction detected - audio enabled');
+        
+        // Resume audio context if suspended
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+          this.audioContext.resume();
+        }
+        
+        // Remove event listeners after first interaction
+        interactionEvents.forEach(event => {
+          document.removeEventListener(event, handleUserInteraction, true);
+        });
+      }
+    };
+
+    interactionEvents.forEach(event => {
+      document.addEventListener(event, handleUserInteraction, true);
+    });
+  }
+
+  /**
+   * Load a sound with fallback strategy
+   * @param {string} name - Sound identifier
+   * @param {string} path - Sound file source
+   * @returns {Promise} - Promise that resolves when the sound is loaded
+   */
+  async loadSoundWithFallback(name, path) {
+    // Check if already loading
+    if (this.loadingPromises.has(name)) {
+      return this.loadingPromises.get(name);
+    }
+
+    const loadPromise = this.loadSound(name, path);
+    this.loadingPromises.set(name, loadPromise);
+    
+    try {
+      await loadPromise;
+      console.log(`✅ Loaded sound: ${name}`);
+    } catch (error) {
+      console.warn(`⚠️ Failed to load sound ${name}:`, error);
+      // Don't throw - let the fallback system handle it
+    }
+    
+    return loadPromise;
   }
   
   /**
@@ -88,11 +153,25 @@ class SoundManager {
       const arrayBuffer = await response.arrayBuffer();
       const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
       this.sounds[name] = audioBuffer;
-      console.log(`✅ Loaded sound: ${name}`);
     } catch (error) {
       console.error(`❌ Error loading sound ${name}:`, error);
-      // Resolve the promise even if the sound fails to load
       this.sounds[name] = null;
+      throw error;
+    }
+  }
+
+  /**
+   * Load music with fallback strategy
+   * @param {string} name - Music identifier
+   * @param {string} path - Music file source
+   * @returns {Promise} - Promise that resolves when the music is loaded
+   */
+  async loadMusicWithFallback(name, path) {
+    try {
+      await this.loadMusic(name, path);
+    } catch (error) {
+      console.warn(`⚠️ Failed to load music ${name}:`, error);
+      this.music[name] = null;
     }
   }
   
@@ -114,24 +193,108 @@ class SoundManager {
       console.log(`✅ Loaded music: ${name}`);
     } catch (error) {
       console.error(`❌ Error loading music ${name}:`, error);
-      // Resolve the promise even if the music fails to load
       this.music[name] = null;
+      throw error;
     }
+  }
+
+  /**
+   * Create fallback sounds for missing audio files
+   */
+  createFallbackSounds() {
+    // Create a simple beep sound as fallback
+    const createBeep = (frequency = 440, duration = 0.1) => {
+      const sampleRate = this.audioContext.sampleRate;
+      const buffer = this.audioContext.createBuffer(1, sampleRate * duration, sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      for (let i = 0; i < buffer.length; i++) {
+        data[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.3;
+      }
+      
+      return buffer;
+    };
+
+    // Create fallbacks for missing sounds
+    const missingSounds = [
+      'pickup', 'portal_standard', 'typing', 'whisper', 
+      'digital_transition', 'toilet_flush', 'discovery'
+    ];
+
+    missingSounds.forEach(soundName => {
+      if (!this.sounds[soundName]) {
+        // Create different beep frequencies for different sounds
+        let frequency = 440;
+        let duration = 0.1;
+        
+        switch (soundName) {
+          case 'pickup':
+          case 'discovery':
+            frequency = 800; // Higher pitch for pickup
+            break;
+          case 'portal_standard':
+          case 'digital_transition':
+            frequency = 200; // Lower pitch for portals
+            duration = 0.3;
+            break;
+          case 'typing':
+            frequency = 600; // Medium pitch for typing
+            duration = 0.05;
+            break;
+          case 'whisper':
+            frequency = 300; // Low pitch for whisper
+            duration = 0.2;
+            break;
+          case 'toilet_flush':
+            frequency = 150; // Very low pitch for toilet
+            duration = 0.5;
+            break;
+        }
+        
+        this.sounds[soundName] = createBeep(frequency, duration);
+        console.log(`🔧 Created fallback sound: ${soundName}`);
+      }
+    });
   }
   
   /**
-   * Play a sound effect
+   * Play a sound effect with user interaction check
    * @param {string} name - Sound identifier
    * @param {number} volume - Optional volume override
    */
   playSound(name, volume = 1) {
-    if (this.isMuted || !this.sounds[name]) return;
+    if (this.isMuted) return;
+
+    // Check if user has interacted (required for autoplay)
+    if (!this.userInteracted) {
+      console.log(`🔇 Sound ${name} blocked - waiting for user interaction`);
+      return;
+    }
+
+    // Resume audio context if suspended
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
 
     try {
+      // Get the sound (with fallback)
+      let soundToPlay = this.sounds[name];
+      
+      // Use fallback if sound doesn't exist
+      if (!soundToPlay) {
+        if (this.sounds['bump']) {
+          soundToPlay = this.sounds['bump'];
+          console.log(`🔄 Using bump sound as fallback for ${name}`);
+        } else {
+          console.warn(`⚠️ No sound available for ${name}`);
+          return;
+        }
+      }
+
       const source = this.audioContext.createBufferSource();
       const gainNode = this.audioContext.createGain();
       
-      source.buffer = this.sounds[name];
+      source.buffer = soundToPlay;
       gainNode.gain.value = volume * this.soundVolume;
       
       source.connect(gainNode);
@@ -145,13 +308,24 @@ class SoundManager {
   }
   
   /**
-   * Play background music
+   * Play background music with user interaction check
    * @param {string} name - Music identifier
    * @param {boolean} loop - Whether to loop the music
    * @param {number} volume - Optional volume override
    */
   playMusic(name, loop = false, volume = 1) {
-    if (this.isMuted || !this.music[name]) return;
+    if (this.isMuted) return;
+
+    // Check if user has interacted (required for autoplay)
+    if (!this.userInteracted) {
+      console.log(`🔇 Music ${name} blocked - waiting for user interaction`);
+      return;
+    }
+
+    // Resume audio context if suspended
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
 
     try {
       // Stop current music if playing
@@ -159,10 +333,24 @@ class SoundManager {
         this.currentMusic.stop();
       }
 
+      // Get the music (with fallback)
+      let musicToPlay = this.music[name];
+      
+      // Use fallback if music doesn't exist
+      if (!musicToPlay) {
+        if (this.music['overworld']) {
+          musicToPlay = this.music['overworld'];
+          console.log(`🔄 Using overworld music as fallback for ${name}`);
+        } else {
+          console.warn(`⚠️ No music available for ${name}`);
+          return;
+        }
+      }
+
       const source = this.audioContext.createBufferSource();
       const gainNode = this.audioContext.createGain();
       
-      source.buffer = this.music[name];
+      source.buffer = musicToPlay;
       source.loop = loop;
       gainNode.gain.value = volume * this.musicVolume;
       
@@ -190,67 +378,78 @@ class SoundManager {
         gainNode.gain.setValueAtTime(this.musicVolume, this.audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 1);
         this.currentMusic.connect(gainNode);
+        
+        // Stop after fade
+        setTimeout(() => {
+          if (this.currentMusic) {
+            this.currentMusic.stop();
+            this.currentMusic = null;
+          }
+        }, 1000);
+      } else {
+        this.currentMusic.stop();
+        this.currentMusic = null;
       }
-      
-      this.currentMusic.stop();
-      this.currentMusic = null;
       console.log('🛑 Stopped music');
     } catch (error) {
       console.error('❌ Error stopping music:', error);
     }
   }
-  
+
   /**
-   * Set sound effect volume
+   * Set sound effects volume
    * @param {number} volume - Volume level (0-1)
    */
   setSoundVolume(volume) {
     this.soundVolume = Math.max(0, Math.min(1, volume));
-    console.log(`🔊 Sound volume set to: ${this.soundVolume}`);
   }
-  
+
   /**
    * Set music volume
    * @param {number} volume - Volume level (0-1)
    */
   setMusicVolume(volume) {
     this.musicVolume = Math.max(0, Math.min(1, volume));
-    if (this.currentMusic) {
-      const gainNode = this.audioContext.createGain();
-      gainNode.gain.value = this.musicVolume;
-      this.currentMusic.connect(gainNode);
-    }
-    console.log(`🎵 Music volume set to: ${this.musicVolume}`);
   }
-  
+
   /**
-   * Set muted state
-   * @param {boolean} muted - Whether to mute all sounds
+   * Toggle mute state
+   * @param {boolean} muted - Whether to mute
    */
-  setMute(muted) {
+  setMuted(muted) {
     this.isMuted = muted;
     if (muted && this.currentMusic) {
       this.stopMusic();
     }
-    console.log(`🔇 Sound ${muted ? 'muted' : 'unmuted'}`);
   }
-  
-  /**
-   * Toggle muted state
-   */
-  toggleMute() {
-    this.setMute(!this.isMuted);
-  }
-  
+
   /**
    * Get singleton instance
-   * @returns {SoundManager} - Sound manager instance
    */
   static getInstance() {
     if (!SoundManager.instance) {
       SoundManager.instance = new SoundManager();
     }
     return SoundManager.instance;
+  }
+
+  /**
+   * Cleanup method
+   */
+  cleanup() {
+    if (this.currentMusic) {
+      this.currentMusic.stop();
+      this.currentMusic = null;
+    }
+    
+    if (this.audioContext) {
+      this.audioContext.close();
+      this.audioContext = null;
+    }
+    
+    this.sounds = {};
+    this.music = {};
+    this.initialized = false;
   }
 }
 
