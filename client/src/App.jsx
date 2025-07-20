@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect }, { useEffect, useState, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AchievementProvider } from './context/AchievementContext';
 import { useGameState } from './context/GameStateContext';
@@ -25,6 +25,24 @@ import './App.css';
 console.log('App starting at', new Date().toISOString());
 
 function App() {
+  // Preload critical images
+  useEffect(() => {
+    const criticalImages = [
+      '/assets/tiles/portal.webp',
+      '/assets/tiles/dungeon.webp',
+      '/assets/npcs/jesus.webp',
+      '/assets/npcs/zeus.webp'
+    ];
+
+    criticalImages.forEach(src => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = src;
+      document.head.appendChild(link);
+    });
+  }, []);
+
   const [world, setWorld] = useState('desert1');
   const [user, setUser] = useState(null);
   const [startupTime] = useState(new Date().toISOString());

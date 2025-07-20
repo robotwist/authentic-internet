@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import OptimizedImage from './OptimizedImage';
 import { v4 as uuidv4 } from 'uuid';
 import {
   fetchArtifacts,

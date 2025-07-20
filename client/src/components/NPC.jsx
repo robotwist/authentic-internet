@@ -367,12 +367,12 @@ const NPC = ({ npc, position, characterPosition, onDialogStateChange, mapData, c
     [NPC_TYPES.SHAKESPEARE]: '/assets/npcs/shakespeare.webp',
     [NPC_TYPES.ARTIST]: '/assets/npcs/artist.svg',
     [NPC_TYPES.MICHELANGELO]: '/assets/npcs/michelangelo.svg',
-    [NPC_TYPES.ADA_LOVELACE]: '/assets/npcs/ada_lovelace.png',
+    [NPC_TYPES.ADA_LOVELACE]: '/assets/npcs/ada_lovelace.webp',
     [NPC_TYPES.LORD_BYRON]: '/assets/npcs/lord_byron.webp',
     [NPC_TYPES.OSCAR_WILDE]: '/assets/npcs/oscar_wilde.svg',
     [NPC_TYPES.ALEXANDER_POPE]: '/assets/npcs/alexander_pope.svg',
     [NPC_TYPES.ZEUS]: '/assets/npcs/zeus.svg',
-    [NPC_TYPES.JOHN_MUIR]: '/assets/npcs/john_muir.png',
+    [NPC_TYPES.JOHN_MUIR]: '/assets/npcs/john_muir.webp',
     [NPC_TYPES.JESUS]: '/assets/npcs/jesus.webp'
   }), []);
 
