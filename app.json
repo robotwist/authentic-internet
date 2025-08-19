@@ -1,0 +1,52 @@
+{
+  "name": "Authentic Internet API",
+  "description": "Backend API for the Authentic Internet multiplayer game platform",
+  "repository": "https://github.com/robotwist/authentic-internet",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "express", "mongodb", "socket.io", "game", "multiplayer"],
+  "env": {
+    "NODE_ENV": {
+      "description": "Environment setting",
+      "value": "production"
+    },
+    "PORT": {
+      "description": "Port for the server to run on",
+      "value": "5001"
+    },
+    "MONGO_URI": {
+      "description": "MongoDB connection string",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT token generation",
+      "required": true,
+      "generator": "secret"
+    },
+    "CLIENT_URL": {
+      "description": "Frontend application URL",
+      "value": "https://authentic-internet.netlify.app"
+    },
+    "EMAIL_USER": {
+      "description": "Email service username",
+      "required": false
+    },
+    "EMAIL_PASS": {
+      "description": "Email service password",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "scripts": {
+    "postdeploy": "echo 'Deployment completed successfully!'"
+  }
+}

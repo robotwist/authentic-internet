@@ -1,7 +1,7 @@
 [build]
-  command = "npm run build"
+  command = "cd client && npm install && npm run build"
   publish = "client/dist"
-  environment = { NODE_VERSION = "18", VITE_COMMIT_REF = "${COMMIT_REF}", VITE_CONTEXT = "${CONTEXT}" }
+  environment = { NODE_VERSION = "20", VITE_COMMIT_REF = "${COMMIT_REF}", VITE_CONTEXT = "${CONTEXT}" }
   
 # Production context: all deploys from the Production branch set in your site's
 # deploy contexts will inherit these settings.
@@ -22,6 +22,22 @@
 # contexts no matter where you define them in the file.
 [[redirects]]
   from = "/api/*"
-  to = "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com/api/:splat"
+  to = "https://authentic-internet-api.herokuapp.com/api/:splat"
   status = 200
-  force = true 
+  force = true
+
+# Handle client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://authentic-internet-api.herokuapp.com;" 

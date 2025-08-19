@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { AuthContext } from '../context/AuthContext';
-import { GameStateContext } from '../context/GameStateContext';
+import GameStateContext from '../context/GameStateContext';
 import Level4Shooter from './Level4Shooter';
 import TextAdventure from './TextAdventure';
 import Level3Terminal from './Level3Terminal';

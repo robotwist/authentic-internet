@@ -51,6 +51,9 @@ const storeAuthData = (data) => {
 // Create the Auth Context
 const AuthContext = createContext(null);
 
+// Export the AuthContext for use in other components
+export { AuthContext };
+
 // Action types
 const AUTH_ACTIONS = {
   SET_LOADING: 'SET_LOADING',
