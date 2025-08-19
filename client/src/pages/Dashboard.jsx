@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import API from '../api/api';
 import { MAPS } from '../components/Constants';
 import DailyQuote from '../components/DailyQuote';
+import CharacterSelection from '../components/CharacterSelection';
 import '../styles/Dashboard.css';
 import { useAchievements, ACHIEVEMENTS } from '../context/AchievementContext';
 
@@ -19,6 +20,7 @@ const Dashboard = () => {
     mapType: ''
   });
   const [character, setCharacter] = useState(null);
+  const [showCharacterSelection, setShowCharacterSelection] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { unlockAchievement } = useAchievements();
@@ -28,6 +30,13 @@ const Dashboard = () => {
     fetchCharacter();
   }, []);
 
+  useEffect(() => {
+    // Show character selection if user doesn't have a character
+    if (user && !character && !showCharacterSelection) {
+      setShowCharacterSelection(true);
+    }
+  }, [user, character, showCharacterSelection]);
+
   const fetchCharacter = async () => {
     if (!user?.id) return;
     
@@ -36,7 +45,18 @@ const Dashboard = () => {
       setCharacter(response.data);
     } catch (error) {
       console.error('Failed to load character data:', error);
+      // If character not found, don't show character selection yet
+      // Let the useEffect handle it
     }
+  };
+
+  const handleCharacterSelected = (selectedCharacter) => {
+    setCharacter(selectedCharacter);
+    setShowCharacterSelection(false);
+  };
+
+  const handleCharacterSkipped = () => {
+    setShowCharacterSelection(false);
   };
 
   // Calculate level and progress based on experience
@@ -144,6 +164,16 @@ const Dashboard = () => {
 
   if (loading) return <div className="loading">Loading worlds...</div>;
 
+  // Show character selection if needed
+  if (showCharacterSelection) {
+    return (
+      <CharacterSelection
+        onCharacterSelected={handleCharacterSelected}
+        onSkip={handleCharacterSkipped}
+      />
+    );
+  }
+
   // Calculate character level and progress
   const { level, progress, nextLevelAt } = calculateLevel(character?.exp || 0);
 
@@ -180,6 +210,7 @@ const Dashboard = () => {
         <div className="character-actions">
           <button onClick={() => navigate('/profile')}>View Profile</button>
           <button onClick={() => navigate('/game')}>Continue Adventure</button>
+          <button onClick={() => setShowCharacterSelection(true)}>Change Character</button>
         </div>
       </div>
       

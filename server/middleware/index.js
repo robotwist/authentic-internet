@@ -9,6 +9,7 @@ import { csrfProtection, handleCsrfError, provideCsrfToken } from "./csrf.js";
 import { configureCorsOptions, configureSessionOptions } from "../config/app-config.js";
 import { configureSecurityHeaders, enforceHttps } from "../utils/security.js";
 import { apiLimiter, healthCheckLimiter } from "../utils/rateLimiting.js";
+import { xssProtection } from "./validation.js";
 
 /**
  * Apply all middleware to Express app
@@ -47,6 +48,9 @@ export const applyMiddleware = (app, allowedOrigins) => {
   
   // Apply general rate limiting to all other routes
   app.use(apiLimiter);
+  
+  // Apply XSS protection middleware
+  app.use(xssProtection);
   
   // Error handling for CORS
   app.use((err, req, res, next) => {

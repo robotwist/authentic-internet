@@ -217,6 +217,23 @@ const ArtifactSchema = new mongoose.Schema({
   featuredAt: { type: Date },
   featuredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   
+  // Sharing and Discovery
+  isShared: { type: Boolean, default: false },
+  sharedAt: { type: Date },
+  shareCount: { type: Number, default: 0 },
+  discoveryCount: { type: Number, default: 0 },
+  lastDiscoveredAt: { type: Date },
+  
+  // Public Artifact Marketplace
+  marketplace: {
+    isListed: { type: Boolean, default: false },
+    listedAt: { type: Date },
+    price: { type: Number, default: 0 }, // Virtual currency
+    category: { type: String, enum: ['featured', 'trending', 'new', 'popular'] },
+    tags: [{ type: String }],
+    description: { type: String, maxlength: 500 }
+  },
+  
   // Requirements and Progression
   requirements: {
     level: { type: Number, default: 1 },
@@ -413,6 +430,56 @@ ArtifactSchema.methods.addToCollection = function(userId, collectionName = 'Favo
     personalNotes: notes,
     addedAt: new Date()
   });
+};
+
+// Method to share artifact publicly
+ArtifactSchema.methods.sharePublicly = function() {
+  this.isShared = true;
+  this.sharedAt = new Date();
+  this.visibility = 'public';
+  this.marketplace.isListed = true;
+  this.marketplace.listedAt = new Date();
+};
+
+// Method to unshare artifact
+ArtifactSchema.methods.unsharePublicly = function() {
+  this.isShared = false;
+  this.sharedAt = null;
+  this.visibility = 'private';
+  this.marketplace.isListed = false;
+  this.marketplace.listedAt = null;
+};
+
+// Method to increment share count
+ArtifactSchema.methods.incrementShareCount = function() {
+  this.shareCount += 1;
+};
+
+// Method to increment discovery count
+ArtifactSchema.methods.incrementDiscoveryCount = function() {
+  this.discoveryCount += 1;
+  this.lastDiscoveredAt = new Date();
+};
+
+// Method to list in marketplace
+ArtifactSchema.methods.listInMarketplace = function(price = 0, category = 'new', tags = [], description = '') {
+  this.marketplace.isListed = true;
+  this.marketplace.listedAt = new Date();
+  this.marketplace.price = price;
+  this.marketplace.category = category;
+  this.marketplace.tags = tags;
+  this.marketplace.description = description;
+  this.visibility = 'public';
+};
+
+// Method to remove from marketplace
+ArtifactSchema.methods.removeFromMarketplace = function() {
+  this.marketplace.isListed = false;
+  this.marketplace.listedAt = null;
+  this.marketplace.price = 0;
+  this.marketplace.category = 'new';
+  this.marketplace.tags = [];
+  this.marketplace.description = '';
 };
 
 // Pre-save middleware

@@ -39,9 +39,11 @@ import Level3Terminal from './Level3Terminal';
 import Level4Shooter from './Level4Shooter';
 import HemingwayChallenge from './HemingwayChallenge';
 import ArtifactGameLauncher from './ArtifactGameLauncher';
+import MultiplayerChat from './MultiplayerChat';
 import { useAuth } from '../context/AuthContext';
 import { useAchievements } from '../context/AchievementContext';
 import { useGameState } from '../context/GameStateContext';
+import { useWebSocket } from '../context/WebSocketContext';
 import gameStateManager from "../utils/gameStateManager";
 import { IconButton } from '@mui/material';
 
@@ -103,6 +105,14 @@ const GameWorld = () => {
   const { user, updateUser } = useAuth();
   const { unlockAchievement, checkLevelAchievements, checkDiscoveryAchievements, checkCollectionAchievements } = useAchievements();
   const { updateGameProgress } = useGameState();
+  
+  // WebSocket connection for multiplayer
+  const { socket, isConnected, sendMessage } = useWebSocket();
+  const [onlinePlayers, setOnlinePlayers] = useState([]);
+  const [showChat, setShowChat] = useState(true);
+  const [otherPlayers, setOtherPlayers] = useState([]);
+  const [worldId, setWorldId] = useState('overworld');
+  const [nearbyPlayer, setNearbyPlayer] = useState(null);
   const gameWorldRef = useRef(null);
   const characterRef = useRef(null);
   const [portalNotificationActive, setPortalNotificationActive] = useState(false);
@@ -443,6 +453,90 @@ const GameWorld = () => {
     }
   }, [character?.experience, character?.level]);
 
+  // Multiplayer position update effect
+  useEffect(() => {
+    if (isConnected && socket && characterPosition) {
+      // Update world ID based on current map
+      const currentWorldId = MAPS[currentMapIndex]?.name || 'overworld';
+      setWorldId(currentWorldId);
+      
+      // Check for player collisions before sending position update
+      const collision = checkPlayerCollision(characterPosition);
+      if (collision) {
+        // Handle collision - prevent movement or trigger interaction
+        handlePlayerCollision(collision);
+        return;
+      }
+      
+      // Send position update to server
+      sendMessage('world:update-position', {
+        worldId: currentWorldId,
+        position: characterPosition,
+        facing: direction
+      });
+    }
+  }, [characterPosition, currentMapIndex, direction, isConnected, socket, sendMessage]);
+
+  // Check for player collisions
+  const checkPlayerCollision = useCallback((position) => {
+    const collisionDistance = TILE_SIZE * 0.8; // 80% of tile size for collision
+    
+    for (const player of otherPlayers) {
+      const distance = Math.sqrt(
+        Math.pow(position.x - player.position.x, 2) + 
+        Math.pow(position.y - player.position.y, 2)
+      );
+      
+      if (distance < collisionDistance) {
+        return {
+          player,
+          distance,
+          type: 'collision'
+        };
+      }
+    }
+    
+    return null;
+  }, [otherPlayers]);
+
+  // Handle player collision
+  const handlePlayerCollision = useCallback((collision) => {
+    const { player, type } = collision;
+    
+    if (type === 'collision') {
+      // Show interaction prompt
+      setNotification({
+        type: 'info',
+        message: `Press SPACE to interact with ${player.username}`,
+        duration: 3000
+      });
+      
+      // Store nearby player for interaction
+      setNearbyPlayer(player);
+    }
+  }, []);
+
+  // Handle player interaction
+  const handlePlayerInteraction = useCallback(() => {
+    if (nearbyPlayer) {
+      // Send interaction event to server
+      sendMessage('world:player-interaction', {
+        worldId,
+        targetUserId: nearbyPlayer.userId,
+        interactionType: 'greet'
+      });
+      
+      // Show interaction result
+      setNotification({
+        type: 'success',
+        message: `You greeted ${nearbyPlayer.username}!`,
+        duration: 2000
+      });
+      
+      setNearbyPlayer(null);
+    }
+  }, [nearbyPlayer, worldId, sendMessage]);
+
   useEffect(() => {
     // Setup event listeners for navbar button actions
     // Add development keyboard shortcuts for testing
@@ -472,6 +566,17 @@ const GameWorld = () => {
       // Toggle feedback form with 'F' key
       if (event.key === 'f' || event.key === 'F') {
         setShowFeedback(prev => !prev);
+      }
+      
+      // Toggle chat with 'C' key
+      if (event.key === 'c' || event.key === 'C') {
+        setShowChat(prev => !prev);
+      }
+      
+      // Player interaction with SPACE key
+      if (event.key === ' ') {
+        event.preventDefault();
+        handlePlayerInteraction();
       }
 
       // Development mode shortcuts
@@ -583,6 +688,63 @@ const GameWorld = () => {
     
     initSoundManager();
   }, [currentMapIndex, soundManager]); // Only reinitialize when map changes or if soundManager changes
+
+  // Socket.io event handlers for multiplayer
+  useEffect(() => {
+    if (!socket) return;
+
+    const handlePlayerJoined = (data) => {
+      if (data.worldId === worldId) {
+        setOtherPlayers(prev => {
+          const existing = prev.find(p => p.userId === data.userId);
+          if (!existing) {
+            return [...prev, {
+              userId: data.userId,
+              username: data.username,
+              avatar: data.avatar,
+              position: data.position,
+              facing: data.facing || 'down'
+            }];
+          }
+          return prev;
+        });
+      }
+    };
+
+    const handlePlayerLeft = (data) => {
+      setOtherPlayers(prev => prev.filter(p => p.userId !== data.userId));
+    };
+
+    const handlePlayerMoved = (data) => {
+      if (data.userId !== user?._id) {
+        setOtherPlayers(prev => prev.map(p => 
+          p.userId === data.userId 
+            ? { ...p, position: data.position, facing: data.facing }
+            : p
+        ));
+      }
+    };
+
+    const handlePlayersUpdated = (data) => {
+      if (data.worldId === worldId) {
+        setOtherPlayers(data.players || []);
+      }
+    };
+
+    // Add Socket.io event listeners
+    socket.on('world:user-joined', handlePlayerJoined);
+    socket.on('world:user-left', handlePlayerLeft);
+    socket.on('world:player-moved', handlePlayerMoved);
+    socket.on('world:players-updated', handlePlayersUpdated);
+
+    return () => {
+      // Cleanup event listeners
+      socket.off('world:user-joined', handlePlayerJoined);
+      socket.off('world:user-left', handlePlayerLeft);
+      socket.off('world:player-moved', handlePlayerMoved);
+      socket.off('world:players-updated', handlePlayersUpdated);
+    };
+  }, [socket, worldId, user?._id]);
 
   const handleCharacterMove = useCallback((newPosition, targetMapIndex) => {
     // Update character position
@@ -1816,6 +1978,38 @@ const GameWorld = () => {
               ref={characterRef}
             />
             
+            {/* Other Players */}
+            {otherPlayers.map(player => (
+              <div
+                key={player.userId}
+                className="other-player"
+                style={{
+                  position: 'absolute',
+                  left: `${player.position.x}px`,
+                  top: `${player.position.y}px`,
+                  width: `${TILE_SIZE}px`,
+                  height: `${TILE_SIZE}px`,
+                  zIndex: 10
+                }}
+              >
+                <div className="other-player-avatar">
+                  <img 
+                    src={player.avatar || '/assets/default-avatar.svg'} 
+                    alt={player.username}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      border: '2px solid #3498db'
+                    }}
+                  />
+                </div>
+                <div className="other-player-name">
+                  {player.username}
+                </div>
+              </div>
+            ))}
+            
             {/* Environment Modifiers */}
             {isDarkMode && <div className="darkmode-overlay" />}
             
@@ -2039,6 +2233,18 @@ const GameWorld = () => {
             />
           ))}
         </div>
+
+        {/* Multiplayer Chat */}
+        {showChat && (
+          <MultiplayerChat
+            worldId={worldId}
+            worldName={MAPS[currentMapIndex]?.name || 'Unknown World'}
+            onPlayerClick={(player) => {
+              console.log('Player clicked:', player);
+              // Handle player interaction
+            }}
+          />
+        )}
       </div>
     </ErrorBoundary>
   );

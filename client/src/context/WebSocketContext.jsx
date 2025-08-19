@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { io } from 'socket.io-client';
 
 // Create context
 const WebSocketContext = createContext(null);
@@ -11,133 +12,132 @@ export function WebSocketProvider({ children }) {
   const { token, isAuthenticated } = useAuth();
   
   // Make sure to use the correct port
-  const SERVER_PORT = import.meta.env.VITE_SERVER_PORT || '5004';
+  const SERVER_PORT = import.meta.env.VITE_SERVER_PORT || '5001';
   const SERVER_URL = import.meta.env.VITE_SERVER_URL || `http://localhost:${SERVER_PORT}`;
-  const WS_URL = SERVER_URL.replace(/^http/, 'ws');
   
-  // Function to create a new WebSocket connection
-  const connectWebSocket = useCallback(() => {
+  // Function to create a new Socket.io connection
+  const connectSocket = useCallback(() => {
     if (!isAuthenticated || !token) {
-      console.log('WebSocket connection not established: User not authenticated');
+      console.log('Socket.io connection not established: User not authenticated');
       return;
     }
 
     try {
-      // Create WebSocket URL with explicit host and port
-      const wsHost = new URL(WS_URL).hostname;
-      // Make sure the port is explicitly set and not undefined
-      const wsPort = SERVER_PORT || '5004';
-      const url = new URL(`ws://${wsHost}:${wsPort}`);
-      
-      // Add auth token as query parameter
-      url.searchParams.append('token', token);
-      
-      console.log(`Connecting to WebSocket at: ${url.toString()}`);
+      console.log(`Connecting to Socket.io at: ${SERVER_URL}`);
       
       // Close existing socket if it exists
       if (socket) {
-        socket.close();
+        socket.disconnect();
       }
       
-      // Create new WebSocket connection
-      const newSocket = new WebSocket(url.toString());
+      // Create new Socket.io connection
+      const newSocket = io(SERVER_URL, {
+        auth: {
+          token: token
+        },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000
+      });
       
       // Setup event handlers
-      newSocket.onopen = () => {
-        console.log('WebSocket connected');
+      newSocket.on('connect', () => {
+        console.log('Socket.io connected');
         setIsConnected(true);
         setReconnectAttempts(0);
-      };
+      });
       
-      newSocket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log('WebSocket message received:', data);
-          // Handle different message types here
-        } catch (err) {
-          console.error('Error parsing WebSocket message:', err);
-        }
-      };
-      
-      newSocket.onclose = (event) => {
-        console.log(`WebSocket disconnected: ${event.code} ${event.reason}`);
+      newSocket.on('disconnect', (reason) => {
+        console.log(`Socket.io disconnected: ${reason}`);
         setIsConnected(false);
-        
-        // Try to reconnect if not a normal closure
-        if (event.code !== 1000) {
-          const maxReconnectAttempts = 5;
-          if (reconnectAttempts < maxReconnectAttempts) {
-            const timeout = Math.min(1000 * (2 ** reconnectAttempts), 30000);
-            console.log(`Attempting to reconnect in ${timeout}ms...`);
-            setTimeout(() => {
-              setReconnectAttempts(prev => prev + 1);
-              connectWebSocket();
-            }, timeout);
-          } else {
-            console.log('Maximum reconnection attempts reached');
-          }
-        }
-      };
+      });
       
-      newSocket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
+      newSocket.on('connect_error', (error) => {
+        console.error('Socket.io connection error:', error);
+        setIsConnected(false);
+      });
+      
+      newSocket.on('reconnect', (attemptNumber) => {
+        console.log(`Socket.io reconnected after ${attemptNumber} attempts`);
+        setIsConnected(true);
+        setReconnectAttempts(0);
+      });
+      
+      newSocket.on('reconnect_attempt', (attemptNumber) => {
+        console.log(`Socket.io reconnection attempt ${attemptNumber}`);
+        setReconnectAttempts(attemptNumber);
+      });
+      
+      newSocket.on('reconnect_failed', () => {
+        console.log('Socket.io reconnection failed');
+        setIsConnected(false);
+      });
       
       setSocket(newSocket);
     } catch (error) {
-      console.error('Error establishing WebSocket connection:', error);
+      console.error('Error establishing Socket.io connection:', error);
     }
-  }, [isAuthenticated, token, socket, reconnectAttempts, WS_URL, SERVER_PORT]);
+  }, [isAuthenticated, token, socket, SERVER_URL]);
   
-  // Connect WebSocket when authenticated
+  // Connect Socket.io when authenticated
   useEffect(() => {
     if (isAuthenticated && token) {
-      connectWebSocket();
+      connectSocket();
     }
     
-    // Clean up WebSocket connection on unmount
+    // Clean up Socket.io connection on unmount
     return () => {
       if (socket) {
-        socket.close();
+        socket.disconnect();
       }
     };
-  }, [isAuthenticated, token, connectWebSocket]);
+  }, [isAuthenticated, token, connectSocket]);
   
-  // Function to send a message through the WebSocket
-  const sendMessage = useCallback((messageType, data) => {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-      console.error('WebSocket is not connected');
+  // Function to send a message through Socket.io
+  const sendMessage = useCallback((event, data) => {
+    if (!socket || !isConnected) {
+      console.error('Socket.io is not connected');
       return false;
     }
     
     try {
-      const message = JSON.stringify({
-        type: messageType,
-        data,
-        timestamp: new Date().toISOString()
-      });
-      
-      socket.send(message);
+      socket.emit(event, data);
       return true;
     } catch (error) {
-      console.error('Error sending WebSocket message:', error);
+      console.error('Error sending Socket.io message:', error);
       return false;
     }
+  }, [socket, isConnected]);
+  
+  // Function to listen to events
+  const onEvent = useCallback((event, callback) => {
+    if (!socket) return;
+    
+    socket.on(event, callback);
+    
+    // Return cleanup function
+    return () => {
+      socket.off(event, callback);
+    };
   }, [socket]);
   
   // Function to manually reconnect
   const reconnect = useCallback(() => {
     if (socket) {
-      socket.close();
+      socket.disconnect();
     }
-    connectWebSocket();
-  }, [socket, connectWebSocket]);
+    connectSocket();
+  }, [socket, connectSocket]);
   
   // The value provided to consumers of this context
   const value = {
     socket,
     isConnected,
     sendMessage,
+    onEvent,
     reconnect
   };
   

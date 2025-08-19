@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './NPCDialog.css';
-import { gameProgressService } from '../services/GameProgressService';
+import gameProgressService from '../services/GameProgressService';
 
 /**
  * NPCDialog component for displaying dialog with NPCs in the game

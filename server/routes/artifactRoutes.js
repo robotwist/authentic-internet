@@ -6,6 +6,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from 'url';
+import { validate, schemas } from "../middleware/validation.js";
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -88,7 +89,7 @@ const uploadFields = upload.fields([
 /* ────────────────────────────────
    🔹 CREATE ARTIFACT (WITH MESSAGE)
 ──────────────────────────────── */
-router.post("/", authenticateToken, uploadFields, async (req, res) => {
+router.post("/", authenticateToken, uploadFields, validate(schemas.artifact.create), async (req, res) => {
   try {
     const { name, description, content, riddle, unlockAnswer, area, isExclusive, location } = req.body;
 
@@ -158,7 +159,10 @@ router.get("/", async (req, res) => {
 
     const artifacts = await Artifact.find(filter)
       .populate('creator', 'username email')
-      .populate('comments.user', 'username')
+      .populate({
+        path: 'comments.user',
+        select: 'username'
+      })
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
@@ -429,6 +433,69 @@ router.post("/admin/seed", async (req, res) => {
   }
 });
 
+// Artifact sharing and marketplace routes
+
+// Get public marketplace artifacts
+router.get('/marketplace', async (req, res) => {
+  try {
+    const { category, tags, sort = 'newest', limit = 20, page = 1 } = req.query;
+    
+    let query = {
+      'marketplace.isListed': true,
+      visibility: 'public'
+    };
+    
+    if (category && category !== 'all') {
+      query['marketplace.category'] = category;
+    }
+    
+    if (tags && tags.length > 0) {
+      query['marketplace.tags'] = { $in: tags.split(',') };
+    }
+    
+    let sortOption = {};
+    switch (sort) {
+      case 'newest':
+        sortOption = { 'marketplace.listedAt': -1 };
+        break;
+      case 'popular':
+        sortOption = { discoveryCount: -1 };
+        break;
+      case 'trending':
+        sortOption = { shareCount: -1 };
+        break;
+      case 'featured':
+        sortOption = { featured: -1, 'marketplace.listedAt': -1 };
+        break;
+      default:
+        sortOption = { 'marketplace.listedAt': -1 };
+    }
+    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const artifacts = await Artifact.find(query)
+      .populate('creator', 'username avatar level')
+      .sort(sortOption)
+      .limit(parseInt(limit))
+      .skip(skip);
+    
+    const total = await Artifact.countDocuments(query);
+    
+    res.json({
+      artifacts,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching marketplace artifacts:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 /* ────────────────────────────────
    🔹 FETCH A SINGLE ARTIFACT BY ID
 ──────────────────────────────── */
@@ -436,7 +503,10 @@ router.get("/:id", async (req, res) => {
   try {
     const artifact = await Artifact.findById(req.params.id)
       .populate('creator', 'username email')
-      .populate('comments.user', 'username');
+      .populate({
+        path: 'comments.user',
+        select: 'username'
+      });
 
     if (!artifact) {
       return res.status(404).json({ error: 'Artifact not found' });
@@ -752,7 +822,10 @@ router.post("/:id/comment", authenticateToken, async (req, res) => {
     
     // Populate the user details for the new comment
     const populatedArtifact = await Artifact.findById(id)
-      .populate('comments.user', 'username avatar');
+      .populate({
+        path: 'comments.user',
+        select: 'username avatar'
+      });
     
     res.json({ 
       message: "Comment added", 
@@ -1625,5 +1698,154 @@ function getAchievementIcon(achievementId) {
   };
   return icons[achievementId] || '🏆';
 }
+
+// Share artifact publicly
+router.post('/:id/share', authenticateToken, validate(schemas.artifact.share), async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+    
+    if (!artifact) {
+      return res.status(404).json({ message: 'Artifact not found' });
+    }
+    
+    if (artifact.creator.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized to share this artifact' });
+    }
+    
+    artifact.sharePublicly();
+    await artifact.save();
+    
+    res.json({ 
+      message: 'Artifact shared successfully',
+      artifact: {
+        id: artifact._id,
+        name: artifact.name,
+        isShared: artifact.isShared,
+        sharedAt: artifact.sharedAt
+      }
+    });
+  } catch (error) {
+    console.error('Error sharing artifact:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Unshare artifact
+router.post('/:id/unshare', authenticateToken, async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+    
+    if (!artifact) {
+      return res.status(404).json({ message: 'Artifact not found' });
+    }
+    
+    if (artifact.creator.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized to unshare this artifact' });
+    }
+    
+    artifact.unsharePublicly();
+    await artifact.save();
+    
+    res.json({ 
+      message: 'Artifact unshared successfully',
+      artifact: {
+        id: artifact._id,
+        name: artifact.name,
+        isShared: artifact.isShared
+      }
+    });
+  } catch (error) {
+    console.error('Error unsharing artifact:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Discover artifact (increment discovery count)
+router.post('/:id/discover', authenticateToken, async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+    
+    if (!artifact) {
+      return res.status(404).json({ message: 'Artifact not found' });
+    }
+    
+    if (artifact.creator.toString() === req.user.userId) {
+      return res.status(400).json({ message: 'Cannot discover your own artifact' });
+    }
+    
+    artifact.incrementDiscoveryCount();
+    await artifact.save();
+    
+    res.json({ 
+      message: 'Artifact discovered!',
+      discoveryCount: artifact.discoveryCount
+    });
+  } catch (error) {
+    console.error('Error discovering artifact:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// List artifact in marketplace
+router.post('/:id/marketplace', authenticateToken, validate(schemas.artifact.share), async (req, res) => {
+  try {
+    const { price = 0, category = 'new', tags = [], description = '' } = req.body;
+    
+    const artifact = await Artifact.findById(req.params.id);
+    
+    if (!artifact) {
+      return res.status(404).json({ message: 'Artifact not found' });
+    }
+    
+    if (artifact.creator.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized to list this artifact' });
+    }
+    
+    artifact.listInMarketplace(price, category, tags, description);
+    await artifact.save();
+    
+    res.json({ 
+      message: 'Artifact listed in marketplace successfully',
+      artifact: {
+        id: artifact._id,
+        name: artifact.name,
+        marketplace: artifact.marketplace
+      }
+    });
+  } catch (error) {
+    console.error('Error listing artifact in marketplace:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Remove artifact from marketplace
+router.delete('/:id/marketplace', authenticateToken, async (req, res) => {
+  try {
+    const artifact = await Artifact.findById(req.params.id);
+    
+    if (!artifact) {
+      return res.status(404).json({ message: 'Artifact not found' });
+    }
+    
+    if (artifact.creator.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized to remove this artifact' });
+    }
+    
+    artifact.removeFromMarketplace();
+    await artifact.save();
+    
+    res.json({ 
+      message: 'Artifact removed from marketplace successfully',
+      artifact: {
+        id: artifact._id,
+        name: artifact.name,
+        marketplace: artifact.marketplace
+      }
+    });
+  } catch (error) {
+    console.error('Error removing artifact from marketplace:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 export default router;

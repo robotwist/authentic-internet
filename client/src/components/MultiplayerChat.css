@@ -1,0 +1,442 @@
+.multiplayer-chat {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 350px;
+  height: 500px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border: 2px solid #3498db;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  font-family: 'Courier New', monospace;
+  color: #ecf0f1;
+  overflow: hidden;
+}
+
+.multiplayer-chat.minimized {
+  width: auto;
+  height: auto;
+}
+
+.chat-toggle {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  transition: all 0.3s ease;
+}
+
+.chat-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+}
+
+/* Chat Header */
+.chat-header {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #2980b9;
+}
+
+.chat-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.world-name {
+  font-weight: bold;
+  font-size: 14px;
+  color: white;
+}
+
+.player-count {
+  font-size: 11px;
+  color: #bdc3c7;
+}
+
+.chat-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.emoji-button,
+.minimize-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s ease;
+}
+
+.emoji-button:hover,
+.minimize-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Online Players */
+.online-players {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  border-bottom: 1px solid #34495e;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.online-players h4 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #bdc3c7;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.players-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(52, 152, 219, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.player-item:hover {
+  background: rgba(52, 152, 219, 0.3);
+  border-color: #3498db;
+  transform: translateY(-1px);
+}
+
+.player-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #3498db;
+}
+
+.player-name {
+  font-size: 11px;
+  color: #ecf0f1;
+  white-space: nowrap;
+}
+
+/* Messages Container */
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid #3498db;
+  animation: messageSlideIn 0.3s ease;
+}
+
+.message.own {
+  background: rgba(52, 152, 219, 0.2);
+  border-left-color: #2ecc71;
+  margin-left: 20px;
+}
+
+.message.system {
+  background: rgba(241, 196, 15, 0.2);
+  border-left-color: #f39c12;
+  text-align: center;
+  font-style: italic;
+  font-size: 11px;
+  color: #f39c12;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.sender-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #3498db;
+}
+
+.sender-name {
+  font-weight: bold;
+  font-size: 12px;
+  color: #3498db;
+}
+
+.sender-level {
+  background: #e74c3c;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.message-time {
+  font-size: 10px;
+  color: #95a5a6;
+  margin-left: auto;
+}
+
+.message-content {
+  font-size: 13px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.message-reactions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.reaction {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.reaction:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.system-message {
+  font-size: 11px;
+  color: #f39c12;
+  text-align: center;
+  font-style: italic;
+}
+
+.typing-indicator {
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #95a5a6;
+  font-style: italic;
+  animation: typingPulse 1.5s infinite;
+}
+
+@keyframes typingPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Emoji Picker */
+.emoji-picker {
+  position: absolute;
+  bottom: 60px;
+  right: 12px;
+  background: #2c3e50;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  z-index: 1001;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.emoji-option {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  padding: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.emoji-option:hover {
+  background: rgba(52, 152, 219, 0.3);
+  transform: scale(1.1);
+}
+
+/* Message Input */
+.message-input-container {
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid #34495e;
+  display: flex;
+  gap: 8px;
+}
+
+.message-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #34495e;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #ecf0f1;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.message-input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.message-input::placeholder {
+  color: #95a5a6;
+}
+
+.message-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-button {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.send-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Scrollbar Styling */
+.messages-container::-webkit-scrollbar,
+.online-players::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track,
+.online-players::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb,
+.online-players::-webkit-scrollbar-thumb {
+  background: rgba(52, 152, 219, 0.5);
+  border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover,
+.online-players::-webkit-scrollbar-thumb:hover {
+  background: rgba(52, 152, 219, 0.7);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .multiplayer-chat {
+    width: calc(100vw - 40px);
+    height: 400px;
+    bottom: 10px;
+    right: 20px;
+    left: 20px;
+  }
+  
+  .emoji-picker {
+    right: 8px;
+    left: 8px;
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+/* Animation for new messages */
+.message.new {
+  animation: messageHighlight 0.5s ease;
+}
+
+@keyframes messageHighlight {
+  0% {
+    background: rgba(52, 152, 219, 0.4);
+    transform: scale(1.02);
+  }
+  100% {
+    background: rgba(255, 255, 255, 0.05);
+    transform: scale(1);
+  }
+}
+
+/* Connection status indicator */
+.connection-status {
+  font-size: 12px;
+  margin-left: 8px;
+  animation: connectionPulse 2s infinite;
+}
+
+.connection-status.connected {
+  color: #2ecc71;
+}
+
+.connection-status.disconnected {
+  color: #e74c3c;
+  animation: none;
+}
+
+@keyframes connectionPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

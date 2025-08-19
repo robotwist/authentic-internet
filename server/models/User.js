@@ -114,6 +114,20 @@ const UserSchema = new mongoose.Schema(
       ref: "User" 
     }],
     
+    // Friend system
+    friendRequests: {
+      sent: [{ 
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        sentAt: { type: Date, default: Date.now },
+        status: { type: String, enum: ['pending', 'accepted', 'declined'], default: 'pending' }
+      }],
+      received: [{ 
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        receivedAt: { type: Date, default: Date.now },
+        status: { type: String, enum: ['pending', 'accepted', 'declined'], default: 'pending' }
+      }]
+    },
+    
     // Game progression
     experience: {
       type: Number,
@@ -535,6 +549,135 @@ UserSchema.methods.unfollowUser = function(userId) {
   
   this.following.splice(index, 1);
   return { unfollowed: true };
+};
+
+// Friend system methods
+
+// Send friend request
+UserSchema.methods.sendFriendRequest = function(targetUserId) {
+  // Check if already friends
+  if (this.friends.includes(targetUserId)) {
+    return { alreadyFriends: true };
+  }
+  
+  // Check if request already sent
+  const existingSent = this.friendRequests.sent.find(req => 
+    req.userId.toString() === targetUserId.toString()
+  );
+  if (existingSent) {
+    return { requestAlreadySent: true };
+  }
+  
+  // Check if request already received
+  const existingReceived = this.friendRequests.received.find(req => 
+    req.userId.toString() === targetUserId.toString()
+  );
+  if (existingReceived) {
+    return { requestAlreadyReceived: true };
+  }
+  
+  // Add to sent requests
+  this.friendRequests.sent.push({
+    userId: targetUserId,
+    sentAt: new Date(),
+    status: 'pending'
+  });
+  
+  return { requestSent: true };
+};
+
+// Accept friend request
+UserSchema.methods.acceptFriendRequest = function(fromUserId) {
+  // Find the received request
+  const request = this.friendRequests.received.find(req => 
+    req.userId.toString() === fromUserId.toString()
+  );
+  
+  if (!request) {
+    return { noRequestFound: true };
+  }
+  
+  if (request.status !== 'pending') {
+    return { requestAlreadyProcessed: true };
+  }
+  
+  // Update request status
+  request.status = 'accepted';
+  
+  // Add to friends list
+  if (!this.friends.includes(fromUserId)) {
+    this.friends.push(fromUserId);
+  }
+  
+  return { requestAccepted: true };
+};
+
+// Decline friend request
+UserSchema.methods.declineFriendRequest = function(fromUserId) {
+  // Find the received request
+  const request = this.friendRequests.received.find(req => 
+    req.userId.toString() === fromUserId.toString()
+  );
+  
+  if (!request) {
+    return { noRequestFound: true };
+  }
+  
+  if (request.status !== 'pending') {
+    return { requestAlreadyProcessed: true };
+  }
+  
+  // Update request status
+  request.status = 'declined';
+  
+  return { requestDeclined: true };
+};
+
+// Remove friend
+UserSchema.methods.removeFriend = function(friendUserId) {
+  // Remove from friends list
+  const friendIndex = this.friends.indexOf(friendUserId);
+  if (friendIndex === -1) {
+    return { notFriends: true };
+  }
+  
+  this.friends.splice(friendIndex, 1);
+  
+  // Remove from friend requests
+  this.friendRequests.sent = this.friendRequests.sent.filter(req => 
+    req.userId.toString() !== friendUserId.toString()
+  );
+  this.friendRequests.received = this.friendRequests.received.filter(req => 
+    req.userId.toString() !== friendUserId.toString()
+  );
+  
+  return { friendRemoved: true };
+};
+
+// Get friend status with another user
+UserSchema.methods.getFriendStatus = function(otherUserId) {
+  // Check if friends
+  if (this.friends.includes(otherUserId)) {
+    return { status: 'friends' };
+  }
+  
+  // Check if request sent
+  const sentRequest = this.friendRequests.sent.find(req => 
+    req.userId.toString() === otherUserId.toString()
+  );
+  if (sentRequest) {
+    return { status: 'requestSent', request: sentRequest };
+  }
+  
+  // Check if request received
+  const receivedRequest = this.friendRequests.received.find(req => 
+    req.userId.toString() === otherUserId.toString()
+  );
+  if (receivedRequest) {
+    return { status: 'requestReceived', request: receivedRequest };
+  }
+  
+  return { status: 'none' };
 };
 
 // Method to update creator stats

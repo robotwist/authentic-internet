@@ -1,7 +1,9 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { auth } from '../middleware/auth.js';
-import World from '../models/World.js';
+import WorldInstance from '../models/World.js';
+import ChatMessage from '../models/Chat.js';
+import User from '../models/User.js';
 import NPC from '../models/NPC.js';
 import jwt from 'jsonwebtoken';
 import { MAPS_STRUCTURE } from '../constants.js';
@@ -20,14 +22,30 @@ const validateWorld = [
 // Get all public worlds
 router.get('/', async (req, res) => {
   try {
-    const worlds = await World.find({ isPublic: true })
-      .populate('creator', 'username avatar')
-      .sort({ createdAt: -1 });
-    
-    return res.json(worlds);
+    const worlds = await WorldInstance.find({ 
+      isPublic: true, 
+      isActive: true 
+    })
+    .populate('creator', 'username avatar')
+    .sort({ 'stats.lastActivity': -1 })
+    .limit(20);
+
+    res.json({
+      success: true,
+      worlds: worlds.map(world => ({
+        worldId: world.worldId,
+        name: world.name,
+        description: world.description,
+        creator: world.creator,
+        playerCount: world.activePlayers.length,
+        maxPlayers: world.maxPlayers,
+        stats: world.stats,
+        createdAt: world.createdAt
+      }))
+    });
   } catch (error) {
     console.error('Error fetching worlds:', error);
-    return res.status(500).json({ message: 'Error fetching worlds' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -366,5 +384,141 @@ export const ensureDefaultWorldExists = async () => {
     return null;
   }
 };
+
+// Multiplayer-specific routes
+
+// Get world details by worldId
+router.get('/instance/:worldId', async (req, res) => {
+  try {
+    const { worldId } = req.params;
+    
+    const world = await WorldInstance.findOne({ worldId })
+      .populate('creator', 'username avatar')
+      .populate('moderators', 'username avatar');
+
+    if (!world) {
+      return res.status(404).json({ success: false, message: 'World not found' });
+    }
+
+    // Don't send sensitive data to non-moderators
+    const isModerator = req.user && world.moderators.some(mod => 
+      mod._id.toString() === req.user.userId
+    );
+
+    const worldData = {
+      worldId: world.worldId,
+      name: world.name,
+      description: world.description,
+      creator: world.creator,
+      playerCount: world.activePlayers.length,
+      maxPlayers: world.maxPlayers,
+      settings: world.settings,
+      stats: world.stats,
+      createdAt: world.createdAt,
+      isPublic: world.isPublic,
+      requiresInvite: world.requiresInvite
+    };
+
+    if (isModerator) {
+      worldData.activePlayers = world.activePlayers;
+      worldData.moderators = world.moderators;
+    }
+
+    res.json({ success: true, world: worldData });
+  } catch (error) {
+    console.error('Error fetching world:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Create a new multiplayer world
+router.post('/instance', auth, async (req, res) => {
+  try {
+    const { name, description, maxPlayers = 50, isPublic = true, requiresInvite = false } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'World name is required' });
+    }
+
+    // Generate unique world ID
+    const worldId = `world_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    const world = new WorldInstance({
+      worldId,
+      name,
+      description,
+      creator: req.user.userId,
+      maxPlayers,
+      isPublic,
+      requiresInvite,
+      moderators: [req.user.userId]
+    });
+
+    await world.save();
+
+    res.json({
+      success: true,
+      world: {
+        worldId: world.worldId,
+        name: world.name,
+        description: world.description,
+        creator: req.user.userId,
+        maxPlayers: world.maxPlayers,
+        isPublic: world.isPublic,
+        requiresInvite: world.requiresInvite
+      }
+    });
+  } catch (error) {
+    console.error('Error creating world:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get world chat history
+router.get('/instance/:worldId/chat', async (req, res) => {
+  try {
+    const { worldId } = req.params;
+    const { limit = 50 } = req.query;
+
+    const messages = await ChatMessage.find({
+      messageType: 'world',
+      'world.worldId': worldId,
+      'status.isDeleted': false
+    })
+    .populate('sender.userId', 'username avatar level')
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit));
+
+    res.json({
+      success: true,
+      messages: messages.reverse() // Return in chronological order
+    });
+  } catch (error) {
+    console.error('Error fetching chat history:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get online players in world
+router.get('/instance/:worldId/players', async (req, res) => {
+  try {
+    const { worldId } = req.params;
+
+    const world = await WorldInstance.findOne({ worldId });
+    if (!world) {
+      return res.status(404).json({ success: false, message: 'World not found' });
+    }
+
+    const onlinePlayers = world.getOnlinePlayers();
+
+    res.json({
+      success: true,
+      players: onlinePlayers
+    });
+  } catch (error) {
+    console.error('Error fetching online players:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
 
 export default router; 

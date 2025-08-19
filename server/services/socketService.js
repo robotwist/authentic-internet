@@ -211,75 +211,307 @@ const setupWorldEvents = (socket) => {
   if (!socketIoAvailable) return;
   
   // Join a world
-  socket.on('world:join', (data) => {
-    if (!data.worldId) {
-      socket.emit('error', { message: 'World ID is required' });
-      return;
-    }
-    
-    // Leave previous world rooms
-    Object.keys(socket.rooms).forEach(room => {
-      if (room.startsWith('world:')) {
-        socket.leave(room);
+  socket.on('world:join', async (data) => {
+    try {
+      if (!data.worldId) {
+        socket.emit('error', { message: 'World ID is required' });
+        return;
       }
-    });
-    
-    // Join new world room
-    const roomId = `world:${data.worldId}`;
-    socket.join(roomId);
-    
-    // Notify others in the world
-    socket.to(roomId).emit('world:user-joined', {
-      userId: socket.user.id,
-      username: socket.user.username
-    });
-    
-    // Send list of users in this world
-    const worldUsers = Array.from(io.sockets.adapter.rooms.get(roomId) || [])
-      .map(socketId => {
-        const userSocket = io.sockets.sockets.get(socketId);
-        return {
-          id: userSocket.user.id,
-          username: userSocket.user.username
-        };
+      
+      // Import required models
+      const { default: WorldInstance } = await import('../models/World.js');
+      const { default: User } = await import('../models/User.js');
+      
+      // Get or create world instance
+      let worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
+      if (!worldInstance) {
+        // Create default world instance
+        const user = await User.findById(socket.user.id);
+        worldInstance = new WorldInstance({
+          worldId: data.worldId,
+          name: data.worldName || 'Default World',
+          description: data.worldDescription || 'A shared world for players to explore',
+          creator: socket.user.id,
+          maxPlayers: data.maxPlayers || 50
+        });
+        await worldInstance.save();
+      }
+      
+      // Check if player can join
+      if (!worldInstance.canPlayerJoin(socket.user.id)) {
+        socket.emit('error', { message: 'Cannot join world - full or requires invite' });
+        return;
+      }
+      
+      // Leave previous world rooms
+      Object.keys(socket.rooms).forEach(room => {
+        if (room.startsWith('world:')) {
+          socket.leave(room);
+        }
       });
-    
-    socket.emit('world:users', { users: worldUsers });
+      
+      // Join new world room
+      const roomId = `world:${data.worldId}`;
+      socket.join(roomId);
+      
+      // Add player to world instance
+      const user = await User.findById(socket.user.id);
+      worldInstance.addPlayer(
+        socket.user.id,
+        socket.user.username,
+        user.avatar,
+        data.position || { x: 0, y: 0, z: 0 }
+      );
+      await worldInstance.save();
+      
+      // Notify others in the world
+      socket.to(roomId).emit('world:user-joined', {
+        userId: socket.user.id,
+        username: socket.user.username,
+        avatar: user.avatar,
+        position: data.position || { x: 0, y: 0, z: 0 }
+      });
+      
+      // Send world state to joining player
+      const onlinePlayers = worldInstance.getOnlinePlayers();
+      const recentMessages = worldInstance.getRecentChatMessages(50);
+      
+      socket.emit('world:joined', {
+        worldId: data.worldId,
+        worldName: worldInstance.name,
+        players: onlinePlayers,
+        messages: recentMessages,
+        settings: worldInstance.settings
+      });
+      
+      // Send updated player list to all players in world
+      io.in(roomId).emit('world:players-updated', {
+        players: onlinePlayers
+      });
+      
+    } catch (error) {
+      console.error('Error joining world:', error);
+      socket.emit('error', { message: 'Failed to join world' });
+    }
   });
   
   // Leave a world
-  socket.on('world:leave', (data) => {
-    if (!data.worldId) {
-      socket.emit('error', { message: 'World ID is required' });
-      return;
+  socket.on('world:leave', async (data) => {
+    try {
+      if (!data.worldId) {
+        socket.emit('error', { message: 'World ID is required' });
+        return;
+      }
+      
+      const { default: WorldInstance } = await import('../models/World.js');
+      
+      const roomId = `world:${data.worldId}`;
+      socket.leave(roomId);
+      
+      // Remove player from world instance
+      const worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
+      if (worldInstance) {
+        worldInstance.removePlayer(socket.user.id);
+        await worldInstance.save();
+        
+        // Send updated player list to remaining players
+        const onlinePlayers = worldInstance.getOnlinePlayers();
+        io.in(roomId).emit('world:players-updated', {
+          players: onlinePlayers
+        });
+      }
+      
+      // Notify others
+      socket.to(roomId).emit('world:user-left', {
+        userId: socket.user.id,
+        username: socket.user.username
+      });
+      
+    } catch (error) {
+      console.error('Error leaving world:', error);
     }
-    
-    const roomId = `world:${data.worldId}`;
-    socket.leave(roomId);
-    
-    // Notify others
-    socket.to(roomId).emit('world:user-left', {
-      userId: socket.user.id,
-      username: socket.user.username
-    });
+  });
+  
+  // Update player position
+  socket.on('world:update-position', async (data) => {
+    try {
+      if (!data.worldId || !data.position) {
+        socket.emit('error', { message: 'World ID and position are required' });
+        return;
+      }
+      
+      const { default: WorldInstance } = await import('../models/World.js');
+      
+      const worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
+      if (worldInstance && worldInstance.isPlayerInWorld(socket.user.id)) {
+        worldInstance.updatePlayerPosition(
+          socket.user.id,
+          data.position,
+          data.facing || 'down'
+        );
+        await worldInstance.save();
+        
+        // Broadcast position update to other players in world
+        const roomId = `world:${data.worldId}`;
+        socket.to(roomId).emit('world:player-moved', {
+          userId: socket.user.id,
+          username: socket.user.username,
+          position: data.position,
+          facing: data.facing || 'down'
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error updating position:', error);
+    }
   });
   
   // World chat message
-  socket.on('world:message', (data) => {
-    if (!data.worldId || !data.content) {
-      socket.emit('error', { message: 'World ID and content are required' });
-      return;
+  socket.on('world:message', async (data) => {
+    try {
+      if (!data.worldId || !data.content) {
+        socket.emit('error', { message: 'World ID and content are required' });
+        return;
+      }
+      
+      const { default: WorldInstance } = await import('../models/World.js');
+      const { default: ChatMessage } = await import('../models/Chat.js');
+      const { default: User } = await import('../models/User.js');
+      
+      const worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
+      if (!worldInstance || !worldInstance.settings.allowChat) {
+        socket.emit('error', { message: 'Chat not allowed in this world' });
+        return;
+      }
+      
+      const user = await User.findById(socket.user.id);
+      
+      // Add message to world instance
+      worldInstance.addChatMessage(
+        socket.user.id,
+        socket.user.username,
+        user.avatar,
+        data.content,
+        'chat'
+      );
+      await worldInstance.save();
+      
+      // Create chat message record
+      const chatMessage = new ChatMessage({
+        messageType: 'world',
+        sender: {
+          userId: socket.user.id,
+          username: socket.user.username,
+          avatar: user.avatar,
+          level: user.level
+        },
+        world: {
+          worldId: data.worldId,
+          worldName: worldInstance.name
+        },
+        content: data.content
+      });
+      await chatMessage.save();
+      
+      const roomId = `world:${data.worldId}`;
+      
+      // Send to everyone in the world (including sender)
+      io.in(roomId).emit('world:message', {
+        messageId: chatMessage.messageId,
+        senderId: socket.user.id,
+        senderName: socket.user.username,
+        senderAvatar: user.avatar,
+        senderLevel: user.level,
+        content: data.content,
+        timestamp: new Date()
+      });
+      
+    } catch (error) {
+      console.error('Error sending world message:', error);
+      socket.emit('error', { message: 'Failed to send message' });
     }
-    
-    const roomId = `world:${data.worldId}`;
-    
-    // Send to everyone in the world (including sender)
-    io.in(roomId).emit('world:message', {
-      senderId: socket.user.id,
-      senderName: socket.user.username,
-      content: data.content,
-      timestamp: new Date()
-    });
+  });
+  
+  // React to world message
+  socket.on('world:react', async (data) => {
+    try {
+      if (!data.messageId || !data.emoji) {
+        socket.emit('error', { message: 'Message ID and emoji are required' });
+        return;
+      }
+      
+      const { default: ChatMessage } = await import('../models/Chat.js');
+      
+      const message = await ChatMessage.findOne({ messageId: data.messageId });
+      if (message) {
+        message.addReaction(socket.user.id, socket.user.username, data.emoji);
+        await message.save();
+        
+        // Broadcast reaction to world
+        const roomId = `world:${data.worldId}`;
+        io.in(roomId).emit('world:reaction', {
+          messageId: data.messageId,
+          userId: socket.user.id,
+          username: socket.user.username,
+          emoji: data.emoji
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error adding reaction:', error);
+      socket.emit('error', { message: 'Failed to add reaction' });
+    }
+  });
+  
+  // Player interaction
+  socket.on('world:player-interaction', async (data) => {
+    try {
+      if (!data.worldId || !data.targetUserId || !data.interactionType) {
+        socket.emit('error', { message: 'World ID, target user ID, and interaction type are required' });
+        return;
+      }
+      
+      const { default: WorldInstance } = await import('../models/World.js');
+      const { default: User } = await import('../models/User.js');
+      
+      const worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
+      if (!worldInstance) {
+        socket.emit('error', { message: 'World not found' });
+        return;
+      }
+      
+      // Get target user
+      const targetUser = await User.findById(data.targetUserId);
+      if (!targetUser) {
+        socket.emit('error', { message: 'Target user not found' });
+        return;
+      }
+      
+      // Send interaction to target player
+      const targetSocket = activeConnections.get(data.targetUserId);
+      if (targetSocket) {
+        targetSocket.emit('world:player-interaction', {
+          fromUserId: socket.user.id,
+          fromUsername: socket.user.username,
+          interactionType: data.interactionType,
+          worldId: data.worldId
+        });
+      }
+      
+      // Broadcast interaction to world
+      const roomId = `world:${data.worldId}`;
+      socket.to(roomId).emit('world:player-interaction-broadcast', {
+        fromUserId: socket.user.id,
+        fromUsername: socket.user.username,
+        targetUserId: data.targetUserId,
+        targetUsername: targetUser.username,
+        interactionType: data.interactionType
+      });
+      
+    } catch (error) {
+      console.error('Error handling player interaction:', error);
+      socket.emit('error', { message: 'Failed to process interaction' });
+    }
   });
 };
 
