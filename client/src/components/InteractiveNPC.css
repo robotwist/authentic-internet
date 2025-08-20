@@ -1,0 +1,337 @@
+.npc-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.npc-container {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 20px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 3px solid #2c3e50;
+}
+
+.npc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  border-radius: 17px 17px 0 0;
+}
+
+.npc-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.npc-avatar {
+  font-size: 3rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.npc-details h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.npc-title {
+  margin: 4px 0 0 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.close-button {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+.npc-content {
+  padding: 24px;
+}
+
+.dialogue-box {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #3498db;
+}
+
+.dialogue-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #2c3e50;
+  margin: 0 0 16px 0;
+}
+
+.dialogue-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dialogue-option {
+  background: #ecf0f1;
+  border: 2px solid #bdc3c7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  text-align: left;
+  color: #2c3e50;
+}
+
+.dialogue-option:hover {
+  background: #d5dbdb;
+  border-color: #95a5a6;
+  transform: translateX(4px);
+}
+
+.dialogue-option.selected {
+  background: #3498db;
+  border-color: #2980b9;
+  color: white;
+}
+
+.dialogue-option:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.quest-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quest-section h3 {
+  margin: 0 0 16px 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 8px;
+}
+
+.quest-item {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.quest-item:hover {
+  border-color: #3498db;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.quest-item.active {
+  border-color: #f39c12;
+  background: linear-gradient(135deg, #fef9e7 0%, #fdfef7 100%);
+}
+
+.quest-item.completed {
+  border-color: #27ae60;
+  background: linear-gradient(135deg, #d5f4e6 0%, #e8f8f5 100%);
+}
+
+.quest-item h4 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.quest-item p {
+  margin: 0 0 12px 0;
+  color: #7f8c8d;
+  line-height: 1.4;
+}
+
+.quest-requirements {
+  background: rgba(231, 76, 60, 0.1);
+  color: #c0392b;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.quest-rewards {
+  background: rgba(39, 174, 96, 0.1);
+  color: #27ae60;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.quest-button {
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.quest-button:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.quest-button.accept {
+  background: #27ae60;
+}
+
+.quest-button.accept:hover {
+  background: #229954;
+}
+
+.quest-button.complete {
+  background: #f39c12;
+}
+
+.quest-button.complete:hover {
+  background: #e67e22;
+}
+
+.quest-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.quest-status {
+  color: #27ae60;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+  z-index: 10;
+}
+
+.loading-spinner {
+  background: #3498db;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .npc-modal {
+    padding: 10px;
+  }
+  
+  .npc-container {
+    max-height: 95vh;
+  }
+  
+  .npc-header {
+    padding: 16px;
+  }
+  
+  .npc-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+  
+  .npc-details h2 {
+    font-size: 1.4rem;
+  }
+  
+  .npc-content {
+    padding: 16px;
+  }
+  
+  .dialogue-text {
+    font-size: 1rem;
+  }
+  
+  .quest-item {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .npc-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .npc-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+  
+  .dialogue-options {
+    gap: 6px;
+  }
+  
+  .dialogue-option {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+}

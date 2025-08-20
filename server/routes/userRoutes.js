@@ -582,4 +582,36 @@ router.get("/friends/requests", authenticateToken, async (req, res) => {
   }
 });
 
+// 📌 Update User Skills (🔐 Requires Authentication)
+router.put("/skills", authenticateToken, async (req, res) => {
+  try {
+    const { skills } = req.body;
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update skills
+    user.skills = skills;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Skills updated successfully',
+      skills: user.skills
+    });
+  } catch (error) {
+    console.error('Error updating skills:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update skills'
+    });
+  }
+});
+
 export default router;

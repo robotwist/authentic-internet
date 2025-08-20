@@ -5,6 +5,7 @@ import API from '../api/api';
 import { MAPS } from '../components/Constants';
 import DailyQuote from '../components/DailyQuote';
 import CharacterSelection from '../components/CharacterSelection';
+import SkillTree from '../components/SkillTree';
 import '../styles/Dashboard.css';
 import { useAchievements, ACHIEVEMENTS } from '../context/AchievementContext';
 
@@ -21,6 +22,7 @@ const Dashboard = () => {
   });
   const [character, setCharacter] = useState(null);
   const [showCharacterSelection, setShowCharacterSelection] = useState(false);
+  const [showSkillTree, setShowSkillTree] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { unlockAchievement } = useAchievements();
@@ -174,6 +176,13 @@ const Dashboard = () => {
     );
   }
 
+  // Show skill tree if needed
+  if (showSkillTree) {
+    return (
+      <SkillTree onClose={() => setShowSkillTree(false)} />
+    );
+  }
+
   // Calculate character level and progress
   const { level, progress, nextLevelAt } = calculateLevel(character?.exp || 0);
 
@@ -207,11 +216,12 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="character-actions">
-          <button onClick={() => navigate('/profile')}>View Profile</button>
-          <button onClick={() => navigate('/game')}>Continue Adventure</button>
-          <button onClick={() => setShowCharacterSelection(true)}>Change Character</button>
-        </div>
+                <div className="character-actions">
+            <button onClick={() => navigate('/profile')}>View Profile</button>
+            <button onClick={() => navigate('/game')}>Continue Adventure</button>
+            <button onClick={() => setShowCharacterSelection(true)}>Change Character</button>
+            <button onClick={() => setShowSkillTree(true)}>🎯 Skill Tree</button>
+          </div>
       </div>
       
       <div className="main-world-section">

@@ -148,6 +148,16 @@ const UserSchema = new mongoose.Schema(
       unlockedAt: Date
     }],
     
+    // Skill system
+    skills: {
+      type: Map,
+      of: {
+        level: { type: Number, default: 0 },
+        unlockedAt: { type: Date, default: Date.now }
+      },
+      default: {}
+    },
+    
     // Game state
     inventory: [{ 
       type: mongoose.Schema.Types.ObjectId, 

@@ -518,6 +518,21 @@ export const loginUser = async (username, password) => {
 };
 
 /**
+ * Update user skills
+ * @param {Object} skills - Updated skills object
+ * @returns {Promise<Object>} Update response
+ */
+export const updateUserSkills = async (skills) => {
+  try {
+    const response = await getApi().put('/api/users/skills', { skills });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating skills:', error);
+    throw error;
+  }
+};
+
+/**
  * Logout a user
  * @param {string} refreshToken - Refresh token to invalidate
  * @returns {Promise<Object>} Logout response
