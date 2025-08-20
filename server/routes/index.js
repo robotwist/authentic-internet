@@ -8,6 +8,7 @@ import proxyRoutes from "./proxy.js";
 import progressRoutes from "./progressRoutes.js";
 import feedbackRoutes from "./feedbackRoutes.js";
 import characterRoutes from "./characterRoutes.js";
+import questRoutes from "./questRoutes.js";
 
 /**
  * Apply all routes to Express app
@@ -53,6 +54,7 @@ export const applyRoutes = (app) => {
   app.use("/api/progress", progressRoutes);
   app.use("/api/feedback", feedbackRoutes);
   app.use("/api/characters", characterRoutes);
+  app.use("/api/quests", questRoutes);
 
   /**
    * @swagger
@@ -130,6 +132,7 @@ export const applyRoutes = (app) => {
         "/api/progress",
         "/api/feedback",
         "/api/characters",
+        "/api/quests",
         "/api/socket-test"
       ],
       documentation: "See /api-docs for detailed API documentation"

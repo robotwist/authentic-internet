@@ -8,6 +8,7 @@ import CharacterSelection from '../components/CharacterSelection';
 import SkillTree from '../components/SkillTree';
 import DailyChallenges from '../components/DailyChallenges';
 import TitleArea from '../components/TitleArea';
+import QuestLog from '../components/QuestLog';
 import '../styles/Dashboard.css';
 import { useAchievements, ACHIEVEMENTS } from '../context/AchievementContext';
 
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const [showCharacterSelection, setShowCharacterSelection] = useState(false);
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showDailyChallenges, setShowDailyChallenges] = useState(false);
+  const [showQuestLog, setShowQuestLog] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { unlockAchievement } = useAchievements();
@@ -193,6 +195,13 @@ const Dashboard = () => {
     );
   }
 
+  // Show quest log if needed
+  if (showQuestLog) {
+    return (
+      <QuestLog onClose={() => setShowQuestLog(false)} />
+    );
+  }
+
   // Calculate character level and progress
   const { level, progress, nextLevelAt } = calculateLevel(character?.exp || 0);
 
@@ -233,6 +242,7 @@ const Dashboard = () => {
             <button onClick={() => setShowCharacterSelection(true)}>Change Character</button>
             <button onClick={() => setShowSkillTree(true)}>🎯 Skill Tree</button>
             <button onClick={() => setShowDailyChallenges(true)}>📅 Daily Challenges</button>
+            <button onClick={() => setShowQuestLog(true)}>📜 Quest Log</button>
           </div>
       </div>
       

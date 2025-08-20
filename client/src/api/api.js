@@ -555,13 +555,89 @@ export const updateUserChallenges = async (challenges) => {
  */
 export const claimChallengeReward = async (challengeId, reward) => {
   try {
-    const response = await getApi().post('/api/users/challenges/claim', { 
-      challengeId, 
-      reward 
+    const response = await getApi().post('/api/users/challenges/claim', {
+      challengeId,
+      reward
     });
     return response.data;
   } catch (error) {
     console.error('Error claiming challenge reward:', error);
+    throw error;
+  }
+};
+
+// Quest API functions
+export const fetchQuests = async () => {
+  try {
+    const response = await getApi().get('/api/quests');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching quests:', error);
+    throw error;
+  }
+};
+
+export const startQuest = async (npcId, questId) => {
+  try {
+    const response = await getApi().post(`/api/quests/start/${npcId}`, {
+      questId
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error starting quest:', error);
+    throw error;
+  }
+};
+
+export const completeQuestStage = async (questId, stageIndex) => {
+  try {
+    const response = await getApi().post('/api/quests/complete-stage', {
+      questId,
+      stageIndex
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error completing quest stage:', error);
+    throw error;
+  }
+};
+
+export const getQuestProgress = async (questId) => {
+  try {
+    const response = await getApi().get(`/api/quests/progress/${questId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching quest progress:', error);
+    throw error;
+  }
+};
+
+export const getAvailableQuests = async (npcId) => {
+  try {
+    const response = await getApi().get(`/api/quests/available/${npcId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching available quests:', error);
+    throw error;
+  }
+};
+
+export const abandonQuest = async (questId) => {
+  try {
+    const response = await getApi().delete(`/api/quests/abandon/${questId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error abandoning quest:', error);
+    throw error;
+  }
+};
+
+export const getQuestStats = async () => {
+  try {
+    const response = await getApi().get('/api/quests/stats');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching quest stats:', error);
     throw error;
   }
 };
