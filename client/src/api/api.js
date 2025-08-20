@@ -482,8 +482,7 @@ export const loginUser = async (username, password) => {
     
     // Send login request
     const response = await getApi().post('/api/auth/login', {
-      identifier: username, // For backward compatibility
-      username: username,   // Add username parameter for newer implementations
+      identifier: username, // Server expects 'identifier' field
       password
     });
 

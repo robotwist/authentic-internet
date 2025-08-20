@@ -164,7 +164,6 @@ const Login = () => {
         },
         body: JSON.stringify({
           identifier: formData.username,
-          username: formData.username,
           password: formData.password
         })
       });
