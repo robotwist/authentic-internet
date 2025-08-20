@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import VictoryScreen from './VictoryScreen';
 import './Level4Shooter.css';
 
 const Level4Shooter = ({ onComplete, onExit, character }) => {
@@ -8,6 +9,7 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
   // Game state
   const [isGameActive, setIsGameActive] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [showVictory, setShowVictory] = useState(false);
   const [score, setScore] = useState(0);
   const [currentLevel, setCurrentLevel] = useState('paris'); // 'paris', 'spain', 'africa'
   const [storyProgress, setStoryProgress] = useState(0); // Track story progress
@@ -554,6 +556,29 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
     setPlayerHealth(0);
     playSound('game-over');
   };
+
+  // Victory screen handlers
+  const handleVictoryContinue = () => {
+    setShowVictory(false);
+    if (onComplete) {
+      onComplete({
+        score: score,
+        level: currentLevel,
+        time: '5:30', // TODO: Calculate actual time
+        achievements: ['First Victory', 'Speed Runner', 'Perfect Score'],
+        rewards: {
+          experience: 150,
+          coins: 50,
+          powers: ['Enhanced Movement', 'Double Jump']
+        }
+      });
+    }
+  };
+
+  const handleVictoryReplay = () => {
+    setShowVictory(false);
+    startGame();
+  };
   
   // Handle level completion
   const handleLevelComplete = () => {
@@ -613,14 +638,14 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
   // Handle game victory
   const handleGameVictory = () => {
     console.log("Game Victory!");
-    setGameOver(true);
+    setShowVictory(true);
+    setIsGameActive(false);
     playSound('victory');
     
-    // Complete the quest if callback provided
-    if (onComplete) {
-      setTimeout(() => {
-        onComplete();
-      }, 5000);
+    // Stop the game loop
+    if (gameLoopRef.current) {
+      cancelAnimationFrame(gameLoopRef.current);
+      gameLoopRef.current = null;
     }
   };
   
@@ -1023,7 +1048,24 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
         />
       </div>
       
-      {gameOver && (
+      {showVictory && (
+        <VictoryScreen
+          gameType="shooter"
+          score={score}
+          time="5:30"
+          achievements={['First Victory', 'Speed Runner', 'Perfect Score']}
+          rewards={{
+            experience: 150,
+            coins: 50,
+            powers: ['Enhanced Movement', 'Double Jump']
+          }}
+          onContinue={handleVictoryContinue}
+          onReplay={handleVictoryReplay}
+          creator="Aurthurneticus Interneticus"
+        />
+      )}
+      
+      {gameOver && !showVictory && (
         <div className="game-over-overlay">
           <div className="game-over-content">
             <h2>{playerHealth <= 0 ? "Game Over" : "Victory!"}</h2>

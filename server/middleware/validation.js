@@ -24,10 +24,23 @@ const artifactValidation = {
   create: Joi.object({
     name: Joi.string().min(1).max(100).required(),
     description: Joi.string().max(1000).optional(),
-    type: Joi.string().valid('game', 'writing', 'art', 'music').required(),
-    content: Joi.object().required(),
+    type: Joi.string().valid('game', 'writing', 'art', 'music', 'artifact').optional(),
+    content: Joi.alternatives().try(Joi.string(), Joi.object()).required(),
     visibility: Joi.string().valid('public', 'private', 'unlisted').default('private'),
-    tags: Joi.array().items(Joi.string().max(50)).max(10).optional()
+    tags: Joi.array().items(Joi.string().max(50)).max(10).optional(),
+    // Additional fields that the form might send
+    riddle: Joi.string().optional(),
+    unlockAnswer: Joi.string().optional(),
+    area: Joi.string().optional(),
+    isExclusive: Joi.boolean().optional(),
+    location: Joi.object({
+      x: Joi.number().optional(),
+      y: Joi.number().optional()
+    }).optional(),
+    exp: Joi.number().optional(),
+    status: Joi.string().optional(),
+    image: Joi.string().optional(),
+    messageText: Joi.string().optional()
   }),
   
   update: Joi.object({
