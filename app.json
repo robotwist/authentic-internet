@@ -24,7 +24,7 @@
     },
     "CLIENT_URL": {
       "description": "Frontend application URL",
-      "value": "https://authentic-internet.netlify.app"
+      "value": "https://flourishing-starburst-8cf88b.netlify.app"
     },
     "EMAIL_USER": {
       "description": "Email service username",
