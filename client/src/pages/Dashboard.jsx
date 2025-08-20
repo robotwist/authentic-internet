@@ -7,6 +7,7 @@ import DailyQuote from '../components/DailyQuote';
 import CharacterSelection from '../components/CharacterSelection';
 import SkillTree from '../components/SkillTree';
 import DailyChallenges from '../components/DailyChallenges';
+import TitleArea from '../components/TitleArea';
 import '../styles/Dashboard.css';
 import { useAchievements, ACHIEVEMENTS } from '../context/AchievementContext';
 
@@ -198,6 +199,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
+        <TitleArea size="medium" />
         <h1>Welcome, {user?.username}!</h1>
         {/* Daily Quote Display */}
         <div className="daily-quote-container">

@@ -5,6 +5,7 @@ import Layout from '../components/shared/Layout';
 import Button from '../components/shared/Button';
 import DailyQuote from '../components/DailyQuote';
 import SecretMessage from '../components/SecretMessage';
+import TitleArea from '../components/TitleArea';
 import '../styles/Home.css';
 import { getRandomQuote } from '../utils/quoteSystem.js';
 import { updateCharacter } from '../api/api';
@@ -123,7 +124,7 @@ const Home = () => {
 
   const header = (
     <div className="home-header">
-      <h1>Authentic Internet</h1>
+      <TitleArea size="large" />
       <p className="subtitle">Enter the place where you are free to experience the goodness of the internet. 
         Here you can experience a site with nothing glaring in the way. You get to see creativity in an unadulterated form.</p>
     </div>

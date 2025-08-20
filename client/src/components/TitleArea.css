@@ -1,0 +1,228 @@
+.title-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.title-area:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease;
+}
+
+.logo-image:hover {
+  transform: scale(1.05);
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-title {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+/* Size variants */
+.title-area.small {
+  gap: 10px;
+  padding: 15px;
+}
+
+.title-area.small .logo-image {
+  width: 30px;
+  height: 30px;
+}
+
+.title-area.small .app-title {
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.title-area.medium {
+  gap: 15px;
+  padding: 20px;
+}
+
+.title-area.medium .logo-image {
+  width: 50px;
+  height: 50px;
+}
+
+.title-area.medium .app-title {
+  font-size: 24px;
+  letter-spacing: 2px;
+}
+
+.title-area.large {
+  gap: 20px;
+  padding: 30px;
+}
+
+.title-area.large .logo-image {
+  width: 80px;
+  height: 80px;
+}
+
+.title-area.large .app-title {
+  font-size: 36px;
+  letter-spacing: 3px;
+}
+
+.title-area.xlarge {
+  gap: 25px;
+  padding: 40px;
+}
+
+.title-area.xlarge .logo-image {
+  width: 120px;
+  height: 120px;
+}
+
+.title-area.xlarge .app-title {
+  font-size: 48px;
+  letter-spacing: 4px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .title-area {
+    gap: 10px;
+    padding: 15px;
+  }
+  
+  .title-area.medium .logo-image {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .title-area.medium .app-title {
+    font-size: 20px;
+    letter-spacing: 1.5px;
+  }
+  
+  .title-area.large .logo-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .title-area.large .app-title {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+  
+  .title-area.xlarge .logo-image {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .title-area.xlarge .app-title {
+    font-size: 32px;
+    letter-spacing: 2.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title-area {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  .title-area.medium .logo-image {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .title-area.medium .app-title {
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+  
+  .title-area.large .logo-image {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .title-area.large .app-title {
+    font-size: 24px;
+    letter-spacing: 1.5px;
+  }
+  
+  .title-area.xlarge .logo-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .title-area.xlarge .app-title {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+}
+
+/* Animation for logo entrance */
+@keyframes logoEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotate(-10deg);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.logo-image {
+  animation: logoEntrance 0.6s ease-out;
+}
+
+/* Animation for title entrance */
+@keyframes titleEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-title {
+  animation: titleEntrance 0.8s ease-out 0.2s both;
+}
