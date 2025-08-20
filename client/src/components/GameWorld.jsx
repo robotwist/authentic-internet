@@ -1227,9 +1227,9 @@ const GameWorld = () => {
       if (currentMapName === "Yosemite") {
         // Terminal portal (code 6)
         if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 6) {
-          // Notify user they're on a terminal portal
+          // Notify user they're on a mysterious portal
           if (!portalNotificationActive) {
-            showPortalNotification('Terminal Challenge', 'Press SPACE to enter the Terminal Challenge');
+            showPortalNotification('Mysterious Portal', 'Press SPACE to investigate this strange energy');
             setPortalNotificationActive(true);
             
             // When space is pressed while on this tile, enter the terminal
@@ -1267,9 +1267,9 @@ const GameWorld = () => {
         
         // Shooter portal (code 7)
         else if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 7) {
-          // Notify user they're on a shooter portal
+          // Notify user they're on a mysterious portal
           if (!portalNotificationActive) {
-            showPortalNotification('Arcade Shooter', 'Press SPACE to enter the Arcade Shooter');
+            showPortalNotification('Mysterious Portal', 'Press SPACE to investigate this strange energy');
             setPortalNotificationActive(true);
             
             // When space is pressed while on this tile, enter the shooter
@@ -1313,9 +1313,9 @@ const GameWorld = () => {
         
         // Text Adventure portal (code 8)
         else if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 8) {
-          // Notify user they're on a text adventure portal
+          // Notify user they're on a mysterious portal
           if (!portalNotificationActive) {
-            showPortalNotification('Text Adventure', 'Press SPACE to enter the Text Adventure');
+            showPortalNotification('Mysterious Portal', 'Press SPACE to investigate this strange energy');
             setPortalNotificationActive(true);
             
             // When space is pressed while on this tile, enter the text adventure
