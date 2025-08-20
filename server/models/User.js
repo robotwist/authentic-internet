@@ -158,6 +158,37 @@ const UserSchema = new mongoose.Schema(
       default: {}
     },
     
+    // Daily challenges system
+    dailyChallenges: {
+      date: { type: String },
+      challenges: [{
+        id: String,
+        title: String,
+        description: String,
+        type: String,
+        target: Number,
+        progress: { type: Number, default: 0 },
+        completed: { type: Boolean, default: false },
+        claimed: { type: Boolean, default: false },
+        reward: {
+          experience: Number,
+          coins: Number
+        }
+      }]
+    },
+    
+    // Virtual currency
+    coins: {
+      type: Number,
+      default: 0
+    },
+    
+    // Challenge streak
+    challengeStreak: {
+      type: Number,
+      default: 0
+    },
+    
     // Game state
     inventory: [{ 
       type: mongoose.Schema.Types.ObjectId, 

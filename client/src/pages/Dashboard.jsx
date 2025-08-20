@@ -6,6 +6,7 @@ import { MAPS } from '../components/Constants';
 import DailyQuote from '../components/DailyQuote';
 import CharacterSelection from '../components/CharacterSelection';
 import SkillTree from '../components/SkillTree';
+import DailyChallenges from '../components/DailyChallenges';
 import '../styles/Dashboard.css';
 import { useAchievements, ACHIEVEMENTS } from '../context/AchievementContext';
 
@@ -23,6 +24,7 @@ const Dashboard = () => {
   const [character, setCharacter] = useState(null);
   const [showCharacterSelection, setShowCharacterSelection] = useState(false);
   const [showSkillTree, setShowSkillTree] = useState(false);
+  const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { unlockAchievement } = useAchievements();
@@ -183,6 +185,13 @@ const Dashboard = () => {
     );
   }
 
+  // Show daily challenges if needed
+  if (showDailyChallenges) {
+    return (
+      <DailyChallenges onClose={() => setShowDailyChallenges(false)} />
+    );
+  }
+
   // Calculate character level and progress
   const { level, progress, nextLevelAt } = calculateLevel(character?.exp || 0);
 
@@ -221,6 +230,7 @@ const Dashboard = () => {
             <button onClick={() => navigate('/game')}>Continue Adventure</button>
             <button onClick={() => setShowCharacterSelection(true)}>Change Character</button>
             <button onClick={() => setShowSkillTree(true)}>🎯 Skill Tree</button>
+            <button onClick={() => setShowDailyChallenges(true)}>📅 Daily Challenges</button>
           </div>
       </div>
       

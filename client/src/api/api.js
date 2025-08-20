@@ -533,6 +533,40 @@ export const updateUserSkills = async (skills) => {
 };
 
 /**
+ * Update user daily challenges
+ * @param {Object} challenges - Updated challenges object
+ * @returns {Promise<Object>} Update response
+ */
+export const updateUserChallenges = async (challenges) => {
+  try {
+    const response = await getApi().put('/api/users/challenges', { challenges });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating challenges:', error);
+    throw error;
+  }
+};
+
+/**
+ * Claim challenge reward
+ * @param {string} challengeId - Challenge ID
+ * @param {Object} reward - Reward object
+ * @returns {Promise<Object>} Claim response
+ */
+export const claimChallengeReward = async (challengeId, reward) => {
+  try {
+    const response = await getApi().post('/api/users/challenges/claim', { 
+      challengeId, 
+      reward 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error claiming challenge reward:', error);
+    throw error;
+  }
+};
+
+/**
  * Logout a user
  * @param {string} refreshToken - Refresh token to invalidate
  * @returns {Promise<Object>} Logout response

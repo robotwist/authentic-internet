@@ -614,4 +614,86 @@ router.put("/skills", authenticateToken, async (req, res) => {
   }
 });
 
+// 📌 Update User Daily Challenges (🔐 Requires Authentication)
+router.put("/challenges", authenticateToken, async (req, res) => {
+  try {
+    const { challenges } = req.body;
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update daily challenges
+    user.dailyChallenges = challenges;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Daily challenges updated successfully',
+      challenges: user.dailyChallenges
+    });
+  } catch (error) {
+    console.error('Error updating daily challenges:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update daily challenges'
+    });
+  }
+});
+
+// 📌 Claim Challenge Reward (🔐 Requires Authentication)
+router.post("/challenges/claim", authenticateToken, async (req, res) => {
+  try {
+    const { challengeId, reward } = req.body;
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Apply rewards
+    if (reward.experience) {
+      user.experience = (user.experience || 0) + reward.experience;
+    }
+    if (reward.coins) {
+      user.coins = (user.coins || 0) + reward.coins;
+    }
+
+    // Update challenge status
+    if (user.dailyChallenges && user.dailyChallenges.challenges) {
+      const challenge = user.dailyChallenges.challenges.find(c => c.id === challengeId);
+      if (challenge) {
+        challenge.claimed = true;
+      }
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Reward claimed successfully',
+      user: {
+        experience: user.experience,
+        coins: user.coins,
+        dailyChallenges: user.dailyChallenges
+      }
+    });
+  } catch (error) {
+    console.error('Error claiming challenge reward:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to claim reward'
+    });
+  }
+});
+
 export default router;
