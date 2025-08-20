@@ -174,17 +174,19 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
     
     // Setup keyboard events
     const handleKeyDown = (e) => {
-      console.log(`Key pressed: ${e.key}`);
-      keysPressed.current[e.key] = true;
+      console.log(`Shooter Game - Key pressed: ${e.key}`);
       
-      // Prevent default behavior and stop propagation for game controls
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', ' '].includes(e.key)) {
+      // Capture ALL game-related keys and prevent them from bubbling up
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', ' ', 'Escape'].includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
       }
       
-      // Handle jump
-      if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && !isJumping) {
+      keysPressed.current[e.key] = true;
+      
+      // Handle jump (only space or up arrow, not both)
+      if ((e.key === 'ArrowUp' || e.key === 'w') && !isJumping) {
         jump();
       }
       
@@ -195,9 +197,9 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
       
       // Debug left/right movement
       if (e.key === 'ArrowLeft' || e.key === 'a') {
-        console.log("LEFT pressed - should move left");
+        console.log("Shooter: LEFT pressed - should move left");
       } else if (e.key === 'ArrowRight' || e.key === 'd') {
-        console.log("RIGHT pressed - should move right");
+        console.log("Shooter: RIGHT pressed - should move right");
       }
     };
     
@@ -1037,7 +1039,11 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
       )}
       
       <div className="controls-info">
-        <p>Use ARROW KEYS or WASD to move | UP or SPACE to jump | ESC to exit</p>
+        <h3>🎮 Shooter Game Controls</h3>
+        <p><strong>Movement:</strong> Arrow Keys or WASD</p>
+        <p><strong>Jump:</strong> Up Arrow or W</p>
+        <p><strong>Exit:</strong> ESC</p>
+        <p><em>Note: Space bar is disabled in shooter mode to prevent conflicts</em></p>
       </div>
     </div>
   );

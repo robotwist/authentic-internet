@@ -546,6 +546,12 @@ const GameWorld = () => {
         return;
       }
       
+      // Skip if a special world is active (shooter, terminal, text adventure, etc.)
+      if (currentSpecialWorld) {
+        console.log(`GameWorld: Skipping key handling - special world '${currentSpecialWorld}' is active`);
+        return;
+      }
+      
       // Handle inventory toggle with 'i' key
       if (event.key === 'i' || event.key === 'I') {
         event.preventDefault();

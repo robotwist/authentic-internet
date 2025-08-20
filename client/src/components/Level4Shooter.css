@@ -110,13 +110,35 @@
 
 .controls-info {
   position: absolute;
-  bottom: 10px;
-  width: 100%;
-  text-align: center;
-  color: #0f0;
-  background-color: rgba(0, 0, 0, 0.6);
-  padding: 5px 0;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
   font-size: 14px;
+  text-align: center;
+  border: 2px solid #3498db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  width: auto;
+  min-width: 300px;
+}
+
+.controls-info h3 {
+  margin: 0 0 10px 0;
+  color: #3498db;
+  font-size: 16px;
+}
+
+.controls-info p {
+  margin: 5px 0;
+  line-height: 1.4;
+}
+
+.controls-info strong {
+  color: #f39c12;
 }
 
 /* Animation for player */
