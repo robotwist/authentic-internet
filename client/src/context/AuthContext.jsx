@@ -311,14 +311,22 @@ export const AuthProvider = ({ children }) => {
       console.error('Registration error:', error);
       logPersistentError('AuthContext - register', error);
       
-      const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
-      let fullErrorMessage = errorMessage;
+      let errorMessage = 'Registration failed. Please try again.';
       
-      if (error.response?.data?.passwordRequirements) {
-        fullErrorMessage += ' ' + error.response.data.passwordRequirements;
+      // Handle validation errors from the backend
+      if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        const validationErrors = error.response.data.errors.map(err => err.msg).join(', ');
+        errorMessage = validationErrors;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
       }
       
-      dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: fullErrorMessage });
+      // Add password requirements if available
+      if (error.response?.data?.passwordRequirements) {
+        errorMessage += ' ' + error.response.data.passwordRequirements;
+      }
+      
+      dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage });
       return false;
     } finally {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });

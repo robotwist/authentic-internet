@@ -95,7 +95,10 @@ const createApiInstance = (baseUrl) => {
         // Handle 400 Bad Request
         if (status === 400) {
           console.error('Request validation error:', data);
-          return Promise.reject(new Error(data.message || 'Invalid request'));
+          // Preserve the detailed error information for registration validation
+          const error = new Error(data.message || 'Invalid request');
+          error.response = { data };
+          return Promise.reject(error);
         }
         
         // Handle 403 Forbidden
