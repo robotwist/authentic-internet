@@ -32,10 +32,20 @@ const Dashboard = () => {
     if (!user?.id) return;
     
     try {
-      const response = await API.get(`/api/characters/${user.id}`);
+      const response = await API.get(`/api/users/${user.id}`);
       setCharacter(response.data);
     } catch (error) {
       console.error('Failed to load character data:', error);
+      // If character data doesn't exist, create a default character
+      setCharacter({
+        id: user.id,
+        username: user.username,
+        experience: 0,
+        level: 1,
+        avatar: null,
+        inventory: [],
+        savedQuotes: []
+      });
     }
   };
 
