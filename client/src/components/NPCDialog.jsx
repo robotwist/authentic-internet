@@ -26,7 +26,7 @@ const NPCDialog = ({
       // Set default responses if none provided
       if (!npc.dialog?.responses || npc.dialog.responses.length === 0) {
         setResponses([
-          { id: 'default-1', text: 'Tell me about yourself.', response: `I am ${npc.name}. I'm here to help you on your journey.` },
+          { id: 'default-1', text: 'Tell me about yourself.', response: `I am ${npc.name}. I\'m here to help you on your journey.` },
           { id: 'default-2', text: 'What do you know about this place?', response: 'This place is full of wisdom and challenges. Explore it thoroughly.' },
           { id: 'default-3', text: 'Goodbye.', response: 'Farewell! Come back if you need assistance.', isExit: true }
         ]);

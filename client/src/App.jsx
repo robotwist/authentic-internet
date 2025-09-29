@@ -1,4 +1,4 @@
-import React, { useEffect }, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AchievementProvider } from './context/AchievementContext';
 import { useGameState } from './context/GameStateContext';
@@ -19,6 +19,7 @@ import TextAdventure from './components/TextAdventure';
 import Level4Shooter from './components/Level4Shooter';
 import LoadingScreen from './components/LoadingScreen';
 import OnboardingTrigger from './components/OnboardingTrigger';
+import OnboardingTest from './pages/OnboardingTest';
 import './App.css';
 
 // Debug startup
@@ -82,6 +83,7 @@ function App() {
             <Route path="/" element={<ErrorBoundary><Home /></ErrorBoundary>} />
             <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
             <Route path="/register" element={<ErrorBoundary><Register /></ErrorBoundary>} />
+            <Route path="/onboarding-test" element={<ErrorBoundary><OnboardingTest /></ErrorBoundary>} />
             <Route
               path="/dashboard"
               element={

@@ -1830,3 +1830,45 @@
     font-size: 14px;
   }
 }
+
+/* Portal hint system */
+.portal-hint {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 100, 200, 0.9);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  border: 2px solid rgba(0, 150, 255, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 100, 200, 0.3);
+  animation: portalPulse 2s ease-in-out infinite;
+}
+
+.portal-hint.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+@keyframes portalPulse {
+  0% { 
+    background: rgba(0, 100, 200, 0.9);
+    border-color: rgba(0, 150, 255, 0.7);
+  }
+  50% { 
+    background: rgba(0, 150, 255, 0.95);
+    border-color: rgba(100, 200, 255, 0.9);
+  }
+  100% { 
+    background: rgba(0, 100, 200, 0.9);
+    border-color: rgba(0, 150, 255, 0.7);
+  }
+}

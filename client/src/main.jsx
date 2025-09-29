@@ -79,7 +79,12 @@ window.addEventListener('load', () => {
 // Render the React application
 ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode> - Commented out to prevent double renders in development
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
       <AuthProvider>
         <GameStateProvider>
           <ErrorBoundary>

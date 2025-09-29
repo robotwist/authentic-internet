@@ -23,7 +23,7 @@ import {
   School
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
-import OnboardingFlow from './OnboardingFlow';
+import OnboardingGuide from './OnboardingGuide';
 import './OnboardingTrigger.css';
 
 const OnboardingTrigger = () => {
@@ -142,7 +142,7 @@ const OnboardingTrigger = () => {
 
   if (showOnboarding) {
     return (
-      <OnboardingFlow 
+      <OnboardingGuide 
         onComplete={handleOnboardingComplete}
         onSkip={handleOnboardingSkip}
       />

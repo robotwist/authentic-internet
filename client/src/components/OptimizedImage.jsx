@@ -17,33 +17,6 @@ import './OptimizedImage.css';
  * @param {string} props.objectFit - CSS object-fit property
  */
 
-  // Progressive loading support
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isProgressive, setIsProgressive] = useState(true);
-  
-  const handleLoad = () => {
-    setIsLoaded(true);
-    setIsProgressive(false);
-  };
-  
-  const handleError = () => {
-    setIsProgressive(false);
-    // Fallback to placeholder or error state
-  };
-  
-  // Add progressive loading classes
-  const imageClasses = `optimized-image ${isLoaded ? 'loaded' : ''} ${isProgressive ? 'progressive' : ''}`;
-
-
-  // Responsive image support
-  const generateSrcSet = (src) => {
-    const baseName = src.replace(/\.[^/.]+$/, '');
-    const ext = src.split('.').pop();
-    return `${baseName}-320.${ext} 320w, ${baseName}-640.${ext} 640w, ${baseName}-1024.${ext} 1024w`;
-  };
-  
-  const srcSet = generateSrcSet(src);
-
 const OptimizedImage = ({
   src,
   alt,
@@ -59,6 +32,15 @@ const OptimizedImage = ({
   const [error, setError] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
   const [isIntersecting, setIsIntersecting] = useState(eager);
+
+  // Responsive image support
+  const generateSrcSet = (src) => {
+    const baseName = src.replace(/\.[^/.]+$/, '');
+    const ext = src.split('.').pop();
+    return `${baseName}-320.${ext} 320w, ${baseName}-640.${ext} 640w, ${baseName}-1024.${ext} 1024w`;
+  };
+  
+  const srcSet = generateSrcSet(src);
 
   useEffect(() => {
     // Skip for eagerly loaded images

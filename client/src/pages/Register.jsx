@@ -9,8 +9,8 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
-  const [error, setError] = useState('');
-  const { register } = useAuth();
+  const [localError, setLocalError] = useState('');
+  const { register, error, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,10 +23,10 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setLocalError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setLocalError('Passwords do not match');
       return;
     }
 
@@ -39,7 +39,7 @@ const Register = () => {
   return (
     <div className="form-container">
       <h2>Register</h2>
-      {error && <div className="error-message">{error}</div>}
+      {(error || localError) && <div className="error-message">{error || localError}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="username">Username</label>
@@ -73,8 +73,11 @@ const Register = () => {
             value={formData.password}
             onChange={handleChange}
             required
-            minLength={6}
+            minLength={8}
           />
+          <small style={{ color: '#666', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
+            Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.
+          </small>
         </div>
         <div className="form-group">
           <label htmlFor="confirmPassword">Confirm Password</label>
@@ -88,8 +91,8 @@ const Register = () => {
             minLength={6}
           />
         </div>
-        <button type="submit" className="btn">
-          Register
+        <button type="submit" className="btn" disabled={loading}>
+          {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
       <p style={{ marginTop: '1rem', textAlign: 'center' }}>
