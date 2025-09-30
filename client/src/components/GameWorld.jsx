@@ -350,6 +350,31 @@ const GameWorld = React.memo(() => {
     setUiState((prev) => ({ ...prev, ...updates }));
   }, []);
 
+  // Screen reader announcement function
+  const announceToScreenReader = useCallback((message) => {
+    // Create a live region for screen reader announcements
+    let liveRegion = document.getElementById("screen-reader-announcements");
+    if (!liveRegion) {
+      liveRegion = document.createElement("div");
+      liveRegion.id = "screen-reader-announcements";
+      liveRegion.setAttribute("aria-live", "polite");
+      liveRegion.setAttribute("aria-atomic", "true");
+      liveRegion.style.position = "absolute";
+      liveRegion.style.left = "-10000px";
+      liveRegion.style.width = "1px";
+      liveRegion.style.height = "1px";
+      liveRegion.style.overflow = "hidden";
+      document.body.appendChild(liveRegion);
+    }
+
+    liveRegion.textContent = message;
+
+    // Clear the message after a short delay
+    setTimeout(() => {
+      liveRegion.textContent = "";
+    }, 1000);
+  }, []);
+
   // Handle NPC interactions based on collision or click
   const handleNPCInteraction = useCallback((npc) => {
     if (!npc) return;
@@ -809,31 +834,6 @@ const GameWorld = React.memo(() => {
     },
     [uiState, updateUIState, handlePortalActivation, mobileState],
   );
-
-  // Screen reader announcement function
-  const announceToScreenReader = useCallback((message) => {
-    // Create a live region for screen reader announcements
-    let liveRegion = document.getElementById("screen-reader-announcements");
-    if (!liveRegion) {
-      liveRegion = document.createElement("div");
-      liveRegion.id = "screen-reader-announcements";
-      liveRegion.setAttribute("aria-live", "polite");
-      liveRegion.setAttribute("aria-atomic", "true");
-      liveRegion.style.position = "absolute";
-      liveRegion.style.left = "-10000px";
-      liveRegion.style.width = "1px";
-      liveRegion.style.height = "1px";
-      liveRegion.style.overflow = "hidden";
-      document.body.appendChild(liveRegion);
-    }
-
-    liveRegion.textContent = message;
-
-    // Clear the message after a short delay
-    setTimeout(() => {
-      liveRegion.textContent = "";
-    }, 1000);
-  }, []);
 
   // Optimized nearby NPC finder
   const findNearbyNPC = useCallback(() => {
