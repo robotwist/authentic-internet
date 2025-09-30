@@ -1021,8 +1021,7 @@ const GameWorld = React.memo(() => {
             if (soundManager) {
               soundManager.playSound('sword', 0.3);
             }
-            // Reset attack state after animation completes
-            setTimeout(() => setIsAttacking(false), 300);
+            // CombatManager will reset attack state via onAttackComplete
             if (mobileState.screenReaderMode) {
               announceToScreenReader("Sword attack");
             }

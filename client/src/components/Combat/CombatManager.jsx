@@ -42,6 +42,9 @@ const CombatManager = ({
         direction: playerDirection,
         damage: getSwordDamage(swordType),
       });
+    } else if (!isAttacking && swordActive) {
+      // Reset sword if attack is cancelled
+      setSwordActive(null);
     }
   }, [isAttacking, swordActive, playerPosition, playerDirection, swordType]);
 
@@ -140,11 +143,18 @@ const CombatManager = ({
 
     // Define enemy spawns for different maps
     const enemySpawns = getEnemySpawnsForMap(currentMap);
+    console.log(`🐙 Spawning ${enemySpawns.length} enemies for map: ${currentMap}`);
     setEnemies(enemySpawns);
   }, [currentMap]);
 
   const getEnemySpawnsForMap = (mapName) => {
-    // Example spawn configurations
+    // Default spawn for testing (always spawn at least 2 enemies)
+    const defaultSpawn = [
+      { id: 'e-default-1', type: 'octorok', position: { x: 300, y: 250 }, health: 2 },
+      { id: 'e-default-2', type: 'moblin', position: { x: 500, y: 350 }, health: 3 },
+    ];
+
+    // Map-specific spawn configurations
     const spawns = {
       'Overworld': [
         { id: 'e1', type: 'octorok', position: { x: 200, y: 200 }, health: 2 },
@@ -165,7 +175,8 @@ const CombatManager = ({
       ],
     };
 
-    return spawns[mapName] || [];
+    // Return map-specific spawns or default spawns
+    return spawns[mapName] || defaultSpawn;
   };
 
   // Handle enemy defeat
