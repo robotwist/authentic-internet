@@ -569,6 +569,37 @@ const GameWorld = React.memo(() => {
     }, 4000);
   }, []);
 
+  // Show world announcement when transitioning to new area
+  const showWorldAnnouncement = useCallback((worldName) => {
+    // Create the announcement element if it doesn't exist
+    let announcement = document.getElementById("world-announcement");
+
+    if (!announcement) {
+      announcement = document.createElement("div");
+      announcement.id = "world-announcement";
+      announcement.className = "world-announcement";
+      document.body.appendChild(announcement);
+    }
+
+    // Update announcement content
+    announcement.innerHTML = `<h2>Welcome to ${worldName}</h2>`;
+
+    // Make announcement visible
+    setTimeout(() => {
+      announcement.classList.add("active");
+    }, 10);
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      announcement.classList.add("fade-out");
+      setTimeout(() => {
+        if (announcement && announcement.parentNode) {
+          announcement.parentNode.removeChild(announcement);
+        }
+      }, 1000);
+    }, 3000);
+  }, []);
+
   // Optimized portal activation handler with improved detection and feedback
   const handlePortalActivation = useCallback(
     (e) => {
@@ -2043,39 +2074,6 @@ const GameWorld = React.memo(() => {
 
     return [];
   }, [gameData.artifacts, currentMapIndex]);
-
-  // Show world announcement when transitioning to new area
-  const showWorldAnnouncement = useCallback((worldName) => {
-    // Create the announcement element if it doesn't exist
-    let announcement = document.getElementById("world-announcement");
-
-    if (!announcement) {
-      announcement = document.createElement("div");
-      announcement.id = "world-announcement";
-      announcement.className = "world-announcement";
-      document.body.appendChild(announcement);
-    }
-
-    // Update announcement content
-    announcement.innerHTML = `<h2>Welcome to ${worldName}</h2>`;
-
-    // Make announcement visible
-    setTimeout(() => {
-      announcement.classList.add("active");
-    }, 10);
-
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-      announcement.classList.add("fade-out");
-      setTimeout(() => {
-        if (announcement && announcement.parentNode) {
-          announcement.parentNode.removeChild(announcement);
-        }
-      }, 1000);
-    }, 3000);
-  }, []);
-
-
 
   return (
     <ErrorBoundary>
