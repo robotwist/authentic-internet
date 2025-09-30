@@ -171,6 +171,7 @@ const GameWorld = React.memo(() => {
   const [swordType, setSwordType] = useState('wooden'); // wooden, white, magical
   const [equippedItem, setEquippedItem] = useState(null);
   const [isInvincible, setIsInvincible] = useState(false);
+  const lastAttackTimeRef = useRef(0); // Attack cooldown
 
   // Mobile and accessibility state
   const [mobileState, setMobileState] = useState({
@@ -1015,8 +1016,12 @@ const GameWorld = React.memo(() => {
           break;
         case "z":
         case "Z":
-          // Sword attack
-          if (!isAttacking) {
+          // Sword attack with cooldown
+          const now = Date.now();
+          const ATTACK_COOLDOWN = 400; // ms between attacks
+          
+          if (!isAttacking && (now - lastAttackTimeRef.current >= ATTACK_COOLDOWN)) {
+            lastAttackTimeRef.current = now;
             setIsAttacking(true);
             if (soundManager) {
               soundManager.playSound('sword', 0.3);

@@ -14,21 +14,76 @@ const Enemy = ({
   onDefeat,
   onDamagePlayer,
   playerPosition,
-  mapData
+  mapData,
+  onTakeDamage // New: callback when enemy is damaged
 }) => {
   const [position, setPosition] = useState(initialPosition);
   const [health, setHealth] = useState(initialHealth);
   const [direction, setDirection] = useState('down');
   const [isFlashing, setIsFlashing] = useState(false);
   const [isDead, setIsDead] = useState(false);
+  const [isStunned, setIsStunned] = useState(false); // New: stun on hit
   
   const movementTimer = useRef(null);
   const directionTimer = useRef(null);
   const enemyRef = useRef(null);
+  const lastFlashTime = useRef(0);
+
+  // Handle taking damage with flash effect
+  const takeDamage = (damageAmount, knockbackDirection) => {
+    const now = Date.now();
+    // Prevent multiple hits in quick succession
+    if (now - lastFlashTime.current < 200) return;
+    
+    lastFlashTime.current = now;
+    
+    // Flash effect
+    setIsFlashing(true);
+    setTimeout(() => setIsFlashing(false), 200);
+    
+    // Brief stun
+    setIsStunned(true);
+    setTimeout(() => setIsStunned(false), 300);
+    
+    // Apply knockback
+    if (knockbackDirection) {
+      const knockbackDistance = 24;
+      const newPos = { ...position };
+      
+      switch (knockbackDirection) {
+        case 'up':
+          newPos.y -= knockbackDistance;
+          break;
+        case 'down':
+          newPos.y += knockbackDistance;
+          break;
+        case 'left':
+          newPos.x -= knockbackDistance;
+          break;
+        case 'right':
+          newPos.x += knockbackDistance;
+          break;
+      }
+      
+      setPosition(newPos);
+    }
+    
+    // Notify parent
+    if (onTakeDamage) {
+      onTakeDamage(damageAmount);
+    }
+  };
+
+  // Expose takeDamage to parent
+  useEffect(() => {
+    if (enemyRef.current) {
+      enemyRef.current.takeDamage = takeDamage;
+    }
+  }, [position, onTakeDamage]);
 
   // AI Movement based on enemy type
   useEffect(() => {
-    if (isDead) return;
+    if (isDead || isStunned) return;
 
     const moveEnemy = () => {
       switch (type) {
@@ -59,7 +114,7 @@ const Enemy = ({
       if (movementTimer.current) clearInterval(movementTimer.current);
       if (directionTimer.current) clearInterval(directionTimer.current);
     };
-  }, [type, isDead, position]);
+  }, [type, isDead, isStunned, position]);
 
   // Octorok AI: Random movement + occasional rock shooting
   const moveOctorok = () => {

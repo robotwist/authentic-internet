@@ -220,6 +220,7 @@ const CombatManager = ({
     if (!swordActive || enemies.length === 0) return;
 
     const swordHitbox = getSwordHitbox(swordActive);
+    let hitProcessed = false;
 
     enemies.forEach(enemy => {
       const enemyHitbox = {
@@ -229,7 +230,9 @@ const CombatManager = ({
         height: 48,
       };
 
-      if (checkCollision(swordHitbox, enemyHitbox)) {
+      if (!hitProcessed && checkCollision(swordHitbox, enemyHitbox)) {
+        hitProcessed = true; // Only hit one enemy per swing
+        
         // Damage enemy
         const updatedEnemy = {
           ...enemy,
@@ -246,6 +249,13 @@ const CombatManager = ({
           if (soundManager) {
             soundManager.playSound('enemy_hit', 0.3);
           }
+          
+          // Trigger visual feedback with knockback
+          const enemyElement = document.querySelector(`[data-enemy-id="${enemy.id}"]`);
+          if (enemyElement && enemyElement.takeDamage) {
+            enemyElement.takeDamage(swordActive.damage, swordActive.direction);
+          }
+          
           // Update enemy health
           setEnemies(prev => 
             prev.map(e => e.id === enemy.id ? updatedEnemy : e)
@@ -253,22 +263,24 @@ const CombatManager = ({
         }
       }
     });
-  }, [swordActive, enemies, handleEnemyDefeat]);
+  }, [swordActive, enemies, handleEnemyDefeat, soundManager]);
 
   const getSwordHitbox = (sword) => {
     const baseX = sword.position.x;
     const baseY = sword.position.y;
-    const size = 48;
+    const size = 64; // Increased from 48 for better feel
+    const width = 56; // Slightly wider
+    const height = 56;
 
     switch (sword.direction) {
       case 'up':
-        return { x: baseX, y: baseY - size, width: 48, height: size };
+        return { x: baseX - 4, y: baseY - size, width: width, height: size };
       case 'down':
-        return { x: baseX, y: baseY + 64, width: 48, height: size };
+        return { x: baseX - 4, y: baseY + 48, width: width, height: size };
       case 'left':
-        return { x: baseX - size, y: baseY, width: size, height: 48 };
+        return { x: baseX - size, y: baseY - 4, width: size, height: height };
       case 'right':
-        return { x: baseX + 64, y: baseY, width: size, height: 48 };
+        return { x: baseX + 48, y: baseY - 4, width: size, height: height };
       default:
         return { x: baseX, y: baseY, width: 48, height: 48 };
     }
@@ -359,15 +371,16 @@ const CombatManager = ({
 
       {/* Enemies */}
       {enemies.map(enemy => (
-        <Enemy
-          key={enemy.id}
-          type={enemy.type}
-          position={enemy.position}
-          health={enemy.health}
-          onDefeat={(drops) => handleEnemyDefeat(enemy.id, drops)}
-          onDamagePlayer={handlePlayerDamage}
-          playerPosition={playerPosition}
-        />
+        <div key={enemy.id} data-enemy-id={enemy.id}>
+          <Enemy
+            type={enemy.type}
+            position={enemy.position}
+            health={enemy.health}
+            onDefeat={(drops) => handleEnemyDefeat(enemy.id, drops)}
+            onDamagePlayer={handlePlayerDamage}
+            playerPosition={playerPosition}
+          />
+        </div>
       ))}
 
       {/* Drops */}
