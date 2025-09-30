@@ -203,7 +203,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
 // Get user's game state
 router.get('/game-state', authenticateToken, gameStateReadLimiter, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     // Get user's full game state from database
     const gameState = await User.findById(userId).select('gameState');
@@ -222,7 +222,7 @@ router.get('/game-state', authenticateToken, gameStateReadLimiter, async (req, r
 // Update user's game state
 router.put('/game-state', authenticateToken, gameStateWriteLimiter, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const gameState = req.body;
     
     // Update user's game state in database
@@ -246,7 +246,7 @@ router.put('/game-state', authenticateToken, gameStateWriteLimiter, async (req, 
 // Update user's experience points
 router.put('/experience', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const { experience } = req.body;
     
     if (typeof experience !== 'number') {
@@ -274,7 +274,7 @@ router.put('/experience', authenticateToken, async (req, res) => {
 // Add achievement for user
 router.post('/achievements', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const { achievement } = req.body;
     
     if (!achievement || !achievement.name || !achievement.description) {
