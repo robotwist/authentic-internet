@@ -538,6 +538,37 @@ const GameWorld = React.memo(() => {
     ],
   );
 
+  // Show a notification when player steps on a portal
+  const showPortalNotification = useCallback((title, message) => {
+    // Create the notification element if it doesn't exist
+    let notification = document.getElementById("portal-notification");
+
+    if (!notification) {
+      notification = document.createElement("div");
+      notification.id = "portal-notification";
+      notification.className = "portal-notification";
+      document.body.appendChild(notification);
+    }
+
+    // Update notification content
+    notification.innerHTML = `
+      <div class="portal-notification-content">
+        <h3>${title}</h3>
+        <p>${message}</p>
+      </div>
+    `;
+
+    // Make notification visible
+    setTimeout(() => {
+      notification.classList.add("visible");
+    }, 10);
+
+    // Hide notification after a few seconds
+    setTimeout(() => {
+      notification.classList.remove("visible");
+    }, 4000);
+  }, []);
+
   // Optimized portal activation handler with improved detection and feedback
   const handlePortalActivation = useCallback(
     (e) => {
@@ -2012,32 +2043,6 @@ const GameWorld = React.memo(() => {
 
     return [];
   }, [gameData.artifacts, currentMapIndex]);
-
-  // Show a notification when player steps on a portal
-  const showPortalNotification = useCallback((title, message) => {
-    // Create the notification element if it doesn't exist
-    let notification = document.getElementById("portal-notification");
-
-    if (!notification) {
-      notification = document.createElement("div");
-      notification.id = "portal-notification";
-      notification.className = "portal-notification";
-      document.body.appendChild(notification);
-    }
-
-    // Update notification content
-    notification.innerHTML = `
-      <div class="portal-notification-content">
-        <h3>${title}</h3>
-        <p>${message}</p>
-      </div>
-    `;
-
-    // Make notification visible
-    setTimeout(() => {
-      notification.classList.add("active");
-    }, 10);
-  }, []);
 
   // Show world announcement when transitioning to new area
   const showWorldAnnouncement = useCallback((worldName) => {
