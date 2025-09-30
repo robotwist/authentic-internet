@@ -10,11 +10,28 @@ const Sword = ({
   direction, 
   onAttackComplete, 
   damage = 1,
-  swordType = 'wooden' // wooden, white, magical
+  swordType = 'wooden', // wooden, white, magical
+  hasFullHealth = false, // Triggers sword beam
+  onSpawnProjectile // Callback to spawn sword beam
 }) => {
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
+    // Spawn sword beam if at full health (Zelda mechanic!)
+    if (hasFullHealth && onSpawnProjectile) {
+      // Slight delay so beam appears after sword swipe starts
+      setTimeout(() => {
+        onSpawnProjectile({
+          type: 'sword_beam',
+          position: { ...position },
+          direction,
+          damage: damage,
+          speed: 8,
+          maxDistance: 400,
+        });
+      }, 100);
+    }
+
     // Sword attack lasts 300ms (like Zelda)
     const timer = setTimeout(() => {
       setIsActive(false);
@@ -24,7 +41,7 @@ const Sword = ({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [onAttackComplete]);
+  }, [onAttackComplete, hasFullHealth, onSpawnProjectile, position, direction, damage]);
 
   if (!isActive) return null;
 

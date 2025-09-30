@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Sword from './Sword';
 import Enemy from './Enemy';
+import Projectile from './Projectile';
 import './CombatManager.css';
 
 /**
@@ -15,6 +16,7 @@ const CombatManager = ({
   playerPosition,
   playerDirection,
   playerHealth,
+  maxPlayerHealth,
   onPlayerDamage,
   onPlayerHeal,
   onCollectRupee,
@@ -26,6 +28,7 @@ const CombatManager = ({
   const [swordActive, setSwordActive] = useState(null);
   const [enemies, setEnemies] = useState([]);
   const [drops, setDrops] = useState([]);
+  const [projectiles, setProjectiles] = useState([]);
   const lastDamageTime = useRef(0);
   const DAMAGE_COOLDOWN = 1000; // 1 second invincibility
 
@@ -46,6 +49,74 @@ const CombatManager = ({
       onAttackComplete();
     }
   };
+
+  // Handle spawning projectiles (sword beam, enemy projectiles)
+  const handleSpawnProjectile = useCallback((projectileData) => {
+    const newProjectile = {
+      ...projectileData,
+      id: `proj-${Date.now()}-${Math.random()}`,
+    };
+    setProjectiles(prev => [...prev, newProjectile]);
+  }, []);
+
+  // Handle projectile expiration
+  const handleProjectileExpire = useCallback((projectileId) => {
+    setProjectiles(prev => prev.filter(p => p.id !== projectileId));
+  }, []);
+
+  // Handle projectile hitting target
+  const handleProjectileHit = useCallback((projectileId, target) => {
+    // Remove projectile
+    setProjectiles(prev => prev.filter(p => p.id !== projectileId));
+    
+    // Apply damage to target if it's an enemy
+    if (target.type === 'enemy') {
+      const updatedEnemy = {
+        ...target,
+        health: target.health - target.damageAmount,
+      };
+
+      if (updatedEnemy.health <= 0) {
+        handleEnemyDefeat(target.id, [
+          { type: Math.random() < 0.5 ? 'heart' : 'rupee', position: target.position }
+        ]);
+      } else {
+        setEnemies(prev => 
+          prev.map(e => e.id === target.id ? updatedEnemy : e)
+        );
+      }
+    }
+  }, []);
+
+  // Check projectile collisions with enemies
+  const checkProjectileCollision = useCallback((projPosition) => {
+    for (const enemy of enemies) {
+      const enemyHitbox = {
+        x: enemy.position.x,
+        y: enemy.position.y,
+        width: 48,
+        height: 48,
+      };
+
+      const projHitbox = {
+        x: projPosition.x,
+        y: projPosition.y,
+        width: 32,
+        height: 32,
+      };
+
+      if (checkCollision(projHitbox, enemyHitbox)) {
+        return {
+          type: 'enemy',
+          id: enemy.id,
+          position: enemy.position,
+          damageAmount: 2, // Sword beam damage
+          ...enemy,
+        };
+      }
+    }
+    return null;
+  }, [enemies]);
 
   // Get sword damage based on type
   const getSwordDamage = (type) => {
@@ -238,9 +309,27 @@ const CombatManager = ({
           direction={swordActive.direction}
           damage={swordActive.damage}
           swordType={swordType}
+          hasFullHealth={playerHealth === maxPlayerHealth}
+          onSpawnProjectile={handleSpawnProjectile}
           onAttackComplete={handleAttackComplete}
         />
       )}
+
+      {/* Projectiles (sword beams, enemy projectiles) */}
+      {projectiles.map(proj => (
+        <Projectile
+          key={proj.id}
+          type={proj.type}
+          position={proj.position}
+          direction={proj.direction}
+          speed={proj.speed}
+          damage={proj.damage}
+          maxDistance={proj.maxDistance}
+          checkCollision={checkProjectileCollision}
+          onHit={(target) => handleProjectileHit(proj.id, target)}
+          onExpire={() => handleProjectileExpire(proj.id)}
+        />
+      ))}
 
       {/* Enemies */}
       {enemies.map(enemy => (

@@ -26,6 +26,8 @@ import Map from "./Map";
 import WorldMap from "./WorldMap";
 import FeedbackForm from "./FeedbackForm";
 import { useCharacterMovement } from "./CharacterMovement";
+import GameHUD from "./UI/GameHUD";
+import CombatManager from "./Combat/CombatManager";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS, isWalkable } from "./Constants";
 import { MAPS } from "./GameData";
 import { debugNPCSprites } from "../utils/debugTools";
@@ -160,6 +162,16 @@ const GameWorld = React.memo(() => {
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Combat state (Zelda-style)
+  const [playerHealth, setPlayerHealth] = useState(6); // 3 hearts (6 half-hearts)
+  const [maxPlayerHealth, setMaxPlayerHealth] = useState(6);
+  const [rupees, setRupees] = useState(0);
+  const [keys, setKeys] = useState(0);
+  const [isAttacking, setIsAttacking] = useState(false);
+  const [swordType, setSwordType] = useState('wooden'); // wooden, white, magical
+  const [equippedItem, setEquippedItem] = useState(null);
+  const [isInvincible, setIsInvincible] = useState(false);
+
   // Mobile and accessibility state
   const [mobileState, setMobileState] = useState({
     isMobile: false,
@@ -200,6 +212,65 @@ const GameWorld = React.memo(() => {
     },
     [experience, updateExperience],
   );
+
+  // Combat handlers
+  const handlePlayerDamage = useCallback((damage) => {
+    if (isInvincible) return;
+    
+    const newHealth = Math.max(0, playerHealth - damage);
+    setPlayerHealth(newHealth);
+    
+    // Invincibility frames
+    setIsInvincible(true);
+    setTimeout(() => setIsInvincible(false), 1000);
+    
+    // Play damage sound
+    if (soundManager) {
+      soundManager.playSound('damage', 0.5);
+    }
+    
+    // Check for game over
+    if (newHealth <= 0) {
+      handleGameOver();
+    }
+  }, [playerHealth, isInvincible, soundManager]);
+
+  const handlePlayerHeal = useCallback((amount) => {
+    const newHealth = Math.min(maxPlayerHealth, playerHealth + amount);
+    setPlayerHealth(newHealth);
+    
+    if (soundManager) {
+      soundManager.playSound('heal', 0.3);
+    }
+  }, [playerHealth, maxPlayerHealth, soundManager]);
+
+  const handleCollectRupee = useCallback((amount) => {
+    setRupees(prev => prev + amount);
+    
+    if (soundManager) {
+      soundManager.playSound('rupee', 0.3);
+    }
+  }, [soundManager]);
+
+  const handleCollectKey = useCallback(() => {
+    setKeys(prev => prev + 1);
+    
+    if (soundManager) {
+      soundManager.playSound('key', 0.3);
+    }
+  }, [soundManager]);
+
+  const handleGameOver = useCallback(() => {
+    console.log('Game Over!');
+    // Reset player health
+    setPlayerHealth(Math.floor(maxPlayerHealth / 2)); // Respawn with half health
+    // Reset position to start
+    setCharacterPosition(INITIAL_CHARACTER_POSITION);
+    
+    if (soundManager) {
+      soundManager.playSound('gameover', 0.5);
+    }
+  }, [maxPlayerHealth, soundManager]);
 
   // Memoized portal configuration
   const PORTAL_CONFIG = useMemo(
@@ -941,6 +1012,22 @@ const GameWorld = React.memo(() => {
           break;
         case " ":
           handlePortalActivation(event);
+          break;
+        case "z":
+        case "Z":
+          // Sword attack
+          if (!isAttacking) {
+            setIsAttacking(true);
+            if (soundManager) {
+              soundManager.playSound('sword', 0.3);
+            }
+            // Reset attack state after animation completes
+            setTimeout(() => setIsAttacking(false), 300);
+            if (mobileState.screenReaderMode) {
+              announceToScreenReader("Sword attack");
+            }
+          }
+          event.preventDefault();
           break;
         case "t":
         case "T":
@@ -2225,6 +2312,16 @@ const GameWorld = React.memo(() => {
           className="sr-only"
         />
 
+        {/* Zelda-style HUD */}
+        <GameHUD
+          health={playerHealth}
+          maxHealth={maxPlayerHealth}
+          rupees={rupees}
+          keys={keys}
+          currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
+          equippedItem={equippedItem}
+        />
+
         {uiState.showLevel4 && (
           <Level4Shooter
             onComplete={handleLevel4Complete}
@@ -2275,12 +2372,27 @@ const GameWorld = React.memo(() => {
 
             {/* Player Character */}
             <div
-              className={`character ${uiState.isMoving ? "walking" : ""} ${characterState.direction} ${characterState.verticalDirection !== characterState.direction && characterState.verticalDirection ? characterState.verticalDirection : ""} ${characterState.horizontalDirection !== characterState.direction && characterState.horizontalDirection ? characterState.horizontalDirection : ""} ${characterState.movementTransition || ""}`}
+              className={`character ${uiState.isMoving ? "walking" : ""} ${characterState.direction} ${characterState.verticalDirection !== characterState.direction && characterState.verticalDirection ? characterState.verticalDirection : ""} ${characterState.horizontalDirection !== characterState.direction && characterState.horizontalDirection ? characterState.horizontalDirection : ""} ${characterState.movementTransition || ""} ${isInvincible ? "character-invincible" : ""}`}
               style={characterState.style}
               ref={characterRef}
               role="img"
               aria-label={`Player character at position ${Math.round(characterPosition.x / TILE_SIZE)}, ${Math.round(characterPosition.y / TILE_SIZE)}`}
               data-testid="character"
+            />
+
+            {/* Combat System */}
+            <CombatManager
+              playerPosition={characterPosition}
+              playerDirection={characterState.direction}
+              playerHealth={playerHealth}
+              maxPlayerHealth={maxPlayerHealth}
+              onPlayerDamage={handlePlayerDamage}
+              onPlayerHeal={handlePlayerHeal}
+              onCollectRupee={handleCollectRupee}
+              currentMap={MAPS[currentMapIndex]?.name}
+              isAttacking={isAttacking}
+              onAttackComplete={() => setIsAttacking(false)}
+              swordType={swordType}
             />
 
             {/* Environment Modifiers */}
