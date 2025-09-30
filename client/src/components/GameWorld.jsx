@@ -220,14 +220,14 @@ const GameWorld = React.memo(() => {
     const newHealth = Math.max(0, playerHealth - damage);
     setPlayerHealth(newHealth);
     
-    // Invincibility frames
-    setIsInvincible(true);
-    setTimeout(() => setIsInvincible(false), 1000);
-    
     // Play damage sound
     if (soundManager) {
       soundManager.playSound('damage', 0.5);
     }
+    
+    // Invincibility frames
+    setIsInvincible(true);
+    setTimeout(() => setIsInvincible(false), 1000);
     
     // Check for game over
     if (newHealth <= 0) {

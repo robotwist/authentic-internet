@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Sword from './Sword';
 import Enemy from './Enemy';
 import Projectile from './Projectile';
+import SoundManager from '../utils/SoundManager';
 import './CombatManager.css';
 
 /**
@@ -25,6 +26,7 @@ const CombatManager = ({
   onAttackComplete,
   swordType = 'wooden'
 }) => {
+  const soundManager = SoundManager.getInstance();
   const [swordActive, setSwordActive] = useState(null);
   const [enemies, setEnemies] = useState([]);
   const [drops, setDrops] = useState([]);
@@ -81,6 +83,10 @@ const CombatManager = ({
           { type: Math.random() < 0.5 ? 'heart' : 'rupee', position: target.position }
         ]);
       } else {
+        // Play enemy hit sound
+        if (soundManager) {
+          soundManager.playSound('enemy_hit', 0.3);
+        }
         setEnemies(prev => 
           prev.map(e => e.id === target.id ? updatedEnemy : e)
         );
@@ -164,6 +170,11 @@ const CombatManager = ({
 
   // Handle enemy defeat
   const handleEnemyDefeat = useCallback((enemyId, droppedItems) => {
+    // Play enemy defeat sound
+    if (soundManager) {
+      soundManager.playSound('enemy_defeat', 0.4);
+    }
+    
     // Remove enemy
     setEnemies(prev => prev.filter(e => e.id !== enemyId));
 
@@ -177,7 +188,7 @@ const CombatManager = ({
         }))
       ]);
     }
-  }, []);
+  }, [soundManager]);
 
   // Handle player taking damage
   const handlePlayerDamage = useCallback((damage) => {
@@ -220,6 +231,10 @@ const CombatManager = ({
             { type: Math.random() < 0.5 ? 'heart' : 'rupee', position: enemy.position }
           ]);
         } else {
+          // Play enemy hit sound
+          if (soundManager) {
+            soundManager.playSound('enemy_hit', 0.3);
+          }
           // Update enemy health
           setEnemies(prev => 
             prev.map(e => e.id === enemy.id ? updatedEnemy : e)

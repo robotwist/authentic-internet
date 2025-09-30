@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import SoundManager from '../utils/SoundManager';
 import './Sword.css';
 
 /**
@@ -15,12 +16,18 @@ const Sword = ({
   onSpawnProjectile // Callback to spawn sword beam
 }) => {
   const [isActive, setIsActive] = useState(true);
+  const soundManager = SoundManager.getInstance();
 
   useEffect(() => {
     // Spawn sword beam if at full health (Zelda mechanic!)
     if (hasFullHealth && onSpawnProjectile) {
       // Slight delay so beam appears after sword swipe starts
       setTimeout(() => {
+        // Play sword beam sound
+        if (soundManager) {
+          soundManager.playSound('sword_beam', 0.4);
+        }
+        
         onSpawnProjectile({
           type: 'sword_beam',
           position: { ...position },

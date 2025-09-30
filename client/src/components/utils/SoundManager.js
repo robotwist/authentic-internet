@@ -34,6 +34,7 @@ class SoundManager {
 
       // List of sounds to load with fallbacks
       const soundsToLoad = [
+        // Existing sounds
         ['bump', '/assets/sounds/bump.mp3'],
         ['portal', '/assets/sounds/portal.mp3'],
         ['level_complete', '/assets/sounds/level-complete.mp3'],
@@ -44,10 +45,23 @@ class SoundManager {
         ['discovery', '/assets/sounds/artifact-pickup.mp3'], // Use artifact-pickup for discovery
         ['portal_standard', '/assets/sounds/portal.mp3'], // Use existing portal.mp3
         ['typing', '/assets/sounds/page-turn.mp3'], // Use page-turn for typing
-        ['whisper', '/assets/sounds/page-turn.mp3'], // Use page-turn for whisper
-        ['digital_transition', '/assets/sounds/portal.mp3'], // Use portal for digital transition
-        ['toilet_flush', '/assets/sounds/water.mp3'], // Use water for toilet flush
-        ['poof', '/assets/sounds/poof.mp3']
+        ['whisper', '/assets/sounds/whisper.mp3'],
+        ['digital_transition', '/assets/sounds/digital-transition.mp3'],
+        ['toilet_flush', '/assets/sounds/toilet-flush.mp3'],
+        ['poof', '/assets/sounds/poof.mp3'],
+        ['step', '/assets/sounds/page-turn.mp3'], // Footstep sound (use page-turn as fallback)
+        
+        // Combat sounds (Zelda-style)
+        ['sword', '/assets/sounds/combat/sword.mp3'],
+        ['sword_beam', '/assets/sounds/combat/sword_beam.mp3'],
+        ['damage', '/assets/sounds/combat/damage.mp3'],
+        ['heal', '/assets/sounds/combat/heal.mp3'],
+        ['rupee', '/assets/sounds/combat/rupee.mp3'],
+        ['key', '/assets/sounds/combat/key.mp3'],
+        ['enemy_hit', '/assets/sounds/combat/enemy_hit.mp3'],
+        ['enemy_defeat', '/assets/sounds/combat/enemy_defeat.mp3'],
+        ['gameover', '/assets/sounds/combat/gameover.mp3'],
+        ['heart', '/assets/sounds/combat/heart.mp3']
       ];
 
       // Load sounds with fallback strategy
@@ -277,12 +291,30 @@ class SoundManager {
     }
 
     try {
-      // Get the sound (with fallback)
+      // Get the sound (with intelligent fallback)
       let soundToPlay = this.sounds[name];
       
       // Use fallback if sound doesn't exist
       if (!soundToPlay) {
-        if (this.sounds['bump']) {
+        // Smart fallbacks for combat sounds
+        const fallbackMap = {
+          'sword': 'portal',
+          'sword_beam': 'portal',
+          'damage': 'bump',
+          'enemy_hit': 'bump',
+          'enemy_defeat': 'poof',
+          'heal': 'pickup',
+          'heart': 'pickup',
+          'rupee': 'pickup',
+          'key': 'pickup',
+          'gameover': 'bump'
+        };
+        
+        const fallbackName = fallbackMap[name];
+        if (fallbackName && this.sounds[fallbackName]) {
+          soundToPlay = this.sounds[fallbackName];
+          console.log(`🔄 Using ${fallbackName} sound as fallback for ${name}`);
+        } else if (this.sounds['bump']) {
           soundToPlay = this.sounds['bump'];
           console.log(`🔄 Using bump sound as fallback for ${name}`);
         } else {
