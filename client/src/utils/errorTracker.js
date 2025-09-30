@@ -101,11 +101,16 @@ export const trackError = (message, options = {}) => {
     console.debug('Error Stack:', originalError.stack);
   }
   
-  // Report to backend for critical errors
+  // Report to backend for critical errors (only if endpoint exists)
   if (level === ERROR_LEVELS.CRITICAL) {
-    reportErrorToServer(errorObj).catch(e => 
-      console.error('Failed to report critical error to server:', e)
-    );
+    reportErrorToServer(errorObj).catch(e => {
+      // Silently handle missing diagnostics endpoint
+      if (e.message && e.message.includes('404')) {
+        console.debug('Diagnostics endpoint not available, error logged locally only');
+      } else {
+        console.error('Failed to report critical error to server:', e);
+      }
+    });
   }
   
   return errorObj;
