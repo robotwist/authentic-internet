@@ -205,19 +205,34 @@ const GameWorld = React.memo(() => {
   const PORTAL_CONFIG = useMemo(
     () => ({
       progression: {
-        Overworld: {
-          destination: "Overworld 2",
-          spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
-        },
+        Overworld: [
+          {
+            destination: "Overworld 2",
+            spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
+            condition: (x, y) => x === 8 && y === 11,
+          },
+          {
+            destination: "Dungeon Level 1",
+            spawnPosition: { x: 1 * TILE_SIZE, y: 1 * TILE_SIZE },
+            condition: (x, y) => x === 10 && y === 12,
+          },
+        ],
         "Overworld 2": {
           destination: "Overworld 3",
           spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
         },
-        "Overworld 3": {
-          destination: "Yosemite",
-          spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
-          condition: (x, y) => x === 8 && y === 1,
-        },
+        "Overworld 3": [
+          {
+            destination: "Desert 1",
+            spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
+            condition: (x, y) => x === 8 && y === 0,
+          },
+          {
+            destination: "Yosemite",
+            spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
+            condition: (x, y) => x === 8 && y === 11,
+          },
+        ],
         "Desert 1": {
           destination: "Desert 2",
           spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
@@ -232,11 +247,11 @@ const GameWorld = React.memo(() => {
         },
         "Dungeon Level 1": {
           destination: "Dungeon Level 2",
-          spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
+          spawnPosition: { x: 1 * TILE_SIZE, y: 1 * TILE_SIZE },
         },
         "Dungeon Level 2": {
           destination: "Dungeon Level 3",
-          spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
+          spawnPosition: { x: 1 * TILE_SIZE, y: 1 * TILE_SIZE },
         },
         "Dungeon Level 3": {
           destination: "Yosemite",
@@ -600,7 +615,80 @@ const GameWorld = React.memo(() => {
     }, 3000);
   }, []);
 
-  // Optimized portal activation handler with improved detection and feedback
+  // Automatic portal activation on collision
+  useEffect(() => {
+    const handlePortalCollision = (event) => {
+      if (portalState.isTransitioning) return;
+
+      const { tileX, tileY, tileType } = event.detail;
+      const currentMapName = currentMap?.name;
+      
+      if (!currentMapName) return;
+
+      console.log(`Portal collision detected - Map: ${currentMapName}, Tile: (${tileX}, ${tileY}), Type: ${tileType}`);
+
+      // Handle progression portals (type 5)
+      if (tileType === 5) {
+        const progressionPortal = PORTAL_CONFIG.progression[currentMapName];
+        if (progressionPortal) {
+          // Handle multiple portals per map (array)
+          if (Array.isArray(progressionPortal)) {
+            for (const portal of progressionPortal) {
+              const { destination, spawnPosition, condition } = portal;
+              
+              // Check if portal condition is met
+              if (condition && condition(tileX, tileY)) {
+                console.log(`✅ Auto-activating portal to ${destination}`);
+                handlePortalTransition(destination, spawnPosition);
+                return;
+              }
+            }
+          } else {
+            // Handle single portal (object)
+            const { destination, spawnPosition, condition } = progressionPortal;
+            
+            // Check if portal condition is met (if any)
+            if (!condition || condition(tileX, tileY)) {
+              console.log(`✅ Auto-activating portal to ${destination}`);
+              handlePortalTransition(destination, spawnPosition);
+              return;
+            }
+          }
+        }
+      }
+
+      // Handle special portals in Yosemite (types 6-8)
+      if (currentMapName === "Yosemite" && (tileType >= 6 && tileType <= 8)) {
+        const specialPortal = PORTAL_CONFIG.special[tileX];
+        
+        if (specialPortal && tileY === 1) {
+          console.log(`✅ Auto-activating special portal: ${specialPortal.title}`);
+          
+          // Activate the special world directly
+          if (specialPortal.type === "terminal") {
+            setCurrentSpecialWorld("terminal");
+          } else if (specialPortal.type === "shooter") {
+            setCurrentSpecialWorld("shooter");
+          } else if (specialPortal.type === "text_adventure") {
+            setCurrentSpecialWorld("text_adventure");
+          }
+          
+          updatePortalState({
+            activePortal: specialPortal,
+            portalNotificationActive: true,
+          });
+          return;
+        }
+      }
+    };
+
+    window.addEventListener('portalCollision', handlePortalCollision);
+    return () => {
+      window.removeEventListener('portalCollision', handlePortalCollision);
+    };
+  }, [portalState.isTransitioning, currentMap, PORTAL_CONFIG, handlePortalTransition, updatePortalState]);
+
+  // Optimized portal activation handler with improved detection and feedback (kept for manual SPACE activation)
   const handlePortalActivation = useCallback(
     (e) => {
       if (e.key !== " " || portalState.isTransitioning) return;
@@ -614,22 +702,38 @@ const GameWorld = React.memo(() => {
       const playerTileX = Math.floor(characterPosition.x / TILE_SIZE);
       const playerTileY = Math.floor(characterPosition.y / TILE_SIZE);
       
-      console.log(`Portal activation attempt - Map: ${currentMapName}, Player position: (${playerTileX}, ${playerTileY})`);
+      console.log(`Manual portal activation attempt - Map: ${currentMapName}, Player position: (${playerTileX}, ${playerTileY})`);
 
       // Check progression portals
       const progressionPortal = PORTAL_CONFIG.progression[currentMapName];
       if (progressionPortal) {
-        const { destination, spawnPosition, condition } = progressionPortal;
-        console.log(`Checking progression portal to ${destination}, condition:`, condition);
+        // Handle multiple portals per map (array)
+        if (Array.isArray(progressionPortal)) {
+          for (const portal of progressionPortal) {
+            const { destination, spawnPosition, condition } = portal;
+            console.log(`Checking progression portal to ${destination}, condition:`, condition);
 
-        if (!condition || condition(playerTileX, playerTileY)) {
-          console.log(`✅ Activating portal to ${destination}`);
-          handlePortalTransition(destination, spawnPosition);
-          return;
-        } else {
-          console.log(`❌ Portal condition not met for ${destination}`);
-          // Show hint to user
+            if (condition && condition(playerTileX, playerTileY)) {
+              console.log(`✅ Activating portal to ${destination}`);
+              handlePortalTransition(destination, spawnPosition);
+              return;
+            }
+          }
+          console.log(`❌ Portal condition not met`);
           showWorldAnnouncement("Find the correct portal location to proceed");
+        } else {
+          // Handle single portal (object)
+          const { destination, spawnPosition, condition } = progressionPortal;
+          console.log(`Checking progression portal to ${destination}, condition:`, condition);
+
+          if (!condition || condition(playerTileX, playerTileY)) {
+            console.log(`✅ Activating portal to ${destination}`);
+            handlePortalTransition(destination, spawnPosition);
+            return;
+          } else {
+            console.log(`❌ Portal condition not met for ${destination}`);
+            showWorldAnnouncement("Find the correct portal location to proceed");
+          }
         }
       }
 
@@ -1020,23 +1124,30 @@ const GameWorld = React.memo(() => {
     let nearPortal = false;
 
     if (progressionPortal) {
-      const { condition } = progressionPortal;
+      // Handle multiple portals per map (array)
+      const portals = Array.isArray(progressionPortal) ? progressionPortal : [progressionPortal];
       
-      // For portals with conditions, check if player is close
-      if (condition) {
-        // Check surrounding tiles (1-tile radius)
-        for (let dx = -1; dx <= 1; dx++) {
-          for (let dy = -1; dy <= 1; dy++) {
-            if (condition(playerTileX + dx, playerTileY + dy)) {
-              nearPortal = true;
-              break;
+      for (const portal of portals) {
+        const { condition } = portal;
+        
+        // For portals with conditions, check if player is close
+        if (condition) {
+          // Check surrounding tiles (1-tile radius)
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+              if (condition(playerTileX + dx, playerTileY + dy)) {
+                nearPortal = true;
+                break;
+              }
             }
+            if (nearPortal) break;
           }
-          if (nearPortal) break;
+        } else {
+          // For portals without conditions, consider always near if on this map
+          nearPortal = true;
         }
-      } else {
-        // For portals without conditions, consider always near if on this map
-        nearPortal = true;
+        
+        if (nearPortal) break;
       }
     }
 

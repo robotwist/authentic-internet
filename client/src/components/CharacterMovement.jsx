@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS, MAPS, isWalkable } from "./Constants";
 import SoundManager from "./utils/SoundManager";
 
-// Add movement speed constant for smoother movement
-const MOVEMENT_STEP_SIZE = TILE_SIZE / 2; // This will make movement smoother - 32px instead of 64px
+// Movement step size - one full tile per button press
+const MOVEMENT_STEP_SIZE = TILE_SIZE; // 64px - one tile per move for grid-based movement
 
 const useCharacterMovement = (
   characterPosition, 
@@ -24,10 +24,8 @@ const useCharacterMovement = (
   const [movementCooldown, setMovementCooldown] = useState(false);
   const [soundManager, setSoundManager] = useState(null);
   const [diagonalMovement, setDiagonalMovement] = useState({ x: 0, y: 0 });
-  const keysPressed = useRef(new Set());
   const lastMoveTime = useRef(Date.now());
-  const moveInterval = useRef(null);
-  const movementInertia = useRef({ x: 0, y: 0 });
+  const processedKeys = useRef(new Set()); // Track keys that have been processed
   
   // Add useEffect for initialization
   useEffect(() => {
@@ -71,10 +69,10 @@ const useCharacterMovement = (
       return;
     }
 
-    // Calculate time since last move for smoother movement
+    // Calculate time since last move for discrete grid-based movement
     const now = Date.now();
     const timeSinceLastMove = now - lastMoveTime.current;
-    if (timeSinceLastMove < 100) { // Minimum time between moves
+    if (timeSinceLastMove < 150) { // Minimum time between moves - prevents accidental double-moves
       return;
     }
     lastMoveTime.current = now;
@@ -211,88 +209,32 @@ const useCharacterMovement = (
       soundManager.playSound('step', 0.2);
     }
 
+    // Check for portal collision after movement (automatic portal activation)
+    const finalMapData = MAPS[targetMapIndex]?.data;
+    if (finalMapData) {
+      const finalTileX = Math.floor(newPosition.x / TILE_SIZE);
+      const finalTileY = Math.floor(newPosition.y / TILE_SIZE);
+      
+      if (finalTileY >= 0 && finalTileY < finalMapData.length && 
+          finalTileX >= 0 && finalTileX < finalMapData[0].length) {
+        const tileType = finalMapData[finalTileY][finalTileX];
+        
+        // Trigger portal activation for portal tiles (5-8)
+        if (tileType >= 5 && tileType <= 8) {
+          // Dispatch a custom event that GameWorld can listen to
+          const portalEvent = new CustomEvent('portalCollision', {
+            detail: { 
+              tileX: finalTileX, 
+              tileY: finalTileY, 
+              tileType: tileType 
+            }
+          });
+          window.dispatchEvent(portalEvent);
+        }
+      }
+    }
+
   }, [characterPosition, currentMapIndex, movementCooldown, handleCharacterMove, adjustViewport, soundManager, triggerBump]);
-
-  // Process multiple key presses for diagonal movement
-  const processKeyPresses = useCallback(() => {
-    const keys = Array.from(keysPressed.current);
-    let dirX = 0;
-    let dirY = 0;
-    
-    // Process vertical movement
-    if (keys.includes('ArrowUp') || keys.includes('w') || keys.includes('W')) {
-      dirY = -1;
-    } else if (keys.includes('ArrowDown') || keys.includes('s') || keys.includes('S')) {
-      dirY = 1;
-    }
-    
-    // Process horizontal movement
-    if (keys.includes('ArrowLeft') || keys.includes('a') || keys.includes('A')) {
-      dirX = -1;
-    } else if (keys.includes('ArrowRight') || keys.includes('d') || keys.includes('D')) {
-      dirX = 1;
-    }
-    
-    // Apply movement inertia
-    if (dirX !== 0 || dirY !== 0) {
-      movementInertia.current = { x: dirX * 0.8, y: dirY * 0.8 };
-    } else {
-      // Gradually decrease inertia when no keys are pressed
-      movementInertia.current.x *= 0.7;
-      movementInertia.current.y *= 0.7;
-      
-      // Reset inertia if it's very small
-      if (Math.abs(movementInertia.current.x) < 0.1) movementInertia.current.x = 0;
-      if (Math.abs(movementInertia.current.y) < 0.1) movementInertia.current.y = 0;
-    }
-    
-    // Determine direction for animation
-    if (dirX !== 0 || dirY !== 0) {
-      // Prioritize horizontal direction for diagonal movement
-      let direction;
-      if (Math.abs(dirX) > Math.abs(dirY)) {
-        direction = dirX > 0 ? 'right' : 'left';
-      } else {
-        direction = dirY > 0 ? 'down' : 'up';
-      }
-      
-      // Set diagonal movement state
-      setDiagonalMovement({ x: dirX, y: dirY });
-      handleMove(direction);
-    } else if (movementInertia.current.x !== 0 || movementInertia.current.y !== 0) {
-      // Handle inertial movement
-      let direction;
-      if (Math.abs(movementInertia.current.x) > Math.abs(movementInertia.current.y)) {
-        direction = movementInertia.current.x > 0 ? 'right' : 'left';
-      } else {
-        direction = movementInertia.current.y > 0 ? 'down' : 'up';
-      }
-      
-      setDiagonalMovement({ 
-        x: movementInertia.current.x, 
-        y: movementInertia.current.y 
-      });
-      
-      // Only move if inertia is significant
-      if (Math.abs(movementInertia.current.x) > 0.3 || 
-          Math.abs(movementInertia.current.y) > 0.3) {
-        handleMove(direction);
-      }
-    }
-  }, [handleMove]);
-
-  // Create continuous movement interval
-  useEffect(() => {
-    moveInterval.current = setInterval(() => {
-      processKeyPresses();
-    }, 100); // Check for key presses every 100ms
-    
-    return () => {
-      if (moveInterval.current) {
-        clearInterval(moveInterval.current);
-      }
-    };
-  }, [processKeyPresses]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -301,11 +243,38 @@ const useCharacterMovement = (
         return;
       }
 
-      // Add key to pressed keys
-      keysPressed.current.add(event.key);
+      // Prevent key repeat for movement - only allow one move per key press
+      if (processedKeys.current.has(event.key)) {
+        return;
+      }
+      processedKeys.current.add(event.key);
 
-      // Handle non-movement keys immediately
+      // Handle movement keys immediately with discrete movement
       switch (event.key) {
+        case "ArrowUp":
+        case "w":
+        case "W":
+          handleMove("up");
+          event.preventDefault();
+          break;
+        case "ArrowDown":
+        case "s":
+        case "S":
+          handleMove("down");
+          event.preventDefault();
+          break;
+        case "ArrowLeft":
+        case "a":
+        case "A":
+          handleMove("left");
+          event.preventDefault();
+          break;
+        case "ArrowRight":
+        case "d":
+        case "D":
+          handleMove("right");
+          event.preventDefault();
+          break;
         case "e":
         case "E":
         case "p":
@@ -327,8 +296,8 @@ const useCharacterMovement = (
     };
 
     const handleKeyUp = (event) => {
-      // Remove key from pressed keys
-      keysPressed.current.delete(event.key);
+      // Remove key from processed keys to allow next press
+      processedKeys.current.delete(event.key);
     };
 
     window.addEventListener("keydown", handleKeyDown);
