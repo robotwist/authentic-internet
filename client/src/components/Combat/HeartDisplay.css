@@ -1,0 +1,61 @@
+/* Zelda-style Heart Display */
+.heart-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  max-width: 320px; /* 8 hearts per row (like Zelda) */
+}
+
+.heart {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  image-rendering: pixelated;
+  transition: transform 0.1s ease;
+}
+
+/* Pulse animation when taking damage */
+@keyframes heart-damage {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.heart-display.damaged .heart {
+  animation: heart-damage 0.3s ease;
+}
+
+/* Different heart states */
+.heart-full {
+  filter: brightness(1);
+}
+
+.heart-half {
+  filter: brightness(0.9);
+}
+
+.heart-empty {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+/* Responsive sizing */
+@media (max-width: 768px) {
+  .heart {
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+  }
+  
+  .heart-display {
+    gap: 2px;
+    padding: 4px;
+    max-width: 216px; /* Adjust for smaller hearts */
+  }
+}
+
