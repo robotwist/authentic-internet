@@ -97,10 +97,10 @@ const Projectile = ({
   // Get projectile sprite and style based on type
   const getProjectileDisplay = () => {
     const sprites = {
-      sword_beam: '✨',
+      sword_beam: '🗡️',
       rock: '⚪',
       arrow: '➤',
-      fireball: '🔥',
+      fireball: '🗡️',
       magic: '💫',
     };
 
@@ -108,7 +108,7 @@ const Projectile = ({
       sword_beam: '#FFD700',
       rock: '#8B4513',
       arrow: '#C0C0C0',
-      fireball: '#FF4500',
+      fireball: '#C0C0C0',
       magic: '#9370DB',
     };
 

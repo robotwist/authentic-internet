@@ -13,20 +13,30 @@
   filter: drop-shadow(0 0 8px currentColor);
 }
 
-/* Sword beam specific */
+/* Sword beam specific - spinning sword projectile */
 .projectile-sword_beam {
-  animation: sword-beam-pulse 0.3s ease-in-out infinite;
-  font-size: 28px;
+  animation: sword-beam-spin 0.4s linear infinite;
+  font-size: 32px;
 }
 
-@keyframes sword-beam-pulse {
-  0%, 100% {
-    transform: scale(1) rotate(var(--rotation, 0deg));
+@keyframes sword-beam-spin {
+  0% {
+    transform: rotate(0deg);
     filter: drop-shadow(0 0 8px #FFD700);
   }
-  50% {
-    transform: scale(1.2) rotate(var(--rotation, 0deg));
+  25% {
     filter: drop-shadow(0 0 12px #FFD700);
+  }
+  50% {
+    transform: rotate(180deg);
+    filter: drop-shadow(0 0 8px #FFD700);
+  }
+  75% {
+    filter: drop-shadow(0 0 12px #FFD700);
+  }
+  100% {
+    transform: rotate(360deg);
+    filter: drop-shadow(0 0 8px #FFD700);
   }
 }
 
@@ -69,19 +79,24 @@
   font-size: 20px;
 }
 
-/* Fireball projectile */
+/* Fireball projectile - now a spinning sword */
 .projectile-fireball {
-  animation: fireball-flicker 0.2s ease-in-out infinite;
+  animation: sword-projectile-spin 0.5s linear infinite;
+  font-size: 28px;
 }
 
-@keyframes fireball-flicker {
-  0%, 100% {
-    filter: drop-shadow(0 0 8px #FF4500);
-    transform: scale(1);
+@keyframes sword-projectile-spin {
+  0% {
+    transform: rotate(0deg);
+    filter: drop-shadow(0 0 6px #C0C0C0);
   }
   50% {
-    filter: drop-shadow(0 0 12px #FF6347);
-    transform: scale(1.1);
+    transform: rotate(180deg);
+    filter: drop-shadow(0 0 10px #FFFFFF);
+  }
+  100% {
+    transform: rotate(360deg);
+    filter: drop-shadow(0 0 6px #C0C0C0);
   }
 }
 
