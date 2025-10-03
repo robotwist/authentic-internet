@@ -37,6 +37,10 @@ const Enemy = ({
     
     lastFlashTime.current = now;
     
+    // Reduce health
+    const newHealth = health - damageAmount;
+    setHealth(newHealth);
+    
     // Flash effect
     setIsFlashing(true);
     setTimeout(() => setIsFlashing(false), 200);
@@ -66,6 +70,11 @@ const Enemy = ({
       }
       
       setPosition(newPos);
+    }
+    
+    // Check if defeated
+    if (newHealth <= 0) {
+      handleDefeat();
     }
     
     // Notify parent
@@ -174,19 +183,6 @@ const Enemy = ({
     const randomDir = directions[Math.floor(Math.random() * directions.length)];
     setDirection(randomDir);
     moveOctorok(); // Use octorok movement
-  };
-
-  // Take damage from sword
-  const takeDamage = (damageAmount) => {
-    const newHealth = health - damageAmount;
-    setHealth(newHealth);
-    setIsFlashing(true);
-
-    setTimeout(() => setIsFlashing(false), 200);
-
-    if (newHealth <= 0) {
-      handleDefeat();
-    }
   };
 
   // Handle enemy defeat
