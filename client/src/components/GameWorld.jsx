@@ -27,6 +27,7 @@ import WorldMap from "./WorldMap";
 import FeedbackForm from "./FeedbackForm";
 import { useCharacterMovement } from "./CharacterMovement";
 import GameHUD from "./UI/GameHUD";
+import ControlsGuide from "./UI/ControlsGuide";
 import CombatManager from "./Combat/CombatManager";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS, isWalkable } from "./Constants";
 import { MAPS } from "./GameData";
@@ -100,6 +101,7 @@ const GameWorld = React.memo(() => {
     showQuotes: false,
     showWorldMap: false,
     showFeedback: false,
+    showControlsGuide: false,
     showWinNotification: false,
     showLevel4: false,
     showRewardModal: false,
@@ -999,12 +1001,24 @@ const GameWorld = React.memo(() => {
             announceToScreenReader(message);
           }
           break;
+        case "c":
+        case "C":
+        case "?":
+          updateUIState({ showControlsGuide: !uiState.showControlsGuide });
+          if (mobileState.screenReaderMode) {
+            const message = uiState.showControlsGuide
+              ? "Closing controls guide"
+              : "Opening keyboard controls guide";
+            announceToScreenReader(message);
+          }
+          break;
         case "Escape":
           updateUIState({
             showInventory: false,
             showQuotes: false,
             showWorldMap: false,
             showFeedback: false,
+            showControlsGuide: false,
             showForm: false,
           });
           if (mobileState.screenReaderMode) {
@@ -2303,9 +2317,9 @@ const GameWorld = React.memo(() => {
       >
         {/* Accessibility instructions */}
         <div id="game-instructions" className="sr-only">
-          Use arrow keys or WASD to move. Press I for inventory, M for map, F
-          for feedback, T to talk to NPCs, H for high contrast mode, R for
-          reduced motion, S for screen reader mode. Press Escape to close menus.
+          Use arrow keys or WASD to move. Press I for inventory, M for map, C for
+          controls guide, F for feedback, T to talk to NPCs, H for high contrast mode,
+          R for reduced motion, S for screen reader mode. Press Escape to close menus.
         </div>
 
         {/* Screen reader announcements */}
@@ -2429,6 +2443,12 @@ const GameWorld = React.memo(() => {
                 <i className="fas fa-compass"></i>
               </IconButton>
               <IconButton
+                onClick={() => updateUIState({ showControlsGuide: true })}
+                tooltip="Keyboard Controls (C)"
+              >
+                <i className="fas fa-keyboard"></i>
+              </IconButton>
+              <IconButton
                 onClick={toggleArtifactsVisibility}
                 tooltip={
                   uiState.showArtifactsOnMap
@@ -2457,6 +2477,13 @@ const GameWorld = React.memo(() => {
         {uiState.showFeedback && (
           <FeedbackForm
             onClose={() => updateUIState({ showFeedback: false })}
+          />
+        )}
+
+        {/* Display keyboard controls guide */}
+        {uiState.showControlsGuide && (
+          <ControlsGuide
+            onClose={() => updateUIState({ showControlsGuide: false })}
           />
         )}
 
