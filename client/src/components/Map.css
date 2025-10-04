@@ -4,7 +4,7 @@
   height: 100%;
   overflow: hidden;
   image-rendering: pixelated;
-  background-color: #1a1a1a;
+  background-color: #2a2a2a; /* Lighter background for brighter feel */
   cursor: grab;
   min-height: 600px; /* Ensure minimum height for small screens */
 }
@@ -24,29 +24,29 @@
   z-index: 1; /* Ensure proper stacking */
 }
 
-/* Style improvements for specific map types to ensure proper saturation and visibility */
+/* Style improvements for specific map types - BRIGHTER and more vibrant */
 [data-map-name="Overworld"] {
-  filter: saturate(1.1) brightness(1.05); /* Light brightness boost */
+  filter: saturate(1.2) brightness(1.2) contrast(1.05); /* Brighter with good contrast */
 }
 
 [data-map-name="Overworld 2"] {
-  filter: saturate(1.15) brightness(1.05); /* Slightly higher saturation */
+  filter: saturate(1.25) brightness(1.2) contrast(1.05); /* Bright and vibrant */
 }
 
 [data-map-name="Overworld 3"] {
-  filter: saturate(1.3) brightness(1.1); /* Higher saturation to prevent muted appearance */
+  filter: saturate(1.3) brightness(1.25) contrast(1.05); /* Very bright and saturated */
 }
 
-/* Desert maps need warmer tones */
+/* Desert maps need warmer tones and brightness */
 [data-map-name="Desert 1"],
 [data-map-name="Desert 2"],
 [data-map-name="Desert 3"] {
-  filter: saturate(1.2) brightness(1.1) sepia(0.15); /* Add sepia for warmer desert feel */
+  filter: saturate(1.3) brightness(1.25) sepia(0.1) contrast(1.05); /* Bright desert feel */
 }
 
-/* Yosemite should be vibrant and natural */
+/* Yosemite should be vibrant, bright and natural */
 [data-map-name="Yosemite"] {
-  filter: saturate(1.25) brightness(1.15) hue-rotate(-5deg); /* Slight hue shift toward green */
+  filter: saturate(1.3) brightness(1.3) hue-rotate(-5deg) contrast(1.05); /* Bright and lush */
 }
 
 /* Enhanced debugging grid for development - helps ensure tiles are properly aligned */
@@ -292,7 +292,7 @@
   }
 }
 
-/* Add a subtle shadow to the map container */
+/* Light ambient shadow for depth - much lighter than before */
 .map::after {
   content: '';
   position: absolute;
@@ -301,7 +301,7 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Add a subtle grid overlay */
@@ -318,7 +318,7 @@
   pointer-events: none;
 }
 
-/* Add a subtle vignette effect */
+/* Very subtle vignette effect - barely visible */
 .map::before {
   content: '';
   position: absolute;
@@ -326,27 +326,27 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+  background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.05) 100%);
   pointer-events: none;
 }
 
-/* Add specific styling for different map types to ensure consistent appearance */
+/* Bright, vibrant styling for all map types */
 .map[data-map-name="Overworld"] {
-  filter: brightness(1.1) saturate(1.1);
+  filter: brightness(1.25) saturate(1.2) contrast(1.05);
 }
 
 .map[data-map-name="Overworld 2"] {
-  filter: brightness(1.1) saturate(1.1);
+  filter: brightness(1.25) saturate(1.2) contrast(1.05);
 }
 
 .map[data-map-name="Overworld 3"] {
-  filter: brightness(1.2) saturate(1.2) !important; /* Ensure this overrides any other filters */
+  filter: brightness(1.3) saturate(1.3) contrast(1.05) !important; /* Bright and vivid */
 }
 
 .map[data-map-name="Desert 1"],
 .map[data-map-name="Desert 2"],
 .map[data-map-name="Desert 3"] {
-  filter: brightness(1.1) saturate(1.1) hue-rotate(10deg); /* Warm tint for desert areas */
+  filter: brightness(1.3) saturate(1.25) hue-rotate(5deg) contrast(1.05); /* Bright desert feel */
 }
 
 /* Keep the special styling for Yosemite */
