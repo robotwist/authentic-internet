@@ -144,6 +144,17 @@ const Map = ({
     return DEFAULT_NPC_SPRITE;
   }, [npcImages]);
 
+  // Calculate viewport culling info early - MUST be before any conditional returns (Rules of Hooks)
+  const mapRows = mapData?.length || 0;
+  const mapCols = mapData?.[0]?.length || 0;
+  const visibleRange = useViewportCulling(mapOffset, TILE_SIZE, mapRows, mapCols, 2);
+
+  // Check if mapData is valid before any rendering logic
+  if (!mapData || !Array.isArray(mapData) || mapData.length === 0) {
+    console.error("Invalid mapData provided to Map component:", mapData);
+    return <div className="map error">Error: Invalid map data</div>;
+  }
+
   // Enhanced NPC rendering with better error handling and viewport culling
   const renderNPCs = useMemo(() => {
     if (!npcs || !Array.isArray(npcs)) {
@@ -224,17 +235,6 @@ const Map = ({
       );
     }).filter(Boolean); // Remove any null entries
   }, [npcs, onNPCClick, getNPCImage, mapName, visibleRange]);
-
-  // Check if mapData is valid before rendering
-  if (!mapData || !Array.isArray(mapData) || mapData.length === 0) {
-    console.error("Invalid mapData provided to Map component:", mapData);
-    return <div className="map error">Error: Invalid map data</div>;
-  }
-
-  // Get viewport culling info for performance optimization
-  const mapRows = mapData.length;
-  const mapCols = mapData[0]?.length || 0;
-  const visibleRange = useViewportCulling(mapOffset, TILE_SIZE, mapRows, mapCols, 2);
 
   // Log culling stats in development mode
   useEffect(() => {
