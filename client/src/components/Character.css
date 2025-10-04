@@ -584,3 +584,200 @@
   40% { opacity: 0.8; transform: scale(1.1); }
   100% { opacity: 0; transform: scale(1.3); }
 }
+
+/* ========================================
+   Sword Carried by Character
+   ======================================== */
+
+/* Base sword styling - appears on character */
+.character-sprite::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    #888 0%, #ccc 10%, #fff 15%, 
+    #ccc 20%, #888 30%, 
+    #666 90%, #444 95%, #8B4513 100%);
+  box-shadow: 
+    0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 3px rgba(255, 215, 0, 0.3);
+  z-index: -1;
+  transform-origin: right center;
+  image-rendering: pixelated;
+  transition: all 0.2s ease;
+}
+
+/* Sword hilt (handle) */
+.character-sprite::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 6px;
+  background: linear-gradient(180deg, #8B4513 0%, #654321 100%);
+  border-radius: 1px;
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
+  z-index: -1;
+  image-rendering: pixelated;
+  transition: all 0.2s ease;
+}
+
+/* Sword position when facing DOWN (default) */
+.character-container:not(.moving-up):not(.moving-left):not(.moving-right) .character-sprite::before,
+.character-container.moving-down .character-sprite::before {
+  right: -2px;
+  top: 50%;
+  transform: rotate(45deg);
+}
+
+.character-container:not(.moving-up):not(.moving-left):not(.moving-right) .character-sprite::after,
+.character-container.moving-down .character-sprite::after {
+  right: -3px;
+  top: calc(50% + 3px);
+}
+
+/* Sword position when facing UP */
+.character-container.moving-up .character-sprite::before {
+  left: -2px;
+  top: 50%;
+  transform: rotate(-135deg);
+}
+
+.character-container.moving-up .character-sprite::after {
+  left: -3px;
+  top: calc(50% - 10px);
+}
+
+/* Sword position when facing LEFT */
+.character-container.moving-left .character-sprite::before {
+  left: 0px;
+  top: 50%;
+  transform: rotate(-180deg);
+}
+
+.character-container.moving-left .character-sprite::after {
+  left: -6px;
+  top: calc(50% - 3px);
+}
+
+/* Sword position when facing RIGHT */
+.character-container.moving-right .character-sprite::before {
+  right: 0px;
+  top: 50%;
+  transform: rotate(0deg);
+}
+
+.character-container.moving-right .character-sprite::after {
+  right: -6px;
+  top: calc(50% - 3px);
+}
+
+/* Sword swing animation when walking */
+.character-container.moving-down .character-sprite::before,
+.character-container.moving-up .character-sprite::before,
+.character-container.moving-left .character-sprite::before,
+.character-container.moving-right .character-sprite::before {
+  animation: sword-swing 0.4s ease-in-out infinite;
+}
+
+@keyframes sword-swing {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2) drop-shadow(0 0 2px rgba(255, 215, 0, 0.4));
+  }
+}
+
+/* Idle sword subtle glow */
+.character-sprite::before {
+  animation: sword-idle-glow 2s ease-in-out infinite;
+}
+
+@keyframes sword-idle-glow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.1);
+  }
+}
+
+/* Sword for standard .character class (used in GameWorld) */
+.character::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    #888 0%, #ccc 10%, #fff 15%, 
+    #ccc 20%, #888 30%, 
+    #666 90%, #444 95%, #8B4513 100%);
+  box-shadow: 
+    0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 3px rgba(255, 215, 0, 0.3);
+  z-index: 1;
+  transform-origin: right center;
+  image-rendering: pixelated;
+  transition: all 0.2s ease;
+  right: -2px;
+  top: 50%;
+  transform: rotate(45deg);
+  animation: sword-idle-glow 2s ease-in-out infinite;
+}
+
+/* Sword hilt for standard .character */
+.character::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 6px;
+  background: linear-gradient(180deg, #8B4513 0%, #654321 100%);
+  border-radius: 1px;
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  image-rendering: pixelated;
+  transition: all 0.2s ease;
+  right: -3px;
+  top: calc(50% + 3px);
+}
+
+/* Sword positions for .character based on direction class */
+.character.up::before {
+  left: -2px;
+  right: auto;
+  transform: rotate(-135deg);
+}
+
+.character.up::after {
+  left: -3px;
+  right: auto;
+  top: calc(50% - 10px);
+}
+
+.character.left::before {
+  left: 0px;
+  right: auto;
+  transform: rotate(-180deg);
+}
+
+.character.left::after {
+  left: -6px;
+  right: auto;
+  top: calc(50% - 3px);
+}
+
+.character.right::before {
+  right: 0px;
+  transform: rotate(0deg);
+}
+
+.character.right::after {
+  right: -6px;
+  top: calc(50% - 3px);
+}
+
+/* Walking sword animation for .character */
+.character.walking::before {
+  animation: sword-swing 0.4s ease-in-out infinite;
+}
