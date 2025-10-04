@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { NPC_TYPES } from './GameConstants';
 import Tile from './Tile';
 import Artifact from './Artifact';
+import { useViewportCulling, isEntityVisible } from '../hooks/useViewportCulling';
 import './Map.css';
 
 // Constants
@@ -143,16 +144,27 @@ const Map = ({
     return DEFAULT_NPC_SPRITE;
   }, [npcImages]);
 
-  // Enhanced NPC rendering with better error handling
+  // Enhanced NPC rendering with better error handling and viewport culling
   const renderNPCs = useMemo(() => {
     if (!npcs || !Array.isArray(npcs)) {
       console.log('No NPCs provided or invalid format:', npcs);
       return null;
     }
     
-    console.log(`Rendering ${npcs.length} NPCs for map: ${mapName}`);
+    // Filter NPCs to only render visible ones
+    // NPCs use pixel coordinates, so convert to tile coordinates for culling
+    const visibleNPCs = npcs.filter(npc => {
+      if (!npc || !npc.position) return false;
+      const tilePos = {
+        x: Math.floor(npc.position.x / TILE_SIZE),
+        y: Math.floor(npc.position.y / TILE_SIZE)
+      };
+      return isEntityVisible(tilePos, visibleRange);
+    });
     
-    return npcs.map((npc, index) => {
+    console.log(`Rendering ${visibleNPCs.length}/${npcs.length} visible NPCs for map: ${mapName}`);
+    
+    return visibleNPCs.map((npc, index) => {
       if (!npc) {
         console.warn(`NPC at index ${index} is null or undefined`);
         return null;
@@ -211,13 +223,55 @@ const Map = ({
         </div>
       );
     }).filter(Boolean); // Remove any null entries
-  }, [npcs, onNPCClick, getNPCImage, mapName]);
+  }, [npcs, onNPCClick, getNPCImage, mapName, visibleRange]);
 
   // Check if mapData is valid before rendering
   if (!mapData || !Array.isArray(mapData) || mapData.length === 0) {
     console.error("Invalid mapData provided to Map component:", mapData);
     return <div className="map error">Error: Invalid map data</div>;
   }
+
+  // Get viewport culling info for performance optimization
+  const mapRows = mapData.length;
+  const mapCols = mapData[0]?.length || 0;
+  const visibleRange = useViewportCulling(mapOffset, TILE_SIZE, mapRows, mapCols, 2);
+
+  // Log culling stats in development mode
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[Map ${mapName}] Rendering ${visibleRange.visibleTiles}/${visibleRange.totalTiles} tiles (${visibleRange.cullingRatio}%)`);
+    }
+  }, [visibleRange, mapName]);
+
+  // Render only visible tiles for performance
+  const renderVisibleTiles = useMemo(() => {
+    const tiles = [];
+    for (let y = visibleRange.startY; y < visibleRange.endY; y++) {
+      if (!mapData[y]) continue;
+      for (let x = visibleRange.startX; x < visibleRange.endX; x++) {
+        const cell = mapData[y][x];
+        if (cell === undefined) continue;
+        
+        tiles.push(
+          <Tile
+            key={`${x}-${y}`}
+            type={cell}
+            x={x}
+            y={y}
+            size={TILE_SIZE}
+            onClick={() => onTileClick?.(x, y)}
+            className={`
+              ${isHalfDome(x, y) ? 'half-dome' : ''} 
+              ${isMistTrail(x, y) ? 'mist-trail' : ''}
+              ${isYosemiteFalls(x, y) ? 'yosemite-falls' : ''}
+            `}
+            mapName={mapName}
+          />
+        );
+      }
+    }
+    return tiles;
+  }, [mapData, visibleRange, onTileClick, mapName]);
 
   return (
     <div 
@@ -236,27 +290,14 @@ const Map = ({
           transformOrigin: '0 0'
         }}
       >
-        {mapData.map((row, y) => (
-          row.map((cell, x) => (
-            <Tile
-              key={`${x}-${y}`}
-              type={cell}
-              x={x}
-              y={y}
-              size={TILE_SIZE}
-              onClick={() => onTileClick?.(x, y)}
-              className={`
-                ${isHalfDome(x, y) ? 'half-dome' : ''} 
-                ${isMistTrail(x, y) ? 'mist-trail' : ''}
-                ${isYosemiteFalls(x, y) ? 'yosemite-falls' : ''}
-              `}
-              mapName={mapName}
-            />
-          ))
-        ))}
+        {/* Render only visible tiles for performance */}
+        {renderVisibleTiles}
         
-        {/* Render artifacts */}
-        {artifacts?.map(artifact => {
+        {/* Render visible artifacts only */}
+        {artifacts?.filter(artifact => {
+          const pos = artifact.location || { x: artifact.x, y: artifact.y };
+          return isEntityVisible(pos, visibleRange);
+        }).map(artifact => {
           // Support both unified model location and legacy x/y coordinates
           const artifactKey = artifact.id || artifact._id || `artifact-${artifact.name || ''}-${artifact.location?.x || artifact.x || 0}-${artifact.location?.y || artifact.y || 0}-${Math.random().toString(36).substr(2, 5)}`;
           

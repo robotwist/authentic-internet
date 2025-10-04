@@ -247,3 +247,4 @@ const collectiblesData = {
 
 **Next Step:** Manual playthrough test to verify collectibles are reachable
 
+

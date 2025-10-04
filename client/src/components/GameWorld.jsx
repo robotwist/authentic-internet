@@ -301,7 +301,7 @@ const GameWorld = React.memo(() => {
           },
           {
             destination: "Yosemite",
-            spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
+            spawnPosition: { x: 10 * TILE_SIZE, y: 20 * TILE_SIZE },  // Central spawn for larger map
             condition: (x, y) => x === 8 && y === 11,
           },
         ],
@@ -327,7 +327,7 @@ const GameWorld = React.memo(() => {
         },
         "Dungeon Level 3": {
           destination: "Yosemite",
-          spawnPosition: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE },
+          spawnPosition: { x: 10 * TILE_SIZE, y: 20 * TILE_SIZE },  // Central spawn for larger map
         },
       },
       yosemiteReturn: {

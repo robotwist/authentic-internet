@@ -1,7 +1,7 @@
 // Map-related constants
 export const TILE_SIZE = 64;
-export const MAP_ROWS = 20;
-export const MAP_COLS = 20;
+export const MAP_ROWS = 40;  // Doubled from 20 for better exploration
+export const MAP_COLS = 40;  // Doubled from 20 for better exploration
 
 // Tile Classes
 export const TILE_TYPES = {
@@ -13,7 +13,17 @@ export const TILE_TYPES = {
   5: "portal",
   6: "terminal-portal",
   7: "shooter-portal",
-  8: "text-portal"
+  8: "text-portal",
+  9: "water",
+  10: "bridge",
+  11: "tall-grass",
+  12: "flower",
+  13: "rock",
+  14: "path",
+  15: "snow",
+  16: "ice",
+  17: "mountain",
+  18: "stone-floor"
 };
 
 // Map validation helper
@@ -25,7 +35,7 @@ export const isValidMapSize = (mapData) => {
   return mapData.every(row => 
     Array.isArray(row) && 
     row.length === rowLength &&
-    row.every(cell => typeof cell === 'number' && cell >= 0 && cell <= 8)
+    row.every(cell => typeof cell === 'number' && cell >= 0 && cell <= 18)
   );
 };
 
@@ -53,7 +63,21 @@ export const isWalkable = (x, y, mapData) => {
     case 6: // Terminal portal
     case 7: // Shooter portal
     case 8: // Text portal
+    case 10: // Bridge
+    case 11: // Tall grass (walkable but slows movement)
+    case 12: // Flower
+    case 14: // Path
+    case 18: // Stone floor
       return true;
+    case 1: // Wall
+    case 2: // Tree
+    case 4: // Dungeon wall
+    case 9: // Water (not walkable without bridge)
+    case 13: // Rock
+    case 15: // Snow (could be walkable with slow movement)
+    case 16: // Ice (walkable but slippery)
+    case 17: // Mountain
+      return false;
     default:
       return false;
   }

@@ -352,4 +352,151 @@
 /* Keep the special styling for Yosemite */
 .yosemite-map {
   animation: yosemiteAmbient 60s infinite alternate linear;
+}
+
+/* ========================================
+   New Tile Type Styles - Phase 2
+   ======================================== */
+
+/* Water tiles - animated flowing water */
+.tile.water {
+  background: linear-gradient(135deg, #4e9fd9 0%, #2573b5 50%, #1e5f8f 100%);
+  animation: water-flow 4s ease-in-out infinite;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes water-flow {
+  0%, 100% { filter: brightness(1) hue-rotate(0deg); }
+  50% { filter: brightness(1.1) hue-rotate(5deg); }
+}
+
+/* Bridge tiles - wooden planks over water */
+.tile.bridge {
+  background: linear-gradient(180deg, #8b6f47 0%, #6b5536 100%);
+  background-image: repeating-linear-gradient(
+    0deg,
+    #8b6f47 0px,
+    #8b6f47 8px,
+    #6b5536 8px,
+    #6b5536 16px
+  );
+  border: 1px solid #4a3a24;
+}
+
+/* Tall grass - animated swaying grass */
+.tile.tall-grass {
+  background: linear-gradient(135deg, #5a9a3a 0%, #4a8a2a 100%);
+  animation: grass-sway 3s ease-in-out infinite;
+}
+
+@keyframes grass-sway {
+  0%, 100% { transform: skewX(0deg); }
+  50% { transform: skewX(1deg); }
+}
+
+/* Flower tiles - colorful meadow flowers */
+.tile.flower {
+  background: linear-gradient(135deg, #90ee90 0%, #7ade7a 100%);
+  background-image: radial-gradient(circle at 30% 40%, #ff69b4 3px, transparent 4px),
+                    radial-gradient(circle at 70% 60%, #ffd700 3px, transparent 4px),
+                    radial-gradient(circle at 50% 20%, #da70d6 3px, transparent 4px);
+  animation: flower-bloom 5s ease-in-out infinite;
+}
+
+@keyframes flower-bloom {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.15); }
+}
+
+/* Rock tiles - large impassable rocks */
+.tile.rock {
+  background: linear-gradient(135deg, #888 0%, #555 100%);
+  box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.5),
+              inset 2px 2px 5px rgba(255, 255, 255, 0.3);
+  border-radius: 10%;
+}
+
+/* Path tiles - stone pathway */
+.tile.path {
+  background: linear-gradient(135deg, #a0a0a0 0%, #808080 50%, #606060 100%);
+  background-image: radial-gradient(circle at 20% 30%, #888 2px, transparent 3px),
+                    radial-gradient(circle at 70% 70%, #888 2px, transparent 3px),
+                    radial-gradient(circle at 50% 50%, #888 2px, transparent 3px);
+}
+
+/* Snow tiles - snowy terrain */
+.tile.snow {
+  background: linear-gradient(135deg, #ffffff 0%, #e6f2ff 100%);
+  box-shadow: inset 0 0 10px rgba(173, 216, 230, 0.5);
+  animation: snow-sparkle 6s ease-in-out infinite;
+}
+
+@keyframes snow-sparkle {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.2); }
+}
+
+/* Ice tiles - slippery ice surface */
+.tile.ice {
+  background: linear-gradient(135deg, #b0e0e6 0%, #87ceeb 50%, #4682b4 100%);
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.8);
+  animation: ice-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes ice-shimmer {
+  0%, 100% { filter: brightness(1.1) contrast(1.2); }
+  50% { filter: brightness(1.3) contrast(1.4); }
+}
+
+/* Mountain tiles - impassable mountain terrain */
+.tile.mountain {
+  background: linear-gradient(135deg, #5a5a5a 0%, #3a3a3a 50%, #2a2a2a 100%);
+  box-shadow: inset -3px -3px 8px rgba(0, 0, 0, 0.7),
+              inset 3px 3px 8px rgba(255, 255, 255, 0.2);
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+/* Stone floor - dungeon/castle floor */
+.tile.stone-floor {
+  background: linear-gradient(135deg, #666 0%, #555 100%);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 16px,
+    rgba(0, 0, 0, 0.1) 16px,
+    rgba(0, 0, 0, 0.1) 32px
+  );
+  border: 1px solid #444;
+}
+
+/* Enhanced portal animations */
+.tile.terminal-portal,
+.tile.shooter-portal,
+.tile.text-portal {
+  animation: portal-pulse 2s ease-in-out infinite;
+}
+
+@keyframes portal-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.6);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(138, 43, 226, 1);
+    filter: brightness(1.3);
+  }
+}
+
+/* Accessibility: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .tile.water,
+  .tile.tall-grass,
+  .tile.flower,
+  .tile.snow,
+  .tile.ice,
+  .tile.terminal-portal,
+  .tile.shooter-portal,
+  .tile.text-portal {
+    animation: none;
+  }
 } 
