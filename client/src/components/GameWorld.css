@@ -304,27 +304,30 @@
   }
 }
 
-/* World announcement styling */
+/* World announcement styling - Zelda style */
 .world-announcement {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 2rem;
-  border-radius: 10px;
+  background: var(--ui-background);
+  color: var(--ui-text);
+  padding: 16px 32px;
+  border: 3px solid var(--ui-border);
   text-align: center;
   z-index: 2000;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-  animation: announcementFadeIn 0.5s ease-out;
+  animation: announcementFadeIn 0.3s linear;
 }
 
 .world-announcement h2 {
   margin: 0;
-  font-size: 2rem;
-  color: #ffd700;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  font-size: 24px;
+  color: var(--zelda-gold);
+  text-shadow: 
+    -1px -1px 0 var(--ui-text-shadow),
+    1px -1px 0 var(--ui-text-shadow),
+    -1px 1px 0 var(--ui-text-shadow),
+    1px 1px 0 var(--ui-text-shadow);
 }
 
 .world-announcement.fade-out {
@@ -359,63 +362,60 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
+  background: var(--nes-white);
   z-index: 2000;
   pointer-events: none;
-  animation: portalFlash 1s ease-in-out;
+  animation: portalFlash 1s linear;
 }
 
 @keyframes portalFlash {
   0% { 
     opacity: 0;
-    transform: scale(0);
   }
   50% { 
-    opacity: 0.8;
-    transform: scale(1.2);
+    opacity: 1;
   }
   100% { 
     opacity: 0;
-    transform: scale(1);
   }
 }
 
-/* Pause Menu */
+/* Pause Menu - Zelda style */
 .pause-menu {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.9);
-  padding: 2rem;
-  border-radius: 10px;
+  background: var(--ui-background);
+  padding: 24px;
+  border: 3px solid var(--ui-border);
   text-align: center;
-  color: white;
+  color: var(--ui-text);
   z-index: 1000;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .pause-menu h2 {
-  margin-bottom: 1rem;
-  font-size: 2rem;
+  margin-bottom: 16px;
+  font-size: 24px;
+  color: var(--zelda-gold);
 }
 
 .pause-menu button {
   display: block;
-  width: 200px;
-  margin: 1rem auto;
-  padding: 0.8rem;
-  background: #4a90e2;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  font-size: 1.1rem;
+  width: 192px;
+  margin: 16px auto;
+  padding: 8px;
+  background: var(--zelda-blue);
+  border: 2px solid var(--ui-border);
+  color: var(--ui-text);
+  font-size: 16px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.15s linear;
 }
 
 .pause-menu button:hover {
-  background: #357abd;
+  background: var(--zelda-gold);
+  color: var(--nes-black);
 }
 
 .edit-menu {
@@ -423,64 +423,62 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.95);
-  padding: 2rem;
-  border-radius: 10px;
-  color: white;
+  background: var(--ui-background);
+  padding: 24px;
+  border: 3px solid var(--ui-border);
+  color: var(--ui-text);
   z-index: 1000;
-  min-width: 300px;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  min-width: 304px;
 }
 
 .edit-menu h3 {
   margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: #4a90e2;
+  margin-bottom: 16px;
+  color: var(--zelda-gold);
+  font-size: 16px;
 }
 
 .edit-menu textarea {
   width: 100%;
-  min-height: 100px;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 5px;
-  color: white;
+  min-height: 96px;
+  margin-bottom: 16px;
+  padding: 8px;
+  background: var(--nes-darkgray);
+  border: 2px solid var(--nes-gray);
+  color: var(--ui-text);
   resize: vertical;
 }
 
 .edit-menu input {
   width: 100%;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 5px;
-  color: white;
+  margin-bottom: 16px;
+  padding: 8px;
+  background: var(--nes-darkgray);
+  border: 2px solid var(--nes-gray);
+  color: var(--ui-text);
 }
 
 .edit-menu button {
-  margin: 0.5rem;
-  padding: 0.8rem 1.5rem;
-  background: #4a90e2;
-  border: none;
-  border-radius: 5px;
-  color: white;
+  margin: 8px;
+  padding: 8px 16px;
+  background: var(--zelda-blue);
+  border: 2px solid var(--ui-border);
+  color: var(--ui-text);
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.15s linear;
 }
 
 .edit-menu button:last-child {
-  background: #666;
+  background: var(--nes-gray);
 }
 
 .edit-menu button:hover {
-  background: #357abd;
+  background: var(--zelda-gold);
+  color: var(--nes-black);
 }
 
 .edit-menu button:last-child:hover {
-  background: #555;
+  background: var(--nes-lightgray);
 }
 
 .error-message {
@@ -488,45 +486,41 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgba(26, 26, 26, 0.95);
-  border: 2px solid #ffd700;
-  border-radius: 10px;
-  padding: 20px;
+  background-color: var(--ui-background);
+  border: 3px solid var(--zelda-gold);
+  padding: 24px;
   width: 80%;
-  max-width: 500px;
+  max-width: 496px;
   z-index: 9000;
-  color: #ffffff;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  color: var(--ui-text);
   text-align: center;
 }
 
 .error-message h3 {
   margin-top: 0;
-  color: #ffd700;
-  font-family: 'Cinzel', serif;
-  margin-bottom: 15px;
+  color: var(--zelda-gold);
+  font-size: 16px;
+  margin-bottom: 16px;
 }
 
 .error-message p {
-  margin-bottom: 20px;
-  line-height: 1.5;
-  font-style: italic;
+  margin-bottom: 16px;
+  line-height: 24px;
+  font-size: 16px;
 }
 
 .error-message button {
-  background-color: #ffd700;
-  color: #000;
-  border: none;
+  background-color: var(--zelda-gold);
+  color: var(--nes-black);
+  border: 2px solid var(--ui-border);
   padding: 8px 16px;
-  border-radius: 20px;
   cursor: pointer;
   font-weight: bold;
-  transition: all 0.2s;
+  transition: background 0.15s linear;
 }
 
 .error-message button:hover {
-  background-color: #fff;
-  transform: translateY(-2px);
+  background-color: var(--nes-white);
 }
 
 .loading-spinner {
