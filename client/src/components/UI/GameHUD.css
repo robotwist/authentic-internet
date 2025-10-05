@@ -1,4 +1,21 @@
-/* Zelda-style HUD */
+/* ========================================
+   NES ZELDA HUD - AUTHENTIC 8-BIT STYLE
+   ======================================== */
+
+/* Import Zelda palette from main game */
+:root {
+  --zelda-green: #00A800;
+  --zelda-darkgreen: #006000;
+  --zelda-gold: #FCE000;
+  --zelda-brown: #A44200;
+  --zelda-red: #F83800;
+  --zelda-blue: #0058F8;
+  --nes-black: #000000;
+  --nes-white: #FFFFFF;
+  --nes-gray: #888888;
+  --nes-darkgray: #545454;
+}
+
 .game-hud {
   position: fixed;
   top: 0;
@@ -41,22 +58,26 @@
 }
 
 .area-name {
-  color: #FFD700;
+  color: var(--zelda-gold);
   font-size: 14px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
   text-transform: uppercase;
   letter-spacing: 2px;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--nes-black);
+  border: 2px solid var(--zelda-gold);
   padding: 8px 16px;
-  border-radius: 4px;
 }
 
 .key-count {
-  color: #FFD700;
+  color: var(--zelda-gold);
   font-size: 14px;
-  background-color: rgba(0, 0, 0, 0.7);
-  padding: 8px 12px;
-  border-radius: 4px;
+  background-color: var(--nes-black);
+  border: 2px solid var(--zelda-gold);
+  padding: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -79,9 +100,8 @@
 .item-slot {
   width: 64px;
   height: 64px;
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 3px solid #666;
-  border-radius: 8px;
+  background-color: var(--nes-black);
+  border: 3px solid var(--nes-gray);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -89,16 +109,15 @@
   position: relative;
   pointer-events: auto;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s linear;
 }
 
 .item-slot:hover {
-  border-color: #FFD700;
-  transform: scale(1.05);
+  border-color: var(--zelda-gold);
 }
 
 .item-slot:active {
-  transform: scale(0.95);
+  border-color: var(--nes-white);
 }
 
 .item-label {
@@ -106,30 +125,28 @@
   top: 2px;
   left: 4px;
   font-size: 10px;
-  color: #FFD700;
+  color: var(--zelda-gold);
   font-weight: bold;
 }
 
 .item-icon {
   font-size: 32px;
-  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
 }
 
 .item-a {
-  border-color: #00FF00;
+  border-color: var(--zelda-green);
 }
 
 .item-b {
-  border-color: #FF6B6B;
+  border-color: var(--zelda-red);
 }
 
 .rupee-count {
-  color: #00FF00;
+  color: var(--zelda-green);
   font-size: 16px;
-  background-color: rgba(0, 0, 0, 0.8);
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 2px solid #00FF00;
+  background-color: var(--nes-black);
+  border: 2px solid var(--zelda-green);
+  padding: 8px 16px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -170,35 +187,33 @@
   }
 }
 
-/* Animations */
+/* Animations - NES Style */
 @keyframes rupee-collect {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); color: #FFD700; }
-  100% { transform: scale(1); }
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
 }
 
 .rupee-count.collecting {
-  animation: rupee-collect 0.3s ease;
+  animation: rupee-collect 0.2s steps(2);
 }
 
 @keyframes key-collect {
-  0% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.2) rotate(10deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
 }
 
 .key-count.collecting {
-  animation: key-collect 0.4s ease;
+  animation: key-collect 0.2s steps(2);
 }
 
-/* Low health warning */
+/* Low health warning - NES blink */
 @keyframes low-health-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0; }
 }
 
 .game-hud.low-health .hud-left {
-  animation: low-health-pulse 1s ease-in-out infinite;
+  animation: low-health-pulse 0.5s steps(1) infinite;
 }
 
 /* ========================================
@@ -217,41 +232,37 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-  border: 2px solid #FFD700;
-  border-radius: 8px;
+  background: var(--nes-black);
+  border: 2px solid var(--zelda-gold);
   padding: 6px 10px;
   min-width: 60px;
-  box-shadow: 
-    0 2px 8px rgba(255, 215, 0, 0.3),
-    inset 0 1px 0 rgba(255, 215, 0, 0.2);
   cursor: default;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s linear;
 }
 
 .level-badge:hover {
-  transform: scale(1.05);
-  box-shadow: 
-    0 4px 12px rgba(255, 215, 0, 0.4),
-    inset 0 1px 0 rgba(255, 215, 0, 0.3);
+  border-color: var(--nes-white);
 }
 
 .level-icon {
   font-size: 16px;
-  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6));
-  animation: level-glow 2s ease-in-out infinite;
+  animation: level-glow 2s steps(2) infinite;
 }
 
 @keyframes level-glow {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)); }
-  50% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9)); }
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
 }
 
 .level-number {
   font-size: 14px;
   font-weight: 700;
-  color: #FFD700;
-  text-shadow: 0 0 4px rgba(255, 215, 0, 0.5);
+  color: var(--zelda-gold);
+  text-shadow: 
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
   font-family: 'Press Start 2P', 'Courier New', monospace;
 }
 
@@ -265,45 +276,22 @@
 .xp-bar-background {
   width: 100%;
   height: 20px;
-  background: linear-gradient(to bottom, #1a1a1a 0%, #0a0a0a 100%);
-  border: 2px solid #444;
-  border-radius: 10px;
+  background: var(--nes-darkgray);
+  border: 2px solid var(--nes-gray);
   overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
   position: relative;
 }
 
 .xp-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, 
-    #4CAF50 0%, 
-    #66BB6A 50%, 
-    #81C784 100%);
-  border-radius: 8px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--zelda-green);
+  transition: width 0.3s linear;
   position: relative;
   overflow: hidden;
-  box-shadow: 
-    0 0 10px rgba(76, 175, 80, 0.5),
-    inset 0 2px 0 rgba(255, 255, 255, 0.3);
 }
 
 .xp-bar-shine {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.3) 50%, 
-    transparent 100%);
-  animation: xp-shine 3s ease-in-out infinite;
-}
-
-@keyframes xp-shine {
-  0% { left: -100%; }
-  50%, 100% { left: 200%; }
+  display: none; /* Remove shine effect for NES authenticity */
 }
 
 .xp-text {
@@ -313,24 +301,25 @@
   transform: translate(-50%, -50%);
   font-size: 11px;
   font-weight: 700;
-  color: #fff;
+  color: var(--nes-white);
   text-shadow: 
-    1px 1px 2px rgba(0, 0, 0, 0.8),
-    0 0 4px rgba(0, 0, 0, 0.9);
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
   pointer-events: none;
   font-family: 'Courier New', monospace;
   white-space: nowrap;
 }
 
-/* Level up animation (can be triggered via class) */
+/* Level up animation - NES blink */
 @keyframes level-up {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2) rotate(5deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
 }
 
 .level-badge.leveling-up {
-  animation: level-up 0.6s ease;
+  animation: level-up 0.3s steps(2) 3;
 }
 
 /* Responsive adjustments for XP display */
