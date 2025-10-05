@@ -1,0 +1,89 @@
+/* ========================================
+   Damage Number Component
+   ======================================== */
+
+.damage-number {
+  position: absolute;
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 
+    2px 2px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    0 0 8px rgba(255, 0, 0, 0.8);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  pointer-events: none;
+  z-index: 150;
+  animation: damage-float-up 1s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes damage-float-up {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(-50%, -60%) scale(1);
+  }
+  100% {
+    transform: translate(-50%, -120%) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Critical hit styling */
+.damage-critical {
+  font-size: 32px;
+  color: #FFD700;
+  text-shadow: 
+    2px 2px 0 #8B0000,
+    -2px -2px 0 #8B0000,
+    2px -2px 0 #8B0000,
+    -2px 2px 0 #8B0000,
+    0 0 12px rgba(255, 215, 0, 1),
+    0 0 20px rgba(255, 69, 0, 0.8);
+  animation: damage-critical-float 1s ease-out forwards;
+}
+
+@keyframes damage-critical-float {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5) rotate(-5deg);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(-50%, -50%) scale(1.5) rotate(5deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(-50%, -70%) scale(1.2) rotate(-2deg);
+  }
+  100% {
+    transform: translate(-50%, -140%) scale(1) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .damage-number,
+  .damage-critical {
+    animation: damage-simple-fade 1s ease forwards;
+  }
+
+  @keyframes damage-simple-fade {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
+

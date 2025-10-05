@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import DamageNumber from './DamageNumber';
 import './Enemy.css';
 
 /**
@@ -23,11 +24,15 @@ const Enemy = ({
   const [isFlashing, setIsFlashing] = useState(false);
   const [isDead, setIsDead] = useState(false);
   const [isStunned, setIsStunned] = useState(false); // New: stun on hit
+  const [damageNumbers, setDamageNumbers] = useState([]); // Track floating damage numbers
   
   const movementTimer = useRef(null);
   const directionTimer = useRef(null);
+  const animationFrameRef = useRef(null);
   const enemyRef = useRef(null);
   const lastFlashTime = useRef(0);
+  const currentDirection = useRef('down');
+  const lastMoveTime = useRef(Date.now());
 
   // Handle taking damage with flash effect
   const takeDamage = (damageAmount, knockbackDirection) => {
@@ -41,6 +46,21 @@ const Enemy = ({
     const newHealth = health - damageAmount;
     setHealth(newHealth);
     
+    // Show damage number
+    const damageId = `dmg-${Date.now()}-${Math.random()}`;
+    const isCritical = Math.random() < 0.15; // 15% chance for critical hit
+    const finalDamage = isCritical ? damageAmount * 2 : damageAmount;
+    
+    setDamageNumbers(prev => [
+      ...prev,
+      {
+        id: damageId,
+        damage: finalDamage,
+        position: { ...position, x: position.x + 24, y: position.y - 10 },
+        isCritical,
+      },
+    ]);
+    
     // Flash effect
     setIsFlashing(true);
     setTimeout(() => setIsFlashing(false), 200);
@@ -51,7 +71,7 @@ const Enemy = ({
     
     // Apply knockback
     if (knockbackDirection) {
-      const knockbackDistance = 24;
+      const knockbackDistance = isCritical ? 36 : 24;
       const newPos = { ...position };
       
       switch (knockbackDirection) {
@@ -82,6 +102,11 @@ const Enemy = ({
       onTakeDamage(damageAmount);
     }
   };
+  
+  // Remove damage number after animation
+  const handleDamageNumberComplete = (damageId) => {
+    setDamageNumbers(prev => prev.filter(dmg => dmg.id !== damageId));
+  };
 
   // Expose takeDamage to parent
   useEffect(() => {
@@ -90,99 +115,155 @@ const Enemy = ({
     }
   }, [position, onTakeDamage]);
 
-  // AI Movement based on enemy type
+  // Smooth continuous AI Movement using requestAnimationFrame
   useEffect(() => {
-    if (isDead || isStunned) return;
+    if (isDead || isStunned) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      return;
+    }
 
-    const moveEnemy = () => {
+    let lastTime = Date.now();
+
+    const animateMovement = () => {
+      const currentTime = Date.now();
+      const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
+      lastTime = currentTime;
+
+      // Update position based on enemy type
+      const newPos = { ...position };
+      let moved = false;
+
       switch (type) {
         case 'octorok':
-          moveOctorok();
+          moved = moveOctorokSmooth(newPos, deltaTime);
           break;
         case 'moblin':
-          moveMoblin();
+          moved = moveMoblinSmooth(newPos, deltaTime);
           break;
         case 'tektite':
-          moveTektite();
+          moved = moveTektiteSmooth(newPos, deltaTime);
           break;
         default:
-          moveRandom();
+          moved = moveRandomSmooth(newPos, deltaTime);
       }
+
+      if (moved) {
+        setPosition(newPos);
+      }
+
+      animationFrameRef.current = requestAnimationFrame(animateMovement);
     };
 
-    // Move enemy every 500ms
-    movementTimer.current = setInterval(moveEnemy, 500);
+    animationFrameRef.current = requestAnimationFrame(animateMovement);
 
     // Change direction randomly every 2-3 seconds
     directionTimer.current = setInterval(() => {
       const directions = ['up', 'down', 'left', 'right'];
-      setDirection(directions[Math.floor(Math.random() * directions.length)]);
+      const newDir = directions[Math.floor(Math.random() * directions.length)];
+      currentDirection.current = newDir;
+      setDirection(newDir);
     }, 2000 + Math.random() * 1000);
 
     return () => {
-      if (movementTimer.current) clearInterval(movementTimer.current);
-      if (directionTimer.current) clearInterval(directionTimer.current);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (directionTimer.current) {
+        clearInterval(directionTimer.current);
+      }
     };
-  }, [type, isDead, isStunned, position]);
+  }, [type, isDead, isStunned, playerPosition]);
 
-  // Octorok AI: Random movement + occasional rock shooting
-  const moveOctorok = () => {
-    const newPos = { ...position };
-    const moveDistance = speed;
+  // Smooth Octorok AI: Random movement with continuous motion
+  const moveOctorokSmooth = (newPos, deltaTime) => {
+    const moveSpeed = speed * 60 * deltaTime; // Normalize speed for 60fps
 
-    switch (direction) {
+    switch (currentDirection.current) {
       case 'up':
-        newPos.y -= moveDistance;
+        newPos.y -= moveSpeed;
         break;
       case 'down':
-        newPos.y += moveDistance;
+        newPos.y += moveSpeed;
         break;
       case 'left':
-        newPos.x -= moveDistance;
+        newPos.x -= moveSpeed;
         break;
       case 'right':
-        newPos.x += moveDistance;
+        newPos.x += moveSpeed;
         break;
     }
 
-    // Simple boundary check (you'd check against mapData normally)
+    // Boundary check
     if (newPos.x >= 0 && newPos.x < 1280 && newPos.y >= 0 && newPos.y < 720) {
-      setPosition(newPos);
+      return true;
     }
+    return false;
   };
 
-  // Moblin AI: Chase player
-  const moveMoblin = () => {
-    if (!playerPosition) return;
+  // Smooth Moblin AI: Chase player continuously
+  const moveMoblinSmooth = (newPos, deltaTime) => {
+    if (!playerPosition) return false;
 
-    const newPos = { ...position };
-    const dx = playerPosition.x - position.x;
-    const dy = playerPosition.y - position.y;
+    const moveSpeed = speed * 60 * deltaTime;
+    const dx = playerPosition.x - newPos.x;
+    const dy = playerPosition.y - newPos.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Move towards player
-    if (Math.abs(dx) > Math.abs(dy)) {
-      newPos.x += dx > 0 ? speed : -speed;
-      setDirection(dx > 0 ? 'right' : 'left');
-    } else {
-      newPos.y += dy > 0 ? speed : -speed;
-      setDirection(dy > 0 ? 'down' : 'up');
+    // Normalize movement direction
+    if (distance > 5) {
+      newPos.x += (dx / distance) * moveSpeed;
+      newPos.y += (dy / distance) * moveSpeed;
+
+      // Update direction for sprite
+      if (Math.abs(dx) > Math.abs(dy)) {
+        const newDir = dx > 0 ? 'right' : 'left';
+        if (currentDirection.current !== newDir) {
+          currentDirection.current = newDir;
+          setDirection(newDir);
+        }
+      } else {
+        const newDir = dy > 0 ? 'down' : 'up';
+        if (currentDirection.current !== newDir) {
+          currentDirection.current = newDir;
+          setDirection(newDir);
+        }
+      }
+
+      return true;
+    }
+    return false;
+  };
+
+  // Smooth Tektite AI: Jump pattern with pauses
+  const moveTektiteSmooth = (newPos, deltaTime) => {
+    const moveSpeed = speed * 60 * deltaTime * 1.5; // Faster movement for jumping effect
+
+    switch (currentDirection.current) {
+      case 'up':
+        newPos.y -= moveSpeed;
+        break;
+      case 'down':
+        newPos.y += moveSpeed;
+        break;
+      case 'left':
+        newPos.x -= moveSpeed;
+        break;
+      case 'right':
+        newPos.x += moveSpeed;
+        break;
     }
 
-    setPosition(newPos);
+    if (newPos.x >= 0 && newPos.x < 1280 && newPos.y >= 0 && newPos.y < 720) {
+      return true;
+    }
+    return false;
   };
 
-  // Tektite AI: Jump pattern
-  const moveTektite = () => {
-    // TODO: Implement jumping pattern
-    moveRandom();
-  };
-
-  // Basic random movement
-  const moveRandom = () => {
-    const directions = ['up', 'down', 'left', 'right'];
-    const randomDir = directions[Math.floor(Math.random() * directions.length)];
-    setDirection(randomDir);
-    moveOctorok(); // Use octorok movement
+  // Basic random movement smooth
+  const moveRandomSmooth = (newPos, deltaTime) => {
+    return moveOctorokSmooth(newPos, deltaTime);
   };
 
   // Handle enemy defeat
@@ -254,26 +335,39 @@ const Enemy = ({
   };
 
   return (
-    <div 
-      ref={enemyRef}
-      className={`enemy enemy-${type} enemy-${direction} ${isFlashing ? 'enemy-flash' : ''}`}
-      style={{
-        left: position.x,
-        top: position.y,
-      }}
-      data-health={health}
-      data-damage={damage}
-      data-hitbox="enemy"
-    >
-      {getEnemySprite()}
-      {/* Debug health bar */}
-      <div className="enemy-health-bar">
-        <div 
-          className="enemy-health-fill" 
-          style={{ width: `${(health / initialHealth) * 100}%` }}
-        />
+    <>
+      <div 
+        ref={enemyRef}
+        className={`enemy enemy-${type} enemy-${direction} ${isFlashing ? 'enemy-flash' : ''} ${isStunned ? 'enemy-stunned' : ''}`}
+        style={{
+          left: position.x,
+          top: position.y,
+        }}
+        data-health={health}
+        data-damage={damage}
+        data-hitbox="enemy"
+      >
+        {getEnemySprite()}
+        {/* Health bar */}
+        <div className="enemy-health-bar">
+          <div 
+            className="enemy-health-fill" 
+            style={{ width: `${(health / initialHealth) * 100}%` }}
+          />
+        </div>
       </div>
-    </div>
+      
+      {/* Floating damage numbers */}
+      {damageNumbers.map((dmg) => (
+        <DamageNumber
+          key={dmg.id}
+          damage={dmg.damage}
+          position={dmg.position}
+          isCritical={dmg.isCritical}
+          onComplete={() => handleDamageNumberComplete(dmg.id)}
+        />
+      ))}
+    </>
   );
 };
 

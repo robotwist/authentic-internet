@@ -7,10 +7,11 @@
   align-items: center;
   justify-content: center;
   font-size: 36px;
-  transition: left 0.3s ease, top 0.3s ease;
+  transition: filter 0.1s ease;
   z-index: 50;
   image-rendering: pixelated;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+  will-change: transform, left, top;
 }
 
 /* Enemy types */
@@ -69,8 +70,31 @@
   0%, 100% {
     filter: brightness(1) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
   }
+  25% {
+    filter: brightness(2) drop-shadow(0 0 12px rgba(255, 255, 255, 1));
+  }
   50% {
-    filter: brightness(3) drop-shadow(0 0 8px rgba(255, 0, 0, 0.8));
+    filter: brightness(3) drop-shadow(0 0 16px rgba(255, 0, 0, 0.9)) hue-rotate(0deg);
+  }
+  75% {
+    filter: brightness(2) drop-shadow(0 0 12px rgba(255, 100, 100, 0.8));
+  }
+}
+
+/* Stunned state */
+.enemy-stunned {
+  animation: enemy-stun-shake 0.1s ease infinite;
+}
+
+@keyframes enemy-stun-shake {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2px, 0);
+  }
+  75% {
+    transform: translate(2px, 0);
   }
 }
 
