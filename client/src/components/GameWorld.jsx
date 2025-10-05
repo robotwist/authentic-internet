@@ -28,6 +28,7 @@ import FeedbackForm from "./FeedbackForm";
 import { useCharacterMovement } from "./CharacterMovement";
 import GameHUD from "./UI/GameHUD";
 import ControlsGuide from "./UI/ControlsGuide";
+import Minimap from "./UI/Minimap";
 import CombatManager from "./Combat/CombatManager";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS, isWalkable } from "./Constants";
 import { MAPS } from "./GameData";
@@ -85,6 +86,9 @@ const GameWorld = React.memo(() => {
   );
   const [character, setCharacter] = useState(null);
   const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
+  
+  // Minimap explored tiles (fog of war)
+  const [exploredTiles, setExploredTiles] = useState(new Set());
 
   // Performance tracking
   const renderCount = useRef(0);
@@ -373,6 +377,33 @@ const GameWorld = React.memo(() => {
     () => currentMap?.artifacts || [],
     [currentMap],
   );
+
+  // Update explored tiles for minimap fog of war
+  useEffect(() => {
+    const tileX = Math.floor(characterPosition.x / TILE_SIZE);
+    const tileY = Math.floor(characterPosition.y / TILE_SIZE);
+    
+    // Explore tiles in a radius around the player (view distance)
+    const viewRadius = 3; // Explore 3 tiles in all directions
+    const newExploredTiles = new Set(exploredTiles);
+    
+    for (let dy = -viewRadius; dy <= viewRadius; dy++) {
+      for (let dx = -viewRadius; dx <= viewRadius; dx++) {
+        const x = tileX + dx;
+        const y = tileY + dy;
+        
+        // Check if tile is within map bounds
+        if (x >= 0 && x < MAP_COLS && y >= 0 && y < MAP_ROWS) {
+          newExploredTiles.add(`${x},${y}`);
+        }
+      }
+    }
+    
+    // Only update if new tiles were explored
+    if (newExploredTiles.size !== exploredTiles.size) {
+      setExploredTiles(newExploredTiles);
+    }
+  }, [characterPosition, exploredTiles]);
 
   // Performance monitoring
   useEffect(() => {
@@ -2341,6 +2372,17 @@ const GameWorld = React.memo(() => {
           experience={character?.experience || 0}
           level={character?.level || 1}
           experienceToNextLevel={Math.floor(100 * Math.pow(1.5, (character?.level || 1)))}
+        />
+        
+        {/* Minimap with fog of war */}
+        <Minimap
+          mapData={MAPS[currentMapIndex]?.data || []}
+          playerPosition={characterPosition}
+          npcs={MAPS[currentMapIndex]?.npcs || []}
+          portals={MAPS[currentMapIndex]?.specialPortals || []}
+          tileSize={TILE_SIZE}
+          exploredTiles={exploredTiles}
+          currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
         />
 
         {uiState.showLevel4 && (

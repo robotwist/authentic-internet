@@ -1,0 +1,370 @@
+/* ========================================
+   Minimap Component
+   ======================================== */
+
+.minimap-container {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  z-index: 1000;
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%);
+  border: 2px solid #444;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.minimap-container:hover {
+  border-color: #FFD700;
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.9),
+    0 0 12px rgba(255, 215, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.minimap-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #333;
+}
+
+.minimap-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #FFD700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.5);
+}
+
+/* Minimap Canvas */
+.minimap {
+  position: relative;
+  background: #0a0a0a;
+  border: 2px solid #333;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.minimap-tiles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.minimap-entities {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Tile Types */
+.minimap-tile {
+  position: absolute;
+  transition: opacity 0.3s ease;
+}
+
+.minimap-tile.unexplored {
+  background: #1a1a1a;
+  opacity: 0.3;
+}
+
+.minimap-tile.walkable {
+  background: #2a3a2a;
+  opacity: 0.8;
+}
+
+.minimap-tile.wall {
+  background: #4a4a4a;
+  opacity: 1;
+}
+
+.minimap-tile.tree {
+  background: #1a4d1a;
+  opacity: 0.9;
+}
+
+.minimap-tile.sand {
+  background: #8B7355;
+  opacity: 0.8;
+}
+
+.minimap-tile.water {
+  background: #2573b5;
+  opacity: 0.8;
+  animation: water-pulse 2s ease-in-out infinite;
+}
+
+@keyframes water-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.6; }
+}
+
+.minimap-tile.portal {
+  background: #9C27B0;
+  opacity: 1;
+  animation: portal-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes portal-glow {
+  0%, 100% { 
+    background: #9C27B0;
+    box-shadow: 0 0 2px #9C27B0;
+  }
+  50% { 
+    background: #BA68C8;
+    box-shadow: 0 0 4px #BA68C8;
+  }
+}
+
+/* Player Marker */
+.minimap-player {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #FFD700 0%, #FFA500 100%);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 8px rgba(255, 215, 0, 0.8),
+    0 0 12px rgba(255, 215, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  z-index: 100;
+  animation: player-pulse 1.5s ease-in-out infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes player-pulse {
+  0%, 100% { 
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 
+      0 0 8px rgba(255, 215, 0, 0.8),
+      0 0 12px rgba(255, 215, 0, 0.4);
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 
+      0 0 12px rgba(255, 215, 0, 1),
+      0 0 16px rgba(255, 215, 0, 0.6);
+  }
+}
+
+/* NPC Marker */
+.minimap-npc {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #4CAF50;
+  border: 1px solid #2E7D32;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(76, 175, 80, 0.6);
+  z-index: 50;
+  animation: npc-blink 2s ease-in-out infinite;
+}
+
+@keyframes npc-blink {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0.5; }
+}
+
+/* Portal Marker */
+.minimap-portal {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #9C27B0;
+  border: 1px solid #7B1FA2;
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(156, 39, 176, 0.8);
+  z-index: 50;
+  animation: portal-spin 3s linear infinite;
+}
+
+@keyframes portal-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Compass */
+.minimap-compass {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid #444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: #FFD700;
+  font-family: 'Courier New', monospace;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  z-index: 200;
+}
+
+.compass-n {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #FF5252;
+  text-shadow: 0 0 2px rgba(255, 82, 82, 0.8);
+}
+
+.compass-s {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.5;
+}
+
+.compass-e {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+}
+
+.compass-w {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+}
+
+/* Legend */
+.minimap-legend {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #333;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #aaa;
+  font-family: 'Courier New', monospace;
+}
+
+.legend-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-icon.player-icon {
+  background: #FFD700;
+  border: 1px solid #fff;
+  box-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
+}
+
+.legend-icon.npc-icon {
+  background: #4CAF50;
+  border: 1px solid #2E7D32;
+}
+
+.legend-icon.portal-icon {
+  background: #9C27B0;
+  border: 1px solid #7B1FA2;
+  border-radius: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .minimap-container {
+    top: auto;
+    bottom: 16px;
+    right: 8px;
+    padding: 8px;
+    transform: scale(0.8);
+    transform-origin: bottom right;
+  }
+
+  .minimap-title {
+    font-size: 10px;
+  }
+
+  .minimap-legend {
+    gap: 8px;
+  }
+
+  .legend-item {
+    font-size: 9px;
+  }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .minimap-player,
+  .minimap-npc,
+  .minimap-portal,
+  .minimap-tile.water,
+  .minimap-tile.portal {
+    animation: none;
+  }
+
+  .minimap-container {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .minimap-container {
+    border: 3px solid #fff;
+    background: rgba(0, 0, 0, 1);
+  }
+
+  .minimap {
+    border: 3px solid #fff;
+  }
+
+  .minimap-tile.unexplored {
+    background: #000;
+  }
+
+  .minimap-tile.walkable {
+    background: #444;
+  }
+
+  .minimap-tile.wall {
+    background: #fff;
+  }
+
+  .minimap-player {
+    border: 3px solid #fff;
+  }
+
+  .legend-item {
+    color: #fff;
+  }
+}
+
