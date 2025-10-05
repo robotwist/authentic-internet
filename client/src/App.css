@@ -6,7 +6,7 @@
   justify-content: center;
   height: 100vh;
   width: 100vw;
-  background: #121212; /* Deep dark grey */
+  background: transparent;
   color: #e0e0e0; /* Soft contrast text */
   font-family: var(--primary-font);
   text-align: center;
