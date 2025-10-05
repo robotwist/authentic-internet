@@ -1,6 +1,16 @@
 /* ========================================
-   Controls Guide - Keyboard Reference
+   Controls Guide - NES Zelda Style
    ======================================== */
+
+:root {
+  --zelda-green: #00A800;
+  --zelda-darkgreen: #006000;
+  --zelda-gold: #FCE000;
+  --nes-black: #000000;
+  --nes-white: #FFFFFF;
+  --nes-gray: #888888;
+  --nes-darkgray: #545454;
+}
 
 .controls-guide-overlay {
   position: fixed;
@@ -8,14 +18,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
+  background: var(--nes-black);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
   padding: 20px;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.15s linear;
 }
 
 @keyframes fadeIn {
@@ -24,59 +33,54 @@
 }
 
 .controls-guide-modal {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-  border: 2px solid #404040;
-  border-radius: 12px;
+  background: var(--nes-darkgray);
+  border: 3px solid var(--zelda-gold);
   max-width: 900px;
   width: 100%;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-  animation: slideUp 0.3s ease;
+  animation: slideUp 0.2s linear;
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Header */
+/* Header - NES Style */
 .controls-guide-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 28px;
-  border-bottom: 2px solid #404040;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+  padding: 16px 24px;
+  border-bottom: 2px solid var(--zelda-gold);
+  background: var(--nes-black);
 }
 
 .controls-guide-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: #FFD700;
+  color: var(--zelda-gold);
   font-family: 'Press Start 2P', 'Courier New', monospace;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
   letter-spacing: 1px;
 }
 
 .controls-close-btn {
-  background: transparent;
-  border: 2px solid #666;
-  color: #ccc;
+  background: var(--nes-black);
+  border: 2px solid var(--nes-gray);
+  color: var(--nes-white);
   font-size: 24px;
   width: 40px;
   height: 40px;
-  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s linear;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,14 +88,12 @@
 }
 
 .controls-close-btn:hover {
-  border-color: #FFD700;
-  color: #FFD700;
-  background: rgba(255, 215, 0, 0.1);
-  transform: scale(1.05);
+  border-color: var(--zelda-gold);
+  color: var(--zelda-gold);
 }
 
 .controls-close-btn:active {
-  transform: scale(0.95);
+  border-color: var(--nes-white);
 }
 
 /* Content */
@@ -105,63 +107,55 @@
   align-content: start;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - NES Style */
 .controls-guide-content::-webkit-scrollbar {
   width: 10px;
 }
 
 .controls-guide-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 5px;
+  background: var(--nes-black);
 }
 
 .controls-guide-content::-webkit-scrollbar-thumb {
-  background: #666;
-  border-radius: 5px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: var(--nes-gray);
+  border: 2px solid var(--nes-black);
 }
 
 .controls-guide-content::-webkit-scrollbar-thumb:hover {
-  background: #888;
-  background-clip: padding-box;
+  background: var(--zelda-gold);
 }
 
-/* Control Section */
+/* Control Section - NES Style */
 .control-section {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid #404040;
-  border-radius: 8px;
-  padding: 20px;
-  transition: all 0.2s ease;
+  background: var(--nes-black);
+  border: 2px solid var(--nes-gray);
+  padding: 16px;
+  transition: border-color 0.15s linear;
 }
 
 .control-section:hover {
-  border-color: #666;
-  background: rgba(0, 0, 0, 0.4);
-  transform: translateY(-2px);
+  border-color: var(--zelda-gold);
 }
 
 .control-section-title {
   margin: 0 0 16px 0;
   font-size: 16px;
   font-weight: 700;
-  color: #FFD700;
+  color: var(--zelda-gold);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   display: flex;
   align-items: center;
   gap: 10px;
   font-family: 'Press Start 2P', 'Courier New', monospace;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #404040;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--nes-gray);
 }
 
 .control-section-icon {
   font-size: 20px;
   display: inline-flex;
   align-items: center;
-  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
 }
 
 /* Control List */
@@ -175,17 +169,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  padding: 8px;
+  background: var(--nes-darkgray);
+  transition: background-color 0.15s linear;
   border: 1px solid transparent;
 }
 
 .control-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: #555;
-  transform: translateX(4px);
+  background: var(--nes-gray);
+  border-color: var(--zelda-gold);
 }
 
 .control-item-secondary {
@@ -206,27 +198,23 @@
   justify-content: center;
   min-width: 40px;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-  border: 2px solid #555;
-  border-radius: 6px;
+  background: var(--nes-black);
+  border: 2px solid var(--nes-gray);
   font-family: 'Courier New', monospace;
   font-size: 14px;
   font-weight: 700;
-  color: #fff;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-  box-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
+  color: var(--nes-white);
+  text-shadow: 
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
+  transition: border-color 0.15s linear;
 }
 
 .control-item:hover .key-badge {
-  border-color: #FFD700;
-  color: #FFD700;
-  transform: translateY(-2px);
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 215, 0, 0.2);
+  border-color: var(--zelda-gold);
+  color: var(--zelda-gold);
 }
 
 .key-separator {
@@ -247,11 +235,11 @@
   margin-left: 16px;
 }
 
-/* Footer */
+/* Footer - NES Style */
 .controls-guide-footer {
-  padding: 20px 28px;
-  border-top: 2px solid #404040;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.3) 0%, transparent 100%);
+  padding: 16px 24px;
+  border-top: 2px solid var(--zelda-gold);
+  background: var(--nes-black);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -261,36 +249,33 @@
 
 .controls-hint {
   margin: 0;
-  color: #888;
+  color: var(--nes-gray);
   font-size: 13px;
   font-style: italic;
   font-family: Arial, sans-serif;
 }
 
 .controls-close-btn-footer {
-  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-  border: 2px solid #666;
-  color: #FFD700;
+  background: var(--nes-black);
+  border: 2px solid var(--zelda-gold);
+  color: var(--zelda-gold);
   font-size: 14px;
   font-weight: 700;
-  padding: 10px 24px;
-  border-radius: 6px;
+  padding: 8px 24px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s linear;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-family: 'Press Start 2P', 'Courier New', monospace;
 }
 
 .controls-close-btn-footer:hover {
-  border-color: #FFD700;
-  background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+  border-color: var(--nes-white);
+  color: var(--nes-white);
 }
 
 .controls-close-btn-footer:active {
-  transform: translateY(0);
+  border-color: var(--zelda-green);
 }
 
 /* Responsive Design */

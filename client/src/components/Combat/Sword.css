@@ -1,7 +1,6 @@
-/* Zelda-style Sword Attack */
+/* Zelda-style Sword Attack - NES */
 .sword {
-  animation: sword-swing 0.3s ease-out;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+  animation: sword-swing 0.3s linear;
 }
 
 .sword-blade {
@@ -140,32 +139,26 @@
 }
 
 .sword-white .sword-blade {
-  filter: brightness(1.2) drop-shadow(0 0 4px white);
+  filter: brightness(1.2);
 }
 
 .sword-magical .sword-blade {
-  filter: brightness(1.3) drop-shadow(0 0 8px #FFD700);
-  animation: magical-pulse 0.3s ease-in-out;
+  filter: brightness(1.3);
+  animation: magical-pulse 0.3s steps(2) infinite;
 }
 
 @keyframes magical-pulse {
-  0%, 100% {
-    filter: brightness(1.3) drop-shadow(0 0 8px #FFD700);
-  }
-  50% {
-    filter: brightness(1.5) drop-shadow(0 0 12px #FFD700);
-  }
+  0%, 100% { filter: brightness(1.3); }
+  50% { filter: brightness(1.5); }
 }
 
-/* Sword beam (full health bonus) */
+/* Sword beam (full health bonus) - NES Style */
 .sword-beam {
   position: absolute;
   width: 32px;
   height: 32px;
-  background: radial-gradient(circle, #FFD700, #FFA500);
-  border-radius: 50%;
+  background: #FCE000;
   animation: sword-beam-travel 1s linear forwards;
-  box-shadow: 0 0 16px #FFD700;
 }
 
 @keyframes sword-beam-travel {

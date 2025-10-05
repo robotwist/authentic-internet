@@ -1,11 +1,10 @@
-/* Zelda-style Heart Display */
+/* Zelda-style Heart Display - NES */
 .heart-display {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   padding: 8px;
-  background-color: rgba(0, 0, 0, 0.7);
-  border-radius: 4px;
+  background-color: #000000;
   max-width: 320px; /* 8 hearts per row (like Zelda) */
 }
 
@@ -17,17 +16,17 @@
   justify-content: center;
   font-size: 24px;
   image-rendering: pixelated;
-  transition: transform 0.1s ease;
+  transition: none;
 }
 
-/* Pulse animation when taking damage */
+/* Pulse animation when taking damage - NES stepped */
 @keyframes heart-damage {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
 }
 
 .heart-display.damaged .heart {
-  animation: heart-damage 0.3s ease;
+  animation: heart-damage 0.2s steps(2);
 }
 
 /* Different heart states */
