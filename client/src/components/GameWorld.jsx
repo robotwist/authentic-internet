@@ -2338,6 +2338,9 @@ const GameWorld = React.memo(() => {
           keys={keys}
           currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
           equippedItem={equippedItem}
+          experience={character?.experience || 0}
+          level={character?.level || 1}
+          experienceToNextLevel={Math.floor(100 * Math.pow(1.5, (character?.level || 1)))}
         />
 
         {uiState.showLevel4 && (

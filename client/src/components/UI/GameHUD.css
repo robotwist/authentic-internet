@@ -201,3 +201,169 @@
   animation: low-health-pulse 1s ease-in-out infinite;
 }
 
+/* ========================================
+   XP Bar and Level Display
+   ======================================== */
+
+.xp-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.level-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-width: 60px;
+  box-shadow: 
+    0 2px 8px rgba(255, 215, 0, 0.3),
+    inset 0 1px 0 rgba(255, 215, 0, 0.2);
+  cursor: default;
+  transition: all 0.2s ease;
+}
+
+.level-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 
+    0 4px 12px rgba(255, 215, 0, 0.4),
+    inset 0 1px 0 rgba(255, 215, 0, 0.3);
+}
+
+.level-icon {
+  font-size: 16px;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6));
+  animation: level-glow 2s ease-in-out infinite;
+}
+
+@keyframes level-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)); }
+  50% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9)); }
+}
+
+.level-number {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFD700;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.5);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.xp-bar-container {
+  flex: 1;
+  position: relative;
+  min-width: 150px;
+  max-width: 250px;
+}
+
+.xp-bar-background {
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(to bottom, #1a1a1a 0%, #0a0a0a 100%);
+  border: 2px solid #444;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    #4CAF50 0%, 
+    #66BB6A 50%, 
+    #81C784 100%);
+  border-radius: 8px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 0 10px rgba(76, 175, 80, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+.xp-bar-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    transparent 100%);
+  animation: xp-shine 3s ease-in-out infinite;
+}
+
+@keyframes xp-shine {
+  0% { left: -100%; }
+  50%, 100% { left: 200%; }
+}
+
+.xp-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 
+    1px 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+}
+
+/* Level up animation (can be triggered via class) */
+@keyframes level-up {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.level-badge.leveling-up {
+  animation: level-up 0.6s ease;
+}
+
+/* Responsive adjustments for XP display */
+@media (max-width: 768px) {
+  .xp-display {
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .level-badge {
+    min-width: 50px;
+    padding: 4px 8px;
+  }
+
+  .level-icon {
+    font-size: 14px;
+  }
+
+  .level-number {
+    font-size: 12px;
+  }
+
+  .xp-bar-container {
+    min-width: 100px;
+    max-width: 150px;
+  }
+
+  .xp-bar-background {
+    height: 16px;
+  }
+
+  .xp-text {
+    font-size: 9px;
+  }
+}
+
