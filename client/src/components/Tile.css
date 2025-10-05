@@ -2,6 +2,7 @@
   position: absolute;
   width: 64px;
   height: 64px;
+  background-color: #2a5a2a; /* NES green fallback */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -149,30 +150,30 @@
   animation: portalVortex 4s infinite linear;
 }
 
-/* Style for tiles with loading images */
+/* Style for tiles with loading images - NES solid colors */
 .tile.image-loading {
-  background-color: rgba(120, 120, 120, 0.5);
-  border: 1px dashed #999;
+  background-color: #888888;
+  border: 2px solid #FFFFFF;
 }
 
 .tile.image-loading.wall {
-  background-color: rgba(90, 77, 65, 0.8);
+  background-color: #5a4d41;
 }
 
 .tile.image-loading.water {
-  background-color: rgba(30, 144, 255, 0.6);
+  background-color: #0058F8;
 }
 
 .tile.image-loading.grass {
-  background-color: rgba(50, 205, 50, 0.6);
+  background-color: #00A800;
 }
 
 .tile.image-loading.sand {
-  background-color: rgba(244, 164, 96, 0.7);
+  background-color: #FCB800;
 }
 
 .tile.image-loading.dungeon {
-  background-color: rgba(72, 61, 139, 0.7);
+  background-color: #483D8B;
 }
 
 /* Hover effects */
