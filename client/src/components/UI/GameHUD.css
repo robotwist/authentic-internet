@@ -67,7 +67,7 @@
     1px 1px 0 var(--nes-black);
   text-transform: uppercase;
   letter-spacing: 2px;
-  background-color: var(--nes-black);
+  background-color: transparent;
   border: 2px solid var(--zelda-gold);
   padding: 8px 16px;
 }
@@ -75,7 +75,7 @@
 .key-count {
   color: var(--zelda-gold);
   font-size: 14px;
-  background-color: var(--nes-black);
+  background-color: transparent;
   border: 2px solid var(--zelda-gold);
   padding: 8px;
   display: flex;
@@ -100,7 +100,7 @@
 .item-slot {
   width: 64px;
   height: 64px;
-  background-color: var(--nes-black);
+  background-color: transparent;
   border: 3px solid var(--nes-gray);
   display: flex;
   flex-direction: column;
@@ -144,7 +144,7 @@
 .rupee-count {
   color: var(--zelda-green);
   font-size: 16px;
-  background-color: var(--nes-black);
+  background-color: transparent;
   border: 2px solid var(--zelda-green);
   padding: 8px 16px;
   display: flex;
@@ -232,7 +232,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  background: var(--nes-black);
+  background: transparent;
   border: 2px solid var(--zelda-gold);
   padding: 6px 10px;
   min-width: 60px;
@@ -276,7 +276,7 @@
 .xp-bar-background {
   width: 100%;
   height: 20px;
-  background: var(--nes-darkgray);
+  background: transparent;
   border: 2px solid var(--nes-gray);
   overflow: hidden;
   position: relative;
