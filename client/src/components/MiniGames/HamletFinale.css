@@ -1,0 +1,368 @@
+/* ========================================
+   ⚔️ Hamlet Finale Mini-Game
+   A dramatic recreation of Hamlet's final duel
+   ======================================== */
+
+.hamlet-finale-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1a0a0a 0%, #2d1818 50%, #1a0a0a 100%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Press Start 2P', monospace;
+  overflow-y: auto;
+}
+
+.hamlet-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.hamlet-header h2 {
+  font-size: 16px;
+  color: #FFD700;
+  margin: 0 0 10px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.hamlet-header h3 {
+  font-size: 10px;
+  color: #DC143C;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* ========================================
+   Stage and Canvas
+   ======================================== */
+
+.hamlet-stage {
+  background: linear-gradient(180deg, #000 0%, #1a0a0a 100%);
+  border: 4px solid #8B0000;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 
+    0 0 20px rgba(139, 0, 0, 0.5),
+    inset 0 0 50px rgba(0, 0, 0, 0.8);
+  margin-bottom: 20px;
+}
+
+.hamlet-canvas {
+  display: block;
+  image-rendering: pixelated;
+  border: 2px solid #FFD700;
+  background: #000;
+}
+
+/* ========================================
+   Dialogue System
+   ======================================== */
+
+.hamlet-dialogue-box {
+  background: rgba(0, 0, 0, 0.95);
+  border: 3px solid #FFD700;
+  border-radius: 8px;
+  padding: 25px;
+  max-width: 650px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+}
+
+.dialogue-text {
+  font-size: 11px;
+  color: #FFF;
+  line-height: 1.8;
+  margin: 0 0 20px 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.dialogue-btn {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+  color: #FFF;
+  border: 2px solid #FFD700;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dialogue-btn:hover {
+  background: linear-gradient(135deg, #DC143C 0%, #FF6B6B 100%);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   Duel Controls
+   ======================================== */
+
+.hamlet-controls {
+  background: rgba(0, 0, 0, 0.9);
+  border: 3px solid #8B0000;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 650px;
+  width: 100%;
+}
+
+.status-text {
+  font-size: 12px;
+  color: #FFD700;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.poison-indicator {
+  color: #9370DB;
+  animation: poison-pulse 1s infinite;
+}
+
+@keyframes poison-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; text-shadow: 0 0 10px #9370DB; }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.action-btn {
+  flex: 1;
+  max-width: 200px;
+  padding: 15px 20px;
+  border: 3px solid;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.attack-btn {
+  background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+  border-color: #FFD700;
+  color: #FFF;
+}
+
+.attack-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #DC143C 0%, #FF6B6B 100%);
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+  transform: scale(1.05);
+}
+
+.parry-btn {
+  background: linear-gradient(135deg, #000080 0%, #4169E1 100%);
+  border-color: #C0C0C0;
+  color: #FFF;
+}
+
+.parry-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4169E1 0%, #6495ED 100%);
+  box-shadow: 0 0 20px rgba(65, 105, 225, 0.6);
+  transform: scale(1.05);
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ========================================
+   Completion Screen
+   ======================================== */
+
+.hamlet-complete {
+  background: rgba(0, 0, 0, 0.95);
+  border: 4px solid #FFD700;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 650px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 
+    0 0 30px rgba(255, 215, 0, 0.6),
+    inset 0 0 50px rgba(139, 0, 0, 0.3);
+}
+
+.hamlet-complete h2 {
+  font-size: 20px;
+  color: #FFD700;
+  margin: 0 0 20px 0;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+  animation: complete-glow 2s infinite;
+}
+
+@keyframes complete-glow {
+  0%, 100% { 
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8); 
+  }
+  50% { 
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8), 0 0 20px #FFD700; 
+  }
+}
+
+.complete-text {
+  font-size: 12px;
+  color: #C0C0C0;
+  margin: 0 0 30px 0;
+  font-style: italic;
+}
+
+.reward-text {
+  font-size: 14px;
+  color: #FFF;
+  margin: 0 0 15px 0;
+}
+
+.highlight {
+  color: #9370DB;
+  text-shadow: 0 0 10px #9370DB;
+  animation: highlight-pulse 1.5s infinite;
+}
+
+@keyframes highlight-pulse {
+  0%, 100% { 
+    opacity: 1; 
+    text-shadow: 0 0 10px #9370DB;
+  }
+  50% { 
+    opacity: 0.7; 
+    text-shadow: 0 0 20px #9370DB, 0 0 30px #9370DB;
+  }
+}
+
+.reward-description {
+  font-size: 9px;
+  color: #A8A8A8;
+  margin: 0 0 30px 0;
+  line-height: 1.6;
+}
+
+.complete-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.complete-btn {
+  padding: 15px 30px;
+  border: 3px solid;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.complete-btn.primary {
+  background: linear-gradient(135deg, #9370DB 0%, #BA55D3 100%);
+  border-color: #FFD700;
+  color: #FFF;
+}
+
+.complete-btn.primary:hover {
+  background: linear-gradient(135deg, #BA55D3 0%, #DA70D6 100%);
+  box-shadow: 0 0 25px rgba(147, 112, 219, 0.8);
+  transform: scale(1.05);
+}
+
+.complete-btn.secondary {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: #C0C0C0;
+  color: #C0C0C0;
+}
+
+.complete-btn.secondary:hover {
+  background: rgba(32, 32, 32, 0.9);
+  border-color: #FFF;
+  color: #FFF;
+}
+
+/* ========================================
+   Exit Button
+   ======================================== */
+
+.exit-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(139, 0, 0, 0.9);
+  border: 2px solid #FFD700;
+  border-radius: 50%;
+  color: #FFF;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exit-btn:hover {
+  background: rgba(220, 20, 60, 1);
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 768px) {
+  .hamlet-header h2 {
+    font-size: 12px;
+  }
+
+  .hamlet-header h3 {
+    font-size: 8px;
+  }
+
+  .hamlet-canvas {
+    width: 100%;
+    height: auto;
+  }
+
+  .dialogue-text {
+    font-size: 9px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    max-width: 100%;
+  }
+
+  .hamlet-complete h2 {
+    font-size: 14px;
+  }
+
+  .reward-text {
+    font-size: 11px;
+  }
+}
+

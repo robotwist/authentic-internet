@@ -7,6 +7,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import CharacterCreator from './pages/CharacterCreator';
 import Dashboard from './pages/Dashboard';
 import World from './pages/World';
 import Profile from './pages/Profile';
@@ -83,6 +84,14 @@ function App() {
             <Route path="/" element={<ErrorBoundary><Home /></ErrorBoundary>} />
             <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
             <Route path="/register" element={<ErrorBoundary><Register /></ErrorBoundary>} />
+            <Route
+              path="/character-creator"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary><CharacterCreator /></ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
             <Route path="/onboarding-test" element={<ErrorBoundary><OnboardingTest /></ErrorBoundary>} />
             <Route
               path="/dashboard"

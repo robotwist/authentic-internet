@@ -1,0 +1,321 @@
+/* ========================================
+   🎨 Pixel Grid Editor - Retro Game Style
+   ======================================== */
+
+.pixel-grid-editor {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  color: #e0e0e0;
+}
+
+.editor-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 3px solid #4ecdc4;
+}
+
+.editor-header h2 {
+  font-size: 24px;
+  color: #4ecdc4;
+  margin: 0 0 10px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.editor-subtitle {
+  font-size: 10px;
+  color: #a8a8a8;
+  margin: 0;
+}
+
+.editor-workspace {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.canvas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.pixel-canvas {
+  border: 4px solid #4ecdc4;
+  background: #0f0f0f;
+  cursor: crosshair;
+  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.3);
+  image-rendering: pixelated;
+  border-radius: 4px;
+}
+
+.pixel-canvas:active {
+  cursor: crosshair;
+  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.6);
+}
+
+.sprite-preview {
+  background: #0f3460;
+  padding: 15px;
+  border-radius: 8px;
+  border: 2px solid #4ecdc4;
+  text-align: center;
+}
+
+.preview-label {
+  font-size: 8px;
+  color: #4ecdc4;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.preview-box {
+  background: #0f0f0f;
+  padding: 15px;
+  border-radius: 4px;
+  display: inline-block;
+  border: 2px solid #2a2a3e;
+}
+
+/* ========================================
+   🛠️ Tools Sidebar
+   ======================================== */
+
+.tools-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #0f3460;
+  padding: 20px;
+  border-radius: 8px;
+  border: 2px solid #4ecdc4;
+  min-width: 250px;
+}
+
+.tool-section h3,
+.color-section h3,
+.action-section h3 {
+  font-size: 10px;
+  color: #4ecdc4;
+  margin: 0 0 15px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tool-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.tool-btn {
+  flex: 1;
+  padding: 10px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 2px solid #2a2a3e;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tool-btn:hover {
+  background: #2a2a3e;
+  border-color: #4ecdc4;
+  transform: translateY(-2px);
+}
+
+.tool-btn.active {
+  background: #4ecdc4;
+  color: #1a1a2e;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+}
+
+/* ========================================
+   🎨 Color Palette
+   ======================================== */
+
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.color-btn {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #2a2a3e;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  image-rendering: pixelated;
+}
+
+.color-btn:hover {
+  transform: scale(1.1);
+  border-color: #4ecdc4;
+  box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+}
+
+.color-btn.selected {
+  border-color: #4ecdc4;
+  border-width: 4px;
+  box-shadow: 0 0 15px rgba(78, 205, 196, 0.8);
+  transform: scale(1.05);
+}
+
+.selected-color-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 7px;
+  color: #a8a8a8;
+  padding: 10px;
+  background: #1a1a2e;
+  border-radius: 4px;
+  border: 1px solid #2a2a3e;
+}
+
+.selected-color-swatch {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #4ecdc4;
+  border-radius: 2px;
+  image-rendering: pixelated;
+}
+
+/* ========================================
+   ⚡ Action Buttons
+   ======================================== */
+
+.action-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.action-btn {
+  padding: 12px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 2px solid #2a2a3e;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.action-btn:hover {
+  background: #2a2a3e;
+  border-color: #4ecdc4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a8a0 100%);
+  color: #1a1a2e;
+  border-color: #4ecdc4;
+  font-weight: bold;
+}
+
+.action-btn.primary:hover {
+  background: linear-gradient(135deg, #5edede 0%, #54b8b0 100%);
+  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.5);
+  transform: translateY(-3px);
+}
+
+/* ========================================
+   💡 Tips Section
+   ======================================== */
+
+.editor-tips {
+  margin-top: 30px;
+  padding: 20px;
+  background: #0f3460;
+  border-radius: 8px;
+  border: 2px solid #4ecdc4;
+}
+
+.editor-tips h4 {
+  font-size: 10px;
+  color: #4ecdc4;
+  margin: 0 0 15px 0;
+  text-transform: uppercase;
+}
+
+.editor-tips ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.editor-tips li {
+  font-size: 8px;
+  color: #a8a8a8;
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.editor-tips li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: #4ecdc4;
+}
+
+/* ========================================
+   📱 Responsive Design
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .editor-workspace {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tools-sidebar {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .color-palette {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .pixel-grid-editor {
+    padding: 15px;
+  }
+
+  .editor-header h2 {
+    font-size: 16px;
+  }
+
+  .pixel-canvas {
+    transform: scale(0.8);
+    transform-origin: center;
+  }
+
+  .color-palette {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+

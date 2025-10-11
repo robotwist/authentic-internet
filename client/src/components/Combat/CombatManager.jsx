@@ -22,6 +22,7 @@ const CombatManager = ({
   onPlayerHeal,
   onCollectRupee,
   onGainExperience, // NEW: XP reward callback
+  onEnemyDefeat, // NEW: Track enemy defeats for quests
   currentMap,
   isAttacking,
   onAttackComplete,
@@ -211,6 +212,11 @@ const CombatManager = ({
       onGainExperience(xpReward, `Defeated ${enemyType}`);
     }
 
+    // Track enemy defeat for quests
+    if (onEnemyDefeat) {
+      onEnemyDefeat(enemyId, enemyType);
+    }
+
     // Add drops
     if (droppedItems && droppedItems.length > 0) {
       setDrops(prev => [
@@ -221,7 +227,7 @@ const CombatManager = ({
         }))
       ]);
     }
-  }, [soundManager, onGainExperience]);
+  }, [soundManager, onGainExperience, onEnemyDefeat]);
 
   // Handle player taking damage
   const handlePlayerDamage = useCallback((damage) => {

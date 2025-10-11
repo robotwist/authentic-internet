@@ -53,6 +53,7 @@ import HemingwayChallenge from "./HemingwayChallenge";
 import NPCInteraction from "./NPCs/NPCInteraction";
 import Dungeon from "./Dungeons/Dungeon";
 import { LIBRARY_OF_ALEXANDRIA } from "./Dungeons/DungeonData";
+import HamletFinale from "./MiniGames/HamletFinale";
 import { useAuth } from "../context/AuthContext";
 import { useAchievements } from "../context/AchievementContext";
 import { useGameState } from "../context/GameStateContext";
@@ -200,6 +201,30 @@ const GameWorld = React.memo(() => {
   const [xpNotifications, setXPNotifications] = useState([]);
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
   const lastAttackTimeRef = useRef(0); // Attack cooldown
+
+  // Shakespeare Quest System
+  const [shakespeareQuest, setShakespeareQuest] = useState({
+    stage: 'not_started', // not_started, enemies_defeated, hamlet_triggered, complete
+    overworldEnemiesDefeated: 0,
+    totalOverworldEnemies: 0,
+    hasWandOfProspero: false
+  });
+  const [showHamletFinale, setShowHamletFinale] = useState(false);
+
+  // Initialize total enemy count for Overworld when map changes
+  useEffect(() => {
+    if (MAPS[currentMapIndex]?.name === 'Overworld') {
+      // Count initial enemy spawns for the Overworld
+      // This would be from the enemy spawning system in CombatManager
+      // For now, set a reasonable default (can be adjusted based on actual spawns)
+      const defaultEnemyCount = 10; // Adjust based on your enemy spawn configuration
+      setShakespeareQuest(prev => ({
+        ...prev,
+        totalOverworldEnemies: prev.totalOverworldEnemies || defaultEnemyCount
+      }));
+      console.log(`📊 Overworld has ${defaultEnemyCount} enemies to defeat for Shakespeare's quest`);
+    }
+  }, [currentMapIndex]);
 
   // Mobile and accessibility state
   const [mobileState, setMobileState] = useState({
@@ -594,6 +619,22 @@ const GameWorld = React.memo(() => {
     
     console.log("Interacting with NPC:", npc.name || npc.type);
     
+    // Special handling for Shakespeare's quest
+    if (npc.name === "William Shakespeare" && shakespeareQuest.stage === 'enemies_defeated') {
+      console.log('🎭 Triggering Hamlet Finale!');
+      setShowHamletFinale(true);
+      
+      // Play dramatic sound
+      if (soundManager) {
+        soundManager.playSound("quest_start", 0.8);
+      }
+      
+      if (mobileState.screenReaderMode) {
+        announceToScreenReader("Beginning the Hamlet Finale challenge!");
+      }
+      return; // Don't show regular dialogue
+    }
+    
     // Set the active NPC and show dialog
     setActiveNPC(npc);
     updateUIState({ showNPCDialog: true });
@@ -607,7 +648,7 @@ const GameWorld = React.memo(() => {
     if (mobileState.screenReaderMode) {
       announceToScreenReader(`Starting conversation with ${npc.name || npc.type}`);
     }
-  }, [setActiveNPC, updateUIState, soundManager, mobileState.screenReaderMode, announceToScreenReader]);
+  }, [setActiveNPC, updateUIState, soundManager, mobileState.screenReaderMode, announceToScreenReader, shakespeareQuest.stage]);
 
   // Handler for clicking on an NPC in the map
   const handleNPCClick = useCallback(
@@ -1170,6 +1211,71 @@ const GameWorld = React.memo(() => {
     console.log(`⚔️ Dungeon enemy defeated: ${enemyId}`);
     // Drops are handled by the drops system in CombatManager
   }, []);
+
+  // Track enemy defeats for Shakespeare's quest
+  const handleOverworldEnemyDefeat = useCallback((enemyId, enemyType) => {
+    // Only track if on Overworld map
+    if (MAPS[currentMapIndex]?.name === 'Overworld') {
+      setShakespeareQuest(prev => {
+        const newDefeated = prev.overworldEnemiesDefeated + 1;
+        const allDefeated = newDefeated >= prev.totalOverworldEnemies && prev.totalOverworldEnemies > 0;
+        
+        console.log(`📊 Overworld Progress: ${newDefeated}/${prev.totalOverworldEnemies} enemies defeated`);
+        
+        if (allDefeated && prev.stage === 'not_started') {
+          console.log('🎭 All Overworld enemies defeated! Shakespeare quest available!');
+          return {
+            ...prev,
+            overworldEnemiesDefeated: newDefeated,
+            stage: 'enemies_defeated'
+          };
+        }
+        
+        return {
+          ...prev,
+          overworldEnemiesDefeated: newDefeated
+        };
+      });
+    }
+  }, [currentMapIndex]);
+
+  // Hamlet Finale completion
+  const handleHamletFinaleComplete = useCallback((result) => {
+    console.log('🎭 Hamlet Finale Complete!', result);
+    
+    // Award the Wand of Prospero
+    setShakespeareQuest(prev => ({
+      ...prev,
+      stage: 'complete',
+      hasWandOfProspero: true
+    }));
+    
+    // Add to inventory
+    setInventory(prev => [
+      ...prev,
+      {
+        id: 'wand_of_prospero',
+        name: "Wand of Prospero",
+        description: "A mystical staff from The Tempest, capable of conjuring storms and bending reality itself",
+        type: "MAGIC_WEAPON",
+        power: 50,
+        special: "conjure_storm"
+      }
+    ]);
+    
+    // Award XP
+    handleGainExperience(result.exp || 100, 'Completed Hamlet Finale');
+    
+    // Close the finale
+    setShowHamletFinale(false);
+    
+    // Show achievement
+    if (soundManager) {
+      soundManager.playSound('powerup', 0.8);
+    }
+    
+    console.log('⚔️ Wand of Prospero obtained!');
+  }, [handleGainExperience, soundManager]);
 
   // Boss defeat
   const handleBossDefeat = useCallback((dungeonId) => {
@@ -2773,10 +2879,18 @@ const GameWorld = React.memo(() => {
             {/* Player Character */}
             <div
               className={`character ${uiState.isMoving ? "walking" : ""} ${characterState.direction} ${characterState.verticalDirection !== characterState.direction && characterState.verticalDirection ? characterState.verticalDirection : ""} ${characterState.horizontalDirection !== characterState.direction && characterState.horizontalDirection ? characterState.horizontalDirection : ""} ${characterState.movementTransition || ""} ${isInvincible ? "character-invincible" : ""} ${characterState.isHit ? "character-hit" : ""}`}
-              style={characterState.style}
+              style={{
+                ...characterState.style,
+                // Use custom character sprite if available, otherwise fallback to default
+                ...(user?.characterSprite ? {
+                  background: `url(${user.characterSprite}) no-repeat center center`,
+                  backgroundSize: 'cover',
+                  imageRendering: 'pixelated'
+                } : {})
+              }}
               ref={characterRef}
               role="img"
-              aria-label={`Player character at position ${Math.round(characterPosition.x / TILE_SIZE)}, ${Math.round(characterPosition.y / TILE_SIZE)}`}
+              aria-label={`${user?.characterName || 'Player'} at position ${Math.round(characterPosition.x / TILE_SIZE)}, ${Math.round(characterPosition.y / TILE_SIZE)}`}
               data-testid="character"
             />
 
@@ -2790,6 +2904,7 @@ const GameWorld = React.memo(() => {
               onPlayerHeal={handlePlayerHeal}
               onCollectRupee={handleCollectRupee}
               onGainExperience={handleGainExperience}
+              onEnemyDefeat={handleOverworldEnemyDefeat}
               currentMap={MAPS[currentMapIndex]?.name}
               isAttacking={isAttacking}
               onAttackComplete={() => setIsAttacking(false)}
@@ -2934,6 +3049,14 @@ const GameWorld = React.memo(() => {
             level={characterStats.level}
             stats={characterStats}
             onClose={() => setShowLevelUpModal(false)}
+          />
+        )}
+
+        {/* Hamlet Finale Mini-Game */}
+        {showHamletFinale && (
+          <HamletFinale
+            onComplete={handleHamletFinaleComplete}
+            onExit={() => setShowHamletFinale(false)}
           />
         )}
 

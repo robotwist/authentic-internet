@@ -32,7 +32,7 @@ const Register = () => {
 
     const success = await register(formData.username, formData.email, formData.password);
     if (success) {
-      navigate('/dashboard');
+      navigate('/character-creator'); // Redirect to character creator for new users
     }
   };
 

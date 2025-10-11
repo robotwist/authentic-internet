@@ -98,6 +98,15 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "https://api.dicebear.com/7.x/pixel-art/svg?seed=unknown",
     },
+    characterSprite: {
+      type: String, // Base64 data URL of custom pixel art character
+      default: null
+    },
+    characterName: {
+      type: String,
+      trim: true,
+      default: function() { return this.username; }
+    },
     bio: {
       type: String,
       default: "",

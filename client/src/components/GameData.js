@@ -49,18 +49,33 @@ export const MAPS = [
           "Though this be madness, yet there is method in't. (Hamlet, Act II, Scene II)"
         ],
         quest: {
-          id: uuidv4(),
-          title: "Words of Wisdom",
-          description: "Shakespeare seeks inspiration for his next great work",
+          id: 'shakespeare_overworld_quest',
+          title: "The Tempest's Trial",
+          description: "Clear the Overworld of all threats to prove your valor, then witness the tragic finale of Hamlet",
           objectives: [
-            "Collect 3 artifacts",
-            "Share your favorite quote",
-            "Return to Shakespeare"
+            "Defeat all enemies in the Overworld",
+            "Return to Shakespeare",
+            "Complete the Hamlet Finale challenge"
           ],
+          requirement: {
+            type: 'defeat_all_enemies',
+            map: 'Overworld',
+            count: 0, // Will be tracked dynamically
+            completed: false
+          },
           reward: {
-            exp: 30,
-            item: "Quill of Eloquence"
-          }
+            exp: 100,
+            item: "Wand of Prospero",
+            itemData: {
+              name: "Wand of Prospero",
+              description: "A mystical staff from The Tempest, capable of conjuring storms and bending reality itself",
+              type: "MAGIC_WEAPON",
+              power: 50,
+              special: "conjure_storm",
+              sprite: "/assets/items/wand_prospero.png"
+            }
+          },
+          stages: ['not_started', 'enemies_defeated', 'hamlet_complete', 'complete']
         }
       },
       {

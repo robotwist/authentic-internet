@@ -142,63 +142,9 @@ router.get("/me", authenticateToken, async (req, res) => {
 // 📌 Check User Access (🔐 Requires Authentication)
 router.get("/me/access", authenticateToken, getUserAccess);
 
-// 📌 Get Character by ID (🔐 Requires Authentication)
-router.get("/:id", authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select("-password");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.json(user);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
-
-// 📌 Update Character (🔐 Requires Authentication)
-router.put("/:id", authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // Ensure the user can only update their own character
-    if (req.user.userId !== id) {
-      return res.status(403).json({ message: "You can only update your own character" });
-    }
-    
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
-    // Update allowed fields
-    const { avatar, exp, level, inventory, savedQuotes } = req.body;
-    
-    if (avatar) user.avatar = avatar;
-    if (exp !== undefined) user.experience = exp;
-    if (level !== undefined) user.level = level;
-    if (inventory) user.inventory = inventory;
-    if (savedQuotes) user.savedQuotes = savedQuotes;
-    
-    await user.save();
-    
-    res.json({
-      message: "Character updated successfully",
-      user: {
-        id: user._id,
-        username: user.username,
-        avatar: user.avatar,
-        exp: user.experience,
-        level: user.level,
-        inventory: user.inventory,
-        savedQuotes: user.savedQuotes
-      }
-    });
-  } catch (error) {
-    console.error("Error updating character:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
+// ========================================
+// 🎯 SPECIFIC ROUTES (Must come before /:id routes!)
+// ========================================
 
 // Get user's game state
 router.get('/game-state', authenticateToken, gameStateReadLimiter, async (req, res) => {
@@ -239,6 +185,49 @@ router.put('/game-state', authenticateToken, gameStateWriteLimiter, async (req, 
     res.json(updatedUser.gameState);
   } catch (error) {
     console.error('Error updating game state:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user's character sprite (custom pixel art)
+router.put('/character-sprite', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { characterSprite, characterName } = req.body;
+    
+    if (!characterSprite || typeof characterSprite !== 'string') {
+      return res.status(400).json({ message: 'Valid character sprite data is required' });
+    }
+    
+    // Validate that it's a data URL (base64 image)
+    if (!characterSprite.startsWith('data:image/')) {
+      return res.status(400).json({ message: 'Character sprite must be a valid image data URL' });
+    }
+    
+    // Update user's character sprite in database
+    const updateData = { characterSprite };
+    if (characterName) {
+      updateData.characterName = characterName;
+    }
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { $set: updateData },
+      { new: true }
+    ).select('username email characterSprite characterName experience level');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    console.log(`✅ Character sprite saved for user: ${updatedUser.username}`);
+    res.json({ 
+      success: true,
+      message: 'Character sprite saved successfully',
+      user: updatedUser 
+    });
+  } catch (error) {
+    console.error('Error updating character sprite:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -316,6 +305,68 @@ router.post('/achievements', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error adding achievement:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ========================================
+// 🎯 GENERIC PARAMETER ROUTES (Must come AFTER specific routes!)
+// ========================================
+
+// 📌 Get Character by ID (🔐 Requires Authentication)
+router.get("/:id", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// 📌 Update Character (🔐 Requires Authentication)
+router.put("/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Ensure the user can only update their own character
+    if (req.user.userId !== id) {
+      return res.status(403).json({ message: "You can only update your own character" });
+    }
+    
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // Update allowed fields
+    const { avatar, exp, level, inventory, savedQuotes } = req.body;
+    
+    if (avatar) user.avatar = avatar;
+    if (exp !== undefined) user.experience = exp;
+    if (level !== undefined) user.level = level;
+    if (inventory) user.inventory = inventory;
+    if (savedQuotes) user.savedQuotes = savedQuotes;
+    
+    await user.save();
+    
+    res.json({
+      message: "Character updated successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        avatar: user.avatar,
+        exp: user.experience,
+        level: user.level,
+        inventory: user.inventory,
+        savedQuotes: user.savedQuotes
+      }
+    });
+  } catch (error) {
+    console.error("Error updating character:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
