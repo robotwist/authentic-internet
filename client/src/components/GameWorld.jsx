@@ -39,6 +39,7 @@ import "./Artifact.css";
 import "./Inventory.css";
 import SavedQuotes from "./SavedQuotes";
 import RewardModal from "./RewardModal";
+import LevelUpModal from "./UI/LevelUpModal";
 import DialogBox from "./DialogBox";
 import TextAdventure from "./TextAdventure";
 import SoundManager from "./utils/SoundManager";
@@ -50,6 +51,8 @@ import Level3Terminal from "./Level3Terminal";
 import Level4Shooter from "./Level4Shooter";
 import HemingwayChallenge from "./HemingwayChallenge";
 import NPCInteraction from "./NPCs/NPCInteraction";
+import Dungeon from "./Dungeons/Dungeon";
+import { LIBRARY_OF_ALEXANDRIA } from "./Dungeons/DungeonData";
 import { useAuth } from "../context/AuthContext";
 import { useAchievements } from "../context/AchievementContext";
 import { useGameState } from "../context/GameStateContext";
@@ -115,6 +118,15 @@ const GameWorld = React.memo(() => {
     showArtifactsOnMap: true,
     isMoving: false,
     isDarkMode: false,
+    inDungeon: false,
+  });
+
+  // Dungeon state
+  const [dungeonState, setDungeonState] = useState({
+    currentDungeon: null,
+    smallKeys: 0,
+    hasBossKey: false,
+    dungeonEntryPosition: null, // Where player was in overworld
   });
 
   // Game data state
@@ -177,6 +189,16 @@ const GameWorld = React.memo(() => {
   const [swordType, setSwordType] = useState('wooden'); // wooden, white, magical
   const [equippedItem, setEquippedItem] = useState(null);
   const [isInvincible, setIsInvincible] = useState(false);
+
+  // XP and Leveling System
+  const [characterStats, setCharacterStats] = useState({
+    experience: 0,
+    level: 1,
+    attack: 1,
+    defense: 0
+  });
+  const [xpNotifications, setXPNotifications] = useState([]);
+  const [showLevelUpModal, setShowLevelUpModal] = useState(false);
   const lastAttackTimeRef = useRef(0); // Attack cooldown
 
   // Mobile and accessibility state
@@ -232,6 +254,12 @@ const GameWorld = React.memo(() => {
       soundManager.playSound('damage', 0.5);
     }
     
+    // Trigger hit animation (retreat and flash)
+    setCharacterState(prev => ({ ...prev, isHit: true }));
+    setTimeout(() => {
+      setCharacterState(prev => ({ ...prev, isHit: false }));
+    }, 400); // Match CSS animation duration
+    
     // Invincibility frames
     setIsInvincible(true);
     setTimeout(() => setIsInvincible(false), 1000);
@@ -266,6 +294,63 @@ const GameWorld = React.memo(() => {
       soundManager.playSound('key', 0.3);
     }
   }, [soundManager]);
+
+  // XP and Leveling System
+  // Calculate XP required for next level
+  const calculateXPForLevel = useCallback((level) => {
+    return Math.floor(100 * Math.pow(1.5, level - 1));
+  }, []);
+
+  // Handle gaining experience with level-up logic
+  const handleGainExperience = useCallback((amount, source = 'Unknown', position = null) => {
+    console.log(`Gained ${amount} XP from: ${source}`);
+    
+    // Add XP notification at enemy position
+    if (position) {
+      setXPNotifications(prev => [...prev, { amount, position, id: uuidv4() }]);
+    }
+    
+    setCharacterStats(prev => {
+      const newXP = prev.experience + amount;
+      const xpNeeded = calculateXPForLevel(prev.level + 1);
+      
+      // Check for level up
+      if (newXP >= xpNeeded) {
+        const newLevel = prev.level + 1;
+        const newMaxHealth = maxPlayerHealth + 2;
+        const newAttack = prev.attack + 1;
+        const newDefense = newLevel % 2 === 0 ? prev.defense + 1 : prev.defense;
+        
+        // Full heal on level up
+        setPlayerHealth(newMaxHealth);
+        setMaxPlayerHealth(newMaxHealth);
+        
+        // Show level-up modal
+        setShowLevelUpModal(true);
+        
+        // Play level-up sound
+        if (soundManager) {
+          soundManager.playSound('powerup', 0.7); // Use powerup sound for now
+        }
+        
+        console.log(`🌟 LEVEL UP! Now level ${newLevel}`);
+        console.log(`  +2 Max Health (${newMaxHealth})`);
+        console.log(`  +1 Attack (${newAttack})`);
+        if (newLevel % 2 === 0) {
+          console.log(`  +1 Defense (${newDefense})`);
+        }
+        
+        return {
+          experience: newXP,
+          level: newLevel,
+          attack: newAttack,
+          defense: newDefense
+        };
+      }
+      
+      return { ...prev, experience: newXP };
+    });
+  }, [calculateXPForLevel, maxPlayerHealth, soundManager]);
 
   const handleGameOver = useCallback(() => {
     console.log('Game Over!');
@@ -385,34 +470,40 @@ const GameWorld = React.memo(() => {
     
     // Explore tiles in a radius around the player (view distance)
     const viewRadius = 3; // Explore 3 tiles in all directions
-    const newExploredTiles = new Set(exploredTiles);
     
-    for (let dy = -viewRadius; dy <= viewRadius; dy++) {
-      for (let dx = -viewRadius; dx <= viewRadius; dx++) {
-        const x = tileX + dx;
-        const y = tileY + dy;
-        
-        // Check if tile is within map bounds
-        if (x >= 0 && x < MAP_COLS && y >= 0 && y < MAP_ROWS) {
-          newExploredTiles.add(`${x},${y}`);
+    setExploredTiles(prevExploredTiles => {
+      const newExploredTiles = new Set(prevExploredTiles);
+      let hasNewTiles = false;
+      
+      for (let dy = -viewRadius; dy <= viewRadius; dy++) {
+        for (let dx = -viewRadius; dx <= viewRadius; dx++) {
+          const x = tileX + dx;
+          const y = tileY + dy;
+          
+          // Check if tile is within map bounds
+          if (x >= 0 && x < MAP_COLS && y >= 0 && y < MAP_ROWS) {
+            const tileKey = `${x},${y}`;
+            if (!newExploredTiles.has(tileKey)) {
+              newExploredTiles.add(tileKey);
+              hasNewTiles = true;
+            }
+          }
         }
       }
-    }
-    
-    // Only update if new tiles were explored
-    if (newExploredTiles.size !== exploredTiles.size) {
-      setExploredTiles(newExploredTiles);
-    }
-  }, [characterPosition, exploredTiles]);
+      
+      // Only update if new tiles were explored
+      return hasNewTiles ? newExploredTiles : prevExploredTiles;
+    });
+  }, [characterPosition]); // Remove exploredTiles from dependencies
 
-  // Performance monitoring
+  // Performance monitoring - only run occasionally to avoid render loops
   useEffect(() => {
     renderCount.current++;
     const now = performance.now();
     const renderTime = now - lastRenderTime.current;
 
-    if (renderTime > 16) {
-      // Longer than 60fps threshold
+    // Only log slow renders occasionally (every 100th render) to avoid console spam
+    if (renderTime > 16 && renderCount.current % 100 === 0) {
       console.warn(
         `Slow render detected: ${renderTime.toFixed(2)}ms (render #${renderCount.current})`,
       );
@@ -421,7 +512,7 @@ const GameWorld = React.memo(() => {
     lastRenderTime.current = now;
 
     // Performance mark for render - with safety checks
-    if (performance.mark) {
+    if (performance.mark && renderCount.current % 100 === 0) {
       performance.mark(PERFORMANCE_MARKERS.RENDER_END);
       
       // Only measure if the start mark exists
@@ -436,6 +527,8 @@ const GameWorld = React.memo(() => {
         performance.mark(PERFORMANCE_MARKERS.RENDER_START);
       }
     }
+  // Empty dependency array would prevent this from running on every render,
+  // but we want to track render count, so we'll keep it running but throttle logging
   });
 
   // Optimized state update function
@@ -809,6 +902,30 @@ const GameWorld = React.memo(() => {
       
       console.log(`Manual portal activation attempt - Map: ${currentMapName}, Player position: (${playerTileX}, ${playerTileY})`);
 
+      // Check for dungeon portal (tile type 9)
+      const currentMapData = currentMap?.data;
+      if (currentMapData && playerTileY >= 0 && playerTileY < currentMapData.length) {
+        const row = currentMapData[playerTileY];
+        if (row && playerTileX >= 0 && playerTileX < row.length) {
+          const tileType = row[playerTileX];
+          if (tileType === 9) {
+            // Dungeon portal detected!
+            console.log('🏰 Dungeon portal detected!');
+            
+            // Check if there's a special portal defined for this location
+            const dungeonPortal = currentMap?.specialPortals?.find(
+              portal => portal.position.x === playerTileX && portal.position.y === playerTileY && portal.type === 'dungeon'
+            );
+            
+            if (dungeonPortal) {
+              console.log(`✅ Entering ${dungeonPortal.name}`);
+              handleEnterDungeon(dungeonPortal.destination);
+              return;
+            }
+          }
+        }
+      }
+
       // Check progression portals
       const progressionPortal = PORTAL_CONFIG.progression[currentMapName];
       if (progressionPortal) {
@@ -913,6 +1030,165 @@ const GameWorld = React.memo(() => {
       checkLevelAchievements,
     ],
   );
+
+  // ============================================
+  // DUNGEON SYSTEM HANDLERS
+  // ============================================
+
+  // Enter dungeon
+  const handleEnterDungeon = useCallback((dungeonName) => {
+    console.log(`🏰 Entering dungeon: ${dungeonName}`);
+    
+    // Save current overworld position
+    setDungeonState(prev => ({
+      ...prev,
+      currentDungeon: LIBRARY_OF_ALEXANDRIA,
+      dungeonEntryPosition: { ...characterPosition }
+    }));
+    
+    // Set player to dungeon entrance spawn
+    const entranceRoom = LIBRARY_OF_ALEXANDRIA.rooms.entrance;
+    setCharacterPosition({
+      x: entranceRoom.startPosition.x * TILE_SIZE,
+      y: entranceRoom.startPosition.y * TILE_SIZE
+    });
+    
+    // Update UI state
+    setUiState(prev => ({ ...prev, inDungeon: true }));
+    
+    // Play dungeon entrance sound
+    if (soundManager) {
+      soundManager.playSound('dungeon_enter', 0.7);
+    }
+    
+    console.log('✅ Dungeon entered successfully');
+  }, [characterPosition, soundManager]);
+
+  // Exit dungeon
+  const handleExitDungeon = useCallback(() => {
+    console.log('🚪 Exiting dungeon...');
+    
+    if (!dungeonState.dungeonEntryPosition) {
+      console.error('No entry position saved!');
+      return;
+    }
+    
+    // Return player to overworld position
+    setCharacterPosition(dungeonState.dungeonEntryPosition);
+    
+    // Clear dungeon state
+    setDungeonState({
+      currentDungeon: null,
+      smallKeys: 0,
+      hasBossKey: false,
+      dungeonEntryPosition: null
+    });
+    
+    // Update UI state
+    setUiState(prev => ({ ...prev, inDungeon: false }));
+    
+    // Play exit sound
+    if (soundManager) {
+      soundManager.playSound('dungeon_exit', 0.7);
+    }
+    
+    console.log('✅ Returned to overworld');
+  }, [dungeonState.dungeonEntryPosition, soundManager]);
+
+  // Collect item in dungeon
+  const handleDungeonItemCollect = useCallback((itemType) => {
+    console.log(`💎 Collected dungeon item: ${itemType}`);
+    
+    switch (itemType) {
+      case 'small_key':
+        setDungeonState(prev => ({
+          ...prev,
+          smallKeys: prev.smallKeys + 1
+        }));
+        if (soundManager) {
+          soundManager.playSound('key_get', 0.6);
+        }
+        console.log(`🔑 Small keys: ${dungeonState.smallKeys + 1}`);
+        break;
+        
+      case 'boss_key':
+        setDungeonState(prev => ({
+          ...prev,
+          hasBossKey: true
+        }));
+        if (soundManager) {
+          soundManager.playSound('boss_key_get', 0.7);
+        }
+        console.log('🗝️ Boss key obtained!');
+        break;
+        
+      case 'compass':
+        if (soundManager) {
+          soundManager.playSound('item_get', 0.6);
+        }
+        console.log('🧭 Compass obtained! Boss room revealed.');
+        break;
+        
+      case 'white_sword':
+        // Upgrade sword type
+        setSwordType('white');
+        if (soundManager) {
+          soundManager.playSound('powerup', 0.8);
+        }
+        handleGainExperience(50, 'White Sword obtained');
+        console.log('⚔️ White Sword obtained! Attack power increased!');
+        break;
+        
+      case 'heart_container':
+        // Increase max health
+        const newMaxHealth = maxPlayerHealth + 2;
+        setMaxPlayerHealth(newMaxHealth);
+        setPlayerHealth(newMaxHealth); // Fully heal
+        if (soundManager) {
+          soundManager.playSound('heart_container', 0.8);
+        }
+        handleGainExperience(30, 'Heart Container');
+        console.log(`❤️ Heart Container! Max health: ${newMaxHealth}`);
+        break;
+        
+      case 'use_small_key':
+        // Consume a small key (used for unlocking doors)
+        setDungeonState(prev => ({
+          ...prev,
+          smallKeys: Math.max(0, prev.smallKeys - 1)
+        }));
+        console.log(`🔑 Small key used. Remaining: ${Math.max(0, dungeonState.smallKeys - 1)}`);
+        break;
+        
+      default:
+        console.log(`Unknown item type: ${itemType}`);
+    }
+  }, [dungeonState.smallKeys, soundManager, maxPlayerHealth, handleGainExperience]);
+
+  // Dungeon enemy defeat (same as overworld but tracks differently)
+  const handleDungeonEnemyDefeat = useCallback((enemyId, drops) => {
+    console.log(`⚔️ Dungeon enemy defeated: ${enemyId}`);
+    // Drops are handled by the drops system in CombatManager
+  }, []);
+
+  // Boss defeat
+  const handleBossDefeat = useCallback((dungeonId) => {
+    console.log(`🎉 Boss defeated in: ${dungeonId}`);
+    
+    // Play boss defeat fanfare
+    if (soundManager) {
+      soundManager.playSound('boss_defeat', 1.0);
+    }
+    
+    // Award massive XP
+    handleGainExperience(100, 'Boss defeated');
+    
+    // Mark dungeon as complete
+    console.log('🏆 Dungeon complete! Treasure revealed.');
+    
+    // Optionally: Track dungeon completion in gameData
+    // This allows for future features like dungeon tracker, etc.
+  }, [soundManager, handleGainExperience]);
 
   // Optimized artifact creation
   const createLevelArtifact = useCallback(async () => {
@@ -1061,12 +1337,49 @@ const GameWorld = React.memo(() => {
           break;
         case "z":
         case "Z":
-          // Sword attack with cooldown
+          // Sword attack with cooldown and AUTO-TARGETING
           const now = Date.now();
           const ATTACK_COOLDOWN = 400; // ms between attacks
           
           if (!isAttacking && (now - lastAttackTimeRef.current >= ATTACK_COOLDOWN)) {
             lastAttackTimeRef.current = now;
+            
+            // AUTO-TARGET: Find closest enemy and face them
+            const enemies = document.querySelectorAll('[data-hitbox="enemy"]');
+            let closestEnemy = null;
+            let closestDistance = Infinity;
+            
+            enemies.forEach((enemyElement) => {
+              const enemyRect = enemyElement.getBoundingClientRect();
+              const enemyX = parseFloat(enemyElement.style.left) || 0;
+              const enemyY = parseFloat(enemyElement.style.top) || 0;
+              
+              const dx = enemyX - characterPosition.x;
+              const dy = enemyY - characterPosition.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              
+              if (distance < closestDistance && distance < 150) { // 150px auto-target range
+                closestDistance = distance;
+                closestEnemy = { x: enemyX, y: enemyY, dx, dy };
+              }
+            });
+            
+            // Face the closest enemy
+            if (closestEnemy) {
+              const { dx, dy } = closestEnemy;
+              let targetDirection = characterState.direction;
+              
+              // Determine which direction to face based on angle to enemy
+              if (Math.abs(dx) > Math.abs(dy)) {
+                targetDirection = dx > 0 ? 'right' : 'left';
+              } else {
+                targetDirection = dy > 0 ? 'down' : 'up';
+              }
+              
+              // Update character direction to face enemy
+              setCharacterState(prev => ({ ...prev, direction: targetDirection }));
+            }
+            
             setIsAttacking(true);
             if (soundManager) {
               soundManager.playSound('sword', 0.3);
@@ -1518,88 +1831,96 @@ const GameWorld = React.memo(() => {
   // Update characterStyle and movement state when position or direction changes
   useEffect(() => {
     // Update character position in the style
-    updateCharacterState({
+    setCharacterState(prev => ({
+      ...prev,
       style: {
-        ...characterState.style,
+        ...prev.style,
         left: characterPosition.x,
         top: characterPosition.y,
       },
-    });
+    }));
 
     // Adjust viewport to follow character
     adjustViewport(characterPosition);
-
+  }, [characterPosition, adjustViewport]);
+  
+  // Separate effect for handling movement animations to avoid infinite loops
+  useEffect(() => {
     // Update movement state based on movementDirection
     if (characterMovement.movementDirection) {
-      // Set primary direction
-      updateCharacterState({ direction: characterMovement.movementDirection });
-
+      // Build all state updates at once to minimize re-renders
+      const stateUpdates = {
+        direction: characterMovement.movementDirection,
+      };
+      
       // Track vertical and horizontal components separately
       if (
         characterMovement.movementDirection === "up" ||
         characterMovement.movementDirection === "down"
       ) {
-        updateCharacterState({
-          verticalDirection: characterMovement.movementDirection,
-        });
+        stateUpdates.verticalDirection = characterMovement.movementDirection;
       } else if (
         characterMovement.movementDirection === "left" ||
         characterMovement.movementDirection === "right"
       ) {
-        updateCharacterState({
-          horizontalDirection: characterMovement.movementDirection,
-        });
+        stateUpdates.horizontalDirection = characterMovement.movementDirection;
       }
 
       // Process diagonal movement from useCharacterMovement
       if (characterMovement.diagonalMovement) {
         if (characterMovement.diagonalMovement.y < 0) {
-          updateCharacterState({ verticalDirection: "up" });
+          stateUpdates.verticalDirection = "up";
         } else if (characterMovement.diagonalMovement.y > 0) {
-          updateCharacterState({ verticalDirection: "down" });
+          stateUpdates.verticalDirection = "down";
         }
 
         if (characterMovement.diagonalMovement.x < 0) {
-          updateCharacterState({ horizontalDirection: "left" });
+          stateUpdates.horizontalDirection = "left";
         } else if (characterMovement.diagonalMovement.x > 0) {
-          updateCharacterState({ horizontalDirection: "right" });
+          stateUpdates.horizontalDirection = "right";
         }
       }
-
-      // Animation sequence: start moving -> walking -> stop moving
-      updateCharacterState({ movementTransition: "start-move" });
+      
+      stateUpdates.movementTransition = "start-move";
+      
+      // Apply all updates at once
+      setCharacterState(prev => ({ ...prev, ...stateUpdates }));
 
       // After start animation, set to walking
-      setTimeout(() => {
-        updateCharacterState({ isMoving: true, movementTransition: null });
+      const walkTimeout = setTimeout(() => {
+        setCharacterState(prev => ({ ...prev, isMoving: true, movementTransition: null }));
       }, 200);
 
       // Reset isMoving after animation completes with stop animation
-      const timeout = setTimeout(() => {
-        updateCharacterState({ movementTransition: "stop-move" });
+      const stopTimeout = setTimeout(() => {
+        setCharacterState(prev => ({ ...prev, movementTransition: "stop-move" }));
 
         // After stop animation, reset to idle
         setTimeout(() => {
-          updateCharacterState({ isMoving: false, movementTransition: null });
-
-          // Reset directions after movement stops fully
-          if (
-            !characterMovement.diagonalMovement ||
-            (characterMovement.diagonalMovement.x === 0 &&
-              characterMovement.diagonalMovement.y === 0)
-          ) {
-            // Only reset directions if we're actually stopping and not continuing to move
-            updateCharacterState({
-              verticalDirection: null,
-              horizontalDirection: null,
-            });
-          }
+          setCharacterState(prev => {
+            const shouldResetDirections = !characterMovement.diagonalMovement ||
+              (characterMovement.diagonalMovement.x === 0 &&
+               characterMovement.diagonalMovement.y === 0);
+            
+            return {
+              ...prev,
+              isMoving: false,
+              movementTransition: null,
+              ...(shouldResetDirections && {
+                verticalDirection: null,
+                horizontalDirection: null,
+              }),
+            };
+          });
         }, 200);
       }, 400);
 
-      return () => clearTimeout(timeout);
+      return () => {
+        clearTimeout(walkTimeout);
+        clearTimeout(stopTimeout);
+      };
     }
-  }, [characterPosition, characterMovement, updateCharacterState, adjustViewport]);
+  }, [characterMovement.movementDirection, characterMovement.diagonalMovement]);
 
   useEffect(() => {
     // Check for both map artifacts and server artifacts at the player's position
@@ -2331,11 +2652,12 @@ const GameWorld = React.memo(() => {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          backgroundColor: '#000',
+          backgroundColor: 'transparent',
           color: '#fff',
-          fontSize: '18px'
+          fontSize: '18px',
+          textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
         }}>
-          Initializing Game World...
+          Loading...
         </div>
       ) : (
       <div
@@ -2369,9 +2691,10 @@ const GameWorld = React.memo(() => {
           keys={keys}
           currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
           equippedItem={equippedItem}
-          experience={character?.experience || 0}
-          level={character?.level || 1}
-          experienceToNextLevel={Math.floor(100 * Math.pow(1.5, (character?.level || 1)))}
+          experience={characterStats.experience}
+          level={characterStats.level}
+          experienceToNextLevel={calculateXPForLevel(characterStats.level + 1)}
+          isDamaged={characterState.isHit}
         />
         
         {/* Minimap with fog of war */}
@@ -2417,7 +2740,21 @@ const GameWorld = React.memo(() => {
             role="region"
             aria-label={`Current area: ${MAPS[currentMapIndex]?.name || "Unknown"}`}
           >
-            {MAPS[currentMapIndex] && (
+            {/* Conditional rendering: Dungeon or Overworld */}
+            {uiState.inDungeon && dungeonState.currentDungeon ? (
+              <Dungeon
+                dungeonData={dungeonState.currentDungeon}
+                playerPosition={characterPosition}
+                onPlayerMove={setCharacterPosition}
+                onCollectItem={handleDungeonItemCollect}
+                onEnemyDefeat={handleDungeonEnemyDefeat}
+                onBossDefeat={handleBossDefeat}
+                onExit={handleExitDungeon}
+                playerKeys={dungeonState.smallKeys}
+                hasBossKey={dungeonState.hasBossKey}
+                characterRef={characterRef}
+              />
+            ) : MAPS[currentMapIndex] && (
               <Map
                 mapData={MAPS[currentMapIndex].data}
                 npcs={
@@ -2435,7 +2772,7 @@ const GameWorld = React.memo(() => {
 
             {/* Player Character */}
             <div
-              className={`character ${uiState.isMoving ? "walking" : ""} ${characterState.direction} ${characterState.verticalDirection !== characterState.direction && characterState.verticalDirection ? characterState.verticalDirection : ""} ${characterState.horizontalDirection !== characterState.direction && characterState.horizontalDirection ? characterState.horizontalDirection : ""} ${characterState.movementTransition || ""} ${isInvincible ? "character-invincible" : ""}`}
+              className={`character ${uiState.isMoving ? "walking" : ""} ${characterState.direction} ${characterState.verticalDirection !== characterState.direction && characterState.verticalDirection ? characterState.verticalDirection : ""} ${characterState.horizontalDirection !== characterState.direction && characterState.horizontalDirection ? characterState.horizontalDirection : ""} ${characterState.movementTransition || ""} ${isInvincible ? "character-invincible" : ""} ${characterState.isHit ? "character-hit" : ""}`}
               style={characterState.style}
               ref={characterRef}
               role="img"
@@ -2452,10 +2789,12 @@ const GameWorld = React.memo(() => {
               onPlayerDamage={handlePlayerDamage}
               onPlayerHeal={handlePlayerHeal}
               onCollectRupee={handleCollectRupee}
+              onGainExperience={handleGainExperience}
               currentMap={MAPS[currentMapIndex]?.name}
               isAttacking={isAttacking}
               onAttackComplete={() => setIsAttacking(false)}
               swordType={swordType}
+              characterAttack={characterStats.attack}
             />
 
             {/* Environment Modifiers */}
@@ -2574,6 +2913,27 @@ const GameWorld = React.memo(() => {
                 : "Unknown Area"
             }
             onManageUserArtifact={handleUserArtifactUpdate}
+          />
+        )}
+
+        {/* XP Notifications */}
+        {xpNotifications.map((notification) => (
+          <XPNotification
+            key={notification.id}
+            amount={notification.amount}
+            position={notification.position}
+            onComplete={() => {
+              setXPNotifications(prev => prev.filter(n => n.id !== notification.id));
+            }}
+          />
+        ))}
+
+        {/* Level Up Modal */}
+        {showLevelUpModal && (
+          <LevelUpModal
+            level={characterStats.level}
+            stats={characterStats}
+            onClose={() => setShowLevelUpModal(false)}
           />
         )}
 

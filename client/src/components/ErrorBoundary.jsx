@@ -143,7 +143,10 @@ class ErrorBoundary extends React.Component {
   };
 
   render() {
-    console.log('ErrorBoundary render - hasError:', this.state.hasError, 'errorCount:', this.state.errorCount);
+    // Only log when there's an actual error to avoid console spam
+    if (this.state.hasError) {
+      console.log('ErrorBoundary render - hasError:', this.state.hasError, 'errorCount:', this.state.errorCount);
+    }
     
     if (this.state.hasError) {
       // If we're in a severe error state with many repeating errors, 

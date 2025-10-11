@@ -52,10 +52,10 @@ const Map = ({
     setIsDragging(false);
   };
 
-  const handleWheel = (e) => {
+  const handleWheel = useCallback((e) => {
     e.preventDefault();
     // Zoom functionality can be added here
-  };
+  }, []);
 
   // Function to determine if a tile is part of Half Dome
   const isHalfDome = (x, y) => {
@@ -173,7 +173,10 @@ const Map = ({
       return isEntityVisible(tilePos, visibleRange);
     });
     
-    console.log(`Rendering ${visibleNPCs.length}/${npcs.length} visible NPCs for map: ${mapName}`);
+    // Only log NPC rendering in development and reduce frequency
+    if (process.env.NODE_ENV === 'development' && Math.random() < 0.01) {
+      console.log(`Rendering ${visibleNPCs.length}/${npcs.length} visible NPCs for map: ${mapName}`);
+    }
     
     return visibleNPCs.map((npc, index) => {
       if (!npc) {
@@ -188,8 +191,6 @@ const Map = ({
       
       // Get the sprite with fallback logic
       const actualSprite = npc.sprite || getNPCImage(npc.type) || DEFAULT_NPC_SPRITE;
-      
-      console.log(`NPC ${npc.name} (${npc.type}) using sprite: ${actualSprite}`);
       
       const spriteStyle = {
         position: 'absolute',
@@ -236,6 +237,17 @@ const Map = ({
     }).filter(Boolean); // Remove any null entries
   }, [npcs, onNPCClick, getNPCImage, mapName, visibleRange]);
 
+  // Setup wheel event listener with passive: false to allow preventDefault
+  useEffect(() => {
+    const mapElement = document.querySelector(`[data-map-name="${mapName}"]`);
+    if (mapElement) {
+      mapElement.addEventListener('wheel', handleWheel, { passive: false });
+      return () => {
+        mapElement.removeEventListener('wheel', handleWheel, { passive: false });
+      };
+    }
+  }, [mapName, handleWheel]);
+
   // Log culling stats in development mode
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
@@ -281,7 +293,6 @@ const Map = ({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      onWheel={handleWheel}
     >
       <div 
         className="map-grid"

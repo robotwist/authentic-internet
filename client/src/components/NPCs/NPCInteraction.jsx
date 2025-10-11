@@ -21,6 +21,18 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
   }, [npc]);
 
   const initializeConversation = async () => {
+    // Use fallback dialogue if no API endpoint or _id
+    if (!npc._id || !npc._id.trim()) {
+      console.log('Using fallback dialogue for NPC:', npc.name);
+      setMessages([{
+        type: 'npc',
+        text: npc.dialogue?.[0] || "Hello there, traveler!",
+        author: npc.name,
+        timestamp: new Date()
+      }]);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/npcs/${npc._id}/interact`, {
         method: 'POST',
@@ -54,9 +66,12 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
         if (data.response.availableQuests) {
           setCurrentQuest(data.response.availableQuests[0]);
         }
+      } else {
+        // Fallback to dialogue if API response not successful
+        throw new Error('API response not successful');
       }
     } catch (error) {
-      console.error('Error initializing conversation:', error);
+      console.log('Using fallback dialogue due to API error:', error.message);
       setMessages([{
         type: 'npc',
         text: npc.dialogue?.[0] || "Hello there, traveler!",
@@ -77,6 +92,26 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
 
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
+
+    // If no API endpoint, use fallback dialogue rotation
+    if (!npc._id || !npc._id.trim()) {
+      console.log('Using fallback dialogue for NPC response');
+      setTimeout(() => {
+        // Pick a random dialogue line or cycle through them
+        const dialogueIndex = messages.filter(m => m.type === 'npc').length % (npc.dialogue?.length || 1);
+        const npcResponse = {
+          type: 'npc',
+          text: npc.dialogue?.[dialogueIndex] || "Thank you for sharing that with me.",
+          author: npc.name,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, npcResponse]);
+        setIsLoading(false);
+        setInput('');
+        setInteractionCount(prev => prev + 1);
+      }, 500); // Simulate thinking delay
+      return;
+    }
 
     try {
       const response = await fetch(`/api/npcs/${npc._id}/interact`, {
@@ -121,15 +156,21 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
             mood: data.response.mood
           }));
         }
+      } else {
+        // Fallback to dialogue
+        throw new Error('API response not successful');
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.log('Using fallback dialogue due to API error:', error.message);
+      // Pick a random dialogue line
+      const dialogueIndex = messages.filter(m => m.type === 'npc').length % (npc.dialogue?.length || 1);
       setMessages(prev => [...prev, {
         type: 'npc',
-        text: "I seem to be having trouble understanding you right now. Perhaps we could speak again later?",
+        text: npc.dialogue?.[dialogueIndex] || "Thank you for sharing that with me.",
         author: npc.name,
         timestamp: new Date()
       }]);
+      setInteractionCount(prev => prev + 1);
     } finally {
       setIsLoading(false);
       setInput('');

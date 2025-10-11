@@ -69,23 +69,23 @@ const Enemy = ({
     setIsStunned(true);
     setTimeout(() => setIsStunned(false), 300);
     
-    // Apply knockback
+    // Apply knockback with boundary check
     if (knockbackDirection) {
-      const knockbackDistance = isCritical ? 36 : 24;
+      const knockbackDistance = isCritical ? 48 : 32; // Increased knockback
       const newPos = { ...position };
       
       switch (knockbackDirection) {
         case 'up':
-          newPos.y -= knockbackDistance;
+          newPos.y = Math.max(0, newPos.y - knockbackDistance);
           break;
         case 'down':
-          newPos.y += knockbackDistance;
+          newPos.y = Math.min(720 - 48, newPos.y + knockbackDistance);
           break;
         case 'left':
-          newPos.x -= knockbackDistance;
+          newPos.x = Math.max(0, newPos.x - knockbackDistance);
           break;
         case 'right':
-          newPos.x += knockbackDistance;
+          newPos.x = Math.min(1280 - 48, newPos.x + knockbackDistance);
           break;
       }
       

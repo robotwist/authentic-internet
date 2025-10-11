@@ -21,10 +21,12 @@ const CombatManager = ({
   onPlayerDamage,
   onPlayerHeal,
   onCollectRupee,
+  onGainExperience, // NEW: XP reward callback
   currentMap,
   isAttacking,
   onAttackComplete,
-  swordType = 'wooden'
+  swordType = 'wooden',
+  characterAttack = 1 // Character's attack stat from leveling
 }) => {
   const soundManager = SoundManager.getInstance();
   const [swordActive, setSwordActive] = useState(null);
@@ -34,19 +36,33 @@ const CombatManager = ({
   const lastDamageTime = useRef(0);
   const DAMAGE_COOLDOWN = 1000; // 1 second invincibility
 
+  // Get sword damage based on type + character attack stat
+  const getSwordDamage = useCallback((type) => {
+    const baseDamages = {
+      wooden: 1,
+      white: 2,
+      magical: 4,
+    };
+    const baseDamage = baseDamages[type] || 1;
+    // Total damage = base sword damage + character attack stat
+    return baseDamage + characterAttack;
+  }, [characterAttack]);
+
   // Handle sword attack
   useEffect(() => {
     if (isAttacking && !swordActive) {
+      const totalDamage = getSwordDamage(swordType);
+      console.log(`⚔️ Sword attack damage: ${totalDamage} (base: ${swordType}, attack: ${characterAttack})`);
       setSwordActive({
         position: playerPosition,
         direction: playerDirection,
-        damage: getSwordDamage(swordType),
+        damage: totalDamage,
       });
     } else if (!isAttacking && swordActive) {
       // Reset sword if attack is cancelled
       setSwordActive(null);
     }
-  }, [isAttacking, swordActive, playerPosition, playerDirection, swordType]);
+  }, [isAttacking, swordActive, playerPosition, playerDirection, swordType, characterAttack, getSwordDamage]);
 
   const handleAttackComplete = () => {
     setSwordActive(null);
@@ -84,7 +100,7 @@ const CombatManager = ({
       if (updatedEnemy.health <= 0) {
         handleEnemyDefeat(target.id, [
           { type: Math.random() < 0.5 ? 'heart' : 'rupee', position: target.position }
-        ]);
+        ], target.type || 'default'); // Pass enemy type for XP
       } else {
         // Play enemy hit sound
         if (soundManager) {
@@ -126,16 +142,6 @@ const CombatManager = ({
     }
     return null;
   }, [enemies]);
-
-  // Get sword damage based on type
-  const getSwordDamage = (type) => {
-    const damages = {
-      wooden: 1,
-      white: 2,
-      magical: 4,
-    };
-    return damages[type] || 1;
-  };
 
   // Spawn enemies based on current map
   useEffect(() => {
@@ -179,8 +185,18 @@ const CombatManager = ({
     return spawns[mapName] || defaultSpawn;
   };
 
+  // XP rewards by enemy type
+  const XP_REWARDS = {
+    octorok: 10,
+    moblin: 15,
+    tektite: 12,
+    keese: 8,
+    stalfos: 20,
+    default: 5
+  };
+
   // Handle enemy defeat
-  const handleEnemyDefeat = useCallback((enemyId, droppedItems) => {
+  const handleEnemyDefeat = useCallback((enemyId, droppedItems, enemyType = 'default') => {
     // Play enemy defeat sound
     if (soundManager) {
       soundManager.playSound('enemy_defeat', 0.4);
@@ -188,6 +204,12 @@ const CombatManager = ({
     
     // Remove enemy
     setEnemies(prev => prev.filter(e => e.id !== enemyId));
+
+    // Award XP
+    const xpReward = XP_REWARDS[enemyType] || XP_REWARDS.default;
+    if (onGainExperience) {
+      onGainExperience(xpReward, `Defeated ${enemyType}`);
+    }
 
     // Add drops
     if (droppedItems && droppedItems.length > 0) {
@@ -199,7 +221,7 @@ const CombatManager = ({
         }))
       ]);
     }
-  }, [soundManager]);
+  }, [soundManager, onGainExperience]);
 
   // Handle player taking damage
   const handlePlayerDamage = useCallback((damage) => {
@@ -243,7 +265,7 @@ const CombatManager = ({
           // Enemy defeated
           handleEnemyDefeat(enemy.id, [
             { type: Math.random() < 0.5 ? 'heart' : 'rupee', position: enemy.position }
-          ]);
+          ], enemy.type); // Pass enemy type for XP calculation
         } else {
           // Play enemy hit sound
           if (soundManager) {
@@ -376,7 +398,7 @@ const CombatManager = ({
             type={enemy.type}
             position={enemy.position}
             health={enemy.health}
-            onDefeat={(drops) => handleEnemyDefeat(enemy.id, drops)}
+            onDefeat={(drops) => handleEnemyDefeat(enemy.id, drops, enemy.type)}
             onDamagePlayer={handlePlayerDamage}
             playerPosition={playerPosition}
           />

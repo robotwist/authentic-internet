@@ -34,6 +34,8 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
         return '/assets/tiles/portal.webp'; // Base portal image, style overridden by CSS
       case 8: // text adventure portal
         return '/assets/tiles/portal.webp'; // Base portal image, style overridden by CSS
+      case 9: // dungeon portal
+        return '/assets/tiles/portal.webp'; // Base portal image, style overridden by CSS
       default:
         console.warn(`Unknown tile type: ${type}, defaulting to grass`);
         return '/assets/tiles/piskel_grass.png';
@@ -97,7 +99,7 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
   };
 
   // Generate additional classes and attributes for portals
-  const portalDestination = (type >= 5 && type <= 8) ? getPortalDestination() : null;
+  const portalDestination = (type >= 5 && type <= 9) ? getPortalDestination() : null;
   const portalLevel = type === 5 ? getPortalLevel() : null;
   const portalClasses = portalDestination ? `portal-to-${portalDestination}` : '';
   const isYosemitePortal = portalDestination === "yosemite";
@@ -108,6 +110,7 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
     if (type === 6) return 'terminal-portal';
     if (type === 7) return 'shooter-portal';
     if (type === 8) return 'text-portal';
+    if (type === 9) return 'dungeon-portal';
     return '';
   };
   
@@ -121,7 +124,7 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
         top: `${y * size}px`,
         width: `${size}px`,
         height: `${size}px`,
-        backgroundImage: type >= 5 && type <= 8 ? 'none' : (imageLoaded ? `url(${imagePath})` : 'none')
+        backgroundImage: type >= 5 && type <= 9 ? 'none' : (imageLoaded ? `url(${imagePath})` : 'none')
       }}
       onClick={onClick}
       data-coords={`${x},${y}`}
@@ -156,6 +159,15 @@ const Tile = ({ type, x, y, size = 64, onClick, className = '', mapName = '' }) 
         <>
           <div className="text-portal-inner"></div>
           <div className="portal-glow blue-glow"></div>
+        </>
+      )}
+      
+      {/* Dungeon portal inner element */}
+      {type === 9 && (
+        <>
+          <div className="portal-glow" style={{ 
+            background: 'radial-gradient(circle at center, rgba(139, 69, 19, 0.6) 0%, transparent 70%)' 
+          }}></div>
         </>
       )}
     </div>

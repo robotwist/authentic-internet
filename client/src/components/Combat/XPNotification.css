@@ -1,0 +1,34 @@
+/* XP Notification - Zelda NES Style */
+.xp-notification {
+  position: absolute;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  color: #FFD700; /* Gold */
+  text-shadow: 
+    2px 2px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+  pointer-events: none;
+  z-index: 9999;
+  animation: xp-float 1s ease-out forwards;
+  image-rendering: pixelated;
+}
+
+@keyframes xp-float {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-40px) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-60px) scale(0.8);
+    opacity: 0;
+  }
+}
+

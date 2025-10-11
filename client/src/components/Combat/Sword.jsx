@@ -19,26 +19,7 @@ const Sword = ({
   const soundManager = SoundManager.getInstance();
 
   useEffect(() => {
-    // Spawn sword beam if at full health (Zelda mechanic!)
-    if (hasFullHealth && onSpawnProjectile) {
-      // Slight delay so beam appears after sword swipe starts
-      setTimeout(() => {
-        // Play sword beam sound
-        if (soundManager) {
-          soundManager.playSound('sword_beam', 0.4);
-        }
-        
-        onSpawnProjectile({
-          type: 'sword_beam',
-          position: { ...position },
-          direction,
-          damage: damage,
-          speed: 8,
-          maxDistance: 400,
-        });
-      }, 100);
-    }
-
+    // Sword beam REMOVED - no projectiles
     // Sword attack lasts 300ms (like Zelda)
     const timer = setTimeout(() => {
       setIsActive(false);
@@ -48,7 +29,7 @@ const Sword = ({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [onAttackComplete, hasFullHealth, onSpawnProjectile, position, direction, damage]);
+  }, [onAttackComplete]);
 
   if (!isActive) return null;
 
@@ -101,18 +82,32 @@ const Sword = ({
   };
 
   return (
-    <div 
-      className={getSwordClass()} 
-      style={getSwordStyle()}
-      data-damage={damage}
-      data-hitbox="sword"
-    >
-      <div className="sword-blade">
-        {swordType === 'wooden' && '🗡️'}
-        {swordType === 'white' && '⚔️'}
-        {swordType === 'magical' && '🔱'}
+    <>
+      <div 
+        className={getSwordClass()} 
+        style={getSwordStyle()}
+        data-damage={damage}
+        data-hitbox="sword"
+      >
+        <div className="sword-blade">
+          {swordType === 'wooden' && '🗡️'}
+          {swordType === 'white' && '⚔️'}
+          {swordType === 'magical' && '🔱'}
+        </div>
       </div>
-    </div>
+      
+      {/* Visual Hitbox Indicator - shows damage radius */}
+      <div 
+        className="sword-hitbox-indicator"
+        style={{
+          position: 'absolute',
+          left: position.x,
+          top: position.y,
+          pointerEvents: 'none',
+          zIndex: 99,
+        }}
+      />
+    </>
   );
 };
 

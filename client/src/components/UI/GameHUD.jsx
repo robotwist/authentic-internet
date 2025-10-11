@@ -16,7 +16,8 @@ const GameHUD = ({
   onItemUse,
   experience = 0,
   level = 1,
-  experienceToNextLevel = 100
+  experienceToNextLevel = 100,
+  isDamaged = false
 }) => {
   
   // Calculate XP progress percentage
@@ -28,10 +29,9 @@ const GameHUD = ({
   
   return (
     <div className="game-hud">
-      {/* Top bar with hearts and area name */}
+      {/* Top bar with XP, hearts, and area name */}
       <div className="hud-top-bar">
         <div className="hud-left">
-          <HeartDisplay currentHealth={health} maxHealth={maxHealth} />
           {/* XP Bar and Level Display */}
           <div className="xp-display">
             <div className="level-badge" title={`Level ${level}`}>
@@ -52,6 +52,8 @@ const GameHUD = ({
               </span>
             </div>
           </div>
+          {/* Hearts below XP */}
+          <HeartDisplay currentHealth={health} maxHealth={maxHealth} isDamaged={isDamaged} />
         </div>
         
         <div className="hud-center">

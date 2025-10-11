@@ -23,7 +23,7 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
-  z-index: 1000;
+  z-index: 5000; /* Above all game elements (artifacts: 1200, character: 1500) but below modals (10000) */
   display: flex;
   flex-direction: column;
   justify-content: space-between;

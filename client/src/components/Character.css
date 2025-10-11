@@ -12,6 +12,34 @@
   }
 }
 
+/* Hit retreat and flash - NES retro style */
+.character-hit {
+  animation: hit-retreat-flash 0.4s steps(4);
+}
+
+@keyframes hit-retreat-flash {
+  0% {
+    transform: translateX(0) translateY(0);
+    filter: brightness(1);
+  }
+  25% {
+    transform: translateX(-8px) translateY(0); /* Retreat */
+    filter: brightness(2); /* Flash bright */
+  }
+  50% {
+    transform: translateX(-4px) translateY(0);
+    filter: brightness(0.5); /* Flash dark */
+  }
+  75% {
+    transform: translateX(-2px) translateY(0);
+    filter: brightness(2); /* Flash bright again */
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+    filter: brightness(1); /* Back to normal */
+  }
+}
+
 .character {
   position: absolute;
   width: 32px;
@@ -21,9 +49,10 @@
   image-rendering: pixelated; /* Ensures crisp pixels */
   transform-origin: center;
   z-index: 10;
-  /* Changed from using float animation by default to a subtle bobbing for idle state */
+  /* Retro idle bobbing animation */
   animation: idle-bob 2s ease-in-out infinite;
-  transition: transform 0.05s ease, left 0.2s cubic-bezier(0.33, 1, 0.68, 1), top 0.2s cubic-bezier(0.33, 1, 0.68, 1);
+  transition: transform 0.05s steps(2), left 0.15s steps(3), top 0.15s steps(3); /* Retro stepped movement */
+  will-change: transform, left, top; /* Performance optimization */
 }
 
 /* Improved idle animation with subtle breathing effect */
@@ -586,40 +615,18 @@
 }
 
 /* ========================================
-   Sword Carried by Character
+   Sword Carried by Character - HIDDEN
+   Combat sword (Sword.jsx) appears during attacks
    ======================================== */
 
-/* Base sword styling - appears on character */
+/* Base sword styling - DISABLED (combat sword is separate component) */
 .character-sprite::before {
-  content: '';
-  position: absolute;
-  width: 18px;
-  height: 3px;
-  background: linear-gradient(90deg, 
-    #888 0%, #ccc 10%, #fff 15%, 
-    #ccc 20%, #888 30%, 
-    #666 90%, #444 95%, #8B4513 100%);
-  box-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 3px rgba(255, 215, 0, 0.3);
-  z-index: -1;
-  transform-origin: right center;
-  image-rendering: pixelated;
-  transition: all 0.2s ease;
+  content: none; /* Hidden - combat sword appears during attacks */
 }
 
-/* Sword hilt (handle) */
+/* Sword hilt (handle) - DISABLED */
 .character-sprite::after {
-  content: '';
-  position: absolute;
-  width: 4px;
-  height: 6px;
-  background: linear-gradient(180deg, #8B4513 0%, #654321 100%);
-  border-radius: 1px;
-  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
-  z-index: -1;
-  image-rendering: pixelated;
-  transition: all 0.2s ease;
+  content: none; /* Hidden - combat sword appears during attacks */
 }
 
 /* Sword position when facing DOWN (default) */
@@ -703,43 +710,14 @@
   }
 }
 
-/* Sword for standard .character class (used in GameWorld) */
+/* Sword for standard .character class - HIDDEN */
 .character::before {
-  content: '';
-  position: absolute;
-  width: 18px;
-  height: 3px;
-  background: linear-gradient(90deg, 
-    #888 0%, #ccc 10%, #fff 15%, 
-    #ccc 20%, #888 30%, 
-    #666 90%, #444 95%, #8B4513 100%);
-  box-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 3px rgba(255, 215, 0, 0.3);
-  z-index: 1;
-  transform-origin: right center;
-  image-rendering: pixelated;
-  transition: all 0.2s ease;
-  right: -2px;
-  top: 50%;
-  transform: rotate(45deg);
-  animation: sword-idle-glow 2s ease-in-out infinite;
+  content: none; /* Hidden - combat sword (Sword.jsx) appears during attacks */
 }
 
-/* Sword hilt for standard .character */
+/* Sword hilt for standard .character - HIDDEN */
 .character::after {
-  content: '';
-  position: absolute;
-  width: 4px;
-  height: 6px;
-  background: linear-gradient(180deg, #8B4513 0%, #654321 100%);
-  border-radius: 1px;
-  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
-  z-index: 1;
-  image-rendering: pixelated;
-  transition: all 0.2s ease;
-  right: -3px;
-  top: calc(50% + 3px);
+  content: none; /* Hidden - combat sword (Sword.jsx) appears during attacks */
 }
 
 /* Sword positions for .character based on direction class */

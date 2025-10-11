@@ -18,13 +18,13 @@ export default defineConfig({
     hmr: {
       protocol: 'ws',
       host: 'localhost',
-      port: 5175, // Use the same port as the server to avoid conflicts
+      // Let Vite auto-detect the port for HMR
       overlay: false, // Disable overlay to prevent intrusive error reporting
       timeout: 120000 // Increase HMR timeout to 120 seconds for more stability
     },
     host: 'localhost',
-    port: 5175,
-    strictPort: false, // Allow fallback to another port if 5175 is in use
+    port: 5176, // Updated to 5176 to match current server
+    strictPort: false, // Allow fallback to another port if in use
     cors: true,
     watch: {
       usePolling: true, // Enable polling for more reliable file watching

@@ -387,7 +387,7 @@ const ArtifactGameLauncher = ({
     if (!isOpen || gameState === 'loading' || gameState === 'failed') return null;
 
     return (
-      <div className="game-hud">
+      <div className="launcher-hud">
         <div className="hud-left">
           <div className="game-title">{artifact.name}</div>
           <div className="game-info">

@@ -1007,7 +1007,7 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
   // Component render
   return (
     <div className="level4-shooter">
-      <div className="game-hud">
+      <div className="shooter-hud">
         <div className="score-display">SCORE: {score}</div>
         <div className="health-display">HEALTH: {playerHealth}</div>
       </div>

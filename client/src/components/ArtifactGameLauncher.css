@@ -22,7 +22,7 @@
 }
 
 /* Game HUD Styles */
-.game-hud {
+.launcher-hud {
   position: absolute;
   top: 0;
   left: 0;
@@ -393,7 +393,7 @@
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
-  .game-hud {
+  .launcher-hud {
     height: 50px;
     padding: 0 15px;
   }
@@ -457,7 +457,7 @@
     background: #000000;
   }
   
-  .game-hud {
+  .launcher-hud {
     background: rgba(0,0,0,1);
     border-bottom-color: #ffffff;
   }
