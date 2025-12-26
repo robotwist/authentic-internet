@@ -121,6 +121,9 @@ const Map = ({
       // Create a stable, unique key with multiple fallbacks for reliability
       const npcKey = npc._id || npc.id || `npc-${npc.name || ''}-${npc.type || ''}-${npc.position.x}-${npc.position.y}`;
       
+      // Check if NPC has available quests (we'll fetch this dynamically)
+      const hasQuests = npc.quests && npc.quests.length > 0;
+      
       return (
         <div 
           key={npcKey}
@@ -128,7 +131,14 @@ const Map = ({
           style={spriteStyle}
           onClick={() => onNPCClick?.(npc)}
           data-npc-type={npc.type?.toLowerCase?.() || 'generic'}
+          data-has-quests={hasQuests}
         >
+          {/* Quest indicator - exclamation mark for available quests */}
+          {hasQuests && (
+            <div className="npc-quest-indicator" title="Has available quests!">
+              !
+            </div>
+          )}
           {/* Enhanced interaction indicator */}
           <div className="npc-interaction-indicator">
             <div className="npc-key-hint">Press 'T' to talk</div>

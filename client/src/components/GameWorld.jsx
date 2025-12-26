@@ -8,7 +8,9 @@ import {
   updateArtifact,
   deleteArtifact,
   updateUserExperience,
-  addUserAchievement
+  addUserAchievement,
+  fetchQuests,
+  completeQuestStage
 } from "../api/api";
 import Character from "./Character";
 import Artifact from "./Artifact";
@@ -121,11 +123,78 @@ const GameWorld = () => {
   const [currentGameArtifact, setCurrentGameArtifact] = useState(null);
   const [showGameLauncher, setShowGameLauncher] = useState(false);
   
+  // Quest tracking state
+  const [activeQuests, setActiveQuests] = useState([]);
+  
   // Update checkForLevelUpAchievements to use our context
   const checkForLevelUpAchievements = useCallback((experience) => {
     const level = Math.floor(experience / 100) + 1;
     checkLevelAchievements(level);
   }, [checkLevelAchievements]);
+
+  // Fetch active quests on mount and when user changes
+  useEffect(() => {
+    if (user?.id) {
+      fetchQuests().then(response => {
+        if (response.success) {
+          setActiveQuests(response.data.activeQuests || []);
+        }
+      }).catch(err => console.error('Error fetching quests:', err));
+    }
+  }, [user?.id]);
+
+  // Quest validation: Check if gameplay actions complete quest stages
+  const validateQuestProgress = useCallback(async (actionType, actionData = {}) => {
+    if (activeQuests.length === 0) return;
+
+    for (const quest of activeQuests) {
+      const currentStage = quest.stages?.[quest.currentStage];
+      if (!currentStage || currentStage.completed) continue;
+
+      const task = currentStage.task?.toLowerCase() || '';
+      let shouldComplete = false;
+
+      // Check task requirements
+      if (actionType === 'artifact_collected' && task.includes('collect')) {
+        // Check if task mentions artifacts or specific artifact
+        if (task.includes('artifact') || task.includes('item')) {
+          shouldComplete = true;
+        }
+      } else if (actionType === 'game_completed' && task.includes('complete')) {
+        // Check if task mentions games or mini-games
+        if (task.includes('game') || task.includes('mini-game') || task.includes('challenge')) {
+          shouldComplete = true;
+        }
+      } else if (actionType === 'artifact_discovered' && task.includes('discover')) {
+        shouldComplete = true;
+      }
+
+      if (shouldComplete) {
+        try {
+          const response = await completeQuestStage(quest.questId, quest.currentStage);
+          if (response.success) {
+            // Refresh quests
+            const questResponse = await fetchQuests();
+            if (questResponse.success) {
+              setActiveQuests(questResponse.data.activeQuests || []);
+            }
+
+            // Show notification
+            const rewards = response.data.rewards;
+            let rewardText = `Quest progress!`;
+            if (rewards.exp) rewardText += ` +${rewards.exp} XP`;
+            if (rewards.item) rewardText += ` +${rewards.item}`;
+            
+            // Show a brief notification
+            showPortalNotification('Quest Progress', rewardText);
+            setTimeout(() => hidePortalNotification(), 3000);
+          }
+        } catch (error) {
+          console.error('Error completing quest stage:', error);
+        }
+      }
+    }
+  }, [activeQuests, showPortalNotification, hidePortalNotification]);
 
   // Function to add XP and show notification  
   const addExperiencePoints = useCallback((amount, reason) => {
@@ -178,6 +247,12 @@ const GameWorld = () => {
       soundManager.playMusic(currentMapName);
     }
     
+    // Validate quest progress for game completion
+    validateQuestProgress('game_completed', { 
+      gameType: completionData.artifact?.type || 'game',
+      artifact: completionData.artifact 
+    });
+    
     // Close game launcher
     setShowGameLauncher(false);
     setCurrentGameArtifact(null);
@@ -194,7 +269,7 @@ const GameWorld = () => {
         hidePortalNotification();
       }, 3000);
     }
-  }, [soundManager, currentMapIndex]);
+  }, [soundManager, currentMapIndex, validateQuestProgress]);
 
   const handleGameExit = useCallback(() => {
     console.log('🚪 Exiting game launcher');
@@ -1655,6 +1730,9 @@ const GameWorld = () => {
       // Award XP for discovering a new artifact
       addExperiencePoints(15, `Discovered ${clickedArtifact.name}`);
       
+      // Validate quest progress for artifact discovery
+      validateQuestProgress('artifact_discovered', { artifact: clickedArtifact });
+      
       // Check for discovery achievements
       checkDiscoveryAchievements(updatedViewedArtifacts.length);
     } else {
@@ -1765,6 +1843,9 @@ const GameWorld = () => {
     // Award XP and show notification
     awardXP(100, "Completed Terminal Adventure!");
     
+    // Validate quest progress for game completion
+    validateQuestProgress('game_completed', { gameType: 'terminal', score });
+    
     // Grant achievement
     handleAchievementUnlocked(
       'terminal_master',
@@ -1774,7 +1855,7 @@ const GameWorld = () => {
     
     // Exit the terminal adventure
     setCurrentSpecialWorld(null);
-  }, [awardXP, handleAchievementUnlocked]);
+  }, [awardXP, handleAchievementUnlocked, validateQuestProgress]);
 
   // Handle terminal adventure exit
   const handleTerminalExit = useCallback(() => {
@@ -1790,6 +1871,9 @@ const GameWorld = () => {
     // Award XP based on score
     const xpAmount = Math.min(200, score * 2);
     awardXP(xpAmount, `Shooter Score: ${score}`);
+    
+    // Validate quest progress for game completion
+    validateQuestProgress('game_completed', { gameType: 'shooter', score });
     
     // Grant achievement based on score
     if (score >= 1000) {
@@ -2037,6 +2121,49 @@ const GameWorld = () => {
                 <i className={`fas fa-${showArtifactsOnMap ? 'eye-slash' : 'eye'}`}></i>
               </IconButton>
             </div>
+
+            {/* Active Quest Display */}
+            {activeQuests.length > 0 && (
+              <div className="active-quest-hud">
+                <div className="quest-hud-header">
+                  <i className="fas fa-scroll"></i>
+                  <span>Active Quest{activeQuests.length > 1 ? 's' : ''}</span>
+                </div>
+                {activeQuests.slice(0, 2).map((quest) => {
+                  const completedStages = quest.stages?.filter(s => s.completed).length || 0;
+                  const totalStages = quest.stages?.length || 0;
+                  const progress = totalStages > 0 ? (completedStages / totalStages) * 100 : 0;
+                  const currentStage = quest.stages?.[quest.currentStage];
+                  
+                  return (
+                    <div key={quest.questId} className="quest-hud-item">
+                      <div className="quest-hud-title">{quest.title}</div>
+                      <div className="quest-hud-progress">
+                        <div className="quest-hud-progress-bar">
+                          <div 
+                            className="quest-hud-progress-fill" 
+                            style={{ width: `${progress}%` }}
+                          ></div>
+                        </div>
+                        <span className="quest-hud-progress-text">
+                          {completedStages}/{totalStages}
+                        </span>
+                      </div>
+                      {currentStage && !currentStage.completed && (
+                        <div className="quest-hud-current-task">
+                          {currentStage.task}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {activeQuests.length > 2 && (
+                  <div className="quest-hud-more">
+                    +{activeQuests.length - 2} more quest{activeQuests.length - 2 > 1 ? 's' : ''}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
         

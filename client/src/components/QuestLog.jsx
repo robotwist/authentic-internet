@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getApi } from '../api/apiConfig';
+import { fetchQuests, completeQuestStage, abandonQuest } from '../api/api';
 import './QuestLog.css';
 
 const QuestLog = ({ onClose, onQuestUpdate }) => {
@@ -15,15 +15,15 @@ const QuestLog = ({ onClose, onQuestUpdate }) => {
   const [selectedQuest, setSelectedQuest] = useState(null);
 
   useEffect(() => {
-    fetchQuests();
+    loadQuests();
   }, []);
 
-  const fetchQuests = async () => {
+  const loadQuests = async () => {
     try {
       setLoading(true);
-      const response = await getApi().get('/api/quests');
-      if (response.data.success) {
-        setQuests(response.data.data);
+      const response = await fetchQuests();
+      if (response.success) {
+        setQuests(response.data);
       }
     } catch (error) {
       console.error('Error fetching quests:', error);
@@ -35,14 +35,11 @@ const QuestLog = ({ onClose, onQuestUpdate }) => {
 
   const handleCompleteStage = async (questId, stageIndex) => {
     try {
-      const response = await getApi().post('/api/quests/complete-stage', {
-        questId,
-        stageIndex
-      });
+      const response = await completeQuestStage(questId, stageIndex);
 
-      if (response.data.success) {
+      if (response.success) {
         // Refresh quests
-        await fetchQuests();
+        await loadQuests();
         
         // Notify parent component
         if (onQuestUpdate) {
@@ -64,9 +61,9 @@ const QuestLog = ({ onClose, onQuestUpdate }) => {
     }
 
     try {
-      const response = await getApi().delete(`/api/quests/abandon/${questId}`);
-      if (response.data.success) {
-        await fetchQuests();
+      const response = await abandonQuest(questId);
+      if (response.success) {
+        await loadQuests();
         alert('Quest abandoned successfully');
       }
     } catch (error) {

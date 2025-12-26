@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { calculateSkillBonuses } from '../constants/SkillTree';
+import { startQuest, getAvailableQuests, completeQuestStage } from '../api/api';
 import './InteractiveNPC.css';
 
 const InteractiveNPC = ({ npc, onClose, onQuestComplete }) => {
@@ -9,8 +10,35 @@ const InteractiveNPC = ({ npc, onClose, onQuestComplete }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [questProgress, setQuestProgress] = useState({});
+  const [availableQuests, setAvailableQuests] = useState([]);
+  const [activeQuests, setActiveQuests] = useState([]);
+  const [completedQuests, setCompletedQuests] = useState([]);
+  const [loadingQuests, setLoadingQuests] = useState(true);
 
   const skillBonuses = calculateSkillBonuses(user?.skills || {});
+
+  // Fetch available quests when NPC dialog opens
+  useEffect(() => {
+    if (npc?._id) {
+      fetchQuestData();
+    }
+  }, [npc?._id]);
+
+  const fetchQuestData = async () => {
+    try {
+      setLoadingQuests(true);
+      const response = await getAvailableQuests(npc._id);
+      if (response.success) {
+        setAvailableQuests(response.data.availableQuests || []);
+        setActiveQuests(response.data.activeQuests || []);
+        setCompletedQuests(response.data.completedQuests || []);
+      }
+    } catch (error) {
+      console.error('Error fetching quest data:', error);
+    } finally {
+      setLoadingQuests(false);
+    }
+  };
 
   // NPC dialogue based on player skills and progress
   const getNPCDialogue = () => {
@@ -61,54 +89,52 @@ const InteractiveNPC = ({ npc, onClose, onQuestComplete }) => {
     try {
       switch (option.action) {
         case 'quest_accept':
-          // Start a new quest
-          const newQuest = {
-            id: `quest_${npc.id}_${Date.now()}`,
-            npcId: npc.id,
-            title: npc.quests[0].title,
-            description: npc.quests[0].description,
-            requirements: npc.quests[0].requirements,
-            rewards: npc.quests[0].rewards,
-            progress: 0,
-            startedAt: new Date().toISOString()
-          };
-          
-          // Save quest to user's active quests
-          const updatedUser = {
-            ...user,
-            activeQuests: [...(user.activeQuests || []), newQuest]
-          };
-          
-          // Update user context (you'll need to implement this)
-          // updateUser(updatedUser);
-          
-          setCurrentDialogue(prev => prev + 1);
+          // Start a new quest using the Quest API
+          try {
+            const questId = option.questId;
+            const response = await startQuest(npc._id, questId);
+            if (response.success) {
+              // Refresh quest data
+              await fetchQuestData();
+              alert(`Quest "${response.data.title}" started!`);
+              setCurrentDialogue(prev => prev + 1);
+            } else {
+              alert('Failed to start quest: ' + (response.message || 'Unknown error'));
+            }
+          } catch (error) {
+            console.error('Error starting quest:', error);
+            alert('Failed to start quest: ' + (error.response?.data?.message || error.message));
+          }
           break;
 
-        case 'quest_complete':
-          // Complete quest and give rewards
-          const quest = user.activeQuests?.find(q => q.npcId === npc.id);
-          if (quest) {
-            const rewards = {
-              experience: quest.rewards.experience || 50,
-              items: quest.rewards.items || [],
-              skills: quest.rewards.skills || []
-            };
-
-            // Apply rewards
-            const updatedUser = {
-              ...user,
-              experience: (user.experience || 0) + rewards.experience,
-              activeQuests: user.activeQuests?.filter(q => q.id !== quest.id) || [],
-              completedQuests: [...(user.completedQuests || []), quest.id]
-            };
-
-            // Update user context
-            // updateUser(updatedUser);
-            
-            if (onQuestComplete) {
-              onQuestComplete(quest, rewards);
+        case 'quest_complete_stage':
+          // Complete a quest stage
+          try {
+            const { questId, stageIndex } = option;
+            const response = await completeQuestStage(questId, stageIndex);
+            if (response.success) {
+              // Refresh quest data
+              await fetchQuestData();
+              
+              // Show reward notification
+              const rewards = response.data.rewards;
+              let rewardText = `Stage completed!`;
+              if (rewards.exp) rewardText += ` +${rewards.exp} XP`;
+              if (rewards.item) rewardText += ` +${rewards.item}`;
+              if (rewards.ability) rewardText += ` +${rewards.ability}`;
+              
+              alert(rewardText);
+              
+              // If quest is fully completed, trigger completion callback
+              if (response.data.questCompleted && onQuestComplete) {
+                onQuestComplete(response.data, rewards);
+              }
+            } else {
+              alert('Failed to complete stage: ' + (response.message || 'Unknown error'));
             }
+          } catch (error) {
+            console.error('Error completing quest stage:', error);
+            alert('Failed to complete stage: ' + (error.response?.data?.message || error.message));
           }
           break;
 
@@ -206,30 +232,34 @@ const InteractiveNPC = ({ npc, onClose, onQuestComplete }) => {
             )}
           </div>
 
-          {npc.quests && npc.quests.length > 0 && (
+          {/* Available Quests Section */}
+          {loadingQuests ? (
             <div className="quest-section">
-              <h3>Available Quests</h3>
-              {npc.quests.map((quest, index) => {
-                const isCompleted = user.completedQuests?.includes(quest.id);
-                const isActive = user.activeQuests?.some(q => q.id === quest.id);
-                const canAccept = !isCompleted && !isActive;
-
-                return (
-                  <div key={index} className={`quest-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}>
-                    <h4>{quest.title}</h4>
-                    <p>{quest.description}</p>
-                    {quest.requirements && (
-                      <div className="quest-requirements">
-                        <strong>Requirements:</strong> {quest.requirements.join(', ')}
-                      </div>
-                    )}
-                    {quest.rewards && (
-                      <div className="quest-rewards">
-                        <strong>Rewards:</strong> {quest.rewards.experience} XP
-                        {quest.rewards.items?.map(item => `, ${item}`).join('')}
-                      </div>
-                    )}
-                    {canAccept && (
+              <p>Loading quests...</p>
+            </div>
+          ) : (
+            <>
+              {/* Available Quests */}
+              {availableQuests.length > 0 && (
+                <div className="quest-section">
+                  <h3>Available Quests</h3>
+                  {availableQuests.map((quest, index) => (
+                    <div key={quest.id || index} className="quest-item">
+                      <h4>{quest.title}</h4>
+                      <p>{quest.description}</p>
+                      {quest.stages && quest.stages.length > 0 && (
+                        <div className="quest-stages-info">
+                          <strong>Stages:</strong> {quest.stages.length}
+                        </div>
+                      )}
+                      {quest.stages && quest.stages[0]?.reward && (
+                        <div className="quest-rewards">
+                          <strong>Rewards:</strong>
+                          {quest.stages[0].reward.exp && <span> +{quest.stages[0].reward.exp} XP</span>}
+                          {quest.stages[0].reward.item && <span> +{quest.stages[0].reward.item}</span>}
+                          {quest.stages[0].reward.ability && <span> +{quest.stages[0].reward.ability}</span>}
+                        </div>
+                      )}
                       <button 
                         className="quest-button accept"
                         onClick={() => handleDialogueOption({ action: 'quest_accept', questId: quest.id })}
@@ -237,23 +267,96 @@ const InteractiveNPC = ({ npc, onClose, onQuestComplete }) => {
                       >
                         Accept Quest
                       </button>
-                    )}
-                    {isActive && (
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Active Quests */}
+              {activeQuests.length > 0 && (
+                <div className="quest-section">
+                  <h3>Active Quests</h3>
+                  {activeQuests.map((quest, index) => {
+                    const completedStages = quest.stages?.filter(s => s.completed).length || 0;
+                    const totalStages = quest.stages?.length || 0;
+                    const currentStage = quest.currentStage || 0;
+                    const nextStage = quest.stages?.[currentStage];
+
+                    return (
+                      <div key={quest.questId || index} className="quest-item active">
+                        <h4>{quest.title}</h4>
+                        <p>{quest.description}</p>
+                        <div className="quest-progress">
+                          <div className="progress-bar">
+                            <div 
+                              className="progress-fill" 
+                              style={{ width: `${(completedStages / totalStages) * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className="progress-text">
+                            {completedStages} / {totalStages} stages completed
+                          </span>
+                        </div>
+                        {nextStage && !nextStage.completed && (
+                          <div className="current-stage">
+                            <strong>Current Stage:</strong> {nextStage.task}
+                            <button 
+                              className="quest-button complete-stage"
+                              onClick={() => handleDialogueOption({ 
+                                action: 'quest_complete_stage', 
+                                questId: quest.questId, 
+                                stageIndex: currentStage 
+                              })}
+                              disabled={isLoading}
+                            >
+                              Complete Stage
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Completed Quests */}
+              {completedQuests.length > 0 && (
+                <div className="quest-section">
+                  <h3>Completed Quests</h3>
+                  {completedQuests.map((quest, index) => (
+                    <div key={quest.questId || index} className="quest-item completed">
+                      <h4>{quest.title}</h4>
+                      <span className="quest-status">✓ Completed</span>
+                      {quest.totalExp > 0 && (
+                        <div className="quest-rewards">
+                          <strong>Total Rewards:</strong> +{quest.totalExp} XP
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Fallback: Show NPC quests if API doesn't return any */}
+              {availableQuests.length === 0 && activeQuests.length === 0 && completedQuests.length === 0 && npc.quests && npc.quests.length > 0 && (
+                <div className="quest-section">
+                  <h3>Available Quests</h3>
+                  {npc.quests.map((quest, index) => (
+                    <div key={quest.id || index} className="quest-item">
+                      <h4>{quest.title}</h4>
+                      <p>{quest.description}</p>
                       <button 
-                        className="quest-button complete"
-                        onClick={() => handleDialogueOption({ action: 'quest_complete', questId: quest.id })}
+                        className="quest-button accept"
+                        onClick={() => handleDialogueOption({ action: 'quest_accept', questId: quest.id })}
                         disabled={isLoading}
                       >
-                        Complete Quest
+                        Accept Quest
                       </button>
-                    )}
-                    {isCompleted && (
-                      <span className="quest-status">✓ Completed</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
           {isLoading && (
