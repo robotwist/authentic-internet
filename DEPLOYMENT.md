@@ -4,7 +4,7 @@ This guide outlines the steps needed to deploy the Authentic Internet applicatio
 
 ## Prerequisites
 
-- Node.js (v14+)
+- Node.js (v20+)
 - MongoDB Atlas account
 - Netlify account (for frontend)
 - Render account (for backend)
@@ -87,17 +87,34 @@ CLIENT_URL=https://authentic-internet.netlify.app
 1. **Test User Authentication**
    - Try registering a new user account
    - Try logging in with existing credentials
+   - Test JWT token refresh functionality
 
 2. **Test Artifact Creation and Management**
    - Create an artifact with different quote types
    - Verify artifacts appear on the map
    - Edit and delete artifacts
+   - Test artifact sharing and marketplace features
 
-3. **Test Quote API Integration**
+3. **Test Game Features**
+   - **Character System**: Create and select pixel art characters
+   - **Combat System**: Test sword combat (Z key) and enemy encounters
+   - **NPCs**: Talk to NPCs (T key) and complete quests
+   - **Dungeons**: Enter dungeons via portal tiles, explore rooms, defeat bosses
+   - **XP System**: Verify XP gains from combat and quests
+   - **Power System**: Unlock and activate/deactivate powers
+   - **Inventory**: Check item collection and management (I key)
+
+4. **Test Multiplayer Features**
+   - Join world instances with multiple users
+   - Test real-time chat functionality
+   - Verify player position synchronization
+   - Test player interactions and collision detection
+
+5. **Test Quote API Integration**
    - Verify Shakespeare quotes appear correctly
    - Verify Zen quotes and daily quotes work
 
-4. **Mobile Responsiveness**
+6. **Mobile Responsiveness**
    - Test the application on different device sizes
    - Verify all features work on mobile devices
 
@@ -134,15 +151,22 @@ CLIENT_URL=https://authentic-internet.netlify.app
    git clone https://github.com/your-username/authentic-internet.git
    cd authentic-internet
 
-   # Install backend dependencies and start server
-   cd server
+   # Install all dependencies (root, server, and client)
+   npm run install:all
+   # OR manually:
    npm install
-   npm start
+   cd server && npm install && cd ..
+   cd client && npm install && cd ..
 
-   # In another terminal, install frontend dependencies and start client
-   cd client
-   npm install
-   npm run dev
+   # Start development (runs both server and client)
+   npm start
+   
+   # OR start separately:
+   # Terminal 1 - Backend
+   cd server && npm run dev
+   
+   # Terminal 2 - Frontend
+   cd client && npm run dev
    ```
 
 4. **Document any known issues or limitations** 

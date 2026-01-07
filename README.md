@@ -25,13 +25,23 @@ A revolutionary **Creative Metaverse Platform** where players don't just play ga
 - **Puzzle Experiences**: Riddles, logic challenges, escape rooms
 - **Mixed Media**: Combinations of all content types
 
-### 🎮 Games as Discoverable Artifacts
-**Revolutionary approach to game discovery:**
-- **Level 4 Shooter**: Hemingway's battlefield adventure becomes a discoverable artifact
-- **Text Adventure**: "The Writer's Journey" found through exploration
-- **Terminal Puzzles**: Command-line challenges hidden throughout the world
-- **Custom Mini-Games**: Players create and share their own game experiences
-- **Progressive Unlocking**: Complete games to gain new powers and access
+### 🎮 Zelda-Inspired Adventure Gameplay
+**Classic action-adventure experience:**
+- **Grid-Based Movement**: 8-directional movement system matching classic Zelda
+- **Combat System**: Sword combat with directional attacks and hit detection
+- **Enemy Types**: Octoroks, Moblins, Tektites, Keese, Stalfos with unique behaviors
+- **Health System**: Heart-based health with visual damage feedback
+- **Item Collection**: Rupees, keys, and special items throughout the world
+- **Victory Screens**: Celebratory animations after defeating enemies and bosses
+
+### 🏰 Dungeon System
+**Explore challenging dungeons:**
+- **The Library of Alexandria**: 6-room dungeon with progressive difficulty
+- **Room Progression**: Locked doors requiring small keys and boss keys
+- **Enemy Encounters**: Strategically placed enemies in each room
+- **Boss Battles**: Unique boss fights with special attack patterns (The Librarian)
+- **Rewards**: Heart containers, weapons (White Sword), and other treasures
+- **Portal Access**: Enter dungeons from special portal tiles in the overworld
 
 ### 🧩 Interactive Puzzle Artifact System
 **Next-generation puzzle creation:**
@@ -42,17 +52,20 @@ A revolutionary **Creative Metaverse Platform** where players don't just play ga
 - **Social Elements**: Rating, reviews, and community discussions
 
 ### ⚡ Power Progression System
-**Unlock extraordinary abilities:**
-- **Speed Boost**: Move faster through the world
-- **Double Jump**: Reach previously inaccessible areas
-- **Flight**: Soar above obstacles and explore from above
-- **Invisibility**: Sneak past enemies and hidden challenges
-- **Teleportation**: Instant travel between discovered locations
-- **Time Manipulation**: Slow down time for precise challenges
-- **Super Strength**: Break through barriers and lift heavy objects
-- **Elemental Powers**: Control fire, water, earth, and air
-- **Mind Reading**: Understand NPC thoughts and hidden secrets
-- **Metamorphosis**: Transform into different creatures and objects
+**Unlock extraordinary abilities through gameplay:**
+- **Power Unlock Notifications**: Beautiful animations when powers are unlocked
+- **Active Power Management**: Activate/deactivate powers (up to 3-10 active based on level)
+- **Power Categories**: Movement, Stealth, Utility, Combat, Elemental powers
+- **Available Powers**:
+  - **Speed Boost**: Move faster through the world
+  - **Double Jump**: Reach previously inaccessible areas
+  - **Flight**: Soar above obstacles and explore from above
+  - **Invisibility**: Sneak past enemies and hidden challenges
+  - **Teleportation**: Instant travel between discovered locations
+  - **Time Manipulation**: Slow down time for precise challenges
+  - **Super Strength**: Break through barriers and lift heavy objects
+  - **Elemental Powers**: Control fire, water, earth, and air
+- **Power Leveling**: Powers can be upgraded through repeated unlocking
 
 ### 🌍 Social Discovery Engine
 **Find amazing content effortlessly:**
@@ -189,10 +202,13 @@ A revolutionary **Creative Metaverse Platform** where players don't just play ga
 5. **📊 Track Success**: Monitor views, completions, and ratings
 
 ### Game Controls
-- **Movement**: Arrow keys or WASD
-- **Interaction**: Click on artifacts, NPCs, or special elements
-- **Inventory**: Briefcase icon for collected items
-- **Powers**: Unlock through artifact completion
+- **Movement**: Arrow keys or WASD (8-directional grid movement)
+- **Attack**: Z key (sword attack in facing direction)
+- **Interaction**: SPACEBAR (talk to NPCs, activate portals, collect items)
+- **Talk to NPCs**: T key (when near NPCs)
+- **Inventory**: I key (character profile with stats, inventory, quests)
+- **Saved Quotes**: Q key (view collected quotes from NPCs)
+- **Powers**: Unlock through artifact completion and quest completion
 - **Creative Mode**: Access through the creation menu
 
 ## 🌟 Content Types & Examples
@@ -208,6 +224,8 @@ A revolutionary **Creative Metaverse Platform** where players don't just play ga
 - **Poetry Collections**: Curated verses with visual accompaniments
 - **Character Monologues**: Dramatic performances and readings
 - **Literary Challenges**: Writing prompts and collaborative stories
+- **NPC Dialogues**: Historical quotes from Shakespeare, Hemingway, Oscar Wilde, and more
+- **Quest Stories**: Narrative-driven quests from NPCs throughout the world
 
 ### 🎨 Visual Art
 - **Digital Paintings**: Original artwork with interactive elements
@@ -231,19 +249,29 @@ A revolutionary **Creative Metaverse Platform** where players don't just play ga
 
 ### 🔓 Unlocking Powers
 - **Complete Artifacts**: Each completion contributes to power progression
+- **Complete Quests**: NPC quests unlock specific powers
+- **Combat Mastery**: Defeating enemies and bosses unlocks combat powers
 - **Difficulty Matters**: Expert puzzles and games provide more power points
-- **Diverse Consumption**: Engaging with different content types unlocks varied abilities
-- **Social Engagement**: Creating and sharing content accelerates progression
+- **Power Notifications**: Beautiful unlock animations with power details
 
 ### ⚡ Power Categories
-- **Movement Powers**: Speed, jumping, flight, teleportation
-- **Perception Powers**: Vision enhancements, mind reading, hidden object detection
-- **Interaction Powers**: Invisibility, time manipulation, elemental control
-- **Creative Powers**: Enhanced creation tools, collaboration abilities
+- **Movement Powers**: Speed boost, double jump, flight, teleportation
+- **Stealth Powers**: Invisibility, enhanced vision
+- **Utility Powers**: Time manipulation, super strength
+- **Combat Powers**: Enhanced attack, defensive abilities
+- **Elemental Powers**: Fire, water, earth, air control
+
+### 📊 XP & Leveling System
+- **Combat XP**: 8-20 XP per enemy defeated (varies by enemy type)
+- **Quest XP**: 30-50 XP per NPC quest completed
+- **Level Progression**: Exponential XP curve (100 * 1.5^(level-1))
+- **Stat Increases**: +2 max health, +1 attack per level; +1 defense every 2 levels
+- **Active Power Slots**: Increase max active powers with level (3-10 slots)
 
 ### 🌍 Area Unlocking
 - **Progressive Exploration**: Powers unlock new areas of the world
 - **Hidden Locations**: Secret areas accessible only with specific abilities
+- **Dungeon Access**: Special portals unlock dungeon entrances
 - **Creator Spaces**: Special areas for content creators and collaborators
 - **Social Hubs**: Community gathering places for events and challenges
 
@@ -255,9 +283,13 @@ A revolutionary **Creative Metaverse Platform** where players don't just play ga
 npm test
 
 # Test specific features
-npm run test:artifacts
-npm run test:powers
-npm run test:social
+npm run test:unit          # Unit tests
+npm run test:integration   # Integration tests
+npm run test:e2e           # End-to-end tests with Playwright
+npm run test:artifacts     # Artifact system tests
+npm run test:backend       # Backend schema tests
+npm run test:ui            # UI component tests
+npm run test:coverage      # Generate coverage report
 
 # Browser-based testing
 # Navigate to http://localhost:5173/run-tests.html
