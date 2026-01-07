@@ -1018,6 +1018,7 @@ const GameWorld = React.memo(() => {
 
   // Update explored tiles for minimap fog of war
   useEffect(() => {
+    const characterPosition = getCharacterPosition();
     const tileX = Math.floor(characterPosition.x / TILE_SIZE);
     const tileY = Math.floor(characterPosition.y / TILE_SIZE);
 
@@ -1047,7 +1048,7 @@ const GameWorld = React.memo(() => {
       // Only update if new tiles were explored
       return hasNewTiles ? newExploredTiles : prevExploredTiles;
     });
-  }, [characterPosition]); // Remove exploredTiles from dependencies
+  }, [getCharacterPosition]); // Remove exploredTiles from dependencies
 
   // Performance monitoring - only run occasionally to avoid render loops
   useEffect(() => {
@@ -1728,7 +1729,7 @@ const GameWorld = React.memo(() => {
       );
       return distance < TILE_SIZE * 2;
     });
-  }, [currentMapNPCs, gameData.databaseNPCs, characterPosition]);
+  }, [currentMapNPCs, gameData.databaseNPCs, getCharacterPosition]);
 
   // Optimized sound manager initialization
   const initSoundManager = useCallback(async () => {
@@ -2634,27 +2635,7 @@ const GameWorld = React.memo(() => {
     ],
   );
 
-  // Remove an XP notification
-  const removeXpNotification = useCallback(
-    (id) => {
-      updateNotifications({
-        xpNotifications: (prev) =>
-          prev.filter((notification) => notification.id !== id),
-      });
-    },
-    [updateNotifications],
-  );
-
-  // Remove an achievement notification
-  const removeAchievementNotification = useCallback(
-    (id) => {
-      updateNotifications({
-        achievementNotifications: (prev) =>
-          prev.filter((notification) => notification.id !== id),
-      });
-    },
-    [updateNotifications],
-  );
+  // removeXpNotification and removeAchievementNotification are now handled by NotificationSystem
 
   // Handle tile clicks for game interactions
   const handleTileClick = useCallback(
@@ -3510,17 +3491,6 @@ const GameWorld = React.memo(() => {
             />
           )}
 
-          {/* Achievement Notification */}
-          {notifications.achievementNotification && (
-            <AchievementNotification
-              title={notifications.achievementNotification.title}
-              description={notifications.achievementNotification.description}
-              duration={5000}
-              onClose={() =>
-                updateNotifications({ achievementNotification: null })
-              }
-            />
-          )}
 
           {/* Special Worlds */}
           {currentSpecialWorld === "textAdventure" && (
@@ -3614,28 +3584,8 @@ const GameWorld = React.memo(() => {
             currentSpecialWorld: "{currentSpecialWorld}"
           </div>
 
-          {/* XP Notifications */}
-          <div className="notification-container">
-            {notifications.xpNotifications.map((notification) => (
-              <XPNotification
-                key={notification.id}
-                amount={notification.amount}
-                reason={notification.reason}
-                onClose={() => removeXpNotification(notification.id)}
-              />
-            ))}
-          </div>
-
-          {/* Achievement Notifications */}
-          <div className="achievement-notification-container">
-            {notifications.achievementNotifications.map((notification) => (
-              <AchievementNotification
-                key={notification.id}
-                achievement={notification.achievement}
-                onClose={() => removeAchievementNotification(notification.id)}
-              />
-            ))}
-          </div>
+          {/* Notification System */}
+          <NotificationSystem soundManager={soundManager} />
 
           {/* Multiplayer Chat */}
           {showChat && (

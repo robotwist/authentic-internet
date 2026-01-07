@@ -17,7 +17,6 @@ const CharacterController = React.forwardRef(({
   user,
   uiState,
   isInvincible,
-  characterState: externalCharacterState,
   onPositionChange,
 }, ref) => {
   // Use refs for position and state to avoid re-renders
@@ -167,17 +166,13 @@ const CharacterController = React.forwardRef(({
     }
   }, [characterMovement.movementDirection, characterMovement.diagonalMovement]);
 
-  // Update isHit from external characterState
-  useEffect(() => {
-    if (externalCharacterState?.isHit !== undefined) {
-      characterStateRef.current.isHit = externalCharacterState.isHit;
-    }
-  }, [externalCharacterState?.isHit]);
 
   // Expose position and state through ref
   React.useImperativeHandle(ref, () => ({
     getPosition: () => characterPositionRef.current,
     getState: () => characterStateRef.current,
+    getDirection: () => characterStateRef.current.direction,
+    getIsHit: () => characterStateRef.current.isHit,
   }), []);
 
   // Get current position for rendering
