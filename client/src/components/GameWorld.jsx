@@ -48,8 +48,9 @@ import TextAdventure from "./TextAdventure";
 import SoundManager from "./utils/SoundManager";
 import UserArtifactManager from "./UserArtifactManager";
 import ArtifactDiscovery from "./ArtifactDiscovery";
-import XPNotification from "./XPNotification";
-import AchievementNotification from "./AchievementNotification";
+import NotificationSystem from "./systems/NotificationSystem";
+import { useNotification } from "./systems/useNotification";
+// XPNotification and AchievementNotification are now handled by NotificationSystem
 import Level3Terminal from "./Level3Terminal";
 import Level4Shooter from "./Level4Shooter";
 import HemingwayChallenge from "./HemingwayChallenge";
@@ -144,15 +145,7 @@ const GameWorld = React.memo(() => {
     databaseNPCs: [],
   });
 
-  // Notifications state
-  const [notifications, setNotifications] = useState({
-    notification: null,
-    achievementNotification: null,
-    xpNotifications: [],
-    achievementNotifications: [],
-    winMessage: "",
-    currentAchievement: "",
-  });
+  // Notifications are now handled by NotificationSystem
 
 
   // Portal state
@@ -200,6 +193,14 @@ const GameWorld = React.memo(() => {
     checkCollectionAchievements,
   } = useAchievements();
   const { updateGameProgress } = useGameState();
+  const {
+    addXPNotification,
+    addAchievementNotification,
+    showPortalNotification,
+    hidePortalNotification,
+    createInteractiveNotification,
+    setPortalNotificationActive,
+  } = useNotification();
 
   // WebSocket connection for multiplayer
   const { socket, isConnected, sendMessage } = useWebSocket();
@@ -210,8 +211,14 @@ const GameWorld = React.memo(() => {
   const [nearbyPlayer, setNearbyPlayer] = useState(null);
   const gameWorldRef = useRef(null);
   const characterRef = useRef(null);
-  const [portalNotificationActive, setPortalNotificationActive] =
-    useState(false);
+  const characterControllerRef = useRef(null);
+
+  // Helper to get current character position from controller
+  const getCharacterPosition = useCallback(() => {
+    return characterControllerRef.current?.getPosition() || INITIAL_CHARACTER_POSITION;
+  }, []);
+
+  // portalNotificationActive is now handled by NotificationSystem
 
   // Mobile and accessibility state
   const [mobileState, setMobileState] = useState({
@@ -347,86 +354,7 @@ const GameWorld = React.memo(() => {
     );
   }, [activeQuests]);
 
-  // Portal notification functions - defined early so they can be used in callbacks
-  const showPortalNotification = useCallback((title, message) => {
-    // Create the notification element if it doesn't exist
-    let notification = document.getElementById("portal-notification");
-
-    if (!notification) {
-      notification = document.createElement("div");
-      notification.id = "portal-notification";
-      notification.className = "portal-notification";
-      document.body.appendChild(notification);
-    }
-
-    // Update notification content
-    notification.innerHTML = `
-      <div class="portal-notification-content">
-        <h3>${title}</h3>
-        <p>${message}</p>
-      </div>
-    `;
-
-    // Make notification visible
-    setTimeout(() => {
-      notification.classList.add("visible");
-    }, 10);
-
-    // Hide notification after a few seconds
-    setTimeout(() => {
-      notification.classList.remove("visible");
-    }, 4000);
-  }, []);
-
-  const hidePortalNotification = useCallback(() => {
-    const notification = document.getElementById("portal-notification");
-    if (notification) {
-      notification.classList.remove("active");
-      notification.classList.remove("visible");
-    }
-  }, []);
-
-  // Reusable function for handling interactive portal notifications
-  const createInteractiveNotification = useCallback(
-    (title, message, conditionFn, actionFn, cleanupFn = null) => {
-      if (!portalNotificationActive) {
-        showPortalNotification(title, message);
-        setPortalNotificationActive(true);
-
-        const handleInteraction = (e) => {
-          if (e.code === "Space" && conditionFn()) {
-            // Play portal sound
-            if (soundManager) {
-              soundManager.playSound("portal");
-            }
-
-            // Hide notification
-            hidePortalNotification();
-            setPortalNotificationActive(false);
-
-            // Execute the action
-            actionFn();
-
-            // Remove event listener
-            window.removeEventListener("keydown", handleInteraction);
-
-            // Optional cleanup
-            if (cleanupFn) cleanupFn();
-          }
-        };
-
-        // Add event listener
-        window.addEventListener("keydown", handleInteraction);
-
-        // Return cleanup function
-        return () => {
-          window.removeEventListener("keydown", handleInteraction);
-          setPortalNotificationActive(false);
-        };
-      }
-    },
-    [portalNotificationActive, showPortalNotification, hidePortalNotification, soundManager],
-  );
+  // Portal notification functions are now handled by NotificationSystem
 
   // UI state update function - allows partial updates
   const updateUIState = useCallback((updates) => {
@@ -688,10 +616,7 @@ const GameWorld = React.memo(() => {
     [currentMapIndex],
   );
 
-  // Optimized state update functions - extracted from updateGameState
-  const updateNotifications = useCallback((updates) => {
-    setNotifications((prev) => ({ ...prev, ...updates }));
-  }, []);
+  // updateNotifications is now handled by NotificationSystem
 
   const updateCharacterState = useCallback((updates) => {
     setCharacterState((prev) => ({ ...prev, ...updates }));

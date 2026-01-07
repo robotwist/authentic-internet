@@ -4,7 +4,7 @@ import { TILE_SIZE } from "../Constants";
 
 const INITIAL_CHARACTER_POSITION = { x: 64, y: 64 };
 
-const CharacterController = ({
+const CharacterController = React.forwardRef(({
   currentMapIndex,
   setCurrentMapIndex,
   isLoggedIn,
@@ -19,7 +19,7 @@ const CharacterController = ({
   isInvincible,
   characterState: externalCharacterState,
   onPositionChange,
-}) => {
+}, ref) => {
   // Use refs for position and state to avoid re-renders
   const characterPositionRef = useRef(INITIAL_CHARACTER_POSITION);
   const characterStateRef = useRef({
@@ -174,6 +174,12 @@ const CharacterController = ({
     }
   }, [externalCharacterState?.isHit]);
 
+  // Expose position and state through ref
+  React.useImperativeHandle(ref, () => ({
+    getPosition: () => characterPositionRef.current,
+    getState: () => characterStateRef.current,
+  }), []);
+
   // Get current position for rendering
   const currentPosition = characterPositionRef.current;
   const currentState = characterStateRef.current;
@@ -198,6 +204,8 @@ const CharacterController = ({
       data-testid="character"
     />
   );
-};
+});
+
+CharacterController.displayName = 'CharacterController';
 
 export default CharacterController;

@@ -158,7 +158,7 @@ const NotificationSystem = ({ soundManager }) => {
   };
 
   return (
-    <>
+    <NotificationProvider notificationAPI={notificationAPI}>
       {/* Positioned XP Notifications */}
       {xpNotifications.map((notification) => (
         <XPNotification
@@ -204,18 +204,7 @@ const NotificationSystem = ({ soundManager }) => {
           onClose={() => updateNotifications({ achievementNotification: null })}
         />
       )}
-
-      {/* Hidden API provider - components can access via ref or context */}
-      <div
-        ref={(el) => {
-          if (el) {
-            el.notificationAPI = notificationAPI;
-          }
-        }}
-        style={{ display: 'none' }}
-        data-notification-api
-      />
-    </>
+    </NotificationProvider>
   );
 };
 

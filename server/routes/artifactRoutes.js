@@ -1,18 +1,52 @@
 import express from "express";
-import Artifact from "../models/Artifact.js";
-import User from "../models/User.js";
 import authenticateToken from "../middleware/authMiddleware.js";
-import { 
-  validateUnifiedArtifact, 
-  validateArtifactUpdate, 
-  convertLegacyArtifact, 
-  ensureUnifiedResponse 
+import {
+  validateUnifiedArtifact,
+  validateArtifactUpdate,
+  convertLegacyArtifact,
+  ensureUnifiedResponse
 } from "../middleware/artifactValidation.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from 'url';
 import { validate, schemas } from "../middleware/validation.js";
+import {
+  createArtifact,
+  createCreativeArtifact,
+  getArtifacts,
+  getArtifactById,
+  updateArtifact,
+  deleteArtifact,
+  getGameProgress,
+  saveGameProgress,
+  completeArtifact,
+  completeArtifactWithRewards,
+  getHint,
+  getInteractiveHint,
+  getPlayerProgress,
+  savePlayerProgress,
+  voteOnArtifact,
+  addComment,
+  recordView,
+  recordShare,
+  recordInteraction,
+  rateArtifact,
+  addToCollection,
+  getMessage,
+  updateMessage,
+  deleteMessage,
+  unlockArtifact,
+  seedArtifacts,
+  getMarketplace,
+  shareArtifact,
+  unshareArtifact,
+  discoverArtifact,
+  listInMarketplace,
+  removeFromMarketplace,
+  getFeatured,
+  searchArtifacts
+} from "../controllers/artifactController.js";
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -95,73 +129,13 @@ const uploadFields = upload.fields([
 /* ────────────────────────────────
    🔹 CREATE ARTIFACT (UNIFIED MODEL)
 ──────────────────────────────── */
-router.post("/", 
-  authenticateToken, 
-  uploadFields, 
+router.post("/",
+  authenticateToken,
+  uploadFields,
   convertLegacyArtifact,
   validateUnifiedArtifact,
   ensureUnifiedResponse,
-  async (req, res) => {
-    try {
-      const artifactData = req.body;
-
-      // Generate unique ID if not provided
-      if (!artifactData.id) {
-        artifactData.id = `artifact-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      }
-
-      // Process uploaded files
-      if (req.files) {
-        // Handle attachment
-        if (req.files.attachment && req.files.attachment[0]) {
-          const file = req.files.attachment[0];
-          const fileUrl = '/uploads/artifacts/' + file.filename;
-          
-          // Add to media array
-          if (!artifactData.media) artifactData.media = [];
-          artifactData.media.push(fileUrl);
-          
-          // Set legacy attachment fields for backward compatibility
-          artifactData.attachment = fileUrl;
-          artifactData.attachmentOriginalName = file.originalname;
-          
-          // Determine attachment type based on mimetype
-          if (file.mimetype.startsWith('image/')) {
-            artifactData.attachmentType = 'image';
-          } else if (file.mimetype.startsWith('audio/')) {
-            artifactData.attachmentType = 'audio';
-          } else if (file.mimetype.startsWith('video/')) {
-            artifactData.attachmentType = 'video';
-          } else {
-            artifactData.attachmentType = 'document';
-          }
-        }
-        
-        // Handle custom icon
-        if (req.files.artifactIcon && req.files.artifactIcon[0]) {
-          const iconFile = req.files.artifactIcon[0];
-          artifactData.image = '/uploads/icons/' + iconFile.filename;
-        }
-      }
-
-      // Create the artifact
-      const newArtifact = new Artifact(artifactData);
-      await newArtifact.save();
-
-      res.status(201).json({ 
-        success: true,
-        message: "Artifact created successfully!", 
-        artifact: newArtifact.toUnifiedFormat()
-      });
-    } catch (error) {
-      console.error("Error creating artifact:", error);
-      res.status(500).json({ 
-        success: false,
-        error: "Failed to create artifact.",
-        details: error.message
-      });
-    }
-  }
+  createArtifact
 );
 
 /* ────────────────────────────────
