@@ -5,6 +5,7 @@ import User from "../models/User.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 import { validate, schemas } from "../middleware/validation.js";
 
 const router = express.Router();
@@ -141,6 +142,176 @@ router.get("/me", authenticateToken, async (req, res) => {
 
 // 📌 Check User Access (🔐 Requires Authentication)
 router.get("/me/access", authenticateToken, getUserAccess);
+
+// ========================================
+// 🎯 SPECIFIC ROUTES (Must come before /:id routes!)
+// ========================================
+
+// Get user's game state
+router.get('/game-state', authenticateToken, gameStateReadLimiter, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    // Get user's full game state from database
+    const gameState = await User.findById(userId).select('gameState');
+    
+    if (!gameState) {
+      return res.status(404).json({ message: 'Game state not found' });
+    }
+    
+    res.json(gameState.gameState || {});
+  } catch (error) {
+    console.error('Error fetching game state:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user's game state
+router.put('/game-state', authenticateToken, gameStateWriteLimiter, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const gameState = req.body;
+    
+    // Update user's game state in database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { $set: { gameState } },
+      { new: true }
+    ).select('gameState');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.json(updatedUser.gameState);
+  } catch (error) {
+    console.error('Error updating game state:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user's character sprite (custom pixel art)
+router.put('/character-sprite', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { characterSprite, characterName } = req.body;
+    
+    if (!characterSprite || typeof characterSprite !== 'string') {
+      return res.status(400).json({ message: 'Valid character sprite data is required' });
+    }
+    
+    // Validate that it's a data URL (base64 image)
+    if (!characterSprite.startsWith('data:image/')) {
+      return res.status(400).json({ message: 'Character sprite must be a valid image data URL' });
+    }
+    
+    // Update user's character sprite in database
+    const updateData = { characterSprite };
+    if (characterName) {
+      updateData.characterName = characterName;
+    }
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { $set: updateData },
+      { new: true }
+    ).select('username email characterSprite characterName experience level');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    console.log(`✅ Character sprite saved for user: ${updatedUser.username}`);
+    res.json({ 
+      success: true,
+      message: 'Character sprite saved successfully',
+      user: updatedUser 
+    });
+  } catch (error) {
+    console.error('Error updating character sprite:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user's experience points
+router.put('/experience', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { experience } = req.body;
+    
+    if (typeof experience !== 'number') {
+      return res.status(400).json({ message: 'Experience must be a number' });
+    }
+    
+    // Update user's experience points in database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { $set: { experience } },
+      { new: true }
+    ).select('username email experience level');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error updating experience:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add achievement for user
+router.post('/achievements', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { achievement } = req.body;
+    
+    if (!achievement || !achievement.name || !achievement.description) {
+      return res.status(400).json({ message: 'Invalid achievement data' });
+    }
+    
+    // Get user
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Initialize achievements array if it doesn't exist
+    if (!user.gameState) user.gameState = {};
+    if (!user.gameState.achievements) user.gameState.achievements = [];
+    
+    // Check if achievement already exists
+    const existingAchievement = user.gameState.achievements.find(
+      a => a.id === achievement.id
+    );
+    
+    if (existingAchievement) {
+      return res.json(user.gameState.achievements);
+    }
+    
+    // Add achievement with timestamp
+    const newAchievement = {
+      ...achievement,
+      unlockedAt: new Date().toISOString()
+    };
+    
+    user.gameState.achievements.push(newAchievement);
+    
+    // Save user
+    await user.save();
+    
+    res.json(user.gameState.achievements);
+  } catch (error) {
+    console.error('Error adding achievement:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ========================================
+// 🎯 GENERIC PARAMETER ROUTES (Must come AFTER specific routes!)
+// ========================================
 
 // 📌 Get Character by ID (🔐 Requires Authentication)
 router.get("/:id", authenticateToken, async (req, res) => {
@@ -693,6 +864,106 @@ router.post("/challenges/claim", authenticateToken, async (req, res) => {
       success: false,
       message: 'Failed to claim reward'
     });
+  }
+});
+
+// Power Management Routes
+
+// Get user's powers
+router.get('/powers', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId || req.user.id;
+    const user = await User.findById(userId).select('unlockedPowers activePowers maxActivePowers');
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        unlockedPowers: user.unlockedPowers || [],
+        activePowers: user.activePowers || [],
+        maxActivePowers: user.maxActivePowers || 3
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user powers:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch powers' });
+  }
+});
+
+// Activate a power
+router.post('/powers/activate', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId || req.user.id;
+    const { powerId } = req.body;
+
+    if (!powerId) {
+      return res.status(400).json({ success: false, message: 'Power ID is required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const result = user.setPowerActive(powerId, true);
+    
+    if (result.error) {
+      return res.status(400).json({ success: false, message: result.error });
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Power activated successfully',
+      data: {
+        power: result.power,
+        activePowers: user.activePowers
+      }
+    });
+  } catch (error) {
+    console.error('Error activating power:', error);
+    res.status(500).json({ success: false, message: 'Failed to activate power' });
+  }
+});
+
+// Deactivate a power
+router.post('/powers/deactivate', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId || req.user.id;
+    const { powerId } = req.body;
+
+    if (!powerId) {
+      return res.status(400).json({ success: false, message: 'Power ID is required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const result = user.setPowerActive(powerId, false);
+    
+    if (result.error) {
+      return res.status(400).json({ success: false, message: result.error });
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Power deactivated successfully',
+      data: {
+        power: result.power,
+        activePowers: user.activePowers
+      }
+    });
+  } catch (error) {
+    console.error('Error deactivating power:', error);
+    res.status(500).json({ success: false, message: 'Failed to deactivate power' });
   }
 });
 

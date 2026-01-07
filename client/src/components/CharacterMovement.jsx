@@ -2,18 +2,22 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS, MAPS, isWalkable } from "./Constants";
 import SoundManager from "./utils/SoundManager";
 
+// Movement step size - one full tile per button press
+const MOVEMENT_STEP_SIZE = TILE_SIZE; // 64px - one tile per move for grid-based movement
+
 const useCharacterMovement = (
-  characterPosition, 
+  characterPosition,
   handleCharacterMove,
-  currentMapIndex, 
-  setCurrentMapIndex, 
-  isLoggedIn, 
-  visibleArtifact, 
-  handleArtifactPickup, 
-  setShowForm, 
+  currentMapIndex,
+  setCurrentMapIndex,
+  isLoggedIn,
+  visibleArtifact,
+  handleArtifactPickup,
+  setShowForm,
   setFormPosition,
-  setShowInventory, 
-  adjustViewport
+  setShowInventory,
+  adjustViewport,
+  activePowers = [], // Array of active power IDs
 ) => {
   const [isBumping, setIsBumping] = useState(false);
   const [bumpDirection, setBumpDirection] = useState(null);
@@ -21,11 +25,22 @@ const useCharacterMovement = (
   const [movementCooldown, setMovementCooldown] = useState(false);
   const [soundManager, setSoundManager] = useState(null);
   const [diagonalMovement, setDiagonalMovement] = useState({ x: 0, y: 0 });
-  const keysPressed = useRef(new Set());
   const lastMoveTime = useRef(Date.now());
-  const moveInterval = useRef(null);
-  const movementInertia = useRef({ x: 0, y: 0 });
-  
+  const processedKeys = useRef(new Set()); // Track keys that have been processed
+  const jumpCount = useRef(0); // Track jumps for double jump power
+  const lastJumpTime = useRef(0);
+
+  // Calculate power effects
+  const hasSpeedBoost = activePowers.includes("speed_boost");
+  const hasDoubleJump = activePowers.includes("double_jump");
+  const hasFlight = activePowers.includes("flight");
+
+  // Movement cooldown based on speed boost (50% faster = 50% less cooldown)
+  const BASE_MOVEMENT_COOLDOWN = 150; // ms
+  const movementCooldownTime = hasSpeedBoost
+    ? BASE_MOVEMENT_COOLDOWN * 0.5
+    : BASE_MOVEMENT_COOLDOWN;
+
   // Add useEffect for initialization
   useEffect(() => {
     const initSoundManager = async () => {
@@ -37,275 +52,329 @@ const useCharacterMovement = (
   }, []);
 
   // Trigger a bumping animation
-  const triggerBump = useCallback((direction) => {
-    if (isBumping) return; // Don't trigger if already bumping
-    
-    setBumpDirection(direction);
-    setIsBumping(true);
-    
-    // Update sound playing
-    if (soundManager) soundManager.playSound('bump', 0.3);
-    
-    // Reset after animation completes
-    setTimeout(() => {
-      setIsBumping(false);
-      setBumpDirection(null);
-    }, 200); // Reduced from 400ms for more responsive feel
-  }, [isBumping, soundManager]);
+  const triggerBump = useCallback(
+    (direction) => {
+      if (isBumping) return; // Don't trigger if already bumping
+
+      setBumpDirection(direction);
+      setIsBumping(true);
+
+      // Update sound playing
+      if (soundManager) soundManager.playSound("bump", 0.3);
+
+      // Reset after animation completes
+      setTimeout(() => {
+        setIsBumping(false);
+        setBumpDirection(null);
+      }, 200); // Reduced from 400ms for more responsive feel
+    },
+    [isBumping, soundManager],
+  );
 
   // Define handleMove before processKeyPresses since it's used there
-  const handleMove = useCallback((direction, event) => {
-    // Skip movement during cooldown
-    if (movementCooldown) {
-      event?.preventDefault();
-      return;
-    }
-
-    // Validate characterPosition to prevent NaN issues
-    if (!characterPosition || typeof characterPosition !== 'object' || 
-        typeof characterPosition.x !== 'number' || typeof characterPosition.y !== 'number') {
-      console.error("Invalid character position:", characterPosition);
-      return;
-    }
-
-    // Calculate time since last move for smoother movement
-    const now = Date.now();
-    const timeSinceLastMove = now - lastMoveTime.current;
-    if (timeSinceLastMove < 100) { // Minimum time between moves
-      return;
-    }
-    lastMoveTime.current = now;
-
-    let newPosition = { ...characterPosition };
-    let canMove = true;
-    let targetMapIndex = currentMapIndex;
-
-    // Get current map data with safety check
-    const currentMapData = MAPS[currentMapIndex]?.data;
-    if (!currentMapData) {
-      console.error("Map data not found for index:", currentMapIndex);
-      return;
-    }
-
-    // Get map dimensions
-    const mapWidth = currentMapData[0].length * TILE_SIZE;
-    const mapHeight = currentMapData.length * TILE_SIZE;
-
-    // Calculate new position based on direction and diagonal movement
-    switch (direction) {
-      case "up":
-        newPosition.y -= TILE_SIZE;
-        // Remove diagonal offset to prevent double movement
-        // We'll still show diagonal animation but only move one tile
-        break;
-      case "down":
-        newPosition.y += TILE_SIZE;
-        // Remove diagonal offset to prevent double movement
-        break;
-      case "left":
-        newPosition.x -= TILE_SIZE;
-        // Remove diagonal offset to prevent double movement
-        break;
-      case "right":
-        newPosition.x += TILE_SIZE;
-        // Remove diagonal offset to prevent double movement
-        break;
-      default:
+  const handleMove = useCallback(
+    (direction, event) => {
+      // Skip movement during cooldown
+      if (movementCooldown) {
+        event?.preventDefault();
         return;
-    }
+      }
 
-    // Boundary checks with smooth edge handling
-    if (newPosition.x < 0) {
-      // Check for map transition to the left
-      if (direction === "left") {
-        const currentMapName = MAPS[currentMapIndex].name;
-        if (currentMapName === "Overworld 2") {
-          targetMapIndex = MAPS.findIndex(map => map.name === "Overworld");
-          if (targetMapIndex !== -1) {
-            newPosition.x = (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
+      // Validate characterPosition to prevent NaN issues
+      if (
+        !characterPosition ||
+        typeof characterPosition !== "object" ||
+        typeof characterPosition.x !== "number" ||
+        typeof characterPosition.y !== "number"
+      ) {
+        console.error("Invalid character position:", characterPosition);
+        return;
+      }
+
+      // Calculate time since last move for discrete grid-based movement
+      const now = Date.now();
+      const timeSinceLastMove = now - lastMoveTime.current;
+      if (timeSinceLastMove < movementCooldownTime) {
+        return;
+      }
+      lastMoveTime.current = now;
+
+      // Reset jump count if enough time has passed (landed on ground)
+      if (now - lastJumpTime.current > 500) {
+        jumpCount.current = 0;
+      }
+
+      let newPosition = { ...characterPosition };
+      let canMove = true;
+      let targetMapIndex = currentMapIndex;
+
+      // Get current map data with safety check
+      const currentMapData = MAPS[currentMapIndex]?.data;
+      if (!currentMapData) {
+        console.error("Map data not found for index:", currentMapIndex);
+        return;
+      }
+
+      // Get map dimensions
+      const mapWidth = currentMapData[0].length * TILE_SIZE;
+      const mapHeight = currentMapData.length * TILE_SIZE;
+
+      // Calculate movement step size based on powers
+      let stepSize = MOVEMENT_STEP_SIZE;
+      let canJump = false;
+
+      // Flight power allows moving over obstacles and 2x movement
+      if (hasFlight && (direction === "up" || direction === "down")) {
+        stepSize = MOVEMENT_STEP_SIZE * 2; // Fly faster vertically
+      }
+
+      // Double jump power - allow jumping up twice
+      if (hasDoubleJump && direction === "up") {
+        if (jumpCount.current < 2) {
+          canJump = true;
+          jumpCount.current += 1;
+          lastJumpTime.current = now;
+        } else {
+          // Check if we can jump (need to be on ground or recently jumped)
+          const timeSinceLastJump = now - lastJumpTime.current;
+          if (timeSinceLastJump > 1000) {
+            // Reset if enough time passed (landed)
+            jumpCount.current = 1;
+            lastJumpTime.current = now;
+            canJump = true;
           } else {
-            canMove = false;
+            return; // Can't jump yet
           }
-        } else if (currentMapName === "Overworld 3") {
-          targetMapIndex = MAPS.findIndex(map => map.name === "Overworld 2");
-          if (targetMapIndex !== -1) {
-            newPosition.x = (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
+        }
+      }
+
+      // Calculate new position based on direction
+      switch (direction) {
+        case "up":
+          newPosition.y -= stepSize;
+          break;
+        case "down":
+          newPosition.y += stepSize;
+          break;
+        case "left":
+          newPosition.x -= stepSize;
+          break;
+        case "right":
+          newPosition.x += stepSize;
+          break;
+        default:
+          return;
+      }
+
+      // Boundary checks with smooth edge handling
+      if (newPosition.x < 0) {
+        // Check for map transition to the left
+        if (direction === "left") {
+          const currentMapName = MAPS[currentMapIndex].name;
+          if (currentMapName === "Overworld 2") {
+            targetMapIndex = MAPS.findIndex((map) => map.name === "Overworld");
+            if (targetMapIndex !== -1) {
+              newPosition.x =
+                (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
+            } else {
+              canMove = false;
+            }
+          } else if (currentMapName === "Overworld 3") {
+            targetMapIndex = MAPS.findIndex(
+              (map) => map.name === "Overworld 2",
+            );
+            if (targetMapIndex !== -1) {
+              newPosition.x =
+                (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
+            } else {
+              canMove = false;
+            }
           } else {
+            newPosition.x = 0; // Smooth edge stop
             canMove = false;
           }
         } else {
           newPosition.x = 0; // Smooth edge stop
           canMove = false;
         }
-      } else {
-        newPosition.x = 0; // Smooth edge stop
-        canMove = false;
-      }
-    } else if (newPosition.x >= mapWidth) {
-      // Check for map transition to the right
-      if (direction === "right") {
-        const currentMapName = MAPS[currentMapIndex].name;
-        if (currentMapName === "Overworld") {
-          targetMapIndex = MAPS.findIndex(map => map.name === "Overworld 2");
-          if (targetMapIndex !== -1) {
-            newPosition.x = 0;
+      } else if (newPosition.x >= mapWidth) {
+        // Check for map transition to the right
+        if (direction === "right") {
+          const currentMapName = MAPS[currentMapIndex].name;
+          if (currentMapName === "Overworld") {
+            targetMapIndex = MAPS.findIndex(
+              (map) => map.name === "Overworld 2",
+            );
+            if (targetMapIndex !== -1) {
+              newPosition.x = 0;
+            } else {
+              canMove = false;
+            }
+          } else if (currentMapName === "Overworld 2") {
+            targetMapIndex = MAPS.findIndex(
+              (map) => map.name === "Overworld 3",
+            );
+            if (targetMapIndex !== -1) {
+              newPosition.x = 0;
+            } else {
+              canMove = false;
+            }
           } else {
-            canMove = false;
-          }
-        } else if (currentMapName === "Overworld 2") {
-          targetMapIndex = MAPS.findIndex(map => map.name === "Overworld 3");
-          if (targetMapIndex !== -1) {
-            newPosition.x = 0;
-          } else {
+            newPosition.x = mapWidth - TILE_SIZE; // Smooth edge stop
             canMove = false;
           }
         } else {
           newPosition.x = mapWidth - TILE_SIZE; // Smooth edge stop
           canMove = false;
         }
-      } else {
-        newPosition.x = mapWidth - TILE_SIZE; // Smooth edge stop
+      }
+
+      // Vertical boundary checks
+      if (newPosition.y < 0) {
+        newPosition.y = 0;
+        canMove = false;
+      } else if (newPosition.y >= mapHeight) {
+        newPosition.y = mapHeight - TILE_SIZE;
         canMove = false;
       }
-    }
 
-    // Vertical boundary checks
-    if (newPosition.y < 0) {
-      newPosition.y = 0;
-      canMove = false;
-    } else if (newPosition.y >= mapHeight) {
-      newPosition.y = mapHeight - TILE_SIZE;
-      canMove = false;
-    }
+      // Check if the new position is walkable (flight power can pass over obstacles)
+      if (canMove && !hasFlight) {
+        const tileX = Math.floor(newPosition.x / TILE_SIZE);
+        const tileY = Math.floor(newPosition.y / TILE_SIZE);
 
-    // Check if the new position is walkable
-    if (canMove) {
-      const tileX = Math.floor(newPosition.x / TILE_SIZE);
-      const tileY = Math.floor(newPosition.y / TILE_SIZE);
-      
-      // Safety check for array bounds
-      if (tileY >= 0 && tileY < currentMapData.length && 
-          tileX >= 0 && tileX < currentMapData[0].length) {
-        if (!isWalkable(newPosition.x, newPosition.y, currentMapData)) {
+        // Safety check for array bounds
+        if (
+          tileY >= 0 &&
+          tileY < currentMapData.length &&
+          tileX >= 0 &&
+          tileX < currentMapData[0].length
+        ) {
+          if (!isWalkable(newPosition.x, newPosition.y, currentMapData)) {
+            canMove = false;
+            triggerBump(direction);
+          }
+        } else {
           canMove = false;
-          triggerBump(direction);
         }
-      } else {
-        canMove = false;
       }
-    }
 
-    if (!canMove) {
-      triggerBump(direction);
-      return;
-    }
+      // Flight power: allow movement over obstacles, but still check boundaries
+      if (canMove && hasFlight) {
+        const tileX = Math.floor(newPosition.x / TILE_SIZE);
+        const tileY = Math.floor(newPosition.y / TILE_SIZE);
 
-    // Update movement direction for animation
-    setMovementDirection(direction);
-
-    // Move character
-    handleCharacterMove(newPosition, targetMapIndex);
-    
-    // Set movement cooldown
-    setMovementCooldown(true);
-    setTimeout(() => {
-      setMovementCooldown(false);
-    }, 150); // Slightly faster movement cooldown for more responsive feel
-  }, [characterPosition, currentMapIndex, handleCharacterMove, movementCooldown, triggerBump, diagonalMovement]);
-
-  // Process multiple key presses for diagonal movement
-  const processKeyPresses = useCallback(() => {
-    const keys = Array.from(keysPressed.current);
-    let dirX = 0;
-    let dirY = 0;
-    
-    // Process vertical movement
-    if (keys.includes('ArrowUp') || keys.includes('w') || keys.includes('W')) {
-      dirY = -1;
-    } else if (keys.includes('ArrowDown') || keys.includes('s') || keys.includes('S')) {
-      dirY = 1;
-    }
-    
-    // Process horizontal movement
-    if (keys.includes('ArrowLeft') || keys.includes('a') || keys.includes('A')) {
-      dirX = -1;
-    } else if (keys.includes('ArrowRight') || keys.includes('d') || keys.includes('D')) {
-      dirX = 1;
-    }
-    
-    // Apply movement inertia
-    if (dirX !== 0 || dirY !== 0) {
-      movementInertia.current = { x: dirX * 0.8, y: dirY * 0.8 };
-    } else {
-      // Gradually decrease inertia when no keys are pressed
-      movementInertia.current.x *= 0.7;
-      movementInertia.current.y *= 0.7;
-      
-      // Reset inertia if it's very small
-      if (Math.abs(movementInertia.current.x) < 0.1) movementInertia.current.x = 0;
-      if (Math.abs(movementInertia.current.y) < 0.1) movementInertia.current.y = 0;
-    }
-    
-    // Determine direction for animation
-    if (dirX !== 0 || dirY !== 0) {
-      // Prioritize horizontal direction for diagonal movement
-      let direction;
-      if (Math.abs(dirX) > Math.abs(dirY)) {
-        direction = dirX > 0 ? 'right' : 'left';
-      } else {
-        direction = dirY > 0 ? 'down' : 'up';
+        // Only check boundaries, not walkability
+        if (
+          tileY < 0 ||
+          tileY >= currentMapData.length ||
+          tileX < 0 ||
+          tileX >= currentMapData[0].length
+        ) {
+          canMove = false;
+        }
       }
-      
-      // Set diagonal movement state
-      setDiagonalMovement({ x: dirX, y: dirY });
-      handleMove(direction);
-    } else if (movementInertia.current.x !== 0 || movementInertia.current.y !== 0) {
-      // Handle inertial movement
-      let direction;
-      if (Math.abs(movementInertia.current.x) > Math.abs(movementInertia.current.y)) {
-        direction = movementInertia.current.x > 0 ? 'right' : 'left';
-      } else {
-        direction = movementInertia.current.y > 0 ? 'down' : 'up';
-      }
-      
-      setDiagonalMovement({ 
-        x: movementInertia.current.x, 
-        y: movementInertia.current.y 
-      });
-      
-      // Only move if inertia is significant
-      if (Math.abs(movementInertia.current.x) > 0.3 || 
-          Math.abs(movementInertia.current.y) > 0.3) {
-        handleMove(direction);
-      }
-    }
-  }, [handleMove]);
 
-  // Create continuous movement interval
-  useEffect(() => {
-    moveInterval.current = setInterval(() => {
-      processKeyPresses();
-    }, 100); // Check for key presses every 100ms
-    
-    return () => {
-      if (moveInterval.current) {
-        clearInterval(moveInterval.current);
+      if (!canMove) {
+        triggerBump(direction);
+        return;
       }
-    };
-  }, [processKeyPresses]);
+
+      // If we can move, update position and handle map transitions
+      handleCharacterMove(newPosition, targetMapIndex);
+
+      // Update viewport
+      if (adjustViewport) {
+        adjustViewport(newPosition);
+      }
+
+      // Play movement sound
+      if (soundManager) {
+        soundManager.playSound("step", 0.2);
+      }
+
+      // Check for portal collision after movement (automatic portal activation)
+      const finalMapData = MAPS[targetMapIndex]?.data;
+      if (finalMapData) {
+        const finalTileX = Math.floor(newPosition.x / TILE_SIZE);
+        const finalTileY = Math.floor(newPosition.y / TILE_SIZE);
+
+        if (
+          finalTileY >= 0 &&
+          finalTileY < finalMapData.length &&
+          finalTileX >= 0 &&
+          finalTileX < finalMapData[0].length
+        ) {
+          const tileType = finalMapData[finalTileY][finalTileX];
+
+          // Trigger portal activation for portal tiles (5-8)
+          if (tileType >= 5 && tileType <= 8) {
+            // Dispatch a custom event that GameWorld can listen to
+            const portalEvent = new CustomEvent("portalCollision", {
+              detail: {
+                tileX: finalTileX,
+                tileY: finalTileY,
+                tileType: tileType,
+              },
+            });
+            window.dispatchEvent(portalEvent);
+          }
+        }
+      }
+    },
+    [
+      characterPosition,
+      currentMapIndex,
+      movementCooldown,
+      handleCharacterMove,
+      adjustViewport,
+      soundManager,
+      triggerBump,
+    ],
+  );
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       // Skip if input is focused
-      if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+      if (
+        document.activeElement.tagName === "INPUT" ||
+        document.activeElement.tagName === "TEXTAREA"
+      ) {
         return;
       }
 
-      // Add key to pressed keys
-      keysPressed.current.add(event.key);
+      // Prevent key repeat for movement - only allow one move per key press
+      if (processedKeys.current.has(event.key)) {
+        return;
+      }
+      processedKeys.current.add(event.key);
 
-      // Handle non-movement keys immediately
+      // Handle movement keys immediately with discrete movement
       switch (event.key) {
+        case "ArrowUp":
+        case "w":
+        case "W":
+          handleMove("up");
+          event.preventDefault();
+          break;
+        case "ArrowDown":
+        case "s":
+        case "S":
+          handleMove("down");
+          event.preventDefault();
+          break;
+        case "ArrowLeft":
+        case "a":
+        case "A":
+          handleMove("left");
+          event.preventDefault();
+          break;
+        case "ArrowRight":
+        case "d":
+        case "D":
+          handleMove("right");
+          event.preventDefault();
+          break;
         case "e":
         case "E":
         case "p":
@@ -327,8 +396,8 @@ const useCharacterMovement = (
     };
 
     const handleKeyUp = (event) => {
-      // Remove key from pressed keys
-      keysPressed.current.delete(event.key);
+      // Remove key from processed keys to allow next press
+      processedKeys.current.delete(event.key);
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -337,13 +406,22 @@ const useCharacterMovement = (
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [handleMove, visibleArtifact, handleArtifactPickup, characterPosition, setShowForm, setFormPosition, setShowInventory]);
+  }, [
+    handleMove,
+    visibleArtifact,
+    handleArtifactPickup,
+    characterPosition,
+    setShowForm,
+    setFormPosition,
+    setShowInventory,
+  ]);
 
   return {
     isBumping,
     bumpDirection,
     movementDirection,
-    diagonalMovement
+    diagonalMovement,
+    handleMove, // Export handleMove for use in TouchControls
   };
 };
 

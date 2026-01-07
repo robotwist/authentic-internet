@@ -51,7 +51,7 @@ fi
 
 # Check for port availability
 echo -e "${YELLOW}Checking port availability...${NC}"
-for port in 5001 5173; do
+for port in 5001 5175; do
   nc -z localhost $port > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo -e "${RED}Port $port is already in use. This will cause conflicts.${NC}"
@@ -144,7 +144,7 @@ echo -e "${YELLOW}If you encountered issues, check the following:${NC}"
 echo -e "1. Make sure all required tools are installed."
 echo -e "2. Ensure Node.js version is compatible (v16+)."
 echo -e "3. Verify no conflicting Node processes are running."
-echo -e "4. Confirm ports 5001 and 5173 are available."
+echo -e "4. Confirm ports 5001 and 5175 are available."
 echo -e "5. Ensure all dependencies are installed."
 echo -e "6. Verify environment files are properly configured."
 echo -e "7. Check MongoDB connection is working."

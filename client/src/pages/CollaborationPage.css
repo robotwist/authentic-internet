@@ -1,0 +1,527 @@
+/* Collaboration Page Styles */
+.collaboration-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Header Styles */
+.collaboration-header {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+  margin-bottom: 0;
+}
+
+.collaboration-header .MuiTypography-h4 {
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.collaboration-header .MuiTypography-body1 {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+}
+
+/* Content Area */
+.collaboration-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 24px;
+}
+
+/* Tabs Styling */
+.collaboration-content .MuiTabs-root {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
+}
+
+.collaboration-content .MuiTab-root {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  text-transform: none;
+  min-height: 64px;
+  transition: all 0.3s ease;
+}
+
+.collaboration-content .MuiTab-root.Mui-selected {
+  color: #64b5f6;
+  background: rgba(100, 181, 246, 0.1);
+}
+
+.collaboration-content .MuiTabs-indicator {
+  background-color: #64b5f6;
+  height: 3px;
+}
+
+/* Tab Content */
+.sessions-tab,
+.active-session-tab {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0 0 12px 12px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Filters Section */
+.filters-section {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.filters-section .MuiTextField-root {
+  margin-bottom: 0;
+}
+
+.filters-section .MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.filters-section .MuiInputBase-root {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.filters-section .MuiInputBase-root:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.filters-section .MuiInputBase-root.Mui-focused {
+  background: rgba(100, 181, 246, 0.1);
+  border-color: #64b5f6;
+}
+
+.filters-section .MuiInputBase-input {
+  color: #ffffff;
+}
+
+.filters-section .MuiInputBase-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Sessions Grid */
+.sessions-grid {
+  margin-top: 24px;
+}
+
+/* Session Cards */
+.session-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.session-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border-color: rgba(100, 181, 246, 0.3);
+}
+
+.session-card .MuiCardContent-root {
+  flex: 1;
+  padding: 20px;
+}
+
+.session-card .MuiTypography-h6 {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.session-card .MuiTypography-body2 {
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+}
+
+.session-card .MuiCardActions-root {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Chips */
+.session-card .MuiChip-root {
+  font-weight: 500;
+  border-radius: 16px;
+  margin: 2px;
+}
+
+.session-card .MuiChip-colorPrimary {
+  background: rgba(100, 181, 246, 0.2) !important;
+  color: #64b5f6 !important;
+  border-color: rgba(100, 181, 246, 0.5) !important;
+}
+
+.session-card .MuiChip-colorSuccess {
+  background: rgba(76, 175, 80, 0.2) !important;
+  color: #4caf50 !important;
+  border-color: rgba(76, 175, 80, 0.5) !important;
+}
+
+.session-card .MuiChip-colorDefault {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Empty State */
+.empty-state {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  margin-top: 48px;
+}
+
+.empty-state .MuiTypography-h6 {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.empty-state .MuiTypography-body2 {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Buttons */
+.collaboration-page .MuiButton-root {
+  text-transform: none;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+}
+
+.collaboration-page .MuiButton-contained {
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+  box-shadow: 0 4px 12px rgba(100, 181, 246, 0.3);
+}
+
+.collaboration-page .MuiButton-contained:hover {
+  background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%);
+  box-shadow: 0 6px 16px rgba(100, 181, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.collaboration-page .MuiButton-outlined {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.collaboration-page .MuiButton-outlined:hover {
+  border-color: #64b5f6;
+  background: rgba(100, 181, 246, 0.1);
+}
+
+.collaboration-page .MuiButton-sizeSmall {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* Icons */
+.collaboration-page .MuiIconButton-root {
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.collaboration-page .MuiIconButton-root:hover {
+  color: #64b5f6;
+  background: rgba(100, 181, 246, 0.1);
+  transform: scale(1.1);
+}
+
+/* Dialogs */
+.collaboration-page .MuiDialog-paper {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+}
+
+.collaboration-page .MuiDialogTitle-root {
+  color: #ffffff;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.collaboration-page .MuiDialogContent-root {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.collaboration-page .MuiDialogContent-root .MuiTextField-root {
+  margin-bottom: 16px;
+}
+
+.collaboration-page .MuiDialogContent-root .MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.collaboration-page .MuiDialogContent-root .MuiInputBase-root {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.collaboration-page .MuiDialogContent-root .MuiInputBase-root:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.collaboration-page .MuiDialogContent-root .MuiInputBase-root.Mui-focused {
+  background: rgba(100, 181, 246, 0.1);
+  border-color: #64b5f6;
+}
+
+.collaboration-page .MuiDialogContent-root .MuiInputBase-input {
+  color: #ffffff;
+}
+
+.collaboration-page .MuiDialogContent-root .MuiInputBase-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Menu */
+.collaboration-page .MuiMenu-paper {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+}
+
+.collaboration-page .MuiMenuItem-root {
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.collaboration-page .MuiMenuItem-root:hover {
+  background: rgba(100, 181, 246, 0.1);
+  color: #64b5f6;
+}
+
+/* Alerts */
+.collaboration-page .MuiAlert-root {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.collaboration-page .MuiAlert-standardSuccess {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.collaboration-page .MuiAlert-standardError {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  color: #f44336;
+}
+
+/* Form Controls */
+.collaboration-page .MuiFormControl-root {
+  margin-bottom: 16px;
+}
+
+.collaboration-page .MuiFormControlLabel-root {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.collaboration-page .MuiSwitch-root {
+  color: #64b5f6;
+}
+
+.collaboration-page .MuiSwitch-track {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.collaboration-page .MuiSwitch-thumb {
+  background-color: #ffffff;
+}
+
+/* Activity Indicators */
+.activity-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.activity-indicator .MuiSvgIcon-root {
+  font-size: 16px;
+}
+
+/* Status Badges */
+.status-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4caf50;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Scrollbars */
+.collaboration-page ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.collaboration-page ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.collaboration-page ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.collaboration-page ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .collaboration-page {
+    height: 100vh;
+  }
+  
+  .collaboration-header {
+    padding: 16px;
+  }
+  
+  .collaboration-content {
+    padding: 16px;
+  }
+  
+  .sessions-tab,
+  .active-session-tab {
+    padding: 16px;
+  }
+  
+  .filters-section {
+    padding: 16px;
+  }
+  
+  .session-card .MuiCardContent-root {
+    padding: 16px;
+  }
+  
+  .session-card .MuiCardActions-root {
+    padding: 12px 16px;
+  }
+  
+  .collaboration-page .MuiButton-root {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .empty-state {
+    padding: 32px 16px;
+  }
+}
+
+/* Loading States */
+.collaboration-page .MuiCircularProgress-root {
+  color: #64b5f6;
+}
+
+/* Focus States */
+.collaboration-page .Mui-focused {
+  outline: 2px solid #64b5f6;
+  outline-offset: 2px;
+}
+
+/* Disabled States */
+.collaboration-page .Mui-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Session Card Hover Effects */
+.session-card:hover .MuiCardActions-root {
+  background: rgba(100, 181, 246, 0.05);
+}
+
+.session-card:hover .MuiTypography-h6 {
+  color: #64b5f6;
+}
+
+/* Grid Layout Enhancements */
+.sessions-grid .MuiGrid-item {
+  display: flex;
+}
+
+.sessions-grid .MuiGrid-item > * {
+  width: 100%;
+}
+
+/* Search Input Styling */
+.filters-section .MuiInputAdornment-root {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.filters-section .MuiInputAdornment-root .MuiSvgIcon-root {
+  font-size: 20px;
+}
+
+/* Select Styling */
+.collaboration-page .MuiSelect-select {
+  color: #ffffff;
+}
+
+.collaboration-page .MuiSelect-icon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Menu Item Icons */
+.collaboration-page .MuiMenuItem-root .MuiSvgIcon-root {
+  margin-right: 8px;
+  font-size: 18px;
+} 

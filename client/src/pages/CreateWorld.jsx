@@ -1,46 +1,46 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Layout from '../components/shared/Layout';
-import Form from '../components/shared/Form';
-import Button from '../components/shared/Button';
-import '../styles/CreateWorld.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Layout from "../components/shared/Layout";
+import Form from "../components/shared/Form";
+import Button from "../components/shared/Button";
+import "../styles/CreateWorld.css";
 
 const CreateWorld = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    type: 'fantasy'
+    name: "",
+    description: "",
+    type: "fantasy",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/worlds`,
         formData,
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: { Authorization: `Bearer ${token}` },
+        },
       );
       navigate(`/world/${response.data._id}`);
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to create world');
+      setError(error.response?.data?.message || "Failed to create world");
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ const CreateWorld = () => {
             </select>
           </div>
           <Button type="submit" disabled={loading}>
-            {loading ? 'Creating...' : 'Create World'}
+            {loading ? "Creating..." : "Create World"}
           </Button>
         </Form>
       </div>
@@ -97,4 +97,4 @@ const CreateWorld = () => {
   );
 };
 
-export default CreateWorld; 
+export default CreateWorld;

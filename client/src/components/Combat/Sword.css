@@ -1,0 +1,197 @@
+/* Zelda-style Sword Attack - NES */
+.sword {
+  animation: sword-swing 0.3s linear;
+}
+
+.sword-blade {
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Sword swing animation with dramatic arc and VISIBLE HITBOX */
+@keyframes sword-swing {
+  0% {
+    transform: scale(0.5) rotate(-120deg);
+    opacity: 0.4;
+    box-shadow: 0 0 0 0 rgba(255, 255, 0, 0); /* No hitbox glow yet */
+  }
+  20% {
+    transform: scale(1.1) rotate(-60deg);
+    opacity: 0.8;
+    box-shadow: 0 0 20px 10px rgba(255, 255, 0, 0.3); /* Hitbox visible */
+  }
+  40% {
+    transform: scale(1.3) rotate(-20deg);
+    opacity: 1;
+    box-shadow: 0 0 30px 15px rgba(255, 255, 0, 0.5); /* Peak hitbox */
+  }
+  60% {
+    transform: scale(1.2) rotate(10deg);
+    opacity: 1;
+    box-shadow: 0 0 25px 12px rgba(255, 255, 0, 0.4); /* Hitbox still active */
+  }
+  80% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.95;
+    box-shadow: 0 0 15px 8px rgba(255, 255, 0, 0.2); /* Fading hitbox */
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.9;
+    box-shadow: 0 0 0 0 rgba(255, 255, 0, 0); /* Hitbox gone */
+  }
+}
+
+/* Direction-specific animations */
+.sword-up {
+  animation: sword-swing-up 0.3s ease-out;
+}
+
+@keyframes sword-swing-up {
+  0% {
+    transform: translateY(-12px) rotate(-135deg) scale(0.6);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-36px) rotate(-110deg) scale(1.1);
+    opacity: 0.9;
+  }
+  60% {
+    transform: translateY(-48px) rotate(-95deg) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-48px) rotate(-90deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.sword-down {
+  animation: sword-swing-down 0.3s ease-out;
+}
+
+@keyframes sword-swing-down {
+  0% {
+    transform: translateY(12px) rotate(45deg) scale(0.6);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(36px) rotate(70deg) scale(1.1);
+    opacity: 0.9;
+  }
+  60% {
+    transform: translateY(48px) rotate(85deg) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(48px) rotate(90deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.sword-left {
+  animation: sword-swing-left 0.3s ease-out;
+}
+
+@keyframes sword-swing-left {
+  0% {
+    transform: translateX(-12px) rotate(135deg) scale(0.6);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateX(-36px) rotate(160deg) scale(1.1);
+    opacity: 0.9;
+  }
+  60% {
+    transform: translateX(-48px) rotate(175deg) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-48px) rotate(180deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.sword-right {
+  animation: sword-swing-right 0.3s ease-out;
+}
+
+@keyframes sword-swing-right {
+  0% {
+    transform: translateX(12px) rotate(-45deg) scale(0.6);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateX(36px) rotate(-20deg) scale(1.1);
+    opacity: 0.9;
+  }
+  60% {
+    transform: translateX(48px) rotate(-5deg) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(48px) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Sword types */
+.sword-wooden .sword-blade {
+  filter: brightness(0.9) sepia(0.3);
+}
+
+.sword-white .sword-blade {
+  filter: brightness(1.2);
+}
+
+.sword-magical .sword-blade {
+  filter: brightness(1.3);
+  animation: magical-pulse 0.3s steps(2) infinite;
+}
+
+@keyframes magical-pulse {
+  0%, 100% { filter: brightness(1.3); }
+  50% { filter: brightness(1.5); }
+}
+
+/* Visual Hitbox Indicator - shows damage radius */
+.sword-hitbox-indicator {
+  width: 64px;
+  height: 64px;
+  border: 3px solid rgba(255, 255, 0, 0.6);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 0, 0.3) 0%,
+    rgba(255, 255, 0, 0.15) 50%,
+    rgba(255, 255, 0, 0) 100%
+  );
+  animation: hitbox-pulse 0.3s ease-out;
+  transform: translate(-50%, -50%);
+  box-shadow: 
+    0 0 10px rgba(255, 255, 0, 0.5),
+    inset 0 0 10px rgba(255, 255, 0, 0.3);
+}
+
+@keyframes hitbox-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    border-width: 5px;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+    border-width: 3px;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+    border-width: 2px;
+  }
+}
+

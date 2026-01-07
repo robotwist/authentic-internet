@@ -1,0 +1,18 @@
+/* Combat Manager Container */
+.combat-manager {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* All combat elements inside should be pointer-events enabled */
+.combat-manager > * {
+  pointer-events: auto;
+}
+
+/* Drop animations handled in Enemy.css */
+

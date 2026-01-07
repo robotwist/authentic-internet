@@ -1,0 +1,64 @@
+/* ========================================
+   Damage Number Component
+   ======================================== */
+
+.damage-number {
+  position: absolute;
+  font-size: 24px;
+  font-weight: 900;
+  color: #FFFFFF;
+  text-shadow: 
+    -1px -1px 0 #000000,
+    1px -1px 0 #000000,
+    -1px 1px 0 #000000,
+    1px 1px 0 #000000;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  pointer-events: none;
+  z-index: 150;
+  animation: damage-float-up 1s linear forwards;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes damage-float-up {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { transform: translate(-50%, -100%); opacity: 1; }
+  100% { transform: translate(-50%, -100%); opacity: 0; }
+}
+
+/* Critical hit styling - NES gold */
+.damage-critical {
+  font-size: 32px;
+  color: #FCE000;
+  text-shadow: 
+    -1px -1px 0 #8B0000,
+    1px -1px 0 #8B0000,
+    -1px 1px 0 #8B0000,
+    1px 1px 0 #8B0000;
+  animation: damage-critical-float 1s linear forwards;
+}
+
+@keyframes damage-critical-float {
+  0% { opacity: 0; }
+  10% { opacity: 1; filter: brightness(1.3); }
+  90% { transform: translate(-50%, -120%); opacity: 1; }
+  100% { transform: translate(-50%, -120%); opacity: 0; }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .damage-number,
+  .damage-critical {
+    animation: damage-simple-fade 1s ease forwards;
+  }
+
+  @keyframes damage-simple-fade {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
+

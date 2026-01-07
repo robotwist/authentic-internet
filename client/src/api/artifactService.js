@@ -1,4 +1,4 @@
-import API, { handleApiError } from './apiConfig';
+import API, { handleApiError } from "./apiConfig";
 
 /**
  * Fetches all artifacts
@@ -68,4 +68,4 @@ export const deleteArtifact = async (artifactId) => {
   } catch (error) {
     throw new Error(handleApiError(error, "Failed to delete artifact"));
   }
-}; 
+};

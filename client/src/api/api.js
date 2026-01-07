@@ -1,33 +1,35 @@
 import axios from "axios";
 import { NPC_TYPES } from "../components/Constants";
-import cacheManager from '../utils/cacheManager';
-import { createErrorHandler, ERROR_CATEGORIES } from '../utils/errorTracker';
+import cacheManager from "../utils/cacheManager";
+import { createErrorHandler, ERROR_CATEGORIES } from "../utils/errorTracker";
 const { withCache, createCacheKey, cacheDurations } = cacheManager;
 
 // Display build information in console for tracking deployments
 const displayBuildInfo = () => {
   const buildDate = new Date().toISOString();
-  const buildEnv = import.meta.env.MODE || 'development';
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-  
-  console.info(`%cApplication Build Info:
+  const buildEnv = import.meta.env.MODE || "development";
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
+  console.info(
+    `%cApplication Build Info:
   🔹 Environment: ${buildEnv}
   🔹 Build Date: ${buildDate}
   🔹 API URL: ${apiUrl}
   🔹 Base URL: ${window.location.origin}
   🔹 Full Path: ${window.location.href}`,
-  'color: #6366F1; font-weight: bold;');
-  
+    "color: #6366F1; font-weight: bold;",
+  );
+
   // Log all environment variables in development mode
-  if (buildEnv === 'development') {
-    console.log('Environment Variables:', {
+  if (buildEnv === "development") {
+    console.log("Environment Variables:", {
       VITE_API_URL: import.meta.env.VITE_API_URL,
       VITE_API_FALLBACK_URL: import.meta.env.VITE_API_FALLBACK_URL,
       VITE_SERVER_URL: import.meta.env.VITE_SERVER_URL,
       // Add other env vars here as needed
     });
   }
-  
+
   return { buildEnv, apiUrl };
 };
 
@@ -40,25 +42,25 @@ const createApiInstance = (baseUrl) => {
     baseURL: baseUrl,
     withCredentials: false,
     headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      "Content-Type": "application/json",
+      Accept: "application/json",
     },
-    timeout: 10000 // 10 seconds timeout for all requests
+    timeout: 10000, // 10 seconds timeout for all requests
   });
 
   // Add request interceptor
   instance.interceptors.request.use(
     (config) => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     },
     (error) => {
-      console.error('Request interceptor error:', error);
+      console.error("Request interceptor error:", error);
       return Promise.reject(error);
-    }
+    },
   );
 
   // Add response interceptor
@@ -68,72 +70,87 @@ const createApiInstance = (baseUrl) => {
       if (error.response) {
         const { status, data } = error.response;
         const requestUrl = error.config.url;
-        
+
         // Handle 401 Unauthorized - but ignore during login/register attempts
         if (status === 401) {
           // Check if this is a login or register endpoint
-          const isAuthEndpoint = requestUrl && 
-            (requestUrl.includes('/api/auth/login') || 
-             requestUrl.includes('/api/auth/register'));
-          
+          const isAuthEndpoint =
+            requestUrl &&
+            (requestUrl.includes("/api/auth/login") ||
+              requestUrl.includes("/api/auth/register"));
+
           if (!isAuthEndpoint) {
             // Only handle as session expiration if NOT a login/register request
-            console.warn('Session expired or invalid token');
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('user');
-            localStorage.removeItem('isAuthenticated');
-            window.location.href = '/login';
-            return Promise.reject(new Error('Session expired. Please log in again.'));
+            console.warn("Session expired or invalid token");
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("user");
+            localStorage.removeItem("isAuthenticated");
+            window.location.href = "/login";
+            return Promise.reject(
+              new Error("Session expired. Please log in again."),
+            );
           } else {
             // For login/register endpoints, pass through the original error
-            console.log('Authentication failed - this is normal during login attempts');
-            return Promise.reject(new Error(data?.message || 'Authentication failed'));
+            console.log(
+              "Authentication failed - this is normal during login attempts",
+            );
+            return Promise.reject(
+              new Error(data?.message || "Authentication failed"),
+            );
           }
         }
-        
+
         // Handle 400 Bad Request
         if (status === 400) {
-          console.error('Request validation error:', data);
-          return Promise.reject(new Error(data.message || 'Invalid request'));
+          console.error("Request validation error:", data);
+          // Preserve the detailed error information for registration validation
+          const error = new Error(data.message || "Invalid request");
+          error.response = { data };
+          return Promise.reject(error);
         }
-        
+
         // Handle 403 Forbidden
         if (status === 403) {
-          console.error('Access forbidden:', data);
-          return Promise.reject(new Error('Access forbidden'));
+          console.error("Access forbidden:", data);
+          return Promise.reject(new Error("Access forbidden"));
         }
-        
+
         // Handle 404 Not Found
         if (status === 404) {
-          console.error('Resource not found:', data);
-          return Promise.reject(new Error('Resource not found'));
+          console.error("Resource not found:", data);
+          return Promise.reject(new Error("Resource not found"));
         }
-        
+
         // Handle 500 Internal Server Error
         if (status === 500) {
-          console.error('Server error:', data);
-          return Promise.reject(new Error('Server error. Please try again later.'));
+          console.error("Server error:", data);
+          return Promise.reject(
+            new Error("Server error. Please try again later."),
+          );
         }
       } else if (error.request) {
         // Handle network errors
-        console.error('Network error:', error.message);
-        return Promise.reject(new Error('Network error. Please check your connection.'));
+        console.error("Network error:", error.message);
+        return Promise.reject(
+          new Error("Network error. Please check your connection."),
+        );
       } else {
         // Handle other errors
-        console.error('Error:', error.message);
+        console.error("Error:", error.message);
         return Promise.reject(error);
       }
-      
+
       return Promise.reject(error);
-    }
+    },
   );
 
   return instance;
 };
 
 // Get the configured API URL or default to localhost:5001
-const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const configuredApiUrl =
+  import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 // Initialize API with the configured URL - use default instance as fallback
 let API = createApiInstance(configuredApiUrl);
@@ -151,7 +168,7 @@ const checkServerHealth = async (url) => {
   // Bypass health checks to prevent reload loops
   console.log(`🔍 Health check bypassed for ${url} to prevent reload loops`);
   return true;
-  
+
   /* Original implementation commented out
   try {
     console.log(`🔍 Checking server health at ${url}/api/health...`);
@@ -208,51 +225,60 @@ const initApi = async () => {
 
   // Prevent concurrent health checks
   if (healthCheckInProgress) {
-    console.log("Health check already in progress, using current API configuration");
+    console.log(
+      "Health check already in progress, using current API configuration",
+    );
     return API;
   }
 
   // Throttle health checks to prevent excessive requests
   const now = Date.now();
   if (now - lastHealthCheckTime < HEALTH_CHECK_THROTTLE_MS) {
-    console.log(`Health check throttled (last check: ${now - lastHealthCheckTime}ms ago). Using default API configuration.`);
+    console.log(
+      `Health check throttled (last check: ${now - lastHealthCheckTime}ms ago). Using default API configuration.`,
+    );
     // Mark as initialized to prevent further checks in development mode
-    if (import.meta.env.MODE === 'development') {
+    if (import.meta.env.MODE === "development") {
       isApiInitialized = true;
     }
     return API; // Return the current API instance
   }
-  
+
   try {
     // Set flag to prevent concurrent checks
     healthCheckInProgress = true;
-    
+
     // Update the last health check time
     lastHealthCheckTime = now;
 
     // In development mode, limit to one check per session to avoid constant rechecking
-    if (import.meta.env.MODE === 'development') {
+    if (import.meta.env.MODE === "development") {
       // Just check the main URL once
       try {
         const healthCheckResult = await checkServerHealth(configuredApiUrl);
-        console.log("Development health check result:", healthCheckResult ? "✅ Success" : "❌ Failed");
+        console.log(
+          "Development health check result:",
+          healthCheckResult ? "✅ Success" : "❌ Failed",
+        );
         // Whether success or failure, mark as initialized to avoid future checks
         isApiInitialized = true;
         return API;
       } catch (error) {
-        console.warn("Development health check error - proceeding with default API config");
+        console.warn(
+          "Development health check error - proceeding with default API config",
+        );
         isApiInitialized = true;
         return API;
       }
     }
 
     // For production, we'll do more thorough checking...
-    
+
     // Try with the configured URL first
     try {
       const healthCheckResult = await checkServerHealth(configuredApiUrl);
       if (healthCheckResult) {
-        if (import.meta.env.MODE !== 'production') {
+        if (import.meta.env.MODE !== "production") {
           console.log(`✅ Connected to API at ${configuredApiUrl}`);
         }
         API = createApiInstance(configuredApiUrl);
@@ -261,22 +287,28 @@ const initApi = async () => {
         return API;
       }
     } catch (error) {
-      console.warn(`Failed to connect to primary API URL ${configuredApiUrl}: ${error.message}`);
+      console.warn(
+        `Failed to connect to primary API URL ${configuredApiUrl}: ${error.message}`,
+      );
       // Continue with alternative ports
     }
 
     // If we reach here, the configured URL failed. Try alternative ports.
-    console.log(`⚠️ Main API at ${configuredApiUrl} unavailable, trying alternative ports...`);
-    
+    console.log(
+      `⚠️ Main API at ${configuredApiUrl} unavailable, trying alternative ports...`,
+    );
+
     // Add short-circuit for testing/development
-    if (import.meta.env.MODE === 'development') {
+    if (import.meta.env.MODE === "development") {
       // In development, we might just want to proceed with a non-functioning API
       // rather than getting stuck in initialization
-      console.log(`Development mode: Proceeding with default API configuration despite health check failure`);
+      console.log(
+        `Development mode: Proceeding with default API configuration despite health check failure`,
+      );
       isApiInitialized = true; // Mark as initialized to prevent further checks
       return API;
     }
-    
+
     // Only try alternative ports if we really need to
     for (const port of alternativePorts) {
       const altUrl = configuredApiUrl.replace(/:\d+/, `:${port}`);
@@ -289,11 +321,15 @@ const initApi = async () => {
           return API;
         }
       } catch (error) {
-        console.warn(`Failed to connect to alternative API URL ${altUrl}: ${error.message}`);
+        console.warn(
+          `Failed to connect to alternative API URL ${altUrl}: ${error.message}`,
+        );
       }
     }
 
-    console.error("❌ All API endpoints unavailable. Using default configuration.");
+    console.error(
+      "❌ All API endpoints unavailable. Using default configuration.",
+    );
     // Fall back to the original URL, even if it's not working
     isApiInitialized = true; // Mark as initialized to prevent further checks
     return API;
@@ -314,9 +350,9 @@ const getApi = () => {
   if (!isApiInitialized) {
     // Set as initialized immediately to prevent future checks
     isApiInitialized = true;
-    
+
     // Run the initialization once but don't wait for it
-    initApi().catch(err => {
+    initApi().catch((err) => {
       console.warn("Background API initialization failed:", err.message);
     });
   }
@@ -324,11 +360,13 @@ const getApi = () => {
 };
 
 // Initialize API on import but don't block execution
-initApi().catch(error => {
-  console.error('API initialization failed:', error);
+initApi().catch((error) => {
+  console.error("API initialization failed:", error);
   // In development, show a more user-friendly error, but don't use alert which blocks UI
-  if (import.meta.env.MODE !== 'production') {
-    console.error('Failed to connect to the server. Please ensure the server is running and try again.');
+  if (import.meta.env.MODE !== "production") {
+    console.error(
+      "Failed to connect to the server. Please ensure the server is running and try again.",
+    );
   }
 });
 
@@ -339,33 +377,33 @@ export const logPersistentError = (source, error) => {
     const errorObj = {
       timestamp: new Date().toISOString(),
       source,
-      message: error.message || 'Unknown error',
+      message: error.message || "Unknown error",
       stack: error.stack,
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
-      url: error.config?.url
+      url: error.config?.url,
     };
-    
+
     // Get existing error log or initialize a new one
-    const existingLog = JSON.parse(localStorage.getItem('apiErrorLog') || '[]');
-    
+    const existingLog = JSON.parse(localStorage.getItem("apiErrorLog") || "[]");
+
     // Add new error to the beginning (most recent first)
     existingLog.unshift(errorObj);
-    
+
     // Keep only last 10 errors to avoid filling localStorage
     const trimmedLog = existingLog.slice(0, 10);
-    
+
     // Save back to localStorage
-    localStorage.setItem('apiErrorLog', JSON.stringify(trimmedLog));
-    
+    localStorage.setItem("apiErrorLog", JSON.stringify(trimmedLog));
+
     // Also log to console
     console.error(`Persistent Error [${source}]:`, error);
-    
+
     return errorObj;
   } catch (e) {
     // Fallback if localStorage fails
-    console.error('Failed to log error persistently:', e);
+    console.error("Failed to log error persistently:", e);
     return null;
   }
 };
@@ -373,9 +411,9 @@ export const logPersistentError = (source, error) => {
 // Retrieve persistent error log
 export const getPersistentErrors = () => {
   try {
-    return JSON.parse(localStorage.getItem('apiErrorLog') || '[]');
+    return JSON.parse(localStorage.getItem("apiErrorLog") || "[]");
   } catch (e) {
-    console.error('Failed to retrieve persistent error log:', e);
+    console.error("Failed to retrieve persistent error log:", e);
     return [];
   }
 };
@@ -383,10 +421,10 @@ export const getPersistentErrors = () => {
 // Clear persistent error log
 export const clearPersistentErrors = () => {
   try {
-    localStorage.removeItem('apiErrorLog');
+    localStorage.removeItem("apiErrorLog");
     return true;
   } catch (e) {
-    console.error('Failed to clear persistent error log:', e);
+    console.error("Failed to clear persistent error log:", e);
     return false;
   }
 };
@@ -396,14 +434,18 @@ export default API;
 // Helper function to handle API errors
 const handleApiError = (error, defaultMessage = "An error occurred") => {
   // Only log errors in development mode
-  if (import.meta.env.MODE !== 'production') {
+  if (import.meta.env.MODE !== "production") {
     console.error("API Error details:", error);
   }
-  
+
   if (error.response) {
     // The request was made and the server responded with a status code
     // that falls out of the range of 2xx
-    return error.response.data?.message || error.response.data?.error || defaultMessage;
+    return (
+      error.response.data?.message ||
+      error.response.data?.error ||
+      defaultMessage
+    );
   } else if (error.request) {
     // The request was made but no response was received
     return "No response from server. Please check your network connection.";
@@ -419,16 +461,16 @@ export const getCurrentApiUrl = () => currentApiUrl;
 // Proxy function for external APIs to avoid CORS issues
 export const proxyExternalRequest = async (url, options = {}) => {
   try {
-    const response = await API.post('/api/proxy', {
+    const response = await API.post("/api/proxy", {
       url,
-      method: options.method || 'GET',
+      method: options.method || "GET",
       headers: options.headers || {},
-      data: options.data || null
+      data: options.data || null,
     });
-    
+
     return response.data;
   } catch (error) {
-    console.error('Proxy request failed:', error);
+    console.error("Proxy request failed:", error);
     throw error;
   }
 };
@@ -448,23 +490,23 @@ export const registerUser = async (username, email, password) => {
   try {
     // Log registration attempt
     console.log(`Attempting to register user: ${username}`);
-    
+
     // Send registration request
-    const response = await getApi().post('/api/auth/register', {
+    const response = await getApi().post("/api/auth/register", {
       username,
       email,
-      password
+      password,
     });
-    
+
     // Check for success flag in response
     if (!response.data.success) {
-      throw new Error(response.data.message || 'Registration failed');
+      throw new Error(response.data.message || "Registration failed");
     }
-    
+
     // Return auth data
     return response.data;
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     throw error;
   }
 };
@@ -479,39 +521,42 @@ export const loginUser = async (username, password) => {
   try {
     // Log login attempt
     console.log(`Attempting login for user: ${username}`);
-    
+
     // Send login request
-    const response = await getApi().post('/api/auth/login', {
+    const response = await getApi().post("/api/auth/login", {
       identifier: username, // Server expects 'identifier' field
-      password
+      password,
     });
 
     // Check for success flag in response
     if (!response.data.success) {
-      throw new Error(response.data.message || 'Login failed');
+      throw new Error(response.data.message || "Login failed");
     }
 
     // Set the Authorization header for future requests
     const api = getApi();
-    api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+    api.defaults.headers.common["Authorization"] =
+      `Bearer ${response.data.token}`;
 
     // Return auth data
     return response.data;
   } catch (error) {
-    console.error('Login error:', error);
-    
+    console.error("Login error:", error);
+
     // If we have a response from the server, prioritize that message
     if (error.response && error.response.data) {
       if (error.response.data.message) {
         throw new Error(error.response.data.message);
       }
     }
-    
+
     // If it's a network error, provide a clearer message
-    if (error.message && error.message.includes('Network Error')) {
-      throw new Error('Unable to connect to the authentication server. Please check your network connection.');
+    if (error.message && error.message.includes("Network Error")) {
+      throw new Error(
+        "Unable to connect to the authentication server. Please check your network connection.",
+      );
     }
-    
+
     // Otherwise pass through the error
     throw error;
   }
@@ -524,10 +569,10 @@ export const loginUser = async (username, password) => {
  */
 export const updateUserSkills = async (skills) => {
   try {
-    const response = await getApi().put('/api/users/skills', { skills });
+    const response = await getApi().put("/api/users/skills", { skills });
     return response.data;
   } catch (error) {
-    console.error('Error updating skills:', error);
+    console.error("Error updating skills:", error);
     throw error;
   }
 };
@@ -539,10 +584,12 @@ export const updateUserSkills = async (skills) => {
  */
 export const updateUserChallenges = async (challenges) => {
   try {
-    const response = await getApi().put('/api/users/challenges', { challenges });
+    const response = await getApi().put("/api/users/challenges", {
+      challenges,
+    });
     return response.data;
   } catch (error) {
-    console.error('Error updating challenges:', error);
+    console.error("Error updating challenges:", error);
     throw error;
   }
 };
@@ -555,13 +602,13 @@ export const updateUserChallenges = async (challenges) => {
  */
 export const claimChallengeReward = async (challengeId, reward) => {
   try {
-    const response = await getApi().post('/api/users/challenges/claim', {
+    const response = await getApi().post("/api/users/challenges/claim", {
       challengeId,
-      reward
+      reward,
     });
     return response.data;
   } catch (error) {
-    console.error('Error claiming challenge reward:', error);
+    console.error("Error claiming challenge reward:", error);
     throw error;
   }
 };
@@ -569,10 +616,10 @@ export const claimChallengeReward = async (challengeId, reward) => {
 // Quest API functions
 export const fetchQuests = async () => {
   try {
-    const response = await getApi().get('/api/quests');
+    const response = await getApi().get("/api/quests");
     return response.data;
   } catch (error) {
-    console.error('Error fetching quests:', error);
+    console.error("Error fetching quests:", error);
     throw error;
   }
 };
@@ -580,24 +627,24 @@ export const fetchQuests = async () => {
 export const startQuest = async (npcId, questId) => {
   try {
     const response = await getApi().post(`/api/quests/start/${npcId}`, {
-      questId
+      questId,
     });
     return response.data;
   } catch (error) {
-    console.error('Error starting quest:', error);
+    console.error("Error starting quest:", error);
     throw error;
   }
 };
 
 export const completeQuestStage = async (questId, stageIndex) => {
   try {
-    const response = await getApi().post('/api/quests/complete-stage', {
+    const response = await getApi().post("/api/quests/complete-stage", {
       questId,
-      stageIndex
+      stageIndex,
     });
     return response.data;
   } catch (error) {
-    console.error('Error completing quest stage:', error);
+    console.error("Error completing quest stage:", error);
     throw error;
   }
 };
@@ -607,7 +654,7 @@ export const getQuestProgress = async (questId) => {
     const response = await getApi().get(`/api/quests/progress/${questId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching quest progress:', error);
+    console.error("Error fetching quest progress:", error);
     throw error;
   }
 };
@@ -617,7 +664,7 @@ export const getAvailableQuests = async (npcId) => {
     const response = await getApi().get(`/api/quests/available/${npcId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching available quests:', error);
+    console.error("Error fetching available quests:", error);
     throw error;
   }
 };
@@ -627,17 +674,52 @@ export const abandonQuest = async (questId) => {
     const response = await getApi().delete(`/api/quests/abandon/${questId}`);
     return response.data;
   } catch (error) {
-    console.error('Error abandoning quest:', error);
+    console.error("Error abandoning quest:", error);
     throw error;
   }
 };
 
 export const getQuestStats = async () => {
   try {
-    const response = await getApi().get('/api/quests/stats');
+    const response = await getApi().get("/api/quests/stats");
     return response.data;
   } catch (error) {
-    console.error('Error fetching quest stats:', error);
+    console.error("Error fetching quest stats:", error);
+    throw error;
+  }
+};
+
+// Power API functions
+export const activatePower = async (powerId) => {
+  try {
+    const response = await getApi().post("/api/users/powers/activate", {
+      powerId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error activating power:", error);
+    throw error;
+  }
+};
+
+export const deactivatePower = async (powerId) => {
+  try {
+    const response = await getApi().post("/api/users/powers/deactivate", {
+      powerId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deactivating power:", error);
+    throw error;
+  }
+};
+
+export const getUserPowers = async () => {
+  try {
+    const response = await getApi().get("/api/users/powers");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user powers:", error);
     throw error;
   }
 };
@@ -650,22 +732,23 @@ export const getQuestStats = async () => {
 export const logoutUser = async (refreshToken) => {
   try {
     // Get token for auth header
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      console.log('No token found, already logged out');
+      console.log("No token found, already logged out");
       return { success: true };
     }
-    
+
     // Send logout request
-    const response = await getApi().post('/api/auth/logout', 
+    const response = await getApi().post(
+      "/api/auth/logout",
       { refreshToken },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
-    
+
     // Return response
     return response.data;
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
     // Continue with logout even if API call fails
     return { success: true };
   }
@@ -678,25 +761,25 @@ export const logoutUser = async (refreshToken) => {
 export const verifyToken = async () => {
   try {
     // Get token for auth header
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      throw new Error('No token found');
+      throw new Error("No token found");
     }
-    
+
     // Send verification request
-    const response = await getApi().get('/api/auth/verify', {
-      headers: { Authorization: `Bearer ${token}` }
+    const response = await getApi().get("/api/auth/verify", {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    
+
     // Check for success flag in response
     if (!response.data.success) {
-      throw new Error(response.data.message || 'Token verification failed');
+      throw new Error(response.data.message || "Token verification failed");
     }
-    
+
     // Return verification data
     return response.data;
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.error("Token verification error:", error);
     throw error;
   }
 };
@@ -710,53 +793,59 @@ export const refreshUserToken = async (refreshToken) => {
   try {
     // Basic validation - don't even try if token looks invalid
     if (!refreshToken || refreshToken.length < 10) {
-      console.warn('Invalid refresh token format - too short or missing');
-      throw new Error('Invalid refresh token format');
+      console.warn("Invalid refresh token format - too short or missing");
+      throw new Error("Invalid refresh token format");
     }
-    
+
     // Log refresh attempt (without showing token)
-    console.log(`Attempting to refresh token (${refreshToken.substring(0, 5)}...)`);
-    
+    console.log(
+      `Attempting to refresh token (${refreshToken.substring(0, 5)}...)`,
+    );
+
     // Send refresh request
-    const response = await getApi().post('/api/auth/refresh', { refreshToken });
-    
+    const response = await getApi().post("/api/auth/refresh", { refreshToken });
+
     // Check for success flag in response
     if (!response.data.success) {
       // Throw a more specific error for session expiration
-      if (response.data.message && response.data.message.includes('expired')) {
-        throw new Error('Session expired. Please log in again.');
+      if (response.data.message && response.data.message.includes("expired")) {
+        throw new Error("Session expired. Please log in again.");
       }
-      throw new Error(response.data.message || 'Token refresh failed');
+      throw new Error(response.data.message || "Token refresh failed");
     }
-    
+
     // Return new token data
     return response.data;
   } catch (error) {
-    console.error('Token refresh error:', error);
-    
+    console.error("Token refresh error:", error);
+
     // If the error is related to network issues or server not responding,
     // provide a clearer message
     if (error.request && !error.response) {
-      throw new Error('Unable to connect to authentication server. Please try again later.');
+      throw new Error(
+        "Unable to connect to authentication server. Please try again later.",
+      );
     }
-    
+
     // If it's an expired token or invalid token error from the server
-    if (error.response && (
-        error.response.status === 401 || 
+    if (
+      error.response &&
+      (error.response.status === 401 ||
         error.response.status === 403 ||
-        (error.response.data && error.response.data.message && 
-         (error.response.data.message.includes('expired') || 
-          error.response.data.message.includes('invalid')))
-    )) {
+        (error.response.data &&
+          error.response.data.message &&
+          (error.response.data.message.includes("expired") ||
+            error.response.data.message.includes("invalid"))))
+    ) {
       // Clear auth data to force a fresh login
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      localStorage.removeItem('isAuthenticated');
-      
-      throw new Error('Session expired. Please log in again.');
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      localStorage.removeItem("isAuthenticated");
+
+      throw new Error("Session expired. Please log in again.");
     }
-    
+
     throw error;
   }
 };
@@ -769,36 +858,37 @@ export const getUserGameState = withCache(
   async (idToken) => {
     try {
       if (!idToken) {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem("authToken");
         if (!token) {
-          throw new Error('Authentication required');
+          throw new Error("Authentication required");
         }
         idToken = token;
       }
-      
+
       const response = await fetch(`${API_URL}/api/users/game-state`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
-        }
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch game state');
+        throw new Error(errorData.message || "Failed to fetch game state");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error fetching game state:', error);
+      console.error("Error fetching game state:", error);
       throw error;
     }
   },
-  { 
+  {
     duration: cacheDurations.gameState,
-    keyFn: () => `gameState:${localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).id : 'guest'}`
-  }
+    keyFn: () =>
+      `gameState:${localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).id : "guest"}`,
+  },
 );
 
 /**
@@ -808,29 +898,29 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem('authToken');
-    
+    const token = localStorage.getItem("authToken");
+
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
-    
+
     const response = await fetch(`${API_URL}/api/users/experience`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ experience })
+      body: JSON.stringify({ experience }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to update experience');
+      throw new Error(errorData.message || "Failed to update experience");
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error updating experience:', error);
+    console.error("Error updating experience:", error);
     throw error;
   }
 };
@@ -845,29 +935,29 @@ export const updateUserExperience = async (experience) => {
  */
 export const addUserAchievement = async (achievement) => {
   try {
-    const token = localStorage.getItem('authToken');
-    
+    const token = localStorage.getItem("authToken");
+
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
-    
+
     const response = await fetch(`${API_URL}/api/users/achievements`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ achievement })
+      body: JSON.stringify({ achievement }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to add achievement');
+      throw new Error(errorData.message || "Failed to add achievement");
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error adding achievement:', error);
+    console.error("Error adding achievement:", error);
     throw error;
   }
 };
@@ -879,29 +969,58 @@ export const addUserAchievement = async (achievement) => {
  */
 export const saveGameState = async (gameState) => {
   try {
-    const token = localStorage.getItem('authToken');
-    
+    const token = localStorage.getItem("authToken");
+
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
-    
+
     const response = await fetch(`${API_URL}/api/users/game-state`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(gameState)
+      body: JSON.stringify(gameState),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to save game state');
+      throw new Error(errorData.message || "Failed to save game state");
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error saving game state:', error);
+    console.error("Error saving game state:", error);
+    throw error;
+  }
+};
+
+export const updateGameState = async (gameState) => {
+  try {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await fetch(`${API_URL}/api/users/game-state`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(gameState),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to update game state");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating game state:", error);
     throw error;
   }
 };
@@ -915,14 +1034,14 @@ export const fetchCharacter = withCache(
       const response = await getApi().get(`/api/users/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching character:', error);
+      console.error("Error fetching character:", error);
       throw error;
     }
   },
-  { 
+  {
     duration: cacheDurations.character,
-    keyFn: (id) => `character:${id}`
-  }
+    keyFn: (id) => `character:${id}`,
+  },
 );
 
 export const updateCharacter = async (characterData) => {
@@ -931,42 +1050,47 @@ export const updateCharacter = async (characterData) => {
     if (characterData.avatarFile) {
       const formData = new FormData();
       const { avatarFile, ...userData } = characterData;
-      
+
       // Add the text fields
-      Object.keys(userData).forEach(key => {
+      Object.keys(userData).forEach((key) => {
         if (userData[key] !== undefined) {
           // Handle nested properties like savedQuotes
-          if (typeof userData[key] === 'object' && userData[key] !== null) {
+          if (typeof userData[key] === "object" && userData[key] !== null) {
             formData.append(key, JSON.stringify(userData[key]));
           } else {
             formData.append(key, userData[key]);
           }
         }
       });
-      
+
       // Add the file
-      formData.append('avatar', avatarFile);
-      
+      formData.append("avatar", avatarFile);
+
       // Make the request with proper headers
-      return getApi().put(`/api/users/${characterData.id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }).then(response => response.data);
+      return getApi()
+        .put(`/api/users/${characterData.id}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => response.data);
     }
-    
+
     // No file - just send the JSON data
     const processedData = { ...characterData };
-    
+
     // Convert any arrays to JSON strings if needed
     if (Array.isArray(processedData.savedQuotes)) {
       processedData.savedQuotes = processedData.savedQuotes;
     }
-    
-    const response = await getApi().put(`/api/users/${characterData.id}`, processedData);
+
+    const response = await getApi().put(
+      `/api/users/${characterData.id}`,
+      processedData,
+    );
     return response.data;
   } catch (error) {
-    console.error('Update character failed:', error);
+    console.error("Update character failed:", error);
     throw error;
   }
 };
@@ -980,60 +1104,63 @@ export const fetchArtifacts = withCache(
       const response = await getApi().get("/api/artifacts");
       return response.data;
     } catch (error) {
-      console.error('Error fetching artifacts:', error);
+      console.error("Error fetching artifacts:", error);
       throw error;
     }
   },
-  { duration: cacheDurations.artifacts }
+  { duration: cacheDurations.artifacts },
 );
 
 export const createArtifact = async (artifactData) => {
   try {
     let requestData = { ...artifactData };
     let requestConfig = {};
-    
+
     // If there's a file to upload, use FormData
     if (artifactData.file) {
       const formData = new FormData();
-      
+
       // Add all the text fields
-      Object.keys(artifactData).forEach(key => {
-        if (key !== 'file' && artifactData[key] !== undefined) {
+      Object.keys(artifactData).forEach((key) => {
+        if (key !== "file" && artifactData[key] !== undefined) {
           // Handle location object
-          if (key === 'location' && artifactData.location) {
-            formData.append('location[x]', artifactData.location.x);
-            formData.append('location[y]', artifactData.location.y);
-          } 
+          if (key === "location" && artifactData.location) {
+            formData.append("location[x]", artifactData.location.x);
+            formData.append("location[y]", artifactData.location.y);
+          }
           // Handle other objects or arrays
-          else if (typeof artifactData[key] === 'object' && artifactData[key] !== null) {
+          else if (
+            typeof artifactData[key] === "object" &&
+            artifactData[key] !== null
+          ) {
             formData.append(key, JSON.stringify(artifactData[key]));
-          } 
+          }
           // Handle primitive values
           else {
             formData.append(key, artifactData[key]);
           }
         }
       });
-      
+
       // Add the file
-      formData.append('image', artifactData.file);
-      
+      formData.append("image", artifactData.file);
+
       // Update request data and config
       requestData = formData;
       requestConfig = {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          "Content-Type": "multipart/form-data",
+        },
       };
     }
-    
-    const response = artifactData.file 
+
+    const response = artifactData.file
       ? await getApi().post("/api/artifacts", requestData, requestConfig)
       : await getApi().post("/api/artifacts", requestData);
-      
+
     return response.data;
   } catch (error) {
-    console.error('Create artifact failed:', error);
+    console.error("Create artifact failed:", error);
     throw error;
   }
 };
@@ -1043,42 +1170,52 @@ export const updateArtifact = async (artifactId, updatedData) => {
     // If there's a file to upload, use FormData
     if (updatedData.file) {
       const formData = new FormData();
-      
+
       // Add all the text fields
-      Object.keys(updatedData).forEach(key => {
-        if (key !== 'file' && updatedData[key] !== undefined) {
+      Object.keys(updatedData).forEach((key) => {
+        if (key !== "file" && updatedData[key] !== undefined) {
           // Handle location object
-          if (key === 'location' && updatedData.location) {
-            formData.append('location[x]', updatedData.location.x);
-            formData.append('location[y]', updatedData.location.y);
-          } 
+          if (key === "location" && updatedData.location) {
+            formData.append("location[x]", updatedData.location.x);
+            formData.append("location[y]", updatedData.location.y);
+          }
           // Handle other objects or arrays
-          else if (typeof updatedData[key] === 'object' && updatedData[key] !== null) {
+          else if (
+            typeof updatedData[key] === "object" &&
+            updatedData[key] !== null
+          ) {
             formData.append(key, JSON.stringify(updatedData[key]));
-          } 
+          }
           // Handle primitive values
           else {
             formData.append(key, updatedData[key]);
           }
         }
       });
-      
+
       // Add the file
-      formData.append('image', updatedData.file);
-      
-      const response = await getApi().put(`/api/artifacts/${artifactId}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      
+      formData.append("image", updatedData.file);
+
+      const response = await getApi().put(
+        `/api/artifacts/${artifactId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
       return response.data;
     }
-    
+
     // No file - just send the JSON data
     const processedData = { ...updatedData };
-    
-    const response = await getApi().put(`/api/artifacts/${artifactId}`, processedData);
+
+    const response = await getApi().put(
+      `/api/artifacts/${artifactId}`,
+      processedData,
+    );
     return response.data;
   } catch (error) {
     console.error(`Update artifact ${artifactId} failed:`, error);
@@ -1101,10 +1238,14 @@ export const deleteArtifact = async (artifactId) => {
 ──────────────────────────────── */
 export const sendMessage = async (recipient, content, artifactId) => {
   try {
-    const response = await getApi().post("/messages", { recipient, content, artifactId });
+    const response = await getApi().post("/messages", {
+      recipient,
+      content,
+      artifactId,
+    });
     return response.data;
   } catch (error) {
-    console.error('Send message failed:', error);
+    console.error("Send message failed:", error);
     throw error;
   }
 };
@@ -1124,7 +1265,7 @@ export const fetchMessages = async () => {
     const response = await getApi().get("/messages");
     return response.data;
   } catch (error) {
-    console.error('Fetch messages failed:', error);
+    console.error("Fetch messages failed:", error);
     throw error;
   }
 };
@@ -1132,7 +1273,7 @@ export const fetchMessages = async () => {
 export const updateMessage = async (artifactId, content) => {
   try {
     const response = await getApi().put(`/artifacts/${artifactId}/message`, {
-      content
+      content,
     });
     return response.data;
   } catch (error) {
@@ -1155,104 +1296,104 @@ export const deleteMessage = async (artifactId) => {
 const HISTORICAL_SOURCES = {
   SHAKESPEARE: {
     works: [
-      'hamlet',
-      'macbeth',
-      'king-lear',
-      'romeo-and-juliet',
-      'midsummer-nights-dream',
-      'tempest',
-      'othello',
-      'merchant-of-venice',
-      'julius-caesar',
-      'much-ado-about-nothing',
-      'sonnets'
+      "hamlet",
+      "macbeth",
+      "king-lear",
+      "romeo-and-juliet",
+      "midsummer-nights-dream",
+      "tempest",
+      "othello",
+      "merchant-of-venice",
+      "julius-caesar",
+      "much-ado-about-nothing",
+      "sonnets",
     ],
-    textTypes: ['plays', 'sonnets', 'poems'],
-    format: 'modern',
-    requiredFields: ['text', 'source', 'work', 'location']
+    textTypes: ["plays", "sonnets", "poems"],
+    format: "modern",
+    requiredFields: ["text", "source", "work", "location"],
   },
   SOCRATES: {
     works: [
-      'apology',
-      'republic',
-      'symposium',
-      'phaedo',
-      'crito',
-      'gorgias',
-      'meno',
-      'phaedrus',
-      'theaetetus',
-      'protagoras'
+      "apology",
+      "republic",
+      "symposium",
+      "phaedo",
+      "crito",
+      "gorgias",
+      "meno",
+      "phaedrus",
+      "theaetetus",
+      "protagoras",
     ],
-    translations: ['Jowett', 'Bloom', 'Grube', 'Reeve'],
-    requiredFields: ['text', 'dialogue', 'translator', 'section']
+    translations: ["Jowett", "Bloom", "Grube", "Reeve"],
+    requiredFields: ["text", "dialogue", "translator", "section"],
   },
   AUGUSTINE: {
     works: [
-      'confessions',
-      'city-of-god',
-      'on-christian-doctrine',
-      'on-free-choice-of-the-will',
-      'on-the-trinity',
-      'enchiridion'
+      "confessions",
+      "city-of-god",
+      "on-christian-doctrine",
+      "on-free-choice-of-the-will",
+      "on-the-trinity",
+      "enchiridion",
     ],
-    translations: ['Chadwick', 'Boulding', 'Dyson'],
-    requiredFields: ['text', 'work', 'book', 'chapter', 'translator']
+    translations: ["Chadwick", "Boulding", "Dyson"],
+    requiredFields: ["text", "work", "book", "chapter", "translator"],
   },
   MICHELANGELO: {
     works: [
-      'letters',
-      'poems',
-      'documented-conversations',
-      'contracts',
-      'notes'
+      "letters",
+      "poems",
+      "documented-conversations",
+      "contracts",
+      "notes",
     ],
-    sources: ['Carteggio', 'Girardi', 'Condivi', 'Vasari'],
-    requiredFields: ['text', 'source', 'date', 'recipient']
+    sources: ["Carteggio", "Girardi", "Condivi", "Vasari"],
+    requiredFields: ["text", "source", "date", "recipient"],
   },
   OSCAR_WILDE: {
     works: [
-      'lady-windermeres-fan',
-      'the-importance-of-being-earnest',
-      'the-picture-of-dorian-gray',
-      'de-profundis',
-      'the-soul-of-man-under-socialism',
-      'the-ballad-of-reading-gaol',
-      'an-ideal-husband',
-      'a-woman-of-no-importance',
-      'salome',
-      'the-duchess-of-padua',
-      'attributed'
+      "lady-windermeres-fan",
+      "the-importance-of-being-earnest",
+      "the-picture-of-dorian-gray",
+      "de-profundis",
+      "the-soul-of-man-under-socialism",
+      "the-ballad-of-reading-gaol",
+      "an-ideal-husband",
+      "a-woman-of-no-importance",
+      "salome",
+      "the-duchess-of-padua",
+      "attributed",
     ],
-    requiredFields: ['text', 'source', 'date', 'work']
+    requiredFields: ["text", "source", "date", "work"],
   },
   ALEXANDER_POPE: {
     works: [
-      'an-essay-on-criticism',
-      'an-essay-on-man',
-      'the-rape-of-the-lock',
-      'moral-essays',
-      'the-dunciad',
-      'imitations-of-horace',
-      'thoughts-on-various-subjects',
-      'letters',
-      'the-universal-prayer'
+      "an-essay-on-criticism",
+      "an-essay-on-man",
+      "the-rape-of-the-lock",
+      "moral-essays",
+      "the-dunciad",
+      "imitations-of-horace",
+      "thoughts-on-various-subjects",
+      "letters",
+      "the-universal-prayer",
     ],
-    requiredFields: ['text', 'source', 'date', 'work']
+    requiredFields: ["text", "source", "date", "work"],
   },
   ZEUS: {
     works: [
-      'iliad',
-      'odyssey',
-      'theogony',
-      'homeric-hymns',
-      'works-and-days',
-      'prometheus-bound',
-      'greek-mythology'
+      "iliad",
+      "odyssey",
+      "theogony",
+      "homeric-hymns",
+      "works-and-days",
+      "prometheus-bound",
+      "greek-mythology",
     ],
-    authors: ['Homer', 'Hesiod', 'Aeschylus', 'Various', 'Traditional'],
-    requiredFields: ['text', 'source', 'date', 'work']
-  }
+    authors: ["Homer", "Hesiod", "Aeschylus", "Various", "Traditional"],
+    requiredFields: ["text", "source", "date", "work"],
+  },
 };
 
 // Source validation function
@@ -1263,21 +1404,24 @@ const validateHistoricalSource = (response, npcType) => {
   if (!sourceConfig) return false;
 
   // Check required fields
-  const hasAllRequiredFields = sourceConfig.requiredFields.every(field => 
-    response.hasOwnProperty(field) && response[field]
+  const hasAllRequiredFields = sourceConfig.requiredFields.every(
+    (field) => response.hasOwnProperty(field) && response[field],
   );
   if (!hasAllRequiredFields) return false;
 
   // Validate work/source is in approved list
   if (sourceConfig.works) {
     // Special handling for Oscar Wilde and Alexander Pope
-    if (npcType === NPC_TYPES.OSCAR_WILDE || npcType === NPC_TYPES.ALEXANDER_POPE) {
+    if (
+      npcType === NPC_TYPES.OSCAR_WILDE ||
+      npcType === NPC_TYPES.ALEXANDER_POPE
+    ) {
       // For these authors, we're using our own curated quotes, so we'll skip the work validation
       return true;
     }
-    
+
     const work = response.work?.toLowerCase() || response.source?.toLowerCase();
-    if (!sourceConfig.works.some(w => work?.includes(w))) return false;
+    if (!sourceConfig.works.some((w) => work?.includes(w))) return false;
   }
 
   // Validate translation if applicable
@@ -1298,7 +1442,7 @@ const formatCitation = (response, npcType) => {
     case NPC_TYPES.AUGUSTINE:
       return `${response.work}, Book ${response.book}, Chapter ${response.chapter} (trans. ${response.translator})`;
     case NPC_TYPES.MICHELANGELO:
-      return `${response.source}, ${response.date}${response.recipient ? `, to ${response.recipient}` : ''}`;
+      return `${response.source}, ${response.date}${response.recipient ? `, to ${response.recipient}` : ""}`;
     case NPC_TYPES.OSCAR_WILDE:
       return `${response.source}, ${response.date} (${response.work})`;
     case NPC_TYPES.ALEXANDER_POPE:
@@ -1306,169 +1450,191 @@ const formatCitation = (response, npcType) => {
     case NPC_TYPES.ZEUS:
       return `${response.source}, ${response.date} (${response.work})`;
     default:
-      return response.source || '';
+      return response.source || "";
   }
 };
 
-export const chat = async (prompt, context, role, npcConfig = null, signal = null) => {
+export const chat = async (
+  prompt,
+  context,
+  role,
+  npcConfig = null,
+  signal = null,
+) => {
   try {
     // Special handling for Shakespeare using Folger API
     if (npcConfig?.type === NPC_TYPES.SHAKESPEARE) {
-      const response = await fetch(npcConfig.apiEndpoint + '/search', {
-        method: 'POST',
+      const response = await fetch(npcConfig.apiEndpoint + "/search", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_FOLGER_API_KEY || ''}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_FOLGER_API_KEY || ""}`,
         },
         body: JSON.stringify({
           query: prompt,
           works: HISTORICAL_SOURCES.SHAKESPEARE.works,
           textTypes: HISTORICAL_SOURCES.SHAKESPEARE.textTypes,
-          format: HISTORICAL_SOURCES.SHAKESPEARE.format
+          format: HISTORICAL_SOURCES.SHAKESPEARE.format,
         }),
-        signal
+        signal,
       });
 
-      if (!response.ok) throw new Error('Folger API response was not ok');
+      if (!response.ok) throw new Error("Folger API response was not ok");
       const data = await response.json();
 
       // Validate each match
-      const validMatches = data.matches.filter(match => 
-        validateHistoricalSource(match, NPC_TYPES.SHAKESPEARE)
+      const validMatches = data.matches.filter((match) =>
+        validateHistoricalSource(match, NPC_TYPES.SHAKESPEARE),
       );
 
       if (validMatches.length === 0) {
-        throw new Error('No valid historical sources found');
+        throw new Error("No valid historical sources found");
       }
 
       return {
-        response: validMatches.map(match => ({
+        response: validMatches.map((match) => ({
           text: match.text,
           source: formatCitation(match, NPC_TYPES.SHAKESPEARE),
-          type: match.textType
-        }))
+          type: match.textType,
+        })),
       };
     }
 
     // Handle other historical figures
     if (npcConfig?.type in NPC_TYPES) {
       const response = await fetch(`/api/${npcConfig.type.toLowerCase()}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           prompt,
           context,
-          sourceConfig: HISTORICAL_SOURCES[npcConfig.type.toUpperCase()]
+          sourceConfig: HISTORICAL_SOURCES[npcConfig.type.toUpperCase()],
         }),
-        signal
+        signal,
       });
 
-      if (!response.ok) throw new Error('Historical API response was not ok');
+      if (!response.ok) throw new Error("Historical API response was not ok");
       const data = await response.json();
 
       // Validate response
       if (!validateHistoricalSource(data, npcConfig.type)) {
-        throw new Error('Invalid historical source');
+        throw new Error("Invalid historical source");
       }
 
       // Special handling for Michelangelo to include additional quotes
-      if (npcConfig.type === NPC_TYPES.MICHELANGELO && data.additionalQuotes && data.additionalQuotes.length > 0) {
+      if (
+        npcConfig.type === NPC_TYPES.MICHELANGELO &&
+        data.additionalQuotes &&
+        data.additionalQuotes.length > 0
+      ) {
         return {
           response: [
             {
               text: data.text,
-              source: formatCitation(data, npcConfig.type)
+              source: formatCitation(data, npcConfig.type),
             },
-            ...data.additionalQuotes.map(quote => ({
+            ...data.additionalQuotes.map((quote) => ({
               text: quote,
-              source: "Michelangelo, Various Works"
-            }))
-          ]
+              source: "Michelangelo, Various Works",
+            })),
+          ],
         };
       }
 
       // Special handling for Oscar Wilde to include additional quotes
-      if (npcConfig.type === NPC_TYPES.OSCAR_WILDE && data.additionalQuotes && data.additionalQuotes.length > 0) {
+      if (
+        npcConfig.type === NPC_TYPES.OSCAR_WILDE &&
+        data.additionalQuotes &&
+        data.additionalQuotes.length > 0
+      ) {
         return {
           response: [
             {
               text: data.text,
-              source: formatCitation(data, npcConfig.type)
+              source: formatCitation(data, npcConfig.type),
             },
-            ...data.additionalQuotes.map(quote => ({
+            ...data.additionalQuotes.map((quote) => ({
               text: quote,
-              source: "Oscar Wilde, Various Works"
-            }))
-          ]
+              source: "Oscar Wilde, Various Works",
+            })),
+          ],
         };
       }
 
       // Special handling for Alexander Pope to include additional quotes
-      if (npcConfig.type === NPC_TYPES.ALEXANDER_POPE && data.additionalQuotes && data.additionalQuotes.length > 0) {
+      if (
+        npcConfig.type === NPC_TYPES.ALEXANDER_POPE &&
+        data.additionalQuotes &&
+        data.additionalQuotes.length > 0
+      ) {
         return {
           response: [
             {
               text: data.text,
-              source: formatCitation(data, npcConfig.type)
+              source: formatCitation(data, npcConfig.type),
             },
-            ...data.additionalQuotes.map(quote => ({
+            ...data.additionalQuotes.map((quote) => ({
               text: quote,
-              source: "Alexander Pope, Various Works"
-            }))
-          ]
+              source: "Alexander Pope, Various Works",
+            })),
+          ],
         };
       }
 
       // Special handling for Zeus to include additional quotes and weather data
-      if (npcConfig.type === NPC_TYPES.ZEUS && data.additionalQuotes && data.additionalQuotes.length > 0) {
+      if (
+        npcConfig.type === NPC_TYPES.ZEUS &&
+        data.additionalQuotes &&
+        data.additionalQuotes.length > 0
+      ) {
         return {
           response: [
             {
               text: data.text,
-              source: formatCitation(data, npcConfig.type)
+              source: formatCitation(data, npcConfig.type),
             },
-            ...data.additionalQuotes.map(quote => ({
+            ...data.additionalQuotes.map((quote) => ({
               text: quote,
-              source: "Zeus, Greek Mythology"
-            }))
-          ]
+              source: "Zeus, Greek Mythology",
+            })),
+          ],
         };
       }
 
       return {
         response: data.text,
-        source: formatCitation(data, npcConfig.type)
+        source: formatCitation(data, npcConfig.type),
       };
     }
 
     // Default chat handling for non-historical NPCs
-    const response = await fetch('/api/chat', {
-      method: 'POST',
+    const response = await fetch("/api/chat", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({
         prompt,
         context,
-        role
+        role,
       }),
-      signal
+      signal,
     });
 
-    if (!response.ok) throw new Error('Network response was not ok');
+    if (!response.ok) throw new Error("Network response was not ok");
     return await response.json();
   } catch (error) {
     // Check if this is an AbortError
-    if (error.name === 'AbortError') {
-      console.log('Request was aborted');
+    if (error.name === "AbortError") {
+      console.log("Request was aborted");
       throw error; // Rethrow to be handled by the component
     }
-    
-    console.error('Error in chat:', error);
+
+    console.error("Error in chat:", error);
     const errorMessage = handleApiError(error, "Failed to chat");
     throw new Error(errorMessage);
   }
@@ -1477,13 +1643,13 @@ export const chat = async (prompt, context, role, npcConfig = null, signal = nul
 // Export a function to proxy OpenAI requests
 export const proxyOpenAIRequest = async (endpoint, requestData) => {
   try {
-    const response = await getApi().post('/api/proxy', {
+    const response = await getApi().post("/api/proxy", {
       targetEndpoint: endpoint,
-      requestData
+      requestData,
     });
     return response.data;
   } catch (error) {
-    console.error('Proxy request failed:', error);
+    console.error("Proxy request failed:", error);
     throw error;
   }
 };
@@ -1491,10 +1657,10 @@ export const proxyOpenAIRequest = async (endpoint, requestData) => {
 // User management
 export const fetchUsers = async () => {
   try {
-    const response = await getApi().get('/api/users');
+    const response = await getApi().get("/api/users");
     return response.data;
   } catch (error) {
-    console.error('Fetch users failed:', error);
+    console.error("Fetch users failed:", error);
     throw error;
   }
 };
@@ -1507,45 +1673,45 @@ export const testApiConnection = async () => {
     originUrl: window.location.origin,
     corsTest: false,
     healthTest: false,
-    error: null
+    error: null,
   };
-  
+
   try {
     // Try a simple CORS preflight with OPTIONS
     console.log(`Testing CORS preflight to ${apiUrl}/api/health...`);
-    
+
     // First test: OPTIONS request
     const optionsResult = await fetch(`${apiUrl}/api/health`, {
-      method: 'OPTIONS',
+      method: "OPTIONS",
       headers: {
-        'Origin': window.location.origin,
-        'Access-Control-Request-Method': 'GET',
-        'Access-Control-Request-Headers': 'Content-Type,Authorization'
-      }
+        Origin: window.location.origin,
+        "Access-Control-Request-Method": "GET",
+        "Access-Control-Request-Headers": "Content-Type,Authorization",
+      },
     });
-    
+
     results.corsTest = optionsResult.ok;
     results.corsStatus = optionsResult.status;
     console.log(`CORS preflight result: ${optionsResult.status}`);
-    
+
     // Second test: GET request to health endpoint
     const healthResult = await fetch(`${apiUrl}/api/health`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Origin': window.location.origin
-      }
+        Origin: window.location.origin,
+      },
     });
-    
+
     results.healthTest = healthResult.ok;
     results.healthStatus = healthResult.status;
-    
+
     if (healthResult.ok) {
       results.healthData = await healthResult.json();
       console.log(`Health check passed: ${JSON.stringify(results.healthData)}`);
     } else {
       console.error(`Health check failed with status ${healthResult.status}`);
     }
-    
+
     return results;
   } catch (error) {
     console.error("API connection test failed:", error);
@@ -1557,20 +1723,20 @@ export const testApiConnection = async () => {
 // Add a function to clear specific cache entries
 export const clearCacheFor = (type, id = null) => {
   switch (type) {
-    case 'artifacts':
-      cacheManager.clear('artifacts');
+    case "artifacts":
+      cacheManager.clear("artifacts");
       break;
-    case 'character':
+    case "character":
       if (id) {
         cacheManager.clear(`character:${id}`);
       } else {
-        cacheManager.clear('character:');
+        cacheManager.clear("character:");
       }
       break;
-    case 'gameState':
-      cacheManager.clear('gameState:');
+    case "gameState":
+      cacheManager.clear("gameState:");
       break;
-    case 'all':
+    case "all":
       cacheManager.clear();
       break;
     default:
@@ -1582,21 +1748,21 @@ export const clearCacheFor = (type, id = null) => {
 export const updateUserProgress = async (userId, progressData) => {
   try {
     const response = await fetch(`${API_BASE_URL}/users/${userId}/progress`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
       },
-      body: JSON.stringify({ progress: progressData })
+      body: JSON.stringify({ progress: progressData }),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to update user progress: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error updating user progress:', error);
+    console.error("Error updating user progress:", error);
     throw error;
   }
 };
@@ -1604,21 +1770,21 @@ export const updateUserProgress = async (userId, progressData) => {
 export const awardPlayerPowers = async (userId, powers) => {
   try {
     const response = await fetch(`${API_BASE_URL}/users/${userId}/powers`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
       },
-      body: JSON.stringify({ powers })
+      body: JSON.stringify({ powers }),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to award powers: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error awarding powers:', error);
+    console.error("Error awarding powers:", error);
     throw error;
   }
 };
@@ -1626,106 +1792,118 @@ export const awardPlayerPowers = async (userId, powers) => {
 export const unlockAreas = async (userId, areas) => {
   try {
     const response = await fetch(`${API_BASE_URL}/users/${userId}/areas`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
       },
-      body: JSON.stringify({ areas })
+      body: JSON.stringify({ areas }),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to unlock areas: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error unlocking areas:', error);
+    console.error("Error unlocking areas:", error);
     throw error;
   }
 };
 
 export const getArtifactProgress = async (artifactId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/artifacts/${artifactId}/progress`, {
-      headers: {
-        'Authorization': `Bearer ${getAuthToken()}`
-      }
-    });
-    
+    const response = await fetch(
+      `${API_BASE_URL}/artifacts/${artifactId}/progress`,
+      {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+      },
+    );
+
     if (!response.ok) {
       throw new Error(`Failed to get artifact progress: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error getting artifact progress:', error);
+    console.error("Error getting artifact progress:", error);
     throw error;
   }
 };
 
 export const saveArtifactProgress = async (artifactId, progress) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/artifacts/${artifactId}/progress`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+    const response = await fetch(
+      `${API_BASE_URL}/artifacts/${artifactId}/progress`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({ progress }),
       },
-      body: JSON.stringify({ progress })
-    });
-    
+    );
+
     if (!response.ok) {
       throw new Error(`Failed to save artifact progress: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error saving artifact progress:', error);
+    console.error("Error saving artifact progress:", error);
     throw error;
   }
 };
 
 export const completeArtifact = async (artifactId, completionData) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/artifacts/${artifactId}/complete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+    const response = await fetch(
+      `${API_BASE_URL}/artifacts/${artifactId}/complete`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify(completionData),
       },
-      body: JSON.stringify(completionData)
-    });
-    
+    );
+
     if (!response.ok) {
       throw new Error(`Failed to complete artifact: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error completing artifact:', error);
+    console.error("Error completing artifact:", error);
     throw error;
   }
 };
 
 export const getArtifactHint = async (artifactId, hintLevel = 0) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/artifacts/${artifactId}/hint`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+    const response = await fetch(
+      `${API_BASE_URL}/artifacts/${artifactId}/hint`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({ hintLevel }),
       },
-      body: JSON.stringify({ hintLevel })
-    });
-    
+    );
+
     if (!response.ok) {
       throw new Error(`Failed to get hint: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error getting hint:', error);
+    console.error("Error getting hint:", error);
     throw error;
   }
 };
@@ -1733,20 +1911,20 @@ export const getArtifactHint = async (artifactId, hintLevel = 0) => {
 export const seedGameArtifacts = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/artifacts/admin/seed`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
-      }
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to seed artifacts: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error seeding artifacts:', error);
+    console.error("Error seeding artifacts:", error);
     throw error;
   }
 };

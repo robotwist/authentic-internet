@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-Bit Combat Sound Generator</title>
+    <style>
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: 3px solid #0f0;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+        button:hover {
+            background: #000;
+            color: #0f0;
+        }
+        .sound-group {
+            margin: 20px 0;
+            border: 2px solid #0f0;
+            padding: 15px;
+        }
+        h2 {
+            color: #0f0;
+            font-size: 16px;
+        }
+        .status {
+            color: #ff0;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 8-Bit Combat Sound Generator</h1>
+    <p>Generate Zelda-style combat sound effects for your game!</p>
+    
+    <div class="sound-group">
+        <h2>⚔️ Combat Sounds</h2>
+        <button onclick="playSword()">Play Sword</button>
+        <button onclick="downloadSword()">Download Sword</button>
+        <br>
+        <button onclick="playSwordBeam()">Play Sword Beam</button>
+        <button onclick="downloadSwordBeam()">Download Sword Beam</button>
+        <br>
+        <button onclick="playEnemyHit()">Play Enemy Hit</button>
+        <button onclick="downloadEnemyHit()">Download Enemy Hit</button>
+        <br>
+        <button onclick="playEnemyDefeat()">Play Enemy Defeat</button>
+        <button onclick="downloadEnemyDefeat()">Download Enemy Defeat</button>
+    </div>
+
+    <div class="sound-group">
+        <h2>❤️ Player Sounds</h2>
+        <button onclick="playDamage()">Play Damage</button>
+        <button onclick="downloadDamage()">Download Damage</button>
+        <br>
+        <button onclick="playHeal()">Play Heal</button>
+        <button onclick="downloadHeal()">Download Heal</button>
+        <br>
+        <button onclick="playGameOver()">Play Game Over</button>
+        <button onclick="downloadGameOver()">Download Game Over</button>
+    </div>
+
+    <div class="sound-group">
+        <h2>💎 Item Sounds</h2>
+        <button onclick="playRupee()">Play Rupee</button>
+        <button onclick="downloadRupee()">Download Rupee</button>
+        <br>
+        <button onclick="playHeart()">Play Heart</button>
+        <button onclick="downloadHeart()">Download Heart</button>
+        <br>
+        <button onclick="playKey()">Play Key</button>
+        <button onclick="downloadKey()">Download Key</button>
+    </div>
+
+    <div class="sound-group">
+        <h2>📦 Batch Download</h2>
+        <button onclick="downloadAll()">Download All Sounds as ZIP</button>
+        <p class="status" id="status"></p>
+    </div>
+
+    <script>
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Helper function to create oscillator
+        function createOscillator(freq, type = 'square') {
+            const osc = audioContext.createOscillator();
+            osc.type = type;
+            osc.frequency.value = freq;
+            return osc;
+        }
+
+        // Helper to create envelope
+        function createEnvelope(gain, attack, decay, sustain, release) {
+            const now = audioContext.currentTime;
+            gain.gain.cancelScheduledValues(now);
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(1, now + attack);
+            gain.gain.linearRampToValueAtTime(sustain, now + attack + decay);
+            gain.gain.setValueAtTime(sustain, now + attack + decay + 0.1);
+            gain.gain.linearRampToValueAtTime(0, now + attack + decay + 0.1 + release);
+        }
+
+        // Generate audio buffer for download
+        async function generateBuffer(generatorFunc, duration) {
+            const offlineContext = new OfflineAudioContext(1, audioContext.sampleRate * duration, audioContext.sampleRate);
+            await generatorFunc(offlineContext);
+            return await offlineContext.startRendering();
+        }
+
+        // Convert buffer to WAV
+        function bufferToWav(buffer) {
+            const length = buffer.length * buffer.numberOfChannels * 2;
+            const arrayBuffer = new ArrayBuffer(44 + length);
+            const view = new DataView(arrayBuffer);
+            const channels = [];
+            let offset = 0;
+            let pos = 0;
+
+            // WAV header
+            setUint32(0x46464952); // "RIFF"
+            setUint32(36 + length); // file length
+            setUint32(0x45564157); // "WAVE"
+            setUint32(0x20746d66); // "fmt "
+            setUint32(16); // chunk size
+            setUint16(1); // PCM
+            setUint16(buffer.numberOfChannels);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * buffer.numberOfChannels);
+            setUint16(buffer.numberOfChannels * 2);
+            setUint16(16); // bits per sample
+            setUint32(0x61746164); // "data"
+            setUint32(length);
+
+            // Audio data
+            for (let i = 0; i < buffer.numberOfChannels; i++) {
+                channels.push(buffer.getChannelData(i));
+            }
+
+            while (pos < buffer.length) {
+                for (let i = 0; i < buffer.numberOfChannels; i++) {
+                    const sample = Math.max(-1, Math.min(1, channels[i][pos]));
+                    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    offset += 2;
+                }
+                pos++;
+            }
+
+            function setUint16(data) {
+                view.setUint16(pos, data, true);
+                pos += 2;
+            }
+
+            function setUint32(data) {
+                view.setUint32(pos, data, true);
+                pos += 4;
+            }
+
+            return new Blob([arrayBuffer], { type: 'audio/wav' });
+        }
+
+        // Download function
+        function download(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // SWORD SOUND (quick swipe)
+        function playSword() {
+            const gain = audioContext.createGain();
+            const osc = createOscillator(200, 'square');
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+            
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            
+            osc.start(now);
+            osc.stop(now + 0.1);
+        }
+
+        async function downloadSword() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc = ctx.createOscillator();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(200, 0);
+                osc.frequency.exponentialRampToValueAtTime(100, 0.1);
+                gain.gain.setValueAtTime(0.3, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 0.1);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(0);
+                osc.stop(0.1);
+            }, 0.15);
+            download(bufferToWav(buffer), 'sword.wav');
+        }
+
+        // SWORD BEAM (magical projectile)
+        function playSwordBeam() {
+            const gain = audioContext.createGain();
+            const osc1 = createOscillator(400, 'sine');
+            const osc2 = createOscillator(800, 'sine');
+            
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 0.3);
+            osc2.stop(now + 0.3);
+        }
+
+        async function downloadSwordBeam() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                osc1.type = 'sine';
+                osc2.type = 'sine';
+                osc1.frequency.value = 400;
+                osc2.frequency.value = 800;
+                gain.gain.setValueAtTime(0.2, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 0.3);
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(ctx.destination);
+                osc1.start(0);
+                osc2.start(0);
+                osc1.stop(0.3);
+                osc2.stop(0.3);
+            }, 0.35);
+            download(bufferToWav(buffer), 'sword_beam.wav');
+        }
+
+        // ENEMY HIT
+        function playEnemyHit() {
+            const gain = audioContext.createGain();
+            const osc = createOscillator(150, 'square');
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+            
+            osc.start(now);
+            osc.stop(now + 0.08);
+        }
+
+        async function downloadEnemyHit() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc = ctx.createOscillator();
+                osc.type = 'square';
+                osc.frequency.value = 150;
+                gain.gain.setValueAtTime(0.3, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 0.08);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(0);
+                osc.stop(0.08);
+            }, 0.1);
+            download(bufferToWav(buffer), 'enemy_hit.wav');
+        }
+
+        // ENEMY DEFEAT
+        function playEnemyDefeat() {
+            const gain = audioContext.createGain();
+            const osc = createOscillator(300, 'square');
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(50, now + 0.4);
+            
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+            
+            osc.start(now);
+            osc.stop(now + 0.4);
+        }
+
+        async function downloadEnemyDefeat() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc = ctx.createOscillator();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, 0);
+                osc.frequency.exponentialRampToValueAtTime(50, 0.4);
+                gain.gain.setValueAtTime(0.3, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(0);
+                osc.stop(0.4);
+            }, 0.45);
+            download(bufferToWav(buffer), 'enemy_defeat.wav');
+        }
+
+        // DAMAGE
+        function playDamage() {
+            const gain = audioContext.createGain();
+            const osc = createOscillator(100, 'sawtooth');
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            
+            osc.start(now);
+            osc.stop(now + 0.2);
+        }
+
+        async function downloadDamage() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc = ctx.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.value = 100;
+                gain.gain.setValueAtTime(0.4, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 0.2);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(0);
+                osc.stop(0.2);
+            }, 0.25);
+            download(bufferToWav(buffer), 'damage.wav');
+        }
+
+        // HEAL
+        function playHeal() {
+            const gain = audioContext.createGain();
+            const osc1 = createOscillator(523, 'sine');
+            const osc2 = createOscillator(659, 'sine');
+            const osc3 = createOscillator(784, 'sine');
+            
+            osc1.connect(gain);
+            osc2.connect(gain);
+            osc3.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            
+            osc1.start(now);
+            osc2.start(now + 0.05);
+            osc3.start(now + 0.1);
+            osc1.stop(now + 0.5);
+            osc2.stop(now + 0.5);
+            osc3.stop(now + 0.5);
+        }
+
+        async function downloadHeal() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const osc3 = ctx.createOscillator();
+                osc1.type = osc2.type = osc3.type = 'sine';
+                osc1.frequency.value = 523;
+                osc2.frequency.value = 659;
+                osc3.frequency.value = 784;
+                gain.gain.setValueAtTime(0.2, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 0.5);
+                osc1.connect(gain);
+                osc2.connect(gain);
+                osc3.connect(gain);
+                gain.connect(ctx.destination);
+                osc1.start(0);
+                osc2.start(0.05);
+                osc3.start(0.1);
+                osc1.stop(0.5);
+                osc2.stop(0.5);
+                osc3.stop(0.5);
+            }, 0.55);
+            download(bufferToWav(buffer), 'heal.wav');
+        }
+
+        // GAME OVER
+        function playGameOver() {
+            const gain = audioContext.createGain();
+            const osc = createOscillator(440, 'triangle');
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.linearRampToValueAtTime(220, now + 0.5);
+            osc.frequency.linearRampToValueAtTime(110, now + 1.0);
+            
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+            
+            osc.start(now);
+            osc.stop(now + 1.0);
+        }
+
+        async function downloadGameOver() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc = ctx.createOscillator();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, 0);
+                osc.frequency.linearRampToValueAtTime(220, 0.5);
+                osc.frequency.linearRampToValueAtTime(110, 1.0);
+                gain.gain.setValueAtTime(0.3, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 1.0);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(0);
+                osc.stop(1.0);
+            }, 1.05);
+            download(bufferToWav(buffer), 'gameover.wav');
+        }
+
+        // RUPEE
+        function playRupee() {
+            const gain = audioContext.createGain();
+            const osc = createOscillator(1000, 'square');
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+            
+            osc.start(now);
+            osc.stop(now + 0.15);
+        }
+
+        async function downloadRupee() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc = ctx.createOscillator();
+                osc.type = 'square';
+                osc.frequency.value = 1000;
+                gain.gain.setValueAtTime(0.2, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 0.15);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(0);
+                osc.stop(0.15);
+            }, 0.2);
+            download(bufferToWav(buffer), 'rupee.wav');
+        }
+
+        // HEART
+        function playHeart() {
+            const gain = audioContext.createGain();
+            const osc = createOscillator(800, 'sine');
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.linearRampToValueAtTime(600, now + 0.1);
+            
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            
+            osc.start(now);
+            osc.stop(now + 0.2);
+        }
+
+        async function downloadHeart() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, 0);
+                osc.frequency.linearRampToValueAtTime(600, 0.1);
+                gain.gain.setValueAtTime(0.2, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 0.2);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(0);
+                osc.stop(0.2);
+            }, 0.25);
+            download(bufferToWav(buffer), 'heart.wav');
+        }
+
+        // KEY
+        function playKey() {
+            const gain = audioContext.createGain();
+            const osc1 = createOscillator(659, 'square');
+            const osc2 = createOscillator(880, 'square');
+            
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            
+            osc1.start(now);
+            osc2.start(now + 0.1);
+            osc1.stop(now + 0.3);
+            osc2.stop(now + 0.3);
+        }
+
+        async function downloadKey() {
+            const buffer = await generateBuffer(async (ctx) => {
+                const gain = ctx.createGain();
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                osc1.type = osc2.type = 'square';
+                osc1.frequency.value = 659;
+                osc2.frequency.value = 880;
+                gain.gain.setValueAtTime(0.2, 0);
+                gain.gain.exponentialRampToValueAtTime(0.01, 0.3);
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(ctx.destination);
+                osc1.start(0);
+                osc2.start(0.1);
+                osc1.stop(0.3);
+                osc2.stop(0.3);
+            }, 0.35);
+            download(bufferToWav(buffer), 'key.wav');
+        }
+
+        // Download all sounds
+        async function downloadAll() {
+            const status = document.getElementById('status');
+            status.textContent = 'Generating all sounds...';
+            
+            const sounds = [
+                {name: 'sword', func: downloadSword},
+                {name: 'sword_beam', func: downloadSwordBeam},
+                {name: 'enemy_hit', func: downloadEnemyHit},
+                {name: 'enemy_defeat', func: downloadEnemyDefeat},
+                {name: 'damage', func: downloadDamage},
+                {name: 'heal', func: downloadHeal},
+                {name: 'gameover', func: downloadGameOver},
+                {name: 'rupee', func: downloadRupee},
+                {name: 'heart', func: downloadHeart},
+                {name: 'key', func: downloadKey}
+            ];
+
+            for (const sound of sounds) {
+                status.textContent = `Generating ${sound.name}...`;
+                await sound.func();
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+            
+            status.textContent = '✅ All sounds downloaded! Place them in: client/public/assets/sounds/combat/';
+        }
+    </script>
+</body>
+</html>
+

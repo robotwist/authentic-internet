@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../context/AuthContext';
-import './NPCInteraction.css';
+import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import "./NPCInteraction.css";
 
 const NPCInteraction = ({ npc, onClose, context = {} }) => {
   const { user } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [relationship, setRelationship] = useState('stranger');
+  const [relationship, setRelationship] = useState("stranger");
   const [interactionCount, setInteractionCount] = useState(0);
   const [currentQuest, setCurrentQuest] = useState(null);
   const [npcState, setNpcState] = useState({
-    mood: 'neutral',
-    knowledge: []
+    mood: "neutral",
+    knowledge: [],
   });
 
   useEffect(() => {
@@ -21,48 +21,73 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
   }, [npc]);
 
   const initializeConversation = async () => {
+    // Use fallback dialogue if no API endpoint or _id
+    if (!npc._id || !npc._id.trim()) {
+      console.log("Using fallback dialogue for NPC:", npc.name);
+      setMessages([
+        {
+          type: "npc",
+          text: npc.dialogue?.[0] || "Hello there, traveler!",
+          author: npc.name,
+          timestamp: new Date(),
+        },
+      ]);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/npcs/${npc._id}/interact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: '',
+          message: "",
           userId: user?._id,
           context: {
-            location: context.area || 'overworld',
-            weather: context.weather || 'sunny',
-            timeOfDay: new Date().getHours() < 12 ? 'morning' : 
-                      new Date().getHours() < 18 ? 'afternoon' : 'evening'
-          }
-        })
+            location: context.area || "overworld",
+            weather: context.weather || "sunny",
+            timeOfDay:
+              new Date().getHours() < 12
+                ? "morning"
+                : new Date().getHours() < 18
+                  ? "afternoon"
+                  : "evening",
+          },
+        }),
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
-        setMessages([{
-          type: 'npc',
-          text: data.response.text,
-          author: data.response.author,
-          timestamp: new Date()
-        }]);
-        
-        setRelationship(data.response.relationship || 'stranger');
+        setMessages([
+          {
+            type: "npc",
+            text: data.response.text,
+            author: data.response.author,
+            timestamp: new Date(),
+          },
+        ]);
+
+        setRelationship(data.response.relationship || "stranger");
         setInteractionCount(data.response.context?.interactionCount || 0);
-        
+
         // Check for available quests
         if (data.response.availableQuests) {
           setCurrentQuest(data.response.availableQuests[0]);
         }
+      } else {
+        // Fallback to dialogue if API response not successful
+        throw new Error("API response not successful");
       }
     } catch (error) {
-      console.error('Error initializing conversation:', error);
-      setMessages([{
-        type: 'npc',
-        text: npc.dialogue?.[0] || "Hello there, traveler!",
-        author: npc.name,
-        timestamp: new Date()
-      }]);
+      console.log("Using fallback dialogue due to API error:", error.message);
+      setMessages([
+        {
+          type: "npc",
+          text: npc.dialogue?.[0] || "Hello there, traveler!",
+          author: npc.name,
+          timestamp: new Date(),
+        },
+      ]);
     }
   };
 
@@ -70,45 +95,75 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = {
-      type: 'user',
+      type: "user",
       text: input,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
+
+    // If no API endpoint, use fallback dialogue rotation
+    if (!npc._id || !npc._id.trim()) {
+      console.log("Using fallback dialogue for NPC response");
+      setTimeout(() => {
+        // Pick a random dialogue line or cycle through them
+        const dialogueIndex =
+          messages.filter((m) => m.type === "npc").length %
+          (npc.dialogue?.length || 1);
+        const npcResponse = {
+          type: "npc",
+          text:
+            npc.dialogue?.[dialogueIndex] ||
+            "Thank you for sharing that with me.",
+          author: npc.name,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, npcResponse]);
+        setIsLoading(false);
+        setInput("");
+        setInteractionCount((prev) => prev + 1);
+      }, 500); // Simulate thinking delay
+      return;
+    }
 
     try {
       const response = await fetch(`/api/npcs/${npc._id}/interact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: input,
           userId: user?._id,
           context: {
-            location: context.area || 'overworld',
-            weather: context.weather || 'sunny',
-            timeOfDay: new Date().getHours() < 12 ? 'morning' : 
-                      new Date().getHours() < 18 ? 'afternoon' : 'evening',
-            previousMessages: messages.slice(-5) // Send last 5 messages for context
-          }
-        })
+            location: context.area || "overworld",
+            weather: context.weather || "sunny",
+            timeOfDay:
+              new Date().getHours() < 12
+                ? "morning"
+                : new Date().getHours() < 18
+                  ? "afternoon"
+                  : "evening",
+            previousMessages: messages.slice(-5), // Send last 5 messages for context
+          },
+        }),
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         const npcResponse = {
-          type: 'npc',
+          type: "npc",
           text: data.response.text,
           author: data.response.author,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
 
-        setMessages(prev => [...prev, npcResponse]);
+        setMessages((prev) => [...prev, npcResponse]);
         setRelationship(data.response.relationship || relationship);
-        setInteractionCount(data.response.context?.interactionCount || interactionCount + 1);
-        
+        setInteractionCount(
+          data.response.context?.interactionCount || interactionCount + 1,
+        );
+
         // Update quest status if applicable
         if (data.response.questUpdate) {
           setCurrentQuest(data.response.questUpdate);
@@ -116,28 +171,41 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
 
         // Update NPC state based on response
         if (data.response.mood) {
-          setNpcState(prev => ({
+          setNpcState((prev) => ({
             ...prev,
-            mood: data.response.mood
+            mood: data.response.mood,
           }));
         }
+      } else {
+        // Fallback to dialogue
+        throw new Error("API response not successful");
       }
     } catch (error) {
-      console.error('Error sending message:', error);
-      setMessages(prev => [...prev, {
-        type: 'npc',
-        text: "I seem to be having trouble understanding you right now. Perhaps we could speak again later?",
-        author: npc.name,
-        timestamp: new Date()
-      }]);
+      console.log("Using fallback dialogue due to API error:", error.message);
+      // Pick a random dialogue line
+      const dialogueIndex =
+        messages.filter((m) => m.type === "npc").length %
+        (npc.dialogue?.length || 1);
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "npc",
+          text:
+            npc.dialogue?.[dialogueIndex] ||
+            "Thank you for sharing that with me.",
+          author: npc.name,
+          timestamp: new Date(),
+        },
+      ]);
+      setInteractionCount((prev) => prev + 1);
     } finally {
       setIsLoading(false);
-      setInput('');
+      setInput("");
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -145,29 +213,29 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
 
   const getRelationshipColor = (relationship) => {
     const colors = {
-      stranger: '#6b7280',
-      acquaintance: '#3b82f6',
-      friend: '#10b981',
-      confidant: '#8b5cf6',
-      mentor_student: '#f59e0b'
+      stranger: "#6b7280",
+      acquaintance: "#3b82f6",
+      friend: "#10b981",
+      confidant: "#8b5cf6",
+      mentor_student: "#f59e0b",
     };
     return colors[relationship] || colors.stranger;
   };
 
   const getRelationshipIcon = (relationship) => {
     const icons = {
-      stranger: '👋',
-      acquaintance: '🤝',
-      friend: '😊',
-      confidant: '💫',
-      mentor_student: '📚'
+      stranger: "👋",
+      acquaintance: "🤝",
+      friend: "😊",
+      confidant: "💫",
+      mentor_student: "📚",
     };
     return icons[relationship] || icons.stranger;
   };
 
   const getPersonalityTraits = () => {
     if (!npc.personality?.traits) return [];
-    
+
     return Object.entries(npc.personality.traits)
       .filter(([trait, value]) => value > 70)
       .map(([trait, value]) => ({ trait, value }))
@@ -176,9 +244,9 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
   };
 
   const formatTimestamp = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -190,28 +258,33 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
           <div className="npc-info">
             <h2>{npc.name}</h2>
             <div className="npc-meta">
-              <span className="npc-type">{npc.type.replace('_', ' ')}</span>
+              <span className="npc-type">{npc.type.replace("_", " ")}</span>
               <span className="npc-location">{npc.area}</span>
             </div>
           </div>
-          
+
           {/* Relationship Status */}
           <div className="relationship-status">
-            <div 
+            <div
               className="relationship-badge"
               style={{ backgroundColor: getRelationshipColor(relationship) }}
             >
-              <span className="relationship-icon">{getRelationshipIcon(relationship)}</span>
+              <span className="relationship-icon">
+                {getRelationshipIcon(relationship)}
+              </span>
               <span className="relationship-text">
-                {relationship.charAt(0).toUpperCase() + relationship.slice(1).replace('_', ' ')}
+                {relationship.charAt(0).toUpperCase() +
+                  relationship.slice(1).replace("_", " ")}
               </span>
             </div>
             <div className="interaction-count">
               Conversations: {interactionCount}
             </div>
           </div>
-          
-          <button className="close-button" onClick={onClose}>×</button>
+
+          <button className="close-button" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         {/* Personality Traits */}
@@ -225,7 +298,7 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
                     {trait.charAt(0).toUpperCase() + trait.slice(1)}
                   </span>
                   <div className="trait-bar">
-                    <div 
+                    <div
                       className="trait-fill"
                       style={{ width: `${value}%` }}
                     />
@@ -259,7 +332,7 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
             <div key={index} className={`message ${message.type}`}>
               <div className="message-content">
                 <div className="message-author">
-                  {message.type === 'npc' ? message.author : 'You'}
+                  {message.type === "npc" ? message.author : "You"}
                 </div>
                 <div className="message-text">{message.text}</div>
                 <div className="message-timestamp">
@@ -268,7 +341,7 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
               </div>
             </div>
           ))}
-          
+
           {isLoading && (
             <div className="message npc">
               <div className="message-content">
@@ -294,7 +367,7 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
               disabled={isLoading}
               rows={2}
             />
-            <button 
+            <button
               onClick={handleSendMessage}
               disabled={!input.trim() || isLoading}
               className="send-button"
@@ -302,23 +375,23 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
               Send
             </button>
           </div>
-          
+
           {/* Quick Actions */}
           <div className="quick-actions">
-            <button 
+            <button
               onClick={() => setInput("Tell me about yourself")}
               disabled={isLoading}
             >
               Ask About Themselves
             </button>
-            <button 
+            <button
               onClick={() => setInput("What wisdom do you have for me?")}
               disabled={isLoading}
             >
               Seek Wisdom
             </button>
             {currentQuest && (
-              <button 
+              <button
                 onClick={() => setInput("Tell me more about this quest")}
                 disabled={isLoading}
               >
@@ -331,16 +404,18 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
         {/* Context Display */}
         <div className="context-display">
           <div className="context-item">
-            📍 {context.area || 'Unknown Location'}
+            📍 {context.area || "Unknown Location"}
           </div>
           {context.weather && (
-            <div className="context-item">
-              🌤️ {context.weather}
-            </div>
+            <div className="context-item">🌤️ {context.weather}</div>
           )}
           <div className="context-item">
-            🕐 {new Date().getHours() < 12 ? 'Morning' : 
-                new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}
+            🕐{" "}
+            {new Date().getHours() < 12
+              ? "Morning"
+              : new Date().getHours() < 18
+                ? "Afternoon"
+                : "Evening"}
           </div>
         </div>
       </div>
@@ -348,4 +423,4 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
   );
 };
 
-export default NPCInteraction; 
+export default NPCInteraction;

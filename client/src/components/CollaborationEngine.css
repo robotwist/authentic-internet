@@ -1,0 +1,521 @@
+/* Collaboration Engine Styles */
+.collaboration-engine {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Header Styles */
+.collaboration-header {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+  margin-bottom: 0;
+}
+
+.collaboration-header .MuiTypography-h5 {
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.collaboration-header .MuiTypography-body2 {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+/* Content Area */
+.collaboration-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 24px;
+}
+
+/* Tabs Styling */
+.collaboration-content .MuiTabs-root {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
+}
+
+.collaboration-content .MuiTab-root {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  text-transform: none;
+  min-height: 64px;
+  transition: all 0.3s ease;
+}
+
+.collaboration-content .MuiTab-root.Mui-selected {
+  color: #64b5f6;
+  background: rgba(100, 181, 246, 0.1);
+}
+
+.collaboration-content .MuiTabs-indicator {
+  background-color: #64b5f6;
+  height: 3px;
+}
+
+/* Tab Content */
+.editor-tab,
+.comments-tab,
+.history-tab {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0 0 12px 12px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Artifact Form */
+.artifact-form {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.artifact-form .MuiTypography-h6 {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.artifact-form .MuiTextField-root {
+  margin-bottom: 16px;
+}
+
+.artifact-form .MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.artifact-form .MuiInputBase-root {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.artifact-form .MuiInputBase-root:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.artifact-form .MuiInputBase-root.Mui-focused {
+  background: rgba(100, 181, 246, 0.1);
+  border-color: #64b5f6;
+}
+
+.artifact-form .MuiInputBase-input {
+  color: #ffffff;
+}
+
+.artifact-form .MuiInputBase-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Editing Indicators */
+.editing-indicators {
+  background: rgba(255, 193, 7, 0.1) !important;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.editing-indicators .MuiTypography-subtitle2 {
+  color: #ffc107;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.editing-chip {
+  margin: 4px;
+  background: rgba(255, 193, 7, 0.2) !important;
+  border-color: rgba(255, 193, 7, 0.5) !important;
+  color: #ffc107 !important;
+  font-weight: 500;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Comments Section */
+.comments-section {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.comments-section .MuiTypography-h6 {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.comments-section .MuiList-root {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.comments-section .MuiListItem-root {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background-color 0.3s ease;
+}
+
+.comments-section .MuiListItem-root:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.comments-section .MuiListItemText-primary {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.comments-section .MuiListItemText-secondary {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Version History */
+.version-history {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.version-history .MuiTypography-h6 {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.version-history .MuiList-root {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+}
+
+.version-history .MuiListItem-root {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background-color 0.3s ease;
+}
+
+.version-history .MuiListItem-root:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Buttons */
+.collaboration-engine .MuiButton-root {
+  text-transform: none;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+}
+
+.collaboration-engine .MuiButton-contained {
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+  box-shadow: 0 4px 12px rgba(100, 181, 246, 0.3);
+}
+
+.collaboration-engine .MuiButton-contained:hover {
+  background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%);
+  box-shadow: 0 6px 16px rgba(100, 181, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.collaboration-engine .MuiButton-outlined {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.collaboration-engine .MuiButton-outlined:hover {
+  border-color: #64b5f6;
+  background: rgba(100, 181, 246, 0.1);
+}
+
+/* Icons */
+.collaboration-engine .MuiIconButton-root {
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.collaboration-engine .MuiIconButton-root:hover {
+  color: #64b5f6;
+  background: rgba(100, 181, 246, 0.1);
+  transform: scale(1.1);
+}
+
+/* Chips */
+.collaboration-engine .MuiChip-root {
+  font-weight: 500;
+  border-radius: 16px;
+}
+
+.collaboration-engine .MuiChip-colorSuccess {
+  background: rgba(76, 175, 80, 0.2) !important;
+  color: #4caf50 !important;
+  border-color: rgba(76, 175, 80, 0.5) !important;
+}
+
+.collaboration-engine .MuiChip-colorWarning {
+  background: rgba(255, 193, 7, 0.2) !important;
+  color: #ffc107 !important;
+  border-color: rgba(255, 193, 7, 0.5) !important;
+}
+
+.collaboration-engine .MuiChip-colorPrimary {
+  background: rgba(100, 181, 246, 0.2) !important;
+  color: #64b5f6 !important;
+  border-color: rgba(100, 181, 246, 0.5) !important;
+}
+
+/* Dialogs */
+.collaboration-engine .MuiDialog-paper {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+}
+
+.collaboration-engine .MuiDialogTitle-root {
+  color: #ffffff;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.collaboration-engine .MuiDialogContent-root {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Menu */
+.collaboration-engine .MuiMenu-paper {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+}
+
+.collaboration-engine .MuiMenuItem-root {
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.collaboration-engine .MuiMenuItem-root:hover {
+  background: rgba(100, 181, 246, 0.1);
+  color: #64b5f6;
+}
+
+/* Alerts */
+.collaboration-engine .MuiAlert-root {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.collaboration-engine .MuiAlert-standardSuccess {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.collaboration-engine .MuiAlert-standardError {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  color: #f44336;
+}
+
+/* Scrollbars */
+.collaboration-engine ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.collaboration-engine ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.collaboration-engine ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.collaboration-engine ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .collaboration-engine {
+    height: 100vh;
+  }
+  
+  .collaboration-header {
+    padding: 16px;
+  }
+  
+  .collaboration-content {
+    padding: 16px;
+  }
+  
+  .editor-tab,
+  .comments-tab,
+  .history-tab {
+    padding: 16px;
+  }
+  
+  .artifact-form {
+    padding: 16px;
+  }
+  
+  .comments-section,
+  .version-history {
+    padding: 16px;
+  }
+  
+  .collaboration-engine .MuiButton-root {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Loading States */
+.collaboration-engine .MuiCircularProgress-root {
+  color: #64b5f6;
+}
+
+/* Focus States */
+.collaboration-engine .Mui-focused {
+  outline: 2px solid #64b5f6;
+  outline-offset: 2px;
+}
+
+/* Disabled States */
+.collaboration-engine .Mui-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Real-time Collaboration Indicators */
+.real-time-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #4caf50;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.collaboration-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.collaboration-status.connected {
+  color: #4caf50;
+}
+
+.collaboration-status.disconnected {
+  color: #f44336;
+}
+
+/* Participant Avatars */
+.participant-avatar {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.participant-avatar.online {
+  border-color: #4caf50;
+}
+
+.participant-avatar.editing {
+  border-color: #ffc107;
+  animation: pulse 1s infinite;
+}
+
+/* Comment Types */
+.comment-type-general {
+  border-left: 4px solid #64b5f6;
+}
+
+.comment-type-suggestion {
+  border-left: 4px solid #ff9800;
+}
+
+.comment-type-question {
+  border-left: 4px solid #9c27b0;
+}
+
+.comment-type-review {
+  border-left: 4px solid #4caf50;
+}
+
+.comment-type-feedback {
+  border-left: 4px solid #f44336;
+}
+
+/* Version History Items */
+.version-item {
+  position: relative;
+  padding-left: 20px;
+}
+
+.version-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  background: #64b5f6;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.version-item.current {
+  background: rgba(100, 181, 246, 0.1);
+  border-radius: 8px;
+}
+
+.version-item.current::before {
+  background: #4caf50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+} 

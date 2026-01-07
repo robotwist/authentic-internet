@@ -1,0 +1,371 @@
+/* Onboarding Trigger Styles */
+.onboarding-prompt {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  max-width: 600px;
+  width: 90%;
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -30%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.prompt-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+}
+
+.prompt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.prompt-avatar {
+  background: linear-gradient(45deg, #64b5f6, #42a5f5);
+  width: 50px;
+  height: 50px;
+  margin-right: 1rem;
+}
+
+.prompt-title {
+  font-weight: 700;
+  color: #ffffff;
+  flex-grow: 1;
+}
+
+.close-button {
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.3s ease;
+}
+
+.close-button:hover {
+  color: #ffffff;
+}
+
+.prompt-description {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+/* Welcome Prompt Specific Styles */
+.welcome-prompt .prompt-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  color: #64b5f6;
+  font-size: 1.5rem;
+}
+
+.feature-item p {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Creation Prompt Specific Styles */
+.creation-prompt .creation-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.idea-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.idea-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border-color: #64b5f6;
+}
+
+.idea-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.idea-title {
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.idea-description {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.idea-prompt {
+  color: #64b5f6;
+  font-style: italic;
+  font-weight: 500;
+  display: block;
+  padding: 0.5rem;
+  background: rgba(100, 181, 246, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(100, 181, 246, 0.2);
+}
+
+/* Inspiration Prompt Specific Styles */
+.inspiration-prompt .trending-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.topic-chip {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.topic-chip:hover {
+  background: rgba(100, 181, 246, 0.2);
+  color: #64b5f6;
+  border-color: #64b5f6;
+  transform: translateY(-2px);
+}
+
+.inspiration-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Button Styles */
+.primary-button {
+  background: linear-gradient(45deg, #64b5f6, #42a5f5);
+  color: white;
+  font-weight: 700;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  text-transform: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(100, 181, 246, 0.3);
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.primary-button:hover {
+  background: linear-gradient(45deg, #42a5f5, #2196f3);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(100, 181, 246, 0.4);
+}
+
+.secondary-button {
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.secondary-button:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Success Alert Styles */
+.success-alert {
+  background: linear-gradient(45deg, #4caf50, #66bb6a);
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.success-alert .MuiAlert-icon {
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .onboarding-prompt {
+    width: 95%;
+    max-width: none;
+  }
+  
+  .welcome-prompt .prompt-features {
+    grid-template-columns: 1fr;
+  }
+  
+  .creation-prompt .creation-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .inspiration-actions {
+    flex-direction: column;
+  }
+  
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+  }
+  
+  .prompt-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .onboarding-prompt {
+    width: 98%;
+    top: 60%;
+  }
+  
+  .prompt-card {
+    border-radius: 16px;
+  }
+  
+  .prompt-title {
+    font-size: 1.25rem;
+  }
+  
+  .prompt-description {
+    font-size: 1rem;
+  }
+  
+  .idea-card {
+    padding: 1rem;
+  }
+  
+  .idea-icon {
+    font-size: 2rem;
+  }
+}
+
+/* Animation for prompt dismissal */
+.onboarding-prompt.dismissing {
+  animation: slideOutDown 0.3s ease-in forwards;
+}
+
+@keyframes slideOutDown {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -70%);
+  }
+}
+
+/* Loading state for buttons */
+.primary-button.loading {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+.primary-button.loading:hover {
+  transform: none;
+  box-shadow: 0 8px 25px rgba(100, 181, 246, 0.3);
+}
+
+/* Focus states for accessibility */
+.primary-button:focus,
+.secondary-button:focus,
+.topic-chip:focus,
+.idea-card:focus {
+  outline: 2px solid #64b5f6;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .prompt-card {
+    border: 2px solid #ffffff;
+  }
+  
+  .feature-item,
+  .idea-card {
+    border: 1px solid #ffffff;
+  }
+  
+  .primary-button {
+    border: 2px solid #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-prompt,
+  .feature-item,
+  .idea-card,
+  .topic-chip,
+  .primary-button,
+  .secondary-button {
+    animation: none;
+    transition: none;
+  }
+  
+  .feature-item:hover,
+  .idea-card:hover,
+  .topic-chip:hover,
+  .primary-button:hover,
+  .secondary-button:hover {
+    transform: none;
+  }
+} 

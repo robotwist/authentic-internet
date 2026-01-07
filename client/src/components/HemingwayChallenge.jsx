@@ -1,6 +1,6 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import './TextAdventure.css'; // Reusing existing styles temporarily
+import React from "react";
+import PropTypes from "prop-types";
+import "./TextAdventure.css"; // Reusing existing styles temporarily
 
 const HemingwayChallenge = ({ onComplete, onExit }) => {
   return (
@@ -8,14 +8,11 @@ const HemingwayChallenge = ({ onComplete, onExit }) => {
       <div className="text-adventure-header">
         <h2>Hemingway Challenge</h2>
         <div className="health-bar">
-          <div 
-            className="health-bar-fill" 
-            style={{ width: `100%` }}
-          />
+          <div className="health-bar-fill" style={{ width: `100%` }} />
           <span>Progress: 100%</span>
         </div>
       </div>
-      
+
       <div className="text-adventure-body">
         <div className="game-history">
           <div className="history-entry system">
@@ -29,7 +26,7 @@ const HemingwayChallenge = ({ onComplete, onExit }) => {
           </div>
         </div>
       </div>
-      
+
       <div className="game-complete-overlay">
         <div className="game-complete-content">
           <h2>Hemingway Challenge</h2>
@@ -38,9 +35,11 @@ const HemingwayChallenge = ({ onComplete, onExit }) => {
           <button onClick={onExit}>Exit Challenge</button>
         </div>
       </div>
-      
+
       <div className="text-adventure-footer">
-        <button className="exit-button" onClick={onExit}>Exit Challenge</button>
+        <button className="exit-button" onClick={onExit}>
+          Exit Challenge
+        </button>
       </div>
     </div>
   );
@@ -48,7 +47,7 @@ const HemingwayChallenge = ({ onComplete, onExit }) => {
 
 HemingwayChallenge.propTypes = {
   onComplete: PropTypes.func.isRequired,
-  onExit: PropTypes.func.isRequired
+  onExit: PropTypes.func.isRequired,
 };
 
-export default HemingwayChallenge; 
+export default HemingwayChallenge;

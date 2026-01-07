@@ -1,0 +1,358 @@
+/* ========================================
+   NES ZELDA HUD - AUTHENTIC 8-BIT STYLE
+   ======================================== */
+
+/* Import Zelda palette from main game */
+:root {
+  --zelda-green: #00A800;
+  --zelda-darkgreen: #006000;
+  --zelda-gold: #FCE000;
+  --zelda-brown: #A44200;
+  --zelda-red: #F83800;
+  --zelda-blue: #0058F8;
+  --nes-black: #000000;
+  --nes-white: #FFFFFF;
+  --nes-gray: #888888;
+  --nes-darkgray: #545454;
+}
+
+.game-hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5000; /* Above all game elements (artifacts: 1200, character: 1500) but below modals (10000) */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+/* Top bar */
+.hud-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  background: none; /* Removed gradient to brighten gameworld */
+}
+
+.hud-left {
+  flex: 1;
+}
+
+.hud-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hud-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.area-name {
+  color: var(--zelda-gold);
+  font-size: 14px;
+  text-shadow: 
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background-color: transparent;
+  border: 2px solid var(--zelda-gold);
+  padding: 8px 16px;
+}
+
+.key-count {
+  color: var(--zelda-gold);
+  font-size: 14px;
+  background-color: transparent;
+  border: 2px solid var(--zelda-gold);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Bottom bar */
+.hud-bottom-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 16px;
+  background: none; /* Removed gradient to brighten gameworld */
+}
+
+.hud-items {
+  display: flex;
+  gap: 12px;
+}
+
+.item-slot {
+  width: 64px;
+  height: 64px;
+  background-color: transparent;
+  border: 3px solid var(--nes-gray);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: border-color 0.15s linear;
+}
+
+.item-slot:hover {
+  border-color: var(--zelda-gold);
+}
+
+.item-slot:active {
+  border-color: var(--nes-white);
+}
+
+.item-label {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+  color: var(--zelda-gold);
+  font-weight: bold;
+}
+
+.item-icon {
+  font-size: 32px;
+}
+
+.item-a {
+  border-color: var(--zelda-green);
+}
+
+.item-b {
+  border-color: var(--zelda-red);
+}
+
+.rupee-count {
+  color: var(--zelda-green);
+  font-size: 16px;
+  background-color: transparent;
+  border: 2px solid var(--zelda-green);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  justify-content: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hud-top-bar,
+  .hud-bottom-bar {
+    padding: 8px;
+  }
+
+  .area-name {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .item-slot {
+    width: 48px;
+    height: 48px;
+  }
+
+  .item-icon {
+    font-size: 24px;
+  }
+
+  .rupee-count {
+    font-size: 12px;
+    padding: 8px 12px;
+    min-width: 90px;
+  }
+
+  .key-count {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+}
+
+/* Animations - NES Style */
+@keyframes rupee-collect {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
+}
+
+.rupee-count.collecting {
+  animation: rupee-collect 0.2s steps(2);
+}
+
+@keyframes key-collect {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
+}
+
+.key-count.collecting {
+  animation: key-collect 0.2s steps(2);
+}
+
+/* Low health warning - NES blink */
+@keyframes low-health-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.game-hud.low-health .hud-left {
+  animation: low-health-pulse 0.5s steps(1) infinite;
+}
+
+/* ========================================
+   XP Bar and Level Display
+   ======================================== */
+
+.xp-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.level-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: 2px solid var(--zelda-gold);
+  padding: 6px 10px;
+  min-width: 60px;
+  cursor: default;
+  transition: border-color 0.15s linear;
+}
+
+.level-badge:hover {
+  border-color: var(--nes-white);
+}
+
+.level-icon {
+  font-size: 16px;
+  animation: level-glow 2s steps(2) infinite;
+}
+
+@keyframes level-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+.level-number {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--zelda-gold);
+  text-shadow: 
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+}
+
+.xp-bar-container {
+  flex: 1;
+  position: relative;
+  min-width: 150px;
+  max-width: 250px;
+}
+
+.xp-bar-background {
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  border: 2px solid var(--nes-gray);
+  overflow: hidden;
+  position: relative;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: var(--zelda-green);
+  transition: width 0.3s linear;
+  position: relative;
+  overflow: hidden;
+}
+
+.xp-bar-shine {
+  display: none; /* Remove shine effect for NES authenticity */
+}
+
+.xp-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--nes-white);
+  text-shadow: 
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
+  pointer-events: none;
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+}
+
+/* Level up animation - NES blink */
+@keyframes level-up {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
+}
+
+.level-badge.leveling-up {
+  animation: level-up 0.3s steps(2) 3;
+}
+
+/* Responsive adjustments for XP display */
+@media (max-width: 768px) {
+  .xp-display {
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .level-badge {
+    min-width: 50px;
+    padding: 4px 8px;
+  }
+
+  .level-icon {
+    font-size: 14px;
+  }
+
+  .level-number {
+    font-size: 12px;
+  }
+
+  .xp-bar-container {
+    min-width: 100px;
+    max-width: 150px;
+  }
+
+  .xp-bar-background {
+    height: 16px;
+  }
+
+  .xp-text {
+    font-size: 9px;
+  }
+}
+

@@ -37,7 +37,7 @@ const allowedOrigins = configureAllowedOrigins();
 
 // Apply middleware
 applyMiddleware(app, allowedOrigins);
-applySessionMiddleware(app);
+await applySessionMiddleware(app);
 
 // Comment out CSRF protection for now to isolate issues
 // applyCsrfProtection(app);
@@ -61,16 +61,22 @@ const startServer = async () => {
     console.log('Checking environment variables...');
 
     // Connect to MongoDB but don't crash if it fails
-    console.log("🔄 Attempting to connect to MongoDB with URI:", 
-      process.env.MONGO_URI ? 
-      process.env.MONGO_URI.split('@')[0].replace(/:([^:]+)@/, ':****@') + '@' + process.env.MONGO_URI.split('@')[1] : 
-      'undefined');
-    
-    const dbConnected = await connectDB();
-    if (dbConnected) {
-      console.log("✅ MongoDB Connected Successfully");
-    } else {
-      console.log("⚠️ Running without MongoDB connection");
+    let dbConnected = false;
+    try {
+      console.log("🔄 Attempting to connect to MongoDB with URI:", 
+        process.env.MONGO_URI ? 
+        process.env.MONGO_URI.split('@')[0].replace(/:([^:]+)@/, ':****@') + '@' + process.env.MONGO_URI.split('@')[1] : 
+        'undefined');
+      
+      dbConnected = await connectDB();
+      if (dbConnected) {
+        console.log("✅ MongoDB Connected Successfully");
+      } else {
+        console.log("⚠️ Running without MongoDB connection");
+      }
+    } catch (dbError) {
+      console.log("⚠️ MongoDB connection failed, continuing without database:", dbError.message);
+      dbConnected = false;
     }
 
     // Initialize WebSocket service

@@ -1,8 +1,5 @@
-import { useState, useEffect } from 'react';
-import {
-  getRandomQuote,
-  getCategoryQuote
-} from '../utils/quoteSystem.js';
+import { useState, useEffect } from "react";
+import { getRandomQuote, getCategoryQuote } from "../utils/quoteSystem.js";
 
 /**
  * Custom hook for fetching and managing quotes
@@ -11,7 +8,7 @@ import {
  * @param {string} options.theme - Theme for themed quotes (maps to category)
  * @returns {Object} Quote data and loading state
  */
-export function useQuote({ source = 'general', theme = null }) {
+export function useQuote({ source = "general", theme = null }) {
   const [quote, setQuote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,33 +18,33 @@ export function useQuote({ source = 'general', theme = null }) {
     setError(null);
     try {
       let quoteData;
-      
+
       switch (source) {
-        case 'wisdom':
-          quoteData = getCategoryQuote('wisdom');
+        case "wisdom":
+          quoteData = getCategoryQuote("wisdom");
           break;
-        case 'nature':
-          quoteData = getCategoryQuote('nature');
+        case "nature":
+          quoteData = getCategoryQuote("nature");
           break;
-        case 'inspiration':
-          quoteData = getCategoryQuote('inspiration');
+        case "inspiration":
+          quoteData = getCategoryQuote("inspiration");
           break;
-        case 'themed':
-          quoteData = getCategoryQuote(theme || 'literary');
+        case "themed":
+          quoteData = getCategoryQuote(theme || "literary");
           break;
-        case 'general':
+        case "general":
         default:
           quoteData = getRandomQuote();
       }
 
       setQuote(quoteData);
     } catch (err) {
-      console.error('Failed to fetch quote:', err);
-      setError(err.message || 'Failed to fetch quote');
+      console.error("Failed to fetch quote:", err);
+      setError(err.message || "Failed to fetch quote");
       setQuote({
         text: "The best way out is always through.",
         author: "Robert Frost",
-        type: "wisdom"
+        type: "wisdom",
       });
     } finally {
       setLoading(false);
@@ -62,4 +59,4 @@ export function useQuote({ source = 'general', theme = null }) {
   return { quote, loading, error, refetch: fetchQuote };
 }
 
-export default useQuote; 
+export default useQuote;

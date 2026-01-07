@@ -1,0 +1,339 @@
+/* ========================================
+   Minimap Component - NES Zelda Style
+   ======================================== */
+
+:root {
+  --zelda-green: #00A800;
+  --zelda-darkgreen: #006000;
+  --zelda-gold: #FCE000;
+  --nes-black: #000000;
+  --nes-white: #FFFFFF;
+  --nes-gray: #888888;
+  --nes-darkgray: #545454;
+}
+
+.minimap-container {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  z-index: 1000;
+  background: var(--nes-black);
+  border: 3px solid var(--nes-gray);
+  padding: 8px;
+  transition: border-color 0.15s linear;
+}
+
+.minimap-container:hover {
+  border-color: var(--zelda-gold);
+}
+
+.minimap-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #333;
+}
+
+.minimap-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--zelda-gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  text-shadow: 
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
+}
+
+/* Minimap Canvas */
+.minimap {
+  position: relative;
+  background: var(--nes-darkgray);
+  border: 2px solid var(--nes-gray);
+  overflow: hidden;
+}
+
+.minimap-tiles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.minimap-entities {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Tile Types - NES Style */
+.minimap-tile {
+  position: absolute;
+}
+
+.minimap-tile.unexplored {
+  background: var(--nes-black);
+}
+
+.minimap-tile.walkable {
+  background: var(--zelda-darkgreen);
+}
+
+.minimap-tile.wall {
+  background: var(--nes-gray);
+}
+
+.minimap-tile.tree {
+  background: var(--zelda-green);
+}
+
+.minimap-tile.sand {
+  background: #8B7355;
+}
+
+.minimap-tile.water {
+  background: #2573b5;
+  animation: water-pulse 2s steps(2) infinite;
+}
+
+@keyframes water-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(0.8); }
+}
+
+.minimap-tile.portal {
+  background: #9C27B0;
+  animation: portal-glow 1.5s steps(2) infinite;
+}
+
+@keyframes portal-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+/* Player Marker - NES Style */
+.minimap-player {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--zelda-gold);
+  border: 2px solid var(--nes-white);
+  z-index: 100;
+  animation: player-pulse 1s steps(2) infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes player-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+/* NPC Marker - NES Style */
+.minimap-npc {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--zelda-green);
+  border: 1px solid var(--zelda-darkgreen);
+  z-index: 50;
+  animation: npc-blink 1s steps(1) infinite;
+}
+
+@keyframes npc-blink {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0; }
+}
+
+/* Portal Marker - NES Style */
+.minimap-portal {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #9C27B0;
+  border: 1px solid #7B1FA2;
+  z-index: 50;
+  animation: portal-spin 3s steps(8) infinite;
+}
+
+@keyframes portal-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Compass - NES Style */
+.minimap-compass {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  background: var(--nes-black);
+  border: 2px solid var(--nes-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--zelda-gold);
+  font-family: 'Courier New', monospace;
+  z-index: 200;
+}
+
+.compass-n {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #FF5252;
+  text-shadow: 
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
+}
+
+.compass-s {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.5;
+}
+
+.compass-e {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+}
+
+.compass-w {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+}
+
+/* Legend */
+.minimap-legend {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #333;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #aaa;
+  font-family: 'Courier New', monospace;
+}
+
+.legend-icon {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+}
+
+.legend-icon.player-icon {
+  background: var(--zelda-gold);
+  border: 1px solid var(--nes-white);
+}
+
+.legend-icon.npc-icon {
+  background: var(--zelda-green);
+  border: 1px solid var(--zelda-darkgreen);
+}
+
+.legend-icon.portal-icon {
+  background: #9C27B0;
+  border: 1px solid #7B1FA2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .minimap-container {
+    top: auto;
+    bottom: 16px;
+    right: 8px;
+    padding: 8px;
+    transform: scale(0.8);
+    transform-origin: bottom right;
+  }
+
+  .minimap-title {
+    font-size: 10px;
+  }
+
+  .minimap-legend {
+    gap: 8px;
+  }
+
+  .legend-item {
+    font-size: 9px;
+  }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .minimap-player,
+  .minimap-npc,
+  .minimap-portal,
+  .minimap-tile.water,
+  .minimap-tile.portal {
+    animation: none;
+  }
+
+  .minimap-container {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .minimap-container {
+    border: 3px solid var(--nes-white);
+    background: var(--nes-black);
+  }
+
+  .minimap {
+    border: 3px solid #fff;
+  }
+
+  .minimap-tile.unexplored {
+    background: #000;
+  }
+
+  .minimap-tile.walkable {
+    background: #444;
+  }
+
+  .minimap-tile.wall {
+    background: #fff;
+  }
+
+  .minimap-player {
+    border: 3px solid #fff;
+  }
+
+  .legend-item {
+    color: #fff;
+  }
+}
+

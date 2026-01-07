@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import './AchievementNotification.css';
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import "./AchievementNotification.css";
 
 /**
  * Component that displays a notification when a user unlocks an achievement
@@ -29,10 +29,10 @@ const AchievementNotification = ({ achievement, onClose }) => {
 
   const handleClose = () => {
     if (closing) return;
-    
+
     setClosing(true);
     setVisible(false);
-    
+
     // Allow animation to complete before removing from DOM
     setTimeout(() => {
       if (onClose) onClose();
@@ -40,18 +40,29 @@ const AchievementNotification = ({ achievement, onClose }) => {
   };
 
   return (
-    <div 
-      className={`achievement-notification ${visible ? 'visible' : ''} ${closing ? 'closing' : ''}`}
+    <div
+      className={`achievement-notification ${visible ? "visible" : ""} ${closing ? "closing" : ""}`}
       onClick={handleClose}
     >
       <div className="achievement-notification-content">
         <div className="achievement-notification-icon">🏆</div>
         <div className="achievement-notification-text">
-          <div className="achievement-notification-title">Achievement Unlocked!</div>
-          <div className="achievement-notification-name">{achievement.name}</div>
-          <div className="achievement-notification-description">{achievement.description}</div>
+          <div className="achievement-notification-title">
+            Achievement Unlocked!
+          </div>
+          <div className="achievement-notification-name">
+            {achievement.name}
+          </div>
+          <div className="achievement-notification-description">
+            {achievement.description}
+          </div>
         </div>
-        <button className="achievement-notification-close" onClick={handleClose}>×</button>
+        <button
+          className="achievement-notification-close"
+          onClick={handleClose}
+        >
+          ×
+        </button>
       </div>
     </div>
   );
@@ -62,9 +73,9 @@ AchievementNotification.propTypes = {
     id: PropTypes.string,
     name: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
-    type: PropTypes.string
+    type: PropTypes.string,
   }).isRequired,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
 };
 
-export default AchievementNotification; 
+export default AchievementNotification;

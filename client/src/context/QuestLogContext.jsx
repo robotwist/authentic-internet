@@ -1,6 +1,6 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { AuthContext } from './AuthContext';
-import gameProgressService from '../services/GameProgressService';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { AuthContext } from "./AuthContext";
+import gameProgressService from "../services/GameProgressService";
 
 const QuestLogContext = createContext();
 
@@ -28,7 +28,7 @@ export const QuestLogProvider = ({ children }) => {
         const playerQuests = await gameProgressService.getPlayerQuests(user.id);
         setQuests(playerQuests || []);
       } catch (error) {
-        console.error('Failed to load quests:', error);
+        console.error("Failed to load quests:", error);
         // Use empty array as fallback
         setQuests([]);
       } finally {
@@ -46,10 +46,9 @@ export const QuestLogProvider = ({ children }) => {
     }
 
     // Save quests to the game progress service
-    gameProgressService.savePlayerQuests(user.id, quests)
-      .catch(error => {
-        console.error('Failed to save quests:', error);
-      });
+    gameProgressService.savePlayerQuests(user.id, quests).catch((error) => {
+      console.error("Failed to save quests:", error);
+    });
   }, [quests, user, isAuthenticated, isLoading]);
 
   /**
@@ -57,18 +56,18 @@ export const QuestLogProvider = ({ children }) => {
    */
   const addQuest = (quest) => {
     if (!quest || !quest.id) {
-      console.error('Invalid quest data');
+      console.error("Invalid quest data");
       return;
     }
 
     // Check if quest already exists
-    if (quests.some(q => q.id === quest.id)) {
+    if (quests.some((q) => q.id === quest.id)) {
       console.warn(`Quest ${quest.id} already exists in quest log`);
       return;
     }
 
     // Add the new quest with initialized fields
-    setQuests(prevQuests => [
+    setQuests((prevQuests) => [
       ...prevQuests,
       {
         ...quest,
@@ -77,11 +76,11 @@ export const QuestLogProvider = ({ children }) => {
         completed: false,
         progress: 0,
         // Ensure all objectives have a completed property
-        objectives: (quest.objectives || []).map(obj => ({
+        objectives: (quest.objectives || []).map((obj) => ({
           ...obj,
-          completed: obj.completed || false
-        }))
-      }
+          completed: obj.completed || false,
+        })),
+      },
     ]);
   };
 
@@ -89,31 +88,36 @@ export const QuestLogProvider = ({ children }) => {
    * Update an objective's completion status within a quest
    */
   const updateObjective = (questId, objectiveId, isCompleted) => {
-    setQuests(prevQuests => 
-      prevQuests.map(quest => {
+    setQuests((prevQuests) =>
+      prevQuests.map((quest) => {
         if (quest.id !== questId) return quest;
-        
+
         // Update the specific objective
-        const updatedObjectives = quest.objectives.map(objective => {
+        const updatedObjectives = quest.objectives.map((objective) => {
           if (objective.id !== objectiveId) return objective;
           return { ...objective, completed: isCompleted };
         });
-        
+
         // Calculate completion percentage
-        const completedCount = updatedObjectives.filter(obj => obj.completed).length;
-        const progress = Math.round((completedCount / updatedObjectives.length) * 100);
-        
+        const completedCount = updatedObjectives.filter(
+          (obj) => obj.completed,
+        ).length;
+        const progress = Math.round(
+          (completedCount / updatedObjectives.length) * 100,
+        );
+
         // Check if all objectives are completed
-        const allCompleted = updatedObjectives.every(obj => obj.completed);
-        
+        const allCompleted = updatedObjectives.every((obj) => obj.completed);
+
         return {
           ...quest,
           objectives: updatedObjectives,
           progress,
           completed: allCompleted,
-          dateCompleted: allCompleted && !quest.completed ? new Date() : quest.dateCompleted
+          dateCompleted:
+            allCompleted && !quest.completed ? new Date() : quest.dateCompleted,
         };
-      })
+      }),
     );
   };
 
@@ -121,24 +125,24 @@ export const QuestLogProvider = ({ children }) => {
    * Mark a quest as complete
    */
   const completeQuest = (questId) => {
-    setQuests(prevQuests => 
-      prevQuests.map(quest => {
+    setQuests((prevQuests) =>
+      prevQuests.map((quest) => {
         if (quest.id !== questId) return quest;
-        
+
         // Mark all objectives as completed
-        const updatedObjectives = quest.objectives.map(objective => ({
+        const updatedObjectives = quest.objectives.map((objective) => ({
           ...objective,
-          completed: true
+          completed: true,
         }));
-        
+
         return {
           ...quest,
           objectives: updatedObjectives,
           progress: 100,
           completed: true,
-          dateCompleted: quest.dateCompleted || new Date()
+          dateCompleted: quest.dateCompleted || new Date(),
         };
-      })
+      }),
     );
   };
 
@@ -146,28 +150,30 @@ export const QuestLogProvider = ({ children }) => {
    * Remove a quest from the quest log
    */
   const removeQuest = (questId) => {
-    setQuests(prevQuests => prevQuests.filter(quest => quest.id !== questId));
+    setQuests((prevQuests) =>
+      prevQuests.filter((quest) => quest.id !== questId),
+    );
   };
 
   /**
    * Get a specific quest by ID
    */
   const getQuest = (questId) => {
-    return quests.find(quest => quest.id === questId);
+    return quests.find((quest) => quest.id === questId);
   };
 
   /**
    * Get active quests (not completed)
    */
   const getActiveQuests = () => {
-    return quests.filter(quest => !quest.completed);
+    return quests.filter((quest) => !quest.completed);
   };
 
   /**
    * Get completed quests
    */
   const getCompletedQuests = () => {
-    return quests.filter(quest => quest.completed);
+    return quests.filter((quest) => quest.completed);
   };
 
   const contextValue = {
@@ -179,7 +185,7 @@ export const QuestLogProvider = ({ children }) => {
     removeQuest,
     getQuest,
     getActiveQuests,
-    getCompletedQuests
+    getCompletedQuests,
   };
 
   return (
@@ -189,4 +195,4 @@ export const QuestLogProvider = ({ children }) => {
   );
 };
 
-export default QuestLogContext; 
+export default QuestLogContext;

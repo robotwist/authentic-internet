@@ -1,4 +1,4 @@
-import API, { handleApiError } from './apiConfig';
+import API, { handleApiError } from "./apiConfig";
 
 /**
  * Fetches a user's character
@@ -21,7 +21,10 @@ export const fetchCharacter = async (userId) => {
  */
 export const updateCharacter = async (updatedCharacter) => {
   try {
-    const response = await API.put(`/api/users/${updatedCharacter.userId}/character`, updatedCharacter);
+    const response = await API.put(
+      `/api/users/${updatedCharacter.userId}/character`,
+      updatedCharacter,
+    );
     return response.data;
   } catch (error) {
     throw new Error(handleApiError(error, "Failed to update character"));
@@ -63,9 +66,9 @@ export const updateUserProfile = async (userId, profileData) => {
  */
 export const listUsers = async () => {
   try {
-    const response = await API.get('/api/users');
+    const response = await API.get("/api/users");
     return response.data;
   } catch (error) {
     throw new Error(handleApiError(error, "Failed to list users"));
   }
-}; 
+};

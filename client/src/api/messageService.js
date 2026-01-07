@@ -1,4 +1,4 @@
-import API, { handleApiError } from './apiConfig';
+import API, { handleApiError } from "./apiConfig";
 
 /**
  * Sends a message
@@ -9,7 +9,11 @@ import API, { handleApiError } from './apiConfig';
  */
 export const sendMessage = async (recipient, content, artifactId = null) => {
   try {
-    const response = await API.post("/api/messages", { recipient, content, artifactId });
+    const response = await API.post("/api/messages", {
+      recipient,
+      content,
+      artifactId,
+    });
     return response.data;
   } catch (error) {
     throw new Error(handleApiError(error, "Failed to send message"));
@@ -51,7 +55,9 @@ export const fetchMessages = async () => {
  */
 export const updateMessage = async (artifactId, messageText) => {
   try {
-    const response = await API.put(`/api/messages/artifact/${artifactId}`, { content: messageText });
+    const response = await API.put(`/api/messages/artifact/${artifactId}`, {
+      content: messageText,
+    });
     return response.data;
   } catch (error) {
     throw new Error(handleApiError(error, "Failed to update message"));
@@ -70,4 +76,4 @@ export const deleteMessage = async (artifactId) => {
   } catch (error) {
     throw new Error(handleApiError(error, "Failed to delete message"));
   }
-}; 
+};

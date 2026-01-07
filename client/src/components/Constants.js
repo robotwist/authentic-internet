@@ -1,16 +1,36 @@
-import { v4 as uuidv4 } from 'uuid';
-import { MAPS, WORLD_MAP } from './GameData';
-import { TILE_SIZE, MAP_ROWS, MAP_COLS, TILE_TYPES, isWalkable } from './MapConstants';
-import { ARTIFACT_TYPES, ARTIFACT_INTERACTIONS, NPC_TYPES } from './GameConstants';
+import { v4 as uuidv4 } from "uuid";
+import { MAPS, WORLD_MAP } from "./GameData";
+import {
+  TILE_SIZE,
+  MAP_ROWS,
+  MAP_COLS,
+  TILE_TYPES,
+  isWalkable,
+} from "./MapConstants";
+import {
+  ARTIFACT_TYPES,
+  ARTIFACT_INTERACTIONS,
+  NPC_TYPES,
+} from "./GameConstants";
 
 // Re-export all constants from their respective files
-export { TILE_SIZE, MAP_ROWS, MAP_COLS, TILE_TYPES, isWalkable } from './MapConstants';
-export { ARTIFACT_TYPES, ARTIFACT_INTERACTIONS, NPC_TYPES } from './GameConstants';
-export { MAPS, WORLD_MAP } from './GameData';
+export {
+  TILE_SIZE,
+  MAP_ROWS,
+  MAP_COLS,
+  TILE_TYPES,
+  isWalkable,
+} from "./MapConstants";
+export {
+  ARTIFACT_TYPES,
+  ARTIFACT_INTERACTIONS,
+  NPC_TYPES,
+} from "./GameConstants";
+export { MAPS, WORLD_MAP } from "./GameData";
 
 // Helper functions
 export const canInteract = (tileType) => {
-  if (typeof tileType !== 'number') return false;
+  if (typeof tileType !== "number") return false;
   switch (tileType) {
     case 5: // Portal
     case 6: // Terminal portal
@@ -23,16 +43,16 @@ export const canInteract = (tileType) => {
 };
 
 export const getInteractionResult = (tileType) => {
-  if (typeof tileType !== 'number') return null;
+  if (typeof tileType !== "number") return null;
   switch (tileType) {
     case 5: // Portal
-      return { type: 'portal' };
+      return { type: "portal" };
     case 6: // Terminal portal
-      return { type: 'terminal' };
+      return { type: "terminal" };
     case 7: // Shooter portal
-      return { type: 'shooter' };
+      return { type: "shooter" };
     case 8: // Text portal
-      return { type: 'text' };
+      return { type: "text" };
     default:
       return null;
   }
@@ -65,5 +85,5 @@ export default {
   canInteract,
   getInteractionResult,
   isNearConditionMet,
-  canInteractWithNPC
-}; 
+  canInteractWithNPC,
+};

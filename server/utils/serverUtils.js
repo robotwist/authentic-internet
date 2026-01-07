@@ -125,6 +125,15 @@ export const setupGlobalErrorHandlers = (shutdownFn) => {
   // Handle unhandled promise rejections
   process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    
+    // In development, don't shut down for MongoDB connection errors
+    if (process.env.NODE_ENV === 'development' && 
+        reason && reason.message && 
+        reason.message.includes('mongodb')) {
+      console.log('⚠️ Ignoring MongoDB connection error in development mode');
+      return;
+    }
+    
     if (shutdownFn) {
       shutdownFn('SIGTERM');
     }

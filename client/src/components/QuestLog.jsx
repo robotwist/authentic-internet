@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { fetchQuests, completeQuestStage, abandonQuest } from '../api/api';
-import './QuestLog.css';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { fetchQuests, completeQuestStage, abandonQuest } from "../api/api";
+import QuestChainVisualization from "./QuestChainVisualization";
+import "./QuestLog.css";
 
 const QuestLog = ({ onClose, onQuestUpdate }) => {
   const { user } = useAuth();
   const [quests, setQuests] = useState({
     activeQuests: [],
     completedQuests: [],
-    stats: {}
+    stats: {},
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [selectedQuest, setSelectedQuest] = useState(null);
+  const [activeTab, setActiveTab] = useState("list"); // 'list' or 'chains'
 
   useEffect(() => {
     loadQuests();
@@ -26,8 +28,8 @@ const QuestLog = ({ onClose, onQuestUpdate }) => {
         setQuests(response.data);
       }
     } catch (error) {
-      console.error('Error fetching quests:', error);
-      setError('Failed to load quests');
+      console.error("Error fetching quests:", error);
+      setError("Failed to load quests");
     } finally {
       setLoading(false);
     }
@@ -40,23 +42,32 @@ const QuestLog = ({ onClose, onQuestUpdate }) => {
       if (response.success) {
         // Refresh quests
         await loadQuests();
-        
+
         // Notify parent component
         if (onQuestUpdate) {
           onQuestUpdate(response.data.data);
         }
 
         // Show success message
-        alert(`Stage completed! You earned ${response.data.data.rewards.exp || 0} XP!`);
+        alert(
+          `Stage completed! You earned ${response.data.data.rewards.exp || 0} XP!`,
+        );
       }
     } catch (error) {
-      console.error('Error completing stage:', error);
-      alert('Failed to complete stage: ' + (error.response?.data?.message || error.message));
+      console.error("Error completing stage:", error);
+      alert(
+        "Failed to complete stage: " +
+          (error.response?.data?.message || error.message),
+      );
     }
   };
 
   const handleAbandonQuest = async (questId) => {
-    if (!confirm('Are you sure you want to abandon this quest? This action cannot be undone.')) {
+    if (
+      !confirm(
+        "Are you sure you want to abandon this quest? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
@@ -64,24 +75,29 @@ const QuestLog = ({ onClose, onQuestUpdate }) => {
       const response = await abandonQuest(questId);
       if (response.success) {
         await loadQuests();
-        alert('Quest abandoned successfully');
+        alert("Quest abandoned successfully");
       }
     } catch (error) {
-      console.error('Error abandoning quest:', error);
-      alert('Failed to abandon quest: ' + (error.response?.data?.message || error.message));
+      console.error("Error abandoning quest:", error);
+      alert(
+        "Failed to abandon quest: " +
+          (error.response?.data?.message || error.message),
+      );
     }
   };
 
   const getQuestProgress = (quest) => {
-    const completedStages = quest.stages.filter(stage => stage.completed).length;
+    const completedStages = quest.stages.filter(
+      (stage) => stage.completed,
+    ).length;
     const totalStages = quest.stages.length;
     return Math.round((completedStages / totalStages) * 100);
   };
 
   const getQuestStatus = (quest) => {
-    if (quest.isCompleted) return 'completed';
-    if (quest.isActive) return 'active';
-    return 'available';
+    if (quest.isCompleted) return "completed";
+    if (quest.isActive) return "active";
+    return "available";
   };
 
   if (loading) {
@@ -90,7 +106,9 @@ const QuestLog = ({ onClose, onQuestUpdate }) => {
         <div className="quest-log">
           <div className="quest-log-header">
             <h2>Quest Log</h2>
-            <button onClick={onClose} className="close-button">×</button>
+            <button onClick={onClose} className="close-button">
+              ×
+            </button>
           </div>
           <div className="loading">Loading quests...</div>
         </div>
@@ -103,135 +121,205 @@ const QuestLog = ({ onClose, onQuestUpdate }) => {
       <div className="quest-log">
         <div className="quest-log-header">
           <h2>Quest Log</h2>
-          <button onClick={onClose} className="close-button">×</button>
+          <button onClick={onClose} className="close-button">
+            ×
+          </button>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="quest-log-tabs">
+          <button
+            className={`quest-tab ${activeTab === "list" ? "active" : ""}`}
+            onClick={() => setActiveTab("list")}
+          >
+            Quest List
+          </button>
+          <button
+            className={`quest-tab ${activeTab === "chains" ? "active" : ""}`}
+            onClick={() => setActiveTab("chains")}
+          >
+            Quest Chains
+          </button>
         </div>
 
         {error && <div className="error-message">{error}</div>}
 
-        {/* Quest Statistics */}
-        <div className="quest-stats">
-          <div className="stat-item">
-            <span className="stat-label">Active Quests:</span>
-            <span className="stat-value">{quests.activeQuests.length}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Completed:</span>
-            <span className="stat-value">{quests.stats.totalQuestsCompleted || 0}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Total XP Earned:</span>
-            <span className="stat-value">{quests.stats.totalExpEarned || 0}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Current Streak:</span>
-            <span className="stat-value">{quests.stats.currentStreak || 0}</span>
-          </div>
-        </div>
+        {/* Quest Chain View */}
+        {activeTab === "chains" ? (
+          <QuestChainVisualization onClose={onClose} />
+        ) : (
+          <>
+            {/* Quest Statistics */}
+            <div className="quest-stats">
+              <div className="stat-item">
+                <span className="stat-label">Active Quests:</span>
+                <span className="stat-value">{quests.activeQuests.length}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">Completed:</span>
+                <span className="stat-value">
+                  {quests.stats.totalQuestsCompleted || 0}
+                </span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">Total XP Earned:</span>
+                <span className="stat-value">
+                  {quests.stats.totalExpEarned || 0}
+                </span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">Current Streak:</span>
+                <span className="stat-value">
+                  {quests.stats.currentStreak || 0}
+                </span>
+              </div>
+            </div>
 
-        {/* Active Quests */}
-        <div className="quest-section">
-          <h3>Active Quests ({quests.activeQuests.length})</h3>
-          {quests.activeQuests.length === 0 ? (
-            <p className="no-quests">No active quests. Visit NPCs to start new quests!</p>
-          ) : (
-            <div className="quest-list">
-              {quests.activeQuests.map((quest) => (
-                <div key={quest.questId} className="quest-item active">
-                  <div className="quest-header">
-                    <h4>{quest.title}</h4>
-                    <div className="quest-actions">
-                      <button 
-                        onClick={() => setSelectedQuest(selectedQuest?.questId === quest.questId ? null : quest)}
-                        className="view-details-btn"
-                      >
-                        {selectedQuest?.questId === quest.questId ? 'Hide' : 'View'} Details
-                      </button>
-                      <button 
-                        onClick={() => handleAbandonQuest(quest.questId)}
-                        className="abandon-btn"
-                      >
-                        Abandon
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="quest-progress">
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
-                        style={{ width: `${getQuestProgress(quest)}%` }}
-                      ></div>
-                    </div>
-                    <span className="progress-text">
-                      {quest.stages.filter(s => s.completed).length} / {quest.stages.length} stages
-                    </span>
-                  </div>
+            {/* Active Quests */}
+            <div className="quest-section">
+              <h3>Active Quests ({quests.activeQuests.length})</h3>
+              {quests.activeQuests.length === 0 ? (
+                <p className="no-quests">
+                  No active quests. Visit NPCs to start new quests!
+                </p>
+              ) : (
+                <div className="quest-list">
+                  {quests.activeQuests.map((quest) => (
+                    <div key={quest.questId} className="quest-item active">
+                      <div className="quest-header">
+                        <h4>{quest.title}</h4>
+                        <div className="quest-actions">
+                          <button
+                            onClick={() =>
+                              setSelectedQuest(
+                                selectedQuest?.questId === quest.questId
+                                  ? null
+                                  : quest,
+                              )
+                            }
+                            className="view-details-btn"
+                          >
+                            {selectedQuest?.questId === quest.questId
+                              ? "Hide"
+                              : "View"}{" "}
+                            Details
+                          </button>
+                          <button
+                            onClick={() => handleAbandonQuest(quest.questId)}
+                            className="abandon-btn"
+                          >
+                            Abandon
+                          </button>
+                        </div>
+                      </div>
 
-                  {selectedQuest?.questId === quest.questId && (
-                    <div className="quest-details">
-                      <p className="quest-description">{quest.description}</p>
-                      <div className="quest-stages">
-                        {quest.stages.map((stage, index) => (
-                          <div key={index} className={`stage-item ${stage.completed ? 'completed' : ''}`}>
-                            <div className="stage-header">
-                              <span className="stage-number">Stage {index + 1}</span>
-                              {stage.completed && <span className="completed-badge">✓</span>}
-                            </div>
-                            <p className="stage-task">{stage.task}</p>
-                            {stage.reward && (
-                              <div className="stage-reward">
-                                <span>Reward: </span>
-                                {stage.reward.exp && <span className="reward-exp">+{stage.reward.exp} XP</span>}
-                                {stage.reward.item && <span className="reward-item">+{stage.reward.item}</span>}
-                                {stage.reward.ability && <span className="reward-ability">+{stage.reward.ability}</span>}
-                              </div>
-                            )}
-                            {!stage.completed && (
-                              <button 
-                                onClick={() => handleCompleteStage(quest.questId, index)}
-                                className="complete-stage-btn"
+                      <div className="quest-progress">
+                        <div className="progress-bar">
+                          <div
+                            className="progress-fill"
+                            style={{ width: `${getQuestProgress(quest)}%` }}
+                          ></div>
+                        </div>
+                        <span className="progress-text">
+                          {quest.stages.filter((s) => s.completed).length} /{" "}
+                          {quest.stages.length} stages
+                        </span>
+                      </div>
+
+                      {selectedQuest?.questId === quest.questId && (
+                        <div className="quest-details">
+                          <p className="quest-description">
+                            {quest.description}
+                          </p>
+                          <div className="quest-stages">
+                            {quest.stages.map((stage, index) => (
+                              <div
+                                key={index}
+                                className={`stage-item ${stage.completed ? "completed" : ""}`}
                               >
-                                Complete Stage
-                              </button>
-                            )}
+                                <div className="stage-header">
+                                  <span className="stage-number">
+                                    Stage {index + 1}
+                                  </span>
+                                  {stage.completed && (
+                                    <span className="completed-badge">✓</span>
+                                  )}
+                                </div>
+                                <p className="stage-task">{stage.task}</p>
+                                {stage.reward && (
+                                  <div className="stage-reward">
+                                    <span>Reward: </span>
+                                    {stage.reward.exp && (
+                                      <span className="reward-exp">
+                                        +{stage.reward.exp} XP
+                                      </span>
+                                    )}
+                                    {stage.reward.item && (
+                                      <span className="reward-item">
+                                        +{stage.reward.item}
+                                      </span>
+                                    )}
+                                    {stage.reward.ability && (
+                                      <span className="reward-ability">
+                                        +{stage.reward.ability}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                                {!stage.completed && (
+                                  <button
+                                    onClick={() =>
+                                      handleCompleteStage(quest.questId, index)
+                                    }
+                                    className="complete-stage-btn"
+                                  >
+                                    Complete Stage
+                                  </button>
+                                )}
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Completed Quests */}
+            {quests.completedQuests.length > 0 && (
+              <div className="quest-section">
+                <h3>Completed Quests ({quests.completedQuests.length})</h3>
+                <div className="quest-list">
+                  {quests.completedQuests.slice(0, 5).map((quest) => (
+                    <div key={quest.questId} className="quest-item completed">
+                      <div className="quest-header">
+                        <h4>{quest.title}</h4>
+                        <span className="completed-date">
+                          {new Date(quest.completedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="quest-rewards">
+                        <span>Total Rewards: </span>
+                        <span className="reward-exp">+{quest.totalExp} XP</span>
+                        {quest.totalItems.length > 0 && (
+                          <span className="reward-items">
+                            +{quest.totalItems.join(", ")}
+                          </span>
+                        )}
+                        {quest.totalAbilities.length > 0 && (
+                          <span className="reward-abilities">
+                            +{quest.totalAbilities.join(", ")}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Completed Quests */}
-        {quests.completedQuests.length > 0 && (
-          <div className="quest-section">
-            <h3>Completed Quests ({quests.completedQuests.length})</h3>
-            <div className="quest-list">
-              {quests.completedQuests.slice(0, 5).map((quest) => (
-                <div key={quest.questId} className="quest-item completed">
-                  <div className="quest-header">
-                    <h4>{quest.title}</h4>
-                    <span className="completed-date">
-                      {new Date(quest.completedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="quest-rewards">
-                    <span>Total Rewards: </span>
-                    <span className="reward-exp">+{quest.totalExp} XP</span>
-                    {quest.totalItems.length > 0 && (
-                      <span className="reward-items">+{quest.totalItems.join(', ')}</span>
-                    )}
-                    {quest.totalAbilities.length > 0 && (
-                      <span className="reward-abilities">+{quest.totalAbilities.join(', ')}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

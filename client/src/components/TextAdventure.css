@@ -1,3 +1,20 @@
+/* ========================================
+   MEGA MAN NES PALETTE - SHOOTER STYLE
+   ======================================== */
+:root {
+  /* Mega Man Blues */
+  --megaman-blue: #0058F8;
+  --megaman-lightblue: #00E5F8;
+  --megaman-darkblue: #000088;
+  
+  /* Mega Man Accents */
+  --megaman-yellow: #FCE000;
+  --megaman-red: #F83800;
+  --megaman-white: #FFFFFF;
+  --megaman-black: #000000;
+  --megaman-gray: #888888;
+}
+
 /* Royal Typewriter Font Import */
 @font-face {
   font-family: 'Royal Vogue';
@@ -21,21 +38,20 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #1a1a1a;
-  color: #ccc;
+  background-color: var(--megaman-black);
+  color: var(--megaman-lightblue);
   font-family: 'Royal Vogue', 'American Typewriter', 'Courier New', monospace;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
-  background-image: url('/assets/images/paper-texture.png');
-  background-blend-mode: overlay;
+  image-rendering: pixelated;
 }
 
 .text-adventure-header {
-  background-color: #121212;
-  padding: 15px;
-  border-bottom: 2px solid #333;
+  background-color: var(--megaman-darkblue);
+  padding: 16px;
+  border-bottom: 3px solid var(--megaman-blue);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -43,27 +59,31 @@
 
 .text-adventure-header h2 {
   margin: 0;
-  color: #e0e0e0;
+  color: var(--megaman-yellow);
   font-size: 24px;
   font-family: 'Royal Vogue', 'American Typewriter', 'Courier New', monospace;
   letter-spacing: 2px;
   text-transform: uppercase;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  text-shadow: 
+    -1px -1px 0 var(--megaman-black),
+    1px -1px 0 var(--megaman-black),
+    -1px 1px 0 var(--megaman-black),
+    1px 1px 0 var(--megaman-black);
 }
 
 .health-bar {
   width: 200px;
-  height: 20px;
-  background-color: #333;
-  border-radius: 10px;
+  height: 24px;
+  background-color: var(--megaman-darkblue);
+  border: 2px solid var(--megaman-blue);
   overflow: hidden;
   position: relative;
 }
 
 .health-bar-fill {
   height: 100%;
-  background-color: #4CAF50;
-  transition: width 0.3s ease;
+  background-color: var(--megaman-yellow);
+  transition: width 0.15s linear;
 }
 
 .health-bar span {
@@ -71,9 +91,13 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: white;
+  color: var(--megaman-white);
   font-size: 12px;
-  text-shadow: 1px 1px 2px black;
+  text-shadow: 
+    -1px -1px 0 var(--megaman-black),
+    1px -1px 0 var(--megaman-black),
+    -1px 1px 0 var(--megaman-black),
+    1px 1px 0 var(--megaman-black);
   white-space: nowrap;
 }
 
@@ -81,25 +105,23 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 16px;
   overflow: hidden;
 }
 
 .game-history {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
-  margin-bottom: 15px;
-  background-color: rgba(20, 20, 20, 0.9);
-  border: 1px solid #333;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
-  border-radius: 0;
+  padding: 16px;
+  margin-bottom: 16px;
+  background-color: var(--megaman-darkblue);
+  border: 2px solid var(--megaman-blue);
 }
 
 .history-entry {
   margin-bottom: 12px;
-  line-height: 1.8;
-  animation: fadeIn 0.3s ease-in;
+  line-height: 24px;
+  animation: fadeIn 0.2s linear;
   letter-spacing: 0.4px;
   position: relative;
   text-indent: 20px;
@@ -107,17 +129,17 @@
 }
 
 .history-entry.system {
-  color: #7cbb00;
+  color: var(--megaman-yellow);
   font-style: italic;
 }
 
 .history-entry.player {
-  color: #4a90e2;
+  color: var(--megaman-lightblue);
   font-weight: bold;
 }
 
 .history-entry.room {
-  color: #ccc;
+  color: var(--megaman-white);
 }
 
 .history-entry.typing {
@@ -138,15 +160,14 @@
 .command-input-container {
   display: flex;
   align-items: center;
-  background-color: #121212;
-  padding: 10px;
-  border-radius: 0;
-  border-top: 1px solid #333;
+  background-color: var(--megaman-darkblue);
+  padding: 8px;
+  border-top: 2px solid var(--megaman-blue);
 }
 
 .command-prompt {
-  color: #4a90e2;
-  margin-right: 10px;
+  color: var(--megaman-yellow);
+  margin-right: 8px;
   font-weight: bold;
 }
 
@@ -154,7 +175,7 @@
   flex: 1;
   background-color: transparent;
   border: none;
-  color: #e0e0e0;
+  color: var(--megaman-lightblue);
   font-family: 'Royal Vogue', 'American Typewriter', 'Courier New', monospace;
   font-size: 16px;
   outline: none;
@@ -163,31 +184,30 @@
 }
 
 .command-input::placeholder {
-  color: #666;
+  color: var(--megaman-gray);
 }
 
 .text-adventure-footer {
-  background-color: #121212;
-  padding: 15px;
-  border-top: 2px solid #333;
+  background-color: var(--megaman-darkblue);
+  padding: 16px;
+  border-top: 3px solid var(--megaman-blue);
   display: flex;
   justify-content: flex-end;
 }
 
 .exit-button {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
+  background-color: var(--megaman-red);
+  color: var(--megaman-white);
+  border: 2px solid var(--megaman-white);
   padding: 8px 16px;
-  border-radius: 5px;
   cursor: pointer;
   font-family: 'Royal Vogue', 'American Typewriter', 'Courier New', monospace;
-  transition: all 0.2s ease;
+  transition: background 0.15s linear;
 }
 
 .exit-button:hover {
-  background-color: #c0392b;
-  transform: scale(1.05);
+  background-color: var(--megaman-yellow);
+  color: var(--megaman-black);
 }
 
 .game-complete-overlay,
@@ -197,7 +217,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: var(--megaman-black);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -206,57 +226,60 @@
 
 .game-complete-content,
 .game-over-content {
-  background-color: #1a1a1a;
-  border: 2px solid #4CAF50;
-  border-radius: 10px;
-  padding: 30px;
-  max-width: 500px;
+  background-color: var(--megaman-darkblue);
+  border: 3px solid var(--megaman-yellow);
+  padding: 32px;
+  max-width: 496px;
   text-align: center;
-  animation: slideIn 0.5s ease;
+  animation: slideIn 0.3s linear;
 }
 
 .game-over-content {
-  border-color: #e74c3c;
+  border-color: var(--megaman-red);
 }
 
 .game-complete-content h2,
 .game-over-content h2 {
-  color: #e0e0e0;
+  color: var(--megaman-yellow);
   margin-top: 0;
+  text-shadow: 
+    -1px -1px 0 var(--megaman-black),
+    1px -1px 0 var(--megaman-black),
+    -1px 1px 0 var(--megaman-black),
+    1px 1px 0 var(--megaman-black);
 }
 
 .game-complete-content p,
 .game-over-content p {
-  color: #ccc;
-  margin-bottom: 20px;
+  color: var(--megaman-lightblue);
+  margin-bottom: 16px;
   font-style: italic;
 }
 
 .game-complete-content button,
 .game-over-content button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin: 0 10px;
-  border-radius: 5px;
+  background-color: var(--megaman-blue);
+  color: var(--megaman-white);
+  border: 2px solid var(--megaman-white);
+  padding: 8px 16px;
+  margin: 0 8px;
   cursor: pointer;
   font-family: 'Royal Vogue', 'American Typewriter', 'Courier New', monospace;
-  transition: all 0.2s ease;
+  transition: background 0.15s linear;
 }
 
 .game-over-content button:first-of-type {
-  background-color: #e74c3c;
+  background-color: var(--megaman-red);
 }
 
 .game-over-content button:last-of-type {
-  background-color: #4CAF50;
+  background-color: var(--megaman-blue);
 }
 
 .game-complete-content button:hover,
 .game-over-content button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  background-color: var(--megaman-yellow);
+  color: var(--megaman-black);
 }
 
 /* Typewriter key sound effect (visual representation) */
@@ -315,11 +338,9 @@
 @keyframes slideIn {
   from { 
     opacity: 0;
-    transform: translateY(-50px);
   }
   to { 
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { WORLD_MAP } from './Constants';
-import './WorldMap.css';
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { WORLD_MAP } from "./Constants";
+import "./WorldMap.css";
 
 const WorldMap = ({ currentWorld, onClose, onNodeClick }) => {
   const [hoveredWorld, setHoveredWorld] = useState(null);
   const [isSpinning, setIsSpinning] = useState(false);
 
   // Get the ID of the current world
-  const currentWorldId = WORLD_MAP.mapToId[currentWorld] || 'overworld';
+  const currentWorldId = WORLD_MAP.mapToId[currentWorld] || "overworld";
 
   // Set up a repeating animation trigger every 30 seconds
   useEffect(() => {
@@ -29,15 +29,15 @@ const WorldMap = ({ currentWorld, onClose, onNodeClick }) => {
 
   // Get node color based on type
   const getNodeColorClass = (world) => {
-    switch(world.type) {
-      case 'dungeon':
-        return 'dungeon-node';
-      case 'special':
-        return 'special-node';
-      case 'text':
-        return 'text-node';
+    switch (world.type) {
+      case "dungeon":
+        return "dungeon-node";
+      case "special":
+        return "special-node";
+      case "text":
+        return "text-node";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -46,7 +46,7 @@ const WorldMap = ({ currentWorld, onClose, onNodeClick }) => {
     // If we click a node, trigger the portal animation
     if (world.id !== currentWorldId) {
       triggerPortalAnimation();
-      
+
       // Call the onNodeClick prop with the world ID
       if (onNodeClick) {
         onNodeClick(world.id);
@@ -55,47 +55,60 @@ const WorldMap = ({ currentWorld, onClose, onNodeClick }) => {
   };
 
   return (
-    <div className={`world-map-overlay ${isSpinning ? 'spinning' : ''}`}>
-      <div className={`world-map-container ${isSpinning ? 'spinning-content' : ''}`}>
+    <div className={`world-map-overlay ${isSpinning ? "spinning" : ""}`}>
+      <div
+        className={`world-map-container ${isSpinning ? "spinning-content" : ""}`}
+      >
         <h2>World Map</h2>
-        <p className="map-subtitle">You are currently in <span className="current-world">{currentWorld}</span></p>
-        
+        <p className="map-subtitle">
+          You are currently in{" "}
+          <span className="current-world">{currentWorld}</span>
+        </p>
+
         <div className="world-map-canvas">
           {/* Draw connection lines between worlds */}
           <svg className="connection-lines" width="100%" height="100%">
-            {WORLD_MAP.structure.map(world => (
-              world.connections.map(connectionId => {
-                const targetWorld = WORLD_MAP.structure.find(w => w.id === connectionId);
+            {WORLD_MAP.structure.map((world) =>
+              world.connections.map((connectionId) => {
+                const targetWorld = WORLD_MAP.structure.find(
+                  (w) => w.id === connectionId,
+                );
                 if (!targetWorld) return null;
-                
+
                 // Determine if this is a special connection type
-                const connectionType = 
-                  (world.type === 'dungeon' || targetWorld.type === 'dungeon') ? 'dungeon-connection' :
-                  (world.type === 'special' || targetWorld.type === 'special') ? 'special-connection' :
-                  (world.type === 'text' || targetWorld.type === 'text') ? 'text-connection' : '';
-                
+                const connectionType =
+                  world.type === "dungeon" || targetWorld.type === "dungeon"
+                    ? "dungeon-connection"
+                    : world.type === "special" || targetWorld.type === "special"
+                      ? "special-connection"
+                      : world.type === "text" || targetWorld.type === "text"
+                        ? "text-connection"
+                        : "";
+
                 return (
-                  <line 
+                  <line
                     key={`${world.id}-${connectionId}`}
-                    x1={world.x} 
-                    y1={world.y} 
-                    x2={targetWorld.x} 
+                    x1={world.x}
+                    y1={world.y}
+                    x2={targetWorld.x}
                     y2={targetWorld.y}
                     className={`connection-line ${
-                      (world.id === currentWorldId || connectionId === currentWorldId) 
-                      ? 'current-connection' : ''
+                      world.id === currentWorldId ||
+                      connectionId === currentWorldId
+                        ? "current-connection"
+                        : ""
                     } ${connectionType}`}
                   />
                 );
-              })
-            ))}
+              }),
+            )}
           </svg>
-          
+
           {/* Draw the world nodes */}
-          {WORLD_MAP.structure.map(world => (
-            <div 
+          {WORLD_MAP.structure.map((world) => (
+            <div
               key={world.id}
-              className={`world-node ${world.id === currentWorldId ? 'current-world-node' : ''} ${getNodeColorClass(world)}`}
+              className={`world-node ${world.id === currentWorldId ? "current-world-node" : ""} ${getNodeColorClass(world)}`}
               style={{ left: world.x, top: world.y }}
               onMouseEnter={() => setHoveredWorld(world)}
               onMouseLeave={() => setHoveredWorld(null)}
@@ -106,31 +119,38 @@ const WorldMap = ({ currentWorld, onClose, onNodeClick }) => {
             </div>
           ))}
         </div>
-        
+
         {/* Show details about hovered world */}
         {hoveredWorld && (
           <div className="world-details">
             <h3>{hoveredWorld.name}</h3>
             <p>
-              {hoveredWorld.id === currentWorldId 
-                ? 'You are here' 
+              {hoveredWorld.id === currentWorldId
+                ? "You are here"
                 : hoveredWorld.connections.includes(currentWorldId)
-                  ? 'Connected to your current world'
-                  : 'To reach this world, you must travel through other portals'
-              }
+                  ? "Connected to your current world"
+                  : "To reach this world, you must travel through other portals"}
             </p>
             {hoveredWorld.type && (
               <p className="world-type">
-                {hoveredWorld.type === 'dungeon' && '🔥 Dangerous dungeon area with monsters and treasures'}
-                {hoveredWorld.type === 'special' && '📚 Hemingway\'s literary adventure awaits'}
-                {hoveredWorld.type === 'text' && '💬 Text-based interactive adventure'}
+                {hoveredWorld.type === "dungeon" &&
+                  "🔥 Dangerous dungeon area with monsters and treasures"}
+                {hoveredWorld.type === "special" &&
+                  "📚 Hemingway's literary adventure awaits"}
+                {hoveredWorld.type === "text" &&
+                  "💬 Text-based interactive adventure"}
               </p>
             )}
           </div>
         )}
 
-        <button className="close-map-btn" onClick={onClose}>Close Map</button>
-        <button className="portal-animation-btn" onClick={triggerPortalAnimation}>
+        <button className="close-map-btn" onClick={onClose}>
+          Close Map
+        </button>
+        <button
+          className="portal-animation-btn"
+          onClick={triggerPortalAnimation}
+        >
           Activate Portal
         </button>
       </div>
@@ -141,7 +161,7 @@ const WorldMap = ({ currentWorld, onClose, onNodeClick }) => {
 WorldMap.propTypes = {
   currentWorld: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
-  onNodeClick: PropTypes.func
+  onNodeClick: PropTypes.func,
 };
 
-export default WorldMap; 
+export default WorldMap;

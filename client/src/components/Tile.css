@@ -2,6 +2,7 @@
   position: absolute;
   width: 64px;
   height: 64px;
+  background-color: #2a5a2a; /* NES green fallback */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -149,30 +150,30 @@
   animation: portalVortex 4s infinite linear;
 }
 
-/* Style for tiles with loading images */
+/* Style for tiles with loading images - NES solid colors */
 .tile.image-loading {
-  background-color: rgba(120, 120, 120, 0.5);
-  border: 1px dashed #999;
+  background-color: #888888;
+  border: 2px solid #FFFFFF;
 }
 
 .tile.image-loading.wall {
-  background-color: rgba(90, 77, 65, 0.8);
+  background-color: #5a4d41;
 }
 
 .tile.image-loading.water {
-  background-color: rgba(30, 144, 255, 0.6);
+  background-color: #0058F8;
 }
 
 .tile.image-loading.grass {
-  background-color: rgba(50, 205, 50, 0.6);
+  background-color: #00A800;
 }
 
 .tile.image-loading.sand {
-  background-color: rgba(244, 164, 96, 0.7);
+  background-color: #FCB800;
 }
 
 .tile.image-loading.dungeon {
-  background-color: rgba(72, 61, 139, 0.7);
+  background-color: #483D8B;
 }
 
 /* Hover effects */
@@ -572,4 +573,114 @@
 .tile.standard-portal.portal-to-overworld3::before {
   content: 'OVERWORLD 3';
   background-color: #1a1acc;
+}
+
+/* ============================================
+   DUNGEON PORTAL (Tile Type 9)
+   ============================================ */
+
+.tile.dungeon-portal {
+  background-color: #8B4513; /* Brown/ancient stone color */
+  animation: dungeonPortalPulse 2s steps(8) infinite; /* Stepped for retro feel */
+  box-shadow: 0 0 20px rgba(139, 69, 19, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.5);
+  border: 3px solid #654321;
+  z-index: 25;
+  position: relative;
+  overflow: visible;
+  background-image: radial-gradient(circle at center, 
+    rgba(0, 0, 0, 0.8) 0%, 
+    rgba(139, 69, 19, 0.6) 50%, 
+    rgba(139, 69, 19, 1) 100%);
+}
+
+.tile.dungeon-portal::before {
+  content: '🏰 LIBRARY';
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(139, 69, 19, 0.95);
+  color: #FFD700; /* Golden text */
+  font-size: 9px;
+  font-weight: bold;
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  border: 1px solid #FFD700;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  animation: dungeonLabelGlow 2s steps(4) infinite;
+}
+
+/* Inner portal effect - dark swirling vortex */
+.tile.dungeon-portal::after {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 15%;
+  right: 15%;
+  bottom: 15%;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, 
+    rgba(0, 0, 0, 0.9) 0%, 
+    rgba(139, 69, 19, 0.6) 50%,
+    transparent 100%);
+  animation: dungeonVortex 4s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes dungeonPortalPulse {
+  0% { 
+    transform: scale(1); 
+    opacity: 0.9; 
+    box-shadow: 0 0 20px rgba(139, 69, 19, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.5);
+  }
+  50% { 
+    transform: scale(1.05); 
+    opacity: 1; 
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), inset 0 0 20px rgba(0, 0, 0, 0.7);
+  }
+  100% { 
+    transform: scale(1); 
+    opacity: 0.9; 
+    box-shadow: 0 0 20px rgba(139, 69, 19, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes dungeonVortex {
+  0% {
+    transform: rotate(0deg) scale(1);
+    filter: brightness(0.8);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+    filter: brightness(0.6);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    filter: brightness(0.8);
+  }
+}
+
+@keyframes dungeonLabelGlow {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+  }
+}
+
+.tile.dungeon-portal:hover {
+  transform: scale(1.15);
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 0 40px rgba(255, 215, 0, 1), inset 0 0 25px rgba(0, 0, 0, 0.8);
 } 

@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './ApiHealthCheck.css';
-import { API_CONFIG, buildApiUrl } from '../utils/apiConfig';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "./ApiHealthCheck.css";
+import { API_CONFIG, buildApiUrl } from "../utils/apiConfig";
 
 /**
  * Component to check health of external APIs used by the application
  */
 const ApiHealthCheck = () => {
   const [apiStatuses, setApiStatuses] = useState({
-    server: { status: 'checking', message: 'Checking server connection...' },
-    quotable: { status: 'checking', message: 'Checking Quotable API...' },
-    zenQuotes: { status: 'checking', message: 'Checking ZenQuotes API...' },
-    folger: { status: 'checking', message: 'Checking Folger Shakespeare API...' },
-    weather: { status: 'checking', message: 'Checking Weather API...' }
+    server: { status: "checking", message: "Checking server connection..." },
+    quotable: { status: "checking", message: "Checking Quotable API..." },
+    zenQuotes: { status: "checking", message: "Checking ZenQuotes API..." },
+    folger: {
+      status: "checking",
+      message: "Checking Folger Shakespeare API...",
+    },
+    weather: { status: "checking", message: "Checking Weather API..." },
   });
 
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -24,25 +27,28 @@ const ApiHealthCheck = () => {
   const checkApiHealth = async () => {
     // Reset statuses
     setApiStatuses({
-      server: { status: 'checking', message: 'Checking server connection...' },
-      quotable: { status: 'checking', message: 'Checking Quotable API...' },
-      zenQuotes: { status: 'checking', message: 'Checking ZenQuotes API...' },
-      folger: { status: 'checking', message: 'Checking Folger Shakespeare API...' },
-      weather: { status: 'checking', message: 'Checking Weather API...' }
+      server: { status: "checking", message: "Checking server connection..." },
+      quotable: { status: "checking", message: "Checking Quotable API..." },
+      zenQuotes: { status: "checking", message: "Checking ZenQuotes API..." },
+      folger: {
+        status: "checking",
+        message: "Checking Folger Shakespeare API...",
+      },
+      weather: { status: "checking", message: "Checking Weather API..." },
     });
 
     // Check server health
     checkServerHealth();
-    
+
     // Check Quotable API
     checkQuotableHealth();
-    
+
     // Check ZenQuotes API
     checkZenQuotesHealth();
-    
+
     // Check Folger Shakespeare API
     checkFolgerHealth();
-    
+
     // Check Weather API
     checkWeatherHealth();
   };
@@ -55,51 +61,56 @@ const ApiHealthCheck = () => {
       // Try to get the current API URL from api.js if available
       let serverUrl;
       try {
-        const { getCurrentApiUrl } = await import('../api/api');
-        if (typeof getCurrentApiUrl === 'function') {
+        const { getCurrentApiUrl } = await import("../api/api");
+        if (typeof getCurrentApiUrl === "function") {
           serverUrl = getCurrentApiUrl();
         }
       } catch (err) {
-        console.log('Could not import getCurrentApiUrl, using environment variable');
+        console.log(
+          "Could not import getCurrentApiUrl, using environment variable",
+        );
       }
-      
+
       // Fallback to environment variable if getCurrentApiUrl is not available
       if (!serverUrl) {
-        serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+        serverUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
       }
-      
-      const response = await axios.get(`${serverUrl}/api/health`, { timeout: 3000 });
-      
+
+      const response = await axios.get(`${serverUrl}/api/health`, {
+        timeout: 3000,
+      });
+
       if (response.status === 200) {
-        setApiStatuses(prev => ({
+        setApiStatuses((prev) => ({
           ...prev,
           server: {
-            status: 'online',
-            message: `Server is online at ${serverUrl} (${response.data.environment || 'unknown'})`,
+            status: "online",
+            message: `Server is online at ${serverUrl} (${response.data.environment || "unknown"})`,
             details: {
               ...response.data,
-              url: serverUrl
-            }
-          }
+              url: serverUrl,
+            },
+          },
         }));
       }
     } catch (error) {
-      console.error('Server health check failed:', error);
-      
+      console.error("Server health check failed:", error);
+
       // Try to detect if this is a port conflict issue
-      const isPortConflict = error.message?.includes('EADDRINUSE') || 
-                             error.message?.includes('Connection refused');
-      
-      setApiStatuses(prev => ({
+      const isPortConflict =
+        error.message?.includes("EADDRINUSE") ||
+        error.message?.includes("Connection refused");
+
+      setApiStatuses((prev) => ({
         ...prev,
         server: {
-          status: 'offline',
-          message: isPortConflict 
+          status: "offline",
+          message: isPortConflict
             ? `Server check failed: Port conflict detected. The application will try alternative ports.`
             : `Server check failed: ${error.message}`,
           error: error.message,
-          isPortConflict
-        }
+          isPortConflict,
+        },
       }));
     }
   };
@@ -109,35 +120,35 @@ const ApiHealthCheck = () => {
    */
   const checkQuotableHealth = async () => {
     try {
-      const url = buildApiUrl('quotable', 'random');
+      const url = buildApiUrl("quotable", "random");
       const response = await axios.get(url);
-      
+
       if (response.status === 200 && response.data?.content) {
-        setApiStatuses(prev => ({
+        setApiStatuses((prev) => ({
           ...prev,
           quotable: {
-            status: 'online',
-            message: 'Quotable API is working',
-            details: { 
-              quote: response.data.content, 
-              author: response.data.author 
+            status: "online",
+            message: "Quotable API is working",
+            details: {
+              quote: response.data.content,
+              author: response.data.author,
             },
-            note: 'The app has fallback quotes if this API fails'
-          }
+            note: "The app has fallback quotes if this API fails",
+          },
         }));
       } else {
-        throw new Error('Invalid response format');
+        throw new Error("Invalid response format");
       }
     } catch (error) {
-      console.error('Quotable API check failed:', error);
-      setApiStatuses(prev => ({
+      console.error("Quotable API check failed:", error);
+      setApiStatuses((prev) => ({
         ...prev,
         quotable: {
-          status: 'offline',
+          status: "offline",
           message: `Quotable API check failed: ${error.message}`,
           error: error.message,
-          note: 'The app has fallback quotes if this API fails'
-        }
+          note: "The app has fallback quotes if this API fails",
+        },
       }));
     }
   };
@@ -147,35 +158,39 @@ const ApiHealthCheck = () => {
    */
   const checkZenQuotesHealth = async () => {
     try {
-      const url = buildApiUrl('zenQuotes', 'random');
+      const url = buildApiUrl("zenQuotes", "random");
       const response = await axios.get(url);
-      
-      if (response.status === 200 && Array.isArray(response.data) && response.data[0]?.q) {
-        setApiStatuses(prev => ({
+
+      if (
+        response.status === 200 &&
+        Array.isArray(response.data) &&
+        response.data[0]?.q
+      ) {
+        setApiStatuses((prev) => ({
           ...prev,
           zenQuotes: {
-            status: 'online',
-            message: 'ZenQuotes API is working',
-            details: { 
-              quote: response.data[0].q, 
-              author: response.data[0].a 
+            status: "online",
+            message: "ZenQuotes API is working",
+            details: {
+              quote: response.data[0].q,
+              author: response.data[0].a,
             },
-            note: 'The app has fallback quotes if this API fails'
-          }
+            note: "The app has fallback quotes if this API fails",
+          },
         }));
       } else {
-        throw new Error('Invalid response format');
+        throw new Error("Invalid response format");
       }
     } catch (error) {
-      console.error('ZenQuotes API check failed:', error);
-      setApiStatuses(prev => ({
+      console.error("ZenQuotes API check failed:", error);
+      setApiStatuses((prev) => ({
         ...prev,
         zenQuotes: {
-          status: 'offline',
+          status: "offline",
           message: `ZenQuotes API check failed: ${error.message}`,
           error: error.message,
-          note: 'The app has fallback quotes if this API fails'
-        }
+          note: "The app has fallback quotes if this API fails",
+        },
       }));
     }
   };
@@ -188,31 +203,31 @@ const ApiHealthCheck = () => {
       // For Folger we'll use a specific line from Hamlet as a test
       const url = `${API_CONFIG.folger.baseUrl}/Ham/ftln/0012`;
       const response = await axios.get(url);
-      
+
       // For Folger API, we're just checking if we get an HTML response
       if (response.status === 200) {
-        setApiStatuses(prev => ({
+        setApiStatuses((prev) => ({
           ...prev,
           folger: {
-            status: 'online',
-            message: 'Folger Shakespeare API is working',
+            status: "online",
+            message: "Folger Shakespeare API is working",
             details: { responseSize: response.data?.length || 0 },
-            note: 'The app has fallback Shakespeare quotes if this API fails'
-          }
+            note: "The app has fallback Shakespeare quotes if this API fails",
+          },
         }));
       } else {
-        throw new Error('Invalid response');
+        throw new Error("Invalid response");
       }
     } catch (error) {
-      console.error('Folger API check failed:', error);
-      setApiStatuses(prev => ({
+      console.error("Folger API check failed:", error);
+      setApiStatuses((prev) => ({
         ...prev,
         folger: {
-          status: 'offline',
+          status: "offline",
           message: `Folger API check failed: ${error.message}`,
           error: error.message,
-          note: 'The app has fallback Shakespeare quotes if this API fails'
-        }
+          note: "The app has fallback Shakespeare quotes if this API fails",
+        },
       }));
     }
   };
@@ -224,75 +239,82 @@ const ApiHealthCheck = () => {
     try {
       // Use a simple lookup for London to test the API
       const params = {
-        q: 'London',
+        q: "London",
         appid: API_CONFIG.weather.apiKey,
-        units: 'metric'
+        units: "metric",
       };
-      
+
       const url = `${API_CONFIG.weather.baseUrl}${API_CONFIG.weather.endpoints.current}`;
       const response = await axios.get(url, { params });
-      
+
       if (response.status === 200 && response.data?.main) {
-        setApiStatuses(prev => ({
+        setApiStatuses((prev) => ({
           ...prev,
           weather: {
-            status: 'online',
-            message: 'Weather API is working',
-            details: { 
+            status: "online",
+            message: "Weather API is working",
+            details: {
               location: response.data.name,
               temp: response.data.main.temp,
-              condition: response.data.weather[0]?.main
-            }
-          }
+              condition: response.data.weather[0]?.main,
+            },
+          },
         }));
       } else {
-        throw new Error('Invalid response format');
+        throw new Error("Invalid response format");
       }
     } catch (error) {
-      console.error('Weather API check failed:', error);
-      setApiStatuses(prev => ({
+      console.error("Weather API check failed:", error);
+      setApiStatuses((prev) => ({
         ...prev,
         weather: {
-          status: 'offline',
+          status: "offline",
           message: `Weather API check failed: ${error.message}`,
-          error: error.message
-        }
+          error: error.message,
+        },
       }));
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'online':
-        return '✅';
-      case 'offline':
-        return '❌';
+      case "online":
+        return "✅";
+      case "offline":
+        return "❌";
       default:
-        return '⏳';
+        return "⏳";
     }
   };
 
   return (
     <div className="api-health-check">
-      <div className="api-health-header" onClick={() => setIsCollapsed(!isCollapsed)}>
+      <div
+        className="api-health-header"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
         <h3>API Status Check</h3>
-        <span className="toggle-icon">{isCollapsed ? '▼' : '▲'}</span>
+        <span className="toggle-icon">{isCollapsed ? "▼" : "▲"}</span>
       </div>
-      
+
       {!isCollapsed && (
         <div className="api-health-content">
           <button className="refresh-button" onClick={checkApiHealth}>
             Refresh Status
           </button>
-          
+
           <div className="api-status-list">
             {Object.entries(apiStatuses).map(([api, data]) => (
               <div key={api} className={`api-status-item ${data.status}`}>
                 <div className="api-status-header">
-                  <span className="api-status-icon">{getStatusIcon(data.status)}</span>
+                  <span className="api-status-icon">
+                    {getStatusIcon(data.status)}
+                  </span>
                   <strong>{api}:</strong> {data.message}
                 </div>
-                {data.note && <div className="api-status-note">{data.note}</div>}
+                {data.note && (
+                  <div className="api-status-note">{data.note}</div>
+                )}
                 {data.details && (
                   <div className="api-status-details">
                     <pre>{JSON.stringify(data.details, null, 2)}</pre>
@@ -301,9 +323,12 @@ const ApiHealthCheck = () => {
               </div>
             ))}
           </div>
-          
+
           <div className="api-health-footer">
-            <p>Note: The application has fallback mechanisms for all external APIs.</p>
+            <p>
+              Note: The application has fallback mechanisms for all external
+              APIs.
+            </p>
           </div>
         </div>
       )}
@@ -311,4 +336,4 @@ const ApiHealthCheck = () => {
   );
 };
 
-export default ApiHealthCheck; 
+export default ApiHealthCheck;

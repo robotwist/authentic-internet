@@ -86,6 +86,9 @@ export const initSocketService = async (server) => {
       // Handle artifact events
       setupArtifactEvents(socket);
       
+      // Handle collaboration events
+      setupCollaborationEvents(socket);
+      
       // Disconnect event
       socket.on('disconnect', () => {
         console.log(`User disconnected: ${socket.user.username}`);
@@ -550,6 +553,238 @@ const setupArtifactEvents = (socket) => {
       username: socket.user.username,
       artifactId: data.artifactId,
       interactionType: data.type
+    });
+  });
+};
+
+/**
+ * Set up collaboration-related event handlers
+ * @param {Object} socket - Socket instance
+ */
+const setupCollaborationEvents = (socket) => {
+  if (!socketIoAvailable) return;
+  
+  // Join collaboration session
+  socket.on('collaboration:join', async (data) => {
+    try {
+      if (!data.sessionId) {
+        socket.emit('error', { message: 'Session ID is required' });
+        return;
+      }
+      
+      // Leave previous collaboration rooms
+      Object.keys(socket.rooms).forEach(room => {
+        if (room.startsWith('collaboration:')) {
+          socket.leave(room);
+        }
+      });
+      
+      // Join collaboration room
+      const roomId = `collaboration:${data.sessionId}`;
+      socket.join(roomId);
+      
+      // Notify others in the session
+      socket.to(roomId).emit('collaboration:user-joined', {
+        userId: socket.user.id,
+        username: socket.user.username,
+        timestamp: new Date()
+      });
+      
+      // Send list of users in this session
+      const sessionUsers = Array.from(io.sockets.adapter.rooms.get(roomId) || [])
+        .map(socketId => {
+          const userSocket = io.sockets.sockets.get(socketId);
+          return {
+            id: userSocket.user.id,
+            username: userSocket.user.username
+          };
+        });
+      
+      socket.emit('collaboration:users', { users: sessionUsers });
+      
+      console.log(`User ${socket.user.username} joined collaboration session ${data.sessionId}`);
+      
+    } catch (error) {
+      console.error('Error joining collaboration session:', error);
+      socket.emit('error', { message: 'Failed to join collaboration session' });
+    }
+  });
+  
+  // Leave collaboration session
+  socket.on('collaboration:leave', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    socket.leave(roomId);
+    
+    // Notify others
+    socket.to(roomId).emit('collaboration:user-left', {
+      userId: socket.user.id,
+      username: socket.user.username,
+      timestamp: new Date()
+    });
+    
+    console.log(`User ${socket.user.username} left collaboration session ${data.sessionId}`);
+  });
+  
+  // User starts editing
+  socket.on('collaboration:user-editing', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    socket.to(roomId).emit('collaboration:user-editing', {
+      userId: socket.user.id,
+      username: socket.user.username,
+      field: data.field,
+      timestamp: new Date()
+    });
+  });
+  
+  // User stops editing
+  socket.on('collaboration:user-stopped-editing', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    socket.to(roomId).emit('collaboration:user-stopped-editing', {
+      userId: socket.user.id,
+      username: socket.user.username,
+      timestamp: new Date()
+    });
+  });
+  
+  // Cursor position update
+  socket.on('collaboration:cursor-update', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    socket.to(roomId).emit('collaboration:cursor-update', {
+      userId: socket.user.id,
+      username: socket.user.username,
+      position: data.position,
+      field: data.field,
+      timestamp: new Date()
+    });
+  });
+  
+  // Content update
+  socket.on('collaboration:content-update', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    socket.to(roomId).emit('collaboration:content-update', {
+      userId: socket.user.id,
+      username: socket.user.username,
+      field: data.field,
+      value: data.value,
+      timestamp: new Date()
+    });
+  });
+  
+  // Comment added
+  socket.on('collaboration:comment-added', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    io.in(roomId).emit('collaboration:comment-added', {
+      comment: data.comment,
+      timestamp: new Date()
+    });
+  });
+  
+  // Comment resolved
+  socket.on('collaboration:comment-resolved', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    io.in(roomId).emit('collaboration:comment-resolved', {
+      commentId: data.commentId,
+      resolvedBy: socket.user.id,
+      timestamp: new Date()
+    });
+  });
+  
+  // Version saved
+  socket.on('collaboration:version-saved', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    io.in(roomId).emit('collaboration:version-saved', {
+      version: data.version,
+      savedBy: socket.user.id,
+      username: socket.user.username,
+      timestamp: new Date()
+    });
+  });
+  
+  // Settings updated
+  socket.on('collaboration:settings-updated', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    io.in(roomId).emit('collaboration:settings-updated', {
+      settings: data.settings,
+      updatedBy: socket.user.id,
+      username: socket.user.username,
+      timestamp: new Date()
+    });
+  });
+  
+  // User activity tracking
+  socket.on('collaboration:activity', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    socket.to(roomId).emit('collaboration:activity', {
+      userId: socket.user.id,
+      username: socket.user.username,
+      activity: data.activity,
+      timestamp: new Date()
+    });
+  });
+  
+  // Session status update
+  socket.on('collaboration:status-update', (data) => {
+    if (!data.sessionId) {
+      socket.emit('error', { message: 'Session ID is required' });
+      return;
+    }
+    
+    const roomId = `collaboration:${data.sessionId}`;
+    io.in(roomId).emit('collaboration:status-update', {
+      status: data.status,
+      updatedBy: socket.user.id,
+      username: socket.user.username,
+      timestamp: new Date()
     });
   });
 };

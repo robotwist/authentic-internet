@@ -1,19 +1,19 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import './Button.css';
+import React from "react";
+import PropTypes from "prop-types";
+import "./Button.css";
 
-const Button = ({ 
-  children, 
-  variant = 'primary', 
-  type = 'button', 
-  onClick, 
+const Button = ({
+  children,
+  variant = "primary",
+  type = "button",
+  onClick,
   disabled = false,
-  className = '',
-  as: Component = 'button',
-  ...props 
+  className = "",
+  as: Component = "button",
+  ...props
 }) => {
-  const buttonProps = Component === 'button' ? { type } : {};
-  
+  const buttonProps = Component === "button" ? { type } : {};
+
   return (
     <Component
       className={`button ${variant} ${className}`}
@@ -29,12 +29,20 @@ const Button = ({
 
 Button.propTypes = {
   children: PropTypes.node.isRequired,
-  variant: PropTypes.oneOf(['primary', 'secondary', 'danger', 'success', 'link']),
-  type: PropTypes.oneOf(['button', 'submit', 'reset']),
+  variant: PropTypes.oneOf([
+    "primary",
+    "secondary",
+    "danger",
+    "success",
+    "link",
+    "outlined",
+    "text",
+  ]),
+  type: PropTypes.oneOf(["button", "submit", "reset"]),
   onClick: PropTypes.func,
   disabled: PropTypes.bool,
   className: PropTypes.string,
   as: PropTypes.elementType,
 };
 
-export default Button; 
+export default Button;

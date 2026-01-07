@@ -1,26 +1,41 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import './PixelCharacterCreator.css';
+import React, { useState, useRef, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import "./PixelCharacterCreator.css";
 
 const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
   const { user, updateUser } = useAuth();
-  const [mode, setMode] = useState('create'); // 'create' or 'import'
+  const [mode, setMode] = useState("create"); // 'create' or 'import'
   const [canvasSize, setCanvasSize] = useState(32);
-  const [selectedColor, setSelectedColor] = useState('#000000');
+  const [selectedColor, setSelectedColor] = useState("#000000");
   const [pixels, setPixels] = useState({});
   const [isDrawing, setIsDrawing] = useState(false);
-  const [characterName, setCharacterName] = useState('');
+  const [characterName, setCharacterName] = useState("");
   const [importFile, setImportFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewUrl, setPreviewUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // Color palette for pixel art
   const colorPalette = [
-    '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00',
-    '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#008000', '#800000',
-    '#808080', '#C0C0C0', '#FFC0CB', '#A52A2A', '#FFD700', '#32CD32'
+    "#000000",
+    "#FFFFFF",
+    "#FF0000",
+    "#00FF00",
+    "#0000FF",
+    "#FFFF00",
+    "#FF00FF",
+    "#00FFFF",
+    "#FFA500",
+    "#800080",
+    "#008000",
+    "#800000",
+    "#808080",
+    "#C0C0C0",
+    "#FFC0CB",
+    "#A52A2A",
+    "#FFD700",
+    "#32CD32",
   ];
 
   // Initialize canvas
@@ -32,7 +47,7 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
     const newPixels = {};
     for (let x = 0; x < canvasSize; x++) {
       for (let y = 0; y < canvasSize; y++) {
-        newPixels[`${x},${y}`] = '#FFFFFF';
+        newPixels[`${x},${y}`] = "#FFFFFF";
       }
     }
     setPixels(newPixels);
@@ -41,9 +56,9 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
   // Handle pixel drawing
   const handlePixelClick = (x, y) => {
     const key = `${x},${y}`;
-    setPixels(prev => ({
+    setPixels((prev) => ({
       ...prev,
-      [key]: selectedColor
+      [key]: selectedColor,
     }));
   };
 
@@ -82,15 +97,15 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append('piskelFile', importFile);
-      formData.append('characterName', characterName);
+      formData.append("piskelFile", importFile);
+      formData.append("characterName", characterName);
 
-      const response = await fetch('/api/characters/import-piskel', {
-        method: 'POST',
+      const response = await fetch("/api/characters/import-piskel", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: formData
+        body: formData,
       });
 
       if (response.ok) {
@@ -98,11 +113,11 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
         onCharacterCreated(result.character);
         updateUser({ ...user, character: result.character });
       } else {
-        throw new Error('Failed to import character');
+        throw new Error("Failed to import character");
       }
     } catch (error) {
-      console.error('Error importing character:', error);
-      alert('Failed to import character. Please try again.');
+      console.error("Error importing character:", error);
+      alert("Failed to import character. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -111,23 +126,23 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
   // Save created character
   const saveCharacter = async () => {
     if (!characterName.trim()) {
-      alert('Please enter a character name');
+      alert("Please enter a character name");
       return;
     }
 
     setIsLoading(true);
     try {
       // Convert pixels to image data
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = canvasSize;
       canvas.height = canvasSize;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
 
       // Draw pixels
       for (let x = 0; x < canvasSize; x++) {
         for (let y = 0; y < canvasSize; y++) {
           const color = pixels[`${x},${y}`];
-          if (color !== '#FFFFFF') {
+          if (color !== "#FFFFFF") {
             ctx.fillStyle = color;
             ctx.fillRect(x, y, 1, 1);
           }
@@ -137,16 +152,16 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
       // Convert to blob
       canvas.toBlob(async (blob) => {
         const formData = new FormData();
-        formData.append('characterImage', blob, 'character.png');
-        formData.append('characterName', characterName);
-        formData.append('pixelData', JSON.stringify(pixels));
+        formData.append("characterImage", blob, "character.png");
+        formData.append("characterName", characterName);
+        formData.append("pixelData", JSON.stringify(pixels));
 
-        const response = await fetch('/api/characters/create', {
-          method: 'POST',
+        const response = await fetch("/api/characters/create", {
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: formData
+          body: formData,
         });
 
         if (response.ok) {
@@ -154,12 +169,12 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
           onCharacterCreated(result.character);
           updateUser({ ...user, character: result.character });
         } else {
-          throw new Error('Failed to save character');
+          throw new Error("Failed to save character");
         }
-      }, 'image/png');
+      }, "image/png");
     } catch (error) {
-      console.error('Error saving character:', error);
-      alert('Failed to save character. Please try again.');
+      console.error("Error saving character:", error);
+      alert("Failed to save character. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -182,12 +197,16 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
   };
 
   return (
-    <div className="pixel-character-creator" role="dialog" aria-labelledby="character-creator-title">
+    <div
+      className="pixel-character-creator"
+      role="dialog"
+      aria-labelledby="character-creator-title"
+    >
       <div className="creator-container">
         <div className="creator-header">
           <h2 id="character-creator-title">Create Your Pixel Character</h2>
-          <button 
-            className="close-button" 
+          <button
+            className="close-button"
             onClick={onClose}
             aria-label="Close character creator"
           >
@@ -197,23 +216,23 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
 
         {/* Mode Selection */}
         <div className="mode-selector">
-          <button 
-            className={`mode-button ${mode === 'create' ? 'active' : ''}`}
-            onClick={() => setMode('create')}
-            aria-pressed={mode === 'create'}
+          <button
+            className={`mode-button ${mode === "create" ? "active" : ""}`}
+            onClick={() => setMode("create")}
+            aria-pressed={mode === "create"}
           >
             Create Character
           </button>
-          <button 
-            className={`mode-button ${mode === 'import' ? 'active' : ''}`}
-            onClick={() => setMode('import')}
-            aria-pressed={mode === 'import'}
+          <button
+            className={`mode-button ${mode === "import" ? "active" : ""}`}
+            onClick={() => setMode("import")}
+            aria-pressed={mode === "import"}
           >
             Import Piskel
           </button>
         </div>
 
-        {mode === 'create' ? (
+        {mode === "create" ? (
           <div className="create-mode">
             {/* Character Name */}
             <div className="input-group">
@@ -249,7 +268,7 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
                 {colorPalette.map((color) => (
                   <button
                     key={color}
-                    className={`color-swatch ${selectedColor === color ? 'selected' : ''}`}
+                    className={`color-swatch ${selectedColor === color ? "selected" : ""}`}
                     style={{ backgroundColor: color }}
                     onClick={() => setSelectedColor(color)}
                     aria-label={`Select color ${color}`}
@@ -273,11 +292,11 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
 
             {/* Canvas */}
             <div className="canvas-container">
-              <div 
+              <div
                 className="pixel-canvas"
                 style={{
                   gridTemplateColumns: `repeat(${canvasSize}, 1px)`,
-                  gridTemplateRows: `repeat(${canvasSize}, 1px)`
+                  gridTemplateRows: `repeat(${canvasSize}, 1px)`,
                 }}
                 onMouseLeave={handleMouseUp}
               >
@@ -285,7 +304,7 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
                   const x = index % canvasSize;
                   const y = Math.floor(index / canvasSize);
                   const key = `${x},${y}`;
-                  const color = pixels[key] || '#FFFFFF';
+                  const color = pixels[key] || "#FFFFFF";
 
                   return (
                     <div
@@ -314,12 +333,12 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
 
             {/* Save Button */}
             <div className="save-section">
-              <button 
+              <button
                 onClick={saveCharacter}
                 disabled={isLoading || !characterName.trim()}
                 className="save-button"
               >
-                {isLoading ? 'Saving...' : 'Save Character'}
+                {isLoading ? "Saving..." : "Save Character"}
               </button>
             </div>
           </div>
@@ -329,8 +348,9 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
             <div className="import-instructions">
               <h3>Import Piskel Character</h3>
               <p>
-                Upload a Piskel (.piskel) file or an image file (PNG, JPG) to import your character.
-                The image will be automatically resized to fit the game's pixel art style.
+                Upload a Piskel (.piskel) file or an image file (PNG, JPG) to
+                import your character. The image will be automatically resized
+                to fit the game's pixel art style.
               </p>
             </div>
 
@@ -340,7 +360,9 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
                 <div className="upload-area">
                   <span className="upload-icon">📁</span>
                   <span>Click to select file or drag and drop</span>
-                  <span className="file-types">Supports: .piskel, .png, .jpg, .jpeg</span>
+                  <span className="file-types">
+                    Supports: .piskel, .png, .jpg, .jpeg
+                  </span>
                 </div>
               </label>
               <input
@@ -358,9 +380,9 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
               <div className="preview-section">
                 <h4>Preview:</h4>
                 <div className="preview-container">
-                  <img 
-                    src={previewUrl} 
-                    alt="Character preview" 
+                  <img
+                    src={previewUrl}
+                    alt="Character preview"
                     className="character-preview"
                   />
                 </div>
@@ -382,12 +404,12 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
 
             {/* Import Button */}
             <div className="import-actions">
-              <button 
+              <button
                 onClick={importPiskelFile}
                 disabled={isLoading || !importFile || !characterName.trim()}
                 className="import-button"
               >
-                {isLoading ? 'Importing...' : 'Import Character'}
+                {isLoading ? "Importing..." : "Import Character"}
               </button>
             </div>
           </div>

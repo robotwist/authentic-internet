@@ -1,34 +1,34 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useWebSocket } from '../context/WebSocketContext';
-import { useAuth } from '../context/AuthContext';
-import './MultiplayerChat.css';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useWebSocket } from "../context/WebSocketContext";
+import { useAuth } from "../context/AuthContext";
+import "./MultiplayerChat.css";
 
-const MultiplayerChat = ({ 
-  worldId, 
-  worldName, 
-  onPlayerClick, 
-  className = '' 
+const MultiplayerChat = ({
+  worldId,
+  worldName,
+  onPlayerClick,
+  className = "",
 }) => {
   const { socket, isConnected, sendMessage } = useWebSocket();
   const { user } = useAuth();
-  
+
   const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState(new Set());
-  const [chatType, setChatType] = useState('world'); // 'world', 'private', 'artifact'
+  const [chatType, setChatType] = useState("world"); // 'world', 'private', 'artifact'
   const [selectedUser, setSelectedUser] = useState(null);
   const [onlinePlayers, setOnlinePlayers] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -47,52 +47,64 @@ const MultiplayerChat = ({
     };
 
     const handleWorldMessage = (data) => {
-      setMessages(prev => [...prev, {
-        id: data.messageId || Date.now(),
-        type: 'world',
-        senderId: data.senderId,
-        senderName: data.senderName,
-        senderAvatar: data.senderAvatar,
-        senderLevel: data.senderLevel,
-        content: data.content,
-        timestamp: new Date(data.timestamp),
-        isOwn: data.senderId === user?._id
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: data.messageId || Date.now(),
+          type: "world",
+          senderId: data.senderId,
+          senderName: data.senderName,
+          senderAvatar: data.senderAvatar,
+          senderLevel: data.senderLevel,
+          content: data.content,
+          timestamp: new Date(data.timestamp),
+          isOwn: data.senderId === user?._id,
+        },
+      ]);
     };
 
     const handlePlayerJoined = (data) => {
-      setOnlinePlayers(prev => {
-        const existing = prev.find(p => p.userId === data.userId);
+      setOnlinePlayers((prev) => {
+        const existing = prev.find((p) => p.userId === data.userId);
         if (!existing) {
-          return [...prev, {
-            userId: data.userId,
-            username: data.username,
-            avatar: data.avatar,
-            position: data.position
-          }];
+          return [
+            ...prev,
+            {
+              userId: data.userId,
+              username: data.username,
+              avatar: data.avatar,
+              position: data.position,
+            },
+          ];
         }
         return prev;
       });
-      
+
       // Add system message
-      setMessages(prev => [...prev, {
-        id: Date.now(),
-        type: 'system',
-        content: `${data.username} joined the world`,
-        timestamp: new Date()
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          type: "system",
+          content: `${data.username} joined the world`,
+          timestamp: new Date(),
+        },
+      ]);
     };
 
     const handlePlayerLeft = (data) => {
-      setOnlinePlayers(prev => prev.filter(p => p.userId !== data.userId));
-      
+      setOnlinePlayers((prev) => prev.filter((p) => p.userId !== data.userId));
+
       // Add system message
-      setMessages(prev => [...prev, {
-        id: Date.now(),
-        type: 'system',
-        content: `${data.username} left the world`,
-        timestamp: new Date()
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          type: "system",
+          content: `${data.username} left the world`,
+          timestamp: new Date(),
+        },
+      ]);
     };
 
     const handlePlayersUpdated = (data) => {
@@ -101,9 +113,9 @@ const MultiplayerChat = ({
 
     const handleTyping = (data) => {
       if (data.userId !== user?._id) {
-        setTypingUsers(prev => new Set(prev).add(data.username));
+        setTypingUsers((prev) => new Set(prev).add(data.username));
         setTimeout(() => {
-          setTypingUsers(prev => {
+          setTypingUsers((prev) => {
             const newSet = new Set(prev);
             newSet.delete(data.username);
             return newSet;
@@ -113,169 +125,187 @@ const MultiplayerChat = ({
     };
 
     const handleReaction = (data) => {
-      setMessages(prev => prev.map(msg => {
-        if (msg.id === data.messageId) {
-          return {
-            ...msg,
-            reactions: [...(msg.reactions || []), {
-              userId: data.userId,
-              username: data.username,
-              emoji: data.emoji
-            }]
-          };
-        }
-        return msg;
-      }));
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (msg.id === data.messageId) {
+            return {
+              ...msg,
+              reactions: [
+                ...(msg.reactions || []),
+                {
+                  userId: data.userId,
+                  username: data.username,
+                  emoji: data.emoji,
+                },
+              ],
+            };
+          }
+          return msg;
+        }),
+      );
     };
 
     // Add Socket.io event listeners
-    socket.on('world:joined', handleWorldJoined);
-    socket.on('world:message', handleWorldMessage);
-    socket.on('world:user-joined', handlePlayerJoined);
-    socket.on('world:user-left', handlePlayerLeft);
-    socket.on('world:players-updated', handlePlayersUpdated);
-    socket.on('user:typing', handleTyping);
-    socket.on('world:reaction', handleReaction);
+    socket.on("world:joined", handleWorldJoined);
+    socket.on("world:message", handleWorldMessage);
+    socket.on("world:user-joined", handlePlayerJoined);
+    socket.on("world:user-left", handlePlayerLeft);
+    socket.on("world:players-updated", handlePlayersUpdated);
+    socket.on("user:typing", handleTyping);
+    socket.on("world:reaction", handleReaction);
 
     // Join world when component mounts
     if (isConnected && worldId) {
-      sendMessage('world:join', {
+      sendMessage("world:join", {
         worldId,
         worldName,
-        position: { x: 0, y: 0, z: 0 }
+        position: { x: 0, y: 0, z: 0 },
       });
     }
 
     return () => {
       // Clean up event listeners
-      socket.off('world:joined', handleWorldJoined);
-      socket.off('world:message', handleWorldMessage);
-      socket.off('world:user-joined', handlePlayerJoined);
-      socket.off('world:user-left', handlePlayerLeft);
-      socket.off('world:players-updated', handlePlayersUpdated);
-      socket.off('user:typing', handleTyping);
-      socket.off('world:reaction', handleReaction);
-      
+      socket.off("world:joined", handleWorldJoined);
+      socket.off("world:message", handleWorldMessage);
+      socket.off("world:user-joined", handlePlayerJoined);
+      socket.off("world:user-left", handlePlayerLeft);
+      socket.off("world:players-updated", handlePlayersUpdated);
+      socket.off("user:typing", handleTyping);
+      socket.off("world:reaction", handleReaction);
+
       // Leave world when component unmounts
       if (isConnected && worldId) {
-        sendMessage('world:leave', { worldId });
+        sendMessage("world:leave", { worldId });
       }
     };
   }, [socket, isConnected, worldId, worldName, user?._id, sendMessage]);
 
   // Handle typing indicator
-  const handleInputChange = useCallback((e) => {
-    setInputMessage(e.target.value);
-    
-    // Send typing indicator
-    if (isConnected && worldId) {
-      sendMessage('user:typing', {
-        userId: selectedUser?.userId,
-        isTyping: true
-      });
-      
-      // Clear typing indicator after delay
+  const handleInputChange = useCallback(
+    (e) => {
+      setInputMessage(e.target.value);
+
+      // Send typing indicator
+      if (isConnected && worldId) {
+        sendMessage("user:typing", {
+          userId: selectedUser?.userId,
+          isTyping: true,
+        });
+
+        // Clear typing indicator after delay
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        typingTimeoutRef.current = setTimeout(() => {
+          sendMessage("user:typing", {
+            userId: selectedUser?.userId,
+            isTyping: false,
+          });
+        }, 1000);
+      }
+    },
+    [isConnected, worldId, selectedUser, sendMessage],
+  );
+
+  // Handle message submission
+  const handleSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+
+      if (!inputMessage.trim() || !isConnected) return;
+
+      const messageData = {
+        worldId,
+        content: inputMessage.trim(),
+      };
+
+      sendMessage("world:message", messageData);
+      setInputMessage("");
+
+      // Clear typing indicator
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      typingTimeoutRef.current = setTimeout(() => {
-        sendMessage('user:typing', {
-          userId: selectedUser?.userId,
-          isTyping: false
-        });
-      }, 1000);
-    }
-  }, [isConnected, worldId, selectedUser, sendMessage]);
-
-  // Handle message submission
-  const handleSubmit = useCallback((e) => {
-    e.preventDefault();
-    
-    if (!inputMessage.trim() || !isConnected) return;
-
-    const messageData = {
-      worldId,
-      content: inputMessage.trim()
-    };
-
-    sendMessage('world:message', messageData);
-    setInputMessage('');
-    
-    // Clear typing indicator
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-    sendMessage('user:typing', {
-      userId: selectedUser?.userId,
-      isTyping: false
-    });
-  }, [inputMessage, isConnected, worldId, selectedUser, sendMessage]);
+      sendMessage("user:typing", {
+        userId: selectedUser?.userId,
+        isTyping: false,
+      });
+    },
+    [inputMessage, isConnected, worldId, selectedUser, sendMessage],
+  );
 
   // Handle emoji selection
   const handleEmojiClick = useCallback((emoji) => {
-    setInputMessage(prev => prev + emoji);
+    setInputMessage((prev) => prev + emoji);
     setShowEmojiPicker(false);
     inputRef.current?.focus();
   }, []);
 
   // Handle message reaction
-  const handleMessageReaction = useCallback((messageId, emoji) => {
-    if (isConnected && worldId) {
-      sendMessage('world:react', {
-        messageId,
-        emoji,
-        worldId
-      });
-    }
-  }, [isConnected, worldId, sendMessage]);
+  const handleMessageReaction = useCallback(
+    (messageId, emoji) => {
+      if (isConnected && worldId) {
+        sendMessage("world:react", {
+          messageId,
+          emoji,
+          worldId,
+        });
+      }
+    },
+    [isConnected, worldId, sendMessage],
+  );
 
   // Handle player click
-  const handlePlayerClick = useCallback((player) => {
-    if (onPlayerClick) {
-      onPlayerClick(player);
-    }
-  }, [onPlayerClick]);
+  const handlePlayerClick = useCallback(
+    (player) => {
+      if (onPlayerClick) {
+        onPlayerClick(player);
+      }
+    },
+    [onPlayerClick],
+  );
 
   const formatTimestamp = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  const emojis = ['😊', '👍', '❤️', '🎉', '🔥', '💯', '👏', '🤔', '😅', '😎'];
+  const emojis = ["😊", "👍", "❤️", "🎉", "🔥", "💯", "👏", "🤔", "😅", "😎"];
 
   if (isMinimized) {
     return (
       <div className={`multiplayer-chat minimized ${className}`}>
-        <button 
-          className="chat-toggle"
-          onClick={() => setIsMinimized(false)}
-        >
+        <button className="chat-toggle" onClick={() => setIsMinimized(false)}>
           💬 {worldName} ({onlinePlayers.length})
-          {!isConnected && <span className="connection-status disconnected">●</span>}
+          {!isConnected && (
+            <span className="connection-status disconnected">●</span>
+          )}
         </button>
       </div>
     );
   }
 
   return (
-    <div className={`multiplayer-chat ${className} ${!isConnected ? 'disconnected' : ''}`}>
+    <div
+      className={`multiplayer-chat ${className} ${!isConnected ? "disconnected" : ""}`}
+    >
       {/* Chat Header */}
       <div className="chat-header">
         <div className="chat-title">
           <span className="world-name">{worldName}</span>
           <span className="player-count">({onlinePlayers.length} online)</span>
-          <span 
-            className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}
-            aria-label={`Connection status: ${isConnected ? 'Connected' : 'Disconnected'}`}
+          <span
+            className={`connection-status ${isConnected ? "connected" : "disconnected"}`}
+            aria-label={`Connection status: ${isConnected ? "Connected" : "Disconnected"}`}
             role="status"
           >
-            {isConnected ? '●' : '●'}
+            {isConnected ? "●" : "●"}
           </span>
         </div>
         <div className="chat-controls">
-          <button 
+          <button
             className="minimize-button"
             onClick={() => setIsMinimized(true)}
             aria-label="Minimize chat"
@@ -287,7 +317,7 @@ const MultiplayerChat = ({
       </div>
 
       {/* Chat Messages */}
-      <div 
+      <div
         className="chat-messages"
         ref={messagesEndRef}
         role="log"
@@ -296,16 +326,16 @@ const MultiplayerChat = ({
         aria-atomic="false"
       >
         {messages.map((message) => (
-          <div 
-            key={message.id} 
-            className={`message ${message.type} ${message.isOwn ? 'own' : ''}`}
+          <div
+            key={message.id}
+            className={`message ${message.type} ${message.isOwn ? "own" : ""}`}
             role="article"
-            aria-label={`${message.senderName || 'System'}: ${message.content}`}
+            aria-label={`${message.senderName || "System"}: ${message.content}`}
           >
-            {message.type === 'world' && (
+            {message.type === "world" && (
               <div className="message-header">
-                <img 
-                  src={message.senderAvatar || '/default-avatar.png'} 
+                <img
+                  src={message.senderAvatar || "/default-avatar.png"}
                   alt={`${message.senderName}'s avatar`}
                   className="sender-avatar"
                 />
@@ -320,8 +350,8 @@ const MultiplayerChat = ({
             {message.reactions && message.reactions.length > 0 && (
               <div className="message-reactions">
                 {message.reactions.map((reaction, index) => (
-                  <span 
-                    key={index} 
+                  <span
+                    key={index}
                     className="reaction"
                     aria-label={`${reaction.username} reacted with ${reaction.emoji}`}
                   >
@@ -334,7 +364,8 @@ const MultiplayerChat = ({
         ))}
         {typingUsers.size > 0 && (
           <div className="typing-indicator" role="status" aria-live="polite">
-            {Array.from(typingUsers).join(', ')} {Array.from(typingUsers).length === 1 ? 'is' : 'are'} typing...
+            {Array.from(typingUsers).join(", ")}{" "}
+            {Array.from(typingUsers).length === 1 ? "is" : "are"} typing...
           </div>
         )}
       </div>
@@ -342,20 +373,20 @@ const MultiplayerChat = ({
       {/* Online Players */}
       <div className="online-players">
         <h3>Online Players ({onlinePlayers.length})</h3>
-        <div 
+        <div
           className="players-list"
           role="list"
           aria-label="Online players list"
         >
           {onlinePlayers.map((player) => (
-            <div 
-              key={player.userId} 
+            <div
+              key={player.userId}
               className="player-item"
               role="listitem"
               aria-label={`${player.username} is online`}
             >
-              <img 
-                src={player.avatar || '/default-avatar.png'} 
+              <img
+                src={player.avatar || "/default-avatar.png"}
                 alt={`${player.username}'s avatar`}
                 className="player-avatar"
               />
@@ -381,8 +412,8 @@ const MultiplayerChat = ({
               maxLength={1000}
               disabled={!isConnected}
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="send-button"
               disabled={!inputMessage.trim() || !isConnected}
               aria-label="Send message"
@@ -394,11 +425,11 @@ const MultiplayerChat = ({
             Press Enter to send, Shift+Enter for new line
           </div>
         </form>
-        
+
         {/* Quick Reactions */}
         <div className="quick-reactions">
           <span className="reactions-label">Quick reactions:</span>
-          {['👍', '❤️', '😂', '😮', '😢', '😡'].map((emoji) => (
+          {["👍", "❤️", "😂", "😮", "😢", "😡"].map((emoji) => (
             <button
               key={emoji}
               onClick={() => handleQuickReaction(emoji)}

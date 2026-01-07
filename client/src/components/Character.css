@@ -1,3 +1,45 @@
+/* Invincibility flashing effect */
+.character-invincible {
+  animation: invincibility-flash 0.2s steps(2) infinite;
+}
+
+@keyframes invincibility-flash {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Hit retreat and flash - NES retro style */
+.character-hit {
+  animation: hit-retreat-flash 0.4s steps(4);
+}
+
+@keyframes hit-retreat-flash {
+  0% {
+    transform: translateX(0) translateY(0);
+    filter: brightness(1);
+  }
+  25% {
+    transform: translateX(-8px) translateY(0); /* Retreat */
+    filter: brightness(2); /* Flash bright */
+  }
+  50% {
+    transform: translateX(-4px) translateY(0);
+    filter: brightness(0.5); /* Flash dark */
+  }
+  75% {
+    transform: translateX(-2px) translateY(0);
+    filter: brightness(2); /* Flash bright again */
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+    filter: brightness(1); /* Back to normal */
+  }
+}
+
 .character {
   position: absolute;
   width: 32px;
@@ -7,9 +49,10 @@
   image-rendering: pixelated; /* Ensures crisp pixels */
   transform-origin: center;
   z-index: 10;
-  /* Changed from using float animation by default to a subtle bobbing for idle state */
+  /* Retro idle bobbing animation */
   animation: idle-bob 2s ease-in-out infinite;
-  transition: transform 0.05s ease, left 0.2s cubic-bezier(0.33, 1, 0.68, 1), top 0.2s cubic-bezier(0.33, 1, 0.68, 1);
+  transition: transform 0.05s steps(2), left 0.15s steps(3), top 0.15s steps(3); /* Retro stepped movement */
+  will-change: transform, left, top; /* Performance optimization */
 }
 
 /* Improved idle animation with subtle breathing effect */
@@ -569,4 +612,150 @@
   0% { opacity: 0; transform: scale(0.8); }
   40% { opacity: 0.8; transform: scale(1.1); }
   100% { opacity: 0; transform: scale(1.3); }
+}
+
+/* ========================================
+   Sword Carried by Character - HIDDEN
+   Combat sword (Sword.jsx) appears during attacks
+   ======================================== */
+
+/* Base sword styling - DISABLED (combat sword is separate component) */
+.character-sprite::before {
+  content: none; /* Hidden - combat sword appears during attacks */
+}
+
+/* Sword hilt (handle) - DISABLED */
+.character-sprite::after {
+  content: none; /* Hidden - combat sword appears during attacks */
+}
+
+/* Sword position when facing DOWN (default) */
+.character-container:not(.moving-up):not(.moving-left):not(.moving-right) .character-sprite::before,
+.character-container.moving-down .character-sprite::before {
+  right: -2px;
+  top: 50%;
+  transform: rotate(45deg);
+}
+
+.character-container:not(.moving-up):not(.moving-left):not(.moving-right) .character-sprite::after,
+.character-container.moving-down .character-sprite::after {
+  right: -3px;
+  top: calc(50% + 3px);
+}
+
+/* Sword position when facing UP */
+.character-container.moving-up .character-sprite::before {
+  left: -2px;
+  top: 50%;
+  transform: rotate(-135deg);
+}
+
+.character-container.moving-up .character-sprite::after {
+  left: -3px;
+  top: calc(50% - 10px);
+}
+
+/* Sword position when facing LEFT */
+.character-container.moving-left .character-sprite::before {
+  left: 0px;
+  top: 50%;
+  transform: rotate(-180deg);
+}
+
+.character-container.moving-left .character-sprite::after {
+  left: -6px;
+  top: calc(50% - 3px);
+}
+
+/* Sword position when facing RIGHT */
+.character-container.moving-right .character-sprite::before {
+  right: 0px;
+  top: 50%;
+  transform: rotate(0deg);
+}
+
+.character-container.moving-right .character-sprite::after {
+  right: -6px;
+  top: calc(50% - 3px);
+}
+
+/* Sword swing animation when walking */
+.character-container.moving-down .character-sprite::before,
+.character-container.moving-up .character-sprite::before,
+.character-container.moving-left .character-sprite::before,
+.character-container.moving-right .character-sprite::before {
+  animation: sword-swing 0.4s ease-in-out infinite;
+}
+
+@keyframes sword-swing {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2) drop-shadow(0 0 2px rgba(255, 215, 0, 0.4));
+  }
+}
+
+/* Idle sword subtle glow */
+.character-sprite::before {
+  animation: sword-idle-glow 2s ease-in-out infinite;
+}
+
+@keyframes sword-idle-glow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.1);
+  }
+}
+
+/* Sword for standard .character class - HIDDEN */
+.character::before {
+  content: none; /* Hidden - combat sword (Sword.jsx) appears during attacks */
+}
+
+/* Sword hilt for standard .character - HIDDEN */
+.character::after {
+  content: none; /* Hidden - combat sword (Sword.jsx) appears during attacks */
+}
+
+/* Sword positions for .character based on direction class */
+.character.up::before {
+  left: -2px;
+  right: auto;
+  transform: rotate(-135deg);
+}
+
+.character.up::after {
+  left: -3px;
+  right: auto;
+  top: calc(50% - 10px);
+}
+
+.character.left::before {
+  left: 0px;
+  right: auto;
+  transform: rotate(-180deg);
+}
+
+.character.left::after {
+  left: -6px;
+  right: auto;
+  top: calc(50% - 3px);
+}
+
+.character.right::before {
+  right: 0px;
+  transform: rotate(0deg);
+}
+
+.character.right::after {
+  right: -6px;
+  top: calc(50% - 3px);
+}
+
+/* Walking sword animation for .character */
+.character.walking::before {
+  animation: sword-swing 0.4s ease-in-out infinite;
 }

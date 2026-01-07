@@ -1,0 +1,208 @@
+/* Enemy styles */
+.enemy {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  transition: filter 0.1s ease;
+  z-index: 50;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+  will-change: transform, left, top;
+}
+
+/* Enemy types */
+.enemy-octorok {
+  animation: enemy-bob 1s ease-in-out infinite;
+}
+
+.enemy-moblin {
+  animation: enemy-walk 0.6s steps(2) infinite;
+}
+
+.enemy-tektite {
+  animation: enemy-jump 1.5s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes enemy-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes enemy-walk {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes enemy-jump {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-16px) scale(0.9);
+  }
+  60% {
+    transform: translateY(-8px) scale(1.1);
+  }
+}
+
+/* Flash when hit */
+.enemy-flash {
+  animation: enemy-damage-flash 0.2s ease;
+}
+
+@keyframes enemy-damage-flash {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+  }
+  25% {
+    filter: brightness(2) drop-shadow(0 0 12px rgba(255, 255, 255, 1));
+  }
+  50% {
+    filter: brightness(3) drop-shadow(0 0 16px rgba(255, 0, 0, 0.9)) hue-rotate(0deg);
+  }
+  75% {
+    filter: brightness(2) drop-shadow(0 0 12px rgba(255, 100, 100, 0.8));
+  }
+}
+
+/* Stunned state */
+.enemy-stunned {
+  animation: enemy-stun-shake 0.1s ease infinite;
+}
+
+@keyframes enemy-stun-shake {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2px, 0);
+  }
+  75% {
+    transform: translate(2px, 0);
+  }
+}
+
+/* Death animation */
+.enemy-defeated {
+  animation: enemy-defeat 0.5s ease forwards;
+  font-size: 48px;
+}
+
+@keyframes enemy-defeat {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Enemy health bar - NES Zelda style */
+.enemy-health-bar {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 6px;
+  background-color: rgba(0, 0, 0, 0.8); /* Darker background for visibility */
+  border: 2px solid rgba(255, 255, 255, 0.9); /* White border like Zelda */
+  border-radius: 0; /* Square edges for retro feel */
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.8); /* Shadow for depth */
+  image-rendering: pixelated;
+}
+
+.enemy-health-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #FF3030 0%, #CC0000 100%); /* Gradient red for depth */
+  transition: width 0.2s steps(4); /* Stepped transition for retro feel */
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 100, 100, 0.5); /* Inner highlight */
+}
+
+/* Direction facing */
+.enemy-up {
+  transform: scaleY(-1);
+}
+
+.enemy-down {
+  /* Default */
+}
+
+.enemy-left {
+  transform: scaleX(-1);
+}
+
+.enemy-right {
+  /* Default */
+}
+
+/* Drops */
+.drop {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  animation: drop-appear 0.5s ease, drop-float 2s ease-in-out infinite;
+  z-index: 40;
+  cursor: pointer;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+}
+
+@keyframes drop-appear {
+  0% {
+    transform: scale(0) translateY(-32px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes drop-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.drop-heart {
+  color: #FF0000;
+}
+
+.drop-rupee {
+  color: #00FF00;
+}
+
+.drop-key {
+  color: #FFD700;
+}
+

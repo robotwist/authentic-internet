@@ -2,6 +2,12 @@ import express from "express";
 import Artifact from "../models/Artifact.js";
 import User from "../models/User.js";
 import authenticateToken from "../middleware/authMiddleware.js";
+import { 
+  validateUnifiedArtifact, 
+  validateArtifactUpdate, 
+  convertLegacyArtifact, 
+  ensureUnifiedResponse 
+} from "../middleware/artifactValidation.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -87,75 +93,93 @@ const uploadFields = upload.fields([
 ]);
 
 /* ────────────────────────────────
-   🔹 CREATE ARTIFACT (WITH MESSAGE)
+   🔹 CREATE ARTIFACT (UNIFIED MODEL)
 ──────────────────────────────── */
-router.post("/", authenticateToken, uploadFields, validate(schemas.artifact.create), async (req, res) => {
-  try {
-    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location } = req.body;
+router.post("/", 
+  authenticateToken, 
+  uploadFields, 
+  convertLegacyArtifact,
+  validateUnifiedArtifact,
+  ensureUnifiedResponse,
+  async (req, res) => {
+    try {
+      const artifactData = req.body;
 
-    if (!name || !description || !content || !area || !location) {
-      return res.status(400).json({ error: "All required fields must be provided." });
-    }
-
-    const newArtifact = new Artifact({
-      name,
-      description,
-      content,
-      riddle,
-      unlockAnswer,
-      area,
-      isExclusive,
-      location,
-      creator: req.user.userId,
-    });
-
-    // Add attachment if provided
-    if (req.files && req.files.attachment && req.files.attachment[0]) {
-      const file = req.files.attachment[0];
-      newArtifact.attachment = '/uploads/artifacts/' + file.filename;
-      newArtifact.attachmentOriginalName = file.originalname;
-      
-      // Determine attachment type based on mimetype
-      if (file.mimetype.startsWith('image/')) {
-        newArtifact.attachmentType = 'image';
-      } else if (file.mimetype.startsWith('audio/')) {
-        newArtifact.attachmentType = 'audio';
-      } else if (file.mimetype.startsWith('video/')) {
-        newArtifact.attachmentType = 'video';
-      } else {
-        newArtifact.attachmentType = 'document';
+      // Generate unique ID if not provided
+      if (!artifactData.id) {
+        artifactData.id = `artifact-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       }
-    }
-    
-    // Add custom icon if provided
-    if (req.files && req.files.artifactIcon && req.files.artifactIcon[0]) {
-      const iconFile = req.files.artifactIcon[0];
-      newArtifact.image = '/uploads/icons/' + iconFile.filename;
-    } else if (req.body.image) {
-      // If no file upload but image path was provided
-      newArtifact.image = req.body.image;
-    }
 
-    await newArtifact.save();
-    res.status(201).json({ message: "Artifact created successfully!", artifact: newArtifact });
-  } catch (error) {
-    console.error("Error creating artifact:", error);
-    res.status(500).json({ error: "Failed to create artifact." });
+      // Process uploaded files
+      if (req.files) {
+        // Handle attachment
+        if (req.files.attachment && req.files.attachment[0]) {
+          const file = req.files.attachment[0];
+          const fileUrl = '/uploads/artifacts/' + file.filename;
+          
+          // Add to media array
+          if (!artifactData.media) artifactData.media = [];
+          artifactData.media.push(fileUrl);
+          
+          // Set legacy attachment fields for backward compatibility
+          artifactData.attachment = fileUrl;
+          artifactData.attachmentOriginalName = file.originalname;
+          
+          // Determine attachment type based on mimetype
+          if (file.mimetype.startsWith('image/')) {
+            artifactData.attachmentType = 'image';
+          } else if (file.mimetype.startsWith('audio/')) {
+            artifactData.attachmentType = 'audio';
+          } else if (file.mimetype.startsWith('video/')) {
+            artifactData.attachmentType = 'video';
+          } else {
+            artifactData.attachmentType = 'document';
+          }
+        }
+        
+        // Handle custom icon
+        if (req.files.artifactIcon && req.files.artifactIcon[0]) {
+          const iconFile = req.files.artifactIcon[0];
+          artifactData.image = '/uploads/icons/' + iconFile.filename;
+        }
+      }
+
+      // Create the artifact
+      const newArtifact = new Artifact(artifactData);
+      await newArtifact.save();
+
+      res.status(201).json({ 
+        success: true,
+        message: "Artifact created successfully!", 
+        artifact: newArtifact.toUnifiedFormat()
+      });
+    } catch (error) {
+      console.error("Error creating artifact:", error);
+      res.status(500).json({ 
+        success: false,
+        error: "Failed to create artifact.",
+        details: error.message
+      });
+    }
   }
-});
+);
 
 /* ────────────────────────────────
-   🔹 FETCH ALL ARTIFACTS
+   🔹 FETCH ALL ARTIFACTS (UNIFIED)
 ──────────────────────────────── */
-router.get("/", async (req, res) => {
+router.get("/", ensureUnifiedResponse, async (req, res) => {
   try {
-    const { area, type, creator, visibility, page = 1, limit = 20 } = req.query;
+    const { area, type, creator, visibility, page = 1, limit = 20, tags } = req.query;
     
     const filter = {};
     if (area) filter.area = area;
     if (type) filter.type = type;
     if (creator) filter.creator = creator;
     if (visibility) filter.visibility = visibility;
+    if (tags) {
+      const tagArray = Array.isArray(tags) ? tags : tags.split(',');
+      filter.tags = { $in: tagArray };
+    }
 
     const artifacts = await Artifact.find(filter)
       .populate('creator', 'username email')
@@ -170,8 +194,49 @@ router.get("/", async (req, res) => {
 
     const total = await Artifact.countDocuments(filter);
 
+    // Convert to unified format
+    const unifiedArtifacts = artifacts.map(artifact => {
+      const unified = {
+        id: artifact.id,
+        name: artifact.name,
+        description: artifact.description,
+        type: artifact.type,
+        content: artifact.content,
+        media: artifact.media || [],
+        location: artifact.location,
+        exp: artifact.exp || 0,
+        visible: artifact.visible !== false,
+        area: artifact.area,
+        tags: artifact.tags || [],
+        rating: artifact.rating || 0,
+        reviews: artifact.reviews || [],
+        remixOf: artifact.remixOf,
+        createdBy: artifact.createdBy,
+        createdAt: artifact.createdAt,
+        updatedAt: artifact.updatedAt,
+        interactions: artifact.interactions || [],
+        properties: artifact.properties || {},
+        userModifiable: artifact.userModifiable || {}
+      };
+      
+      // Add legacy fields for backward compatibility
+      if (artifact.messageText) unified.messageText = artifact.messageText;
+      if (artifact.riddle) unified.riddle = artifact.riddle;
+      if (artifact.unlockAnswer) unified.unlockAnswer = artifact.unlockAnswer;
+      if (artifact.isExclusive !== undefined) unified.isExclusive = artifact.isExclusive;
+      if (artifact.status) unified.status = artifact.status;
+      if (artifact.image) unified.image = artifact.image;
+      if (artifact.attachment) unified.attachment = artifact.attachment;
+      if (artifact.theme) unified.theme = artifact.theme;
+      if (artifact.dedication) unified.dedication = artifact.dedication;
+      if (artifact.significance) unified.significance = artifact.significance;
+      
+      return unified;
+    });
+
     res.json({
-      artifacts,
+      success: true,
+      artifacts: unifiedArtifacts,
       pagination: {
         current: parseInt(page),
         pages: Math.ceil(total / limit),
@@ -180,11 +245,16 @@ router.get("/", async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching artifacts:', error);
-    res.status(500).json({ error: 'Failed to fetch artifacts' });
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch artifacts',
+      details: error.message
+    });
   }
 });
 
 /* ────────────────────────────────
+<<<<<<< HEAD
    🔹 GAME ARTIFACT PROGRESS TRACKING
 ──────────────────────────────── */
 
@@ -497,11 +567,16 @@ router.get('/marketplace', async (req, res) => {
 });
 
 /* ────────────────────────────────
-   🔹 FETCH A SINGLE ARTIFACT BY ID
+   🔹 FETCH A SINGLE ARTIFACT BY ID (UNIFIED)
 ──────────────────────────────── */
-router.get("/:id", async (req, res) => {
+router.get("/:id", ensureUnifiedResponse, async (req, res) => {
   try {
-    const artifact = await Artifact.findById(req.params.id)
+    const artifact = await Artifact.findOne({
+      $or: [
+        { _id: req.params.id.match(/^[0-9a-fA-F]{24}$/) ? req.params.id : null },
+        { id: req.params.id }
+      ]
+    })
       .populate('creator', 'username email')
       .populate({
         path: 'comments.user',
@@ -509,112 +584,133 @@ router.get("/:id", async (req, res) => {
       });
 
     if (!artifact) {
-      return res.status(404).json({ error: 'Artifact not found' });
+      return res.status(404).json({ 
+        success: false,
+        error: 'Artifact not found' 
+      });
     }
 
     // Increment view count
-    artifact.views += 1;
+    artifact.views = (artifact.views || 0) + 1;
     await artifact.save();
 
-    res.json(artifact);
+    res.json({
+      success: true,
+      artifact: artifact.toUnifiedFormat()
+    });
   } catch (error) {
     console.error('Error fetching artifact:', error);
-    res.status(500).json({ error: 'Failed to fetch artifact' });
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch artifact',
+      details: error.message
+    });
   }
 });
 
 /* ────────────────────────────────
-   🔹 UPDATE ARTIFACT (EDIT PROPERTIES)
+   🔹 UPDATE ARTIFACT (UNIFIED)
 ──────────────────────────────── */
-router.put("/:id", authenticateToken, uploadFields, async (req, res) => {
-  try {
-    const artifactId = req.params.id;
-    const artifact = await Artifact.findById(artifactId);
-    
-    if (!artifact || artifact.type !== "artifact") {
-      return res.status(404).json({ error: "Artifact not found." });
-    }
-    
-    // Update basic fields from body
-    Object.keys(req.body).forEach(key => {
-      // Handle location object specially
-      if (key === 'location[x]' || key === 'location[y]') {
-        if (!artifact.location) artifact.location = {};
-        if (key === 'location[x]') artifact.location.x = Number(req.body[key]);
-        if (key === 'location[y]') artifact.location.y = Number(req.body[key]);
-      } 
-      // Handle boolean conversions
-      else if (key === 'isExclusive') {
-        artifact[key] = req.body[key] === 'true';
+router.put("/:id", 
+  authenticateToken, 
+  uploadFields, 
+  convertLegacyArtifact,
+  validateArtifactUpdate,
+  ensureUnifiedResponse,
+  async (req, res) => {
+    try {
+      const artifactId = req.params.id;
+      const artifact = await Artifact.findOne({
+        $or: [
+          { _id: artifactId.match(/^[0-9a-fA-F]{24}$/) ? artifactId : null },
+          { id: artifactId }
+        ]
+      });
+      
+      if (!artifact) {
+        return res.status(404).json({ 
+          success: false,
+          error: "Artifact not found." 
+        });
       }
-      // Handle all other fields normally
-      else if (key !== 'attachment' && key !== 'artifactIcon') {
-        artifact[key] = req.body[key];
+      
+      // Check if user is the creator
+      if (artifact.createdBy !== req.user.userId && artifact.createdBy !== req.user.id) {
+        return res.status(403).json({ 
+          success: false,
+          error: "You can only edit your own artifacts." 
+        });
       }
-    });
-    
-    // Add attachment if provided
-    if (req.files && req.files.attachment && req.files.attachment[0]) {
-      // If there was a previous attachment, delete it
-      if (artifact.attachment) {
-        try {
-          const oldFilePath = path.join(process.cwd(), 'public', artifact.attachment);
-          if (fs.existsSync(oldFilePath)) {
-            fs.unlinkSync(oldFilePath);
+      
+      // Update fields from body
+      Object.keys(req.body).forEach(key => {
+        if (key !== 'attachment' && key !== 'artifactIcon' && key !== 'id') {
+          artifact[key] = req.body[key];
+        }
+      });
+      
+      // Handle file uploads
+      if (req.files) {
+        // Handle attachment
+        if (req.files.attachment && req.files.attachment[0]) {
+          // Delete old attachment if exists
+          if (artifact.attachment) {
+            try {
+              const oldFilePath = path.join(process.cwd(), 'public', artifact.attachment);
+              if (fs.existsSync(oldFilePath)) {
+                fs.unlinkSync(oldFilePath);
+              }
+            } catch (error) {
+              console.error("Error deleting old attachment:", error);
+            }
           }
-        } catch (error) {
-          console.error("Error deleting old attachment:", error);
-          // Continue with the update even if file deletion fails
+          
+          const file = req.files.attachment[0];
+          const fileUrl = '/uploads/artifacts/' + file.filename;
+          
+          // Update media array
+          if (!artifact.media) artifact.media = [];
+          artifact.media.push(fileUrl);
+          
+          artifact.attachment = fileUrl;
+          artifact.attachmentOriginalName = file.originalname;
+          
+          if (file.mimetype.startsWith('image/')) {
+            artifact.attachmentType = 'image';
+          } else if (file.mimetype.startsWith('audio/')) {
+            artifact.attachmentType = 'audio';
+          } else if (file.mimetype.startsWith('video/')) {
+            artifact.attachmentType = 'video';
+          } else {
+            artifact.attachmentType = 'document';
+          }
+        }
+        
+        // Handle icon
+        if (req.files.artifactIcon && req.files.artifactIcon[0]) {
+          const iconFile = req.files.artifactIcon[0];
+          artifact.image = '/uploads/icons/' + iconFile.filename;
         }
       }
       
-      // Update with new attachment
-      const file = req.files.attachment[0];
-      artifact.attachment = '/uploads/artifacts/' + file.filename;
-      artifact.attachmentOriginalName = file.originalname;
-      
-      // Determine attachment type based on mimetype
-      if (file.mimetype.startsWith('image/')) {
-        artifact.attachmentType = 'image';
-      } else if (file.mimetype.startsWith('audio/')) {
-        artifact.attachmentType = 'audio';
-      } else if (file.mimetype.startsWith('video/')) {
-        artifact.attachmentType = 'video';
-      } else {
-        artifact.attachmentType = 'document';
-      }
+      await artifact.save();
+      await artifact.populate('creator', 'username email');
+
+      res.json({ 
+        success: true,
+        message: "Artifact updated successfully!", 
+        artifact: artifact.toUnifiedFormat()
+      });
+    } catch (error) {
+      console.error("Error updating artifact:", error);
+      res.status(500).json({ 
+        success: false,
+        error: "Failed to update artifact.",
+        details: error.message
+      });
     }
-    
-    // Add custom icon if provided
-    if (req.files && req.files.artifactIcon && req.files.artifactIcon[0]) {
-      // If there was a previous custom icon, delete it
-      if (artifact.image && artifact.image.startsWith('/uploads/icons/')) {
-        try {
-          const oldIconPath = path.join(process.cwd(), 'public', artifact.image);
-          if (fs.existsSync(oldIconPath)) {
-            fs.unlinkSync(oldIconPath);
-          }
-        } catch (error) {
-          console.error("Error deleting old icon:", error);
-          // Continue with the update even if file deletion fails
-        }
-      }
-      
-      // Update with new icon
-      const iconFile = req.files.artifactIcon[0];
-      artifact.image = '/uploads/icons/' + iconFile.filename;
-    } else if (req.body.image) {
-      // If no file upload but image path was provided
-      artifact.image = req.body.image;
-    }
-    
-    await artifact.save();
-    res.json({ message: "Artifact updated successfully!", artifact });
-  } catch (error) {
-    console.error("Error updating artifact:", error);
-    res.status(500).json({ error: "Failed to update artifact." });
   }
-});
+);
 
 /* ────────────────────────────────
    🔹 FETCH MESSAGE FROM ARTIFACT

@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import './FeedbackForm.css';
-import { useAuth } from '../context/AuthContext'; // Import Auth context to get user info if logged in
+import React, { useState } from "react";
+import "./FeedbackForm.css";
+import { useAuth } from "../context/AuthContext"; // Import Auth context to get user info if logged in
 
 // Updated for automatic deployment testing - Added GitHub repository secrets
 const FeedbackForm = ({ onClose }) => {
   const { user } = useAuth(); // Get current authenticated user if available
   const [feedback, setFeedback] = useState({
-    gameplay: '',
-    bugs: '',
-    visual: '',
-    performance: '',
-    suggestions: '',
-    email: '',
-    name: ''
+    gameplay: "",
+    bugs: "",
+    visual: "",
+    performance: "",
+    suggestions: "",
+    email: "",
+    name: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,9 +21,9 @@ const FeedbackForm = ({ onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFeedback(prev => ({
+    setFeedback((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -38,16 +38,17 @@ const FeedbackForm = ({ onClose }) => {
         screenHeight: window.innerHeight,
         userAgent: navigator.userAgent,
         timestamp: new Date().toISOString(),
-        mapLocation: window.gameState?.currentMapIndex !== undefined 
-          ? `Map: ${window.gameState.currentMapIndex}`
-          : 'Unknown',
-        gameVersion: process.env.VITE_APP_VERSION || '1.0'
+        mapLocation:
+          window.gameState?.currentMapIndex !== undefined
+            ? `Map: ${window.gameState.currentMapIndex}`
+            : "Unknown",
+        gameVersion: process.env.VITE_APP_VERSION || "1.0",
       };
 
       // Combine user feedback with device info
       const feedbackData = {
         ...feedback,
-        deviceInfo
+        deviceInfo,
       };
 
       // If user is authenticated, add their name and email
@@ -57,21 +58,29 @@ const FeedbackForm = ({ onClose }) => {
       }
 
       // Save to localStorage as backup
-      const existingFeedback = JSON.parse(localStorage.getItem('gameFeedback') || '[]');
-      localStorage.setItem('gameFeedback', JSON.stringify([...existingFeedback, feedbackData]));
+      const existingFeedback = JSON.parse(
+        localStorage.getItem("gameFeedback") || "[]",
+      );
+      localStorage.setItem(
+        "gameFeedback",
+        JSON.stringify([...existingFeedback, feedbackData]),
+      );
 
       // Submit to server API
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Include auth token if user is logged in
-          ...(localStorage.getItem('authToken') && {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          })
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/feedback`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Include auth token if user is logged in
+            ...(localStorage.getItem("authToken") && {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            }),
+          },
+          body: JSON.stringify(feedbackData),
         },
-        body: JSON.stringify(feedbackData)
-      });
+      );
 
       if (response.ok) {
         console.log("📝 Feedback submitted to server successfully");
@@ -80,7 +89,7 @@ const FeedbackForm = ({ onClose }) => {
         console.warn("Server submission failed, but feedback saved locally");
         // Don't show error to user since we saved locally
       }
-      
+
       setSubmitted(true);
     } catch (error) {
       console.error("Error submitting feedback:", error);
@@ -93,13 +102,13 @@ const FeedbackForm = ({ onClose }) => {
 
   const handleExportFeedback = () => {
     try {
-      const feedbackData = localStorage.getItem('gameFeedback') || '[]';
-      const blob = new Blob([feedbackData], { type: 'application/json' });
+      const feedbackData = localStorage.getItem("gameFeedback") || "[]";
+      const blob = new Blob([feedbackData], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
+
+      const a = document.createElement("a");
       a.href = url;
-      a.download = 'game-feedback.json';
+      a.download = "game-feedback.json";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -114,9 +123,11 @@ const FeedbackForm = ({ onClose }) => {
 
   const handleCopyFeedbackToClipboard = () => {
     try {
-      const feedbackData = localStorage.getItem('gameFeedback') || '[]';
+      const feedbackData = localStorage.getItem("gameFeedback") || "[]";
       navigator.clipboard.writeText(feedbackData).then(() => {
-        alert("Feedback copied to clipboard! You can now paste it into an email or document.");
+        alert(
+          "Feedback copied to clipboard! You can now paste it into an email or document.",
+        );
       });
     } catch (error) {
       console.error("Error copying feedback:", error);
@@ -131,16 +142,19 @@ const FeedbackForm = ({ onClose }) => {
           <h2>Thank You!</h2>
           <p>Your feedback has been saved successfully.</p>
           <p>To share your feedback with the developer:</p>
-          
+
           <div className="export-options">
             <button onClick={handleExportFeedback} className="primary-button">
               Download Feedback File
             </button>
-            <button onClick={handleCopyFeedbackToClipboard} className="secondary-button">
+            <button
+              onClick={handleCopyFeedbackToClipboard}
+              className="secondary-button"
+            >
               Copy to Clipboard
             </button>
           </div>
-          
+
           {showExportInstructions && (
             <div className="export-instructions">
               <h3>What's Next?</h3>
@@ -148,11 +162,14 @@ const FeedbackForm = ({ onClose }) => {
               <ol>
                 <li>Create a new email</li>
                 <li>Attach the game-feedback.json file</li>
-                <li>Send it to the developer directly or through whatever communication channel you use</li>
+                <li>
+                  Send it to the developer directly or through whatever
+                  communication channel you use
+                </li>
               </ol>
             </div>
           )}
-          
+
           <div className="button-container">
             <button onClick={onClose}>Close</button>
           </div>
@@ -166,9 +183,11 @@ const FeedbackForm = ({ onClose }) => {
       <div className="feedback-form">
         <div className="form-header">
           <h2>Game Feedback</h2>
-          <button className="close-button" onClick={onClose}>&times;</button>
+          <button className="close-button" onClick={onClose}>
+            &times;
+          </button>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">Your Name (Optional):</label>
@@ -256,15 +275,15 @@ const FeedbackForm = ({ onClose }) => {
           </div>
 
           <div className="button-container">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isSubmitting || !feedback.gameplay}
-              className={isSubmitting ? 'loading' : ''}
+              className={isSubmitting ? "loading" : ""}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+              {isSubmitting ? "Submitting..." : "Submit Feedback"}
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={handleExportFeedback}
               className="secondary-button"
             >
@@ -277,4 +296,4 @@ const FeedbackForm = ({ onClose }) => {
   );
 };
 
-export default FeedbackForm; 
+export default FeedbackForm;

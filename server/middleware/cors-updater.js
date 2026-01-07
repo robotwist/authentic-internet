@@ -67,7 +67,7 @@ export const clearBlockedOrigins = () => blockedOrigins.clear();
 corsUpdater.getBlockedOrigins = getBlockedOrigins;
 corsUpdater.clearBlockedOrigins = clearBlockedOrigins;
 
-// Create a helper function to update the server.mjs file
+// Create a helper function to update the app-config.js file
 export const addOriginToAllowedOrigins = async (newOrigin) => {
   if (!newOrigin) {
     console.error('No origin specified');
@@ -75,28 +75,28 @@ export const addOriginToAllowedOrigins = async (newOrigin) => {
   }
   
   try {
-    // Read the server.mjs file
-    const serverFilePath = path.resolve(__dirname, '../server.mjs');
+    // Read the app-config.js file
+    const configFilePath = path.resolve(__dirname, '../config/app-config.js');
     let content;
     
     try {
-      content = fs.readFileSync(serverFilePath, 'utf8');
+      content = fs.readFileSync(configFilePath, 'utf8');
     } catch (error) {
-      console.error(`Error reading server.mjs: ${error.message}`);
+      console.error(`Error reading app-config.js: ${error.message}`);
       return { 
         success: false, 
-        message: `Cannot read server.mjs: ${error.message}` 
+        message: `Cannot read app-config.js: ${error.message}` 
       };
     }
     
-    // Find the allowedOrigins array
-    const originsRegex = /const allowedOrigins = process\.env\.NODE_ENV === 'development'\s*\?\s*\[(.*?)\]\s*:/s;
+    // Find the configureAllowedOrigins function
+    const originsRegex = /return getEnv\('NODE_ENV'\) === 'development'\s*\?\s*\[(.*?)\]\s*:/s;
     const match = content.match(originsRegex);
     
     if (!match) {
       return { 
         success: false, 
-        message: 'Could not find allowedOrigins array in server.mjs' 
+        message: 'Could not find configureAllowedOrigins function in app-config.js' 
       };
     }
     
@@ -117,17 +117,17 @@ export const addOriginToAllowedOrigins = async (newOrigin) => {
     // Update the file
     const updatedContent = content.replace(
       originsRegex,
-      `const allowedOrigins = process.env.NODE_ENV === 'development' ? [${newOriginsStr}] :`
+      `return getEnv('NODE_ENV') === 'development' ? [${newOriginsStr}] :`
     );
     
     // Write the updated content back to the file
     try {
-      fs.writeFileSync(serverFilePath, updatedContent);
+      fs.writeFileSync(configFilePath, updatedContent);
     } catch (error) {
-      console.error(`Error writing to server.mjs: ${error.message}`);
+      console.error(`Error writing to app-config.js: ${error.message}`);
       return { 
         success: false, 
-        message: `Cannot write to server.mjs: ${error.message}` 
+        message: `Cannot write to app-config.js: ${error.message}` 
       };
     }
     
@@ -136,7 +136,7 @@ export const addOriginToAllowedOrigins = async (newOrigin) => {
       message: `Successfully added ${newOrigin} to allowedOrigins array` 
     };
   } catch (error) {
-    console.error('Error updating server.mjs:', error);
+    console.error('Error updating app-config.js:', error);
     return { 
       success: false, 
       message: `Error: ${error.message}` 

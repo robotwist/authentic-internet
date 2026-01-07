@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import './Dialog.css';
+import React, { useState, useEffect } from "react";
+import "./Dialog.css";
 
 /**
  * Dialog component for in-game conversations and messages
@@ -12,18 +12,18 @@ import './Dialog.css';
  * @param {string} props.characterName - Name of the speaking character (optional)
  * @param {string} props.characterAvatar - URL of character avatar (optional)
  */
-const Dialog = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  content, 
-  options = [], 
+const Dialog = ({
+  isOpen,
+  onClose,
+  title,
+  content,
+  options = [],
   characterName,
   characterAvatar,
-  className = ''
+  className = "",
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  
+
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
@@ -35,9 +35,9 @@ const Dialog = ({
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
-  
+
   if (!isVisible) return null;
-  
+
   const handleOptionSelect = (option) => {
     if (option.action) {
       option.action();
@@ -46,22 +46,24 @@ const Dialog = ({
       onClose();
     }
   };
-  
+
   return (
-    <div className={`dialog-overlay ${isOpen ? 'active' : 'closing'}`}>
-      <div className={`dialog-container ${className} ${isOpen ? 'active' : 'closing'}`}>
+    <div className={`dialog-overlay ${isOpen ? "active" : "closing"}`}>
+      <div
+        className={`dialog-container ${className} ${isOpen ? "active" : "closing"}`}
+      >
         {characterAvatar && (
           <div className="dialog-avatar">
             <img src={characterAvatar} alt={characterName || "Character"} />
           </div>
         )}
-        
+
         <div className="dialog-content">
           {title && <h3 className="dialog-title">{characterName || title}</h3>}
           <div className="dialog-message">
-            {typeof content === 'string' ? <p>{content}</p> : content}
+            {typeof content === "string" ? <p>{content}</p> : content}
           </div>
-          
+
           {options.length > 0 && (
             <div className="dialog-options">
               {options.map((option, index) => (
@@ -75,7 +77,7 @@ const Dialog = ({
               ))}
             </div>
           )}
-          
+
           {(!options || options.length === 0) && (
             <div className="dialog-close">
               <button onClick={onClose}>Close</button>
@@ -87,4 +89,4 @@ const Dialog = ({
   );
 };
 
-export default Dialog; 
+export default Dialog;

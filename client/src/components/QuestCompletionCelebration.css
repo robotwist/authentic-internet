@@ -1,0 +1,270 @@
+.quest-completion-celebration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.quest-completion-celebration.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.quest-completion-celebration.closing {
+  opacity: 0;
+}
+
+.quest-celebration-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.quest-celebration-particle {
+  position: absolute;
+  font-size: 24px;
+  animation: particleFloat 1.5s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes particleFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px) scale(1.5) rotate(360deg);
+  }
+}
+
+.quest-celebration-content {
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  animation: celebrationPulse 2s ease-in-out infinite;
+}
+
+.quest-completion-celebration.visible .quest-celebration-content {
+  transform: scale(1);
+}
+
+@keyframes celebrationPulse {
+  0%, 100% {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 20px 80px rgba(102, 126, 234, 0.6), 0 0 40px rgba(118, 75, 162, 0.4);
+  }
+}
+
+.quest-celebration-icon {
+  font-size: 80px;
+  animation: iconBounce 0.6s ease-in-out;
+  margin-bottom: 20px;
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.2);
+  }
+}
+
+.quest-celebration-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #fff;
+  margin: 0 0 10px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  animation: titleSlideIn 0.5s ease-out;
+}
+
+@keyframes titleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quest-celebration-quest-name {
+  font-size: 24px;
+  color: #ffd700;
+  margin-bottom: 30px;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  animation: nameFadeIn 0.7s ease-out;
+}
+
+@keyframes nameFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.quest-celebration-rewards {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 30px;
+  backdrop-filter: blur(10px);
+  animation: rewardsSlideIn 0.8s ease-out;
+}
+
+@keyframes rewardsSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quest-rewards-header {
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 15px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.quest-reward-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  margin: 8px 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  font-size: 18px;
+  color: #fff;
+  font-weight: 600;
+  animation: rewardItemFadeIn 1s ease-out;
+  animation-fill-mode: both;
+}
+
+.quest-reward-item.xp-reward {
+  animation-delay: 0.2s;
+}
+
+.quest-reward-item.item-reward {
+  animation-delay: 0.4s;
+}
+
+.quest-reward-item.ability-reward {
+  animation-delay: 0.6s;
+}
+
+@keyframes rewardItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.reward-icon {
+  font-size: 24px;
+}
+
+.reward-text {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.quest-celebration-close {
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: buttonSlideIn 1s ease-out;
+}
+
+@keyframes buttonSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quest-celebration-close:hover {
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.quest-celebration-close:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .quest-celebration-content {
+    padding: 30px 20px;
+    max-width: 90%;
+  }
+
+  .quest-celebration-icon {
+    font-size: 60px;
+  }
+
+  .quest-celebration-title {
+    font-size: 28px;
+  }
+
+  .quest-celebration-quest-name {
+    font-size: 20px;
+  }
+
+  .quest-reward-item {
+    font-size: 16px;
+    padding: 8px;
+  }
+}
+

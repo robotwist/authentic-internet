@@ -59,14 +59,30 @@ serverProcess.on('error', (err) => {
 
 // Handle termination signals
 const handleTermination = () => {
-  if (serverProcess) {
+  if (serverProcess && !serverProcess.killed) {
     console.log('Stopping server process...');
     
-    // Kill the process
-    if (process.platform === 'win32') {
-      spawn('taskkill', ['/pid', serverProcess.pid, '/f', '/t']);
-    } else {
-      process.kill(-serverProcess.pid, 'SIGINT'); // The negative PID kills the process group
+    try {
+      // Kill the process
+      if (process.platform === 'win32') {
+        spawn('taskkill', ['/pid', serverProcess.pid, '/f', '/t']);
+      } else {
+        // Check if process still exists before killing
+        try {
+          process.kill(-serverProcess.pid, 0); // Signal 0 checks if process exists
+          process.kill(-serverProcess.pid, 'SIGINT'); // The negative PID kills the process group
+        } catch (err) {
+          if (err.code !== 'ESRCH') {
+            // Process doesn't exist, which is fine
+            throw err;
+          }
+        }
+      }
+    } catch (err) {
+      // Process may have already exited, that's okay
+      if (err.code !== 'ESRCH') {
+        console.error('Error stopping server:', err);
+      }
     }
   }
   

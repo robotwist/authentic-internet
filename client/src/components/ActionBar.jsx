@@ -1,21 +1,21 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import './ActionBar.css';
+import React from "react";
+import PropTypes from "prop-types";
+import "./ActionBar.css";
 
-const ActionBar = ({ 
-  onOpenInventory, 
-  onShowQuotes, 
+const ActionBar = ({
+  onOpenInventory,
+  onShowQuotes,
   onCreateInspiration,
-  inventory = [], 
-  exp = 0, 
+  inventory = [],
+  exp = 0,
   level = 1,
-  isLoggedIn = false
+  isLoggedIn = false,
 }) => {
   return (
     <div className="action-bar">
       <div className="action-bar-left">
-        <button 
-          className="action-button inventory-button" 
+        <button
+          className="action-button inventory-button"
           onClick={onOpenInventory}
           title="Open Inventory"
         >
@@ -23,9 +23,9 @@ const ActionBar = ({
           <span className="action-label">Inventory</span>
           <span className="inventory-count">{inventory.length}</span>
         </button>
-        
-        <button 
-          className="action-button quotes-button" 
+
+        <button
+          className="action-button quotes-button"
           onClick={onShowQuotes}
           title="View Saved Quotes"
         >
@@ -33,11 +33,11 @@ const ActionBar = ({
           <span className="action-label">Quotes</span>
         </button>
       </div>
-      
+
       <div className="action-bar-center">
         {isLoggedIn && (
-          <button 
-            className="action-button inspiration-button" 
+          <button
+            className="action-button inspiration-button"
             onClick={onCreateInspiration}
             title="Create Something Meaningful"
           >
@@ -46,7 +46,7 @@ const ActionBar = ({
           </button>
         )}
       </div>
-      
+
       <div className="action-bar-right">
         <div className="character-stats">
           <div className="level-indicator" title="Your Level">
@@ -54,10 +54,10 @@ const ActionBar = ({
             <span className="level-value">{level}</span>
           </div>
           <div className="exp-bar" title={`Experience: ${exp} points`}>
-            <div 
-              className="exp-progress" 
-              style={{ 
-                width: `${Math.min(100, (exp % 100))}%` 
+            <div
+              className="exp-progress"
+              style={{
+                width: `${Math.min(100, exp % 100)}%`,
               }}
             ></div>
           </div>
@@ -74,7 +74,7 @@ ActionBar.propTypes = {
   inventory: PropTypes.array,
   exp: PropTypes.number,
   level: PropTypes.number,
-  isLoggedIn: PropTypes.bool
+  isLoggedIn: PropTypes.bool,
 };
 
-export default ActionBar; 
+export default ActionBar;

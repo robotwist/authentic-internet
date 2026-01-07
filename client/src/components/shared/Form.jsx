@@ -1,30 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import './Form.css';
+import React from "react";
+import PropTypes from "prop-types";
+import "./Form.css";
 
-const Form = ({ 
-  onSubmit, 
-  children, 
-  className = '',
-  ...props 
-}) => {
+const Form = ({ onSubmit, children, className = "", ...props }) => {
   return (
-    <form 
-      className={`form ${className}`}
-      onSubmit={onSubmit}
-      {...props}
-    >
+    <form className={`form ${className}`} onSubmit={onSubmit} {...props}>
       {children}
     </form>
   );
 };
 
-const FormGroup = ({ 
-  label, 
-  children, 
-  error, 
-  className = '' 
-}) => {
+const FormGroup = ({ label, children, error, className = "" }) => {
   return (
     <div className={`form-group ${className}`}>
       {label && <label>{label}</label>}
@@ -34,16 +20,16 @@ const FormGroup = ({
   );
 };
 
-const FormInput = ({ 
-  type = 'text',
+const FormInput = ({
+  type = "text",
   name,
   value,
   onChange,
   placeholder,
   required = false,
   disabled = false,
-  className = '',
-  ...props 
+  className = "",
+  ...props
 }) => {
   return (
     <input
@@ -87,4 +73,4 @@ FormInput.propTypes = {
 Form.Group = FormGroup;
 Form.Input = FormInput;
 
-export default Form; 
+export default Form;

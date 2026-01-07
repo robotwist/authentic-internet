@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import { TILE_SIZE } from './Constants';
-import './UserArtifactManager.css';
+import React, { useState } from "react";
+import { TILE_SIZE } from "./Constants";
+import "./UserArtifactManager.css";
 
-const UserArtifactManager = ({ 
-  artifact, 
-  onUpdate, 
-  onDelete, 
-  onPlace, 
+const UserArtifactManager = ({
+  artifact,
+  onUpdate,
+  onDelete,
+  onPlace,
   currentMapName,
-  position 
+  position,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isPlacing, setIsPlacing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: artifact.name,
     description: artifact.description,
-    messageText: artifact.messageText || ''
+    messageText: artifact.messageText || "",
   });
 
   const handleEdit = () => {
@@ -27,18 +27,18 @@ const UserArtifactManager = ({
       await onUpdate(artifact._id, editForm);
       setIsEditing(false);
     } catch (error) {
-      console.error('Failed to update artifact:', error);
-      alert('Failed to update artifact. Please try again.');
+      console.error("Failed to update artifact:", error);
+      alert("Failed to update artifact. Please try again.");
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this artifact?')) {
+    if (window.confirm("Are you sure you want to delete this artifact?")) {
       try {
         await onDelete(artifact._id);
       } catch (error) {
-        console.error('Failed to delete artifact:', error);
-        alert('Failed to delete artifact. Please try again.');
+        console.error("Failed to delete artifact:", error);
+        alert("Failed to delete artifact. Please try again.");
       }
     }
   };
@@ -66,12 +66,16 @@ const UserArtifactManager = ({
           />
           <textarea
             value={editForm.description}
-            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+            onChange={(e) =>
+              setEditForm({ ...editForm, description: e.target.value })
+            }
             placeholder="Description"
           />
           <textarea
             value={editForm.messageText}
-            onChange={(e) => setEditForm({ ...editForm, messageText: e.target.value })}
+            onChange={(e) =>
+              setEditForm({ ...editForm, messageText: e.target.value })
+            }
             placeholder="Message Text (optional)"
           />
           <div className="button-group">
@@ -86,7 +90,7 @@ const UserArtifactManager = ({
           <button onClick={handlePlace}>Place in World</button>
         </div>
       )}
-      
+
       {isPlacing && (
         <div className="placement-instructions">
           Click on a walkable tile to place the artifact
@@ -96,4 +100,4 @@ const UserArtifactManager = ({
   );
 };
 
-export default UserArtifactManager; 
+export default UserArtifactManager;

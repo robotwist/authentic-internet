@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import './VictoryScreen.css';
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import "./VictoryScreen.css";
 
-const VictoryScreen = ({ 
-  gameType, 
-  score, 
-  time, 
-  achievements, 
-  rewards, 
-  onContinue, 
+const VictoryScreen = ({
+  gameType,
+  score,
+  time,
+  achievements,
+  rewards,
+  onContinue,
   onReplay,
-  creator = "Aurthurneticus Interneticus"
+  creator = "Aurthurneticus Interneticus",
 }) => {
   const [showRewards, setShowRewards] = useState(false);
   const [animateScore, setAnimateScore] = useState(false);
@@ -20,7 +20,7 @@ const VictoryScreen = ({
     // Animate score after a short delay
     const scoreTimer = setTimeout(() => setAnimateScore(true), 500);
     const rewardsTimer = setTimeout(() => setAnimateRewards(true), 1500);
-    
+
     return () => {
       clearTimeout(scoreTimer);
       clearTimeout(rewardsTimer);
@@ -29,33 +29,33 @@ const VictoryScreen = ({
 
   const getGameTheme = () => {
     switch (gameType) {
-      case 'shooter':
+      case "shooter":
         return {
-          title: '🎯 Arcade Victory!',
-          subtitle: 'You\'ve mastered the digital battlefield',
-          bgClass: 'victory-shooter',
-          icon: '🎮'
+          title: "🎯 Arcade Victory!",
+          subtitle: "You've mastered the digital battlefield",
+          bgClass: "victory-shooter",
+          icon: "🎮",
         };
-      case 'terminal':
+      case "terminal":
         return {
-          title: '💻 Terminal Mastery!',
-          subtitle: 'Code conquered, knowledge gained',
-          bgClass: 'victory-terminal',
-          icon: '⌨️'
+          title: "💻 Terminal Mastery!",
+          subtitle: "Code conquered, knowledge gained",
+          bgClass: "victory-terminal",
+          icon: "⌨️",
         };
-      case 'text_adventure':
+      case "text_adventure":
         return {
-          title: '📖 Story Completed!',
-          subtitle: 'Your adventure has reached its conclusion',
-          bgClass: 'victory-text',
-          icon: '📚'
+          title: "📖 Story Completed!",
+          subtitle: "Your adventure has reached its conclusion",
+          bgClass: "victory-text",
+          icon: "📚",
         };
       default:
         return {
-          title: '🏆 Victory Achieved!',
-          subtitle: 'You\'ve completed the challenge',
-          bgClass: 'victory-default',
-          icon: '⭐'
+          title: "🏆 Victory Achieved!",
+          subtitle: "You've completed the challenge",
+          bgClass: "victory-default",
+          icon: "⭐",
         };
     }
   };
@@ -72,11 +72,11 @@ const VictoryScreen = ({
         </div>
 
         <div className="victory-stats">
-          <div className={`stat-item ${animateScore ? 'animate' : ''}`}>
+          <div className={`stat-item ${animateScore ? "animate" : ""}`}>
             <div className="stat-label">Final Score</div>
             <div className="stat-value">{score || 0}</div>
           </div>
-          
+
           {time && (
             <div className="stat-item">
               <div className="stat-label">Time</div>
@@ -100,7 +100,7 @@ const VictoryScreen = ({
         )}
 
         {rewards && (
-          <div className={`rewards-section ${animateRewards ? 'animate' : ''}`}>
+          <div className={`rewards-section ${animateRewards ? "animate" : ""}`}>
             <h3>🎁 Rewards Earned</h3>
             <div className="rewards-grid">
               {rewards.experience && (
@@ -121,7 +121,9 @@ const VictoryScreen = ({
                 <div className="reward-item">
                   <span className="reward-icon">⚡</span>
                   <span className="reward-label">New Powers</span>
-                  <span className="reward-value">{rewards.powers.join(', ')}</span>
+                  <span className="reward-value">
+                    {rewards.powers.join(", ")}
+                  </span>
                 </div>
               )}
             </div>
@@ -129,7 +131,9 @@ const VictoryScreen = ({
         )}
 
         <div className="creator-credit">
-          <p>Created by <span className="creator-name">{creator}</span></p>
+          <p>
+            Created by <span className="creator-name">{creator}</span>
+          </p>
         </div>
 
         <div className="victory-actions">
@@ -146,18 +150,19 @@ const VictoryScreen = ({
 };
 
 VictoryScreen.propTypes = {
-  gameType: PropTypes.oneOf(['shooter', 'terminal', 'text_adventure']).isRequired,
+  gameType: PropTypes.oneOf(["shooter", "terminal", "text_adventure"])
+    .isRequired,
   score: PropTypes.number,
   time: PropTypes.string,
   achievements: PropTypes.arrayOf(PropTypes.string),
   rewards: PropTypes.shape({
     experience: PropTypes.number,
     coins: PropTypes.number,
-    powers: PropTypes.arrayOf(PropTypes.string)
+    powers: PropTypes.arrayOf(PropTypes.string),
   }),
   onContinue: PropTypes.func.isRequired,
   onReplay: PropTypes.func.isRequired,
-  creator: PropTypes.string
+  creator: PropTypes.string,
 };
 
 export default VictoryScreen;

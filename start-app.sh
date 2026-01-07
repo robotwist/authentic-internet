@@ -43,7 +43,7 @@ check_port() {
 
 # Check critical ports
 check_port 5001 # Backend API
-check_port 5173 # Frontend development server
+check_port 5175 # Frontend development server
 
 # Step 4: Start the backend server
 echo -e "${YELLOW}Starting backend server...${NC}"
@@ -84,7 +84,7 @@ cd ..
 echo -e "${YELLOW}Waiting for frontend to be available...${NC}"
 timeout=30
 counter=0
-while ! curl -s http://localhost:5173 > /dev/null && [ $counter -lt $timeout ]; do
+while ! curl -s http://localhost:5175 > /dev/null && [ $counter -lt $timeout ]; do
   echo -e "${YELLOW}Waiting for frontend... ($counter/$timeout)${NC}"
   sleep 1
   counter=$((counter+1))
@@ -95,7 +95,7 @@ if [ $counter -lt $timeout ]; then
   echo -e "${GREEN}Application started successfully!${NC}"
   echo -e "${BLUE}------------------------------------${NC}"
   echo -e "${GREEN}Backend API:${NC} http://localhost:5001"
-  echo -e "${GREEN}Frontend:${NC} http://localhost:5173"
+  echo -e "${GREEN}Frontend:${NC} http://localhost:5175"
   echo -e "${BLUE}------------------------------------${NC}"
   echo -e "${YELLOW}Server logs: ${NC}tail -f server.log"
   echo -e "${YELLOW}Client logs: ${NC}tail -f client.log"

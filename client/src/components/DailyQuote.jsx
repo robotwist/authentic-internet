@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { getRandomQuote } from '../utils/quoteSystem.js';
-import '../styles/DailyQuote.css';
+import React, { useState, useEffect } from "react";
+import { getRandomQuote } from "../utils/quoteSystem.js";
+import "../styles/DailyQuote.css";
 
 const DailyQuote = ({ onSave }) => {
   const [quote, setQuote] = useState(null);
@@ -14,13 +14,13 @@ const DailyQuote = ({ onSave }) => {
         const quoteResponse = getRandomQuote();
         setQuote(quoteResponse);
       } catch (err) {
-        console.error('Failed to fetch daily quote:', err);
-        setError('Failed to load daily quote');
+        console.error("Failed to fetch daily quote:", err);
+        setError("Failed to load daily quote");
         // Set fallback quote
         setQuote({
           text: "The best way out is always through.",
           author: "Robert Frost",
-          type: "wisdom"
+          type: "wisdom",
         });
       } finally {
         setLoading(false);
@@ -45,10 +45,7 @@ const DailyQuote = ({ onSave }) => {
         <footer className="quote-author">— {quote.author}</footer>
       </blockquote>
       {onSave && (
-        <button 
-          className="save-quote-button"
-          onClick={() => onSave(quote)}
-        >
+        <button className="save-quote-button" onClick={() => onSave(quote)}>
           Save Quote
         </button>
       )}
@@ -56,4 +53,4 @@ const DailyQuote = ({ onSave }) => {
   );
 };
 
-export default DailyQuote; 
+export default DailyQuote;

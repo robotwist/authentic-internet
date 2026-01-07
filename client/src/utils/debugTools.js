@@ -1,6 +1,6 @@
 /**
  * Debug Tools for Authentic Internet Game
- * 
+ *
  * Utility functions to help diagnose issues with game rendering and assets
  */
 
@@ -14,78 +14,83 @@ import { MAPS } from "../components/Constants";
  */
 export const verifyNPCSprites = async (npcs, logSuccesses = false) => {
   if (!npcs || !npcs.length) {
-    console.error('No NPCs provided to verify');
+    console.error("No NPCs provided to verify");
     return [];
   }
-  
+
   const problemNPCs = [];
-  
+
   for (const npc of npcs) {
     // Determine sprite URL based on NPC type
     let spriteUrl = npc.sprite;
-    
+
     if (!spriteUrl) {
       // Fallback for missing sprite URL
-      const type = typeof npc.type === 'string' ? npc.type.toLowerCase() : npc.type;
-      
+      const type =
+        typeof npc.type === "string" ? npc.type.toLowerCase() : npc.type;
+
       switch (type) {
-        case 'shakespeare':
+        case "shakespeare":
         case 1:
-          spriteUrl = '/assets/npcs/shakespeare.webp';
+          spriteUrl = "/assets/npcs/shakespeare.webp";
           break;
-        case 'artist':
+        case "artist":
         case 2:
-          spriteUrl = '/assets/npcs/artist.svg';
+          spriteUrl = "/assets/npcs/artist.svg";
           break;
-        case 'ada_lovelace':
+        case "ada_lovelace":
         case 3:
-          spriteUrl = '/assets/npcs/ada_lovelace.png';
+          spriteUrl = "/assets/npcs/ada_lovelace.png";
           break;
-        case 'lord_byron':
+        case "lord_byron":
         case 4:
-          spriteUrl = '/assets/npcs/lord_byron.webp';
+          spriteUrl = "/assets/npcs/lord_byron.webp";
           break;
-        case 'oscar_wilde':
+        case "oscar_wilde":
         case 5:
-          spriteUrl = '/assets/npcs/oscar_wilde.svg';
+          spriteUrl = "/assets/npcs/oscar_wilde.svg";
           break;
-        case 'alexander_pope':
+        case "alexander_pope":
         case 6:
-          spriteUrl = '/assets/npcs/alexander_pope.svg';
+          spriteUrl = "/assets/npcs/alexander_pope.svg";
           break;
-        case 'zeus':
+        case "zeus":
         case 7:
-          spriteUrl = '/assets/npcs/zeus.svg';
+          spriteUrl = "/assets/npcs/zeus.svg";
           break;
-        case 'john_muir':
+        case "john_muir":
         case 8:
-          spriteUrl = '/assets/npcs/john_muir.png';
+          spriteUrl = "/assets/npcs/john_muir.png";
           break;
-        case 'jesus':
+        case "jesus":
         case 9:
-          spriteUrl = '/assets/npcs/jesus.png';
+          spriteUrl = "/assets/npcs/jesus.png";
           break;
         default:
-          spriteUrl = '/assets/npcs/guide.png';
+          spriteUrl = "/assets/npcs/guide.png";
           break;
       }
     }
-    
+
     try {
       const loadResult = await loadImage(spriteUrl);
       if (logSuccesses) {
-        console.log(`✅ NPC sprite loaded: ${spriteUrl} for ${npc.name || 'Unknown NPC'}`);
+        console.log(
+          `✅ NPC sprite loaded: ${spriteUrl} for ${npc.name || "Unknown NPC"}`,
+        );
       }
     } catch (error) {
-      console.error(`❌ Failed to load sprite for NPC: ${npc.name || 'Unknown NPC'} - ${spriteUrl}`);
+      console.error(
+        `❌ Failed to load sprite for NPC: ${npc.name || "Unknown NPC"} - ${spriteUrl}`,
+      );
       problemNPCs.push({
         npc,
         spriteUrl,
-        error: error.message
+        error: error.message,
       });
     }
   }
-  
+
   return problemNPCs;
 };
 
@@ -107,40 +112,46 @@ export const loadImage = (url) => {
  * Logs details about the available NPC sprites in the game
  */
 export const debugNPCSprites = () => {
-  console.group('🎭 NPC Sprite Debug Information');
-  console.log('Checking for NPC sprites in /assets/npcs/...');
-  
+  console.group("🎭 NPC Sprite Debug Information");
+  console.log("Checking for NPC sprites in /assets/npcs/...");
+
   const knownSprites = [
-    '/assets/npcs/shakespeare.webp',
-    '/assets/npcs/artist.svg',
-    '/assets/npcs/ada_lovelace.png',
-    '/assets/npcs/lord_byron.webp',
-    '/assets/npcs/oscar_wilde.svg',
-    '/assets/npcs/alexander_pope.svg',
-    '/assets/npcs/zeus.svg',
-    '/assets/npcs/john_muir.png',
-    '/assets/npcs/jesus.png',
-    '/assets/npcs/guide.png'
+    "/assets/npcs/shakespeare.webp",
+    "/assets/npcs/artist.svg",
+    "/assets/npcs/ada_lovelace.png",
+    "/assets/npcs/lord_byron.webp",
+    "/assets/npcs/oscar_wilde.svg",
+    "/assets/npcs/alexander_pope.svg",
+    "/assets/npcs/zeus.svg",
+    "/assets/npcs/john_muir.png",
+    "/assets/npcs/jesus.png",
+    "/assets/npcs/guide.png",
   ];
-  
-  Promise.all(knownSprites.map(url => {
-    return loadImage(url)
-      .then(() => ({ url, exists: true }))
-      .catch(() => ({ url, exists: false }));
-  })).then(results => {
-    results.forEach(result => {
+
+  Promise.all(
+    knownSprites.map((url) => {
+      return loadImage(url)
+        .then(() => ({ url, exists: true }))
+        .catch(() => ({ url, exists: false }));
+    }),
+  ).then((results) => {
+    results.forEach((result) => {
       if (result.exists) {
         console.log(`✅ ${result.url} - Available`);
       } else {
         console.error(`❌ ${result.url} - Missing`);
       }
     });
-    
-    console.log('\nTo debug NPC rendering issues:');
-    console.log('1. Check that sprite files exist in /assets/npcs/');
-    console.log('2. Ensure the correct file extension is used (.png, .svg, .webp)');
-    console.log('3. Verify that NPC objects in Constants.jsx have the correct type value');
-    
+
+    console.log("\nTo debug NPC rendering issues:");
+    console.log("1. Check that sprite files exist in /assets/npcs/");
+    console.log(
+      "2. Ensure the correct file extension is used (.png, .svg, .webp)",
+    );
+    console.log(
+      "3. Verify that NPC objects in Constants.jsx have the correct type value",
+    );
+
     console.groupEnd();
   });
 };
@@ -151,62 +162,68 @@ export const debugNPCSprites = () => {
  */
 export const fixNPCRendering = (gameWorld) => {
   if (!gameWorld) {
-    console.error('Game world object not provided');
+    console.error("Game world object not provided");
     return;
   }
-  
-  console.group('🔧 NPC Rendering Fix Tool');
-  
+
+  console.group("🔧 NPC Rendering Fix Tool");
+
   // Check current map index - directly access from gameWorld
   const currentMapIndex = gameWorld.currentMapIndex || 0;
   console.log(`Current map: ${currentMapIndex}`);
-  
+
   // Get NPCs from current map using the imported MAPS constant
   if (!MAPS.length || !MAPS[currentMapIndex]) {
-    console.error('Maps data not available');
+    console.error("Maps data not available");
     console.groupEnd();
     return;
   }
-  
+
   const npcs = MAPS[currentMapIndex].npcs || [];
   console.log(`Found ${npcs.length} NPCs on current map`);
-  
+
   // Verify NPC sprites
-  verifyNPCSprites(npcs, true).then(problemNPCs => {
+  verifyNPCSprites(npcs, true).then((problemNPCs) => {
     if (problemNPCs.length === 0) {
-      console.log('✅ All NPC sprites are valid!');
+      console.log("✅ All NPC sprites are valid!");
     } else {
-      console.error(`❌ Found ${problemNPCs.length} NPCs with invalid sprites.`);
-      console.table(problemNPCs.map(item => ({
-        Name: item.npc.name || 'Unknown',
-        Type: item.npc.type,
-        SpriteURL: item.spriteUrl,
-        Error: item.error
-      })));
-      
+      console.error(
+        `❌ Found ${problemNPCs.length} NPCs with invalid sprites.`,
+      );
+      console.table(
+        problemNPCs.map((item) => ({
+          Name: item.npc.name || "Unknown",
+          Type: item.npc.type,
+          SpriteURL: item.spriteUrl,
+          Error: item.error,
+        })),
+      );
+
       // Apply fixes to the game world
-      console.log('Applying fixes...');
-      
+      console.log("Applying fixes...");
+
       // Force re-render of the map component
       if (gameWorld.forceUpdate) {
         gameWorld.forceUpdate();
-        console.log('✅ Force re-rendered the map component');
+        console.log("✅ Force re-rendered the map component");
       }
-      
-      console.log('Fixes applied. Check if NPCs are now visible.');
+
+      console.log("Fixes applied. Check if NPCs are now visible.");
     }
-    
+
     console.groupEnd();
   });
 };
 
 // Expose debug functions to the window object for console access
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.gameDebug = {
     fixNPCRendering,
     debugNPCSprites,
-    verifyNPCSprites
+    verifyNPCSprites,
   };
-  
-  console.log('🛠️ Game debug tools loaded. Access via window.gameDebug in the console.');
-} 
+
+  console.log(
+    "🛠️ Game debug tools loaded. Access via window.gameDebug in the console.",
+  );
+}

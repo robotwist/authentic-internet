@@ -1,14 +1,14 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import './Layout.css';
+import React from "react";
+import PropTypes from "prop-types";
+import "./Layout.css";
 
-const Layout = ({ 
-  children, 
+const Layout = ({
+  children,
   header,
   footer,
   sidebar,
-  className = '',
-  ...props 
+  className = "",
+  ...props
 }) => {
   return (
     <div className={`layout ${className}`} {...props}>
@@ -22,25 +22,25 @@ const Layout = ({
   );
 };
 
-const LayoutHeader = ({ children, className = '', ...props }) => (
+const LayoutHeader = ({ children, className = "", ...props }) => (
   <header className={`layout-header ${className}`} {...props}>
     {children}
   </header>
 );
 
-const LayoutFooter = ({ children, className = '', ...props }) => (
+const LayoutFooter = ({ children, className = "", ...props }) => (
   <footer className={`layout-footer ${className}`} {...props}>
     {children}
   </footer>
 );
 
-const LayoutSidebar = ({ children, className = '', ...props }) => (
+const LayoutSidebar = ({ children, className = "", ...props }) => (
   <aside className={`layout-sidebar ${className}`} {...props}>
     {children}
   </aside>
 );
 
-const LayoutMain = ({ children, className = '', ...props }) => (
+const LayoutMain = ({ children, className = "", ...props }) => (
   <main className={`layout-main ${className}`} {...props}>
     {children}
   </main>
@@ -79,4 +79,4 @@ Layout.Footer = LayoutFooter;
 Layout.Sidebar = LayoutSidebar;
 Layout.Main = LayoutMain;
 
-export default Layout; 
+export default Layout;

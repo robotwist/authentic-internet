@@ -1,4 +1,4 @@
-import API, { handleApiError } from './apiConfig';
+import API, { handleApiError } from "./apiConfig";
 
 /**
  * Logs in a user
@@ -8,19 +8,19 @@ import API, { handleApiError } from './apiConfig';
  */
 export const loginUser = async (username, password) => {
   try {
-    const response = await API.post("/api/auth/login", { 
-      identifier: username, 
-      password 
+    const response = await API.post("/api/auth/login", {
+      identifier: username,
+      password,
     });
-    
+
     if (response.data && response.data.token) {
       localStorage.setItem("token", response.data.token);
-      
+
       // Store user data if available
       if (response.data.user) {
         localStorage.setItem("user", JSON.stringify(response.data.user));
       }
-      
+
       return response.data;
     } else {
       throw new Error("No token received from server");
@@ -39,7 +39,11 @@ export const loginUser = async (username, password) => {
  */
 export const registerUser = async (username, email, password) => {
   try {
-    const response = await API.post("/api/auth/register", { username, email, password });
+    const response = await API.post("/api/auth/register", {
+      username,
+      email,
+      password,
+    });
     return response.data;
   } catch (error) {
     throw new Error(handleApiError(error, "Failed to register"));
@@ -53,10 +57,11 @@ export const registerUser = async (username, email, password) => {
 export const logoutUser = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-  
+
   // Optional: Call to server to invalidate token
-  return API.post("/api/auth/logout")
-    .catch(error => console.warn("Logout error:", error));
+  return API.post("/api/auth/logout").catch((error) =>
+    console.warn("Logout error:", error),
+  );
 };
 
 /**
@@ -74,4 +79,4 @@ export const getCurrentUser = () => {
  */
 export const isAuthenticated = () => {
   return !!localStorage.getItem("token");
-}; 
+};

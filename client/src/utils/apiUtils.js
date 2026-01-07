@@ -4,7 +4,8 @@
  */
 
 // Base API URL from environment variable or default
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
 
 /**
  * Builds a complete API URL from the given endpoint
@@ -13,7 +14,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001
  */
 export const buildApiUrl = (endpoint) => {
   // Remove leading slash if present to avoid double slashes
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
   return `${API_BASE_URL}/${cleanEndpoint}`;
 };
 
@@ -23,11 +24,11 @@ export const buildApiUrl = (endpoint) => {
  * @returns {Object} Standardized error object
  */
 export const handleApiError = (error) => {
-  console.error('API Error:', error);
+  console.error("API Error:", error);
   return {
     error: true,
-    message: error.message || 'An unexpected error occurred',
-    status: error.response?.status || 500
+    message: error.message || "An unexpected error occurred",
+    status: error.response?.status || 500,
   };
 };
 
@@ -37,10 +38,12 @@ export const handleApiError = (error) => {
  * @returns {boolean} Whether the response is valid
  */
 export const isValidResponse = (response) => {
-  return response && 
-         !response.error && 
-         response.status !== 'error' &&
-         response.status !== 'failed';
+  return (
+    response &&
+    !response.error &&
+    response.status !== "error" &&
+    response.status !== "failed"
+  );
 };
 
 /**
@@ -51,6 +54,9 @@ export const isValidResponse = (response) => {
 export const formatParams = (params) => {
   return Object.entries(params)
     .filter(([_, value]) => value !== undefined && value !== null)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-    .join('&');
-}; 
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+    )
+    .join("&");
+};

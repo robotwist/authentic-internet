@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { getRandomQuote, getCategoryQuote } from '../utils/quoteSystem.js';
-import '../styles/QuoteDisplay.css';
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { getRandomQuote, getCategoryQuote } from "../utils/quoteSystem.js";
+import "../styles/QuoteDisplay.css";
 
-const QuoteDisplay = ({ type = 'random', onSave }) => {
+const QuoteDisplay = ({ type = "random", onSave }) => {
   const [quote, setQuote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,24 +14,24 @@ const QuoteDisplay = ({ type = 'random', onSave }) => {
       setError(null);
       try {
         let quoteData;
-        
+
         switch (type) {
-          case 'wisdom':
-            quoteData = getCategoryQuote('wisdom');
+          case "wisdom":
+            quoteData = getCategoryQuote("wisdom");
             break;
-          case 'random':
+          case "random":
           default:
             quoteData = getRandomQuote();
         }
-        
+
         setQuote(quoteData);
       } catch (err) {
-        console.error('Failed to fetch quote:', err);
-        setError('Failed to load quote');
+        console.error("Failed to fetch quote:", err);
+        setError("Failed to load quote");
         setQuote({
           text: "The best way out is always through.",
           author: "Robert Frost",
-          type: "wisdom"
+          type: "wisdom",
         });
       } finally {
         setLoading(false);
@@ -60,10 +60,7 @@ const QuoteDisplay = ({ type = 'random', onSave }) => {
         <footer className="quote-author">— {quote.author}</footer>
       </blockquote>
       {onSave && (
-        <button 
-          className="save-quote-button"
-          onClick={() => onSave(quote)}
-        >
+        <button className="save-quote-button" onClick={() => onSave(quote)}>
           Save Quote
         </button>
       )}
@@ -72,8 +69,8 @@ const QuoteDisplay = ({ type = 'random', onSave }) => {
 };
 
 QuoteDisplay.propTypes = {
-  type: PropTypes.oneOf(['random', 'wisdom']),
-  onSave: PropTypes.func
+  type: PropTypes.oneOf(["random", "wisdom"]),
+  onSave: PropTypes.func,
 };
 
-export default QuoteDisplay; 
+export default QuoteDisplay;

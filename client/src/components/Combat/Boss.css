@@ -1,0 +1,233 @@
+/* ============================================
+   BOSS ENEMY STYLES
+   ============================================ */
+
+.boss {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+  transition: none; /* No smooth transitions - retro style */
+}
+
+/* Boss sprite */
+.boss-sprite {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.boss-sprite img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.boss-emoji {
+  font-size: 96px;
+  animation: boss-idle 2s steps(4) infinite;
+  filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.8));
+}
+
+@keyframes boss-idle {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.05); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+}
+
+/* Boss attacking animation */
+.boss.attacking .boss-sprite {
+  animation: boss-attack 0.8s steps(8) forwards;
+}
+
+@keyframes boss-attack {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.2) rotate(-10deg); }
+  50% { transform: scale(1.3) rotate(10deg); }
+  75% { transform: scale(1.2) rotate(-5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Boss name */
+.boss-name {
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 14px;
+  color: #FFD700;
+  text-shadow: 
+    2px 2px 0 #000,
+    0 0 10px rgba(255, 215, 0, 0.8);
+  margin-top: 8px;
+  text-align: center;
+  animation: boss-name-glow 1s steps(2) infinite;
+  white-space: nowrap;
+}
+
+@keyframes boss-name-glow {
+  0%, 100% { 
+    text-shadow: 
+      2px 2px 0 #000,
+      0 0 10px rgba(255, 215, 0, 0.8);
+  }
+  50% { 
+    text-shadow: 
+      2px 2px 0 #000,
+      0 0 20px rgba(255, 215, 0, 1);
+  }
+}
+
+/* Boss health bar */
+.boss-health-bar {
+  position: relative;
+  width: 150%;
+  margin-top: 12px;
+  margin-left: -25%; /* Center it since it's wider */
+}
+
+.boss-health-bar-background {
+  width: 100%;
+  height: 16px;
+  background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
+  border: 3px solid #FFD700;
+  border-radius: 4px;
+  box-shadow: 
+    0 0 8px rgba(255, 215, 0, 0.5),
+    inset 0 0 8px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.boss-health-bar-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #ff0000 0%, #cc0000 50%, #990000 100%);
+  transition: width 0.3s steps(8); /* Stepped transition for retro feel */
+  position: relative;
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+.boss-health-bar-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+  animation: health-shine 2s linear infinite;
+}
+
+@keyframes health-shine {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+
+.boss-health-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 8px;
+  color: #fff;
+  text-shadow: 
+    1px 1px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000;
+  pointer-events: none;
+}
+
+/* Flashing when hit */
+.boss.flashing {
+  animation: boss-flash 0.2s steps(2);
+}
+
+@keyframes boss-flash {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(2) hue-rotate(180deg); }
+}
+
+/* Invincibility frames */
+.boss.invincible {
+  animation: boss-invincible 0.5s steps(4);
+}
+
+@keyframes boss-invincible {
+  0%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* Attack indicator - ring that expands */
+.boss-attack-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.attack-ring {
+  width: 128px;
+  height: 128px;
+  border: 4px solid rgba(255, 0, 0, 0.6);
+  border-radius: 50%;
+  animation: attack-ring-expand 0.8s steps(8) forwards;
+}
+
+@keyframes attack-ring-expand {
+  0% {
+    width: 128px;
+    height: 128px;
+    opacity: 1;
+    border-width: 4px;
+  }
+  100% {
+    width: 256px;
+    height: 256px;
+    opacity: 0;
+    border-width: 2px;
+  }
+}
+
+/* Boss shadow */
+.boss::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 20px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.5) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -2;
+}
+
+/* Boss defeated animation */
+.boss.defeated {
+  animation: boss-defeat 1s steps(10) forwards;
+}
+
+@keyframes boss-defeat {
+  0% { 
+    transform: scale(1) rotate(0deg); 
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.5) rotate(180deg); 
+    opacity: 0.5;
+    filter: brightness(2);
+  }
+  100% { 
+    transform: scale(0) rotate(360deg); 
+    opacity: 0;
+  }
+}
+

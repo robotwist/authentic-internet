@@ -1,3 +1,4 @@
+/* NES Zelda Style Dialog */
 .dialog-overlay {
   position: fixed;
   top: 50%;
@@ -5,20 +6,18 @@
   transform: translate(-50%, -50%);
   width: 450px;
   max-width: 90vw;
-  background: rgba(0, 0, 0, 0.9);
-  border: 2px solid #ffd700;
-  border-radius: 8px;
+  background: #000000;
+  border: 3px solid #FCE000;
   z-index: 2000;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
-  animation: dialogFadeIn 0.3s ease-out;
+  animation: dialogFadeIn 0.2s linear;
   user-select: none;
 }
 
 @keyframes dialogFadeIn {
-  from { opacity: 0; transform: translate(-50%, -60%); }
-  to { opacity: 1; transform: translate(-50%, -50%); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .dialog-box {
@@ -48,7 +47,7 @@
 .close-btn {
   background: none;
   border: none;
-  color: #ffd700;
+  color: #FCE000;
   font-size: 1.4em;
   cursor: pointer;
   height: 25px;
@@ -57,11 +56,11 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: color 0.2s;
+  transition: color 0.15s linear;
 }
 
 .close-btn:hover {
-  color: #ffffff;
+  color: #FFFFFF;
 }
 
 .dialog-content {
@@ -72,11 +71,10 @@
 }
 
 .npc-message {
-  background: rgba(50, 50, 50, 0.5);
-  border-radius: 5px;
+  background: #545454;
   padding: 15px;
   position: relative;
-  border-left: 3px solid #ffd700;
+  border-left: 3px solid #FCE000;
 }
 
 .typing-cursor {
@@ -96,19 +94,18 @@
 }
 
 .dialog-btn {
-  background: #333;
-  color: #ffd700;
-  border: 1px solid #ffd700;
-  border-radius: 4px;
+  background: #000000;
+  color: #FCE000;
+  border: 2px solid #FCE000;
   padding: 6px 15px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.15s linear;
   font-size: 0.9em;
 }
 
 .dialog-btn:hover {
-  background: #444;
-  box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
 }
 
 /* Mobile responsiveness */
@@ -129,43 +126,44 @@
 
 /* Highlight message when complete */
 .npc-message:not(.typing) {
-  transition: background-color 0.3s;
+  transition: background-color 0.2s linear;
 }
 
-/* Enhance styling for guide NPCs */
+/* Enhance styling for guide NPCs - NES Style */
 .dialog-box[data-npc-type="guide"] .dialog-header {
-  background-color: rgba(0, 80, 255, 0.2);
-  border-bottom: 1px solid #4080ff;
+  background-color: #0058F8;
+  border-bottom: 1px solid #0058F8;
   padding: 10px 15px;
   margin-bottom: 15px;
-  border-radius: 4px 4px 0 0;
 }
 
 .dialog-box[data-npc-type="guide"] .dialog-header h2 {
-  color: #4080ff;
-  text-shadow: 0 0 5px rgba(0, 100, 255, 0.5);
+  color: #FFFFFF;
+  text-shadow: 
+    -1px -1px 0 #000000,
+    1px -1px 0 #000000,
+    -1px 1px 0 #000000,
+    1px 1px 0 #000000;
 }
 
 .dialog-box[data-npc-type="guide"] .dialog-content {
-  background-color: rgba(0, 50, 150, 0.1);
-  border-left: 3px solid #4080ff;
+  background-color: #545454;
+  border-left: 3px solid #0058F8;
   padding: 10px;
   margin-bottom: 15px;
-  border-radius: 0 4px 4px 0;
 }
 
 .dialog-box[data-npc-type="guide"] .dialog-actions button {
-  background-color: #4080ff;
-  color: white;
-  border: none;
+  background-color: #0058F8;
+  color: #FFFFFF;
+  border: 2px solid #FFFFFF;
   padding: 8px 16px;
-  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.15s linear;
 }
 
 .dialog-box[data-npc-type="guide"] .dialog-actions button:hover {
-  background-color: #2060dd;
+  background-color: #00A800;
 }
 
 .dialog-box[data-npc-type="guide"] .dialog-actions button:disabled {
@@ -180,26 +178,28 @@
   margin-top: 15px;
 }
 
-/* Make both button styles compatible */
+/* Make both button styles compatible - NES Style */
 .dialog-actions button,
 .dialog-btn {
-  background-color: #ffd700;
-  color: #000;
-  border: none;
+  background-color: #000000;
+  color: #FCE000;
+  border: 2px solid #FCE000;
   padding: 8px 16px;
-  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: border-color 0.15s linear;
   font-weight: bold;
 }
 
 .dialog-actions button:hover,
 .dialog-btn:hover {
-  background-color: #ffcc00;
+  border-color: #FFFFFF;
+  color: #FFFFFF;
 }
 
 .dialog-actions button:disabled,
 .dialog-btn:disabled {
-  background-color: #a0a0a0;
+  background-color: #545454;
+  border-color: #888888;
+  color: #888888;
   cursor: not-allowed;
 } 

@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext';
-import TextAdventure from './TextAdventure';
-import NPCDialog from './NPCDialog';
-import Terminal from './Terminal';
-import './InteractivePuzzleArtifact.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../context/AuthContext";
+import TextAdventure from "./TextAdventure";
+import NPCDialog from "./NPCDialog";
+import Terminal from "./Terminal";
+import "./InteractivePuzzleArtifact.css";
 
 /**
  * Interactive Puzzle Artifact Component
  * Handles different types of interactive puzzles embedded in artifacts
  */
-const InteractivePuzzleArtifact = ({ 
-  artifact, 
-  onClose, 
+const InteractivePuzzleArtifact = ({
+  artifact,
+  onClose,
   onComplete,
-  isOpen = false 
+  isOpen = false,
 }) => {
   const { user } = useAuth();
   const [playerProgress, setPlayerProgress] = useState(null);
@@ -34,21 +34,21 @@ const InteractivePuzzleArtifact = ({
   const initializePuzzle = async () => {
     setLoading(true);
     setStartTime(Date.now());
-    
+
     try {
       // Fetch player's existing progress
       const response = await fetch(`/api/artifacts/${artifact._id}/progress`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      
+
       if (response.ok) {
         const progress = await response.json();
         setPlayerProgress(progress);
         setCurrentAttempt(progress.attempts || 0);
         setCompleted(progress.completed || false);
-        
+
         // Restore game state if exists
         if (progress.currentState) {
           setGameState(progress.currentState);
@@ -60,50 +60,55 @@ const InteractivePuzzleArtifact = ({
           completed: false,
           currentState: {},
           hintsUsed: 0,
-          timeSpent: 0
+          timeSpent: 0,
         });
       }
     } catch (error) {
-      console.error('Error loading puzzle progress:', error);
+      console.error("Error loading puzzle progress:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const saveProgress = useCallback(async (state, isCompleted = false) => {
-    if (!user || !artifact) return;
+  const saveProgress = useCallback(
+    async (state, isCompleted = false) => {
+      if (!user || !artifact) return;
 
-    const timeSpent = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
-    
-    try {
-      await fetch(`/api/artifacts/${artifact._id}/progress`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          currentState: state,
-          completed: isCompleted,
-          timeSpent: timeSpent,
-          attempts: currentAttempt + (isCompleted ? 1 : 0)
-        })
-      });
+      const timeSpent = startTime
+        ? Math.floor((Date.now() - startTime) / 1000)
+        : 0;
 
-      if (isCompleted) {
-        setCompleted(true);
-        handlePuzzleComplete();
+      try {
+        await fetch(`/api/artifacts/${artifact._id}/progress`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            currentState: state,
+            completed: isCompleted,
+            timeSpent: timeSpent,
+            attempts: currentAttempt + (isCompleted ? 1 : 0),
+          }),
+        });
+
+        if (isCompleted) {
+          setCompleted(true);
+          handlePuzzleComplete();
+        }
+      } catch (error) {
+        console.error("Error saving puzzle progress:", error);
       }
-    } catch (error) {
-      console.error('Error saving puzzle progress:', error);
-    }
-  }, [user, artifact, startTime, currentAttempt]);
+    },
+    [user, artifact, startTime, currentAttempt],
+  );
 
   const handlePuzzleComplete = async () => {
     if (!artifact.completionRewards) return;
 
     const rewards = artifact.completionRewards;
-    
+
     // Grant experience
     if (rewards.experience) {
       // Add experience through your existing system
@@ -112,17 +117,17 @@ const InteractivePuzzleArtifact = ({
 
     // Grant items
     if (rewards.items && rewards.items.length > 0) {
-      console.log('Granted items:', rewards.items);
+      console.log("Granted items:", rewards.items);
     }
 
     // Unlock achievements
     if (rewards.achievements && rewards.achievements.length > 0) {
-      console.log('Unlocked achievements:', rewards.achievements);
+      console.log("Unlocked achievements:", rewards.achievements);
     }
 
     // Make other artifacts visible
     if (rewards.unlockArtifacts && rewards.unlockArtifacts.length > 0) {
-      console.log('Unlocked artifacts:', rewards.unlockArtifacts);
+      console.log("Unlocked artifacts:", rewards.unlockArtifacts);
     }
 
     if (onComplete) {
@@ -135,28 +140,29 @@ const InteractivePuzzleArtifact = ({
 
     try {
       const response = await fetch(`/api/artifacts/${artifact._id}/hint`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      
+
       if (response.ok) {
         const hint = await response.json();
         setShowHints(true);
         return hint;
       }
     } catch (error) {
-      console.error('Error getting hint:', error);
+      console.error("Error getting hint:", error);
     }
   };
 
   const renderPuzzleContent = () => {
     if (loading) return <div className="puzzle-loading">Loading puzzle...</div>;
-    if (completed) return <div className="puzzle-completed">Puzzle already completed!</div>;
+    if (completed)
+      return <div className="puzzle-completed">Puzzle already completed!</div>;
 
     switch (artifact.puzzleType) {
-      case 'textAdventure':
+      case "textAdventure":
         return (
           <TextAdventure
             gameWorld={artifact.gameConfig.rooms}
@@ -169,16 +175,18 @@ const InteractivePuzzleArtifact = ({
           />
         );
 
-      case 'dialogChallenge':
+      case "dialogChallenge":
         return (
           <NPCDialog
             isOpen={true}
             npc={{
               name: artifact.name,
               dialog: {
-                greeting: artifact.gameConfig.dialogTree[0]?.text || "Welcome to the challenge!",
-                responses: artifact.gameConfig.dialogTree[0]?.responses || []
-              }
+                greeting:
+                  artifact.gameConfig.dialogTree[0]?.text ||
+                  "Welcome to the challenge!",
+                responses: artifact.gameConfig.dialogTree[0]?.responses || [],
+              },
             }}
             onClose={onClose}
             character={user}
@@ -190,7 +198,7 @@ const InteractivePuzzleArtifact = ({
           />
         );
 
-      case 'terminalPuzzle':
+      case "terminalPuzzle":
         return (
           <Terminal
             isOpen={true}
@@ -199,20 +207,35 @@ const InteractivePuzzleArtifact = ({
             terminalData={{
               commands: artifact.gameConfig.terminalCommands,
               files: artifact.gameConfig.terminalFiles,
-              winCondition: artifact.gameConfig.terminalWinCondition
+              winCondition: artifact.gameConfig.terminalWinCondition,
             }}
           />
         );
 
-      case 'apiQuiz':
-        return <ApiQuizPuzzle artifact={artifact} onComplete={() => saveProgress({ quizComplete: true }, true)} />;
+      case "apiQuiz":
+        return (
+          <ApiQuizPuzzle
+            artifact={artifact}
+            onComplete={() => saveProgress({ quizComplete: true }, true)}
+          />
+        );
 
-      case 'logicChallenge':
-        return <LogicChallengePuzzle artifact={artifact} onComplete={() => saveProgress({ logicComplete: true }, true)} />;
+      case "logicChallenge":
+        return (
+          <LogicChallengePuzzle
+            artifact={artifact}
+            onComplete={() => saveProgress({ logicComplete: true }, true)}
+          />
+        );
 
-      case 'riddle':
+      case "riddle":
       default:
-        return <RiddlePuzzle artifact={artifact} onComplete={() => saveProgress({ riddleComplete: true }, true)} />;
+        return (
+          <RiddlePuzzle
+            artifact={artifact}
+            onComplete={() => saveProgress({ riddleComplete: true }, true)}
+          />
+        );
     }
   };
 
@@ -230,14 +253,14 @@ const InteractivePuzzleArtifact = ({
             )}
             <span>Attempts: {currentAttempt}</span>
             {artifact.completionStats.difficultyRating > 0 && (
-              <span>Difficulty: {artifact.completionStats.difficultyRating}/10</span>
+              <span>
+                Difficulty: {artifact.completionStats.difficultyRating}/10
+              </span>
             )}
           </div>
         </div>
 
-        <div className="puzzle-content">
-          {renderPuzzleContent()}
-        </div>
+        <div className="puzzle-content">{renderPuzzleContent()}</div>
 
         <div className="puzzle-actions">
           {artifact.gameConfig.hintsEnabled && !completed && (
@@ -265,19 +288,21 @@ const InteractivePuzzleArtifact = ({
 
 // Simple puzzle components for non-complex types
 const RiddlePuzzle = ({ artifact, onComplete }) => {
-  const [answer, setAnswer] = useState('');
+  const [answer, setAnswer] = useState("");
   const [attempts, setAttempts] = useState(0);
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setAttempts(prev => prev + 1);
+    setAttempts((prev) => prev + 1);
 
-    if (answer.toLowerCase().trim() === artifact.unlockAnswer.toLowerCase().trim()) {
-      setFeedback('Correct! Well done!');
+    if (
+      answer.toLowerCase().trim() === artifact.unlockAnswer.toLowerCase().trim()
+    ) {
+      setFeedback("Correct! Well done!");
       setTimeout(() => onComplete(), 1000);
     } else {
-      setFeedback('Not quite right. Try again!');
+      setFeedback("Not quite right. Try again!");
     }
   };
 
@@ -306,7 +331,7 @@ const ApiQuizPuzzle = ({ artifact, onComplete }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [apiData, setApiData] = useState(null);
-  const [userAnswer, setUserAnswer] = useState('');
+  const [userAnswer, setUserAnswer] = useState("");
 
   useEffect(() => {
     // Fetch data from the specified API
@@ -321,25 +346,28 @@ const ApiQuizPuzzle = ({ artifact, onComplete }) => {
         const data = await response.json();
         setApiData(data);
       } catch (error) {
-        console.error('Error fetching API data:', error);
+        console.error("Error fetching API data:", error);
       }
     }
   };
 
   const handleAnswer = () => {
     const question = artifact.gameConfig.questions[currentQuestion];
-    const isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim();
-    
+    const isCorrect =
+      userAnswer.toLowerCase().trim() ===
+      question.correctAnswer.toLowerCase().trim();
+
     if (isCorrect) {
-      setScore(prev => prev + 1);
+      setScore((prev) => prev + 1);
     }
 
     if (currentQuestion < artifact.gameConfig.questions.length - 1) {
-      setCurrentQuestion(prev => prev + 1);
-      setUserAnswer('');
+      setCurrentQuestion((prev) => prev + 1);
+      setUserAnswer("");
     } else {
       // Quiz complete
-      const passed = score >= Math.ceil(artifact.gameConfig.questions.length * 0.7); // 70% to pass
+      const passed =
+        score >= Math.ceil(artifact.gameConfig.questions.length * 0.7); // 70% to pass
       if (passed) {
         onComplete();
       }
@@ -347,13 +375,14 @@ const ApiQuizPuzzle = ({ artifact, onComplete }) => {
   };
 
   const question = artifact.gameConfig.questions[currentQuestion];
-  
+
   return (
     <div className="api-quiz-puzzle">
       <div className="quiz-progress">
-        Question {currentQuestion + 1} of {artifact.gameConfig.questions.length} | Score: {score}
+        Question {currentQuestion + 1} of {artifact.gameConfig.questions.length}{" "}
+        | Score: {score}
       </div>
-      
+
       {question && (
         <div className="question">
           <h3>{question.question}</h3>
@@ -376,26 +405,29 @@ const ApiQuizPuzzle = ({ artifact, onComplete }) => {
 };
 
 const LogicChallengePuzzle = ({ artifact, onComplete }) => {
-  const [userSolution, setUserSolution] = useState('');
+  const [userSolution, setUserSolution] = useState("");
   const [attempts, setAttempts] = useState(0);
 
   const handleSubmit = () => {
-    setAttempts(prev => prev + 1);
-    
+    setAttempts((prev) => prev + 1);
+
     // Check solution based on logic type
     const config = artifact.gameConfig;
     let isCorrect = false;
 
     switch (config.logicType) {
-      case 'math':
+      case "math":
         isCorrect = eval(userSolution) === config.challengeData.expectedResult;
         break;
-      case 'pattern':
+      case "pattern":
         isCorrect = userSolution === config.challengeData.nextInSequence;
         break;
-      case 'sequence':
-        isCorrect = userSolution.split(',').map(n => parseInt(n.trim())).toString() === 
-                   config.challengeData.correctSequence.toString();
+      case "sequence":
+        isCorrect =
+          userSolution
+            .split(",")
+            .map((n) => parseInt(n.trim()))
+            .toString() === config.challengeData.correctSequence.toString();
         break;
     }
 
@@ -410,10 +442,12 @@ const LogicChallengePuzzle = ({ artifact, onComplete }) => {
         <h3>{artifact.gameConfig.challengeData.title}</h3>
         <p>{artifact.gameConfig.challengeData.description}</p>
       </div>
-      
+
       <div className="challenge-data">
         {artifact.gameConfig.challengeData.data && (
-          <pre>{JSON.stringify(artifact.gameConfig.challengeData.data, null, 2)}</pre>
+          <pre>
+            {JSON.stringify(artifact.gameConfig.challengeData.data, null, 2)}
+          </pre>
         )}
       </div>
 
@@ -429,4 +463,4 @@ const LogicChallengePuzzle = ({ artifact, onComplete }) => {
   );
 };
 
-export default InteractivePuzzleArtifact; 
+export default InteractivePuzzleArtifact;

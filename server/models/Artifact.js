@@ -1,493 +1,392 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-// Sub-schemas for different content types
-const GameConfigSchema = new mongoose.Schema({
-  gameType: { 
+const ArtifactInteractionSchema = new mongoose.Schema({
+  type: { 
     type: String, 
-    enum: ['shooter', 'textAdventure', 'terminal', 'puzzle', 'platformer', 'rpg', 'custom'],
-    required: function() { return this.parent().contentType === 'game'; }
+    required: true,
+    enum: ['REVEAL', 'UNLOCK', 'COLLECT', 'SOLVE', 'CUSTOM']
   },
-  difficulty: { type: String, enum: ['easy', 'medium', 'hard', 'expert'], default: 'medium' },
-  estimatedPlayTime: { type: Number, default: 10 }, // minutes
-  gameData: { type: mongoose.Schema.Types.Mixed }, // Game-specific data
-  controlScheme: {
-    type: [String],
-    default: ['keyboard'],
-    enum: ['keyboard', 'mouse', 'touch', 'gamepad']
+  condition: String,
+  revealedContent: String,
+  action: String
+}, { _id: false });
+
+const ReviewSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  rating: { 
+    type: Number, 
+    required: true,
+    min: 1,
+    max: 5
   },
-  multiplayer: { type: Boolean, default: false },
-  maxPlayers: { type: Number, default: 1 }
-});
+  comment: String,
+  createdAt: { type: Date, default: Date.now }
+}, { _id: false });
 
-const WritingConfigSchema = new mongoose.Schema({
-  writingType: {
-    type: String,
-    enum: ['poetry', 'short-story', 'novel-chapter', 'essay', 'script', 'lyrics', 'other'],
-    required: function() { return this.parent().contentType === 'writing'; }
-  },
-  genre: [{ type: String }], // fantasy, sci-fi, romance, etc.
-  wordCount: { type: Number },
-  language: { type: String, default: 'en' },
-  mature: { type: Boolean, default: false },
-  collaborativeEdit: { type: Boolean, default: false },
-  allowComments: { type: Boolean, default: true }
-});
-
-const ArtConfigSchema = new mongoose.Schema({
-  artType: {
-    type: String,
-    enum: ['digital', 'pixel', 'concept', 'character', 'environment', 'ui', 'photo', 'mixed'],
-    required: function() { return this.parent().contentType === 'art'; }
-  },
-  medium: [{ type: String }], // photoshop, procreate, traditional, etc.
-  dimensions: {
-    width: { type: Number },
-    height: { type: Number }
-  },
-  style: [{ type: String }], // realistic, cartoon, abstract, etc.
-  nsfw: { type: Boolean, default: false }
-});
-
-const MusicConfigSchema = new mongoose.Schema({
-  musicType: {
-    type: String,
-    enum: ['original', 'remix', 'cover', 'soundtrack', 'ambient', 'effect'],
-    required: function() { return this.parent().contentType === 'music'; }
-  },
-  genre: [{ type: String }],
-  duration: { type: Number }, // seconds
-  bpm: { type: Number },
-  key: { type: String },
-  instruments: [{ type: String }],
-  collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
-});
-
-// Player progress for interactive content
-const PlayerProgressSchema = new mongoose.Schema({
-  playerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  
-  // Progress tracking
-  startedAt: { type: Date, default: Date.now },
-  lastPlayedAt: { type: Date, default: Date.now },
-  completedAt: { type: Date },
-  completed: { type: Boolean, default: false },
-  
-  // Game-specific progress
-  currentState: { type: mongoose.Schema.Types.Mixed, default: {} },
-  saveData: { type: mongoose.Schema.Types.Mixed, default: {} },
-  achievements: [{ type: String }],
-  
-  // Performance metrics
-  timeSpent: { type: Number, default: 0 }, // seconds
-  attempts: { type: Number, default: 0 },
-  highScore: { type: Number, default: 0 },
-  hintsUsed: { type: Number, default: 0 },
-  
-  // Completion rewards granted
-  rewardsGranted: { type: Boolean, default: false },
-  experienceGained: { type: Number, default: 0 },
-  powersUnlocked: [{ type: String }]
-});
-
-// Rating and review system
-const RatingSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  rating: { type: Number, min: 1, max: 5, required: true },
-  review: { type: String, maxlength: 1000 },
-  helpful: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // users who found this helpful
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
-
-// Collection system
-const CollectionEntrySchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  addedAt: { type: Date, default: Date.now },
-  collectionName: { type: String, default: 'Favorites' },
-  tags: [{ type: String }],
-  personalNotes: { type: String, maxlength: 500 }
-});
-
-// Main Artifact Schema
+// Unified Artifact Schema
 const ArtifactSchema = new mongoose.Schema({
-  // Basic Information
-  _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
-  name: { type: String, required: true, maxlength: 100 },
-  description: { type: String, maxlength: 1000 },
-  
-  // Game Artifact specific fields
-  gameType: { type: String }, // For game artifacts
-  category: { type: String }, // For categorization
-  difficulty: { type: String, enum: ['beginner', 'intermediate', 'advanced', 'expert'] },
-  estimatedDuration: { type: String, enum: ['short', 'medium', 'long', 'epic'] },
-  
-  // Position in world (pixel coordinates for precise placement)
-  position: {
-    x: { type: Number },
-    y: { type: Number },
-    z: { type: Number, default: 0 }
-  },
-  
-  // Discovery and progression
-  discovered: { type: Boolean, default: false },
-  requiresUnlock: { type: Boolean, default: false },
-  unlockConditions: [{ type: String }],
-  
-  // Game data for interactive artifacts
-  gameData: { type: mongoose.Schema.Types.Mixed },
-  
-  // Social engagement
-  rating: { type: Number, min: 0, max: 5, default: 0 },
-  ratingsCount: { type: Number, default: 0 },
-  likes: { type: Number, default: 0 },
-  comments: [{ 
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    text: { type: String, maxlength: 500 },
-    createdAt: { type: Date, default: Date.now }
-  }],
-  
-  // Screenshot gallery for games
-  screenshots: [{ type: String }],
-  
-  // Completion statistics for games
-  completionStats: {
-    totalAttempts: { type: Number, default: 0 },
-    totalCompletions: { type: Number, default: 0 },
-    averageScore: { type: Number, default: 0 },
-    topScore: { type: Number, default: 0 },
-    averagePlayTime: { type: Number, default: 0 }
-  },
-  
-  // User progress tracking for game artifacts
-  userProgress: [{
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    progressData: { type: mongoose.Schema.Types.Mixed },
-    completed: { type: Boolean, default: false },
-    completedAt: { type: Date },
-    completionData: { type: mongoose.Schema.Types.Mixed },
-    attempts: { type: Number, default: 0 },
-    bestScore: { type: Number, default: 0 },
-    totalPlayTime: { type: Number, default: 0 },
-    lastSaved: { type: Date },
-    startedAt: { type: Date, default: Date.now }
-  }],
-  
-  // Content Type and Configuration
-  contentType: {
-    type: String,
-    enum: ['game', 'writing', 'art', 'music', 'puzzle', 'experience', 'artifact'],
-    default: 'artifact'
-  },
-  
-  // Type-specific configurations
-  gameConfig: GameConfigSchema,
-  writingConfig: WritingConfigSchema,
-  artConfig: ArtConfigSchema,
-  musicConfig: MusicConfigSchema,
-  
-  // Legacy fields for backwards compatibility
-  content: { type: String },
-  riddle: { type: String },
-  unlockAnswer: { type: String },
-  
-  // Location and World
-  area: { type: String, required: true },
-  location: {
-    x: { type: Number, required: true },
-    y: { type: Number, required: true },
-    z: { type: Number, default: 0 } // For 3D positioning
-  },
-  worldType: { 
+  // Core fields (required)
+  id: { 
     type: String, 
-    enum: ['overworld', 'desert', 'yosemite', 'dungeon', 'special', 'user-created'],
-    default: 'overworld' 
+    required: true, 
+    unique: true,
+    validate: {
+      validator: function(v) {
+        return v && v.length > 0;
+      },
+      message: 'Artifact ID is required'
+    }
+  },
+  name: { 
+    type: String, 
+    required: [true, 'Artifact name is required'],
+    trim: true,
+    maxlength: [100, 'Name cannot exceed 100 characters']
+  },
+  description: { 
+    type: String, 
+    required: [true, 'Artifact description is required'],
+    trim: true,
+    maxlength: [500, 'Description cannot exceed 500 characters']
+  },
+  type: { 
+    type: String, 
+    required: [true, 'Artifact type is required'],
+    enum: {
+      values: [
+        'artifact', 'WEAPON', 'SCROLL', 'ART', 'MUSIC', 'GAME', 'PUZZLE', 
+        'STORY', 'TOOL', 'TREASURE', 'PORTAL', 'NPC', 'ENVIRONMENT'
+      ],
+      message: 'Invalid artifact type'
+    }
+  },
+  content: { 
+    type: String, 
+    required: [true, 'Artifact content is required'],
+    trim: true,
+    maxlength: [5000, 'Content cannot exceed 5000 characters']
   },
   
-  // Creator and Ownership
-  creator: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  // Media and attachments
+  media: {
+    type: [String],
+    validate: {
+      validator: function(v) {
+        return !v || v.length <= 10; // Max 10 media files
+      },
+      message: 'Cannot have more than 10 media files'
+    }
+  },
   
-  // Visibility and Access
-  visibility: {
+  // Location and visibility
+  location: {
+    x: { 
+      type: Number, 
+      required: [true, 'X coordinate is required'],
+      min: [0, 'X coordinate must be non-negative']
+    },
+    y: { 
+      type: Number, 
+      required: [true, 'Y coordinate is required'],
+      min: [0, 'Y coordinate must be non-negative']
+    },
+    mapName: {
+      type: String,
+      default: 'overworld'
+    }
+  },
+  exp: { 
+    type: Number, 
+    default: 10,
+    min: [0, 'Experience points must be non-negative'],
+    max: [1000, 'Experience points cannot exceed 1000']
+  },
+  visible: { 
+    type: Boolean, 
+    default: true 
+  },
+  area: { 
+    type: String, 
+    required: [true, 'Area is required'],
+    enum: {
+      values: ['overworld', 'desert', 'dungeon', 'yosemite', 'custom'],
+      message: 'Invalid area'
+    }
+  },
+  
+  // Social and discovery
+  tags: {
+    type: [String],
+    validate: {
+      validator: function(v) {
+        return !v || v.length <= 20; // Max 20 tags
+      },
+      message: 'Cannot have more than 20 tags'
+    }
+  },
+  rating: {
+    type: Number,
+    min: [0, 'Rating must be non-negative'],
+    max: [5, 'Rating cannot exceed 5']
+  },
+  reviews: [ReviewSchema],
+  remixOf: {
     type: String,
-    enum: ['public', 'unlisted', 'private', 'community-only'],
-    default: 'public'
-  },
-  featured: { type: Boolean, default: false },
-  featuredAt: { type: Date },
-  featuredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  
-  // Sharing and Discovery
-  isShared: { type: Boolean, default: false },
-  sharedAt: { type: Date },
-  shareCount: { type: Number, default: 0 },
-  discoveryCount: { type: Number, default: 0 },
-  lastDiscoveredAt: { type: Date },
-  
-  // Public Artifact Marketplace
-  marketplace: {
-    isListed: { type: Boolean, default: false },
-    listedAt: { type: Date },
-    price: { type: Number, default: 0 }, // Virtual currency
-    category: { type: String, enum: ['featured', 'trending', 'new', 'popular'] },
-    tags: [{ type: String }],
-    description: { type: String, maxlength: 500 }
+    validate: {
+      validator: function(v) {
+        return !v || mongoose.Types.ObjectId.isValid(v);
+      },
+      message: 'Invalid remix artifact ID'
+    }
   },
   
-  // Requirements and Progression
-  requirements: {
-    level: { type: Number, default: 1 },
-    powers: [{ type: String }], // Required powers to access
-    completedArtifacts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Artifact" }],
-    areas: [{ type: String }] // Required areas to unlock
-  },
-  
-  // Rewards and Progression
-  completionRewards: {
-    experience: { type: Number, default: 0 },
-    powers: [{ type: String }], // Powers to unlock
-    areas: [{ type: String }], // Areas to unlock
-    items: [{ type: String }], // Items to grant
-    achievements: [{ type: String }],
-    customRewards: { type: mongoose.Schema.Types.Mixed }
-  },
-  
-  // Interactive Features
-  isInteractive: { type: Boolean, default: false },
-  allowsUserProgress: { type: Boolean, default: false },
-  playerProgress: [PlayerProgressSchema],
-  
-  // Social Features
-  ratings: [RatingSchema],
-  averageRating: { type: Number, default: 0 },
-  totalRatings: { type: Number, default: 0 },
-  collections: [CollectionEntrySchema],
-  
-  // Engagement Metrics
-  views: { type: Number, default: 0 },
-  plays: { type: Number, default: 0 }, // For interactive content
-  completions: { type: Number, default: 0 },
-  shares: { type: Number, default: 0 },
-  
-  // Content Management
-  tags: [{ type: String }],
-  mature: { type: Boolean, default: false },
-  reportCount: { type: Number, default: 0 },
-  moderationStatus: {
+  // Creator information
+  createdBy: {
     type: String,
-    enum: ['approved', 'pending', 'flagged', 'removed'],
-    default: 'approved'
+    required: [true, 'Creator is required']
+  },
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  },
+  updatedAt: { 
+    type: Date, 
+    default: Date.now 
   },
   
-  // Media and Assets
-  image: { type: String, default: "/images/default-artifact.png" },
-  media: [{
-    type: { type: String, enum: ['image', 'audio', 'video', 'document'] },
-    url: { type: String },
-    filename: { type: String },
-    description: { type: String }
+  // Legacy fields (for backward compatibility)
+  interactions: [ArtifactInteractionSchema],
+  properties: { 
+    type: mongoose.Schema.Types.Mixed,
+    validate: {
+      validator: function(v) {
+        return !v || typeof v === 'object';
+      },
+      message: 'Properties must be an object'
+    }
+  },
+  userModifiable: { 
+    type: mongoose.Schema.Types.Mixed,
+    validate: {
+      validator: function(v) {
+        return !v || typeof v === 'object';
+      },
+      message: 'UserModifiable must be an object'
+    }
+  },
+  
+  // Additional legacy fields
+  messageText: {
+    type: String,
+    maxlength: [1000, 'Message text cannot exceed 1000 characters']
+  },
+  riddle: {
+    type: String,
+    maxlength: [200, 'Riddle cannot exceed 200 characters']
+  },
+  unlockAnswer: {
+    type: String,
+    maxlength: [100, 'Unlock answer cannot exceed 100 characters']
+  },
+  isExclusive: {
+    type: Boolean,
+    default: false
+  },
+  status: {
+    type: String,
+    enum: ['dropped', 'collected', 'hidden', 'locked'],
+    default: 'dropped'
+  },
+  image: {
+    type: String,
+    validate: {
+      validator: function(v) {
+        return !v || v.startsWith('/') || v.startsWith('http');
+      },
+      message: 'Image must be a valid path or URL'
+    }
+  },
+  attachment: {
+    type: String
+  },
+  attachmentType: {
+    type: String,
+    enum: ['image', 'audio', 'video', 'document']
+  },
+  attachmentOriginalName: String,
+  
+  // Social features
+  votes: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  voters: [String],
+  views: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  shares: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  comments: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    text: {
+      type: String,
+      required: true,
+      maxlength: [500, 'Comment cannot exceed 500 characters']
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
   }],
   
-  // Legacy fields
-  attachment: { type: String },
-  attachmentType: { type: String },
-  attachmentOriginalName: { type: String },
-  type: { type: String, enum: ["artifact", "message"], default: "artifact" },
-  messageText: { type: String },
-  isExclusive: { type: Boolean, default: false },
+  // Interactive features
+  isInteractive: {
+    type: Boolean,
+    default: false
+  },
+  puzzleType: {
+    type: String,
+    enum: ['riddle', 'textAdventure', 'dialogChallenge', 'terminalPuzzle', 'apiQuiz', 'logicChallenge']
+  },
+  gameConfig: {
+    type: mongoose.Schema.Types.Mixed
+  },
+  completionRewards: {
+    type: mongoose.Schema.Types.Mixed
+  },
   
-  // Timestamps
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-  publishedAt: { type: Date }
+  // Portal features
+  portalType: {
+    type: String,
+    enum: ['textAdventure', 'terminal', 'hemingway']
+  },
+  
+  // Theme and dedication
+  theme: {
+    type: String,
+    enum: ['wisdom', 'inspiration', 'nature', 'literature', 'history', 'personal']
+  },
+  dedication: {
+    type: String,
+    maxlength: [200, 'Dedication cannot exceed 200 characters']
+  },
+  significance: {
+    type: String,
+    maxlength: [500, 'Significance cannot exceed 500 characters']
+  }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-// Indexes for performance
-ArtifactSchema.index({ contentType: 1, featured: -1, createdAt: -1 });
-ArtifactSchema.index({ area: 1, visibility: 1 });
-ArtifactSchema.index({ creator: 1, createdAt: -1 });
-ArtifactSchema.index({ averageRating: -1, totalRatings: -1 });
-ArtifactSchema.index({ tags: 1 });
-ArtifactSchema.index({ "location.x": 1, "location.y": 1, area: 1 });
-
-// Virtual for display name based on content type
-ArtifactSchema.virtual('displayType').get(function() {
-  switch(this.contentType) {
-    case 'game': return this.gameConfig?.gameType || 'Game';
-    case 'writing': return this.writingConfig?.writingType || 'Writing';
-    case 'art': return this.artConfig?.artType || 'Art';
-    case 'music': return this.musicConfig?.musicType || 'Music';
-    default: return 'Artifact';
-  }
-});
-
-// Method to get player's progress
-ArtifactSchema.methods.getPlayerProgress = function(playerId) {
-  return this.playerProgress.find(p => p.playerId.toString() === playerId.toString());
-};
-
-// Method to check if player can access this artifact
-ArtifactSchema.methods.canPlayerAccess = function(player) {
-  // Check level requirement
-  if (this.requirements.level && player.level < this.requirements.level) {
-    return { canAccess: false, reason: 'Level too low', required: this.requirements.level };
-  }
-  
-  // Check power requirements
-  if (this.requirements.powers && this.requirements.powers.length > 0) {
-    const playerPowers = player.unlockedPowers || [];
-    const missingPowers = this.requirements.powers.filter(power => !playerPowers.includes(power));
-    if (missingPowers.length > 0) {
-      return { canAccess: false, reason: 'Missing powers', required: missingPowers };
-    }
-  }
-  
-  // Check completed artifacts requirement
-  if (this.requirements.completedArtifacts && this.requirements.completedArtifacts.length > 0) {
-    const playerCompletions = player.completedArtifacts || [];
-    const missingCompletions = this.requirements.completedArtifacts.filter(
-      artifactId => !playerCompletions.includes(artifactId.toString())
-    );
-    if (missingCompletions.length > 0) {
-      return { canAccess: false, reason: 'Missing prerequisites', required: missingCompletions };
-    }
-  }
-  
-  return { canAccess: true };
-};
-
-// Method to check if player can attempt (for interactive content)
-ArtifactSchema.methods.canPlayerAttempt = function(playerId) {
-  if (!this.isInteractive) return false;
-  
-  const progress = this.getPlayerProgress(playerId);
-  if (!progress) return true; // First attempt
-  
-  // Check if already completed
-  if (progress.completed) return false;
-  
-  // Check attempt limits (if configured)
-  const maxAttempts = this.gameConfig?.maxAttempts || -1;
-  if (maxAttempts > 0 && progress.attempts >= maxAttempts) {
-    return false;
-  }
-  
-  return true;
-};
-
-// Method to add or update rating
-ArtifactSchema.methods.addRating = function(userId, rating, review = '') {
-  // Remove existing rating from this user
-  this.ratings = this.ratings.filter(r => r.userId.toString() !== userId.toString());
-  
-  // Add new rating
-  this.ratings.push({
-    userId,
-    rating,
-    review,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  });
-  
-  // Recalculate average
-  this.updateRatingStats();
-};
-
-// Method to update rating statistics
-ArtifactSchema.methods.updateRatingStats = function() {
-  if (this.ratings.length === 0) {
-    this.averageRating = 0;
-    this.totalRatings = 0;
-  } else {
-    const sum = this.ratings.reduce((acc, rating) => acc + rating.rating, 0);
-    this.averageRating = Math.round((sum / this.ratings.length) * 10) / 10; // Round to 1 decimal
-    this.totalRatings = this.ratings.length;
-  }
-};
-
-// Method to update completion statistics
-ArtifactSchema.methods.updateCompletionStats = function() {
-  if (this.isInteractive) {
-    this.completions = this.playerProgress.filter(p => p.completed).length;
-    this.plays = this.playerProgress.length;
-  }
-};
-
-// Method to add to user's collection
-ArtifactSchema.methods.addToCollection = function(userId, collectionName = 'Favorites', tags = [], notes = '') {
-  // Remove if already in collection
-  this.collections = this.collections.filter(c => 
-    !(c.userId.toString() === userId.toString() && c.collectionName === collectionName)
-  );
-  
-  // Add to collection
-  this.collections.push({
-    userId,
-    collectionName,
-    tags,
-    personalNotes: notes,
-    addedAt: new Date()
-  });
-};
-
-// Method to share artifact publicly
-ArtifactSchema.methods.sharePublicly = function() {
-  this.isShared = true;
-  this.sharedAt = new Date();
-  this.visibility = 'public';
-  this.marketplace.isListed = true;
-  this.marketplace.listedAt = new Date();
-};
-
-// Method to unshare artifact
-ArtifactSchema.methods.unsharePublicly = function() {
-  this.isShared = false;
-  this.sharedAt = null;
-  this.visibility = 'private';
-  this.marketplace.isListed = false;
-  this.marketplace.listedAt = null;
-};
-
-// Method to increment share count
-ArtifactSchema.methods.incrementShareCount = function() {
-  this.shareCount += 1;
-};
-
-// Method to increment discovery count
-ArtifactSchema.methods.incrementDiscoveryCount = function() {
-  this.discoveryCount += 1;
-  this.lastDiscoveredAt = new Date();
-};
-
-// Method to list in marketplace
-ArtifactSchema.methods.listInMarketplace = function(price = 0, category = 'new', tags = [], description = '') {
-  this.marketplace.isListed = true;
-  this.marketplace.listedAt = new Date();
-  this.marketplace.price = price;
-  this.marketplace.category = category;
-  this.marketplace.tags = tags;
-  this.marketplace.description = description;
-  this.visibility = 'public';
-};
-
-// Method to remove from marketplace
-ArtifactSchema.methods.removeFromMarketplace = function() {
-  this.marketplace.isListed = false;
-  this.marketplace.listedAt = null;
-  this.marketplace.price = 0;
-  this.marketplace.category = 'new';
-  this.marketplace.tags = [];
-  this.marketplace.description = '';
-};
-
-// Pre-save middleware
+// Pre-save middleware to update timestamps
 ArtifactSchema.pre('save', function(next) {
   this.updatedAt = new Date();
-  this.updateRatingStats();
-  this.updateCompletionStats();
   next();
 });
 
-export default mongoose.model("Artifact", ArtifactSchema);
+// Virtual for average rating
+ArtifactSchema.virtual('averageRating').get(function() {
+  if (!this.reviews || this.reviews.length === 0) return 0;
+  const total = this.reviews.reduce((sum, review) => sum + review.rating, 0);
+  return Math.round((total / this.reviews.length) * 10) / 10;
+});
+
+// Virtual for total reviews
+ArtifactSchema.virtual('totalReviews').get(function() {
+  return this.reviews ? this.reviews.length : 0;
+});
+
+// Index for better query performance
+ArtifactSchema.index({ area: 1, type: 1 });
+ArtifactSchema.index({ createdBy: 1 });
+ArtifactSchema.index({ tags: 1 });
+ArtifactSchema.index({ 'location.x': 1, 'location.y': 1 });
+ArtifactSchema.index({ createdAt: -1 });
+ArtifactSchema.index({ rating: -1 });
+
+// Static method to validate unified artifact data
+ArtifactSchema.statics.validateUnifiedArtifact = function(data) {
+  const errors = [];
+  
+  // Check required fields
+  if (!data.name) errors.push('Name is required');
+  if (!data.description) errors.push('Description is required');
+  if (!data.type) errors.push('Type is required');
+  if (!data.content) errors.push('Content is required');
+  if (!data.location || data.location.x === undefined || data.location.y === undefined) {
+    errors.push('Location with x and y coordinates is required');
+  }
+  if (!data.area) errors.push('Area is required');
+  if (!data.createdBy) errors.push('Creator is required');
+  
+  // Check field lengths
+  if (data.name && data.name.length > 100) errors.push('Name cannot exceed 100 characters');
+  if (data.description && data.description.length > 500) errors.push('Description cannot exceed 500 characters');
+  if (data.content && data.content.length > 5000) errors.push('Content cannot exceed 5000 characters');
+  
+  // Check media array
+  if (data.media && data.media.length > 10) errors.push('Cannot have more than 10 media files');
+  
+  // Check tags array
+  if (data.tags && data.tags.length > 20) errors.push('Cannot have more than 20 tags');
+  
+  // Check experience points
+  if (data.exp !== undefined && (data.exp < 0 || data.exp > 1000)) {
+    errors.push('Experience points must be between 0 and 1000');
+  }
+  
+  return errors;
+};
+
+// Instance method to convert to unified format
+ArtifactSchema.methods.toUnifiedFormat = function() {
+  const unified = {
+    id: this.id,
+    name: this.name,
+    description: this.description,
+    type: this.type,
+    content: this.content,
+    media: this.media || [],
+    location: this.location,
+    exp: this.exp || 0,
+    visible: this.visible !== false,
+    area: this.area,
+    tags: this.tags || [],
+    rating: this.averageRating,
+    reviews: this.reviews || [],
+    remixOf: this.remixOf,
+    createdBy: this.createdBy,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
+    interactions: this.interactions || [],
+    properties: this.properties || {},
+    userModifiable: this.userModifiable || {}
+  };
+  
+  // Add legacy fields for backward compatibility
+  if (this.messageText) unified.messageText = this.messageText;
+  if (this.riddle) unified.riddle = this.riddle;
+  if (this.unlockAnswer) unified.unlockAnswer = this.unlockAnswer;
+  if (this.isExclusive !== undefined) unified.isExclusive = this.isExclusive;
+  if (this.status) unified.status = this.status;
+  if (this.image) unified.image = this.image;
+  if (this.attachment) unified.attachment = this.attachment;
+  if (this.theme) unified.theme = this.theme;
+  if (this.dedication) unified.dedication = this.dedication;
+  if (this.significance) unified.significance = this.significance;
+  
+  return unified;
+};
+
+export default mongoose.model('Artifact', ArtifactSchema);

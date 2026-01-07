@@ -29,7 +29,10 @@ const ArtifactList = () => {
   };
 
   const submitPassword = (id, correctPassword) => {
-    if (passwordInputs[id]?.trim().toLowerCase() === correctPassword?.trim().toLowerCase()) {
+    if (
+      passwordInputs[id]?.trim().toLowerCase() ===
+      correctPassword?.trim().toLowerCase()
+    ) {
       setUnlockedArtifacts((prev) => ({ ...prev, [id]: true }));
       alert("✅ Correct password! Artifact unlocked.");
     } else {
@@ -44,43 +47,56 @@ const ArtifactList = () => {
         {artifacts.map((artifact) => (
           <li key={artifact._id} className="artifact-item">
             <strong>
-              {artifact.visibility === "hidden" && !unlockedArtifacts[artifact._id]
+              {artifact.visibility === "hidden" &&
+              !unlockedArtifacts[artifact._id]
                 ? "🔍 [Hidden Artifact]"
-                : artifact.visibility === "locked" && !unlockedArtifacts[artifact._id]
-                ? "🔒 [Locked Artifact]"
-                : `📜 ${artifact.name || "Unnamed Artifact"}`}
+                : artifact.visibility === "locked" &&
+                    !unlockedArtifacts[artifact._id]
+                  ? "🔒 [Locked Artifact]"
+                  : `📜 ${artifact.name || "Unnamed Artifact"}`}
             </strong>
 
-            {artifact.visibility === "hidden" && !unlockedArtifacts[artifact._id] && (
-              <button onClick={() => unlockArtifact(artifact._id)} className="unlock-button">
-                🔓 Unlock
-              </button>
-            )}
-
-            {artifact.visibility === "locked" && !unlockedArtifacts[artifact._id] && (
-              <div className="password-container">
-                <input
-                  type="password"
-                  placeholder="Enter password"
-                  value={passwordInputs[artifact._id] || ""}
-                  onChange={(e) => handlePasswordInput(e, artifact._id)}
-                  className="password-input"
-                />
-                <button onClick={() => submitPassword(artifact._id, artifact.unlockAnswer)} className="submit-button">
-                  🔑 Submit
+            {artifact.visibility === "hidden" &&
+              !unlockedArtifacts[artifact._id] && (
+                <button
+                  onClick={() => unlockArtifact(artifact._id)}
+                  className="unlock-button"
+                >
+                  🔓 Unlock
                 </button>
-              </div>
-            )}
+              )}
+
+            {artifact.visibility === "locked" &&
+              !unlockedArtifacts[artifact._id] && (
+                <div className="password-container">
+                  <input
+                    type="password"
+                    placeholder="Enter password"
+                    value={passwordInputs[artifact._id] || ""}
+                    onChange={(e) => handlePasswordInput(e, artifact._id)}
+                    className="password-input"
+                  />
+                  <button
+                    onClick={() =>
+                      submitPassword(artifact._id, artifact.unlockAnswer)
+                    }
+                    className="submit-button"
+                  >
+                    🔑 Submit
+                  </button>
+                </div>
+              )}
 
             {unlockedArtifacts[artifact._id] && (
               <p className="artifact-content">{artifact.content}</p>
             )}
 
-            {artifact.location?.x !== undefined && artifact.location?.y !== undefined && (
-              <p className="artifact-location">
-                🌍 Location: {artifact.location.x}, {artifact.location.y}
-              </p>
-            )}
+            {artifact.location?.x !== undefined &&
+              artifact.location?.y !== undefined && (
+                <p className="artifact-location">
+                  🌍 Location: {artifact.location.x}, {artifact.location.y}
+                </p>
+              )}
           </li>
         ))}
       </ul>

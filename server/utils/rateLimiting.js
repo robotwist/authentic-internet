@@ -35,6 +35,56 @@ export const healthCheckLimiter = rateLimit({
   }
 });
 
+// Game state read operations - more lenient for authenticated users
+export const gameStateReadLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: (req) => {
+    // More lenient limits for authenticated users
+    return req.user ? 120 : 30; // 120 reads/min for authenticated, 30 for unauthenticated
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    message: 'Too many game state read requests, please try again later.'
+  },
+  // Skip rate limiting in development
+  skip: (req) => process.env.NODE_ENV === 'development'
+});
+
+// Game state write operations - stricter to prevent abuse
+export const gameStateWriteLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: (req) => {
+    // Different limits for authenticated vs unauthenticated users
+    return req.user ? 60 : 10; // 60 writes/min for authenticated, 10 for unauthenticated
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    message: 'Too many game state save requests, please try again later.'
+  },
+  // Skip rate limiting in development
+  skip: (req) => process.env.NODE_ENV === 'development'
+});
+
+// Artifact progress operations - moderate limits
+export const artifactProgressLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: (req) => {
+    return req.user ? 90 : 20; // 90 operations/min for authenticated, 20 for unauthenticated
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    message: 'Too many artifact progress requests, please try again later.'
+  },
+  // Skip rate limiting in development
+  skip: (req) => process.env.NODE_ENV === 'development'
+});
+
 /**
  * Rate limiting utilities to prevent brute force attacks
  */

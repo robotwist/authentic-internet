@@ -1,0 +1,392 @@
+/* ============================================
+   DUNGEON STYLES - The Legend of Zelda inspired
+   ============================================ */
+
+.dungeon-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  image-rendering: pixelated;
+}
+
+.dungeon-room {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   DUNGEON TILES
+   ============================================ */
+
+.dungeon-tile {
+  position: absolute;
+  image-rendering: pixelated;
+  transition: none; /* No smooth transitions - instant like NES */
+}
+
+/* Floor - dark stone */
+.dungeon-tile.floor {
+  background: linear-gradient(135deg, #2a2a2a 25%, #1a1a1a 25%, #1a1a1a 50%, #2a2a2a 50%, #2a2a2a 75%, #1a1a1a 75%);
+  background-size: 8px 8px;
+  border: 1px solid #1a1a1a;
+}
+
+/* Walls - stone texture */
+.dungeon-tile.wall {
+  background: linear-gradient(135deg, #4a4a4a 25%, #3a3a3a 25%, #3a3a3a 50%, #4a4a4a 50%, #4a4a4a 75%, #3a3a3a 75%);
+  background-size: 16px 16px;
+  border: 2px solid #2a2a2a;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+/* Doors - archway style */
+.dungeon-tile.door_north,
+.dungeon-tile.door_south,
+.dungeon-tile.door_east,
+.dungeon-tile.door_west {
+  background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+  border: 4px solid #8B4513;
+  box-shadow: 
+    inset 0 0 20px rgba(0, 0, 0, 0.9),
+    0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.dungeon-tile.door_north::before,
+.dungeon-tile.door_south::before,
+.dungeon-tile.door_east::before,
+.dungeon-tile.door_west::before {
+  content: '🚪';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+}
+
+/* Locked doors - with keyhole */
+.dungeon-tile.locked_door_north,
+.dungeon-tile.locked_door_south,
+.dungeon-tile.locked_door_east,
+.dungeon-tile.locked_door_west {
+  background: radial-gradient(circle, #2a2a2a 0%, #1a1a1a 100%);
+  border: 4px solid #666;
+  box-shadow: 
+    inset 0 0 20px rgba(0, 0, 0, 0.9),
+    0 0 10px rgba(255, 0, 0, 0.3);
+  animation: locked-pulse 2s steps(4) infinite;
+}
+
+.dungeon-tile.locked_door_north::before,
+.dungeon-tile.locked_door_south::before,
+.dungeon-tile.locked_door_east::before,
+.dungeon-tile.locked_door_west::before {
+  content: '🔒';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.5));
+}
+
+@keyframes locked-pulse {
+  0%, 100% { 
+    box-shadow: 
+      inset 0 0 20px rgba(0, 0, 0, 0.9),
+      0 0 10px rgba(255, 0, 0, 0.3);
+  }
+  50% { 
+    box-shadow: 
+      inset 0 0 20px rgba(0, 0, 0, 0.9),
+      0 0 15px rgba(255, 0, 0, 0.6);
+  }
+}
+
+/* Boss door - special golden door */
+.dungeon-tile.boss_door {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
+  border: 6px solid #8B4513;
+  box-shadow: 
+    inset 0 0 20px rgba(255, 215, 0, 0.5),
+    0 0 20px rgba(255, 215, 0, 0.8);
+  animation: boss-door-glow 1s steps(2) infinite;
+}
+
+.dungeon-tile.boss_door::before {
+  content: '👹';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  filter: drop-shadow(0 0 12px rgba(255, 0, 0, 0.8));
+  animation: boss-door-icon 2s steps(4) infinite;
+}
+
+@keyframes boss-door-glow {
+  0%, 100% { 
+    box-shadow: 
+      inset 0 0 20px rgba(255, 215, 0, 0.5),
+      0 0 20px rgba(255, 215, 0, 0.8);
+  }
+  50% { 
+    box-shadow: 
+      inset 0 0 20px rgba(255, 215, 0, 0.7),
+      0 0 30px rgba(255, 215, 0, 1);
+  }
+}
+
+@keyframes boss-door-icon {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* Stairs */
+.dungeon-tile.stairs_up,
+.dungeon-tile.stairs_down {
+  background: linear-gradient(180deg, #666 0%, #333 100%);
+  border: 2px solid #444;
+}
+
+.dungeon-tile.stairs_up::before {
+  content: '⬆️';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+}
+
+.dungeon-tile.stairs_down::before {
+  content: '⬇️';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+}
+
+/* Chest */
+.dungeon-tile.chest {
+  background: #8B4513;
+  border: 4px solid #654321;
+  box-shadow: 
+    inset 0 0 10px rgba(0, 0, 0, 0.5),
+    0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.dungeon-tile.chest::before {
+  content: '📦';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  animation: chest-float 2s steps(8) infinite;
+}
+
+@keyframes chest-float {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, -55%); }
+}
+
+/* Spike trap */
+.dungeon-tile.spike {
+  background: #1a1a1a;
+  border: 2px solid #666;
+}
+
+.dungeon-tile.spike::before {
+  content: '▲';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  color: #888;
+}
+
+/* Water */
+.dungeon-tile.water {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%);
+  background-size: 32px 32px;
+  animation: water-flow 4s linear infinite;
+}
+
+@keyframes water-flow {
+  0% { background-position: 0 0; }
+  100% { background-position: 32px 32px; }
+}
+
+/* ============================================
+   DUNGEON ITEMS
+   ============================================ */
+
+.dungeon-item {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  cursor: pointer;
+  z-index: 500;
+  animation: item-spawn 0.3s steps(3) forwards, item-float 2s steps(8) infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+@keyframes item-spawn {
+  0% { 
+    transform: scale(0) rotate(0deg); 
+    opacity: 0;
+  }
+  100% { 
+    transform: scale(1) rotate(360deg); 
+    opacity: 1;
+  }
+}
+
+@keyframes item-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.dungeon-item:hover {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1));
+}
+
+/* Specific item styles */
+.dungeon-item.white_sword {
+  animation: item-spawn 0.3s steps(3) forwards, sword-spin 3s steps(12) infinite;
+}
+
+@keyframes sword-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.dungeon-item.heart_container {
+  animation: item-spawn 0.3s steps(3) forwards, heart-pulse 1s steps(4) infinite;
+}
+
+@keyframes heart-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* ============================================
+   BOSS
+   ============================================ */
+
+.dungeon-boss {
+  position: absolute;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.boss-sprite {
+  font-size: 96px;
+  animation: boss-idle 2s steps(4) infinite;
+  filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.8));
+}
+
+@keyframes boss-idle {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.05); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+}
+
+.boss-name {
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 12px;
+  color: #FFD700;
+  text-shadow: 
+    2px 2px 0 #000,
+    0 0 10px rgba(255, 215, 0, 0.8);
+  margin-top: 8px;
+  text-align: center;
+  animation: boss-name-glow 1s steps(2) infinite;
+}
+
+@keyframes boss-name-glow {
+  0%, 100% { 
+    text-shadow: 
+      2px 2px 0 #000,
+      0 0 10px rgba(255, 215, 0, 0.8);
+  }
+  50% { 
+    text-shadow: 
+      2px 2px 0 #000,
+      0 0 20px rgba(255, 215, 0, 1);
+  }
+}
+
+/* ============================================
+   ROOM NAME OVERLAY
+   ============================================ */
+
+.room-name-overlay {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 16px;
+  color: #FFD700;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 12px 24px;
+  border: 3px solid #8B4513;
+  border-radius: 8px;
+  text-align: center;
+  z-index: 2000;
+  pointer-events: none;
+  text-shadow: 2px 2px 0 #000;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  animation: room-name-fade-in 0.5s steps(5) forwards;
+}
+
+@keyframes room-name-fade-in {
+  0% { 
+    opacity: 0; 
+    transform: translateX(-50%) translateY(-20px);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ============================================
+   DUNGEON ATMOSPHERE
+   ============================================ */
+
+/* Dark vignette for dungeon atmosphere */
+.dungeon-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Torch flicker effect */
+@keyframes torch-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+.dungeon-room {
+  animation: torch-flicker 3s steps(8) infinite;
+}
+

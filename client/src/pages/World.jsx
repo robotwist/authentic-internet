@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Map from '../components/Map';
-import '../styles/World.css';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import Map from "../components/Map";
+import "../styles/World.css";
 
 const World = () => {
   const { worldId } = useParams();
@@ -11,7 +11,7 @@ const World = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedNPC, setSelectedNPC] = useState(null);
-  const [interactionPrompt, setInteractionPrompt] = useState('');
+  const [interactionPrompt, setInteractionPrompt] = useState("");
   const [interactionResult, setInteractionResult] = useState(null);
   const [zoom, setZoom] = useState(1);
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
@@ -23,7 +23,7 @@ const World = () => {
         setWorld(response.data);
         setLoading(false);
       } catch (err) {
-        setError('Failed to load world data');
+        setError("Failed to load world data");
         setLoading(false);
       }
     };
@@ -38,16 +38,18 @@ const World = () => {
 
   const handleNPCClick = (npc) => {
     setSelectedNPC(npc);
-    setInteractionPrompt('');
+    setInteractionPrompt("");
     setInteractionResult(null);
   };
 
   const handleArtifactClick = async (artifact) => {
     try {
-      const response = await axios.post(`/api/artifacts/${artifact._id}/interact`);
+      const response = await axios.post(
+        `/api/artifacts/${artifact._id}/interact`,
+      );
       setInteractionResult(response.data);
     } catch (err) {
-      setError('Failed to interact with artifact');
+      setError("Failed to interact with artifact");
     }
   };
 
@@ -56,12 +58,15 @@ const World = () => {
     if (!selectedNPC || !interactionPrompt) return;
 
     try {
-      const response = await axios.post(`/api/npcs/${selectedNPC._id}/interact`, {
-        prompt: interactionPrompt
-      });
+      const response = await axios.post(
+        `/api/npcs/${selectedNPC._id}/interact`,
+        {
+          prompt: interactionPrompt,
+        },
+      );
       setInteractionResult(response.data);
     } catch (err) {
-      setError('Failed to interact with NPC');
+      setError("Failed to interact with NPC");
     }
   };
 
@@ -109,7 +114,7 @@ const World = () => {
         <div className="world-sidebar">
           <div className="npcs-list">
             <h2>NPCs</h2>
-            {world.npcs.map(npc => (
+            {world.npcs.map((npc) => (
               <div
                 key={npc._id}
                 className="npc-item"
@@ -123,14 +128,16 @@ const World = () => {
 
           <div className="portals-list">
             <h2>Portals</h2>
-            {world.portals.map(portal => (
+            {world.portals.map((portal) => (
               <div
                 key={portal._id}
                 className="portal-item"
                 onClick={() => handlePortalClick(portal)}
               >
                 <span>{portal.name}</span>
-                <span className="portal-target">→ {portal.targetWorldName}</span>
+                <span className="portal-target">
+                  → {portal.targetWorldName}
+                </span>
               </div>
             ))}
           </div>
@@ -169,4 +176,4 @@ const World = () => {
   );
 };
 
-export default World; 
+export default World;

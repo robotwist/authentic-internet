@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import '../styles/MagicalButton.css';
+import React, { useState, useEffect, useRef } from "react";
+import "../styles/MagicalButton.css";
 
 const MagicalButton = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -13,29 +13,28 @@ const MagicalButton = () => {
       const rect = buttonRef.current.getBoundingClientRect();
       setBirdPosition({
         top: rect.top + window.scrollY,
-        left: rect.left + rect.width / 2 + window.scrollX
+        left: rect.left + rect.width / 2 + window.scrollX,
       });
     }
-    
+
     // Create smoke/poof effect
     setIsVisible(false);
     setBirdVisible(true);
-    
+
     // Play sound effect with robust error handling
     try {
-      const poofSound = new Audio('/assets/sounds/poof.mp3');
+      const poofSound = new Audio("/assets/sounds/poof.mp3");
       poofSound.volume = 0.5;
-      
+
       // Only try to play if browser is likely to support Audio API
-      if (typeof poofSound.play === 'function') {
-        poofSound.play()
-          .catch(err => {
-            console.log('Audio play failed (expected if no interaction):', err);
-            // Continue with animation even if sound fails
-          });
+      if (typeof poofSound.play === "function") {
+        poofSound.play().catch((err) => {
+          console.log("Audio play failed (expected if no interaction):", err);
+          // Continue with animation even if sound fails
+        });
       }
     } catch (err) {
-      console.log('Audio creation failed:', err);
+      console.log("Audio creation failed:", err);
       // Continue with animation even if sound creation fails
     }
   };
@@ -46,7 +45,7 @@ const MagicalButton = () => {
       const animationTimer = setTimeout(() => {
         setBirdVisible(false);
       }, 2000); // Animation duration in milliseconds
-      
+
       return () => clearTimeout(animationTimer);
     }
   }, [birdVisible]);
@@ -54,7 +53,7 @@ const MagicalButton = () => {
   return (
     <div className="magical-container">
       {isVisible && (
-        <button 
+        <button
           ref={buttonRef}
           className="magical-button"
           onClick={handleButtonClick}
@@ -62,13 +61,13 @@ const MagicalButton = () => {
           Press the Button
         </button>
       )}
-      
+
       {birdVisible && (
-        <div 
+        <div
           className="magical-bird"
-          style={{ 
+          style={{
             top: `${birdPosition.top}px`,
-            left: `${birdPosition.left}px`
+            left: `${birdPosition.left}px`,
           }}
         >
           {/* Bird sprite images will be applied via CSS */}
@@ -78,4 +77,4 @@ const MagicalButton = () => {
   );
 };
 
-export default MagicalButton; 
+export default MagicalButton;

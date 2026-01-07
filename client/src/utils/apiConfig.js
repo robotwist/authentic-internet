@@ -4,57 +4,58 @@
  */
 
 // Environment variables
-const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY || 'a5913e247d4c4ed5bd721932251402';
-const QUOTES_API_KEY = import.meta.env.VITE_QUOTES_API_KEY || 'free-tier';
+const WEATHER_API_KEY =
+  import.meta.env.VITE_WEATHER_API_KEY || "a5913e247d4c4ed5bd721932251402";
+const QUOTES_API_KEY = import.meta.env.VITE_QUOTES_API_KEY || "free-tier";
 
 // API Base URLs
 export const API_CONFIG = {
   // Weather API (OpenWeatherMap)
   weather: {
-    baseUrl: 'https://api.openweathermap.org/data/2.5',
+    baseUrl: "https://api.openweathermap.org/data/2.5",
     apiKey: WEATHER_API_KEY,
     endpoints: {
-      current: '/weather',
-      forecast: '/forecast'
-    }
+      current: "/weather",
+      forecast: "/forecast",
+    },
   },
-  
+
   // Quotable API (free to use)
   quotable: {
-    baseUrl: 'https://api.quotable.io',
+    baseUrl: "https://api.quotable.io",
     apiKey: null, // No API key needed
     endpoints: {
-      random: '/random',
-      today: '/random', // Using random as fallback since 'today' endpoint doesn't exist
-      quotes: '/quotes',
-      authors: '/authors',
-      tags: '/tags',
-      search: '/search/quotes'
-    }
+      random: "/random",
+      today: "/random", // Using random as fallback since 'today' endpoint doesn't exist
+      quotes: "/quotes",
+      authors: "/authors",
+      tags: "/tags",
+      search: "/search/quotes",
+    },
   },
-  
+
   // ZenQuotes API (free to use)
   zenQuotes: {
-    baseUrl: 'https://zenquotes.io/api',
+    baseUrl: "https://zenquotes.io/api",
     apiKey: null, // No API key needed
     endpoints: {
-      random: '/random',
-      today: '/today',
-      quotes: '/quotes'
-    }
+      random: "/random",
+      today: "/today",
+      quotes: "/quotes",
+    },
   },
-  
+
   // Folger Shakespeare Library API (free to use)
   folger: {
-    baseUrl: 'https://www.folgerdigitaltexts.org',
-    apiEndpoint: 'https://folgerdigitaltexts.org/api',
+    baseUrl: "https://www.folgerdigitaltexts.org",
+    apiEndpoint: "https://folgerdigitaltexts.org/api",
     apiKey: null, // No API key needed
     endpoints: {
-      random: '/random_quote',
+      random: "/random_quote",
       play: (play) => `/${play}`,
-      line: (play, line) => `/${play}/ftln/${line}`
-    }
-  }
+      line: (play, line) => `/${play}/ftln/${line}`,
+    },
+  },
 };
 
 /**
@@ -69,31 +70,34 @@ export const buildApiUrl = (apiName, endpoint, params = {}) => {
   if (!config) {
     throw new Error(`Unknown API: ${apiName}`);
   }
-  
+
   let url;
-  if (typeof endpoint === 'function') {
+  if (typeof endpoint === "function") {
     // Handle function endpoints like folger.endpoints.play('Ham')
     url = `${config.baseUrl}${endpoint}`;
   } else {
     // Handle string endpoints
     url = `${config.baseUrl}${config.endpoints[endpoint] || endpoint}`;
   }
-  
+
   // Add API key if available
   if (config.apiKey) {
     params.apiKey = config.apiKey;
   }
-  
+
   // Add query parameters
   const queryString = Object.entries(params)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-    .join('&');
-  
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+    )
+    .join("&");
+
   if (queryString) {
     url += `?${queryString}`;
   }
-  
+
   return url;
 };
 
-export default API_CONFIG; 
+export default API_CONFIG;

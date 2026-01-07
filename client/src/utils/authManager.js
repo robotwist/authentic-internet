@@ -3,8 +3,8 @@
  * Handles user authentication, token management, and session recovery
  */
 
-import axios from 'axios';
-import { buildApiUrl } from './apiUtils';
+import axios from "axios";
+import { buildApiUrl } from "./apiUtils";
 
 class AuthManager {
   constructor() {
@@ -17,13 +17,13 @@ class AuthManager {
 
   init() {
     if (this.initialized) return;
-    
+
     try {
       // Try to recover session
-      this.token = localStorage.getItem('auth_token');
-      this.refreshToken = localStorage.getItem('refresh_token');
-      const savedUser = localStorage.getItem('user');
-      
+      this.token = localStorage.getItem("auth_token");
+      this.refreshToken = localStorage.getItem("refresh_token");
+      const savedUser = localStorage.getItem("user");
+
       if (savedUser) {
         this.user = JSON.parse(savedUser);
       }
@@ -34,37 +34,43 @@ class AuthManager {
 
       this.initialized = true;
     } catch (error) {
-      console.error('Failed to initialize auth manager:', error);
+      console.error("Failed to initialize auth manager:", error);
       this.clearAuth();
     }
   }
 
   async login(credentials) {
     try {
-      const response = await axios.post(buildApiUrl('/auth/login'), credentials);
-      
+      const response = await axios.post(
+        buildApiUrl("/auth/login"),
+        credentials,
+      );
+
       this.setAuthData(response.data);
       return { success: true, user: this.user };
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       return {
         success: false,
-        error: error.response?.data?.message || 'Login failed'
+        error: error.response?.data?.message || "Login failed",
       };
     }
   }
 
   async register(userData) {
     try {
-      const response = await axios.post(buildApiUrl('/auth/register'), userData);
-      
+      const response = await axios.post(
+        buildApiUrl("/auth/register"),
+        userData,
+      );
+
       this.setAuthData(response.data);
       return { success: true, user: this.user };
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error("Registration failed:", error);
       return {
         success: false,
-        error: error.response?.data?.message || 'Registration failed'
+        error: error.response?.data?.message || "Registration failed",
       };
     }
   }
@@ -74,9 +80,9 @@ class AuthManager {
     this.refreshToken = data.refreshToken;
     this.user = data.user;
 
-    localStorage.setItem('auth_token', this.token);
-    localStorage.setItem('refresh_token', this.refreshToken);
-    localStorage.setItem('user', JSON.stringify(this.user));
+    localStorage.setItem("auth_token", this.token);
+    localStorage.setItem("refresh_token", this.refreshToken);
+    localStorage.setItem("user", JSON.stringify(this.user));
 
     this.setupRefreshTimer();
   }
@@ -95,24 +101,24 @@ class AuthManager {
 
   getTokenExpiryTime() {
     try {
-      const tokenData = JSON.parse(atob(this.token.split('.')[1]));
-      return (tokenData.exp * 1000) - Date.now();
+      const tokenData = JSON.parse(atob(this.token.split(".")[1]));
+      return tokenData.exp * 1000 - Date.now();
     } catch (error) {
-      console.error('Error parsing token:', error);
+      console.error("Error parsing token:", error);
       return 0;
     }
   }
 
   async refreshAuth() {
     try {
-      const response = await axios.post(buildApiUrl('/auth/refresh'), {
-        refreshToken: this.refreshToken
+      const response = await axios.post(buildApiUrl("/auth/refresh"), {
+        refreshToken: this.refreshToken,
       });
 
       this.setAuthData(response.data);
       return true;
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      console.error("Token refresh failed:", error);
       this.clearAuth();
       return false;
     }
@@ -122,10 +128,10 @@ class AuthManager {
     this.token = null;
     this.refreshToken = null;
     this.user = null;
-    
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
+
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user");
 
     if (this.refreshTimeout) {
       clearTimeout(this.refreshTimeout);
@@ -143,12 +149,16 @@ class AuthManager {
   async logout() {
     try {
       if (this.token) {
-        await axios.post(buildApiUrl('/auth/logout'), {}, {
-          headers: this.getAuthHeaders()
-        });
+        await axios.post(
+          buildApiUrl("/auth/logout"),
+          {},
+          {
+            headers: this.getAuthHeaders(),
+          },
+        );
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       this.clearAuth();
     }
@@ -156,4 +166,4 @@ class AuthManager {
 }
 
 export const authManager = new AuthManager();
-export default authManager; 
+export default authManager;

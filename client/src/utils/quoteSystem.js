@@ -3,15 +3,20 @@
  * Centralized management of all game quotes
  */
 
-import { LITERARY_QUOTES, WISDOM_QUOTES, NATURE_QUOTES, INSPIRATIONAL_QUOTES } from './fallbackQuotes.js';
+import {
+  LITERARY_QUOTES,
+  WISDOM_QUOTES,
+  NATURE_QUOTES,
+  INSPIRATIONAL_QUOTES,
+} from "./fallbackQuotes.js";
 
 export const QUOTE_CATEGORIES = {
-  SPIRITUAL: 'spiritual',
-  LITERARY: 'literary',
-  WIT: 'wit',
-  WISDOM: 'wisdom',
-  NATURE: 'nature',
-  INSPIRATION: 'inspiration'
+  SPIRITUAL: "spiritual",
+  LITERARY: "literary",
+  WIT: "wit",
+  WISDOM: "wisdom",
+  NATURE: "nature",
+  INSPIRATION: "inspiration",
 };
 
 export const CORE_QUOTES = {
@@ -31,9 +36,9 @@ export const CORE_QUOTES = {
         "Consider the lilies of the field, how they grow; they toil not, neither do they spin.",
         "Judge not, that ye be not judged.",
         "But I say unto you, Love your enemies, bless them that curse you.",
-        "I am the way, the truth, and the life."
-      ]
-    }
+        "I am the way, the truth, and the life.",
+      ],
+    },
   },
   [QUOTE_CATEGORIES.LITERARY]: {
     HEMINGWAY: {
@@ -51,8 +56,8 @@ export const CORE_QUOTES = {
         "There is no friend as loyal as a book.",
         "Always do sober what you said you'd do drunk. That will teach you to keep your mouth shut.",
         "The most painful thing is losing yourself in the process of loving someone too much.",
-        "Every day above earth is a good day."
-      ]
+        "Every day above earth is a good day.",
+      ],
     },
     TOLKIEN: {
       name: "J.R.R. Tolkien",
@@ -69,9 +74,9 @@ export const CORE_QUOTES = {
         "Courage is found in unlikely places.",
         "It's the job that's never started as takes longest to finish.",
         "All's well that ends better.",
-        "If more of us valued food and cheer and song above hoarded gold, it would be a merrier world."
-      ]
-    }
+        "If more of us valued food and cheer and song above hoarded gold, it would be a merrier world.",
+      ],
+    },
   },
   [QUOTE_CATEGORIES.WIT]: {
     WILDE: {
@@ -89,8 +94,8 @@ export const CORE_QUOTES = {
         "I have nothing to declare except my genius.",
         "Always forgive your enemies; nothing annoys them so much.",
         "Anyone who lives within their means suffers from a lack of imagination.",
-        "Everything in moderation, including moderation."
-      ]
+        "Everything in moderation, including moderation.",
+      ],
     },
     POPE: {
       name: "Alexander Pope",
@@ -107,9 +112,9 @@ export const CORE_QUOTES = {
         "The bookful blockhead, ignorantly read, with loads of learned lumber in his head.",
         "True ease in writing comes from art, not chance, as those move easiest who have learned to dance.",
         "Honor and shame from no condition rise; act well your part, there all the honor lies.",
-        "An honest man's the noblest work of God."
-      ]
-    }
+        "An honest man's the noblest work of God.",
+      ],
+    },
   },
   [QUOTE_CATEGORIES.WISDOM]: {
     MUIR: {
@@ -127,10 +132,10 @@ export const CORE_QUOTES = {
         "Of all the paths you take in life, make sure a few of them are dirt.",
         "The world is big and I want to have a good look at it before it gets dark.",
         "How glorious a greeting the sun gives the mountains!",
-        "Nature is ever at work building and pulling down, creating and destroying, keeping everything whirling and flowing."
-      ]
-    }
-  }
+        "Nature is ever at work building and pulling down, creating and destroying, keeping everything whirling and flowing.",
+      ],
+    },
+  },
 };
 
 /**
@@ -162,7 +167,7 @@ export const getCategoryQuote = (category) => {
     default:
       quotes = LITERARY_QUOTES;
   }
-  
+
   const randomIndex = Math.floor(Math.random() * quotes.length);
   return quotes[randomIndex];
 };
@@ -175,7 +180,7 @@ export const getRandomQuote = () => {
     ...LITERARY_QUOTES,
     ...WISDOM_QUOTES,
     ...NATURE_QUOTES,
-    ...INSPIRATIONAL_QUOTES
+    ...INSPIRATIONAL_QUOTES,
   ];
   const randomIndex = Math.floor(Math.random() * allQuotes.length);
   return allQuotes[randomIndex];
@@ -184,4 +189,4 @@ export const getRandomQuote = () => {
 /**
  * Get all available categories
  */
-export const getCategories = () => Object.values(QUOTE_CATEGORIES); 
+export const getCategories = () => Object.values(QUOTE_CATEGORIES);

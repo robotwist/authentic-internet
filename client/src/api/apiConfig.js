@@ -3,12 +3,14 @@ import axios from "axios";
 // Display build information in console for tracking deployments
 export const displayBuildInfo = () => {
   const buildDate = new Date().toISOString();
-  const buildEnv = import.meta.env.MODE || 'development';
-  console.info(`%cApplication Build Info:
+  const buildEnv = import.meta.env.MODE || "development";
+  console.info(
+    `%cApplication Build Info:
   🔹 Environment: ${buildEnv}
   🔹 Build Date: ${buildDate}
-  🔹 API URL: ${import.meta.env.VITE_API_URL || 'http://localhost:5001'}`,
-  'color: #6366F1; font-weight: bold;');
+  🔹 API URL: ${import.meta.env.VITE_API_URL || "http://localhost:5001"}`,
+    "color: #6366F1; font-weight: bold;",
+  );
 };
 
 // Function to create API instance with the given base URL
@@ -17,14 +19,15 @@ export const createApiInstance = (baseUrl) => {
     baseURL: baseUrl,
     withCredentials: false,
     headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    }
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
   });
 };
 
 // Get the configured API URL or default to localhost:5001
-export const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+export const configuredApiUrl =
+  import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 // Initialize API with the configured URL
 let API = createApiInstance(configuredApiUrl);
@@ -40,7 +43,9 @@ export const initApi = async () => {
 
   try {
     // First try the configured URL
-    const response = await axios.get(`${configuredApiUrl}/health`, { timeout: 2000 });
+    const response = await axios.get(`${configuredApiUrl}/health`, {
+      timeout: 2000,
+    });
     if (response.status === 200) {
       console.log(`✅ Connected to API at ${configuredApiUrl}`);
       API = createApiInstance(configuredApiUrl);
@@ -51,7 +56,9 @@ export const initApi = async () => {
   } catch (error) {
     // Try again with the proper health endpoint
     try {
-      const response = await axios.get(`${configuredApiUrl}/api/health`, { timeout: 2000 });
+      const response = await axios.get(`${configuredApiUrl}/api/health`, {
+        timeout: 2000,
+      });
       if (response.status === 200) {
         console.log(`✅ Connected to API at ${configuredApiUrl}`);
         API = createApiInstance(configuredApiUrl);
@@ -60,28 +67,32 @@ export const initApi = async () => {
         return API;
       }
     } catch (retryError) {
-      console.warn(`⚠️ Could not connect to API at ${configuredApiUrl}: ${error.message}`);
+      console.warn(
+        `⚠️ Could not connect to API at ${configuredApiUrl}: ${error.message}`,
+      );
     }
   }
 
   // If main URL fails, try alternative ports
-  const baseUrl = configuredApiUrl.split(':').slice(0, -1).join(':');
-  
+  const baseUrl = configuredApiUrl.split(":").slice(0, -1).join(":");
+
   for (const port of alternativePorts) {
     const altUrl = `${baseUrl}:${port}`;
     try {
-      const response = await axios.get(`${altUrl}/api/health`, { timeout: 1000 });
+      const response = await axios.get(`${altUrl}/api/health`, {
+        timeout: 1000,
+      });
       if (response.status === 200) {
         console.log(`✅ Connected to API at alternative port: ${altUrl}`);
         API = createApiInstance(altUrl);
         currentApiUrl = altUrl;
         isApiInitialized = true;
-        
+
         // Update environment variable for future use
         if (window.sessionStorage) {
-          window.sessionStorage.setItem('apiUrl', altUrl);
+          window.sessionStorage.setItem("apiUrl", altUrl);
         }
-        
+
         return API;
       }
     } catch (error) {
@@ -89,7 +100,9 @@ export const initApi = async () => {
     }
   }
 
-  console.error("❌ Failed to connect to API on any port. Using default configuration.");
+  console.error(
+    "❌ Failed to connect to API on any port. Using default configuration.",
+  );
   // Keep the default API instance as fallback
   return API;
 };
@@ -97,11 +110,15 @@ export const initApi = async () => {
 // Helper function to handle API errors
 export const handleApiError = (error, defaultMessage = "An error occurred") => {
   console.error("API Error details:", error);
-  
+
   if (error.response) {
     // The request was made and the server responded with a status code
     // that falls out of the range of 2xx
-    return error.response.data?.message || error.response.data?.error || defaultMessage;
+    return (
+      error.response.data?.message ||
+      error.response.data?.error ||
+      defaultMessage
+    );
   } else if (error.request) {
     // The request was made but no response was received
     console.log("No response received:", error.request);
@@ -126,7 +143,7 @@ export const setupApiInterceptors = (apiInstance) => {
       }
       return config;
     },
-    (error) => Promise.reject(error)
+    (error) => Promise.reject(error),
   );
 
   // 🔹 Handle token expiration and errors
@@ -134,25 +151,25 @@ export const setupApiInterceptors = (apiInstance) => {
     (response) => response,
     (error) => {
       console.error("API Error:", error);
-      
+
       // Handle authentication errors
       if (error.response && error.response.status === 401) {
         console.warn("Authentication error detected, clearing session");
-        
+
         // Clear token and user data
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        
+
         // Redirect to login page if not already there
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
+        if (!window.location.pathname.includes("/login")) {
+          window.location.href = "/login";
         }
       }
-      
+
       return Promise.reject(error);
-    }
+    },
   );
-  
+
   return apiInstance;
 };
 
@@ -161,4 +178,4 @@ displayBuildInfo();
 setupApiInterceptors(API);
 
 // Export the API instance
-export default API; 
+export default API;

@@ -10,6 +10,7 @@ html {
   touch-action: manipulation;
   height: 100%;
   overscroll-behavior: none;
+  background: #2a2a2a; /* Dark grey base - not as dark as black */
 }
 
 :root {
@@ -34,7 +35,7 @@ html {
 
 body {
   font-family: var(--base-font);
-  background-color: var(--background-color);
+  background-color: transparent;
   color: var(--text-color);
   line-height: 1.6;
   overflow-x: hidden;
@@ -52,7 +53,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: url("/assets/background-pattern.png") repeat;
+  background: transparent;
   height: 100%;
   width: 100%;
 }

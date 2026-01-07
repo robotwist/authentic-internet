@@ -1,33 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import API from '../api/api';
-import { MAPS } from '../components/Constants';
-import DailyQuote from '../components/DailyQuote';
-import CharacterSelection from '../components/CharacterSelection';
-import SkillTree from '../components/SkillTree';
-import DailyChallenges from '../components/DailyChallenges';
-import TitleArea from '../components/TitleArea';
-import QuestLog from '../components/QuestLog';
-import '../styles/Dashboard.css';
-import { useAchievements, ACHIEVEMENTS } from '../context/AchievementContext';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import API from "../api/api";
+import { MAPS } from "../components/Constants";
+import DailyQuote from "../components/DailyQuote";
+import CharacterSelection from "../components/CharacterSelection";
+import SkillTree from "../components/SkillTree";
+import DailyChallenges from "../components/DailyChallenges";
+import TitleArea from "../components/TitleArea";
+import QuestLog from "../components/QuestLog";
+import PowerManagement from "../components/PowerManagement";
+import "../styles/Dashboard.css";
+import { useAchievements, ACHIEVEMENTS } from "../context/AchievementContext";
 
 const Dashboard = () => {
   const [mainWorld, setMainWorld] = useState(null);
   const [devWorlds, setDevWorlds] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newWorld, setNewWorld] = useState({
-    name: '',
-    description: '',
-    mapType: ''
+    name: "",
+    description: "",
+    mapType: "",
   });
   const [character, setCharacter] = useState(null);
   const [showCharacterSelection, setShowCharacterSelection] = useState(false);
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   const [showQuestLog, setShowQuestLog] = useState(false);
+  const [showPowerManagement, setShowPowerManagement] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { unlockAchievement } = useAchievements();
@@ -46,14 +48,22 @@ const Dashboard = () => {
 
   const fetchCharacter = async () => {
     if (!user?.id) return;
-    
+
     try {
-      const response = await API.get(`/api/characters/${user.id}`);
+      const response = await API.get(`/api/users/${user.id}`);
       setCharacter(response.data);
     } catch (error) {
-      console.error('Failed to load character data:', error);
-      // If character not found, don't show character selection yet
-      // Let the useEffect handle it
+      console.error("Failed to load character data:", error);
+      // If character data doesn't exist, create a default character
+      setCharacter({
+        id: user.id,
+        username: user.username,
+        experience: 0,
+        level: 1,
+        avatar: null,
+        inventory: [],
+        savedQuotes: [],
+      });
     }
   };
 
@@ -69,50 +79,55 @@ const Dashboard = () => {
   // Calculate level and progress based on experience
   const calculateLevel = (exp) => {
     if (!exp && exp !== 0) return { level: 1, progress: 0, nextLevelAt: 100 };
-    
-    const level = exp >= 1000 ? 5 : 
-                exp >= 750 ? 4 : 
-                exp >= 500 ? 3 : 
-                exp >= 250 ? 2 : 1;
-    
+
+    const level =
+      exp >= 1000 ? 5 : exp >= 750 ? 4 : exp >= 500 ? 3 : exp >= 250 ? 2 : 1;
+
     const levelThresholds = [0, 250, 500, 750, 1000];
     const currentThreshold = levelThresholds[level - 1];
-    const nextThreshold = level < 5 ? levelThresholds[level] : levelThresholds[4] + 250;
-    
-    const progress = Math.min(100, Math.floor(((exp - currentThreshold) / (nextThreshold - currentThreshold)) * 100));
-    
+    const nextThreshold =
+      level < 5 ? levelThresholds[level] : levelThresholds[4] + 250;
+
+    const progress = Math.min(
+      100,
+      Math.floor(
+        ((exp - currentThreshold) / (nextThreshold - currentThreshold)) * 100,
+      ),
+    );
+
     return { level, progress, nextLevelAt: nextThreshold };
   };
 
   const fetchWorlds = async () => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
       // Set up the main world data from our Constants
       const mainWorldData = {
-        _id: 'main-world',
-        name: 'Authentic Internet',
-        description: 'The main world where all users can interact and explore together.',
+        _id: "main-world",
+        name: "Authentic Internet",
+        description:
+          "The main world where all users can interact and explore together.",
         isMainWorld: true,
         mapData: MAPS[0], // Use the first map from Constants.jsx as the main world
         artifacts: MAPS[0].artifacts,
-        npcs: [] // We'll populate this later
+        npcs: [], // We'll populate this later
       };
 
       setMainWorld(mainWorldData);
 
       // Fetch user's development worlds
-      const devWorldsResponse = await API.get('/api/worlds/my-worlds');
-      const devWorldsList = Array.isArray(devWorldsResponse.data) 
-        ? devWorldsResponse.data.filter(world => !world.isMainWorld)
+      const devWorldsResponse = await API.get("/api/worlds/my-worlds");
+      const devWorldsList = Array.isArray(devWorldsResponse.data)
+        ? devWorldsResponse.data.filter((world) => !world.isMainWorld)
         : [];
       setDevWorlds(devWorldsList);
-      
+
       setLoading(false);
     } catch (error) {
-      console.error('Failed to load worlds:', error);
-      setError('Failed to load worlds');
+      console.error("Failed to load worlds:", error);
+      setError("Failed to load worlds");
       setLoading(false);
     }
   };
@@ -122,40 +137,40 @@ const Dashboard = () => {
 
     // Validate form data
     if (newWorld.name.length < 3) {
-      setError('World name must be at least 3 characters long');
+      setError("World name must be at least 3 characters long");
       return;
     }
     if (newWorld.description.length < 10) {
-      setError('World description must be at least 10 characters long');
+      setError("World description must be at least 10 characters long");
       return;
     }
 
     try {
-      setError('');
-      const response = await API.post('/api/worlds', {
+      setError("");
+      const response = await API.post("/api/worlds", {
         ...newWorld,
-        isMainWorld: false // Ensure new worlds are always development worlds
+        isMainWorld: false, // Ensure new worlds are always development worlds
       });
-      
+
       if (response.data.world) {
-        setDevWorlds(prevWorlds => [...prevWorlds, response.data.world]);
+        setDevWorlds((prevWorlds) => [...prevWorlds, response.data.world]);
         setShowCreateForm(false);
         setNewWorld({
-          name: '',
-          description: '',
-          mapType: ''
+          name: "",
+          description: "",
+          mapType: "",
         });
       }
     } catch (error) {
-      console.error('Failed to create world:', error);
-      setError(error.response?.data?.message || 'Failed to create world');
+      console.error("Failed to create world:", error);
+      setError(error.response?.data?.message || "Failed to create world");
     }
   };
 
   const handleWorldClick = (worldId) => {
-    if (worldId === 'main-world') {
+    if (worldId === "main-world") {
       // Navigate to the GameWorld component for the main world
-      navigate('/game');
+      navigate("/game");
     } else {
       // For development worlds, use the regular world route
       navigate(`/world/${worldId}`);
@@ -165,7 +180,8 @@ const Dashboard = () => {
   const testAchievement = () => {
     // Unlock a random achievement for testing
     const achievementKeys = Object.keys(ACHIEVEMENTS);
-    const randomKey = achievementKeys[Math.floor(Math.random() * achievementKeys.length)];
+    const randomKey =
+      achievementKeys[Math.floor(Math.random() * achievementKeys.length)];
     unlockAchievement(randomKey);
   };
 
@@ -183,23 +199,22 @@ const Dashboard = () => {
 
   // Show skill tree if needed
   if (showSkillTree) {
-    return (
-      <SkillTree onClose={() => setShowSkillTree(false)} />
-    );
+    return <SkillTree onClose={() => setShowSkillTree(false)} />;
   }
 
   // Show daily challenges if needed
   if (showDailyChallenges) {
-    return (
-      <DailyChallenges onClose={() => setShowDailyChallenges(false)} />
-    );
+    return <DailyChallenges onClose={() => setShowDailyChallenges(false)} />;
   }
 
   // Show quest log if needed
   if (showQuestLog) {
-    return (
-      <QuestLog onClose={() => setShowQuestLog(false)} />
-    );
+    return <QuestLog onClose={() => setShowQuestLog(false)} />;
+  }
+
+  // Show power management if needed
+  if (showPowerManagement) {
+    return <PowerManagement onClose={() => setShowPowerManagement(false)} />;
   }
 
   // Calculate character level and progress
@@ -215,7 +230,7 @@ const Dashboard = () => {
           <DailyQuote />
         </div>
       </div>
-      
+
       {/* Character Progress Section */}
       <div className="character-progress-section">
         <h2>Your Journey</h2>
@@ -224,35 +239,52 @@ const Dashboard = () => {
             <span className="level-label">Level</span>
             <span className="level-value">{level}</span>
           </div>
-          
+
           <div className="experience-container">
             <div className="experience-info">
-              <span>Experience: {character?.exp || 0} / {nextLevelAt}</span>
-              <span>{progress}% to Level {level + 1}</span>
+              <span>
+                Experience: {character?.exp || 0} / {nextLevelAt}
+              </span>
+              <span>
+                {progress}% to Level {level + 1}
+              </span>
             </div>
             <div className="experience-bar-container">
-              <div className="experience-bar" style={{ width: `${progress}%` }}></div>
+              <div
+                className="experience-bar"
+                style={{ width: `${progress}%` }}
+              ></div>
             </div>
           </div>
         </div>
-        
-                <div className="character-actions">
-            <button onClick={() => navigate('/profile')}>View Profile</button>
-            <button onClick={() => navigate('/game')}>Continue Adventure</button>
-            <button onClick={() => setShowCharacterSelection(true)}>Change Character</button>
-            <button onClick={() => setShowSkillTree(true)}>🎯 Skill Tree</button>
-            <button onClick={() => setShowDailyChallenges(true)}>📅 Daily Challenges</button>
-            <button onClick={() => setShowQuestLog(true)}>📜 Quest Log</button>
-          </div>
+
+        <div className="character-actions">
+          <button onClick={() => navigate("/profile")}>View Profile</button>
+          <button onClick={() => navigate("/game")}>Continue Adventure</button>
+          <button onClick={() => setShowCharacterSelection(true)}>
+            Change Character
+          </button>
+          <button onClick={() => setShowSkillTree(true)}>🎯 Skill Tree</button>
+          <button onClick={() => setShowDailyChallenges(true)}>
+            📅 Daily Challenges
+          </button>
+          <button onClick={() => setShowQuestLog(true)}>📜 Quest Log</button>
+          <button onClick={() => setShowPowerManagement(true)}>
+            ⚡ Powers
+          </button>
+        </div>
       </div>
-      
+
       <div className="main-world-section">
         <h2>The Main World</h2>
-        <p>Welcome to Authentic Internet - the shared world where all users can interact and explore together.</p>
+        <p>
+          Welcome to Authentic Internet - the shared world where all users can
+          interact and explore together.
+        </p>
         {mainWorld ? (
-          <div 
-            className="world-card main" 
-            onClick={() => handleWorldClick('main-world')}
+          <div
+            className="world-card main"
+            onClick={() => handleWorldClick("main-world")}
             role="button"
             tabIndex={0}
           >
@@ -267,7 +299,9 @@ const Dashboard = () => {
             </div>
           </div>
         ) : (
-          <div className="error">Main world is not available. Please try refreshing the page.</div>
+          <div className="error">
+            Main world is not available. Please try refreshing the page.
+          </div>
         )}
       </div>
 
@@ -276,16 +310,21 @@ const Dashboard = () => {
       <div className="development-worlds">
         <div className="section-header">
           <h2>Development Worlds</h2>
-          <button onClick={() => setShowCreateForm(true)}>Create New World</button>
+          <button onClick={() => setShowCreateForm(true)}>
+            Create New World
+          </button>
         </div>
-        <p>Create and test your worlds here before making them accessible in the main world.</p>
-        
+        <p>
+          Create and test your worlds here before making them accessible in the
+          main world.
+        </p>
+
         <div className="worlds-grid">
           {devWorlds.length > 0 ? (
-            devWorlds.map(world => (
-              <div 
-                key={world._id} 
-                className="world-card dev" 
+            devWorlds.map((world) => (
+              <div
+                key={world._id}
+                className="world-card dev"
                 onClick={() => handleWorldClick(world._id)}
                 role="button"
                 tabIndex={0}
@@ -298,12 +337,14 @@ const Dashboard = () => {
                   <span>{world.artifacts?.length || 0} Artifacts</span>
                 </div>
                 <div className="world-status">
-                  {world.isPublic ? 'Public' : 'Private'} Development World
+                  {world.isPublic ? "Public" : "Private"} Development World
                 </div>
               </div>
             ))
           ) : (
-            <p className="no-worlds">No development worlds yet. Create one to get started!</p>
+            <p className="no-worlds">
+              No development worlds yet. Create one to get started!
+            </p>
           )}
         </div>
       </div>
@@ -318,7 +359,9 @@ const Dashboard = () => {
                 <input
                   type="text"
                   value={newWorld.name}
-                  onChange={(e) => setNewWorld({ ...newWorld, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewWorld({ ...newWorld, name: e.target.value })
+                  }
                   required
                   minLength={3}
                   placeholder="Enter world name (min. 3 characters)"
@@ -328,7 +371,9 @@ const Dashboard = () => {
                 <label>Description:</label>
                 <textarea
                   value={newWorld.description}
-                  onChange={(e) => setNewWorld({ ...newWorld, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewWorld({ ...newWorld, description: e.target.value })
+                  }
                   required
                   minLength={10}
                   placeholder="Enter world description (min. 10 characters)"
@@ -338,11 +383,13 @@ const Dashboard = () => {
                 <label>Map Type:</label>
                 <select
                   value={newWorld.mapType}
-                  onChange={(e) => setNewWorld({ ...newWorld, mapType: e.target.value })}
+                  onChange={(e) =>
+                    setNewWorld({ ...newWorld, mapType: e.target.value })
+                  }
                   required
                 >
                   <option value="">Select a map type</option>
-                  {Object.keys(MAPS).map(mapKey => (
+                  {Object.keys(MAPS).map((mapKey) => (
                     <option key={mapKey} value={mapKey}>
                       {MAPS[mapKey].name}
                     </option>
@@ -351,7 +398,9 @@ const Dashboard = () => {
               </div>
               <div className="form-actions">
                 <button type="submit">Create World</button>
-                <button type="button" onClick={() => setShowCreateForm(false)}>Cancel</button>
+                <button type="button" onClick={() => setShowCreateForm(false)}>
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
@@ -364,7 +413,9 @@ const Dashboard = () => {
           <div className="feature-card">
             <h3>Test Achievement</h3>
             <p>Unlock a random achievement to test the notification system.</p>
-            <button onClick={testAchievement} className="primary-button">Unlock Achievement</button>
+            <button onClick={testAchievement} className="primary-button">
+              Unlock Achievement
+            </button>
           </div>
         </div>
       </section>
@@ -372,4 +423,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

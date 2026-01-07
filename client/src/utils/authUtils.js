@@ -1,6 +1,6 @@
 /**
  * Auth Utility Functions
- * 
+ *
  * Centralizes all authentication and token-related operations
  * to ensure consistent behavior across the application.
  */
@@ -10,7 +10,7 @@
  * @returns {string|null} The auth token or null if not found
  */
 export const getAuthToken = () => {
-  return localStorage.getItem('token') || sessionStorage.getItem('token');
+  return localStorage.getItem("token") || sessionStorage.getItem("token");
 };
 
 /**
@@ -21,17 +21,17 @@ export const getAuthToken = () => {
  */
 export const storeAuthData = (token, user, rememberMe = false) => {
   const storage = rememberMe ? localStorage : sessionStorage;
-  
+
   // Clear any existing tokens from both storages
   clearAuthData();
-  
+
   // Store the new token and user data
-  storage.setItem('token', token);
-  storage.setItem('user', JSON.stringify(user));
-  
+  storage.setItem("token", token);
+  storage.setItem("user", JSON.stringify(user));
+
   // Update the authorization header for API requests
   updateAuthHeader(token);
-  
+
   return true;
 };
 
@@ -40,14 +40,14 @@ export const storeAuthData = (token, user, rememberMe = false) => {
  */
 export const clearAuthData = () => {
   // Clear from both storage types to ensure complete logout
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('user');
-  
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("user");
+
   // Remove auth header
   updateAuthHeader(null);
-  
+
   return true;
 };
 
@@ -56,14 +56,14 @@ export const clearAuthData = () => {
  * @param {string|null} token - JWT token or null to remove header
  */
 export const updateAuthHeader = (token) => {
-  if (typeof window === 'undefined') return; // Skip in SSR context
-  
+  if (typeof window === "undefined") return; // Skip in SSR context
+
   // This assumes you're using axios with a global config
   if (window.API && window.API.defaults && window.API.defaults.headers) {
     if (token) {
-      window.API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      window.API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     } else {
-      delete window.API.defaults.headers.common['Authorization'];
+      delete window.API.defaults.headers.common["Authorization"];
     }
   }
 };
@@ -82,10 +82,11 @@ export const isAuthenticated = () => {
  */
 export const getCurrentUser = () => {
   try {
-    const userString = localStorage.getItem('user') || sessionStorage.getItem('user');
+    const userString =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
     return userString ? JSON.parse(userString) : null;
   } catch (error) {
-    console.error('Error parsing user data:', error);
+    console.error("Error parsing user data:", error);
     return null;
   }
 };
@@ -97,23 +98,23 @@ export const getCurrentUser = () => {
  */
 export const isTokenExpiringSoon = (token) => {
   if (!token) return false;
-  
+
   try {
     // Extract payload from JWT token
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const payload = JSON.parse(window.atob(base64));
-    
+
     // Get expiration time from token
     const exp = payload.exp;
     if (!exp) return false;
-    
+
     // Check if token expires in less than 5 minutes
     const currentTime = Math.floor(Date.now() / 1000);
     const timeRemaining = exp - currentTime;
     return timeRemaining < 300; // 5 minutes in seconds
   } catch (error) {
-    console.error('Error checking token expiration:', error);
+    console.error("Error checking token expiration:", error);
     return false;
   }
 };
@@ -125,7 +126,10 @@ export const isTokenExpiringSoon = (token) => {
  */
 export const saveGameProgress = (key, data) => {
   try {
-    localStorage.setItem(key, typeof data === 'object' ? JSON.stringify(data) : data);
+    localStorage.setItem(
+      key,
+      typeof data === "object" ? JSON.stringify(data) : data,
+    );
     return true;
   } catch (error) {
     console.error(`Error saving game progress (${key}):`, error);
@@ -143,7 +147,7 @@ export const getGameProgress = (key, defaultValue = null) => {
   try {
     const value = localStorage.getItem(key);
     if (value === null) return defaultValue;
-    
+
     // Try to parse JSON, but return as-is if it fails (for string values)
     try {
       return JSON.parse(value);
@@ -178,28 +182,28 @@ export const resetAllGameProgress = () => {
     // Save auth data temporarily
     const token = getAuthToken();
     const user = getCurrentUser();
-    const isInLocalStorage = !!localStorage.getItem('token');
-    
+    const isInLocalStorage = !!localStorage.getItem("token");
+
     // Get all keys in localStorage
     const keys = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key !== 'token' && key !== 'user') {
+      if (key !== "token" && key !== "user") {
         keys.push(key);
       }
     }
-    
+
     // Remove all game progress keys
-    keys.forEach(key => localStorage.removeItem(key));
-    
+    keys.forEach((key) => localStorage.removeItem(key));
+
     // Restore auth data
     if (token && user) {
       storeAuthData(token, user, isInLocalStorage);
     }
-    
+
     return true;
   } catch (error) {
-    console.error('Error resetting all game progress:', error);
+    console.error("Error resetting all game progress:", error);
     return false;
   }
 };
@@ -214,5 +218,5 @@ export default {
   saveGameProgress,
   getGameProgress,
   resetGameProgress,
-  resetAllGameProgress
-}; 
+  resetAllGameProgress,
+};

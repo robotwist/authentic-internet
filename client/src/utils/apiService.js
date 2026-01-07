@@ -1,10 +1,10 @@
-import axios from 'axios';
-import { API_CONFIG, buildApiUrl } from './apiConfig';
+import axios from "axios";
+import { API_CONFIG, buildApiUrl } from "./apiConfig";
 
 // Authentication
 export const loginUser = async (credentials) => {
   try {
-    const response = await axios.post(buildApiUrl('/auth/login'), credentials);
+    const response = await axios.post(buildApiUrl("/auth/login"), credentials);
     return response.data;
   } catch (error) {
     throw error;
@@ -13,7 +13,7 @@ export const loginUser = async (credentials) => {
 
 export const registerUser = async (userData) => {
   try {
-    const response = await axios.post(buildApiUrl('/auth/register'), userData);
+    const response = await axios.post(buildApiUrl("/auth/register"), userData);
     return response.data;
   } catch (error) {
     throw error;
@@ -22,7 +22,7 @@ export const registerUser = async (userData) => {
 
 export const logoutUser = async () => {
   try {
-    const response = await axios.post(buildApiUrl('/auth/logout'));
+    const response = await axios.post(buildApiUrl("/auth/logout"));
     return response.data;
   } catch (error) {
     throw error;
@@ -41,7 +41,10 @@ export const getCharacterData = async (characterId) => {
 
 export const updateCharacter = async (characterId, updateData) => {
   try {
-    const response = await axios.patch(buildApiUrl(`/characters/${characterId}`), updateData);
+    const response = await axios.patch(
+      buildApiUrl(`/characters/${characterId}`),
+      updateData,
+    );
     return response.data;
   } catch (error) {
     throw error;
@@ -51,7 +54,7 @@ export const updateCharacter = async (characterId, updateData) => {
 // Game related
 export const saveGameState = async (gameData) => {
   try {
-    const response = await axios.post(buildApiUrl('/game/save'), gameData);
+    const response = await axios.post(buildApiUrl("/game/save"), gameData);
     return response.data;
   } catch (error) {
     throw error;
@@ -72,7 +75,7 @@ export const interactWithNPC = async (npcId, prompt, npcType) => {
   try {
     const response = await axios.post(buildApiUrl(`/npcs/${npcType}`), {
       npcId,
-      prompt
+      prompt,
     });
     return response.data;
   } catch (error) {
@@ -92,9 +95,9 @@ export const getArtifactData = async (artifactId) => {
 
 export const collectArtifact = async (characterId, artifactId) => {
   try {
-    const response = await axios.post(buildApiUrl('/artifacts/collect'), {
+    const response = await axios.post(buildApiUrl("/artifacts/collect"), {
       characterId,
-      artifactId
+      artifactId,
     });
     return response.data;
   } catch (error) {
@@ -104,9 +107,9 @@ export const collectArtifact = async (characterId, artifactId) => {
 
 export const dropArtifact = async (characterId, artifactId) => {
   try {
-    const response = await axios.post(buildApiUrl('/artifacts/drop'), {
+    const response = await axios.post(buildApiUrl("/artifacts/drop"), {
       characterId,
-      artifactId
+      artifactId,
     });
     return response.data;
   } catch (error) {
@@ -116,25 +119,25 @@ export const dropArtifact = async (characterId, artifactId) => {
 
 export const trackArtifactInteraction = async (artifactId, interactionType) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      console.log('User not authenticated, skipping interaction tracking');
+      console.log("User not authenticated, skipping interaction tracking");
       return null;
     }
-    
+
     const response = await fetch(`/api/artifacts/${artifactId}/interact`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ interactionType })
+      body: JSON.stringify({ interactionType }),
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to track interaction');
+      throw new Error("Failed to track interaction");
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error(`Error tracking ${interactionType} interaction:`, error);
@@ -145,7 +148,10 @@ export const trackArtifactInteraction = async (artifactId, interactionType) => {
 // User settings and preferences
 export const updateUserSettings = async (userId, settings) => {
   try {
-    const response = await axios.patch(buildApiUrl(`/users/${userId}/settings`), settings);
+    const response = await axios.patch(
+      buildApiUrl(`/users/${userId}/settings`),
+      settings,
+    );
     return response.data;
   } catch (error) {
     throw error;
@@ -156,27 +162,31 @@ export const updateUserSettings = async (userId, settings) => {
 export const getRandomShakespeareQuote = async () => {
   try {
     // Try to get from our server endpoint first
-    const response = await axios.post(buildApiUrl('/npcs/shakespeare'), {
-      prompt: "Share a quote about wisdom or life"
+    const response = await axios.post(buildApiUrl("/npcs/shakespeare"), {
+      prompt: "Share a quote about wisdom or life",
     });
-    
+
     if (response.data && response.data.response) {
       return { quote: response.data.response };
     }
-    
+
     // Fallback to external API if available
-    throw new Error('Server quote unavailable');
+    throw new Error("Server quote unavailable");
   } catch (error) {
     // Try external Shakespeare API
     try {
-      const response = await axios.get('https://api.allorigins.win/raw?url=' + 
-        encodeURIComponent('https://shakespeare-quotes-gen.herokuapp.com/api/v1/quotes/random'));
+      const response = await axios.get(
+        "https://api.allorigins.win/raw?url=" +
+          encodeURIComponent(
+            "https://shakespeare-quotes-gen.herokuapp.com/api/v1/quotes/random",
+          ),
+      );
       if (response.data && response.data.quote) {
         return response.data;
       }
-      throw new Error('External API failed');
+      throw new Error("External API failed");
     } catch (externalError) {
-      console.error('Shakespeare quote API failed:', externalError);
+      console.error("Shakespeare quote API failed:", externalError);
       throw externalError;
     }
   }
@@ -185,30 +195,32 @@ export const getRandomShakespeareQuote = async () => {
 export const getZenQuote = async () => {
   try {
     // Try to get from our server endpoint first
-    const response = await axios.post(buildApiUrl('/npcs/zen'), {
-      prompt: "Share a quote about wisdom"
+    const response = await axios.post(buildApiUrl("/npcs/zen"), {
+      prompt: "Share a quote about wisdom",
     });
-    
+
     if (response.data && response.data.response) {
-      return { 
+      return {
         q: response.data.response,
-        a: "Zen Master" 
+        a: "Zen Master",
       };
     }
-    
+
     // Fallback to external API if available
-    throw new Error('Server quote unavailable');
+    throw new Error("Server quote unavailable");
   } catch (error) {
     // Try external Zen Quotes API
     try {
-      const response = await axios.get('https://api.allorigins.win/raw?url=' + 
-        encodeURIComponent('https://zenquotes.io/api/random'));
+      const response = await axios.get(
+        "https://api.allorigins.win/raw?url=" +
+          encodeURIComponent("https://zenquotes.io/api/random"),
+      );
       if (response.data && response.data.length > 0) {
         return response.data[0];
       }
-      throw new Error('External API failed');
+      throw new Error("External API failed");
     } catch (externalError) {
-      console.error('Zen quote API failed:', externalError);
+      console.error("Zen quote API failed:", externalError);
       throw externalError;
     }
   }
@@ -218,29 +230,29 @@ export const getQuoteForArtifact = async (artifactType) => {
   try {
     // Map artifact types to NPC types for quote retrieval
     const npcTypeMap = {
-      'scroll': 'shakespeare',
-      'book': 'philosopher',
-      'tablet': 'zen',
-      'journal': 'john_muir',
-      'map': 'explorer'
+      scroll: "shakespeare",
+      book: "philosopher",
+      tablet: "zen",
+      journal: "john_muir",
+      map: "explorer",
     };
-    
-    const npcType = npcTypeMap[artifactType] || 'shakespeare';
-    
+
+    const npcType = npcTypeMap[artifactType] || "shakespeare";
+
     const response = await axios.post(buildApiUrl(`/npcs/${npcType}`), {
-      prompt: "Share wisdom about nature and exploration"
+      prompt: "Share wisdom about nature and exploration",
     });
-    
+
     if (response.data && response.data.response) {
       return {
         text: response.data.response,
         source: getNpcNameFromType(npcType),
-        npcType: npcType
+        npcType: npcType,
       };
     }
-    throw new Error('Server quote unavailable');
+    throw new Error("Server quote unavailable");
   } catch (error) {
-    console.error('Failed to get artifact quote:', error);
+    console.error("Failed to get artifact quote:", error);
     throw error;
   }
 };
@@ -248,12 +260,12 @@ export const getQuoteForArtifact = async (artifactType) => {
 // Helper function to get display name from NPC type
 function getNpcNameFromType(npcType) {
   const npcNames = {
-    'shakespeare': 'William Shakespeare',
-    'philosopher': 'Ancient Philosopher',
-    'zen': 'Zen Master',
-    'john_muir': 'John Muir',
-    'explorer': 'Explorer'
+    shakespeare: "William Shakespeare",
+    philosopher: "Ancient Philosopher",
+    zen: "Zen Master",
+    john_muir: "John Muir",
+    explorer: "Explorer",
   };
-  
-  return npcNames[npcType] || 'Scholar';
-} 
+
+  return npcNames[npcType] || "Scholar";
+}

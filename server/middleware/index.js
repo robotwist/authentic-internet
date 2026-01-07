@@ -70,23 +70,35 @@ export const applyMiddleware = (app, allowedOrigins) => {
  * Configure and apply session middleware
  * @param {Object} app - Express app instance
  */
-export const applySessionMiddleware = (app) => {
+export const applySessionMiddleware = async (app) => {
   try {
     if (process.env.MONGO_URI) {
-      const mongoStore = connectMongo.create({ 
-        mongoUrl: process.env.MONGO_URI,
-        ttl: 14 * 24 * 60 * 60 // 14 days
-      });
-      
-      app.use(session(configureSessionOptions(mongoStore)));
-      console.log("✅ MongoDB Session Store Connected Successfully");
-    } else {
-      console.log("⚠️ No MONGO_URI provided, using memory sessions");
-      app.use(session(configureSessionOptions()));
+      // Test MongoDB connection before creating session store
+      const mongoose = await import('mongoose');
+      try {
+        await mongoose.default.connect(process.env.MONGO_URI, {
+          serverSelectionTimeoutMS: 3000,
+        });
+        const mongoStore = connectMongo.create({ 
+          mongoUrl: process.env.MONGO_URI,
+          ttl: 14 * 24 * 60 * 60 // 14 days
+        });
+        
+        app.use(session(configureSessionOptions(mongoStore)));
+        console.log("✅ MongoDB Session Store Connected Successfully");
+        return;
+      } catch (dbError) {
+        console.warn("⚠️ MongoDB connection failed, falling back to memory sessions:", dbError.message);
+        mongoose.default.disconnect();
+      }
     }
+    
+    // Use memory sessions as fallback
+    console.log("🔧 Using memory sessions (sessions will be lost on server restart)");
+    app.use(session(configureSessionOptions()));
   } catch (error) {
-    console.error("❌ Failed to connect to MongoDB Session Store:", error);
-    // Fallback to memory sessions
+    console.error("❌ Failed to configure session middleware:", error);
+    // Final fallback to memory sessions
     app.use(session(configureSessionOptions()));
   }
 };

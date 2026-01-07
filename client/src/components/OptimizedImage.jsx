@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import './OptimizedImage.css';
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import "./OptimizedImage.css";
 
 /**
  * OptimizedImage component
  * Handles lazy loading, responsive images, and provides loading states
- * 
+ *
  * @param {Object} props
  * @param {string} props.src - Image source URL
  * @param {string} props.alt - Alt text for image
@@ -16,21 +16,31 @@ import './OptimizedImage.css';
  * @param {boolean} props.eager - If true, loads immediately instead of lazy
  * @param {string} props.objectFit - CSS object-fit property
  */
+
 const OptimizedImage = ({
   src,
   alt,
-  className = '',
+  className = "",
   width,
   height,
   fallbackSrc,
   eager = false,
-  objectFit = 'cover',
+  objectFit = "cover",
   ...rest
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
   const [isIntersecting, setIsIntersecting] = useState(eager);
+
+  // Responsive image support
+  const generateSrcSet = (src) => {
+    const baseName = src.replace(/\.[^/.]+$/, "");
+    const ext = src.split(".").pop();
+    return `${baseName}-320.${ext} 320w, ${baseName}-640.${ext} 640w, ${baseName}-1024.${ext} 1024w`;
+  };
+
+  const srcSet = generateSrcSet(src);
 
   useEffect(() => {
     // Skip for eagerly loaded images
@@ -39,7 +49,7 @@ const OptimizedImage = ({
     // Set up intersection observer for lazy loading
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsIntersecting(true);
             observer.disconnect();
@@ -47,13 +57,13 @@ const OptimizedImage = ({
         });
       },
       {
-        rootMargin: '200px', // Start loading when image is 200px from viewport
-        threshold: 0.01      // Trigger when 1% of the image is visible
-      }
+        rootMargin: "200px", // Start loading when image is 200px from viewport
+        threshold: 0.01, // Trigger when 1% of the image is visible
+      },
     );
 
     // Get reference to current DOM element
-    const element = document.getElementById(`img-${src.split('/').pop()}`);
+    const element = document.getElementById(`img-${src.split("/").pop()}`);
     if (element) {
       observer.observe(element);
     }
@@ -71,7 +81,7 @@ const OptimizedImage = ({
   const handleError = () => {
     setIsLoading(false);
     setError(true);
-    
+
     // Use fallback image if available
     if (fallbackSrc && fallbackSrc !== src) {
       setImageSrc(fallbackSrc);
@@ -79,14 +89,14 @@ const OptimizedImage = ({
   };
 
   // Generate unique ID from image source
-  const imgId = `img-${src.split('/').pop()}`;
+  const imgId = `img-${src.split("/").pop()}`;
 
   return (
-    <div 
+    <div
       className={`optimized-image-container ${className}`}
-      style={{ 
-        width: width ? `${width}px` : '100%',
-        height: height ? `${height}px` : 'auto',
+      style={{
+        width: width ? `${width}px` : "100%",
+        height: height ? `${height}px` : "auto",
       }}
       id={imgId}
     >
@@ -96,23 +106,25 @@ const OptimizedImage = ({
           <div className="spinner"></div>
         </div>
       )}
-      
+
       {/* Only load image when in viewport or eager loading is enabled */}
       {(isIntersecting || eager) && (
         <img
+          srcSet={srcSet}
+          sizes="(max-width: 320px) 320px, (max-width: 640px) 640px, 1024px"
           src={imageSrc}
           alt={alt}
-          className={`optimized-image ${isLoading ? 'loading' : ''} ${error ? 'error' : ''}`}
+          className={`optimized-image ${isLoading ? "loading" : ""} ${error ? "error" : ""}`}
           onLoad={handleLoad}
           onError={handleError}
-          loading={eager ? 'eager' : 'lazy'}
+          loading={eager ? "eager" : "lazy"}
           style={{ objectFit }}
           width={width}
           height={height}
           {...rest}
         />
       )}
-      
+
       {/* Error state */}
       {error && !fallbackSrc && (
         <div className="image-error">
@@ -131,7 +143,7 @@ OptimizedImage.propTypes = {
   height: PropTypes.number,
   fallbackSrc: PropTypes.string,
   eager: PropTypes.bool,
-  objectFit: PropTypes.string
+  objectFit: PropTypes.string,
 };
 
-export default OptimizedImage; 
+export default OptimizedImage;
