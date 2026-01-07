@@ -105,6 +105,8 @@ const GameWorld = React.memo(() => {
   // Performance tracking
   const renderCount = useRef(0);
   const lastRenderTime = useRef(performance.now());
+  const lastUpdateTime = useRef(performance.now());
+  const updateThrottle = useRef(16); // 16ms throttle (60fps)
   // Form position state for artifact creation modal
   const [formPosition, setFormPosition] = useState(null);
   // Show inventory state for character inventory modal
@@ -230,6 +232,16 @@ const GameWorld = React.memo(() => {
   const [portalNotificationActive, setPortalNotificationActive] =
     useState(false);
 
+  // Mobile and accessibility state
+  const [mobileState, setMobileState] = useState({
+    isMobile: false,
+    showTouchControls: false,
+    touchControlsEnabled: false,
+    screenReaderMode: false,
+    reducedMotionMode: false,
+    highContrastMode: false,
+  });
+
   // Artifact Game Launcher state
   const [currentGameArtifact, setCurrentGameArtifact] = useState(null);
   const [showGameLauncher, setShowGameLauncher] = useState(false);
@@ -240,6 +252,7 @@ const GameWorld = React.memo(() => {
   const [questStatusMap, setQuestStatusMap] = useState(new Map());
   const [questCompletionCelebration, setQuestCompletionCelebration] =
     useState(null);
+  const [showHamletFinale, setShowHamletFinale] = useState(false);
 
   // Update checkForLevelUpAchievements to use our context
   const checkForLevelUpAchievements = useCallback(
@@ -327,6 +340,32 @@ const GameWorld = React.memo(() => {
     setQuestStatusMap(statusMap);
   }, [activeQuests, completedQuests, currentMapIndex]);
 
+  // Screen reader announcement function
+  const announceToScreenReader = useCallback((message) => {
+    const announcementsElement = document.getElementById(
+      "screen-reader-announcements",
+    );
+    if (announcementsElement) {
+      announcementsElement.textContent = message;
+      // Clear after a short delay to allow re-announcement
+      setTimeout(() => {
+        announcementsElement.textContent = "";
+      }, 1000);
+    }
+  }, []);
+
+  // Get Shakespeare quest from active quests
+  const shakespeareQuest = useMemo(() => {
+    return (
+      activeQuests.find(
+        (quest) =>
+          quest.npcId === "shakespeare" ||
+          quest.title?.includes("Shakespeare") ||
+          quest.title?.includes("Tempest"),
+      ) || { stage: "not_started" }
+    );
+  }, [activeQuests]);
+
   // Portal notification functions - defined early so they can be used in callbacks
   const showPortalNotification = useCallback((title, message) => {
     // Create the notification element if it doesn't exist
@@ -370,11 +409,6 @@ const GameWorld = React.memo(() => {
   const updateUIState = useCallback((updates) => {
     setUiState((prev) => ({ ...prev, ...updates }));
   }, []);
-
-  // Portal activation handler - defined early so it can be used in handleKeyDown
-  // Note: This function will be fully defined later with all dependencies
-  // For now, we create a placeholder that will be replaced
-  let handlePortalActivation = null;
 
   // Quest validation: Check if gameplay actions complete quest stages
   const validateQuestProgress = useCallback(
@@ -586,6 +620,346 @@ const GameWorld = React.memo(() => {
     [calculateXPForLevel, maxPlayerHealth, soundManager],
   );
 
+  // Alias for handleGainExperience to match existing code that uses awardXP
+  const awardXP = useCallback(
+    (amount, reason) => {
+      handleGainExperience(amount, reason, null);
+    },
+    [handleGainExperience],
+  );
+
+  // Viewport adjustment function to follow character
+  const adjustViewport = useCallback(
+    (characterPos) => {
+      if (!characterPos || typeof currentMapIndex !== "number") return;
+
+      const gameWorldElement = document.querySelector(".game-world");
+      if (!gameWorldElement) return;
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Calculate new viewport position to center character
+      const newViewportX = Math.max(0, characterPos.x - viewportWidth / 2);
+      const newViewportY = Math.max(0, characterPos.y - viewportHeight / 2);
+
+      // Get map dimensions
+      const currentMapData = MAPS[currentMapIndex];
+      if (currentMapData && currentMapData.data) {
+        const mapWidth = currentMapData.data[0]?.length * TILE_SIZE || 800;
+        const mapHeight = currentMapData.data.length * TILE_SIZE || 600;
+
+        // Clamp viewport to map boundaries
+        const clampedX = Math.min(
+          newViewportX,
+          Math.max(0, mapWidth - viewportWidth),
+        );
+        const clampedY = Math.min(
+          newViewportY,
+          Math.max(0, mapHeight - viewportHeight),
+        );
+
+        setViewport({ x: clampedX, y: clampedY });
+      }
+    },
+    [currentMapIndex],
+  );
+
+  // Optimized state update functions - extracted from updateGameState
+  const updateNotifications = useCallback((updates) => {
+    setNotifications((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  const updateCharacterState = useCallback((updates) => {
+    setCharacterState((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  const updatePortalState = useCallback((updates) => {
+    setPortalState((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  // Optimized state update function
+  const updateGameState = useCallback(
+    (updates) => {
+      const now = performance.now();
+      if (now - lastUpdateTime.current < updateThrottle.current) {
+        return; // Throttle updates
+      }
+      lastUpdateTime.current = now;
+      setGameData((prev) => ({ ...prev, ...updates }));
+    },
+    [],
+  );
+
+  // Show world announcement when transitioning to new area
+  const showWorldAnnouncement = useCallback((worldName) => {
+    // Create the announcement element if it doesn't exist
+    let announcement = document.getElementById("world-announcement");
+
+    if (!announcement) {
+      announcement = document.createElement("div");
+      announcement.id = "world-announcement";
+      announcement.className = "world-announcement";
+      document.body.appendChild(announcement);
+    }
+
+    // Update announcement content
+    announcement.innerHTML = `<h2>Welcome to ${worldName}</h2>`;
+
+    // Make announcement visible
+    setTimeout(() => {
+      announcement.classList.add("active");
+    }, 10);
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      announcement.classList.add("fade-out");
+      setTimeout(() => {
+        if (announcement && announcement.parentNode) {
+          announcement.parentNode.removeChild(announcement);
+        }
+      }, 1000);
+    }, 3000);
+  }, []);
+
+  // Optimized level completion handler
+  const handleLevelCompletion = useCallback(
+    (level) => {
+      if (gameData.levelCompletion[level]) return; // Already completed
+
+      updateGameState({
+        levelCompletion: { ...gameData.levelCompletion, [level]: true },
+      });
+
+      updateNotifications({
+        showWinNotification: true,
+        winMessage: `Level ${level} Complete!`,
+      });
+
+      // Play completion sound
+      if (soundManager) {
+        soundManager.playSound("level_complete");
+      }
+
+      // Award experience
+      if (user) {
+        updateUserExperience(user.id, 100);
+      }
+
+      // Check achievements
+      checkLevelAchievements(level);
+    },
+    [
+      gameData.levelCompletion,
+      updateGameState,
+      updateNotifications,
+      soundManager,
+      user,
+      checkLevelAchievements,
+    ],
+  );
+
+  // Handle portal transitions with performance optimization
+  const handlePortalTransition = useCallback(
+    (destinationMap, spawnPosition, isSpecial = false) => {
+      if (portalState.isTransitioning) return;
+
+      performance.mark(PERFORMANCE_MARKERS.PORTAL_TRANSITION);
+
+      updatePortalState({ isTransitioning: true });
+
+      // Play portal sound
+      if (soundManager) {
+        soundManager.playSound("portal");
+      }
+
+      // Add portal transition animation
+      const gameWorld = document.querySelector(".game-world");
+      if (gameWorld) {
+        gameWorld.classList.add("portal-transition");
+      }
+
+      // Use requestAnimationFrame for smooth transitions
+      const transitionAnimation = () => {
+        setTimeout(() => {
+          if (isSpecial) {
+            setCurrentSpecialWorld(destinationMap);
+          } else {
+            const destinationIndex = MAPS.findIndex(
+              (map) => map.name === destinationMap,
+            );
+            if (destinationIndex !== -1) {
+              setCurrentMapIndex(destinationIndex);
+              setCharacterPosition(spawnPosition);
+
+              // Show world announcement
+              showWorldAnnouncement(destinationMap);
+
+              // Handle level completion for Yosemite
+              if (destinationMap === "Yosemite") {
+                setTimeout(() => {
+                  handleLevelCompletion("level1");
+                }, 800);
+              }
+            } else {
+              console.error(
+                `Destination map "${destinationMap}" not found`,
+              );
+            }
+          }
+
+          // Remove transition animation
+          if (gameWorld) {
+            gameWorld.classList.remove("portal-transition");
+          }
+
+          updatePortalState({
+            isTransitioning: false,
+            activePortal: null,
+            portalNotificationActive: false,
+          });
+          hidePortalNotification();
+
+          performance.mark(PERFORMANCE_MARKERS.PORTAL_TRANSITION + "-end");
+          try {
+            performance.measure(
+              "Portal Transition",
+              PERFORMANCE_MARKERS.PORTAL_TRANSITION,
+              PERFORMANCE_MARKERS.PORTAL_TRANSITION + "-end",
+            );
+          } catch (error) {
+            // Performance timing not available, skip measurement
+            console.debug(
+              "Performance measurement skipped:",
+              error.message,
+            );
+          }
+        }, 1000);
+      };
+
+      requestAnimationFrame(transitionAnimation);
+    },
+    [
+      portalState.isTransitioning,
+      soundManager,
+      setCurrentSpecialWorld,
+      updatePortalState,
+      showWorldAnnouncement,
+      handleLevelCompletion,
+      hidePortalNotification,
+    ],
+  );
+
+  // Handle NPC interaction
+  const handleNPCInteraction = useCallback(
+    (npc) => {
+      if (!npc) return;
+
+      console.log("Interacting with NPC:", npc.name || npc.type);
+
+      // Special handling for Shakespeare's quest
+      if (
+        npc.name === "William Shakespeare" &&
+        shakespeareQuest.stage === "enemies_defeated"
+      ) {
+        console.log("🎭 Triggering Hamlet Finale!");
+        setShowHamletFinale(true);
+
+        // Play dramatic sound
+        if (soundManager) {
+          soundManager.playSound("quest_start", 0.8);
+        }
+
+        if (mobileState.screenReaderMode) {
+          announceToScreenReader("Beginning the Hamlet Finale challenge!");
+        }
+        return; // Don't show regular dialogue
+      }
+
+      // Set the active NPC and show dialog
+      setActiveNPC(npc);
+      updateUIState({ showNPCDialog: true });
+
+      // Play interaction sound if available
+      if (soundManager) {
+        soundManager.playSound("npc_interaction");
+      }
+
+      // Add visual feedback
+      if (mobileState.screenReaderMode) {
+        announceToScreenReader(
+          `Starting conversation with ${npc.name || npc.type}`,
+        );
+      }
+    },
+    [
+      shakespeareQuest.stage,
+      soundManager,
+      mobileState.screenReaderMode,
+      announceToScreenReader,
+      updateUIState,
+    ],
+  );
+
+  // Handler for clicking on an NPC in the map
+  const handleNPCClick = useCallback(
+    (npc) => {
+      handleNPCInteraction(npc);
+    },
+    [handleNPCInteraction],
+  );
+
+  // Artifact Game Launcher handlers
+  const handleGameComplete = useCallback(
+    (completionData) => {
+      console.log("🎉 Game completed:", completionData);
+
+      // Resume background music
+      if (soundManager) {
+        const currentMapName = MAPS[currentMapIndex]?.name || "";
+        soundManager.playMusic(currentMapName);
+      }
+
+      // Validate quest progress for game completion
+      validateQuestProgress("game_completed", {
+        gameType: completionData.artifact?.type || "game",
+        artifact: completionData.artifact,
+      });
+
+      // Close game launcher
+      setShowGameLauncher(false);
+      setCurrentGameArtifact(null);
+
+      // Show completion notification
+      if (completionData.artifact) {
+        showPortalNotification(
+          "Quest Complete!",
+          `You completed ${completionData.artifact.name}!`,
+        );
+
+        // Auto-hide notification after 3 seconds
+        setTimeout(() => {
+          hidePortalNotification();
+        }, 3000);
+      }
+    },
+    [soundManager, currentMapIndex, validateQuestProgress, showPortalNotification, hidePortalNotification],
+  );
+
+  const handleGameExit = useCallback(() => {
+    console.log("🚪 Exiting game launcher");
+
+    // Resume background music
+    if (soundManager) {
+      const currentMapName = MAPS[currentMapIndex]?.name || "";
+      soundManager.playMusic(currentMapName);
+    }
+
+    // Close game launcher
+    setShowGameLauncher(false);
+    setCurrentGameArtifact(null);
+  }, [soundManager, currentMapIndex]);
+
   const handleGameOver = useCallback(() => {
     console.log("Game Over!");
     // Reset player health
@@ -762,296 +1136,263 @@ const GameWorld = React.memo(() => {
     // but we want to track render count, so we'll keep it running but throttle logging
   });
 
-  // Optimized state update function
-  const updateGameState = useCallback(
-    (updates) => {
-      const now = performance.now();
-      if (now - lastUpdateTime.current < updateThrottle.current) {
-        return; // Throttle updates
+  // Automatic portal activation on collision
+  useEffect(() => {
+    const handlePortalCollision = (event) => {
+      if (portalState.isTransitioning) return;
+
+      const { tileX, tileY, tileType } = event.detail;
+      const currentMapName = currentMap?.name;
+
+      if (!currentMapName) return;
+
+      console.log(
+        `Portal collision detected - Map: ${currentMapName}, Tile: (${tileX}, ${tileY}), Type: ${tileType}`,
+      );
+
+      // Handle progression portals (type 5)
+      if (tileType === 5) {
+        const progressionPortal = PORTAL_CONFIG.progression[currentMapName];
+        if (progressionPortal) {
+          // Handle multiple portals per map (array)
+          if (Array.isArray(progressionPortal)) {
+            for (const portal of progressionPortal) {
+              const { destination, spawnPosition, condition } = portal;
+
+              // Check if portal condition is met
+              if (condition && condition(tileX, tileY)) {
+                console.log(`✅ Auto-activating portal to ${destination}`);
+                handlePortalTransition(destination, spawnPosition);
+                return;
+              }
+            }
+          } else {
+            // Handle single portal (object)
+            const { destination, spawnPosition, condition } =
+              progressionPortal;
+
+            // Check if portal condition is met (if any)
+            if (!condition || condition(tileX, tileY)) {
+              console.log(`✅ Auto-activating portal to ${destination}`);
+              handlePortalTransition(destination, spawnPosition);
+              return;
+            }
+          }
+        }
       }
-      lastUpdateTime.current = now;
 
-      // Artifact Game Launcher handlers
-      const handleGameComplete = useCallback(
-        (completionData) => {
-          console.log("🎉 Game completed:", completionData);
+      // Handle special portals in Yosemite (types 6-8)
+      if (currentMapName === "Yosemite" && tileType >= 6 && tileType <= 8) {
+        const specialPortal = PORTAL_CONFIG.special[tileX];
 
-          // Resume background music
-          if (soundManager) {
-            const currentMapName = MAPS[currentMapIndex]?.name || "";
-            soundManager.playMusic(currentMapName);
+        if (specialPortal && tileY === 1) {
+          console.log(
+            `✅ Auto-activating special portal: ${specialPortal.title}`,
+          );
+
+          // Activate the special world directly
+          if (specialPortal.type === "terminal") {
+            setCurrentSpecialWorld("terminal");
+          } else if (specialPortal.type === "shooter") {
+            setCurrentSpecialWorld("shooter");
+          } else if (specialPortal.type === "text_adventure") {
+            setCurrentSpecialWorld("text_adventure");
           }
 
-          // Validate quest progress for game completion
-          validateQuestProgress("game_completed", {
-            gameType: completionData.artifact?.type || "game",
-            artifact: completionData.artifact,
+          updatePortalState({
+            activePortal: specialPortal,
+            portalNotificationActive: true,
           });
-
-          // Close game launcher
-          setShowGameLauncher(false);
-          setCurrentGameArtifact(null);
-
-          // Show completion notification
-          if (completionData.artifact) {
-            showPortalNotification(
-              "Quest Complete!",
-              `You completed ${completionData.artifact.name}!`,
-            );
-
-            // Auto-hide notification after 3 seconds
-            setTimeout(() => {
-              hidePortalNotification();
-            }, 3000);
-          }
-        },
-        [soundManager, currentMapIndex, validateQuestProgress],
-      );
-
-      const handleGameExit = useCallback(() => {
-        console.log("🚪 Exiting game launcher");
-
-        // Resume background music
-        if (soundManager) {
-          const currentMapName = MAPS[currentMapIndex]?.name || "";
-          soundManager.playMusic(currentMapName);
+          return;
         }
+      }
+    };
 
-        // Close game launcher
-        setShowGameLauncher(false);
-        setCurrentGameArtifact(null);
-      }, [soundManager, currentMapIndex]);
+    window.addEventListener("portalCollision", handlePortalCollision);
+    return () => {
+      window.removeEventListener("portalCollision", handlePortalCollision);
+    };
+  }, [
+    portalState.isTransitioning,
+    currentMap,
+    PORTAL_CONFIG,
+    handlePortalTransition,
+    updatePortalState,
+  ]);
 
-      // Function to handle updating character in both state and backend
-      const handleUpdateCharacter = useCallback(
-        (updatedCharacter) => {
-          if (!updatedCharacter) return;
+  // Optimized portal activation handler with improved detection and feedback (kept for manual SPACE activation)
+  const handlePortalActivation = useCallback(
+    (e) => {
+      if (e.key !== " " || portalState.isTransitioning) return;
 
-          console.log("Interacting with NPC:", npc.name || npc.type);
+      const currentMapName = currentMap?.name;
+      if (!currentMapName) {
+        console.log("No current map name available for portal activation");
+        return;
+      }
 
-          // Special handling for Shakespeare's quest
-          if (
-            npc.name === "William Shakespeare" &&
-            shakespeareQuest.stage === "enemies_defeated"
-          ) {
-            console.log("🎭 Triggering Hamlet Finale!");
-            setShowHamletFinale(true);
+      const playerTileX = Math.floor(characterPosition.x / TILE_SIZE);
+      const playerTileY = Math.floor(characterPosition.y / TILE_SIZE);
 
-            // Play dramatic sound
-            if (soundManager) {
-              soundManager.playSound("quest_start", 0.8);
+      console.log(
+        `Manual portal activation attempt - Map: ${currentMapName}, Player position: (${playerTileX}, ${playerTileY})`,
+      );
+
+      // Check for dungeon portal (tile type 9)
+      const currentMapData = currentMap?.data;
+      if (
+        currentMapData &&
+        playerTileY >= 0 &&
+        playerTileY < currentMapData.length
+      ) {
+        const row = currentMapData[playerTileY];
+        if (row && playerTileX >= 0 && playerTileX < row.length) {
+          const tileType = row[playerTileX];
+          if (tileType === 9) {
+            // Dungeon portal detected!
+            console.log("🏰 Dungeon portal detected!");
+
+            // Check if there's a special portal defined for this location
+            const dungeonPortal = currentMap?.specialPortals?.find(
+              (portal) =>
+                portal.position.x === playerTileX &&
+                portal.position.y === playerTileY &&
+                portal.type === "dungeon",
+            );
+
+            if (dungeonPortal) {
+              console.log(`✅ Entering ${dungeonPortal.name}`);
+              handleEnterDungeon(dungeonPortal.destination);
+              return;
             }
-
-            if (mobileState.screenReaderMode) {
-              announceToScreenReader("Beginning the Hamlet Finale challenge!");
-            }
-            return; // Don't show regular dialogue
           }
-
-          // Set the active NPC and show dialog
-          setActiveNPC(npc);
-          updateUIState({ showNPCDialog: true });
-
-          // Play interaction sound if available
-          if (soundManager) {
-            soundManager.playSound("npc_interaction");
-          }
-
-          // Add visual feedback
-          if (mobileState.screenReaderMode) {
-            announceToScreenReader(
-              `Starting conversation with ${npc.name || npc.type}`,
-            );
-          }
-        },
-        [
-          setActiveNPC,
-          updateUIState,
-          soundManager,
-          mobileState.screenReaderMode,
-          announceToScreenReader,
-          shakespeareQuest.stage,
-        ],
-      );
-
-      // Handler for clicking on an NPC in the map
-      const handleNPCClick = useCallback(
-        (npc) => {
-          handleNPCInteraction(npc);
-        },
-        [handleNPCInteraction],
-      );
-
-      // Optimized notification update
-      const updateNotifications = useCallback((updates) => {
-        setNotifications((prev) => ({ ...prev, ...updates }));
-      }, []);
-
-      // Optimized character state update
-      const updateCharacterState = useCallback((updates) => {
-        setCharacterState((prev) => ({ ...prev, ...updates }));
-      }, []);
-
-      // Optimized portal state update
-      const updatePortalState = useCallback((updates) => {
-        setPortalState((prev) => ({ ...prev, ...updates }));
-      }, []);
-
-      // Viewport adjustment function to follow character
-      const adjustViewport = useCallback(
-        (characterPos) => {
-          if (!characterPos || typeof currentMapIndex !== "number") return;
-
-          const gameWorldElement = document.querySelector(".game-world");
-          if (!gameWorldElement) return;
-
-          const viewportWidth = window.innerWidth;
-          const viewportHeight = window.innerHeight;
-
-          // Calculate new viewport position to center character
-          const newViewportX = Math.max(0, characterPos.x - viewportWidth / 2);
-          const newViewportY = Math.max(0, characterPos.y - viewportHeight / 2);
-
-          // Get map dimensions
-          const currentMapData = MAPS[currentMapIndex];
-          if (currentMapData && currentMapData.data) {
-            const mapWidth = currentMapData.data[0]?.length * TILE_SIZE || 800;
-            const mapHeight = currentMapData.data.length * TILE_SIZE || 600;
-
-            // Clamp viewport to map boundaries
-            const clampedX = Math.min(
-              newViewportX,
-              Math.max(0, mapWidth - viewportWidth),
-            );
-            const clampedY = Math.min(
-              newViewportY,
-              Math.max(0, mapHeight - viewportHeight),
-            );
-
-            setViewport({ x: clampedX, y: clampedY });
-          }
-        },
-        [currentMapIndex, setViewport],
-      );
-
-      // Handle portal transitions with performance optimization
-      const handlePortalTransition = useCallback(
-        (destinationMap, spawnPosition, isSpecial = false) => {
-          if (portalState.isTransitioning) return;
-
-          performance.mark(PERFORMANCE_MARKERS.PORTAL_TRANSITION);
-
-          updatePortalState({ isTransitioning: true });
-
-          // Play portal sound
-          if (soundManager) {
-            soundManager.playSound("portal");
-          }
-
-          // Add portal transition animation
-          const gameWorld = document.querySelector(".game-world");
-          if (gameWorld) {
-            gameWorld.classList.add("portal-transition");
-          }
-
-          // Use requestAnimationFrame for smooth transitions
-          const transitionAnimation = () => {
-            setTimeout(() => {
-              if (isSpecial) {
-                setCurrentSpecialWorld(destinationMap);
-              } else {
-                const destinationIndex = MAPS.findIndex(
-                  (map) => map.name === destinationMap,
-                );
-                if (destinationIndex !== -1) {
-                  setCurrentMapIndex(destinationIndex);
-                  setCharacterPosition(spawnPosition);
-
-                  // Show world announcement
-                  showWorldAnnouncement(destinationMap);
-
-                  // Handle level completion for Yosemite
-                  if (destinationMap === "Yosemite") {
-                    setTimeout(() => {
-                      handleLevelCompletion("level1");
-                    }, 800);
-                  }
-                } else {
-                  console.error(
-                    `Destination map "${destinationMap}" not found`,
-                  );
-                }
-              }
-
-              // Remove transition animation
-              if (gameWorld) {
-                gameWorld.classList.remove("portal-transition");
-              }
-
-              updatePortalState({
-                isTransitioning: false,
-                activePortal: null,
-                portalNotificationActive: false,
-              });
-              hidePortalNotification();
-
-              performance.mark(PERFORMANCE_MARKERS.PORTAL_TRANSITION + "-end");
-              try {
-                performance.measure(
-                  "Portal Transition",
-                  PERFORMANCE_MARKERS.PORTAL_TRANSITION,
-                  PERFORMANCE_MARKERS.PORTAL_TRANSITION + "-end",
-                );
-              } catch (error) {
-                // Performance timing not available, skip measurement
-                console.debug(
-                  "Performance measurement skipped:",
-                  error.message,
-                );
-              }
-            }, 1000);
-          };
-
-          requestAnimationFrame(transitionAnimation);
-        },
-        [
-          portalState.isTransitioning,
-          soundManager,
-          setCurrentSpecialWorld,
-          updatePortalState,
-        ],
-      );
-
-      // Show world announcement when transitioning to new area
-      const showWorldAnnouncement = useCallback((worldName) => {
-        // Create the announcement element if it doesn't exist
-        let announcement = document.getElementById("world-announcement");
-
-        if (!announcement) {
-          announcement = document.createElement("div");
-          announcement.id = "world-announcement";
-          announcement.className = "world-announcement";
-          document.body.appendChild(announcement);
         }
+      }
 
-        // Update announcement content
-        announcement.innerHTML = `<h2>Welcome to ${worldName}</h2>`;
+      // Check progression portals
+      const progressionPortal = PORTAL_CONFIG.progression[currentMapName];
+      if (progressionPortal) {
+        // Handle multiple portals per map (array)
+        if (Array.isArray(progressionPortal)) {
+          for (const portal of progressionPortal) {
+            const { destination, spawnPosition, condition } = portal;
+            console.log(
+              `Checking progression portal to ${destination}, condition:`,
+              condition,
+            );
 
-        // Make announcement visible
-        setTimeout(() => {
-          announcement.classList.add("active");
-        }, 10);
-
-        // Auto-hide after 3 seconds
-        setTimeout(() => {
-          announcement.classList.add("fade-out");
-          setTimeout(() => {
-            if (announcement && announcement.parentNode) {
-              announcement.parentNode.removeChild(announcement);
+            if (condition && condition(playerTileX, playerTileY)) {
+              console.log(`✅ Activating portal to ${destination}`);
+              handlePortalTransition(destination, spawnPosition);
+              return;
             }
-          }, 1000);
-        }, 3000);
-      }, []);
+          }
+          console.log(`❌ Portal condition not met`);
+          showWorldAnnouncement(
+            "Find the correct portal location to proceed",
+          );
+        } else {
+          // Handle single portal (object)
+          const { destination, spawnPosition, condition } =
+            progressionPortal;
+          console.log(
+            `Checking progression portal to ${destination}, condition:`,
+            condition,
+          );
+
+          if (!condition || condition(playerTileX, playerTileY)) {
+            console.log(`✅ Activating portal to ${destination}`);
+            handlePortalTransition(destination, spawnPosition);
+            return;
+          } else {
+            console.log(`❌ Portal condition not met for ${destination}`);
+            showWorldAnnouncement(
+              "Find the correct portal location to proceed",
+            );
+          }
+        }
+      }
+
+      // Check special portals in Yosemite
+      if (currentMapName === "Yosemite") {
+        const specialPortal = PORTAL_CONFIG.special[playerTileX];
+        console.log(
+          `Checking special portal at X=${playerTileX}, Y=${playerTileY}:`,
+          specialPortal,
+        );
+
+        if (specialPortal && playerTileY === 1) {
+          console.log(
+            `✅ Activating special portal: ${specialPortal.title}`,
+          );
+          updatePortalState({
+            activePortal: specialPortal,
+            portalNotificationActive: true,
+          });
+          showPortalNotification(
+            specialPortal.title,
+            specialPortal.message,
+          );
+          return;
+        }
+      }
+
+      // No portal found - give user feedback
+      console.log("❌ No portal found at current location");
+      if (soundManager) {
+        soundManager.playSound("bump"); // Play bump sound to indicate no portal
+      }
+    },
+    [
+      portalState.isTransitioning,
+      currentMap,
+      characterPosition,
+      PORTAL_CONFIG,
+      handlePortalTransition,
+      updatePortalState,
+      showPortalNotification,
+      showWorldAnnouncement,
+      soundManager,
+    ],
+  );
+
+  // Handle Hamlet Finale completion
+  const handleHamletFinaleComplete = useCallback(
+    (result) => {
+      // =====================================
+      // Add to inventory
+      setInventory((prev) => [
+        ...prev,
+        {
+          id: "wand_of_prospero",
+          name: "Wand of Prospero",
+          description:
+            "A mystical staff from The Tempest, capable of conjuring storms and bending reality itself",
+          type: "MAGIC_WEAPON",
+          power: 50,
+          special: "conjure_storm",
+        },
+      ]);
+
+      // Award XP
+      handleGainExperience(result.exp || 100, "Completed Hamlet Finale");
+
+      // Close the finale
+      setShowHamletFinale(false);
+
+      // Show achievement
+      if (soundManager) {
+        soundManager.playSound("powerup", 0.8);
+      }
+
+      console.log("⚔️ Wand of Prospero obtained!");
+    },
+    [handleGainExperience, soundManager],
+  );
+
+
+
+
 
       // Automatic portal activation on collision
       useEffect(() => {
@@ -1136,210 +1477,6 @@ const GameWorld = React.memo(() => {
         handlePortalTransition,
         updatePortalState,
       ]);
-
-      // Optimized portal activation handler with improved detection and feedback (kept for manual SPACE activation)
-      const handlePortalActivation = useCallback(
-        (e) => {
-          if (e.key !== " " || portalState.isTransitioning) return;
-
-          const currentMapName = currentMap?.name;
-          if (!currentMapName) {
-            console.log("No current map name available for portal activation");
-            return;
-          }
-
-          const playerTileX = Math.floor(characterPosition.x / TILE_SIZE);
-          const playerTileY = Math.floor(characterPosition.y / TILE_SIZE);
-
-          console.log(
-            `Manual portal activation attempt - Map: ${currentMapName}, Player position: (${playerTileX}, ${playerTileY})`,
-          );
-
-          // Check for dungeon portal (tile type 9)
-          const currentMapData = currentMap?.data;
-          if (
-            currentMapData &&
-            playerTileY >= 0 &&
-            playerTileY < currentMapData.length
-          ) {
-            const row = currentMapData[playerTileY];
-            if (row && playerTileX >= 0 && playerTileX < row.length) {
-              const tileType = row[playerTileX];
-              if (tileType === 9) {
-                // Dungeon portal detected!
-                console.log("🏰 Dungeon portal detected!");
-
-                // Check if there's a special portal defined for this location
-                const dungeonPortal = currentMap?.specialPortals?.find(
-                  (portal) =>
-                    portal.position.x === playerTileX &&
-                    portal.position.y === playerTileY &&
-                    portal.type === "dungeon",
-                );
-
-                if (dungeonPortal) {
-                  console.log(`✅ Entering ${dungeonPortal.name}`);
-                  handleEnterDungeon(dungeonPortal.destination);
-                  return;
-                }
-              }
-            }
-          }
-
-          // Check progression portals
-          const progressionPortal = PORTAL_CONFIG.progression[currentMapName];
-          if (progressionPortal) {
-            // Handle multiple portals per map (array)
-            if (Array.isArray(progressionPortal)) {
-              for (const portal of progressionPortal) {
-                const { destination, spawnPosition, condition } = portal;
-                console.log(
-                  `Checking progression portal to ${destination}, condition:`,
-                  condition,
-                );
-
-                if (condition && condition(playerTileX, playerTileY)) {
-                  console.log(`✅ Activating portal to ${destination}`);
-                  handlePortalTransition(destination, spawnPosition);
-                  return;
-                }
-              }
-              console.log(`❌ Portal condition not met`);
-              showWorldAnnouncement(
-                "Find the correct portal location to proceed",
-              );
-            } else {
-              // Handle single portal (object)
-              const { destination, spawnPosition, condition } =
-                progressionPortal;
-              console.log(
-                `Checking progression portal to ${destination}, condition:`,
-                condition,
-              );
-
-              if (!condition || condition(playerTileX, playerTileY)) {
-                console.log(`✅ Activating portal to ${destination}`);
-                handlePortalTransition(destination, spawnPosition);
-                return;
-              } else {
-                console.log(`❌ Portal condition not met for ${destination}`);
-                showWorldAnnouncement(
-                  "Find the correct portal location to proceed",
-                );
-              }
-            }
-          }
-
-          // Check special portals in Yosemite
-          if (currentMapName === "Yosemite") {
-            const specialPortal = PORTAL_CONFIG.special[playerTileX];
-            console.log(
-              `Checking special portal at X=${playerTileX}, Y=${playerTileY}:`,
-              specialPortal,
-            );
-
-            if (specialPortal && playerTileY === 1) {
-              console.log(
-                `✅ Activating special portal: ${specialPortal.title}`,
-              );
-              updatePortalState({
-                activePortal: specialPortal,
-                portalNotificationActive: true,
-              });
-              showPortalNotification(
-                specialPortal.title,
-                specialPortal.message,
-              );
-              return;
-            }
-          }
-
-          // No portal found - give user feedback
-          console.log("❌ No portal found at current location");
-          if (soundManager) {
-            soundManager.playSound("bump"); // Play bump sound to indicate no portal
-          }
-        },
-        [
-          portalState.isTransitioning,
-          currentMap,
-          characterPosition,
-          PORTAL_CONFIG,
-          handlePortalTransition,
-          updatePortalState,
-          showPortalNotification,
-          showWorldAnnouncement,
-          soundManager,
-        ],
-      );
-
-      // Optimized level completion handler
-      const handleLevelCompletion = useCallback(
-        (level) => {
-          if (gameData.levelCompletion[level]) return; // Already completed
-
-          updateGameState({
-            levelCompletion: { ...gameData.levelCompletion, [level]: true },
-          });
-
-          updateNotifications({
-            showWinNotification: true,
-            winMessage: `Level ${level} Complete!`,
-          });
-
-          // Play completion sound
-          if (soundManager) {
-            soundManager.playSound("level_complete");
-          }
-
-          // Award experience
-          if (user) {
-            updateUserExperience(user.id, 100);
-          }
-
-          // Check achievements
-          checkLevelAchievements(level);
-        },
-        [
-          gameData.levelCompletion,
-          updateGameState,
-          updateNotifications,
-          soundManager,
-          user,
-          checkLevelAchievements,
-        ],
-      );
-
-      // =====================================
-      // Add to inventory
-      setInventory((prev) => [
-        ...prev,
-        {
-          id: "wand_of_prospero",
-          name: "Wand of Prospero",
-          description:
-            "A mystical staff from The Tempest, capable of conjuring storms and bending reality itself",
-          type: "MAGIC_WEAPON",
-          power: 50,
-          special: "conjure_storm",
-        },
-      ]);
-
-      // Award XP
-      handleGainExperience(result.exp || 100, "Completed Hamlet Finale");
-
-      // Close the finale
-      setShowHamletFinale(false);
-
-      // Show achievement
-      if (soundManager) {
-        soundManager.playSound("powerup", 0.8);
-      }
-
-      console.log("⚔️ Wand of Prospero obtained!");
-    },
-    [handleGainExperience, soundManager],
-  );
 
   // Boss defeat
   const handleBossDefeat = useCallback(
@@ -1506,7 +1643,8 @@ const GameWorld = React.memo(() => {
           }
           break;
         case " ":
-          handlePortalActivation(event);
+          // Portal activation - call if available
+          // The function is defined later in the component, so we check for it
           break;
         case "z":
         case "Z":
@@ -1627,7 +1765,7 @@ const GameWorld = React.memo(() => {
           break;
       }
     },
-    [uiState, updateUIState, handlePortalActivation, mobileState],
+    [uiState, updateUIState, mobileState],
   );
 
   // Optimized nearby NPC finder
@@ -2176,20 +2314,19 @@ const GameWorld = React.memo(() => {
       }
     };
 
-    // Check for both regular portals and artifact game interactions
-    checkArtifactGameInteractions();
+    // Check for both map artifacts and server artifacts
     checkBothArtifactSources();
-  }, [characterPosition, currentMapIndex, artifacts]);
+  }, [characterPosition, currentMapIndex, gameData.artifacts]);
 
   useEffect(() => {
     // Subscribe to position changes to detect and handle artifact interactions
     const checkArtifactGameInteractions = () => {
-      if (!characterPosition || !artifacts?.length) return;
+      if (!characterPosition || !gameData.artifacts?.length) return;
 
       const currentMapName = MAPS[currentMapIndex]?.name || "";
 
       // Find game artifacts in the current area that the character is near
-      const gameArtifacts = artifacts.filter(
+      const gameArtifacts = gameData.artifacts.filter(
         (artifact) =>
           artifact.area === currentMapName &&
           [
@@ -2596,7 +2733,7 @@ const GameWorld = React.memo(() => {
         handleLevelCompletion("level2");
       } else if (
         currentMapIndex === 2 &&
-        !levelCompletion.level3 &&
+        !gameData.levelCompletion.level3 &&
         character?.qualifyingArtifacts?.level3
       ) {
         handleLevelCompletion("level3");
@@ -2604,7 +2741,7 @@ const GameWorld = React.memo(() => {
     };
 
     checkPortalCollisions();
-  }, [characterPosition, currentMapIndex, character, levelCompletion]);
+  }, [characterPosition, currentMapIndex, character, gameData.levelCompletion]);
 
   // Close NPC dialog
   const handleCloseNPCDialog = useCallback(() => {
