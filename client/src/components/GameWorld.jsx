@@ -5,22 +5,17 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import OptimizedImage from "./OptimizedImage";
-import { v4 as uuidv4 } from "uuid";
 import {
   fetchArtifacts,
   createArtifact,
   fetchCharacter,
   updateCharacter,
   updateUserExperience,
-  addUserAchievement,
   fetchQuests,
   completeQuestStage,
 } from "../api/api";
 import Character from "./Character";
-import Artifact from "./Artifact";
 import ArtifactCreation from "./ArtifactCreation";
-import Inventory from "./Inventory";
 import InventoryManager from "./managers/InventoryManager";
 import ErrorBoundary from "./ErrorBoundary";
 import MapComponent from "./Map";
@@ -33,9 +28,8 @@ import ControlsGuide from "./UI/ControlsGuide";
 import TouchControls from "./TouchControls";
 import Minimap from "./UI/Minimap";
 import CombatManager from "./Combat/CombatManager";
-import { TILE_SIZE, MAP_COLS, MAP_ROWS, isWalkable } from "./Constants";
+import { TILE_SIZE, MAP_COLS, MAP_ROWS } from "./Constants";
 import { MAPS } from "./GameData";
-import { debugNPCSprites } from "../utils/debugTools";
 import "./GameWorld.css";
 import "./Character.css";
 import "./Artifact.css";
@@ -46,7 +40,6 @@ import LevelUpModal from "./UI/LevelUpModal";
 import DialogBox from "./DialogBox";
 import TextAdventure from "./TextAdventure";
 import SoundManager from "./utils/SoundManager";
-import UserArtifactManager from "./UserArtifactManager";
 import ArtifactDiscovery from "./ArtifactDiscovery";
 import NotificationSystem from "./systems/NotificationSystem";
 import { useNotification } from "./systems/useNotification";
@@ -63,7 +56,8 @@ import HamletFinale from "./MiniGames/HamletFinale";
 import QuestCompletionCelebration from "./QuestCompletionCelebration";
 import { useAuth } from "../context/AuthContext";
 import { useAchievements } from "../context/AchievementContext";
-import { useGameState } from "../context/GameStateContext";
+import { useGameState as useGameStateContext } from "../context/GameStateContext";
+import { useGameState } from "../hooks/useGameState";
 import { useWebSocket } from "../context/WebSocketContext";
 import gameStateManager from "../utils/gameStateManager";
 import { IconButton } from "@mui/material";
@@ -91,129 +85,25 @@ const GameWorld = React.memo(() => {
   // Initialization guard to prevent render-order issues
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Core game state - optimized with useReducer pattern
-  const [currentMapIndex, setCurrentMapIndex] = useState(0);
-  const [inventory, setInventory] = useState([]);
-  const [characterPosition, setCharacterPosition] = useState(
-    INITIAL_CHARACTER_POSITION,
-  );
-  const [character, setCharacter] = useState(null);
-
-  // Character state for rendering (managed by CharacterController internally)
-  const [characterState, setCharacterState] = useState({
-    direction: "down",
-    style: {
-      left: 64,
-      top: 64,
-      width: TILE_SIZE,
-      height: TILE_SIZE,
-      transition: "left 0.2s, top 0.2s",
-    },
-    movementTransition: null,
-    verticalDirection: null,
-    horizontalDirection: null,
-    isHit: false,
-  });
-  const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
-
-  // Minimap explored tiles (fog of war)
-  const [exploredTiles, setExploredTiles] = useState(new Set());
+  // Use the custom game state hook
+  const gameState = useGameState();
 
   // Performance tracking
   const renderCount = useRef(0);
   const lastRenderTime = useRef(performance.now());
   const lastUpdateTime = useRef(performance.now());
   const updateThrottle = useRef(16); // 16ms throttle (60fps)
-  // Form position state for artifact creation modal
-  const [formPosition, setFormPosition] = useState(null);
 
-  // UI state - grouped for better performance
-  const [uiState, setUiState] = useState({
-    showInventory: false,
-    showForm: false,
-    showQuotes: false,
-    showWorldMap: false,
-    showFeedback: false,
-    showControlsGuide: false,
-    showWinNotification: false,
-    winMessage: "",
-    showLevel4: false,
-    showRewardModal: false,
-    currentAchievement: "",
-    showNPCDialog: false,
-    showWorldGuide: true,
-    isPlacingArtifact: false,
-    showArtifactsOnMap: true,
-    isMoving: false,
-    isDarkMode: false,
-    inDungeon: false,
-  });
+  // All state is now managed by the gameState hook
 
-  // Dungeon state
-  const [dungeonState, setDungeonState] = useState({
-    currentDungeon: null,
-    smallKeys: 0,
-    hasBossKey: false,
-    dungeonEntryPosition: null, // Where player was in overworld
-  });
-
-  // Game data state
-  const [gameData, setGameData] = useState({
-    artifacts: [],
-    levelCompletion: INITIAL_LEVEL_COMPLETION,
-    achievements: [],
-    viewedArtifacts: [],
-    databaseNPCs: [],
-  });
-
-  // Notifications are now handled by NotificationSystem
-
-
-  // Portal state
-  const [portalState, setPortalState] = useState({
-    isTransitioning: false,
-    portalNotificationActive: false,
-    activePortal: null,
-  });
-
-  // Special world state
-  const [currentSpecialWorld, setCurrentSpecialWorld] = useState(null);
-  const [activeNPC, setActiveNPC] = useState(null);
-  const [soundManager, setSoundManager] = useState(null);
-  const [selectedUserArtifact, setSelectedUserArtifact] = useState(null);
-  const [visibleArtifact, setVisibleArtifact] = useState(null);
-  const [mapZoom, setMapZoom] = useState(1);
-  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Combat state (Zelda-style)
-  const [playerHealth, setPlayerHealth] = useState(6); // 3 hearts (6 half-hearts)
-  const [maxPlayerHealth, setMaxPlayerHealth] = useState(6);
-  const [rupees, setRupees] = useState(0);
-  const [keys, setKeys] = useState(0);
-  const [isAttacking, setIsAttacking] = useState(false);
-  const [swordType, setSwordType] = useState("wooden"); // wooden, white, magical
-  const [equippedItem, setEquippedItem] = useState(null);
-  const [isInvincible, setIsInvincible] = useState(false);
-
-  // XP and Leveling System
-  const [characterStats, setCharacterStats] = useState({
-    experience: 0,
-    level: 1,
-    attack: 1,
-    defense: 0,
-  });
-  const [movementTransition, setMovementTransition] = useState(null);
-  const [verticalDirection, setVerticalDirection] = useState(null);
-  const [horizontalDirection, setHorizontalDirection] = useState(null);
-  const { user, updateUser } = useAuth();
+  // Context hooks
   const {
     unlockAchievement,
     checkLevelAchievements,
     checkDiscoveryAchievements,
     checkCollectionAchievements,
   } = useAchievements();
-  const { updateGameProgress } = useGameState();
+  const { updateGameProgress } = useGameStateContext();
   const {
     addXPNotification,
     addAchievementNotification,
@@ -225,38 +115,11 @@ const GameWorld = React.memo(() => {
 
   // WebSocket connection for multiplayer
   const { socket, isConnected, sendMessage } = useWebSocket();
-  const [onlinePlayers, setOnlinePlayers] = useState([]);
-  const [showChat, setShowChat] = useState(true);
-  const [otherPlayers, setOtherPlayers] = useState([]);
-  const [worldId, setWorldId] = useState("overworld");
-  const [nearbyPlayer, setNearbyPlayer] = useState(null);
   const gameWorldRef = useRef(null);
   const characterRef = useRef(null);
   const characterControllerRef = useRef(null);
 
   // portalNotificationActive is now handled by NotificationSystem
-
-  // Mobile and accessibility state
-  const [mobileState, setMobileState] = useState({
-    isMobile: false,
-    showTouchControls: false,
-    touchControlsEnabled: false,
-    screenReaderMode: false,
-    reducedMotionMode: false,
-    highContrastMode: false,
-  });
-
-  // Artifact Game Launcher state
-  const [currentGameArtifact, setCurrentGameArtifact] = useState(null);
-  const [showGameLauncher, setShowGameLauncher] = useState(false);
-
-  // Quest tracking state
-  const [activeQuests, setActiveQuests] = useState([]);
-  const [completedQuests, setCompletedQuests] = useState([]);
-  const [questStatusMap, setQuestStatusMap] = useState(new Map());
-  const [questCompletionCelebration, setQuestCompletionCelebration] =
-    useState(null);
-  const [showHamletFinale, setShowHamletFinale] = useState(false);
 
   // Update checkForLevelUpAchievements to use our context
   const checkForLevelUpAchievements = useCallback(
@@ -273,8 +136,8 @@ const GameWorld = React.memo(() => {
       fetchQuests()
         .then((response) => {
           if (response.success) {
-            setActiveQuests(response.data.activeQuests || []);
-            setCompletedQuests(response.data.completedQuests || []);
+            gameState.setActiveQuests(response.data.activeQuests || []);
+            gameState.setCompletedQuests(response.data.completedQuests || []);
           }
         })
         .catch((err) => console.error("Error fetching quests:", err));
@@ -283,24 +146,24 @@ const GameWorld = React.memo(() => {
 
   // Create quest status map for NPCs when quests or current map changes
   useEffect(() => {
-    if (!MAPS[currentMapIndex]?.npcs) return;
+    if (!MAPS[gameState.currentMapIndex]?.npcs) return;
 
     const statusMap = new Map();
-    const currentNPCs = MAPS[currentMapIndex].npcs || [];
+    const currentNPCs = MAPS[gameState.currentMapIndex].npcs || [];
 
     currentNPCs.forEach((npc) => {
       const npcId = npc._id || npc.id;
       if (!npcId) return;
 
       // Check if NPC has any active quests
-      const npcActiveQuests = activeQuests.filter(
+      const npcActiveQuests = gameState.activeQuests.filter(
         (quest) =>
           quest.npcId === npcId ||
           quest.npcId?.toString() === npcId?.toString(),
       );
 
       // Check if NPC has any completed quests
-      const npcCompletedQuests = completedQuests.filter(
+      const npcCompletedQuests = gameState.completedQuests.filter(
         (quest) =>
           quest.npcId === npcId ||
           quest.npcId?.toString() === npcId?.toString(),
@@ -342,7 +205,7 @@ const GameWorld = React.memo(() => {
     });
 
     setQuestStatusMap(statusMap);
-  }, [activeQuests, completedQuests, currentMapIndex]);
+  }, [gameState]);
 
   // Screen reader announcement function
   const announceToScreenReader = useCallback((message) => {
@@ -361,28 +224,28 @@ const GameWorld = React.memo(() => {
   // Get Shakespeare quest from active quests
   const shakespeareQuest = useMemo(() => {
     return (
-      activeQuests.find(
+      gameState.activeQuests.find(
         (quest) =>
           quest.npcId === "shakespeare" ||
           quest.title?.includes("Shakespeare") ||
           quest.title?.includes("Tempest"),
       ) || { stage: "not_started" }
     );
-  }, [activeQuests]);
+  }, [gameState.activeQuests]);
 
   // Portal notification functions are now handled by NotificationSystem
 
-  // UI state update function - allows partial updates
+  // UI state update function - now uses gameState
   const updateUIState = useCallback((updates) => {
-    setUiState((prev) => ({ ...prev, ...updates }));
-  }, []);
+    gameState.updateUIState(updates);
+  }, [gameState]);
 
   // Quest validation: Check if gameplay actions complete quest stages
   const validateQuestProgress = useCallback(
     async (actionType, actionData = {}) => {
-      if (activeQuests.length === 0) return;
+      if (gameState.activeQuests.length === 0) return;
 
-      for (const quest of activeQuests) {
+      for (const quest of gameState.activeQuests) {
         const currentStage = quest.stages?.[quest.currentStage];
         if (!currentStage || currentStage.completed) continue;
 
@@ -436,7 +299,7 @@ const GameWorld = React.memo(() => {
                   title: quest.title,
                   description: quest.description,
                 };
-                setQuestCompletionCelebration({
+                gameState.setQuestCompletionCelebration({
                   quest: completedQuest,
                   rewards: rewards,
                 });
@@ -466,12 +329,12 @@ const GameWorld = React.memo(() => {
       // Update local experience state
       const newExperience = (user?.experience || 0) + amount;
 
-      const newHealth = Math.max(0, playerHealth - damage);
+      const newHealth = Math.max(0, gameState.playerHealth - damage);
       setPlayerHealth(newHealth);
 
       // Play damage sound
-      if (soundManager) {
-        soundManager.playSound("damage", 0.5);
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("damage", 0.5);
       }
 
       // Trigger hit animation (retreat and flash)
@@ -489,19 +352,19 @@ const GameWorld = React.memo(() => {
         handleGameOver();
       }
     },
-    [playerHealth, isInvincible, soundManager],
+    [gameState.playerHealth, gameState.isInvincible, gameState.soundManager],
   );
 
   const handlePlayerHeal = useCallback(
     (amount) => {
-      const newHealth = Math.min(maxPlayerHealth, playerHealth + amount);
+      const newHealth = Math.min(gameState.maxPlayerHealth, gameState.playerHealth + amount);
       setPlayerHealth(newHealth);
 
       if (soundManager) {
         soundManager.playSound("heal", 0.3);
       }
     },
-    [playerHealth, maxPlayerHealth, soundManager],
+    [gameState.playerHealth, gameState.maxPlayerHealth, gameState.soundManager],
   );
 
   const handleCollectRupee = useCallback(
@@ -546,7 +409,7 @@ const GameWorld = React.memo(() => {
         // Check for level up
         if (newXP >= xpNeeded) {
           const newLevel = prev.level + 1;
-          const newMaxHealth = maxPlayerHealth + 2;
+          const newMaxHealth = gameState.maxPlayerHealth + 2;
           const newAttack = prev.attack + 1;
           const newDefense =
             newLevel % 2 === 0 ? prev.defense + 1 : prev.defense;
@@ -595,7 +458,7 @@ const GameWorld = React.memo(() => {
   // Viewport adjustment function to follow character
   const adjustViewport = useCallback(
     (characterPos) => {
-      if (!characterPos || typeof currentMapIndex !== "number") return;
+      if (!characterPos || typeof gameState.currentMapIndex !== "number") return;
 
       const gameWorldElement = document.querySelector(".game-world");
       if (!gameWorldElement) return;
@@ -608,7 +471,7 @@ const GameWorld = React.memo(() => {
       const newViewportY = Math.max(0, characterPos.y - viewportHeight / 2);
 
       // Get map dimensions
-      const currentMapData = MAPS[currentMapIndex];
+      const currentMapData = MAPS[gameState.currentMapIndex];
       if (currentMapData && currentMapData.data) {
         const mapWidth = currentMapData.data[0]?.length * TILE_SIZE || 800;
         const mapHeight = currentMapData.data.length * TILE_SIZE || 600;
@@ -626,7 +489,7 @@ const GameWorld = React.memo(() => {
         setViewport({ x: clampedX, y: clampedY });
       }
     },
-    [currentMapIndex],
+    [gameState.currentMapIndex],
   );
 
   // updateNotifications is now handled by NotificationSystem
@@ -686,10 +549,10 @@ const GameWorld = React.memo(() => {
   // Optimized level completion handler
   const handleLevelCompletion = useCallback(
     (level) => {
-      if (gameData.levelCompletion[level]) return; // Already completed
+      if (gameState.gameData.levelCompletion[level]) return; // Already completed
 
       updateGameState({
-        levelCompletion: { ...gameData.levelCompletion, [level]: true },
+        levelCompletion: { ...gameState.gameData.levelCompletion, [level]: true },
       });
 
       updateUIState({
@@ -711,7 +574,7 @@ const GameWorld = React.memo(() => {
       checkLevelAchievements(level);
     },
     [
-      gameData.levelCompletion,
+      gameState.gameData.levelCompletion,
       updateGameState,
       soundManager,
       user,
@@ -823,21 +686,21 @@ const GameWorld = React.memo(() => {
         shakespeareQuest.stage === "enemies_defeated"
       ) {
         console.log("🎭 Triggering Hamlet Finale!");
-        setShowHamletFinale(true);
+        gameState.setShowHamletFinale(true);
 
         // Play dramatic sound
         if (soundManager) {
           soundManager.playSound("quest_start", 0.8);
         }
 
-        if (mobileState.screenReaderMode) {
+        if (gameState.mobileState.screenReaderMode) {
           announceToScreenReader("Beginning the Hamlet Finale challenge!");
         }
         return; // Don't show regular dialogue
       }
 
       // Set the active NPC and show dialog
-      setActiveNPC(npc);
+      gameState.setActiveNPC(npc);
       updateUIState({ showNPCDialog: true });
 
       // Play interaction sound if available
@@ -846,7 +709,7 @@ const GameWorld = React.memo(() => {
       }
 
       // Add visual feedback
-      if (mobileState.screenReaderMode) {
+      if (gameState.mobileState.screenReaderMode) {
         announceToScreenReader(
           `Starting conversation with ${npc.name || npc.type}`,
         );
@@ -855,7 +718,7 @@ const GameWorld = React.memo(() => {
     [
       shakespeareQuest.stage,
       soundManager,
-      mobileState.screenReaderMode,
+      gameState.mobileState.screenReaderMode,
       announceToScreenReader,
       updateUIState,
     ],
@@ -876,7 +739,7 @@ const GameWorld = React.memo(() => {
 
       // Resume background music
       if (soundManager) {
-        const currentMapName = MAPS[currentMapIndex]?.name || "";
+        const currentMapName = MAPS[gameState.currentMapIndex]?.name || "";
         soundManager.playMusic(currentMapName);
       }
 
@@ -903,16 +766,16 @@ const GameWorld = React.memo(() => {
         }, 3000);
       }
     },
-    [soundManager, currentMapIndex, validateQuestProgress, showPortalNotification, hidePortalNotification],
+    [gameState.soundManager, gameState.currentMapIndex, validateQuestProgress, showPortalNotification, hidePortalNotification],
   );
 
   const handleGameExit = useCallback(() => {
     console.log("🚪 Exiting game launcher");
 
     // Resume background music
-    if (soundManager) {
-      const currentMapName = MAPS[currentMapIndex]?.name || "";
-      soundManager.playMusic(currentMapName);
+    if (gameState.soundManager) {
+      const currentMapName = MAPS[gameState.currentMapIndex]?.name || "";
+      gameState.soundManager.playMusic(currentMapName);
     }
 
     // Close game launcher
@@ -1030,8 +893,8 @@ const GameWorld = React.memo(() => {
 
   // Update explored tiles for minimap fog of war
   useEffect(() => {
-    const tileX = Math.floor(characterPosition.x / TILE_SIZE);
-    const tileY = Math.floor(characterPosition.y / TILE_SIZE);
+    const tileX = Math.floor(gameState.characterPosition.x / TILE_SIZE);
+    const tileY = Math.floor(gameState.characterPosition.y / TILE_SIZE);
 
     // Explore tiles in a radius around the player (view distance)
     const viewRadius = 3; // Explore 3 tiles in all directions
@@ -1191,8 +1054,8 @@ const GameWorld = React.memo(() => {
         return;
       }
 
-      const playerTileX = Math.floor(characterPosition.x / TILE_SIZE);
-      const playerTileY = Math.floor(characterPosition.y / TILE_SIZE);
+      const playerTileX = Math.floor(gameState.characterPosition.x / TILE_SIZE);
+      const playerTileY = Math.floor(gameState.characterPosition.y / TILE_SIZE);
 
       console.log(
         `Manual portal activation attempt - Map: ${currentMapName}, Player position: (${playerTileX}, ${playerTileY})`,
@@ -1321,7 +1184,7 @@ const GameWorld = React.memo(() => {
     (result) => {
       // =====================================
       // Add to inventory
-      setInventory((prev) => [
+      gameState.setInventory((prev) => [
         ...prev,
         {
           id: "wand_of_prospero",
@@ -1338,7 +1201,7 @@ const GameWorld = React.memo(() => {
       handleGainExperience(result.exp || 100, "Completed Hamlet Finale");
 
       // Close the finale
-      setShowHamletFinale(false);
+      gameState.setShowHamletFinale(false);
 
       // Show achievement
       if (soundManager) {
@@ -1475,7 +1338,7 @@ const GameWorld = React.memo(() => {
       const newArtifact = await createArtifact(artifactData);
 
       updateGameState({
-        artifacts: [...gameData.artifacts, newArtifact],
+        artifacts: [...gameState.gameData.artifacts, newArtifact],
       });
 
       // Play creation sound
@@ -1492,7 +1355,7 @@ const GameWorld = React.memo(() => {
     currentMapIndex,
     characterPosition,
     user,
-    gameData.artifacts,
+    gameState.gameData.artifacts,
     soundManager,
     updateGameState,
   ]);
@@ -1539,10 +1402,10 @@ const GameWorld = React.memo(() => {
       switch (event.key) {
         case "i":
         case "I":
-          updateUIState({ showInventory: !uiState.showInventory });
+          updateUIState({ showInventory: !gameState.uiState.showInventory });
           // Announce to screen readers
-          if (mobileState.screenReaderMode) {
-            const message = uiState.showInventory
+          if (gameState.mobileState.screenReaderMode) {
+            const message = gameState.uiState.showInventory
               ? "Closing inventory"
               : "Opening inventory";
             announceToScreenReader(message);
@@ -1550,9 +1413,9 @@ const GameWorld = React.memo(() => {
           break;
         case "q":
         case "Q":
-          updateUIState({ showQuotes: !uiState.showQuotes });
-          if (mobileState.screenReaderMode) {
-            const message = uiState.showQuotes
+          updateUIState({ showQuotes: !gameState.uiState.showQuotes });
+          if (gameState.mobileState.screenReaderMode) {
+            const message = gameState.uiState.showQuotes
               ? "Closing quotes"
               : "Opening saved quotes";
             announceToScreenReader(message);
@@ -1560,9 +1423,9 @@ const GameWorld = React.memo(() => {
           break;
         case "m":
         case "M":
-          updateUIState({ showWorldMap: !uiState.showWorldMap });
-          if (mobileState.screenReaderMode) {
-            const message = uiState.showWorldMap
+          updateUIState({ showWorldMap: !gameState.uiState.showWorldMap });
+          if (gameState.mobileState.screenReaderMode) {
+            const message = gameState.uiState.showWorldMap
               ? "Closing world map"
               : "Opening world map";
             announceToScreenReader(message);
@@ -1570,9 +1433,9 @@ const GameWorld = React.memo(() => {
           break;
         case "f":
         case "F":
-          updateUIState({ showFeedback: !uiState.showFeedback });
-          if (mobileState.screenReaderMode) {
-            const message = uiState.showFeedback
+          updateUIState({ showFeedback: !gameState.uiState.showFeedback });
+          if (gameState.mobileState.screenReaderMode) {
+            const message = gameState.uiState.showFeedback
               ? "Closing feedback form"
               : "Opening feedback form";
             announceToScreenReader(message);
@@ -1581,9 +1444,9 @@ const GameWorld = React.memo(() => {
         case "c":
         case "C":
         case "?":
-          updateUIState({ showControlsGuide: !uiState.showControlsGuide });
-          if (mobileState.screenReaderMode) {
-            const message = uiState.showControlsGuide
+          updateUIState({ showControlsGuide: !gameState.uiState.showControlsGuide });
+          if (gameState.mobileState.screenReaderMode) {
+            const message = gameState.uiState.showControlsGuide
               ? "Closing controls guide"
               : "Opening keyboard controls guide";
             announceToScreenReader(message);
@@ -1598,7 +1461,7 @@ const GameWorld = React.memo(() => {
             showControlsGuide: false,
             showForm: false,
           });
-          if (mobileState.screenReaderMode) {
+          if (gameState.mobileState.screenReaderMode) {
             announceToScreenReader("Closed all menus");
           }
           break;
@@ -1613,7 +1476,7 @@ const GameWorld = React.memo(() => {
           const ATTACK_COOLDOWN = 400; // ms between attacks
 
           if (
-            !isAttacking &&
+            !gameState.isAttacking &&
             now - lastAttackTimeRef.current >= ATTACK_COOLDOWN
           ) {
             lastAttackTimeRef.current = now;
@@ -1663,7 +1526,7 @@ const GameWorld = React.memo(() => {
               soundManager.playSound("sword", 0.3);
             }
             // CombatManager will reset attack state via onAttackComplete
-            if (mobileState.screenReaderMode) {
+            if (gameState.mobileState.screenReaderMode) {
               announceToScreenReader("Sword attack");
             }
           }
@@ -1674,12 +1537,12 @@ const GameWorld = React.memo(() => {
           // NPC interaction
           const nearbyNPC = findNearbyNPC();
           if (nearbyNPC) {
-            setActiveNPC(nearbyNPC);
+            gameState.setActiveNPC(nearbyNPC);
             updateUIState({ showNPCDialog: true });
-            if (mobileState.screenReaderMode) {
+            if (gameState.mobileState.screenReaderMode) {
               announceToScreenReader(`Talking to ${nearbyNPC.name || "NPC"}`);
             }
-          } else if (mobileState.screenReaderMode) {
+          } else if (gameState.mobileState.screenReaderMode) {
             announceToScreenReader("No NPC nearby to talk to");
           }
           break;
@@ -1690,8 +1553,8 @@ const GameWorld = React.memo(() => {
             ...prev,
             highContrastMode: !prev.highContrastMode,
           }));
-          if (mobileState.screenReaderMode) {
-            const message = mobileState.highContrastMode
+          if (gameState.mobileState.screenReaderMode) {
+            const message = gameState.mobileState.highContrastMode
               ? "High contrast mode disabled"
               : "High contrast mode enabled";
             announceToScreenReader(message);
@@ -1704,8 +1567,8 @@ const GameWorld = React.memo(() => {
             ...prev,
             reducedMotionMode: !prev.reducedMotionMode,
           }));
-          if (mobileState.screenReaderMode) {
-            const message = mobileState.reducedMotionMode
+          if (gameState.mobileState.screenReaderMode) {
+            const message = gameState.mobileState.reducedMotionMode
               ? "Reduced motion mode disabled"
               : "Reduced motion mode enabled";
             announceToScreenReader(message);
@@ -1718,7 +1581,7 @@ const GameWorld = React.memo(() => {
             ...prev,
             screenReaderMode: !prev.screenReaderMode,
           }));
-          const message = mobileState.screenReaderMode
+          const message = gameState.mobileState.screenReaderMode
             ? "Screen reader mode disabled"
             : "Screen reader mode enabled";
           announceToScreenReader(message);
@@ -1730,7 +1593,7 @@ const GameWorld = React.memo(() => {
 
   // Optimized nearby NPC finder
   const findNearbyNPC = useCallback(() => {
-    const npcs = [...currentMapNPCs, ...gameData.databaseNPCs];
+    const npcs = [...currentMapNPCs, ...gameState.gameData.databaseNPCs];
     return npcs.find((npc) => {
       const npcX = npc.position?.x || 0;
       const npcY = npc.position?.y || 0;
@@ -1740,7 +1603,7 @@ const GameWorld = React.memo(() => {
       );
       return distance < TILE_SIZE * 2;
     });
-  }, [currentMapNPCs, gameData.databaseNPCs, getCharacterPosition]);
+  }, [currentMapNPCs, gameState.gameData.databaseNPCs, getCharacterPosition]);
 
   // Optimized sound manager initialization
   const initSoundManager = useCallback(async () => {
@@ -1946,9 +1809,9 @@ const GameWorld = React.memo(() => {
       characterPosition,
       currentMapIndex,
       inventory,
-      levelCompletion: gameData.levelCompletion,
-      achievements: gameData.achievements,
-      viewedArtifacts: gameData.viewedArtifacts,
+      levelCompletion: gameState.gameData.levelCompletion,
+      achievements: gameState.gameData.achievements,
+      viewedArtifacts: gameState.gameData.viewedArtifacts,
     };
 
     gameStateManager.updateState(gameState);
@@ -2041,14 +1904,14 @@ const GameWorld = React.memo(() => {
 
       // Check if this artifact was already viewed
       const isFirstView =
-        !Array.isArray(gameData.viewedArtifacts) ||
-        !gameData.viewedArtifacts.includes(artifact.id);
+        !Array.isArray(gameState.gameData.viewedArtifacts) ||
+        !gameState.gameData.viewedArtifacts.includes(artifact.id);
 
       // Update viewed artifacts
       if (isFirstView) {
         const updatedViewedArtifacts = [
-          ...(Array.isArray(gameData.viewedArtifacts)
-            ? gameData.viewedArtifacts
+          ...(Array.isArray(gameState.gameData.viewedArtifacts)
+            ? gameState.gameData.viewedArtifacts
             : []),
           artifact.id,
         ];
@@ -2083,7 +1946,7 @@ const GameWorld = React.memo(() => {
       if (user && typeof updateGameProgress === "function") {
         const gameState = {
           inventory,
-          viewedArtifacts: gameData.viewedArtifacts,
+          viewedArtifacts: gameState.gameData.viewedArtifacts,
           lastPosition: {
             x: characterPosition.x,
             y: characterPosition.y,
@@ -2100,7 +1963,7 @@ const GameWorld = React.memo(() => {
       }
     },
     [
-      gameData.viewedArtifacts,
+      gameState.gameData.viewedArtifacts,
       updateGameState,
       updateGameProgress,
       user,
@@ -2156,8 +2019,8 @@ const GameWorld = React.memo(() => {
 
       // Check server artifacts
       const serverArtifact =
-        gameData.artifacts && Array.isArray(gameData.artifacts)
-          ? gameData.artifacts.find(
+        gameState.gameData.artifacts && Array.isArray(gameState.gameData.artifacts)
+          ? gameState.gameData.artifacts.find(
               (artifact) =>
                 artifact &&
                 artifact.location &&
@@ -2180,7 +2043,7 @@ const GameWorld = React.memo(() => {
 
     // Check for both map artifacts and server artifacts
     checkBothArtifactSources();
-  }, [characterPosition, currentMapIndex, gameData.artifacts]);
+  }, [characterPosition, currentMapIndex, gameState.gameData.artifacts]);
 
   // Portal collision detection
   useEffect(() => {
@@ -2190,12 +2053,12 @@ const GameWorld = React.memo(() => {
   useEffect(() => {
     // Subscribe to position changes to detect and handle artifact interactions
     const checkArtifactGameInteractions = () => {
-      if (!characterPosition || !gameData.artifacts?.length) return;
+      if (!characterPosition || !gameState.gameData.artifacts?.length) return;
 
       const currentMapName = MAPS[currentMapIndex]?.name || "";
 
       // Find game artifacts in the current area that the character is near
-      const gameArtifacts = gameData.artifacts.filter(
+      const gameArtifacts = gameState.gameData.artifacts.filter(
         (artifact) =>
           artifact.area === currentMapName &&
           [
@@ -2270,12 +2133,12 @@ const GameWorld = React.memo(() => {
     };
 
     checkArtifactGameInteractions();
-  }, [characterPosition, currentMapIndex, gameData.artifacts]);
+  }, [characterPosition, currentMapIndex, gameState.gameData.artifacts]);
 
   // Close NPC dialog
   const handleCloseNPCDialog = useCallback(() => {
     updateUIState({ showNPCDialog: false });
-    setActiveNPC(null);
+    gameState.setActiveNPC(null);
   }, []);
 
   // Add a handler for the World Map node click
@@ -2348,7 +2211,7 @@ const GameWorld = React.memo(() => {
   // Handle deleting a quote from savedQuotes
   const handleDeleteQuote = useCallback(
     (quoteIndex) => {
-      if (!character || !character.savedQuotes) return;
+      if (!gameState.character || !gameState.character.savedQuotes) return;
 
       // Create a copy of the savedQuotes array without the quote to delete
       const updatedQuotes = [...character.savedQuotes];
@@ -2526,7 +2389,7 @@ const GameWorld = React.memo(() => {
           createdAt: new Date().toISOString(),
         });
 
-        updateGameState({ artifacts: [...gameData.artifacts, newArtifact] });
+        updateGameState({ artifacts: [...gameState.gameData.artifacts, newArtifact] });
 
         // Award XP for creating an artifact
         if (typeof awardXP === "function") {
@@ -2536,8 +2399,8 @@ const GameWorld = React.memo(() => {
         // Check for creator achievement
         if (character && character.id) {
           const createdCount =
-            (Array.isArray(gameData.artifacts)
-              ? gameData.artifacts.filter((a) => a.createdBy === character.id)
+            (Array.isArray(gameState.gameData.artifacts)
+              ? gameState.gameData.artifacts.filter((a) => a.createdBy === character.id)
                   .length
               : 0) + 1;
           if (createdCount >= 5) {
@@ -2561,7 +2424,7 @@ const GameWorld = React.memo(() => {
         throw error;
       }
     },
-    [gameData.artifacts, character, updateGameState, handleAchievementUnlocked],
+    [gameState.gameData.artifacts, character, updateGameState, handleAchievementUnlocked],
   );
 
   // Update the handleArtifactClick function to include achievements
@@ -2668,8 +2531,8 @@ const GameWorld = React.memo(() => {
       if (npcInteracted) return true;
 
       // Check for artifacts at this position
-      const clickedArtifact = Array.isArray(gameData.artifacts)
-        ? gameData.artifacts.find(
+      const clickedArtifact = Array.isArray(gameState.gameData.artifacts)
+        ? gameState.gameData.artifacts.find(
             (artifact) =>
               artifact.location &&
               Math.floor(artifact.location.x) === tileX &&
@@ -2695,7 +2558,7 @@ const GameWorld = React.memo(() => {
       return false;
     },
     [
-      gameData.artifacts,
+      gameState.gameData.artifacts,
       handleNPCInteraction,
       handleArtifactClick,
       currentMapIndex,
@@ -2813,12 +2676,12 @@ const GameWorld = React.memo(() => {
 
   // Update the saveGameProgress method to use context
   const saveGameProgressWithContext = useCallback(() => {
-    if (isLoggedIn && character?.id) {
+    if (gameState.isLoggedIn && gameState.character?.id) {
       const gameState = {
         experience: character.experience || 0,
         avatar: character.avatar,
         inventory,
-        viewedArtifacts: gameData.viewedArtifacts,
+        viewedArtifacts: gameState.gameData.viewedArtifacts,
         lastPosition: {
           x: characterPosition.x,
           y: characterPosition.y,
@@ -2837,7 +2700,7 @@ const GameWorld = React.memo(() => {
     isLoggedIn,
     character,
     inventory,
-    gameData.viewedArtifacts,
+    gameState.gameData.viewedArtifacts,
     characterPosition,
     currentMapIndex,
     updateGameProgress,
@@ -2856,14 +2719,14 @@ const GameWorld = React.memo(() => {
 
   // Function to toggle artifacts visibility
   const toggleArtifactsVisibility = useCallback(() => {
-    updateUIState({ showArtifactsOnMap: !uiState.showArtifactsOnMap });
-  }, [uiState.showArtifactsOnMap, updateUIState]);
+    updateUIState({ showArtifactsOnMap: !gameState.uiState.showArtifactsOnMap });
+  }, [gameState.uiState.showArtifactsOnMap, updateUIState]);
 
   // Calculate artifacts to show based on current map
   const artifactsToShow = useMemo(() => {
     if (
-      !gameData.artifacts ||
-      !Array.isArray(gameData.artifacts) ||
+      !gameState.gameData.artifacts ||
+      !Array.isArray(gameState.gameData.artifacts) ||
       !MAPS ||
       !MAPS[currentMapIndex]
     ) {
@@ -2871,13 +2734,13 @@ const GameWorld = React.memo(() => {
     }
 
     const currentMapName = MAPS[currentMapIndex].name;
-    const artifactMapName = gameData.artifacts.find(
+    const artifactMapName = gameState.gameData.artifacts.find(
       (artifact) => artifact.location,
     )?.location.mapName;
 
     // Handle different naming conventions between MAPS and database
     if (artifactMapName === currentMapName) {
-      return gameData.artifacts.filter((artifact) => artifact.visible);
+      return gameState.gameData.artifacts.filter((artifact) => artifact.visible);
     }
 
     // Handle case-insensitive matching, only if artifactMapName and currentMapName are defined
@@ -2886,7 +2749,7 @@ const GameWorld = React.memo(() => {
       typeof currentMapName === "string" &&
       artifactMapName.toLowerCase() === currentMapName.toLowerCase()
     ) {
-      return gameData.artifacts.filter((artifact) => artifact.visible);
+      return gameState.gameData.artifacts.filter((artifact) => artifact.visible);
     }
 
     // Handle specific mappings
@@ -2897,7 +2760,7 @@ const GameWorld = React.memo(() => {
     };
 
     if (mapMappings[artifactMapName] === currentMapName) {
-      return gameData.artifacts.filter((artifact) => artifact.visible);
+      return gameState.gameData.artifacts.filter((artifact) => artifact.visible);
     }
 
     // Handle reverse mappings
@@ -2908,11 +2771,11 @@ const GameWorld = React.memo(() => {
     };
 
     if (reverseMappings[currentMapName] === artifactMapName) {
-      return gameData.artifacts.filter((artifact) => artifact.visible);
+      return gameState.gameData.artifacts.filter((artifact) => artifact.visible);
     }
 
     return [];
-  }, [gameData.artifacts, currentMapIndex]);
+  }, [gameState.gameData.artifacts, currentMapIndex]);
 
   return (
     <ErrorBoundary>
@@ -2935,14 +2798,14 @@ const GameWorld = React.memo(() => {
         </div>
       ) : (
         <div
-          className={`game-container ${mobileState.highContrastMode ? "high-contrast" : ""} ${mobileState.reducedMotionMode ? "reduced-motion" : ""}`}
+          className={`game-container ${gameState.mobileState.highContrastMode ? "high-contrast" : ""} ${gameState.mobileState.reducedMotionMode ? "reduced-motion" : ""}`}
           role="application"
           aria-label="Authentic Internet Game World"
           aria-describedby="game-instructions"
           tabIndex={0}
           onKeyDown={handleKeyDown}
         >
-          {/* Accessibility instructions */}
+          {/* === ACCESSIBILITY === */}
           <div id="game-instructions" className="sr-only">
             Use arrow keys or WASD to move. Press I for inventory, M for map, C
             for controls guide, F for feedback, T to talk to NPCs, H for high
@@ -2950,7 +2813,6 @@ const GameWorld = React.memo(() => {
             Escape to close menus.
           </div>
 
-          {/* Screen reader announcements */}
           <div
             id="screen-reader-announcements"
             aria-live="polite"
@@ -2958,20 +2820,46 @@ const GameWorld = React.memo(() => {
             className="sr-only"
           />
 
+          {/* === CORE GAME WORLD === */}
+          <MapComponent
+            currentMapIndex={gameState.currentMapIndex}
+            exploredTiles={gameState.exploredTiles}
+            viewport={gameState.viewport}
+            characterPosition={gameState.characterPosition}
+            artifacts={gameState.gameData.artifacts}
+            showArtifactsOnMap={gameState.uiState.showArtifactsOnMap}
+            inDungeon={gameState.uiState.inDungeon}
+          />
+
+          <Character
+            ref={characterRef}
+            position={gameState.characterPosition}
+            characterState={gameState.characterState}
+            direction={gameState.characterState.direction}
+            isLoggedIn={gameState.isLoggedIn}
+            character={gameState.character}
+            soundManager={gameState.soundManager}
+            playerHealth={gameState.playerHealth}
+            maxPlayerHealth={gameState.maxPlayerHealth}
+            isInvincible={gameState.isInvincible}
+          />
+
+          {/* === UI SYSTEMS === */}
+
           {/* Zelda-style HUD */}
           <GameHUD
-            health={playerHealth}
-            maxHealth={maxPlayerHealth}
-            rupees={rupees}
-            keys={keys}
-            currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
-            equippedItem={equippedItem}
-            experience={characterStats.experience}
-            level={characterStats.level}
+            health={gameState.playerHealth}
+            maxHealth={gameState.maxPlayerHealth}
+            rupees={gameState.rupees}
+            keys={gameState.keys}
+            currentArea={MAPS[gameState.currentMapIndex]?.name || "Overworld"}
+            equippedItem={gameState.equippedItem}
+            experience={gameState.characterStats.experience}
+            level={gameState.characterStats.level}
             experienceToNextLevel={calculateXPForLevel(
-              characterStats.level + 1,
+              gameState.characterStats.level + 1,
             )}
-            isDamaged={characterState.isHit}
+            isDamaged={gameState.characterState.isHit}
           />
 
           {/* Minimap with fog of war */}
@@ -2985,7 +2873,7 @@ const GameWorld = React.memo(() => {
             currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
           />
 
-          {uiState.showLevel4 && (
+          {gameState.uiState.showLevel4 && (
             <Level4Shooter
               onComplete={handleLevel4Complete}
               onExit={handleLevel4Exit}
@@ -2998,9 +2886,9 @@ const GameWorld = React.memo(() => {
             aria-label="Game viewport"
           >
             <div
-              className={`game-world ${currentMapIndex === 2 ? "level-3" : currentMapIndex === 1 ? "level-2" : "level-1"} ${mobileState.reducedMotionMode ? "no-animations" : ""}`}
+              className={`game-world ${currentMapIndex === 2 ? "level-3" : currentMapIndex === 1 ? "level-2" : "level-1"} ${gameState.mobileState.reducedMotionMode ? "no-animations" : ""}`}
               style={{
-                transform: mobileState.reducedMotionMode
+                transform: gameState.mobileState.reducedMotionMode
                   ? `translate(${-viewport.x}px, ${-viewport.y}px)`
                   : `translate(${-viewport.x}px, ${-viewport.y}px)`,
                 width: `${
@@ -3019,17 +2907,17 @@ const GameWorld = React.memo(() => {
               aria-label={`Current area: ${MAPS[currentMapIndex]?.name || "Unknown"}`}
             >
               {/* Conditional rendering: Dungeon or Overworld */}
-              {uiState.inDungeon && dungeonState.currentDungeon ? (
+              {gameState.uiState.inDungeon && gameState.dungeonState.currentDungeon ? (
                 <Dungeon
-                  dungeonData={dungeonState.currentDungeon}
+                  dungeonData={gameState.dungeonState.currentDungeon}
                   playerPosition={characterPosition}
                   onPlayerMove={setCharacterPosition}
                   onCollectItem={handleDungeonItemCollect}
                   onEnemyDefeat={handleDungeonEnemyDefeat}
                   onBossDefeat={handleBossDefeat}
                   onExit={handleExitDungeon}
-                  playerKeys={dungeonState.smallKeys}
-                  hasBossKey={dungeonState.hasBossKey}
+                  playerKeys={gameState.dungeonState.smallKeys}
+                  hasBossKey={gameState.dungeonState.hasBossKey}
                   characterRef={characterRef}
                 />
               ) : (
@@ -3042,7 +2930,7 @@ const GameWorld = React.memo(() => {
                       ) || []
                     }
                     artifacts={
-                      !uiState.showArtifactsOnMap ? [] : artifactsToShow
+                      !gameState.uiState.showArtifactsOnMap ? [] : artifactsToShow
                     }
                     onTileClick={handleMapTileClick}
                     onNPCClick={handleNPCClick}
@@ -3057,7 +2945,7 @@ const GameWorld = React.memo(() => {
               <CharacterController
                 currentMapIndex={currentMapIndex}
                 setCurrentMapIndex={setCurrentMapIndex}
-                isLoggedIn={isLoggedIn}
+                isLoggedIn={gameState.isLoggedIn}
                 visibleArtifact={visibleArtifact}
                 handleArtifactPickup={handleArtifactPickup}
                 setFormPosition={setFormPosition}
@@ -3066,7 +2954,7 @@ const GameWorld = React.memo(() => {
                 activePowers={activePowers}
                 user={user}
                 uiState={uiState}
-                isInvincible={isInvincible}
+                isInvincible={gameState.isInvincible}
                 onPositionChange={(position, reason) => {
                   // Update GameWorld characterPosition state for compatibility
                   // This is throttled to prevent excessive re-renders
@@ -3108,7 +2996,7 @@ const GameWorld = React.memo(() => {
               ))}
 
               {/* Environment Modifiers */}
-              {uiState.isDarkMode && <div className="darkmode-overlay" />}
+              {gameState.uiState.isDarkMode && <div className="darkmode-overlay" />}
 
               {/* Buttons Menu */}
               <div className="game-controls">
@@ -3145,13 +3033,13 @@ const GameWorld = React.memo(() => {
                 <IconButton
                   onClick={toggleArtifactsVisibility}
                   tooltip={
-                    uiState.showArtifactsOnMap
+                    gameState.uiState.showArtifactsOnMap
                       ? "Hide Artifacts"
                       : "Show Artifacts"
                   }
                 >
                   <i
-                    className={`fas fa-${uiState.showArtifactsOnMap ? "eye-slash" : "eye"}`}
+                    className={`fas fa-${gameState.uiState.showArtifactsOnMap ? "eye-slash" : "eye"}`}
                   ></i>
                 </IconButton>
               </div>
@@ -3208,34 +3096,34 @@ const GameWorld = React.memo(() => {
             </div>
           </div>
 
-          {/* Display world map when toggled */}
-          {uiState.showWorldMap && (
+          {/* === MODALS AND OVERLAYS === */}
+          {gameState.uiState.showWorldMap && (
             <WorldMap
-              currentWorld={MAPS[currentMapIndex].name}
+              currentWorld={MAPS[gameState.currentMapIndex].name}
               onClose={() => updateUIState({ showWorldMap: false })}
               onNodeClick={handleWorldMapNodeClick}
             />
           )}
 
           {/* Display feedback form when toggled */}
-          {uiState.showFeedback && (
+          {gameState.uiState.showFeedback && (
             <FeedbackForm
               onClose={() => updateUIState({ showFeedback: false })}
             />
           )}
 
           {/* Display keyboard controls guide */}
-          {uiState.showControlsGuide && (
+          {gameState.uiState.showControlsGuide && (
             <ControlsGuide
               onClose={() => updateUIState({ showControlsGuide: false })}
             />
           )}
 
-          {uiState.showWinNotification && (
+          {gameState.uiState.showWinNotification && (
             <div className="win-notification">
               <div className="win-content">
                 <h2>Level Complete!</h2>
-                <p>{uiState.winMessage}</p>
+                <p>{gameState.uiState.winMessage}</p>
                 <div className="win-stars">★★★</div>
                 <button
                   onClick={() => updateUIState({ showWinNotification: false })}
@@ -3247,14 +3135,14 @@ const GameWorld = React.memo(() => {
           )}
 
           <RewardModal
-            visible={uiState.showRewardModal}
+            visible={gameState.uiState.showRewardModal}
             onClose={() => updateUIState({ showRewardModal: false })}
-            achievement={uiState.currentAchievement}
+            achievement={gameState.uiState.currentAchievement}
           />
 
-          {uiState.showForm && (
+          {gameState.uiState.showForm && (
             <ArtifactCreation
-              position={formPosition}
+              position={gameState.formPosition}
               onClose={() => updateUIState({ showForm: false })}
               refreshArtifacts={refreshArtifactList}
               currentArea={MAPS[currentMapIndex].name}
@@ -3262,11 +3150,11 @@ const GameWorld = React.memo(() => {
           )}
 
           <InventoryManager
-            showInventory={uiState.showInventory}
+            showInventory={gameState.uiState.showInventory}
             setShowInventory={(show) => updateUIState({ showInventory: show })}
             character={character}
-            inventory={character?.inventory || []}
-            artifacts={gameData.artifacts}
+            inventory={gameState.character?.inventory || []}
+            artifacts={gameState.gameData.artifacts}
             currentArea={
               Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
                 ? MAPS[currentMapIndex].name
@@ -3274,28 +3162,28 @@ const GameWorld = React.memo(() => {
             }
             setSelectedUserArtifact={setSelectedUserArtifact}
             refreshArtifactList={refreshArtifactList}
-            setInventory={setInventory}
+            setInventory={gameState.setInventory}
             updateUIState={updateUIState}
           />
 
           {/* Level Up Modal */}
           {showLevelUpModal && (
             <LevelUpModal
-              level={characterStats.level}
+              level={gameState.characterStats.level}
               stats={characterStats}
               onClose={() => setShowLevelUpModal(false)}
             />
           )}
 
           {/* Hamlet Finale Mini-Game */}
-          {showHamletFinale && (
+          {gameState.showHamletFinale && (
             <HamletFinale
               onComplete={handleHamletFinaleComplete}
-              onExit={() => setShowHamletFinale(false)}
+              onExit={() => gameState.setShowHamletFinale(false)}
             />
           )}
 
-          {uiState.showQuotes && character && (
+          {gameState.uiState.showQuotes && character && (
             <SavedQuotes
               quotes={character.savedQuotes || []}
               onClose={() => updateUIState({ showQuotes: false })}
@@ -3304,12 +3192,12 @@ const GameWorld = React.memo(() => {
           )}
 
           {/* NPC Interaction Dialog */}
-          {uiState.showNPCDialog && activeNPC && (
+          {gameState.uiState.showNPCDialog && gameState.activeNPC && (
             <NPCInteraction
-              npc={activeNPC}
+              npc={gameState.activeNPC}
               onClose={() => {
                 updateUIState({ showNPCDialog: false });
-                setActiveNPC(null);
+                gameState.setActiveNPC(null);
               }}
               context={{
                 area: MAPS[currentMapIndex]?.name || "Unknown",
@@ -3333,11 +3221,11 @@ const GameWorld = React.memo(() => {
           )}
 
           {/* Quest Completion Celebration */}
-          {questCompletionCelebration && (
+          {gameState.questCompletionCelebration && (
             <QuestCompletionCelebration
               quest={questCompletionCelebration.quest}
               rewards={questCompletionCelebration.rewards}
-              onClose={() => setQuestCompletionCelebration(null)}
+              onClose={() => gameState.setQuestCompletionCelebration(null)}
             />
           )}
 
@@ -3353,17 +3241,17 @@ const GameWorld = React.memo(() => {
           </div>
 
           {/* Map key hint - only shown when there's no other overlay */}
-          {!uiState.showInventory &&
-            !uiState.showForm &&
-            !uiState.showQuotes &&
-            !uiState.showWorldMap &&
-            !uiState.showWinNotification &&
-            !uiState.showRewardModal &&
-            !uiState.showLevel4 &&
-            !uiState.showFeedback &&
-            !uiState.showNPCDialog && (
+          {!gameState.uiState.showInventory &&
+            !gameState.uiState.showForm &&
+            !gameState.uiState.showQuotes &&
+            !gameState.uiState.showWorldMap &&
+            !gameState.uiState.showWinNotification &&
+            !gameState.uiState.showRewardModal &&
+            !gameState.uiState.showLevel4 &&
+            !gameState.uiState.showFeedback &&
+            !gameState.uiState.showNPCDialog && (
               <div className="map-key-hint" role="status" aria-live="polite">
-                {mobileState.isMobile ? (
+                {gameState.mobileState.isMobile ? (
                   <span>
                     Tap and drag to move | Tap NPCs to talk | Use menu buttons
                   </span>
@@ -3377,8 +3265,8 @@ const GameWorld = React.memo(() => {
             )}
 
           {/* Mobile touch controls - Directional pad for movement */}
-          {mobileState.showTouchControls &&
-            mobileState.touchControlsEnabled &&
+          {gameState.mobileState.showTouchControls &&
+            gameState.mobileState.touchControlsEnabled &&
             characterMovement.handleMove && (
               <TouchControls
                 onMove={(direction) => {
@@ -3391,8 +3279,8 @@ const GameWorld = React.memo(() => {
             )}
 
           {/* Mobile UI controls */}
-          {mobileState.showTouchControls &&
-            mobileState.touchControlsEnabled && (
+          {gameState.mobileState.showTouchControls &&
+            gameState.mobileState.touchControlsEnabled && (
               <div
                 className="mobile-controls"
                 role="group"
@@ -3434,7 +3322,7 @@ const GameWorld = React.memo(() => {
                     }))
                   }
                   aria-label={
-                    mobileState.screenReaderMode
+                    gameState.mobileState.screenReaderMode
                       ? "Disable screen reader mode"
                       : "Enable screen reader mode"
                   }
@@ -3447,7 +3335,7 @@ const GameWorld = React.memo(() => {
             )}
 
           {/* Accessibility status indicator */}
-          {mobileState.screenReaderMode && (
+          {gameState.mobileState.screenReaderMode && (
             <div
               className="accessibility-status"
               role="status"
@@ -3459,7 +3347,7 @@ const GameWorld = React.memo(() => {
 
           {currentSpecialWorld === "text_adventure" && (
             <TextAdventure
-              username={character?.username || "traveler"}
+              username={gameState.character?.username || "traveler"}
               onComplete={handleTextAdventureComplete}
               onExit={handleTextAdventureExit}
             />
@@ -3467,7 +3355,7 @@ const GameWorld = React.memo(() => {
 
           {/* Add ArtifactDiscovery component */}
           <ArtifactDiscovery
-            artifacts={gameData.artifacts}
+            artifacts={gameState.gameData.artifacts}
             characterPosition={characterPosition}
             currentMapName={MAPS[currentMapIndex].name}
             onArtifactFound={handleArtifactClick}
@@ -3476,12 +3364,12 @@ const GameWorld = React.memo(() => {
 
 
 
-          {/* Special Worlds */}
-          {currentSpecialWorld === "textAdventure" && (
+          {/* === SPECIAL WORLDS AND MINI-GAMES === */}
+          {gameState.currentSpecialWorld === "textAdventure" && (
             <TextAdventure
               onComplete={handleTextAdventureComplete}
               onExit={handleTextAdventureExit}
-              character={character}
+              character={gameState.character}
             />
           )}
 
@@ -3490,8 +3378,8 @@ const GameWorld = React.memo(() => {
               onComplete={handleTerminalComplete}
               onExit={handleTerminalExit}
               character={character}
-              artifacts={gameData.artifacts}
-              username={character?.username || "User"}
+              artifacts={gameState.gameData.artifacts}
+              username={gameState.character?.username || "User"}
               inventory={inventory}
             />
           )}
@@ -3516,9 +3404,9 @@ const GameWorld = React.memo(() => {
           )}
 
           {/* Artifact Game Launcher */}
-          {showGameLauncher && currentGameArtifact && (
+          {gameState.showGameLauncher && gameState.currentGameArtifact && (
             <ArtifactGameLauncher
-              artifact={currentGameArtifact}
+              artifact={gameState.currentGameArtifact}
               character={character}
               onComplete={handleGameComplete}
               onExit={handleGameExit}
@@ -3565,23 +3453,20 @@ const GameWorld = React.memo(() => {
               fontFamily: "monospace",
             }}
           >
-            currentSpecialWorld: "{currentSpecialWorld}"
+            currentSpecialWorld: "{gameState.currentSpecialWorld}"
           </div>
 
-          {/* Notification System */}
-          <NotificationSystem soundManager={soundManager} />
+          {/* === SYSTEMS === */}
+          <NotificationSystem soundManager={gameState.soundManager} />
 
-          {/* Multiplayer Chat */}
-          {showChat && (
-            <MultiplayerChat
-              worldId={worldId}
-              worldName={MAPS[currentMapIndex]?.name || "Unknown World"}
-              onPlayerClick={(player) => {
-                console.log("Player clicked:", player);
-                // Handle player interaction
-              }}
-            />
-          )}
+          <MultiplayerChat
+            worldId={worldId}
+            worldName={MAPS[gameState.currentMapIndex]?.name || "Unknown World"}
+            onPlayerClick={(player) => {
+              console.log("Player clicked:", player);
+              // Handle player interaction
+            }}
+          />
         </div>
       )}
     </ErrorBoundary>
