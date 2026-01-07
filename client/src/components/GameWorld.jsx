@@ -94,7 +94,26 @@ const GameWorld = React.memo(() => {
   // Core game state - optimized with useReducer pattern
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
   const [inventory, setInventory] = useState([]);
+  const [characterPosition, setCharacterPosition] = useState(
+    INITIAL_CHARACTER_POSITION,
+  );
   const [character, setCharacter] = useState(null);
+
+  // Character state for rendering (managed by CharacterController internally)
+  const [characterState, setCharacterState] = useState({
+    direction: "down",
+    style: {
+      left: 64,
+      top: 64,
+      width: TILE_SIZE,
+      height: TILE_SIZE,
+      transition: "left 0.2s, top 0.2s",
+    },
+    movementTransition: null,
+    verticalDirection: null,
+    horizontalDirection: null,
+    isHit: false,
+  });
   const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
 
   // Minimap explored tiles (fog of war)
@@ -117,8 +136,10 @@ const GameWorld = React.memo(() => {
     showFeedback: false,
     showControlsGuide: false,
     showWinNotification: false,
+    winMessage: "",
     showLevel4: false,
     showRewardModal: false,
+    currentAchievement: "",
     showNPCDialog: false,
     showWorldGuide: true,
     isPlacingArtifact: false,
@@ -212,11 +233,6 @@ const GameWorld = React.memo(() => {
   const gameWorldRef = useRef(null);
   const characterRef = useRef(null);
   const characterControllerRef = useRef(null);
-
-  // Helper to get current character position from controller
-  const getCharacterPosition = useCallback(() => {
-    return characterControllerRef.current?.getPosition() || INITIAL_CHARACTER_POSITION;
-  }, []);
 
   // portalNotificationActive is now handled by NotificationSystem
 
@@ -520,10 +536,7 @@ const GameWorld = React.memo(() => {
 
       // Add XP notification at enemy position
       if (position) {
-        setXPNotifications((prev) => [
-          ...prev,
-          { amount, position, id: uuidv4() },
-        ]);
+        addXPNotification(amount, source, position);
       }
 
       setCharacterStats((prev) => {
@@ -679,7 +692,7 @@ const GameWorld = React.memo(() => {
         levelCompletion: { ...gameData.levelCompletion, [level]: true },
       });
 
-      updateNotifications({
+      updateUIState({
         showWinNotification: true,
         winMessage: `Level ${level} Complete!`,
       });
@@ -700,7 +713,6 @@ const GameWorld = React.memo(() => {
     [
       gameData.levelCompletion,
       updateGameState,
-      updateNotifications,
       soundManager,
       user,
       checkLevelAchievements,
@@ -1018,7 +1030,6 @@ const GameWorld = React.memo(() => {
 
   // Update explored tiles for minimap fog of war
   useEffect(() => {
-    const characterPosition = getCharacterPosition();
     const tileX = Math.floor(characterPosition.x / TILE_SIZE);
     const tileY = Math.floor(characterPosition.y / TILE_SIZE);
 
@@ -2290,11 +2301,11 @@ const GameWorld = React.memo(() => {
   const handleHemingwayComplete = useCallback(() => {
     setCurrentSpecialWorld(null);
     // Give rewards, etc.
-    updateNotifications({
+    updateUIState({
       currentAchievement: "Completed Hemingway's Adventure",
+      showRewardModal: true
     });
-    updateUIState({ showRewardModal: true });
-  }, [setCurrentSpecialWorld, updateNotifications, updateUIState]);
+  }, [setCurrentSpecialWorld, updateUIState]);
 
   const handleHemingwayExit = useCallback(() => {
     setCurrentSpecialWorld(null);
@@ -2303,11 +2314,11 @@ const GameWorld = React.memo(() => {
   const handleTextAdventureComplete = useCallback(() => {
     setCurrentSpecialWorld(null);
     // Give rewards, etc.
-    updateNotifications({
+    updateUIState({
       currentAchievement: "Completed The Writer's Journey",
+      showRewardModal: true
     });
-    updateUIState({ showRewardModal: true });
-  }, [setCurrentSpecialWorld, updateNotifications, updateUIState]);
+  }, [setCurrentSpecialWorld, updateUIState]);
 
   const handleTextAdventureExit = useCallback(() => {
     // Hide any remaining portal notification
@@ -2433,12 +2444,7 @@ const GameWorld = React.memo(() => {
       }
 
       // Show achievement notification
-      updateNotifications({
-        achievementNotification: {
-          title,
-          description,
-        },
-      });
+      addAchievementNotification({ title, description });
 
       // Add achievement to character record
       if (character && character.id) {
@@ -2488,7 +2494,7 @@ const GameWorld = React.memo(() => {
         }
       }
     },
-    [character, updateCharacter, updateNotifications],
+    [character, updateCharacter],
   );
 
   // Load achievements from localStorage on component mount
@@ -3061,10 +3067,10 @@ const GameWorld = React.memo(() => {
                 user={user}
                 uiState={uiState}
                 isInvincible={isInvincible}
-                characterState={characterState}
                 onPositionChange={(position, reason) => {
-                  // Update any GameWorld state that still depends on characterPosition
+                  // Update GameWorld characterPosition state for compatibility
                   // This is throttled to prevent excessive re-renders
+                  setCharacterPosition(position);
                   if (reason === 'portal') {
                     // Handle portal-specific logic if needed
                   }
@@ -3229,7 +3235,7 @@ const GameWorld = React.memo(() => {
             <div className="win-notification">
               <div className="win-content">
                 <h2>Level Complete!</h2>
-                <p>{notifications.winMessage}</p>
+                <p>{uiState.winMessage}</p>
                 <div className="win-stars">★★★</div>
                 <button
                   onClick={() => updateUIState({ showWinNotification: false })}
@@ -3243,7 +3249,7 @@ const GameWorld = React.memo(() => {
           <RewardModal
             visible={uiState.showRewardModal}
             onClose={() => updateUIState({ showRewardModal: false })}
-            achievement={notifications.currentAchievement}
+            achievement={uiState.currentAchievement}
           />
 
           {uiState.showForm && (
@@ -3271,20 +3277,6 @@ const GameWorld = React.memo(() => {
             setInventory={setInventory}
             updateUIState={updateUIState}
           />
-
-          {/* XP Notifications */}
-          {xpNotifications.map((notification) => (
-            <XPNotification
-              key={notification.id}
-              amount={notification.amount}
-              position={notification.position}
-              onComplete={() => {
-                setXPNotifications((prev) =>
-                  prev.filter((n) => n.id !== notification.id),
-                );
-              }}
-            />
-          ))}
 
           {/* Level Up Modal */}
           {showLevelUpModal && (
@@ -3482,14 +3474,6 @@ const GameWorld = React.memo(() => {
             character={character}
           />
 
-          {notifications.notification && (
-            <XPNotification
-              message={notifications.notification.message}
-              type={notifications.notification.type}
-              duration={notifications.notification.duration}
-              onClose={() => updateNotifications({ notification: null })}
-            />
-          )}
 
 
           {/* Special Worlds */}
