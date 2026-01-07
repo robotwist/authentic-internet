@@ -84,9 +84,51 @@ const INITIAL_LEVEL_COMPLETION = {
 const GameWorld = React.memo(() => {
   // Initialization guard to prevent render-order issues
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showLevelUpModal, setShowLevelUpModal] = useState(false);
 
   // Use the custom game state hook
   const gameState = useGameState();
+
+  // Destructure state values and setters from gameState
+  const {
+    // State values
+    currentMapIndex,
+    characterPosition,
+    viewport,
+    exploredTiles,
+    inventory,
+    character,
+    visibleArtifact,
+    currentSpecialWorld,
+    characterStats,
+    uiState,
+    questStatusMap,
+    mobileState,
+    portalState,
+    // Setters
+    setCurrentMapIndex,
+    setCharacterPosition,
+    setViewport,
+    setExploredTiles,
+    setInventory,
+    setCharacter,
+    setVisibleArtifact,
+    setCurrentSpecialWorld,
+    setCharacterStats,
+    setPlayerHealth,
+    setMaxPlayerHealth,
+    setPortalState,
+    setGameData,
+    updateUIState,
+    setActiveNPC,
+    setSelectedUserArtifact,
+    setIsInvincible,
+    setRupees,
+    setKeys,
+    setCharacterState,
+    setQuestStatusMap,
+    setMobileState,
+  } = gameState;
 
   // Performance tracking
   const renderCount = useRef(0);
@@ -97,6 +139,7 @@ const GameWorld = React.memo(() => {
   // All state is now managed by the gameState hook
 
   // Context hooks
+  const { user } = useAuth();
   const {
     unlockAchievement,
     checkLevelAchievements,
@@ -146,10 +189,10 @@ const GameWorld = React.memo(() => {
 
   // Create quest status map for NPCs when quests or current map changes
   useEffect(() => {
-    if (!MAPS[gameState.currentMapIndex]?.npcs) return;
+    if (!MAPS[currentMapIndex]?.npcs) return;
 
     const statusMap = new Map();
-    const currentNPCs = MAPS[gameState.currentMapIndex].npcs || [];
+    const currentNPCs = MAPS[currentMapIndex].npcs || [];
 
     currentNPCs.forEach((npc) => {
       const npcId = npc._id || npc.id;
@@ -205,7 +248,7 @@ const GameWorld = React.memo(() => {
     });
 
     setQuestStatusMap(statusMap);
-  }, [gameState]);
+  }, [gameState.activeQuests, gameState.completedQuests, currentMapIndex, setQuestStatusMap]);
 
   // Screen reader announcement function
   const announceToScreenReader = useCallback((message) => {
@@ -234,11 +277,6 @@ const GameWorld = React.memo(() => {
   }, [gameState.activeQuests]);
 
   // Portal notification functions are now handled by NotificationSystem
-
-  // UI state update function - now uses gameState
-  const updateUIState = useCallback((updates) => {
-    gameState.updateUIState(updates);
-  }, [gameState]);
 
   // Quest validation: Check if gameplay actions complete quest stages
   const validateQuestProgress = useCallback(
@@ -287,8 +325,8 @@ const GameWorld = React.memo(() => {
               // Refresh quests
               const questResponse = await fetchQuests();
               if (questResponse.success) {
-                setActiveQuests(questResponse.data.activeQuests || []);
-                setCompletedQuests(questResponse.data.completedQuests || []);
+                gameState.setActiveQuests(questResponse.data.activeQuests || []);
+                gameState.setCompletedQuests(questResponse.data.completedQuests || []);
               }
 
               const rewards = response.data.rewards;
@@ -320,7 +358,7 @@ const GameWorld = React.memo(() => {
         }
       }
     },
-    [activeQuests, showPortalNotification, hidePortalNotification],
+    [gameState.activeQuests, showPortalNotification, hidePortalNotification],
   );
 
   // Function to add XP and show notification
@@ -360,8 +398,8 @@ const GameWorld = React.memo(() => {
       const newHealth = Math.min(gameState.maxPlayerHealth, gameState.playerHealth + amount);
       setPlayerHealth(newHealth);
 
-      if (soundManager) {
-        soundManager.playSound("heal", 0.3);
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("heal", 0.3);
       }
     },
     [gameState.playerHealth, gameState.maxPlayerHealth, gameState.soundManager],
@@ -371,20 +409,20 @@ const GameWorld = React.memo(() => {
     (amount) => {
       setRupees((prev) => prev + amount);
 
-      if (soundManager) {
-        soundManager.playSound("rupee", 0.3);
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("rupee", 0.3);
       }
     },
-    [soundManager],
+    [gameState.soundManager],
   );
 
   const handleCollectKey = useCallback(() => {
     setKeys((prev) => prev + 1);
 
-    if (soundManager) {
-      soundManager.playSound("key", 0.3);
+    if (gameState.soundManager) {
+      gameState.soundManager.playSound("key", 0.3);
     }
-  }, [soundManager]);
+  }, [gameState.soundManager]);
 
   // XP and Leveling System
   // Calculate XP required for next level
@@ -422,8 +460,8 @@ const GameWorld = React.memo(() => {
           setShowLevelUpModal(true);
 
           // Play level-up sound
-          if (soundManager) {
-            soundManager.playSound("powerup", 0.7); // Use powerup sound for now
+          if (gameState.soundManager) {
+            gameState.soundManager.playSound("powerup", 0.7); // Use powerup sound for now
           }
 
           console.log(`🌟 LEVEL UP! Now level ${newLevel}`);
@@ -444,7 +482,7 @@ const GameWorld = React.memo(() => {
         return { ...prev, experience: newXP };
       });
     },
-    [calculateXPForLevel, maxPlayerHealth, soundManager],
+    [calculateXPForLevel, gameState.maxPlayerHealth, gameState.soundManager],
   );
 
   // Alias for handleGainExperience to match existing code that uses awardXP
@@ -561,8 +599,8 @@ const GameWorld = React.memo(() => {
       });
 
       // Play completion sound
-      if (soundManager) {
-        soundManager.playSound("level_complete");
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("level_complete");
       }
 
       // Award experience
@@ -576,7 +614,7 @@ const GameWorld = React.memo(() => {
     [
       gameState.gameData.levelCompletion,
       updateGameState,
-      soundManager,
+      gameState.soundManager,
       user,
       checkLevelAchievements,
     ],
@@ -592,8 +630,8 @@ const GameWorld = React.memo(() => {
       updatePortalState({ isTransitioning: true });
 
       // Play portal sound
-      if (soundManager) {
-        soundManager.playSound("portal");
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("portal");
       }
 
       // Add portal transition animation
@@ -664,12 +702,14 @@ const GameWorld = React.memo(() => {
     },
     [
       portalState.isTransitioning,
-      soundManager,
+      gameState.soundManager,
       setCurrentSpecialWorld,
       updatePortalState,
       showWorldAnnouncement,
       handleLevelCompletion,
       hidePortalNotification,
+      setCurrentMapIndex,
+      setCharacterPosition,
     ],
   );
 
@@ -689,8 +729,8 @@ const GameWorld = React.memo(() => {
         gameState.setShowHamletFinale(true);
 
         // Play dramatic sound
-        if (soundManager) {
-          soundManager.playSound("quest_start", 0.8);
+        if (gameState.soundManager) {
+          gameState.soundManager.playSound("quest_start", 0.8);
         }
 
         if (gameState.mobileState.screenReaderMode) {
@@ -704,8 +744,8 @@ const GameWorld = React.memo(() => {
       updateUIState({ showNPCDialog: true });
 
       // Play interaction sound if available
-      if (soundManager) {
-        soundManager.playSound("npc_interaction");
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("npc_interaction");
       }
 
       // Add visual feedback
@@ -717,7 +757,7 @@ const GameWorld = React.memo(() => {
     },
     [
       shakespeareQuest.stage,
-      soundManager,
+      gameState.soundManager,
       gameState.mobileState.screenReaderMode,
       announceToScreenReader,
       updateUIState,
@@ -738,9 +778,9 @@ const GameWorld = React.memo(() => {
       console.log("🎉 Game completed:", completionData);
 
       // Resume background music
-      if (soundManager) {
+      if (gameState.soundManager) {
         const currentMapName = MAPS[gameState.currentMapIndex]?.name || "";
-        soundManager.playMusic(currentMapName);
+        gameState.soundManager.playMusic(currentMapName);
       }
 
       // Validate quest progress for game completion
@@ -781,19 +821,19 @@ const GameWorld = React.memo(() => {
     // Close game launcher
     setShowGameLauncher(false);
     setCurrentGameArtifact(null);
-  }, [soundManager, currentMapIndex]);
+  }, [gameState.soundManager, gameState.currentMapIndex]);
 
   const handleGameOver = useCallback(() => {
     console.log("Game Over!");
     // Reset player health
-    setPlayerHealth(Math.floor(maxPlayerHealth / 2)); // Respawn with half health
+    setPlayerHealth(Math.floor(gameState.maxPlayerHealth / 2)); // Respawn with half health
     // Reset position to start
     setCharacterPosition(INITIAL_CHARACTER_POSITION);
 
-    if (soundManager) {
-      soundManager.playSound("gameover", 0.5);
+    if (gameState.soundManager) {
+      gameState.soundManager.playSound("gameover", 0.5);
     }
-  }, [maxPlayerHealth, soundManager]);
+  }, [gameState.maxPlayerHealth, gameState.soundManager]);
 
   // Memoized portal configuration
   const PORTAL_CONFIG = useMemo(
@@ -880,15 +920,21 @@ const GameWorld = React.memo(() => {
   // Memoized current map data with safety check
   const currentMap = useMemo(() => {
     // Safety check to prevent initialization order issues
-    if (typeof currentMapIndex !== "number" || !MAPS || !Array.isArray(MAPS)) {
+    if (typeof gameState.currentMapIndex !== "number" || !MAPS || !Array.isArray(MAPS)) {
       return MAPS?.[0] || null;
     }
-    return MAPS[currentMapIndex] || MAPS[0];
-  }, [currentMapIndex]);
+    return MAPS[gameState.currentMapIndex] || MAPS[0];
+  }, [gameState.currentMapIndex]);
   const currentMapNPCs = useMemo(() => currentMap?.npcs || [], [currentMap]);
   const currentMapArtifacts = useMemo(
     () => currentMap?.artifacts || [],
     [currentMap],
+  );
+
+  // Convenience getter used by some hook dependency arrays
+  const getCharacterPosition = useCallback(
+    () => characterPosition,
+    [characterPosition],
   );
 
   // Update explored tiles for minimap fog of war
@@ -1162,8 +1208,8 @@ const GameWorld = React.memo(() => {
 
       // No portal found - give user feedback
       console.log("❌ No portal found at current location");
-      if (soundManager) {
-        soundManager.playSound("bump"); // Play bump sound to indicate no portal
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("bump"); // Play bump sound to indicate no portal
       }
     },
     [
@@ -1175,7 +1221,7 @@ const GameWorld = React.memo(() => {
       updatePortalState,
       showPortalNotification,
       showWorldAnnouncement,
-      soundManager,
+      gameState.soundManager,
     ],
   );
 
@@ -1204,13 +1250,13 @@ const GameWorld = React.memo(() => {
       gameState.setShowHamletFinale(false);
 
       // Show achievement
-      if (soundManager) {
-        soundManager.playSound("powerup", 0.8);
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("powerup", 0.8);
       }
 
       console.log("⚔️ Wand of Prospero obtained!");
     },
-    [handleGainExperience, soundManager],
+    [handleGainExperience, gameState.soundManager],
   );
 
 
@@ -1307,8 +1353,8 @@ const GameWorld = React.memo(() => {
       console.log(`🎉 Boss defeated in: ${dungeonId}`);
 
       // Play boss defeat fanfare
-      if (soundManager) {
-        soundManager.playSound("boss_defeat", 1.0);
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("boss_defeat", 1.0);
       }
 
       // Award massive XP
@@ -1320,7 +1366,7 @@ const GameWorld = React.memo(() => {
       // Optionally: Track dungeon completion in gameData
       // This allows for future features like dungeon tracker, etc.
     },
-    [soundManager, handleGainExperience],
+    [gameState.soundManager, handleGainExperience],
   );
 
   // Optimized artifact creation
@@ -1342,8 +1388,8 @@ const GameWorld = React.memo(() => {
       });
 
       // Play creation sound
-      if (soundManager) {
-        soundManager.playSound("artifact_create");
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("artifact_create");
       }
 
       return newArtifact;
@@ -1356,7 +1402,7 @@ const GameWorld = React.memo(() => {
     characterPosition,
     user,
     gameState.gameData.artifacts,
-    soundManager,
+    gameState.soundManager,
     updateGameState,
   ]);
 
@@ -1522,8 +1568,8 @@ const GameWorld = React.memo(() => {
             }
 
             setIsAttacking(true);
-            if (soundManager) {
-              soundManager.playSound("sword", 0.3);
+            if (gameState.soundManager) {
+              gameState.soundManager.playSound("sword", 0.3);
             }
             // CombatManager will reset attack state via onAttackComplete
             if (gameState.mobileState.screenReaderMode) {
@@ -1577,18 +1623,18 @@ const GameWorld = React.memo(() => {
         case "s":
         case "S":
           // Toggle screen reader mode
-          setMobileState((prev) => ({
-            ...prev,
-            screenReaderMode: !prev.screenReaderMode,
-          }));
-          const message = gameState.mobileState.screenReaderMode
+          setMobileState({
+            ...mobileState,
+            screenReaderMode: !mobileState.screenReaderMode,
+          });
+          const message = mobileState.screenReaderMode
             ? "Screen reader mode disabled"
             : "Screen reader mode enabled";
           announceToScreenReader(message);
           break;
       }
     },
-    [uiState, updateUIState, mobileState],
+    [uiState, updateUIState, mobileState, setMobileState, announceToScreenReader],
   );
 
   // Optimized nearby NPC finder
@@ -1607,7 +1653,7 @@ const GameWorld = React.memo(() => {
 
   // Optimized sound manager initialization
   const initSoundManager = useCallback(async () => {
-    if (soundManager) return;
+    if (gameState.soundManager) return;
 
     try {
       const manager = SoundManager.getInstance();
@@ -1617,7 +1663,7 @@ const GameWorld = React.memo(() => {
     } catch (error) {
       console.error("Error initializing sound manager:", error);
     }
-  }, [soundManager]);
+  }, [gameState.soundManager]);
 
   // Initialize component safely
   useEffect(() => {
@@ -1647,15 +1693,15 @@ const GameWorld = React.memo(() => {
 
     return () => {
       window.removeEventListener("keydown", handleKeyDownEvent);
-      if (soundManager) {
-        soundManager.cleanup();
+      if (gameState.soundManager) {
+        gameState.soundManager.cleanup();
       }
     };
-  }, [loadCharacter, fetchNPCs, initSoundManager, handleKeyDown, soundManager]);
+  }, [loadCharacter, fetchNPCs, initSoundManager, handleKeyDown, gameState.soundManager]);
 
   // Music management based on current map
   useEffect(() => {
-    if (!soundManager || !currentMap) return;
+    if (!gameState.soundManager || !currentMap) return;
 
     const currentMapName = currentMap.name || "";
     const newMusicTrack = getMusicTrackForMap(currentMapName);
@@ -1672,36 +1718,36 @@ const GameWorld = React.memo(() => {
       try {
         // Check if we're already playing this track by comparing current music
         const shouldChangeMusic =
-          !soundManager.currentMusic ||
-          soundManager.currentMusic !== newMusicTrack;
+          !gameState.soundManager.currentMusic ||
+          gameState.soundManager.currentMusic !== newMusicTrack;
 
         if (shouldChangeMusic) {
           console.log(
             "Changing music from",
-            soundManager.currentMusic,
+            gameState.soundManager.currentMusic,
             "to",
             newMusicTrack,
           );
 
           // Stop current music before starting new one
-          soundManager.stopMusic();
+          gameState.soundManager.stopMusic();
 
           // Start appropriate music for the current map
           if (currentMapName === "Yosemite") {
-            soundManager.playMusic("yosemite", true, 0.3);
+            gameState.soundManager.playMusic("yosemite", true, 0.3);
           } else if (currentMapName.includes("Overworld")) {
-            soundManager.playMusic("overworld", true, 0.3);
+            gameState.soundManager.playMusic("overworld", true, 0.3);
           } else if (currentMapName.includes("Dungeon")) {
-            soundManager.playMusic("terminal", true, 0.3);
+            gameState.soundManager.playMusic("terminal", true, 0.3);
           } else if (currentMapName.includes("Desert")) {
-            soundManager.playMusic("desert", true, 0.3);
+            gameState.soundManager.playMusic("desert", true, 0.3);
           }
         }
       } catch (error) {
         console.error("Error changing music:", error);
       }
     }
-  }, [soundManager, currentMapIndex]); // Only trigger on map index change
+  }, [gameState.soundManager, gameState.currentMapIndex]); // Only trigger on map index change
 
   // Helper function to get music track for map
   const getMusicTrackForMap = useCallback((mapName) => {
@@ -1815,7 +1861,7 @@ const GameWorld = React.memo(() => {
     };
 
     gameStateManager.updateState(gameState);
-  }, [user, characterPosition, currentMapIndex, inventory, gameData]);
+  }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
   useEffect(() => {
@@ -1984,8 +2030,8 @@ const GameWorld = React.memo(() => {
   const { checkPortalCollisions } = usePortalCollisions({
     characterPosition,
     currentMapIndex,
-    soundManager,
-    portalNotificationActive,
+    soundManager: gameState.soundManager,
+    portalNotificationActive: gameState.portalState.portalNotificationActive,
     setPortalNotificationActive,
     showPortalNotification,
     hidePortalNotification,
@@ -1994,7 +2040,7 @@ const GameWorld = React.memo(() => {
     setCharacterPosition,
     adjustViewport,
     setCurrentSpecialWorld,
-    gameData,
+    gameData: gameState.gameData,
     handleLevelCompletion,
   });
 
@@ -2094,8 +2140,8 @@ const GameWorld = React.memo(() => {
             const handleGameLaunch = (e) => {
               if (e.code === "Space" && distance <= TILE_SIZE * 1.5) {
                 // Play interaction sound
-                if (soundManager) {
-                  soundManager.playSound("portal");
+                if (gameState.soundManager) {
+                  gameState.soundManager.playSound("portal");
                 }
 
                 // Hide notification
@@ -2107,8 +2153,8 @@ const GameWorld = React.memo(() => {
                 setShowGameLauncher(true);
 
                 // Stop background music for immersive game experience
-                if (soundManager) {
-                  soundManager.stopMusic(true);
+                if (gameState.soundManager) {
+                  gameState.soundManager.stopMusic(true);
                 }
 
                 // Remove event listener
@@ -2955,6 +3001,7 @@ const GameWorld = React.memo(() => {
                 user={user}
                 uiState={uiState}
                 isInvincible={gameState.isInvincible}
+                characterState={gameState.characterState}
                 onPositionChange={(position, reason) => {
                   // Update GameWorld characterPosition state for compatibility
                   // This is throttled to prevent excessive re-renders
@@ -3213,8 +3260,8 @@ const GameWorld = React.memo(() => {
                 // Refresh quests when a quest is updated
                 const questResponse = await fetchQuests();
                 if (questResponse.success) {
-                  setActiveQuests(questResponse.data.activeQuests || []);
-                  setCompletedQuests(questResponse.data.completedQuests || []);
+                  gameState.setActiveQuests(questResponse.data.activeQuests || []);
+                  gameState.setCompletedQuests(questResponse.data.completedQuests || []);
                 }
               }}
             />
@@ -3347,7 +3394,7 @@ const GameWorld = React.memo(() => {
 
           {currentSpecialWorld === "text_adventure" && (
             <TextAdventure
-              username={gameState.character?.username || "traveler"}
+              username={character?.username || "traveler"}
               onComplete={handleTextAdventureComplete}
               onExit={handleTextAdventureExit}
             />
@@ -3365,11 +3412,11 @@ const GameWorld = React.memo(() => {
 
 
           {/* === SPECIAL WORLDS AND MINI-GAMES === */}
-          {gameState.currentSpecialWorld === "textAdventure" && (
+          {currentSpecialWorld === "textAdventure" && (
             <TextAdventure
               onComplete={handleTextAdventureComplete}
               onExit={handleTextAdventureExit}
-              character={gameState.character}
+              character={character}
             />
           )}
 
@@ -3453,7 +3500,7 @@ const GameWorld = React.memo(() => {
               fontFamily: "monospace",
             }}
           >
-            currentSpecialWorld: "{gameState.currentSpecialWorld}"
+            currentSpecialWorld: "{currentSpecialWorld}"
           </div>
 
           {/* === SYSTEMS === */}

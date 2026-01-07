@@ -18,6 +18,7 @@ const CharacterController = React.forwardRef(({
   uiState,
   isInvincible,
   onPositionChange,
+  characterState,
 }, ref) => {
   // Use refs for position and state to avoid re-renders
   const characterPositionRef = useRef(INITIAL_CHARACTER_POSITION);
@@ -90,6 +91,7 @@ const CharacterController = React.forwardRef(({
   // Character movement hook
   const characterMovement = useCharacterMovement(
     characterPositionRef.current,
+    characterState,
     handleCharacterMove,
     currentMapIndex,
     setCurrentMapIndex,

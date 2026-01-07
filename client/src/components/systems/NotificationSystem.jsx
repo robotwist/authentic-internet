@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import XPNotification from '../XPNotification';
 import AchievementNotification from '../AchievementNotification';
-import { NotificationProvider } from './useNotification';
+import { NotificationProvider } from './useNotification.jsx';
 
 const NotificationSystem = ({ soundManager }) => {
   // Notifications state
@@ -120,14 +121,12 @@ const NotificationSystem = ({ soundManager }) => {
   const addXPNotification = useCallback((amount, reason, position = null) => {
     if (position) {
       // Add positioned XP notification
-      const { v4: uuidv4 } = require('uuid');
       setXPNotifications((prev) => [
         ...prev,
         { amount, position, id: uuidv4() },
       ]);
     } else {
       // Add regular XP notification
-      const { v4: uuidv4 } = require('uuid');
       updateNotifications({
         xpNotifications: (prev) => [
           ...prev,
@@ -138,7 +137,6 @@ const NotificationSystem = ({ soundManager }) => {
   }, [updateNotifications]);
 
   const addAchievementNotification = useCallback((achievement) => {
-    const { v4: uuidv4 } = require('uuid');
     updateNotifications({
       achievementNotifications: (prev) => [
         ...prev,

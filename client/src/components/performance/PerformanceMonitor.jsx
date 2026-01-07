@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { getCacheStats } from "../../utils/cacheManager";
-import { getErrorLog } from "../../utils/errorTracker";
+import { getCacheStats, clearAllCache } from "../../utils/cacheManager";
+import { getErrorLog, clearErrorLog } from "../../utils/errorTracker";
 
 /**
  * Performance Monitor Component
@@ -293,7 +293,6 @@ const PerformanceMonitor = ({
                 cursor: "pointer",
               }}
               onClick={() => {
-                const { clearAllCache } = require("../../utils/cacheManager");
                 clearAllCache();
                 setMetrics((prev) => ({
                   ...prev,
@@ -319,7 +318,6 @@ const PerformanceMonitor = ({
                 cursor: "pointer",
               }}
               onClick={() => {
-                const { clearErrorLog } = require("../../utils/errorTracker");
                 clearErrorLog();
                 setMetrics((prev) => ({
                   ...prev,

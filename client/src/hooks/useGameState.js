@@ -95,6 +95,18 @@ const initialState = {
     verticalDirection: null,
     horizontalDirection: null,
     isHit: false,
+    // Physics state
+    physicsState: {
+      velocity: { x: 0, y: 0 },
+      acceleration: { x: 0, y: 0 },
+      isGrounded: true,
+      canJump: true,
+      jumpCount: 0,
+      maxJumps: 1,
+      friction: 0.8,
+      gravity: 0.5,
+      maxSpeed: 2,
+    },
   },
   viewport: INITIAL_VIEWPORT,
   exploredTiles: new Set(),
