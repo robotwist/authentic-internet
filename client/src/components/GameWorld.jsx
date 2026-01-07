@@ -12,8 +12,6 @@ import {
   createArtifact,
   fetchCharacter,
   updateCharacter,
-  updateArtifact,
-  deleteArtifact,
   updateUserExperience,
   addUserAchievement,
   fetchQuests,
@@ -23,11 +21,12 @@ import Character from "./Character";
 import Artifact from "./Artifact";
 import ArtifactCreation from "./ArtifactCreation";
 import Inventory from "./Inventory";
+import InventoryManager from "./managers/InventoryManager";
 import ErrorBoundary from "./ErrorBoundary";
 import MapComponent from "./Map";
 import WorldMap from "./WorldMap";
 import FeedbackForm from "./FeedbackForm";
-import { useCharacterMovement } from "./CharacterMovement";
+import CharacterController from "./controllers/CharacterController";
 import GameHUD from "./UI/GameHUD";
 import { getPowerDefinition } from "../constants/Powers";
 import ControlsGuide from "./UI/ControlsGuide";
@@ -67,6 +66,7 @@ import { useGameState } from "../context/GameStateContext";
 import { useWebSocket } from "../context/WebSocketContext";
 import gameStateManager from "../utils/gameStateManager";
 import { IconButton } from "@mui/material";
+import { usePortalCollisions } from "../hooks/usePortalCollisions";
 
 // Performance monitoring
 const PERFORMANCE_MARKERS = {
@@ -93,9 +93,6 @@ const GameWorld = React.memo(() => {
   // Core game state - optimized with useReducer pattern
   const [currentMapIndex, setCurrentMapIndex] = useState(0);
   const [inventory, setInventory] = useState([]);
-  const [characterPosition, setCharacterPosition] = useState(
-    INITIAL_CHARACTER_POSITION,
-  );
   const [character, setCharacter] = useState(null);
   const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
 
@@ -109,8 +106,6 @@ const GameWorld = React.memo(() => {
   const updateThrottle = useRef(16); // 16ms throttle (60fps)
   // Form position state for artifact creation modal
   const [formPosition, setFormPosition] = useState(null);
-  // Show inventory state for character inventory modal
-  const [showInventory, setShowInventory] = useState(false);
 
   // UI state - grouped for better performance
   const [uiState, setUiState] = useState({
@@ -159,20 +154,6 @@ const GameWorld = React.memo(() => {
     currentAchievement: "",
   });
 
-  // Character state
-  const [characterState, setCharacterState] = useState({
-    direction: "down",
-    style: {
-      left: 64,
-      top: 64,
-      width: TILE_SIZE,
-      height: TILE_SIZE,
-      transition: "left 0.2s, top 0.2s",
-    },
-    movementTransition: null,
-    verticalDirection: null,
-    horizontalDirection: null,
-  });
 
   // Portal state
   const [portalState, setPortalState] = useState({
@@ -404,6 +385,48 @@ const GameWorld = React.memo(() => {
       notification.classList.remove("visible");
     }
   }, []);
+
+  // Reusable function for handling interactive portal notifications
+  const createInteractiveNotification = useCallback(
+    (title, message, conditionFn, actionFn, cleanupFn = null) => {
+      if (!portalNotificationActive) {
+        showPortalNotification(title, message);
+        setPortalNotificationActive(true);
+
+        const handleInteraction = (e) => {
+          if (e.code === "Space" && conditionFn()) {
+            // Play portal sound
+            if (soundManager) {
+              soundManager.playSound("portal");
+            }
+
+            // Hide notification
+            hidePortalNotification();
+            setPortalNotificationActive(false);
+
+            // Execute the action
+            actionFn();
+
+            // Remove event listener
+            window.removeEventListener("keydown", handleInteraction);
+
+            // Optional cleanup
+            if (cleanupFn) cleanupFn();
+          }
+        };
+
+        // Add event listener
+        window.addEventListener("keydown", handleInteraction);
+
+        // Return cleanup function
+        return () => {
+          window.removeEventListener("keydown", handleInteraction);
+          setPortalNotificationActive(false);
+        };
+      }
+    },
+    [portalNotificationActive, showPortalNotification, hidePortalNotification, soundManager],
+  );
 
   // UI state update function - allows partial updates
   const updateUIState = useCallback((updates) => {
@@ -2156,122 +2179,26 @@ const GameWorld = React.memo(() => {
   // Get active powers from user
   const activePowers = user?.activePowers || [];
 
-  // Memoized character movement hook
-  const characterMovement = useCharacterMovement(
+
+  // Portal collision detection hook
+  const { checkPortalCollisions } = usePortalCollisions({
     characterPosition,
-    setCharacterPosition,
     currentMapIndex,
+    soundManager,
+    portalNotificationActive,
+    setPortalNotificationActive,
+    showPortalNotification,
+    hidePortalNotification,
+    createInteractiveNotification,
     setCurrentMapIndex,
-    isLoggedIn,
-    visibleArtifact,
-    handleArtifactPickup,
-    setFormPosition,
-    setShowInventory,
+    setCharacterPosition,
     adjustViewport,
-    activePowers, // Pass active powers to movement hook
-  );
+    setCurrentSpecialWorld,
+    gameData,
+    handleLevelCompletion,
+  });
 
-  // Update characterStyle and movement state when position or direction changes
-  useEffect(() => {
-    // Update character position in the style
-    setCharacterState((prev) => ({
-      ...prev,
-      style: {
-        ...prev.style,
-        left: characterPosition.x,
-        top: characterPosition.y,
-      },
-    }));
 
-    // Adjust viewport to follow character
-    adjustViewport(characterPosition);
-  }, [characterPosition, adjustViewport]);
-
-  // Separate effect for handling movement animations to avoid infinite loops
-  useEffect(() => {
-    // Update movement state based on movementDirection
-    if (characterMovement.movementDirection) {
-      // Build all state updates at once to minimize re-renders
-      const stateUpdates = {
-        direction: characterMovement.movementDirection,
-      };
-
-      // Track vertical and horizontal components separately
-      if (
-        characterMovement.movementDirection === "up" ||
-        characterMovement.movementDirection === "down"
-      ) {
-        stateUpdates.verticalDirection = characterMovement.movementDirection;
-      } else if (
-        characterMovement.movementDirection === "left" ||
-        characterMovement.movementDirection === "right"
-      ) {
-        stateUpdates.horizontalDirection = characterMovement.movementDirection;
-      }
-
-      // Process diagonal movement from useCharacterMovement
-      if (characterMovement.diagonalMovement) {
-        if (characterMovement.diagonalMovement.y < 0) {
-          stateUpdates.verticalDirection = "up";
-        } else if (characterMovement.diagonalMovement.y > 0) {
-          stateUpdates.verticalDirection = "down";
-        }
-
-        if (characterMovement.diagonalMovement.x < 0) {
-          stateUpdates.horizontalDirection = "left";
-        } else if (characterMovement.diagonalMovement.x > 0) {
-          stateUpdates.horizontalDirection = "right";
-        }
-      }
-
-      stateUpdates.movementTransition = "start-move";
-
-      // Apply all updates at once
-      setCharacterState((prev) => ({ ...prev, ...stateUpdates }));
-
-      // After start animation, set to walking
-      const walkTimeout = setTimeout(() => {
-        setCharacterState((prev) => ({
-          ...prev,
-          isMoving: true,
-          movementTransition: null,
-        }));
-      }, 200);
-
-      // Reset isMoving after animation completes with stop animation
-      const stopTimeout = setTimeout(() => {
-        setCharacterState((prev) => ({
-          ...prev,
-          movementTransition: "stop-move",
-        }));
-
-        // After stop animation, reset to idle
-        setTimeout(() => {
-          setCharacterState((prev) => {
-            const shouldResetDirections =
-              !characterMovement.diagonalMovement ||
-              (characterMovement.diagonalMovement.x === 0 &&
-                characterMovement.diagonalMovement.y === 0);
-
-            return {
-              ...prev,
-              isMoving: false,
-              movementTransition: null,
-              ...(shouldResetDirections && {
-                verticalDirection: null,
-                horizontalDirection: null,
-              }),
-            };
-          });
-        }, 200);
-      }, 400);
-
-      return () => {
-        clearTimeout(walkTimeout);
-        clearTimeout(stopTimeout);
-      };
-    }
-  }, [characterMovement.movementDirection, characterMovement.diagonalMovement]);
 
   useEffect(() => {
     // Check for both map artifacts and server artifacts at the player's position
@@ -2317,6 +2244,11 @@ const GameWorld = React.memo(() => {
     // Check for both map artifacts and server artifacts
     checkBothArtifactSources();
   }, [characterPosition, currentMapIndex, gameData.artifacts]);
+
+  // Portal collision detection
+  useEffect(() => {
+    checkPortalCollisions();
+  }, [checkPortalCollisions]);
 
   useEffect(() => {
     // Subscribe to position changes to detect and handle artifact interactions
@@ -2400,348 +2332,8 @@ const GameWorld = React.memo(() => {
       }
     };
 
-    const checkPortalCollisions = () => {
-      if (!characterPosition) return;
-
-      const row = Math.floor(characterPosition.y / TILE_SIZE);
-      const col = Math.floor(characterPosition.x / TILE_SIZE);
-
-      // Handle regular portals (type 5) for any map
-      if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 5) {
-        // Get the current map's name
-        const currentMapName = MAPS[currentMapIndex]?.name || "";
-
-        // For Yosemite map, handle type 5 portal specially to return to Overworld 3
-        if (currentMapName === "Yosemite") {
-          // Notify user they're on a regular portal
-          if (!portalNotificationActive) {
-            showPortalNotification(
-              "Return to Overworld 3",
-              "Press SPACE to return to Overworld 3",
-            );
-            setPortalNotificationActive(true);
-
-            // When space is pressed while on this tile, go back to Overworld 3
-            const handleRegularPortalEnter = (e) => {
-              if (
-                e.code === "Space" &&
-                MAPS[currentMapIndex]?.data?.[row]?.[col] === 5 &&
-                currentMapName === "Yosemite"
-              ) {
-                // Play portal sound
-                if (soundManager) {
-                  soundManager.playSound("portal");
-                }
-
-                // Hide the portal notification
-                hidePortalNotification();
-                setPortalNotificationActive(false);
-
-                // Find Overworld 3 map index
-                const destinationIndex = MAPS.findIndex(
-                  (map) => map.name === "Overworld 3",
-                );
-                if (destinationIndex !== -1) {
-                  // Change map to Overworld 3
-                  setCurrentMapIndex(destinationIndex);
-                  // Set character position near the portal to Yosemite
-                  setCharacterPosition({ x: 8, y: 2 });
-
-                  // Announce the world name
-                  const portalAnnouncement = document.createElement("div");
-                  portalAnnouncement.className = "world-announcement";
-                  portalAnnouncement.innerHTML =
-                    "<h2>Welcome back to Overworld 3</h2>";
-                  document.body.appendChild(portalAnnouncement);
-
-                  // Remove the announcement after a few seconds
-                  setTimeout(() => {
-                    portalAnnouncement.classList.add("fade-out");
-                    setTimeout(() => {
-                      document.body.removeChild(portalAnnouncement);
-                    }, 1000);
-                  }, 3000);
-                } else {
-                  console.error("Destination map Overworld 3 not found");
-                }
-
-                // Remove the event listener
-                window.removeEventListener("keydown", handleRegularPortalEnter);
-              }
-            };
-
-            // Add temporary event listener for space key
-            window.addEventListener("keydown", handleRegularPortalEnter);
-
-            // Clean up function to remove listener when player moves away
-            return () => {
-              window.removeEventListener("keydown", handleRegularPortalEnter);
-              setPortalNotificationActive(false);
-            };
-          }
-        }
-        // For all other maps, handle type 5 portal with the standard progression
-        else {
-          // Save current position as a checkpoint before transitioning
-          gameStateManager.saveCheckpoint(currentMapName, {
-            ...characterPosition,
-          });
-
-          // Define destination based on current map - making progression more logical
-          let destinationMap = null;
-          let spawnPosition = { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE }; // Default spawn
-
-          // Logical world progression paths
-          if (currentMapName === "Overworld") {
-            destinationMap = "Overworld 2";
-          } else if (currentMapName === "Overworld 2") {
-            destinationMap = "Overworld 3";
-          } else if (currentMapName === "Overworld 3") {
-            // Need to check for specific portal coordinates to determine destination
-            const portalX = Math.floor(characterPosition.x / TILE_SIZE);
-            const portalY = Math.floor(characterPosition.y / TILE_SIZE);
-
-            // Special Yosemite portal is at x=8, y=1 in Overworld 3
-            if (portalX === 8 && portalY === 1) {
-              destinationMap = "Yosemite";
-              // Reset the level1 completed flag for testing purposes
-              try {
-                localStorage.removeItem("level-level1-completed");
-                localStorage.removeItem("nkd-man-reward-shown");
-                console.log("🏆 Reset level1 completion flags for testing");
-              } catch (error) {
-                console.error("Error resetting level completion flags:", error);
-              }
-            } else {
-              // Default portal in Overworld 3 goes to Desert 1
-              destinationMap = "Desert 1";
-            }
-          } else if (currentMapName === "Desert 1") {
-            destinationMap = "Desert 2";
-          } else if (currentMapName === "Desert 2") {
-            destinationMap = "Desert 3";
-          } else if (currentMapName === "Desert 3") {
-            destinationMap = "Dungeon Level 1";
-          } else if (currentMapName === "Dungeon Level 1") {
-            destinationMap = "Dungeon Level 2";
-          } else if (currentMapName === "Dungeon Level 2") {
-            destinationMap = "Dungeon Level 3";
-          } else if (currentMapName === "Dungeon Level 3") {
-            // Change to go to Yosemite instead of directly to Text Adventure
-            destinationMap = "Yosemite";
-          }
-
-          // Find the index of the destination map
-          const destinationIndex = MAPS.findIndex(
-            (map) => map.name === destinationMap,
-          );
-
-          if (destinationIndex !== -1) {
-            // Play portal sound
-            if (soundManager) soundManager.playSound("portal");
-
-            // Change map
-            setCurrentMapIndex(destinationIndex);
-            setCharacterPosition(spawnPosition);
-
-            // Announce the world name
-            const portalAnnouncement = document.createElement("div");
-            portalAnnouncement.className = "world-announcement";
-            portalAnnouncement.innerHTML = `<h2>Welcome to ${destinationMap}</h2>`;
-            document.body.appendChild(portalAnnouncement);
-
-            // Remove the announcement after a few seconds
-            setTimeout(() => {
-              portalAnnouncement.classList.add("fade-out");
-              setTimeout(() => {
-                document.body.removeChild(portalAnnouncement);
-              }, 1000);
-            }, 3000);
-
-            // Check if this is the path to Yosemite (Level 1 completion)
-            if (destinationMap === "Yosemite") {
-              // Add slight delay to show portal transition first
-              setTimeout(() => {
-                handleLevelCompletion("level1");
-              }, 800);
-            }
-          } else {
-            console.error(`Destination map "${destinationMap}" not found`);
-          }
-        }
-      }
-
-      // Handle special portals in Yosemite map
-      const currentMapName = MAPS[currentMapIndex]?.name || "";
-      if (currentMapName === "Yosemite") {
-        // Terminal portal (code 6)
-        if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 6) {
-          // Notify user they're on a mysterious portal
-          if (!portalNotificationActive) {
-            showPortalNotification(
-              "Mysterious Portal",
-              "Press SPACE to investigate this strange energy",
-            );
-            setPortalNotificationActive(true);
-
-            // When space is pressed while on this tile, enter the terminal
-            const handleTerminalEnter = (e) => {
-              if (
-                e.code === "Space" &&
-                MAPS[currentMapIndex]?.data?.[row]?.[col] === 6 &&
-                currentMapName === "Yosemite"
-              ) {
-                // Play portal sound
-                if (soundManager) {
-                  // Stop Yosemite music first
-                  soundManager.stopMusic(true);
-                  // Play portal sound
-                  soundManager.playSound("portal");
-                }
-                // Hide the portal notification before launching terminal
-                hidePortalNotification();
-                setPortalNotificationActive(false);
-                // Launch terminal special world
-                setCurrentSpecialWorld("terminal");
-                // Remove the event listener
-                window.removeEventListener("keydown", handleTerminalEnter);
-              }
-            };
-
-            // Add temporary event listener for space key
-            window.addEventListener("keydown", handleTerminalEnter);
-
-            // Clean up function to remove listener when player moves away
-            return () => {
-              window.removeEventListener("keydown", handleTerminalEnter);
-              setPortalNotificationActive(false);
-            };
-          }
-        }
-
-        // Shooter portal (code 7)
-        else if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 7) {
-          // Notify user they're on a mysterious portal
-          if (!portalNotificationActive) {
-            showPortalNotification(
-              "Mysterious Portal",
-              "Press SPACE to investigate this strange energy",
-            );
-            setPortalNotificationActive(true);
-
-            // When space is pressed while on this tile, enter the shooter
-            const handleShooterEnter = (e) => {
-              if (
-                e.code === "Space" &&
-                MAPS[currentMapIndex]?.data?.[row]?.[col] === 7 &&
-                currentMapName === "Yosemite"
-              ) {
-                console.log(
-                  "SHOOTER PORTAL: Space key pressed on shooter portal",
-                );
-
-                // Play portal sound
-                if (soundManager) {
-                  // Stop Yosemite music first
-                  soundManager.stopMusic(true);
-                  // Play portal sound
-                  soundManager.playSound("portal");
-                  console.log("SHOOTER PORTAL: Portal sound played");
-                }
-                // Hide the portal notification before launching shooter
-                hidePortalNotification();
-                setPortalNotificationActive(false);
-                // Launch shooter special world
-                console.log(
-                  "SHOOTER PORTAL: Setting currentSpecialWorld to 'shooter'",
-                );
-                setCurrentSpecialWorld("shooter");
-                console.log(
-                  "SHOOTER PORTAL: State updated, should render Level4Shooter now",
-                );
-
-                // Remove the event listener
-                window.removeEventListener("keydown", handleShooterEnter);
-              }
-            };
-
-            // Add temporary event listener for space key
-            window.addEventListener("keydown", handleShooterEnter);
-
-            // Clean up function to remove listener when player moves away
-            return () => {
-              window.removeEventListener("keydown", handleShooterEnter);
-              setPortalNotificationActive(false);
-            };
-          }
-        }
-
-        // Text Adventure portal (code 8)
-        else if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 8) {
-          // Notify user they're on a mysterious portal
-          if (!portalNotificationActive) {
-            showPortalNotification(
-              "Mysterious Portal",
-              "Press SPACE to investigate this strange energy",
-            );
-            setPortalNotificationActive(true);
-
-            // When space is pressed while on this tile, enter the text adventure
-            const handleTextEnter = (e) => {
-              if (
-                e.code === "Space" &&
-                MAPS[currentMapIndex]?.data?.[row]?.[col] === 8 &&
-                currentMapName === "Yosemite"
-              ) {
-                // Play portal sound
-                if (soundManager) {
-                  // Stop Yosemite music first
-                  soundManager.stopMusic(true);
-                  // Play portal sound
-                  soundManager.playSound("portal");
-                }
-                // Hide the portal notification before launching text adventure
-                hidePortalNotification();
-                setPortalNotificationActive(false);
-                // Launch text adventure special world
-                setCurrentSpecialWorld("text_adventure");
-                // Remove the event listener
-                window.removeEventListener("keydown", handleTextEnter);
-              }
-            };
-
-            // Add temporary event listener for space key
-            window.addEventListener("keydown", handleTextEnter);
-
-            // Clean up function to remove listener when player moves away
-            return () => {
-              window.removeEventListener("keydown", handleTextEnter);
-              setPortalNotificationActive(false);
-            };
-          }
-        } else {
-          // Reset portal notification when not on a special portal
-          if (portalNotificationActive) {
-            hidePortalNotification();
-            setPortalNotificationActive(false);
-          }
-        }
-      }
-
-      // Legacy level completion logic (for backwards compatibility)
-      if (currentMapIndex === 1 && row === 0 && col === 19) {
-        handleLevelCompletion("level2");
-      } else if (
-        currentMapIndex === 2 &&
-        !gameData.levelCompletion.level3 &&
-        character?.qualifyingArtifacts?.level3
-      ) {
-        handleLevelCompletion("level3");
-      }
-    };
-
-    checkPortalCollisions();
-  }, [characterPosition, currentMapIndex, character, gameData.levelCompletion]);
+    checkArtifactGameInteractions();
+  }, [characterPosition, currentMapIndex, gameData.artifacts]);
 
   // Close NPC dialog
   const handleCloseNPCDialog = useCallback(() => {
@@ -3349,30 +2941,6 @@ const GameWorld = React.memo(() => {
     }
   }, [updateGameState]);
 
-  // Function to handle user artifact management
-  const handleUserArtifactUpdate = useCallback(
-    async (artifact, action) => {
-      try {
-        if (action === "place") {
-          setSelectedUserArtifact(artifact);
-          updateUIState({ isPlacingArtifact: true });
-          updateUIState({ showInventory: false });
-        } else if (action === "update" && artifact._id) {
-          await updateArtifact(artifact);
-          refreshArtifactList();
-        } else if (action === "delete" && artifact._id) {
-          await deleteArtifact(artifact._id);
-          setInventory((prev) =>
-            prev.filter((item) => item._id !== artifact._id),
-          );
-          refreshArtifactList();
-        }
-      } catch (error) {
-        console.error(`❌ Error ${action}ing artifact:`, error);
-      }
-    },
-    [updateUIState, setSelectedUserArtifact, refreshArtifactList],
-  );
 
   // Function to toggle artifacts visibility
   const toggleArtifactsVisibility = useCallback(() => {
@@ -3574,23 +3142,27 @@ const GameWorld = React.memo(() => {
               )}
 
               {/* Player Character */}
-              <div
-                className={`character ${uiState.isMoving ? "walking" : ""} ${characterState.direction} ${characterState.verticalDirection !== characterState.direction && characterState.verticalDirection ? characterState.verticalDirection : ""} ${characterState.horizontalDirection !== characterState.direction && characterState.horizontalDirection ? characterState.horizontalDirection : ""} ${characterState.movementTransition || ""} ${isInvincible ? "character-invincible" : ""} ${characterState.isHit ? "character-hit" : ""}`}
-                style={{
-                  ...characterState.style,
-                  // Use custom character sprite if available, otherwise fallback to default
-                  ...(user?.characterSprite
-                    ? {
-                        background: `url(${user.characterSprite}) no-repeat center center`,
-                        backgroundSize: "cover",
-                        imageRendering: "pixelated",
-                      }
-                    : {}),
+              <CharacterController
+                currentMapIndex={currentMapIndex}
+                setCurrentMapIndex={setCurrentMapIndex}
+                isLoggedIn={isLoggedIn}
+                visibleArtifact={visibleArtifact}
+                handleArtifactPickup={handleArtifactPickup}
+                setFormPosition={setFormPosition}
+                setShowInventory={setShowInventory}
+                adjustViewport={adjustViewport}
+                activePowers={activePowers}
+                user={user}
+                uiState={uiState}
+                isInvincible={isInvincible}
+                characterState={characterState}
+                onPositionChange={(position, reason) => {
+                  // Update any GameWorld state that still depends on characterPosition
+                  // This is throttled to prevent excessive re-renders
+                  if (reason === 'portal') {
+                    // Handle portal-specific logic if needed
+                  }
                 }}
-                ref={characterRef}
-                role="img"
-                aria-label={`${user?.characterName || "Player"} at position ${Math.round(characterPosition.x / TILE_SIZE)}, ${Math.round(characterPosition.y / TILE_SIZE)}`}
-                data-testid="character"
               />
 
               {/* Other Players */}
@@ -3777,20 +3349,22 @@ const GameWorld = React.memo(() => {
             />
           )}
 
-          {uiState.showInventory && character && (
-            <Inventory
-              onClose={() => updateUIState({ showInventory: false })}
-              character={character}
-              inventory={character?.inventory || []}
-              artifacts={gameData.artifacts}
-              currentArea={
-                Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
-                  ? MAPS[currentMapIndex].name
-                  : "Unknown Area"
-              }
-              onManageUserArtifact={handleUserArtifactUpdate}
-            />
-          )}
+          <InventoryManager
+            showInventory={uiState.showInventory}
+            setShowInventory={(show) => updateUIState({ showInventory: show })}
+            character={character}
+            inventory={character?.inventory || []}
+            artifacts={gameData.artifacts}
+            currentArea={
+              Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
+                ? MAPS[currentMapIndex].name
+                : "Unknown Area"
+            }
+            setSelectedUserArtifact={setSelectedUserArtifact}
+            refreshArtifactList={refreshArtifactList}
+            setInventory={setInventory}
+            updateUIState={updateUIState}
+          />
 
           {/* XP Notifications */}
           {xpNotifications.map((notification) => (
