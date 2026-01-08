@@ -47,8 +47,8 @@ const Character = forwardRef(({
       data-level={level}
       style={{
         position: "absolute",
-        left: `${x}px`,
-        top: `${y}px`,
+        left: `${x - TILE_SIZE / 2}px`,
+        top: `${y - TILE_SIZE / 2}px`,
         width: `${TILE_SIZE}px`,
         height: `${TILE_SIZE}px`,
         transform: `scale(${bubbleSize})`,
