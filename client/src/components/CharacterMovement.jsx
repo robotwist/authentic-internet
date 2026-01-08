@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS, MAPS, isWalkable } from "./Constants";
 import SoundManager from "./utils/SoundManager";
 
-// Movement step size - one full tile per button press
-const MOVEMENT_STEP_SIZE = TILE_SIZE; // 64px - one tile per move for grid-based movement
+// Movement step size - half tile per button press for precise grid movement
+const MOVEMENT_STEP_SIZE = TILE_SIZE / 2; // 32px - half tile per move
 
 const useCharacterMovement = (
   characterPosition,
@@ -31,19 +31,13 @@ const useCharacterMovement = (
   const jumpCount = useRef(0); // Track jumps for double jump power
   const lastJumpTime = useRef(0);
 
-  // Calculate power effects
+  // Calculate power effects for discrete movement
   const hasSpeedBoost = activePowers.includes("speed_boost");
-  const hasDoubleJump = activePowers.includes("double_jump");
   const hasFlight = activePowers.includes("flight");
 
-  // Physics constants based on powers
-  const physicsConstants = {
-    acceleration: 0.3,
-    friction: 0.85,
-    maxSpeed: hasSpeedBoost ? 3.5 : 2.5,
-    jumpForce: -8,
-    gravity: hasFlight ? 0.2 : 0.5, // Reduced gravity for flight
-    maxJumps: hasDoubleJump ? 2 : 1,
+  // Movement constants - discrete movement per key press
+  const movementConstants = {
+    stepSize: hasSpeedBoost ? MOVEMENT_STEP_SIZE * 1.5 : MOVEMENT_STEP_SIZE, // Speed boost gives 1.5x movement
   };
 
   // Add useEffect for initialization
@@ -76,116 +70,43 @@ const useCharacterMovement = (
     [isBumping, soundManager],
   );
 
-  // Continuous physics-based movement system
-  const updatePhysics = useCallback((inputDirection, deltaTime = 16) => {
-    if (!characterState?.physicsState) return characterPosition;
+  // Discrete movement system - move exactly one step per key press
+  const moveCharacter = useCallback((direction) => {
+    const currentMapData = MAPS[currentMapIndex]?.data;
+    if (!currentMapData) return characterPosition;
 
-    const physics = characterState.physicsState;
-    let newVelocity = { ...physics.velocity };
     let newPosition = { ...characterPosition };
     let targetMapIndex = currentMapIndex;
 
-    // Apply gravity (unless flying)
-    if (!hasFlight) {
-      newVelocity.y += physicsConstants.gravity;
-      // Cap falling speed
-      newVelocity.y = Math.min(newVelocity.y, 8);
+    // Calculate movement based on direction
+    switch (direction) {
+      case "left":
+        newPosition.x -= movementConstants.stepSize;
+        break;
+      case "right":
+        newPosition.x += movementConstants.stepSize;
+        break;
+      case "up":
+        newPosition.y -= movementConstants.stepSize;
+        break;
+      case "down":
+        newPosition.y += movementConstants.stepSize;
+        break;
     }
-
-    // Apply acceleration based on input
-    if (inputDirection.left) {
-      newVelocity.x = Math.max(newVelocity.x - physicsConstants.acceleration, -physicsConstants.maxSpeed);
-    } else if (inputDirection.right) {
-      newVelocity.x = Math.min(newVelocity.x + physicsConstants.acceleration, physicsConstants.maxSpeed);
-    } else {
-      // Apply friction when no horizontal input
-      newVelocity.x *= physicsConstants.friction;
-      // Stop completely when velocity is very small
-      if (Math.abs(newVelocity.x) < 0.1) newVelocity.x = 0;
-    }
-
-    // Handle jumping
-    if (inputDirection.up && physics.canJump && physics.jumpCount < physicsConstants.maxJumps) {
-      newVelocity.y = physicsConstants.jumpForce;
-      physics.jumpCount += 1;
-      lastJumpTime.current = Date.now();
-      // Play jump sound
-      if (soundManager) soundManager.playSound("jump", 0.3);
-    }
-
-    // Flight controls (vertical movement)
-    if (hasFlight) {
-      if (inputDirection.up) {
-        newVelocity.y = Math.max(newVelocity.y - physicsConstants.acceleration, -physicsConstants.maxSpeed);
-      } else if (inputDirection.down) {
-        newVelocity.y = Math.min(newVelocity.y + physicsConstants.acceleration, physicsConstants.maxSpeed);
-      } else {
-        newVelocity.y *= physicsConstants.friction;
-        if (Math.abs(newVelocity.y) < 0.1) newVelocity.y = 0;
-      }
-    }
-
-    // Update position based on velocity
-    newPosition.x += newVelocity.x;
-    newPosition.y += newVelocity.y;
-
-    // Get current map data
-    const currentMapData = MAPS[currentMapIndex]?.data;
-    if (!currentMapData) return characterPosition;
 
     const mapWidth = currentMapData[0].length * TILE_SIZE;
     const mapHeight = currentMapData.length * TILE_SIZE;
 
-    // Ground collision and landing detection
-    if (!hasFlight) {
-      const groundY = Math.floor((newPosition.y + TILE_SIZE) / TILE_SIZE) * TILE_SIZE;
-      const tileX = Math.floor(newPosition.x / TILE_SIZE);
-      const tileY = Math.floor(groundY / TILE_SIZE);
+    // Check collision at new position
+    const canMove = isWalkable(newPosition.x, newPosition.y, currentMapData) &&
+                    isWalkable(newPosition.x + TILE_SIZE - 1, newPosition.y, currentMapData) &&
+                    isWalkable(newPosition.x, newPosition.y + TILE_SIZE - 1, currentMapData) &&
+                    isWalkable(newPosition.x + TILE_SIZE - 1, newPosition.y + TILE_SIZE - 1, currentMapData);
 
-      if (tileY >= 0 && tileY < currentMapData.length && tileX >= 0 && tileX < currentMapData[0].length) {
-        if (isWalkable(newPosition.x, groundY, currentMapData)) {
-          // Check if we're on ground
-          if (newVelocity.y >= 0 && newPosition.y + TILE_SIZE >= groundY - 1) {
-            newPosition.y = groundY - TILE_SIZE;
-            newVelocity.y = 0;
-            physics.isGrounded = true;
-            physics.canJump = true;
-            physics.jumpCount = 0;
-          }
-        }
-      }
-    }
-
-    // Horizontal collision detection
-    if (!hasFlight) {
-      const tileX = Math.floor(newPosition.x / TILE_SIZE);
-      const tileY = Math.floor(newPosition.y / TILE_SIZE);
-
-      // Check left collision
-      if (newVelocity.x < 0 && tileX >= 0 && tileY >= 0 && tileY < currentMapData.length) {
-        if (!isWalkable(newPosition.x, newPosition.y, currentMapData)) {
-          newPosition.x = (tileX + 1) * TILE_SIZE;
-          newVelocity.x = 0;
-          triggerBump("left");
-        }
-      }
-
-      // Check right collision
-      if (newVelocity.x > 0 && tileX < currentMapData[0].length && tileY >= 0 && tileY < currentMapData.length) {
-        if (!isWalkable(newPosition.x + TILE_SIZE - 1, newPosition.y, currentMapData)) {
-          newPosition.x = tileX * TILE_SIZE;
-          newVelocity.x = 0;
-          triggerBump("right");
-        }
-      }
-
-      // Check ceiling collision (for jumping)
-      if (newVelocity.y < 0 && tileY >= 0 && tileX >= 0 && tileX < currentMapData[0].length) {
-        if (!isWalkable(newPosition.x, newPosition.y, currentMapData)) {
-          newPosition.y = (tileY + 1) * TILE_SIZE;
-          newVelocity.y = 0;
-        }
-      }
+    if (!canMove) {
+      // Trigger bump animation based on direction
+      triggerBump(direction);
+      return characterPosition; // Return original position if can't move
     }
 
     // Boundary checks with map transitions
@@ -197,7 +118,8 @@ const useCharacterMovement = (
           newPosition.x = (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
         } else {
           newPosition.x = 0;
-          newVelocity.x = 0;
+          triggerBump("left");
+          return characterPosition;
         }
       } else if (currentMapName === "Overworld 3") {
         targetMapIndex = MAPS.findIndex((map) => map.name === "Overworld 2");
@@ -205,11 +127,13 @@ const useCharacterMovement = (
           newPosition.x = (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
         } else {
           newPosition.x = 0;
-          newVelocity.x = 0;
+          triggerBump("left");
+          return characterPosition;
         }
       } else {
         newPosition.x = 0;
-        newVelocity.x = 0;
+        triggerBump("left");
+        return characterPosition;
       }
     } else if (newPosition.x >= mapWidth) {
       const currentMapName = MAPS[currentMapIndex].name;
@@ -219,7 +143,8 @@ const useCharacterMovement = (
           newPosition.x = 0;
         } else {
           newPosition.x = mapWidth - TILE_SIZE;
-          newVelocity.x = 0;
+          triggerBump("right");
+          return characterPosition;
         }
       } else if (currentMapName === "Overworld 2") {
         targetMapIndex = MAPS.findIndex((map) => map.name === "Overworld 3");
@@ -227,28 +152,26 @@ const useCharacterMovement = (
           newPosition.x = 0;
         } else {
           newPosition.x = mapWidth - TILE_SIZE;
-          newVelocity.x = 0;
+          triggerBump("right");
+          return characterPosition;
         }
       } else {
         newPosition.x = mapWidth - TILE_SIZE;
-        newVelocity.x = 0;
+        triggerBump("right");
+        return characterPosition;
       }
     }
 
-    // Vertical boundaries
+    // Vertical boundaries (no map transitions for vertical movement)
     if (newPosition.y < 0) {
       newPosition.y = 0;
-      newVelocity.y = 0;
+      triggerBump("up");
+      return characterPosition;
     } else if (newPosition.y >= mapHeight) {
       newPosition.y = mapHeight - TILE_SIZE;
-      newVelocity.y = 0;
-      physics.isGrounded = true;
-      physics.canJump = true;
-      physics.jumpCount = 0;
+      triggerBump("down");
+      return characterPosition;
     }
-
-    // Update physics state
-    physics.velocity = newVelocity;
 
     // Handle map transitions
     if (targetMapIndex !== currentMapIndex) {
@@ -256,21 +179,16 @@ const useCharacterMovement = (
     }
 
     return newPosition;
-  }, [characterPosition, characterState, currentMapIndex, setCurrentMapIndex, hasFlight, physicsConstants, soundManager, triggerBump]);
+  }, [characterPosition, currentMapIndex, setCurrentMapIndex, movementConstants.stepSize, triggerBump]);
 
-  // Input handling for continuous movement
-  const inputDirection = useRef({ left: false, right: false, up: false, down: false });
-  const lastPhysicsUpdate = useRef(Date.now());
-
-  // Physics update loop
-  const updateMovement = useCallback(() => {
+  // Discrete movement handling - one move per key press
+  const handleDiscreteMove = useCallback((direction) => {
+    // Prevent rapid successive moves
     const now = Date.now();
-    const deltaTime = now - lastPhysicsUpdate.current;
-    lastPhysicsUpdate.current = now;
+    if (now - lastMoveTime.current < 150) return; // Minimum 150ms between moves
+    lastMoveTime.current = now;
 
-    if (deltaTime > 50) return; // Skip large time jumps
-
-    const newPosition = updatePhysics(inputDirection.current, deltaTime);
+    const newPosition = moveCharacter(direction);
 
     // Only update if position actually changed
     if (newPosition.x !== characterPosition.x || newPosition.y !== characterPosition.y) {
@@ -281,36 +199,19 @@ const useCharacterMovement = (
         adjustViewport(newPosition);
       }
 
-      // Play movement sound occasionally (not every frame)
-      if (soundManager && Math.random() < 0.1 && (Math.abs(characterState?.physicsState?.velocity?.x || 0) > 1)) {
-        soundManager.playSound("step", 0.15);
+      // Play movement sound
+      if (soundManager) {
+        soundManager.playSound("step", 0.2);
       }
     }
-  }, [updatePhysics, characterPosition, handleCharacterMove, currentMapIndex, adjustViewport, soundManager, characterState]);
+  }, [moveCharacter, characterPosition, handleCharacterMove, currentMapIndex, adjustViewport, soundManager]);
 
-  // Set up physics loop
-  useEffect(() => {
-    const physicsInterval = setInterval(updateMovement, 16); // ~60fps
-    return () => clearInterval(physicsInterval);
-  }, [updateMovement]);
-
-  // Handle key input for continuous movement
+  // Handle key input for discrete movement
   const handleMove = useCallback((direction, pressed) => {
-    switch (direction) {
-      case "left":
-        inputDirection.current.left = pressed;
-        break;
-      case "right":
-        inputDirection.current.right = pressed;
-        break;
-      case "up":
-        inputDirection.current.up = pressed;
-        break;
-      case "down":
-        inputDirection.current.down = pressed;
-        break;
+    if (pressed) {
+      handleDiscreteMove(direction);
     }
-  }, []);
+  }, [handleDiscreteMove]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -322,33 +223,40 @@ const useCharacterMovement = (
         return;
       }
 
-      // Prevent key repeat for non-movement keys
-      if (processedKeys.current.has(event.key)) {
-        return;
-      }
-
       switch (event.key) {
         case "ArrowUp":
         case "w":
         case "W":
+          // Prevent key repeat for movement keys
+          if (processedKeys.current.has(event.key)) return;
+          processedKeys.current.add(event.key);
           handleMove("up", true);
           event.preventDefault();
           break;
         case "ArrowDown":
         case "s":
         case "S":
+          // Prevent key repeat for movement keys
+          if (processedKeys.current.has(event.key)) return;
+          processedKeys.current.add(event.key);
           handleMove("down", true);
           event.preventDefault();
           break;
         case "ArrowLeft":
         case "a":
         case "A":
+          // Prevent key repeat for movement keys
+          if (processedKeys.current.has(event.key)) return;
+          processedKeys.current.add(event.key);
           handleMove("left", true);
           event.preventDefault();
           break;
         case "ArrowRight":
         case "d":
         case "D":
+          // Prevent key repeat for movement keys
+          if (processedKeys.current.has(event.key)) return;
+          processedKeys.current.add(event.key);
           handleMove("right", true);
           event.preventDefault();
           break;
@@ -376,32 +284,8 @@ const useCharacterMovement = (
     };
 
     const handleKeyUp = (event) => {
-      switch (event.key) {
-        case "ArrowUp":
-        case "w":
-        case "W":
-          handleMove("up", false);
-          break;
-        case "ArrowDown":
-        case "s":
-        case "S":
-          handleMove("down", false);
-          break;
-        case "ArrowLeft":
-        case "a":
-        case "A":
-          handleMove("left", false);
-          break;
-        case "ArrowRight":
-        case "d":
-        case "D":
-          handleMove("right", false);
-          break;
-        default:
-          // Remove from processed keys for non-movement keys
-          processedKeys.current.delete(event.key);
-          break;
-      }
+      // Clear processed keys for all keys (including movement keys)
+      processedKeys.current.delete(event.key);
     };
 
     window.addEventListener("keydown", handleKeyDown);
