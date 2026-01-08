@@ -234,6 +234,16 @@ const MultiplayerChat = ({
     [inputMessage, isConnected, worldId, selectedUser, sendMessage],
   );
 
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit(e);
+      }
+    },
+    [handleSubmit]
+  );
+
   // Handle emoji selection
   const handleEmojiClick = useCallback((emoji) => {
     setInputMessage((prev) => prev + emoji);

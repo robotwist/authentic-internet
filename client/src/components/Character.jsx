@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef } from "react";
 import PropTypes from "prop-types";
 import { TILE_SIZE } from "./Constants";
 import "./Character.css";
 
-const Character = ({
+const Character = forwardRef(({
   x,
   y,
   exp = 0,
@@ -12,7 +12,7 @@ const Character = ({
   avatar = null,
   isBumping = false,
   bumpDirection = null,
-}) => {
+}, ref) => {
   // Calculate the bubble size based on experience
   const bubbleSize = Math.min(1.5, 1 + exp / 1000); // Max size is 1.5x
   const [isNKDMan, setIsNKDMan] = useState(true);
@@ -42,6 +42,7 @@ const Character = ({
 
   return (
     <div
+      ref={ref}
       className={`character-container ${getAnimationClass()} ${isNKDMan ? "nkd-man" : ""}`}
       data-level={level}
       style={{
@@ -71,7 +72,7 @@ const Character = ({
       {exp > 0 && <div className="exp-indicator">Level {level}</div>}
     </div>
   );
-};
+});
 
 Character.propTypes = {
   x: PropTypes.number.isRequired,

@@ -85,6 +85,7 @@ const GameWorld = React.memo(() => {
   // Initialization guard to prevent render-order issues
   const [isInitialized, setIsInitialized] = useState(false);
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
+  const [otherPlayers, setOtherPlayers] = useState([]);
 
   // Use the custom game state hook
   const gameState = useGameState();
@@ -105,6 +106,7 @@ const GameWorld = React.memo(() => {
     questStatusMap,
     mobileState,
     portalState,
+    isLoggedIn,
     // Setters
     setCurrentMapIndex,
     setCharacterPosition,
@@ -128,6 +130,8 @@ const GameWorld = React.memo(() => {
     setCharacterState,
     setQuestStatusMap,
     setMobileState,
+    setFormPosition,
+    setSoundManager,
   } = gameState;
 
   // Performance tracking
@@ -2476,19 +2480,22 @@ const GameWorld = React.memo(() => {
   // Update the handleArtifactClick function to include achievements
   const handleArtifactClick = useCallback(
     (artifactId) => {
-      // Find the clicked artifact
-      const clickedArtifact = artifacts.find(
+      // Find the clicked artifact from game data
+      const clickedArtifact = gameState.gameData.artifacts?.find(
         (artifact) => artifact.id === artifactId,
       );
       if (!clickedArtifact) return;
 
       // Check if this artifact was already viewed
-      const isFirstView = !viewedArtifacts.includes(artifactId);
+      const isFirstView = !gameState.gameData.viewedArtifacts?.includes(artifactId);
 
       // Update viewed artifacts
       if (isFirstView) {
-        const updatedViewedArtifacts = [...viewedArtifacts, artifactId];
-        setViewedArtifacts(updatedViewedArtifacts);
+        const updatedViewedArtifacts = [
+          ...(gameState.gameData.viewedArtifacts || []),
+          artifactId,
+        ];
+        updateGameState({ viewedArtifacts: updatedViewedArtifacts });
         localStorage.setItem(
           "viewedArtifacts",
           JSON.stringify(updatedViewedArtifacts),
@@ -2514,11 +2521,11 @@ const GameWorld = React.memo(() => {
 
       // Save game state if user is logged in
       if (user && typeof updateGameProgress === "function") {
-        const gameState = {
+        const gameStateToSave = {
           inventory,
           viewedArtifacts: isFirstView
-            ? [...viewedArtifacts, artifactId]
-            : viewedArtifacts,
+            ? [...(gameState.gameData.viewedArtifacts || []), artifactId]
+            : gameState.gameData.viewedArtifacts,
           lastPosition: {
             x: characterPosition.x,
             y: characterPosition.y,
@@ -2531,12 +2538,12 @@ const GameWorld = React.memo(() => {
           },
         };
 
-        updateGameProgress(gameState);
+        updateGameProgress(gameStateToSave);
       }
     },
     [
-      artifacts,
-      viewedArtifacts,
+      gameState.gameData.artifacts,
+      gameState.gameData.viewedArtifacts,
       user,
       inventory,
       characterPosition,
@@ -2547,6 +2554,7 @@ const GameWorld = React.memo(() => {
       setVisibleArtifact,
       validateQuestProgress,
       updateGameProgress,
+      updateGameState,
     ],
   );
 
@@ -2722,8 +2730,8 @@ const GameWorld = React.memo(() => {
 
   // Update the saveGameProgress method to use context
   const saveGameProgressWithContext = useCallback(() => {
-    if (gameState.isLoggedIn && gameState.character?.id) {
-      const gameState = {
+    if (isLoggedIn && character?.id) {
+      const gameStateToSave = {
         experience: character.experience || 0,
         avatar: character.avatar,
         inventory,
@@ -2740,7 +2748,7 @@ const GameWorld = React.memo(() => {
         },
       };
 
-      updateGameProgress(gameState);
+      updateGameProgress(gameStateToSave);
     }
   }, [
     isLoggedIn,
@@ -2867,23 +2875,27 @@ const GameWorld = React.memo(() => {
           />
 
           {/* === CORE GAME WORLD === */}
-          <MapComponent
-            currentMapIndex={gameState.currentMapIndex}
-            exploredTiles={gameState.exploredTiles}
-            viewport={gameState.viewport}
-            characterPosition={gameState.characterPosition}
-            artifacts={gameState.gameData.artifacts}
-            showArtifactsOnMap={gameState.uiState.showArtifactsOnMap}
-            inDungeon={gameState.uiState.inDungeon}
-          />
+          {MAPS[currentMapIndex]?.data && (
+            <MapComponent
+              currentMapIndex={currentMapIndex}
+              mapData={MAPS[currentMapIndex].data}
+              exploredTiles={exploredTiles}
+              viewport={viewport}
+              characterPosition={characterPosition}
+              artifacts={gameState.gameData.artifacts}
+              showArtifactsOnMap={uiState.showArtifactsOnMap}
+              inDungeon={uiState.inDungeon}
+            />
+          )}
 
           <Character
             ref={characterRef}
-            position={gameState.characterPosition}
+            x={(characterPosition || { x: 64, y: 64 }).x}
+            y={(characterPosition || { x: 64, y: 64 }).y}
             characterState={gameState.characterState}
-            direction={gameState.characterState.direction}
-            isLoggedIn={gameState.isLoggedIn}
-            character={gameState.character}
+            direction={gameState.characterState?.direction || "down"}
+            isLoggedIn={isLoggedIn}
+            character={character}
             soundManager={gameState.soundManager}
             playerHealth={gameState.playerHealth}
             maxPlayerHealth={gameState.maxPlayerHealth}
@@ -2911,11 +2923,11 @@ const GameWorld = React.memo(() => {
           {/* Minimap with fog of war */}
           <Minimap
             mapData={MAPS[currentMapIndex]?.data || []}
-            playerPosition={characterPosition}
+            playerPosition={characterPosition || { x: 64, y: 64 }}
             npcs={MAPS[currentMapIndex]?.npcs || []}
             portals={MAPS[currentMapIndex]?.specialPortals || []}
             tileSize={TILE_SIZE}
-            exploredTiles={exploredTiles}
+            exploredTiles={exploredTiles instanceof Set ? exploredTiles : new Set()}
             currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
           />
 
@@ -2967,7 +2979,7 @@ const GameWorld = React.memo(() => {
                   characterRef={characterRef}
                 />
               ) : (
-                MAPS[currentMapIndex] && (
+                MAPS[currentMapIndex] && MAPS[currentMapIndex].data && (
                   <MapComponent
                     mapData={MAPS[currentMapIndex].data}
                     npcs={
@@ -2976,13 +2988,13 @@ const GameWorld = React.memo(() => {
                       ) || []
                     }
                     artifacts={
-                      !gameState.uiState.showArtifactsOnMap ? [] : artifactsToShow
+                      !uiState.showArtifactsOnMap ? [] : artifactsToShow
                     }
                     onTileClick={handleMapTileClick}
                     onNPCClick={handleNPCClick}
                     onArtifactClick={handleArtifactClick}
                     mapName={MAPS[currentMapIndex].name}
-                    questStatusMap={questStatusMap}
+                    questStatusMap={questStatusMap || new Map()}
                   />
                 )
               )}
@@ -2991,11 +3003,11 @@ const GameWorld = React.memo(() => {
               <CharacterController
                 currentMapIndex={currentMapIndex}
                 setCurrentMapIndex={setCurrentMapIndex}
-                isLoggedIn={gameState.isLoggedIn}
+                isLoggedIn={isLoggedIn}
                 visibleArtifact={visibleArtifact}
                 handleArtifactPickup={handleArtifactPickup}
                 setFormPosition={setFormPosition}
-                setShowInventory={setShowInventory}
+                setShowInventory={(show) => updateUIState({ showInventory: show })}
                 adjustViewport={adjustViewport}
                 activePowers={activePowers}
                 user={user}
@@ -3092,15 +3104,15 @@ const GameWorld = React.memo(() => {
               </div>
 
               {/* Active Quest Display */}
-              {activeQuests.length > 0 && (
+              {gameState.activeQuests.length > 0 && (
                 <div className="active-quest-hud">
                   <div className="quest-hud-header">
                     <i className="fas fa-scroll"></i>
                     <span>
-                      Active Quest{activeQuests.length > 1 ? "s" : ""}
+                      Active Quest{gameState.activeQuests.length > 1 ? "s" : ""}
                     </span>
                   </div>
-                  {activeQuests.slice(0, 2).map((quest) => {
+                  {gameState.activeQuests.slice(0, 2).map((quest) => {
                     const completedStages =
                       quest.stages?.filter((s) => s.completed).length || 0;
                     const totalStages = quest.stages?.length || 0;
@@ -3132,10 +3144,10 @@ const GameWorld = React.memo(() => {
                       </div>
                     );
                   })}
-                  {activeQuests.length > 2 && (
+                  {gameState.activeQuests.length > 2 && (
                     <div className="quest-hud-more">
-                      +{activeQuests.length - 2} more quest
-                      {activeQuests.length - 2 > 1 ? "s" : ""}
+                      +{gameState.activeQuests.length - 2} more quest
+                      {gameState.activeQuests.length - 2 > 1 ? "s" : ""}
                     </div>
                   )}
                 </div>
@@ -3507,8 +3519,8 @@ const GameWorld = React.memo(() => {
           <NotificationSystem soundManager={gameState.soundManager} />
 
           <MultiplayerChat
-            worldId={worldId}
-            worldName={MAPS[gameState.currentMapIndex]?.name || "Unknown World"}
+            worldId={MAPS[currentMapIndex]?.name || "overworld"}
+            worldName={MAPS[currentMapIndex]?.name || "Unknown World"}
             onPlayerClick={(player) => {
               console.log("Player clicked:", player);
               // Handle player interaction
