@@ -132,7 +132,17 @@ const GameWorld = React.memo(() => {
     setMobileState,
     setFormPosition,
     setSoundManager,
+    transitionToNeighbor: originalTransitionToNeighbor,
   } = gameState;
+
+  // Override transitionToNeighbor to use our local state
+  const transitionToNeighbor = useCallback((direction) => {
+    setPendingTransition({ direction });
+    // Also call the original function to maintain compatibility
+    if (originalTransitionToNeighbor) {
+      originalTransitionToNeighbor(direction);
+    }
+  }, [originalTransitionToNeighbor]);
 
   // Performance tracking
   const renderCount = useRef(0);
@@ -143,6 +153,128 @@ const GameWorld = React.memo(() => {
   // All state is now managed by the gameState hook
 
   // Context hooks
+  // State to track pending map transitions
+  const [pendingTransition, setPendingTransition] = useState(null);
+  const [transitionDirection, setTransitionDirection] = useState(null);
+
+  // Show world announcement when transitioning to new area
+  const showWorldAnnouncement = useCallback((worldName) => {
+    // Create the announcement element if it doesn't exist
+    let announcement = document.getElementById("world-announcement");
+
+    if (!announcement) {
+      announcement = document.createElement("div");
+      announcement.id = "world-announcement";
+      announcement.className = "world-announcement";
+      document.body.appendChild(announcement);
+    }
+
+    // Update announcement content
+    announcement.innerHTML = `<h2>Welcome to ${worldName}</h2>`;
+
+    // Make announcement visible
+    setTimeout(() => {
+      announcement.classList.add("active");
+    }, 10);
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      announcement.classList.add("fade-out");
+      setTimeout(() => {
+        if (announcement && announcement.parentNode) {
+          announcement.parentNode.removeChild(announcement);
+        }
+      }, 1000);
+    }, 3000);
+  }, []);
+
+  // Handle map transitions to neighbors
+  useEffect(() => {
+    if (!pendingTransition) return;
+
+    const { direction } = pendingTransition;
+    const currentMap = MAPS[currentMapIndex];
+    if (!currentMap?.neighbors) {
+      setPendingTransition(null);
+      setTransitionDirection(null);
+      return;
+    }
+
+    const neighborId = currentMap.neighbors[direction];
+    if (!neighborId) {
+      setPendingTransition(null);
+      setTransitionDirection(null);
+      return;
+    }
+
+    // Find the neighbor map index
+    const neighborIndex = MAPS.findIndex(map => map.id === neighborId || map.name === neighborId);
+    if (neighborIndex === -1) {
+      setPendingTransition(null);
+      setTransitionDirection(null);
+      return;
+    }
+
+    const neighborMap = MAPS[neighborIndex];
+    if (!neighborMap?.data) {
+      setPendingTransition(null);
+      setTransitionDirection(null);
+      return;
+    }
+
+    // Set transitioning state and direction for CSS animation
+    updateUIState({ isTransitioning: true });
+    setTransitionDirection(direction);
+
+    // Calculate spawn position on the neighbor map based on direction
+    let spawnX = characterPosition.x;
+    let spawnY = characterPosition.y;
+
+    const neighborMapWidth = neighborMap.data[0].length * TILE_SIZE;
+    const neighborMapHeight = neighborMap.data.length * TILE_SIZE;
+
+    switch (direction) {
+      case 'left':
+        // Coming from right edge, spawn on left edge
+        spawnX = TILE_SIZE; // Small offset from edge
+        break;
+      case 'right':
+        // Coming from left edge, spawn on right edge
+        spawnX = neighborMapWidth - 2 * TILE_SIZE; // Small offset from edge
+        break;
+      case 'up':
+        // Coming from bottom edge, spawn on top edge
+        spawnY = TILE_SIZE; // Small offset from edge
+        break;
+      case 'down':
+        // Coming from top edge, spawn on bottom edge
+        spawnY = neighborMapHeight - 2 * TILE_SIZE; // Small offset from edge
+        break;
+    }
+
+    // Ensure spawn position is within bounds and walkable
+    spawnX = Math.max(TILE_SIZE, Math.min(spawnX, neighborMapWidth - TILE_SIZE));
+    spawnY = Math.max(TILE_SIZE, Math.min(spawnY, neighborMapHeight - TILE_SIZE));
+
+    // Wait for animation to start, then change the map
+    setTimeout(() => {
+      // Transition to the neighbor map
+      setCurrentMapIndex(neighborIndex);
+      setCharacterPosition({ x: spawnX, y: spawnY });
+
+      // Show transition effect or announcement
+      showWorldAnnouncement(neighborMap.name || neighborId);
+
+      // Wait for animation to complete, then reset transitioning state
+      setTimeout(() => {
+        updateUIState({ isTransitioning: false });
+        setPendingTransition(null);
+        setTransitionDirection(null);
+      }, 250); // Half of the 500ms animation duration
+    }, 250); // Start map change halfway through animation
+
+  }, [pendingTransition, currentMapIndex, characterPosition, setCurrentMapIndex, setCharacterPosition, showWorldAnnouncement, updateUIState]);
+
   const { user } = useAuth();
   const {
     unlockAchievement,
@@ -556,37 +688,6 @@ const GameWorld = React.memo(() => {
     },
     [],
   );
-
-  // Show world announcement when transitioning to new area
-  const showWorldAnnouncement = useCallback((worldName) => {
-    // Create the announcement element if it doesn't exist
-    let announcement = document.getElementById("world-announcement");
-
-    if (!announcement) {
-      announcement = document.createElement("div");
-      announcement.id = "world-announcement";
-      announcement.className = "world-announcement";
-      document.body.appendChild(announcement);
-    }
-
-    // Update announcement content
-    announcement.innerHTML = `<h2>Welcome to ${worldName}</h2>`;
-
-    // Make announcement visible
-    setTimeout(() => {
-      announcement.classList.add("active");
-    }, 10);
-
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-      announcement.classList.add("fade-out");
-      setTimeout(() => {
-        if (announcement && announcement.parentNode) {
-          announcement.parentNode.removeChild(announcement);
-        }
-      }, 1000);
-    }, 3000);
-  }, []);
 
   // Optimized level completion handler
   const handleLevelCompletion = useCallback(
@@ -2026,8 +2127,8 @@ const GameWorld = React.memo(() => {
     ],
   );
 
-  // Get active powers from user
-  const activePowers = user?.activePowers || [];
+  // Get active powers from user - ensure it's always an array
+  const activePowers = Array.isArray(user?.activePowers) ? user.activePowers : [];
 
 
   // Portal collision detection hook
@@ -2980,22 +3081,28 @@ const GameWorld = React.memo(() => {
                 />
               ) : (
                 MAPS[currentMapIndex] && MAPS[currentMapIndex].data && (
-                  <MapComponent
-                    mapData={MAPS[currentMapIndex].data}
-                    npcs={
-                      MAPS[currentMapIndex].npcs?.filter(
-                        (npc) => npc && npc.position,
-                      ) || []
-                    }
-                    artifacts={
-                      !uiState.showArtifactsOnMap ? [] : artifactsToShow
-                    }
-                    onTileClick={handleMapTileClick}
-                    onNPCClick={handleNPCClick}
-                    onArtifactClick={handleArtifactClick}
-                    mapName={MAPS[currentMapIndex].name}
-                    questStatusMap={questStatusMap || new Map()}
-                  />
+                  <div
+                    className={`map-transition-container ${
+                      uiState.isTransitioning ? `transitioning-${transitionDirection}` : ''
+                    }`}
+                  >
+                    <MapComponent
+                      mapData={MAPS[currentMapIndex].data}
+                      npcs={
+                        MAPS[currentMapIndex].npcs?.filter(
+                          (npc) => npc && npc.position,
+                        ) || []
+                      }
+                      artifacts={
+                        !uiState.showArtifactsOnMap ? [] : artifactsToShow
+                      }
+                      onTileClick={handleMapTileClick}
+                      onNPCClick={handleNPCClick}
+                      onArtifactClick={handleArtifactClick}
+                      mapName={MAPS[currentMapIndex].name}
+                      questStatusMap={questStatusMap || new Map()}
+                    />
+                  </div>
                 )
               )}
 
@@ -3014,6 +3121,7 @@ const GameWorld = React.memo(() => {
                 uiState={uiState}
                 isInvincible={gameState.isInvincible}
                 characterState={gameState.characterState}
+                transitionToNeighbor={transitionToNeighbor}
                 onPositionChange={(position, reason) => {
                   // Update GameWorld characterPosition state for compatibility
                   // This is throttled to prevent excessive re-renders

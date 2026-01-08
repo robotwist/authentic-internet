@@ -19,6 +19,7 @@ const CharacterController = React.forwardRef(({
   isInvincible,
   onPositionChange,
   characterState,
+  transitionToNeighbor,
 }, ref) => {
   // Use refs for position and state to avoid re-renders
   const characterPositionRef = useRef(INITIAL_CHARACTER_POSITION);
@@ -102,12 +103,13 @@ const CharacterController = React.forwardRef(({
     setShowInventory,
     adjustViewport,
     activePowers,
+    transitionToNeighbor,
   );
 
   // Update character style and viewport when position changes
   useEffect(() => {
-    // Adjust viewport to follow character
-    if (adjustViewport) {
+    // Adjust viewport to follow character - ensure it's a function before calling
+    if (adjustViewport && typeof adjustViewport === 'function') {
       adjustViewport(characterPositionRef.current);
     }
   }, [adjustViewport]);

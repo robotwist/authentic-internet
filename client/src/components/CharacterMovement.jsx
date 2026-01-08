@@ -19,6 +19,7 @@ const useCharacterMovement = (
   setShowInventory,
   adjustViewport,
   activePowers = [], // Array of active power IDs
+  transitionToNeighbor, // New callback for neighbor transitions
 ) => {
   const [isBumping, setIsBumping] = useState(false);
   const [bumpDirection, setBumpDirection] = useState(null);
@@ -32,8 +33,9 @@ const useCharacterMovement = (
   const lastJumpTime = useRef(0);
 
   // Calculate power effects for discrete movement
-  const hasSpeedBoost = activePowers.includes("speed_boost");
-  const hasFlight = activePowers.includes("flight");
+  const safeActivePowers = Array.isArray(activePowers) ? activePowers : [];
+  const hasSpeedBoost = safeActivePowers.includes("speed_boost");
+  const hasFlight = safeActivePowers.includes("flight");
 
   // Movement constants - discrete movement per key press
   const movementConstants = {
@@ -109,68 +111,66 @@ const useCharacterMovement = (
       return characterPosition; // Return original position if can't move
     }
 
-    // Boundary checks with map transitions
+    // Edge detection for map transitions
+    const currentMap = MAPS[currentMapIndex];
+    const neighbors = currentMap?.neighbors || {};
+
+    // Check if movement would go out of bounds
     if (newPosition.x < 0) {
-      const currentMapName = MAPS[currentMapIndex].name;
-      if (currentMapName === "Overworld 2") {
-        targetMapIndex = MAPS.findIndex((map) => map.name === "Overworld");
-        if (targetMapIndex !== -1) {
-          newPosition.x = (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
-        } else {
-          newPosition.x = 0;
-          triggerBump("left");
-          return characterPosition;
+      // Would go left off the map
+      if (neighbors.left) {
+        // Dispatch transition to neighbor instead of moving
+        if (transitionToNeighbor) {
+          transitionToNeighbor("left");
         }
-      } else if (currentMapName === "Overworld 3") {
-        targetMapIndex = MAPS.findIndex((map) => map.name === "Overworld 2");
-        if (targetMapIndex !== -1) {
-          newPosition.x = (MAPS[targetMapIndex].data[0].length - 1) * TILE_SIZE;
-        } else {
-          newPosition.x = 0;
-          triggerBump("left");
-          return characterPosition;
-        }
+        return characterPosition; // Don't move the character
       } else {
-        newPosition.x = 0;
+        // No neighbor - treat as wall
         triggerBump("left");
         return characterPosition;
       }
     } else if (newPosition.x >= mapWidth) {
-      const currentMapName = MAPS[currentMapIndex].name;
-      if (currentMapName === "Overworld") {
-        targetMapIndex = MAPS.findIndex((map) => map.name === "Overworld 2");
-        if (targetMapIndex !== -1) {
-          newPosition.x = 0;
-        } else {
-          newPosition.x = mapWidth - TILE_SIZE;
-          triggerBump("right");
-          return characterPosition;
+      // Would go right off the map
+      if (neighbors.right) {
+        // Dispatch transition to neighbor instead of moving
+        if (transitionToNeighbor) {
+          transitionToNeighbor("right");
         }
-      } else if (currentMapName === "Overworld 2") {
-        targetMapIndex = MAPS.findIndex((map) => map.name === "Overworld 3");
-        if (targetMapIndex !== -1) {
-          newPosition.x = 0;
-        } else {
-          newPosition.x = mapWidth - TILE_SIZE;
-          triggerBump("right");
-          return characterPosition;
-        }
+        return characterPosition; // Don't move the character
       } else {
-        newPosition.x = mapWidth - TILE_SIZE;
+        // No neighbor - treat as wall
         triggerBump("right");
         return characterPosition;
       }
     }
 
-    // Vertical boundaries (no map transitions for vertical movement)
+    // Vertical edge detection for map transitions
     if (newPosition.y < 0) {
-      newPosition.y = 0;
-      triggerBump("up");
-      return characterPosition;
+      // Would go up off the map
+      if (neighbors.up) {
+        // Dispatch transition to neighbor instead of moving
+        if (transitionToNeighbor) {
+          transitionToNeighbor("up");
+        }
+        return characterPosition; // Don't move the character
+      } else {
+        // No neighbor - treat as wall
+        triggerBump("up");
+        return characterPosition;
+      }
     } else if (newPosition.y >= mapHeight) {
-      newPosition.y = mapHeight - TILE_SIZE;
-      triggerBump("down");
-      return characterPosition;
+      // Would go down off the map
+      if (neighbors.down) {
+        // Dispatch transition to neighbor instead of moving
+        if (transitionToNeighbor) {
+          transitionToNeighbor("down");
+        }
+        return characterPosition; // Don't move the character
+      } else {
+        // No neighbor - treat as wall
+        triggerBump("down");
+        return characterPosition;
+      }
     }
 
     // Handle map transitions
@@ -194,8 +194,8 @@ const useCharacterMovement = (
     if (newPosition.x !== characterPosition.x || newPosition.y !== characterPosition.y) {
       handleCharacterMove(newPosition, currentMapIndex);
 
-      // Update viewport
-      if (adjustViewport) {
+      // Update viewport - ensure it's a function before calling
+      if (adjustViewport && typeof adjustViewport === 'function') {
         adjustViewport(newPosition);
       }
 
