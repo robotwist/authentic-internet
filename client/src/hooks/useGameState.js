@@ -73,6 +73,9 @@ const ACTIONS = {
   SET_QUEST_STATUS_MAP: 'SET_QUEST_STATUS_MAP',
   SET_QUEST_COMPLETION_CELEBRATION: 'SET_QUEST_COMPLETION_CELEBRATION',
   SET_SHOW_HAMLET_FINALE: 'SET_SHOW_HAMLET_FINALE',
+
+  // Map transition actions
+  TRANSITION_TO_NEIGHBOR: 'TRANSITION_TO_NEIGHBOR',
 };
 
 // Initial state
@@ -132,6 +135,7 @@ const initialState = {
     isMoving: false,
     isDarkMode: false,
     inDungeon: false,
+    isTransitioning: false,
   },
 
   // Dungeon state
@@ -294,6 +298,9 @@ function gameStateReducer(state, action) {
       return { ...state, questCompletionCelebration: action.payload };
     case ACTIONS.SET_SHOW_HAMLET_FINALE:
       return { ...state, showHamletFinale: action.payload };
+    case ACTIONS.TRANSITION_TO_NEIGHBOR:
+      // This action is handled by the GameWorld component to trigger map transitions
+      return state;
     default:
       return state;
   }
@@ -464,6 +471,10 @@ export function useGameState() {
     dispatch({ type: ACTIONS.SET_SHOW_HAMLET_FINALE, payload: value });
   }, []);
 
+  const transitionToNeighbor = useCallback((direction) => {
+    dispatch({ type: ACTIONS.TRANSITION_TO_NEIGHBOR, payload: { direction } });
+  }, []);
+
   return {
     // State
     ...state,
@@ -509,6 +520,7 @@ export function useGameState() {
     setQuestStatusMap,
     setQuestCompletionCelebration,
     setShowHamletFinale,
+    transitionToNeighbor,
   };
 }
 

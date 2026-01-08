@@ -4,7 +4,14 @@ import { NPC_TYPES } from "../../components/GameConstants";
 // Overworld map data
 export const OVERWORLD_MAPS = [
   {
+    id: "Overworld",
     name: "Overworld",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: "Overworld 2"
+    },
     data: [
       [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -201,7 +208,14 @@ export const OVERWORLD_MAPS = [
     ],
   },
   {
+    id: "Overworld 2",
     name: "Overworld 2",
+    neighbors: {
+      up: null,
+      down: null,
+      left: "Overworld",
+      right: "Overworld 3"
+    },
     data: [
       [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -281,7 +295,14 @@ export const OVERWORLD_MAPS = [
     ],
   },
   {
+    id: "Overworld 3",
     name: "Overworld 3",
+    neighbors: {
+      up: null,
+      down: null,
+      left: "Overworld 2",
+      right: null
+    },
     data: [
       [0, 0, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -359,7 +380,14 @@ export const OVERWORLD_MAPS = [
     ],
   },
   {
+    id: "Desert 1",
     name: "Desert 1",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [1, 1, 3, 3, 3, 1, 1, 1, 1, 1],
       [3, 3, 3, 3, 3, 3, 3, 3, 3, 1],
@@ -450,7 +478,14 @@ export const OVERWORLD_MAPS = [
     ],
   },
   {
+    id: "Desert 2",
     name: "Desert 2",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [3, 3, 3, 3, 3, 3, 3, 3, 3, 1],
@@ -542,7 +577,14 @@ export const OVERWORLD_MAPS = [
     ],
   },
   {
+    id: "Desert 3",
     name: "Desert 3",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [3, 3, 3, 3, 3, 3, 3, 3, 3, 1],
@@ -633,7 +675,14 @@ export const OVERWORLD_MAPS = [
     ],
   },
   {
+    id: "Yosemite",
     name: "Yosemite",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       // Row 0-9: Northern forest and mountains
       [

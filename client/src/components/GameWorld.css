@@ -127,3 +127,75 @@
     right: 5px;
   }
 }
+
+/* Map Transition Animations - Zelda Style Sliding */
+.map-transition-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.map-transition-container.transitioning-left {
+  animation: slideInFromRight 0.5s ease-in-out;
+}
+
+.map-transition-container.transitioning-right {
+  animation: slideInFromLeft 0.5s ease-in-out;
+}
+
+.map-transition-container.transitioning-up {
+  animation: slideInFromBottom 0.5s ease-in-out;
+}
+
+.map-transition-container.transitioning-down {
+  animation: slideInFromTop 0.5s ease-in-out;
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes slideInFromBottom {
+  0% {
+    transform: translateY(100%);
+  }
+  50% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-100%);
+  }
+  50% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}

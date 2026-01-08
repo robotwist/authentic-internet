@@ -4,7 +4,14 @@ import { NPC_TYPES } from "../../components/GameConstants";
 // Dungeon and special area map data
 export const DUNGEON_MAPS = [
   {
+    id: "Hemingway's Battleground",
     name: "Hemingway's Battleground",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -65,7 +72,14 @@ export const DUNGEON_MAPS = [
     ],
   },
   {
+    id: "Text Adventure",
     name: "Text Adventure",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
@@ -112,7 +126,14 @@ export const DUNGEON_MAPS = [
     ],
   },
   {
+    id: "Terminal3",
     name: "Terminal3",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
@@ -158,7 +179,14 @@ export const DUNGEON_MAPS = [
     ],
   },
   {
+    id: "Level4Shooter",
     name: "Level4Shooter",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
@@ -212,7 +240,14 @@ export const DUNGEON_MAPS = [
     ],
   },
   {
+    id: "Dungeon Level 1",
     name: "Dungeon Level 1",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
@@ -261,7 +296,14 @@ export const DUNGEON_MAPS = [
     ],
   },
   {
+    id: "Dungeon Level 2",
     name: "Dungeon Level 2",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
@@ -304,7 +346,14 @@ export const DUNGEON_MAPS = [
     ],
   },
   {
+    id: "Dungeon Level 3",
     name: "Dungeon Level 3",
+    neighbors: {
+      up: null,
+      down: null,
+      left: null,
+      right: null
+    },
     data: [
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
