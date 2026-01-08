@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SoundManager from "../utils/SoundManager";
+import ICONS from "../../constants/Icons";
 import "./Sword.css";
 
 /**
@@ -90,9 +91,11 @@ const Sword = ({
         data-hitbox="sword"
       >
         <div className="sword-blade">
-          {swordType === "wooden" && "🗡️"}
-          {swordType === "white" && "⚔️"}
-          {swordType === "magical" && "🔱"}
+          <img
+            src={ICONS.weapons[swordType]}
+            alt={`${swordType} sword`}
+            className="sword-icon"
+          />
         </div>
       </div>
 

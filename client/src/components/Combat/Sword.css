@@ -4,12 +4,18 @@
 }
 
 .sword-blade {
-  font-size: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
+}
+
+.sword-icon {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated; /* Keep pixel art crisp */
+  object-fit: contain;
 }
 
 /* Sword swing animation with dramatic arc and VISIBLE HITBOX */
@@ -139,16 +145,16 @@
   }
 }
 
-/* Sword types */
-.sword-wooden .sword-blade {
+/* Sword types - now applied to images */
+.sword-wooden .sword-icon {
   filter: brightness(0.9) sepia(0.3);
 }
 
-.sword-white .sword-blade {
+.sword-white .sword-icon {
   filter: brightness(1.2);
 }
 
-.sword-magical .sword-blade {
+.sword-magical .sword-icon {
   filter: brightness(1.3);
   animation: magical-pulse 0.3s steps(2) infinite;
 }
