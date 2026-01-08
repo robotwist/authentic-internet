@@ -1,0 +1,20 @@
+
+> server@1.0.0 dev
+> nodemon --watch '*.mjs' --watch 'routes/**/*.mjs' --watch 'controllers/**/*.mjs' --watch 'models/**/*.mjs' --watch 'middleware/**/*.mjs' --watch 'services/**/*.mjs' --watch 'utils/**/*.mjs' --watch 'config/**/*.mjs' --ignore 'node_modules/' --ignore '.git/' --ignore 'logs/' --ignore '*.log' --ignore '*.pid' server.mjs
+
+[33m[nodemon] 3.1.9[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.mjs routes/**/*.mjs controllers/**/*.mjs models/**/*.mjs middleware/**/*.mjs services/**/*.mjs utils/**/*.mjs config/**/*.mjs[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.mjs`[39m
+file:///home/robwistrand/code/ga/projects/authentic-internet/server/routes/artifactRoutes.js:30
+  addComment,
+  ^^^^^^^^^^
+SyntaxError: The requested module '../controllers/artifactController.js' does not provide an export named 'addComment'
+    at ModuleJob._instantiate (node:internal/modules/esm/module_job:213:21)
+    at async ModuleJob.run (node:internal/modules/esm/module_job:320:5)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.6
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m

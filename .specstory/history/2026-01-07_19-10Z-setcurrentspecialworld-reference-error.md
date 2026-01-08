@@ -2338,3 +2338,3476 @@ If you reload now, the `ReferenceError: getCharacterPosition is not defined` sho
 
 ---
 
+_**User (2026-01-07 03:53Z)**_
+
+commit and push - it looks like we are runnign into repeated errors
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+You're absolutely right—let's commit and push what we have so far to stabilize the codebase.
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /home/robwistrand/code/ga/projects/authentic-internet && git add -A</summary>
+
+```bash
+cd /home/robwistrand/code/ga/projects/authentic-internet && git add -A
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /home/robwistrand/code/ga/projects/authentic-internet && git status</summary>
+
+```bash
+cd /home/robwistrand/code/ga/projects/authentic-internet && git status
+```
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes to be committed:
+  (use "git restore --staged &lt;file&gt;..." to unstage)
+	modified:   .specstory/history/2026-01-07_17-10Z-notification-system-component-extraction.md
+	modified:   .specstory/history/2026-01-07_17-11Z-artifact-routes-controller-service-pattern.md
+	modified:   .specstory/history/2026-01-07_17-11Z-character-movement-controller-refactor.md
+	modified:   .specstory/history/2026-01-07_17-11Z-game-data-file-restructuring.md
+	new file:   .specstory/history/2026-01-07_17-13Z-gameworld-cleanup-and-state-organization.md
+	new file:   .specstory/history/2026-01-07_17-44Z-gamestate-and-character-movement-changes.md
+	new file:   .specstory/history/2026-01-07_17-47Z-vite-import-analysis-syntax-error.md
+	new file:   .specstory/history/2026-01-07_19-10Z-setcurrentspecialworld-reference-error.md
+	modified:   client/src/components/CharacterMovement.jsx
+	modified:   client/src/components/GameWorld.jsx
+	modified:   client/src/components/controllers/CharacterController.jsx
+	modified:   client/src/components/performance/PerformanceMonitor.jsx
+	modified:   client/src/components/systems/NotificationSystem.jsx
+	renamed:    client/src/components/systems/useNotification.js -&gt; client/src/components/systems/useNotification.jsx
+	modified:   client/src/hooks/useGameState.js
+	deleted:    server/.server_pid
+	modified:   server/routes/artifactRoutes.js
+
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /home/robwistrand/code/ga/projects/authentic-internet && git commit -m "fix: resolve setCurrentSpecialWorld and getCharacterPosition reference errors
+
+- Destructured all required state values and setters from gameState hook
+- Added showLevelUpModal as local state
+- Removed duplicate updateUIState declaration
+- Added getCharacterPosition wrapper function for dependency arrays
+- Fixed currentSpecialWorld references to use destructured variable
+- Updated dependency arrays with correct references
+- Fixed portalNotificationActive and gameData references
+
+Resolves runtime errors that prevented GameWorld from rendering"</summary>
+
+```bash
+cd /home/robwistrand/code/ga/projects/authentic-internet && git commit -m "fix: resolve setCurrentSpecialWorld and getCharacterPosition reference errors
+
+- Destructured all required state values and setters from gameState hook
+- Added showLevelUpModal as local state
+- Removed duplicate updateUIState declaration
+- Added getCharacterPosition wrapper function for dependency arrays
+- Fixed currentSpecialWorld references to use destructured variable
+- Updated dependency arrays with correct references
+- Fixed portalNotificationActive and gameData references
+
+Resolves runtime errors that prevented GameWorld from rendering"
+```
+
+```
+[main 8246ce3] fix: resolve setCurrentSpecialWorld and getCharacterPosition reference errors
+ 17 files changed, 33299 insertions(+), 619 deletions(-)
+ create mode 100644 .specstory/history/2026-01-07_17-13Z-gameworld-cleanup-and-state-organization.md
+ create mode 100644 .specstory/history/2026-01-07_17-44Z-gamestate-and-character-movement-changes.md
+ create mode 100644 .specstory/history/2026-01-07_17-47Z-vite-import-analysis-syntax-error.md
+ create mode 100644 .specstory/history/2026-01-07_19-10Z-setcurrentspecialworld-reference-error.md
+ rename client/src/components/systems/{useNotification.js =&gt; useNotification.jsx} (100%)
+ delete mode 100644 server/.server_pid
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /home/robwistrand/code/ga/projects/authentic-internet && git push origin main</summary>
+
+```bash
+cd /home/robwistrand/code/ga/projects/authentic-internet && git push origin main
+```
+
+```
+To github.com:robotwist/authentic-internet.git
+   820a14b..8246ce3  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+Perfect! ✅ Successfully committed and pushed the fixes. 
+
+## Summary of what was fixed:
+
+1. **`setCurrentSpecialWorld` reference error** - Destructured from `gameState` hook
+2. **`getCharacterPosition` reference error** - Added back as a `useCallback` wrapper
+3. **Duplicate `updateUIState` declaration** - Removed the redundant wrapper
+4. **Missing destructured variables** - Added all required state values and setters including:
+   - State: `currentMapIndex`, `characterPosition`, `viewport`, `exploredTiles`, `inventory`, `character`, `visibleArtifact`, `currentSpecialWorld`, `characterStats`, `uiState`, `questStatusMap`, `mobileState`, `portalState`
+   - Setters: All corresponding setters
+5. **Fixed dependency arrays** - Updated to use correct references
+6. **Added local state** - `showLevelUpModal` for level-up modal display
+
+The codebase should now be stable. You can reload the app and these reference errors should be resolved. [[memory:3401649]]
+
+---
+
+_**User (2026-01-07 03:53Z)**_
+
+errorTracker.js:90 [unknown] Unhandled error: Uncaught ReferenceError: artifacts is not defined {source: 'http://localhost:5177/src/components/GameWorld.jsx?t=1767822045452', line: 1882, column: 7} ReferenceError: artifacts is not defined
+    at GameWorld.jsx:2538:7
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+trackError @ errorTracker.js:90
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2538 Uncaught ReferenceError: artifacts is not defined
+    at GameWorld.jsx:2538:7
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+(anonymous) @ GameWorld.jsx:2538
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+updateMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14366
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15977
+callCallback2 @ chunk-NUMECXU6.js?v=c9a7e100:3674
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:90 [unknown] Unhandled error: Uncaught ReferenceError: artifacts is not defined {source: 'http://localhost:5177/src/components/GameWorld.jsx?t=1767822045452', line: 1882, column: 7} ReferenceError: artifacts is not defined
+    at GameWorld.jsx:2538:7
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+trackError @ errorTracker.js:90
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2538 Uncaught ReferenceError: artifacts is not defined
+    at GameWorld.jsx:2538:7
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+(anonymous) @ GameWorld.jsx:2538
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+updateMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14366
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15977
+callCallback2 @ chunk-NUMECXU6.js?v=c9a7e100:3674
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+chunk-NUMECXU6.js?v=c9a7e100:14032 The above error occurred in the <GameWorld> component:
+
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767822045452:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767822045452:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+logCapturedError @ chunk-NUMECXU6.js?v=c9a7e100:14032
+callback @ chunk-NUMECXU6.js?v=c9a7e100:14078
+callCallback @ chunk-NUMECXU6.js?v=c9a7e100:11248
+commitUpdateQueue @ chunk-NUMECXU6.js?v=c9a7e100:11265
+commitLayoutEffectOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:17075
+commitLayoutMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:17980
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17969
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17950
+commitLayoutEffects @ chunk-NUMECXU6.js?v=c9a7e100:17920
+commitRootImpl @ chunk-NUMECXU6.js?v=c9a7e100:19353
+commitRoot @ chunk-NUMECXU6.js?v=c9a7e100:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=c9a7e100:18760
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18718
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+ErrorBoundary.jsx:31 Error caught by boundary: ReferenceError: artifacts is not defined
+    at GameWorld.jsx:2538:7
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19753:22)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+    at workLoopSync (chunk-NUMECXU6.js?v=c9a7e100:19137:13)
+    at renderRootSync (chunk-NUMECXU6.js?v=c9a7e100:19116:15) {componentStack: '\n    at http://localhost:5177/src/components/GameW….vite/deps/react-router-dom.js?v=ce3ce900:5248:5)'}
+componentDidCatch @ ErrorBoundary.jsx:31
+callback @ chunk-NUMECXU6.js?v=c9a7e100:14084
+callCallback @ chunk-NUMECXU6.js?v=c9a7e100:11248
+commitUpdateQueue @ chunk-NUMECXU6.js?v=c9a7e100:11265
+commitLayoutEffectOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:17075
+commitLayoutMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:17980
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17969
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17950
+commitLayoutEffects @ chunk-NUMECXU6.js?v=c9a7e100:17920
+commitRootImpl @ chunk-NUMECXU6.js?v=c9a7e100:19353
+commitRoot @ chunk-NUMECXU6.js?v=c9a7e100:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=c9a7e100:18760
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18718
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:138  POST http://localhost:5177/api/diagnostics/errors 500 (Internal Server Error)
+reportErrorToServer @ errorTracker.js:138
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:152 Error reporting to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+reportErrorToServer @ errorTracker.js:152
+await in reportErrorToServer
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:113 Failed to report critical error to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+(anonymous) @ errorTracker.js:113
+Promise.catch
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:138  POST http://localhost:5177/api/diagnostics/errors net::ERR_ABORTED 500 (Internal Server Error)
+reportErrorToServer @ errorTracker.js:138
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:152 Error reporting to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+reportErrorToServer @ errorTracker.js:152
+await in reportErrorToServer
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:113 Failed to report critical error to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+(anonymous) @ errorTracker.js:113
+Promise.catch
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Checking line 2538 where `artifacts` is referenced:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "\bartifacts\b" in "/home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx" • 29 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `client/src/components/GameWorld.jsx` | `// Check if task mentions artifacts or specific artifact` | L295 |
+| `client/src/components/GameWorld.jsx` | `() => currentMap?.artifacts \|\| [],` | L930 |
+| `client/src/components/GameWorld.jsx` | `artifacts: [...gameState.gameData.artifacts, newArtifact],` | L1387 |
+| `client/src/components/GameWorld.jsx` | `gameState.gameData.artifacts,` | L1404 |
+| `client/src/components/GameWorld.jsx` | `updateGameState(\{ artifacts: artifactsData \});` | L1841 |
+| `client/src/components/GameWorld.jsx` | `console.error("Error loading artifacts:", error);` | L1843 |
+| `client/src/components/GameWorld.jsx` | `// Update viewed artifacts` | L1956 |
+| `client/src/components/GameWorld.jsx` | `// Check for both map artifacts and server artifacts at the player's position` | L2050 |
+| `client/src/components/GameWorld.jsx` | `// Check if the current map and its artifacts property exist before accessing them` | L2057 |
+| `client/src/components/GameWorld.jsx` | `const mapArtifact = MAPS[currentMapIndex]?.artifacts?.find(` | L2058 |
+| `client/src/components/GameWorld.jsx` | `// Check server artifacts` | L2066 |
+| `client/src/components/GameWorld.jsx` | `gameState.gameData.artifacts && Array.isArray(gameState.gameData.artifacts)` | L2068 |
+| `client/src/components/GameWorld.jsx` | `? gameState.gameData.artifacts.find(` | L2069 |
+| `client/src/components/GameWorld.jsx` | `// Prioritize server artifacts (they might be more up-to-date)` | L2080 |
+| `client/src/components/GameWorld.jsx` | `// Check for both map artifacts and server artifacts` | L2090 |
+| `client/src/components/GameWorld.jsx` | `\}, [characterPosition, currentMapIndex, gameState.gameData.artifacts]);` | L2092 |
+| `client/src/components/GameWorld.jsx` | `if (!characterPosition \|\| !gameState.gameData.artifacts?.length) return;` | L2102 |
+| `client/src/components/GameWorld.jsx` | `// Find game artifacts in the current area that the character is near` | L2106 |
+| `client/src/components/GameWorld.jsx` | `const gameArtifacts = gameState.gameData.artifacts.filter(` | L2107 |
+| `client/src/components/GameWorld.jsx` | `\}, [characterPosition, currentMapIndex, gameState.gameData.artifacts]);` | L2182 |
+| `client/src/components/GameWorld.jsx` | `if (!map \|\| !Array.isArray(map.artifacts)) return;` | L2287 |
+| `client/src/components/GameWorld.jsx` | `map.artifacts.forEach((artifact, artifactIndex) => \{` | L2289 |
+| `client/src/components/GameWorld.jsx` | `MAPS[mapIndex].artifacts[artifactIndex].visible = false;` | L2291 |
+| `client/src/components/GameWorld.jsx` | `updateGameState(\{ artifacts: [...gameState.gameData.artifacts, newArtifact] \});` | L2438 |
+| `client/src/components/GameWorld.jsx` | `(Array.isArray(gameState.gameData.artifacts)` | L2448 |
+| `client/src/components/GameWorld.jsx` | `? gameState.gameData.artifacts.filter((a) => a.createdBy === character.id)` | L2449 |
+| `client/src/components/GameWorld.jsx` | `"Created 5 artifacts to shape the Authentic Internet",` | L2456 |
+| `client/src/components/GameWorld.jsx` | `[gameState.gameData.artifacts, character, updateGameState, handleAchievementUnlocked],` | L2473 |
+| `client/src/components/GameWorld.jsx` | `const clickedArtifact = artifacts.find(` | L2480 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Checking the function context:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing `artifacts` usage: it's referenced but not defined. Replacing with `gameState.gameData.artifacts` or `artifactsToShow`.
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 8, lines removed: 5
+
+```diff
+@@ -2477,17 +2477,20 @@
+    const handleArtifactClick = useCallback(
+      (artifactId) =&gt; {
+-       // Find the clicked artifact
+-       const clickedArtifact = artifacts.find(
++       // Find the clicked artifact from game data
++       const clickedArtifact = gameState.gameData.artifacts?.find(
+          (artifact) =&gt; artifact.id === artifactId,
+        );
+        if (!clickedArtifact) return;
+  
+        // Check if this artifact was already viewed
+-       const isFirstView = !viewedArtifacts.includes(artifactId);
++       const isFirstView = !gameState.gameData.viewedArtifacts?.includes(artifactId);
+  
+        // Update viewed artifacts
+        if (isFirstView) {
+-         const updatedViewedArtifacts = [...viewedArtifacts, artifactId];
+-         setViewedArtifacts(updatedViewedArtifacts);
++         const updatedViewedArtifacts = [
++           ...(gameState.gameData.viewedArtifacts || []),
++           artifactId,
++         ];
++         updateGameState({ viewedArtifacts: updatedViewedArtifacts });
+          localStorage.setItem(
+            "viewedArtifacts",
+```
+
+**Chunk 2**
+Lines added: 3, lines removed: 3
+
+```diff
+@@ -2515,9 +2518,9 @@
+        // Save game state if user is logged in
+        if (user &amp;&amp; typeof updateGameProgress === "function") {
+-         const gameState = {
++         const gameStateToSave = {
+            inventory,
+            viewedArtifacts: isFirstView
+-             ? [...viewedArtifacts, artifactId]
+-             : viewedArtifacts,
++             ? [...(gameState.gameData.viewedArtifacts || []), artifactId]
++             : gameState.gameData.viewedArtifacts,
+            lastPosition: {
+              x: characterPosition.x,
+```
+
+**Chunk 3**
+Lines added: 3, lines removed: 3
+
+```diff
+@@ -2532,10 +2535,10 @@
+          };
+  
+-         updateGameProgress(gameState);
++         updateGameProgress(gameStateToSave);
+        }
+      },
+      [
+-       artifacts,
+-       viewedArtifacts,
++       gameState.gameData.artifacts,
++       gameState.gameData.viewedArtifacts,
+        user,
+        inventory,
+```
+
+**Chunk 4**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -2548,4 +2551,5 @@
+        validateQuestProgress,
+        updateGameProgress,
++       updateGameState,
+      ],
+    );
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "setViewedArtifacts|viewedArtifacts" in "/home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx" • 10 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `client/src/components/GameWorld.jsx` | `viewedArtifacts: gameState.gameData.viewedArtifacts,` | L1860 |
+| `client/src/components/GameWorld.jsx` | `!Array.isArray(gameState.gameData.viewedArtifacts) \|\|` | L1953 |
+| `client/src/components/GameWorld.jsx` | `!gameState.gameData.viewedArtifacts.includes(artifact.id);` | L1954 |
+| `client/src/components/GameWorld.jsx` | `...(Array.isArray(gameState.gameData.viewedArtifacts)` | L1959 |
+| `client/src/components/GameWorld.jsx` | `? gameState.gameData.viewedArtifacts` | L1960 |
+| `client/src/components/GameWorld.jsx` | `updateGameState(\{ viewedArtifacts: updatedViewedArtifacts \});` | L1964 |
+| `client/src/components/GameWorld.jsx` | `"viewedArtifacts",` | L1966 |
+| `client/src/components/GameWorld.jsx` | `viewedArtifacts: gameState.gameData.viewedArtifacts,` | L1995 |
+| `client/src/components/GameWorld.jsx` | `gameState.gameData.viewedArtifacts,` | L2012 |
+| `client/src/components/GameWorld.jsx` | `const isFirstView = !gameState.gameData.viewedArtifacts?.includes(artifactId);` | L2486 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `client/src/components/GameWorld.jsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the `artifacts` reference error. The `handleArtifactClick` function was using an undefined `artifacts` variable. Changes:
+
+1. **Changed `artifacts.find()`** to `gameState.gameData.artifacts?.find()` 
+2. **Fixed `viewedArtifacts` references** to use `gameState.gameData.viewedArtifacts`
+3. **Fixed variable shadowing** - renamed the local `gameState` variable in the save function to `gameStateToSave` to avoid shadowing the outer `gameState` hook
+4. **Updated dependency array** to use `gameState.gameData.artifacts` and `gameState.gameData.viewedArtifacts`
+5. **Added `updateGameState`** to the dependency array
+
+The error should be resolved. The function now uses the correct artifact data from `gameState`.
+
+---
+
+_**User (2026-01-07 03:53Z)**_
+
+ errorTracker.js:90 [unknown] Unhandled error: Uncaught ReferenceError: isLoggedIn is not defined {source: 'http://localhost:5177/src/components/GameWorld.jsx?t=1767822210565', line: 2031, column: 7} ReferenceError: isLoggedIn is not defined
+    at GameWorld.jsx:2750:5
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+trackError @ errorTracker.js:90
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2750 Uncaught ReferenceError: isLoggedIn is not defined
+    at GameWorld.jsx:2750:5
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+(anonymous) @ GameWorld.jsx:2750
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+updateMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14366
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15977
+callCallback2 @ chunk-NUMECXU6.js?v=c9a7e100:3674
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:90 [unknown] Unhandled error: Uncaught ReferenceError: isLoggedIn is not defined {source: 'http://localhost:5177/src/components/GameWorld.jsx?t=1767822210565', line: 2031, column: 7} ReferenceError: isLoggedIn is not defined
+    at GameWorld.jsx:2750:5
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+trackError @ errorTracker.js:90
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2750 Uncaught ReferenceError: isLoggedIn is not defined
+    at GameWorld.jsx:2750:5
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+(anonymous) @ GameWorld.jsx:2750
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+updateMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14366
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15977
+callCallback2 @ chunk-NUMECXU6.js?v=c9a7e100:3674
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+chunk-NUMECXU6.js?v=c9a7e100:14032 The above error occurred in the <GameWorld> component:
+
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767822210565:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767822210565:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+logCapturedError @ chunk-NUMECXU6.js?v=c9a7e100:14032
+callback @ chunk-NUMECXU6.js?v=c9a7e100:14078
+callCallback @ chunk-NUMECXU6.js?v=c9a7e100:11248
+commitUpdateQueue @ chunk-NUMECXU6.js?v=c9a7e100:11265
+commitLayoutEffectOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:17075
+commitLayoutMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:17980
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17969
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17950
+commitLayoutEffects @ chunk-NUMECXU6.js?v=c9a7e100:17920
+commitRootImpl @ chunk-NUMECXU6.js?v=c9a7e100:19353
+commitRoot @ chunk-NUMECXU6.js?v=c9a7e100:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=c9a7e100:18760
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18718
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+ErrorBoundary.jsx:31 Error caught by boundary: ReferenceError: isLoggedIn is not defined
+    at GameWorld.jsx:2750:5
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at updateMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14366:22)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15977:22)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19753:22)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+    at workLoopSync (chunk-NUMECXU6.js?v=c9a7e100:19137:13)
+    at renderRootSync (chunk-NUMECXU6.js?v=c9a7e100:19116:15) {componentStack: '\n    at http://localhost:5177/src/components/GameW….vite/deps/react-router-dom.js?v=ce3ce900:5248:5)'}
+componentDidCatch @ ErrorBoundary.jsx:31
+callback @ chunk-NUMECXU6.js?v=c9a7e100:14084
+callCallback @ chunk-NUMECXU6.js?v=c9a7e100:11248
+commitUpdateQueue @ chunk-NUMECXU6.js?v=c9a7e100:11265
+commitLayoutEffectOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:17075
+commitLayoutMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:17980
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17969
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17950
+commitLayoutEffects @ chunk-NUMECXU6.js?v=c9a7e100:17920
+commitRootImpl @ chunk-NUMECXU6.js?v=c9a7e100:19353
+commitRoot @ chunk-NUMECXU6.js?v=c9a7e100:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=c9a7e100:18760
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18718
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:138  POST http://localhost:5177/api/diagnostics/errors net::ERR_ABORTED 500 (Internal Server Error)
+reportErrorToServer @ errorTracker.js:138
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:152 Error reporting to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+reportErrorToServer @ errorTracker.js:152
+await in reportErrorToServer
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:113 Failed to report critical error to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+(anonymous) @ errorTracker.js:113
+Promise.catch
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:138  POST http://localhost:5177/api/diagnostics/errors net::ERR_ABORTED 500 (Internal Server Error)
+reportErrorToServer @ errorTracker.js:138
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:152 Error reporting to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+reportErrorToServer @ errorTracker.js:152
+await in reportErrorToServer
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:113 Failed to report critical error to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+(anonymous) @ errorTracker.js:113
+Promise.catch
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Checking line 2750 for the `isLoggedIn` reference error:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "\bisLoggedIn\b" in "/home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx" • 4 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `client/src/components/GameWorld.jsx` | `if (gameState.isLoggedIn && gameState.character?.id) \{` | L2729 |
+| `client/src/components/GameWorld.jsx` | `isLoggedIn,` | L2750 |
+| `client/src/components/GameWorld.jsx` | `isLoggedIn=\{gameState.isLoggedIn\}` | L2889 |
+| `client/src/components/GameWorld.jsx` | `isLoggedIn=\{gameState.isLoggedIn\}` | L2998 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Checking the function context and fixing the `isLoggedIn` reference:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -106,4 +106,5 @@
+      mobileState,
+      portalState,
++     isLoggedIn,
+      // Setters
+      setCurrentMapIndex,
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -2728,5 +2728,5 @@
+    // Update the saveGameProgress method to use context
+    const saveGameProgressWithContext = useCallback(() =&gt; {
+-     if (gameState.isLoggedIn &amp;&amp; gameState.character?.id) {
++     if (isLoggedIn &amp;&amp; character?.id) {
+        const gameState = {
+          experience: character.experience || 0,
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -2888,5 +2888,5 @@
+              characterState={gameState.characterState}
+              direction={gameState.characterState.direction}
+-             isLoggedIn={gameState.isLoggedIn}
++             isLoggedIn={isLoggedIn}
+              character={gameState.character}
+              soundManager={gameState.soundManager}
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -2997,5 +2997,5 @@
+                  currentMapIndex={currentMapIndex}
+                  setCurrentMapIndex={setCurrentMapIndex}
+-                 isLoggedIn={gameState.isLoggedIn}
++                 isLoggedIn={isLoggedIn}
+                  visibleArtifact={visibleArtifact}
+                  handleArtifactPickup={handleArtifactPickup}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `client/src/components/GameWorld.jsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing variable shadowing in `saveGameProgressWithContext`:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -2729,5 +2729,5 @@
+    const saveGameProgressWithContext = useCallback(() =&gt; {
+      if (isLoggedIn &amp;&amp; character?.id) {
+-       const gameState = {
++       const gameStateToSave = {
+          experience: character.experience || 0,
+          avatar: character.avatar,
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -2746,5 +2746,5 @@
+        };
+  
+-       updateGameProgress(gameState);
++       updateGameProgress(gameStateToSave);
+      }
+    }, [
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `client/src/components/GameWorld.jsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the `isLoggedIn` reference error:
+
+1. **Added `isLoggedIn` to destructuring** - Now destructured from `gameState` along with other state values
+2. **Updated references** - Changed `gameState.isLoggedIn` to `isLoggedIn` throughout the component
+3. **Fixed variable shadowing** - Renamed the local `gameState` variable in `saveGameProgressWithContext` to `gameStateToSave` to avoid shadowing the outer `gameState` hook
+
+The error should be resolved. The component now uses the destructured `isLoggedIn` variable consistently.
+
+---
+
+_**User (2026-01-07 03:53Z)**_
+
+GameWorld.jsx:2875 Warning: Failed prop type: The prop `mapData` is marked as required in `Map`, but its value is `undefined`.
+    at Map (http://localhost:5177/src/components/Map.jsx:31:3)
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887161577:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887161577:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+printWarning @ react_jsx-dev-runtime.js?v=ce3ce900:64
+error @ react_jsx-dev-runtime.js?v=ce3ce900:48
+checkPropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:451
+validatePropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:778
+jsxWithValidation @ react_jsx-dev-runtime.js?v=ce3ce900:876
+(anonymous) @ GameWorld.jsx:2875
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19753
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2885 Warning: Failed prop type: The prop `x` is marked as required in `Character`, but its value is `undefined`.
+    at Character (http://localhost:5177/src/components/Character.jsx:23:3)
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887161577:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887161577:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+printWarning @ react_jsx-dev-runtime.js?v=ce3ce900:64
+error @ react_jsx-dev-runtime.js?v=ce3ce900:48
+checkPropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:451
+validatePropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:778
+jsxWithValidation @ react_jsx-dev-runtime.js?v=ce3ce900:876
+(anonymous) @ GameWorld.jsx:2885
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19753
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2885 Warning: Failed prop type: The prop `y` is marked as required in `Character`, but its value is `undefined`.
+    at Character (http://localhost:5177/src/components/Character.jsx:23:3)
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887161577:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887161577:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+printWarning @ react_jsx-dev-runtime.js?v=ce3ce900:64
+error @ react_jsx-dev-runtime.js?v=ce3ce900:48
+checkPropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:451
+validatePropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:778
+jsxWithValidation @ react_jsx-dev-runtime.js?v=ce3ce900:876
+(anonymous) @ GameWorld.jsx:2885
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19753
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2917 Warning: Failed prop type: Invalid prop `exploredTiles` of type `Function` supplied to `Minimap`, expected instance of `Set`.
+    at Minimap (http://localhost:5177/src/components/UI/Minimap.jsx:22:3)
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887161577:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887161577:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+printWarning @ react_jsx-dev-runtime.js?v=ce3ce900:64
+error @ react_jsx-dev-runtime.js?v=ce3ce900:48
+checkPropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:451
+validatePropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:778
+jsxWithValidation @ react_jsx-dev-runtime.js?v=ce3ce900:876
+(anonymous) @ GameWorld.jsx:2917
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19753
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2976 Warning: Failed prop type: Function has non-object prototype 'undefined' in instanceof check
+    at Map (http://localhost:5177/src/components/Map.jsx:31:3)
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887161577:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887161577:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+printWarning @ react_jsx-dev-runtime.js?v=ce3ce900:64
+error @ react_jsx-dev-runtime.js?v=ce3ce900:48
+checkPropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:451
+validatePropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:778
+jsxWithValidation @ react_jsx-dev-runtime.js?v=ce3ce900:876
+(anonymous) @ GameWorld.jsx:2976
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19753
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:90 [unknown] Unhandled error: Uncaught ReferenceError: setFormPosition is not defined {source: 'http://localhost:5177/src/components/GameWorld.jsx?t=1767887161577', line: 2315, column: 23} ReferenceError: setFormPosition is not defined
+    at GameWorld.jsx:3002:17
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+trackError @ errorTracker.js:90
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:3002 Uncaught ReferenceError: setFormPosition is not defined
+    at GameWorld.jsx:3002:17
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+(anonymous) @ GameWorld.jsx:3002
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+callCallback2 @ chunk-NUMECXU6.js?v=c9a7e100:3674
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:90 [unknown] Unhandled error: Uncaught ReferenceError: setFormPosition is not defined {source: 'http://localhost:5177/src/components/GameWorld.jsx?t=1767887161577', line: 2315, column: 23} ReferenceError: setFormPosition is not defined
+    at GameWorld.jsx:3002:17
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+trackError @ errorTracker.js:90
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:3002 Uncaught ReferenceError: setFormPosition is not defined
+    at GameWorld.jsx:3002:17
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+(anonymous) @ GameWorld.jsx:3002
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+callCallback2 @ chunk-NUMECXU6.js?v=c9a7e100:3674
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+chunk-NUMECXU6.js?v=c9a7e100:14032 The above error occurred in the <GameWorld> component:
+
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887161577:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887161577:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+logCapturedError @ chunk-NUMECXU6.js?v=c9a7e100:14032
+callback @ chunk-NUMECXU6.js?v=c9a7e100:14078
+callCallback @ chunk-NUMECXU6.js?v=c9a7e100:11248
+commitUpdateQueue @ chunk-NUMECXU6.js?v=c9a7e100:11265
+commitLayoutEffectOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:17075
+commitLayoutMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:17980
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17969
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17950
+commitLayoutEffects @ chunk-NUMECXU6.js?v=c9a7e100:17920
+commitRootImpl @ chunk-NUMECXU6.js?v=c9a7e100:19353
+commitRoot @ chunk-NUMECXU6.js?v=c9a7e100:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=c9a7e100:18760
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18718
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+ErrorBoundary.jsx:31 Error caught by boundary: ReferenceError: setFormPosition is not defined
+    at GameWorld.jsx:3002:17
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19753:22)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+    at workLoopSync (chunk-NUMECXU6.js?v=c9a7e100:19137:13)
+    at renderRootSync (chunk-NUMECXU6.js?v=c9a7e100:19116:15)
+    at recoverFromConcurrentError (chunk-NUMECXU6.js?v=c9a7e100:18736:28) {componentStack: '\n    at http://localhost:5177/src/components/GameW….vite/deps/react-router-dom.js?v=ce3ce900:5248:5)'}
+componentDidCatch @ ErrorBoundary.jsx:31
+callback @ chunk-NUMECXU6.js?v=c9a7e100:14084
+callCallback @ chunk-NUMECXU6.js?v=c9a7e100:11248
+commitUpdateQueue @ chunk-NUMECXU6.js?v=c9a7e100:11265
+commitLayoutEffectOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:17075
+commitLayoutMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:17980
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17969
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17950
+commitLayoutEffects @ chunk-NUMECXU6.js?v=c9a7e100:17920
+commitRootImpl @ chunk-NUMECXU6.js?v=c9a7e100:19353
+commitRoot @ chunk-NUMECXU6.js?v=c9a7e100:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=c9a7e100:18760
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18718
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+api.js:134 Network error: Network Error
+(anonymous) @ api.js:134
+Promise.then
+_request @ axios.js?v=b1588b43:2195
+request @ axios.js?v=b1588b43:2104
+Axios.<computed> @ axios.js?v=b1588b43:2232
+wrap @ axios.js?v=b1588b43:8
+withCache.duration @ api.js:1104
+(anonymous) @ cacheManager.js:159
+loadArtifacts @ GameWorld.jsx:1841
+(anonymous) @ GameWorld.jsx:1848
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+api.js:1107 Error fetching artifacts: Error: Network error. Please check your connection.
+    at api.js:136:11
+    at async Axios.request (axios.js?v=b1588b43:2104:14)
+    at async withCache.duration (api.js:1104:24)
+    at async cacheManager.js:159:22
+    at async loadArtifacts (GameWorld.jsx:1841:31)
+withCache.duration @ api.js:1107
+await in withCache.duration
+(anonymous) @ cacheManager.js:159
+loadArtifacts @ GameWorld.jsx:1841
+(anonymous) @ GameWorld.jsx:1848
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:90 [performance] Error in cached function  {args: Array(0)} Error: Network error. Please check your connection.
+    at api.js:136:11
+    at async Axios.request (axios.js?v=b1588b43:2104:14)
+    at async withCache.duration (api.js:1104:24)
+    at async cacheManager.js:159:22
+    at async loadArtifacts (GameWorld.jsx:1841:31)
+trackError @ errorTracker.js:90
+(anonymous) @ cacheManager.js:165
+await in (anonymous)
+loadArtifacts @ GameWorld.jsx:1841
+(anonymous) @ GameWorld.jsx:1848
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:1844 Error loading artifacts: Error: Network error. Please check your connection.
+    at api.js:136:11
+    at async Axios.request (axios.js?v=b1588b43:2104:14)
+    at async withCache.duration (api.js:1104:24)
+    at async cacheManager.js:159:22
+    at async loadArtifacts (GameWorld.jsx:1841:31)
+loadArtifacts @ GameWorld.jsx:1844
+await in loadArtifacts
+(anonymous) @ GameWorld.jsx:1848
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+api.js:1104  GET http://localhost:5000/api/artifacts net::ERR_CONNECTION_REFUSED
+dispatchXhrRequest @ axios.js?v=b1588b43:1637
+xhr @ axios.js?v=b1588b43:1517
+dispatchRequest @ axios.js?v=b1588b43:1992
+Promise.then
+_request @ axios.js?v=b1588b43:2195
+request @ axios.js?v=b1588b43:2104
+Axios.<computed> @ axios.js?v=b1588b43:2232
+wrap @ axios.js?v=b1588b43:8
+withCache.duration @ api.js:1104
+(anonymous) @ cacheManager.js:159
+loadArtifacts @ GameWorld.jsx:1841
+(anonymous) @ GameWorld.jsx:1848
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:138  POST http://localhost:5177/api/diagnostics/errors net::ERR_ABORTED 500 (Internal Server Error)
+reportErrorToServer @ errorTracker.js:138
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:152 Error reporting to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+reportErrorToServer @ errorTracker.js:152
+await in reportErrorToServer
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:113 Failed to report critical error to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+(anonymous) @ errorTracker.js:113
+Promise.catch
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:138  POST http://localhost:5177/api/diagnostics/errors net::ERR_ABORTED 500 (Internal Server Error)
+reportErrorToServer @ errorTracker.js:138
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:152 Error reporting to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+reportErrorToServer @ errorTracker.js:152
+await in reportErrorToServer
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:113 Failed to report critical error to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+(anonymous) @ errorTracker.js:113
+Promise.catch
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound whisper: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound digital_transition: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound toilet_flush: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound sword: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound damage: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound heal: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound key: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound sword_beam: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound rupee: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound enemy_hit: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound enemy_defeat: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound poof: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound gameover: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound heart: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1661
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:1665 Error initializing sound manager: ReferenceError: setSoundManager is not defined
+    at GameWorld.jsx:1662:7
+(anonymous) @ GameWorld.jsx:1665
+await in (anonymous)
+(anonymous) @ GameWorld.jsx:1689
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Fixing multiple issues: `setFormPosition` and `setSoundManager` are missing, and some props are undefined. Checking and fixing:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "setFormPosition|setSoundManager" in "/home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx" • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `client/src/components/GameWorld.jsx` | `setSoundManager(manager);` | L1662 |
+| `client/src/components/GameWorld.jsx` | `setFormPosition=\{setFormPosition\}` | L3002 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing missing setters and prop issues:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "setShowInventory" in "/home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx" • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `client/src/components/GameWorld.jsx` | `setShowInventory=\{setShowInventory\}` | L3003 |
+| `client/src/components/GameWorld.jsx` | `setShowInventory=\{(show) => updateUIState(\{ showInventory: show \})\}` | L3206 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: undefined
+
+```diff
+@@ -130,4 +130,6 @@
+      setQuestStatusMap,
+      setMobileState,
++     setFormPosition,
++     setSoundManager,
+    } = gameState;
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing missing setters and prop issues:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 6, lines removed: 6
+
+```diff
+@@ -2876,11 +2876,11 @@
+            {/* === CORE GAME WORLD === */}
+            &lt;MapComponent
+-             currentMapIndex={gameState.currentMapIndex}
+-             exploredTiles={gameState.exploredTiles}
+-             viewport={gameState.viewport}
+-             characterPosition={gameState.characterPosition}
++             currentMapIndex={currentMapIndex}
++             exploredTiles={exploredTiles}
++             viewport={viewport}
++             characterPosition={characterPosition}
+              artifacts={gameState.gameData.artifacts}
+-             showArtifactsOnMap={gameState.uiState.showArtifactsOnMap}
+-             inDungeon={gameState.uiState.inDungeon}
++             showArtifactsOnMap={uiState.showArtifactsOnMap}
++             inDungeon={uiState.inDungeon}
+            /&gt;
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 3
+
+```diff
+@@ -2887,9 +2887,9 @@
+            &lt;Character
+              ref={characterRef}
+-             position={gameState.characterPosition}
++             position={characterPosition || { x: 64, y: 64 }}
+              characterState={gameState.characterState}
+-             direction={gameState.characterState.direction}
++             direction={gameState.characterState?.direction || "down"}
+              isLoggedIn={isLoggedIn}
+-             character={gameState.character}
++             character={character}
+              soundManager={gameState.soundManager}
+              playerHealth={gameState.playerHealth}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -2975,5 +2975,5 @@
+                  /&gt;
+                ) : (
+-                 MAPS[currentMapIndex] &amp;&amp; (
++                 MAPS[currentMapIndex] &amp;&amp; MAPS[currentMapIndex].data &amp;&amp; (
+                    &lt;MapComponent
+                      mapData={MAPS[currentMapIndex].data}
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -2984,5 +2984,5 @@
+                      }
+                      artifacts={
+-                       !gameState.uiState.showArtifactsOnMap ? [] : artifactsToShow
++                       !uiState.showArtifactsOnMap ? [] : artifactsToShow
+                      }
+                      onTileClick={handleMapTileClick}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -2919,9 +2919,9 @@
+            &lt;Minimap
+              mapData={MAPS[currentMapIndex]?.data || []}
+-             playerPosition={characterPosition}
++             playerPosition={characterPosition || { x: 64, y: 64 }}
+              npcs={MAPS[currentMapIndex]?.npcs || []}
+              portals={MAPS[currentMapIndex]?.specialPortals || []}
+              tileSize={TILE_SIZE}
+-             exploredTiles={exploredTiles}
++             exploredTiles={exploredTiles instanceof Set ? exploredTiles : new Set()}
+              currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
+            /&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "const setShowInventory|setShowInventory\s*=" in "/home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx" • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `client/src/components/GameWorld.jsx` | `setShowInventory=\{setShowInventory\}` | L3005 |
+| `client/src/components/GameWorld.jsx` | `setShowInventory=\{(show) => updateUIState(\{ showInventory: show \})\}` | L3208 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `client/src/components/GameWorld.jsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing the `setShowInventory` reference:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -3003,5 +3003,5 @@
+                  handleArtifactPickup={handleArtifactPickup}
+                  setFormPosition={setFormPosition}
+-                 setShowInventory={setShowInventory}
++                 setShowInventory={(show) =&gt; updateUIState({ showInventory: show })}
+                  adjustViewport={adjustViewport}
+                  activePowers={activePowers}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `client/src/components/GameWorld.jsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the issues:
+
+1. **Added missing setters** - Added `setFormPosition` and `setSoundManager` to the destructuring from `gameState`
+
+2. **Fixed `setShowInventory`** - Changed it to use an inline function `(show) => updateUIState({ showInventory: show })` instead of a non-existent variable
+
+3. **Fixed prop warnings**:
+   - Updated `MapComponent` and `Character` to use destructured variables instead of `gameState.*`
+   - Added safety check for `characterPosition` with default `{ x: 64, y: 64 }` if undefined
+   - Added check to ensure `mapData` exists before rendering the inner `MapComponent`
+   - Fixed `exploredTiles` to ensure it's a `Set` (checking `instanceof Set` and providing fallback)
+
+4. **Fixed `exploredTiles` type issue** - Added a check to ensure it's a `Set` instance, not a function
+
+These changes should resolve the reference errors and prop warnings. The component should now render without these errors.
+
+---
+
+_**User (2026-01-07 03:53Z)**_
+
+ GameWorld.jsx:2877 Warning: Failed prop type: The prop `mapData` is marked as required in `Map`, but its value is `undefined`.
+    at Map (http://localhost:5177/src/components/Map.jsx:31:3)
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887265644:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887265644:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+printWarning @ react_jsx-dev-runtime.js?v=ce3ce900:64
+error @ react_jsx-dev-runtime.js?v=ce3ce900:48
+checkPropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:451
+validatePropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:778
+jsxWithValidation @ react_jsx-dev-runtime.js?v=ce3ce900:876
+(anonymous) @ GameWorld.jsx:2877
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19753
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2887 Warning: Failed prop type: The prop `x` is marked as required in `Character`, but its value is `undefined`.
+    at Character (http://localhost:5177/src/components/Character.jsx:23:3)
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887265644:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887265644:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+printWarning @ react_jsx-dev-runtime.js?v=ce3ce900:64
+error @ react_jsx-dev-runtime.js?v=ce3ce900:48
+checkPropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:451
+validatePropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:778
+jsxWithValidation @ react_jsx-dev-runtime.js?v=ce3ce900:876
+(anonymous) @ GameWorld.jsx:2887
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19753
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2887 Warning: Failed prop type: The prop `y` is marked as required in `Character`, but its value is `undefined`.
+    at Character (http://localhost:5177/src/components/Character.jsx:23:3)
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887265644:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887265644:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+printWarning @ react_jsx-dev-runtime.js?v=ce3ce900:64
+error @ react_jsx-dev-runtime.js?v=ce3ce900:48
+checkPropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:451
+validatePropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:778
+jsxWithValidation @ react_jsx-dev-runtime.js?v=ce3ce900:876
+(anonymous) @ GameWorld.jsx:2887
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19753
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:2978 Warning: Failed prop type: Function has non-object prototype 'undefined' in instanceof check
+    at Map (http://localhost:5177/src/components/Map.jsx:31:3)
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887265644:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887265644:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+printWarning @ react_jsx-dev-runtime.js?v=ce3ce900:64
+error @ react_jsx-dev-runtime.js?v=ce3ce900:48
+checkPropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:451
+validatePropTypes @ react_jsx-dev-runtime.js?v=ce3ce900:778
+jsxWithValidation @ react_jsx-dev-runtime.js?v=ce3ce900:876
+(anonymous) @ GameWorld.jsx:2978
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19753
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:90 [unknown] Unhandled error: Uncaught ReferenceError: otherPlayers is not defined {source: 'http://localhost:5177/src/components/GameWorld.jsx?t=1767887265644', line: 2340, column: 19} ReferenceError: otherPlayers is not defined
+    at GameWorld.jsx:3023:16
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+trackError @ errorTracker.js:90
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:3023 Uncaught ReferenceError: otherPlayers is not defined
+    at GameWorld.jsx:3023:16
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+(anonymous) @ GameWorld.jsx:3023
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+callCallback2 @ chunk-NUMECXU6.js?v=c9a7e100:3674
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:90 [unknown] Unhandled error: Uncaught ReferenceError: otherPlayers is not defined {source: 'http://localhost:5177/src/components/GameWorld.jsx?t=1767887265644', line: 2340, column: 19} ReferenceError: otherPlayers is not defined
+    at GameWorld.jsx:3023:16
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+trackError @ errorTracker.js:90
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:3023 Uncaught ReferenceError: otherPlayers is not defined
+    at GameWorld.jsx:3023:16
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at HTMLUnknownElement.callCallback2 (chunk-NUMECXU6.js?v=c9a7e100:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NUMECXU6.js?v=c9a7e100:3699:24)
+    at invokeGuardedCallback (chunk-NUMECXU6.js?v=c9a7e100:3733:39)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19765:15)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+(anonymous) @ GameWorld.jsx:3023
+renderWithHooks @ chunk-NUMECXU6.js?v=c9a7e100:11548
+updateFunctionComponent @ chunk-NUMECXU6.js?v=c9a7e100:14582
+updateSimpleMemoComponent @ chunk-NUMECXU6.js?v=c9a7e100:14463
+beginWork @ chunk-NUMECXU6.js?v=c9a7e100:15980
+callCallback2 @ chunk-NUMECXU6.js?v=c9a7e100:3674
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+chunk-NUMECXU6.js?v=c9a7e100:14032 The above error occurred in the <GameWorld> component:
+
+    at http://localhost:5177/src/components/GameWorld.jsx?t=1767887265644:97:45
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at Suspense
+    at RenderedRoute (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4089:5)
+    at Routes (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4559:5)
+    at main
+    at AchievementProvider (http://localhost:5177/src/context/AchievementContext.jsx:89:39)
+    at div
+    at App (http://localhost:5177/src/App.jsx?t=1767887265644:45:3)
+    at ErrorBoundary (http://localhost:5177/src/components/ErrorBoundary.jsx:8:5)
+    at GameStateProvider (http://localhost:5177/src/context/GameStateContext.jsx:98:37)
+    at WebSocketProvider (http://localhost:5177/src/context/WebSocketContext.jsx:28:37)
+    at AuthProvider (http://localhost:5177/src/context/AuthContext.jsx:227:32)
+    at Router (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:4502:15)
+    at BrowserRouter (http://localhost:5177/node_modules/.vite/deps/react-router-dom.js?v=ce3ce900:5248:5)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+logCapturedError @ chunk-NUMECXU6.js?v=c9a7e100:14032
+callback @ chunk-NUMECXU6.js?v=c9a7e100:14078
+callCallback @ chunk-NUMECXU6.js?v=c9a7e100:11248
+commitUpdateQueue @ chunk-NUMECXU6.js?v=c9a7e100:11265
+commitLayoutEffectOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:17075
+commitLayoutMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:17980
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17969
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17950
+commitLayoutEffects @ chunk-NUMECXU6.js?v=c9a7e100:17920
+commitRootImpl @ chunk-NUMECXU6.js?v=c9a7e100:19353
+commitRoot @ chunk-NUMECXU6.js?v=c9a7e100:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=c9a7e100:18760
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18718
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+ErrorBoundary.jsx:31 Error caught by boundary: ReferenceError: otherPlayers is not defined
+    at GameWorld.jsx:3023:16
+    at renderWithHooks (chunk-NUMECXU6.js?v=c9a7e100:11548:26)
+    at updateFunctionComponent (chunk-NUMECXU6.js?v=c9a7e100:14582:28)
+    at updateSimpleMemoComponent (chunk-NUMECXU6.js?v=c9a7e100:14463:18)
+    at beginWork (chunk-NUMECXU6.js?v=c9a7e100:15980:22)
+    at beginWork$1 (chunk-NUMECXU6.js?v=c9a7e100:19753:22)
+    at performUnitOfWork (chunk-NUMECXU6.js?v=c9a7e100:19198:20)
+    at workLoopSync (chunk-NUMECXU6.js?v=c9a7e100:19137:13)
+    at renderRootSync (chunk-NUMECXU6.js?v=c9a7e100:19116:15)
+    at recoverFromConcurrentError (chunk-NUMECXU6.js?v=c9a7e100:18736:28) {componentStack: '\n    at http://localhost:5177/src/components/GameW….vite/deps/react-router-dom.js?v=ce3ce900:5248:5)'}
+componentDidCatch @ ErrorBoundary.jsx:31
+callback @ chunk-NUMECXU6.js?v=c9a7e100:14084
+callCallback @ chunk-NUMECXU6.js?v=c9a7e100:11248
+commitUpdateQueue @ chunk-NUMECXU6.js?v=c9a7e100:11265
+commitLayoutEffectOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:17075
+commitLayoutMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:17980
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17969
+commitLayoutEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:17950
+commitLayoutEffects @ chunk-NUMECXU6.js?v=c9a7e100:17920
+commitRootImpl @ chunk-NUMECXU6.js?v=c9a7e100:19353
+commitRoot @ chunk-NUMECXU6.js?v=c9a7e100:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=c9a7e100:18760
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18718
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+api.js:134 Network error: Network Error
+(anonymous) @ api.js:134
+Promise.then
+_request @ axios.js?v=b1588b43:2195
+request @ axios.js?v=b1588b43:2104
+Axios.<computed> @ axios.js?v=b1588b43:2232
+wrap @ axios.js?v=b1588b43:8
+withCache.duration @ api.js:1104
+(anonymous) @ cacheManager.js:159
+loadArtifacts @ GameWorld.jsx:1843
+(anonymous) @ GameWorld.jsx:1850
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+api.js:1107 Error fetching artifacts: Error: Network error. Please check your connection.
+    at api.js:136:11
+    at async Axios.request (axios.js?v=b1588b43:2104:14)
+    at async withCache.duration (api.js:1104:24)
+    at async cacheManager.js:159:22
+    at async loadArtifacts (GameWorld.jsx:1843:31)
+withCache.duration @ api.js:1107
+await in withCache.duration
+(anonymous) @ cacheManager.js:159
+loadArtifacts @ GameWorld.jsx:1843
+(anonymous) @ GameWorld.jsx:1850
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:90 [performance] Error in cached function  {args: Array(0)} Error: Network error. Please check your connection.
+    at api.js:136:11
+    at async Axios.request (axios.js?v=b1588b43:2104:14)
+    at async withCache.duration (api.js:1104:24)
+    at async cacheManager.js:159:22
+    at async loadArtifacts (GameWorld.jsx:1843:31)
+trackError @ errorTracker.js:90
+(anonymous) @ cacheManager.js:165
+await in (anonymous)
+loadArtifacts @ GameWorld.jsx:1843
+(anonymous) @ GameWorld.jsx:1850
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+GameWorld.jsx:1846 Error loading artifacts: Error: Network error. Please check your connection.
+    at api.js:136:11
+    at async Axios.request (axios.js?v=b1588b43:2104:14)
+    at async withCache.duration (api.js:1104:24)
+    at async cacheManager.js:159:22
+    at async loadArtifacts (GameWorld.jsx:1843:31)
+loadArtifacts @ GameWorld.jsx:1846
+await in loadArtifacts
+(anonymous) @ GameWorld.jsx:1850
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+api.js:1104  GET http://localhost:5000/api/artifacts net::ERR_CONNECTION_REFUSED
+dispatchXhrRequest @ axios.js?v=b1588b43:1637
+xhr @ axios.js?v=b1588b43:1517
+dispatchRequest @ axios.js?v=b1588b43:1992
+Promise.then
+_request @ axios.js?v=b1588b43:2195
+request @ axios.js?v=b1588b43:2104
+Axios.<computed> @ axios.js?v=b1588b43:2232
+wrap @ axios.js?v=b1588b43:8
+withCache.duration @ api.js:1104
+(anonymous) @ cacheManager.js:159
+loadArtifacts @ GameWorld.jsx:1843
+(anonymous) @ GameWorld.jsx:1850
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:138  POST http://localhost:5177/api/diagnostics/errors net::ERR_ABORTED 500 (Internal Server Error)
+reportErrorToServer @ errorTracker.js:138
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:152 Error reporting to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+reportErrorToServer @ errorTracker.js:152
+await in reportErrorToServer
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:113 Failed to report critical error to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+(anonymous) @ errorTracker.js:113
+Promise.catch
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18678
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:138  POST http://localhost:5177/api/diagnostics/errors net::ERR_ABORTED 500 (Internal Server Error)
+reportErrorToServer @ errorTracker.js:138
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:152 Error reporting to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+reportErrorToServer @ errorTracker.js:152
+await in reportErrorToServer
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+errorTracker.js:113 Failed to report critical error to server: Error: Server returned 500: Internal Server Error
+    at reportErrorToServer (errorTracker.js:145:13)
+(anonymous) @ errorTracker.js:113
+Promise.catch
+trackError @ errorTracker.js:106
+(anonymous) @ errorTracker.js:196
+invokeGuardedCallbackDev @ chunk-NUMECXU6.js?v=c9a7e100:3699
+invokeGuardedCallback @ chunk-NUMECXU6.js?v=c9a7e100:3733
+beginWork$1 @ chunk-NUMECXU6.js?v=c9a7e100:19765
+performUnitOfWork @ chunk-NUMECXU6.js?v=c9a7e100:19198
+workLoopSync @ chunk-NUMECXU6.js?v=c9a7e100:19137
+renderRootSync @ chunk-NUMECXU6.js?v=c9a7e100:19116
+recoverFromConcurrentError @ chunk-NUMECXU6.js?v=c9a7e100:18736
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=c9a7e100:18684
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound whisper: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound digital_transition: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound toilet_flush: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound sword_beam: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound damage: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound sword: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound heal: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound key: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound rupee: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound poof: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound enemy_hit: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound enemy_defeat: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound gameover: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+SoundManager.js:187 ❌ Error loading sound heart: EncodingError: Unable to decode audio data
+loadSound @ SoundManager.js:187
+await in loadSound
+loadSoundWithFallback @ SoundManager.js:157
+(anonymous) @ SoundManager.js:70
+initialize @ SoundManager.js:69
+(anonymous) @ GameWorld.jsx:1663
+(anonymous) @ GameWorld.jsx:1691
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=c9a7e100:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=c9a7e100:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=c9a7e100:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=c9a7e100:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=c9a7e100:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=c9a7e100:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=c9a7e100:19447
+(anonymous) @ chunk-NUMECXU6.js?v=c9a7e100:19328
+workLoop @ chunk-NUMECXU6.js?v=c9a7e100:197
+flushWork @ chunk-NUMECXU6.js?v=c9a7e100:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=c9a7e100:384
+
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Fixing the `otherPlayers` error and the prop warnings:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "otherPlayers" in "/home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `client/src/components/GameWorld.jsx` | `\{otherPlayers.map((player) => (` | L3023 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="codebase_search">
+<details>
+                <summary>Tool use: **codebase_search** • Searched codebase "Where is otherPlayers state defined or used in GameWorld? How is multiplayer player data managed?" • **15** results</summary>
+            
+| File | Lines |
+|------|-------|
+| `client/src/components/MultiplayerChat.jsx` | L37-114 |
+| `client/src/components/GameWorld.jsx` | L3019-3056 |
+| `client/src/components/GameWorld.jsx` | L79-162 |
+| `client/src/components/GameWorld.jsx` | L3470-3532 |
+| `client/src/components/MultiplayerChat.jsx` | L110-167 |
+| `client/src/components/MultiplayerChat.jsx` | L39 |
+| `client/src/components/GameWorld.jsx` | L54 |
+| `client/src/components/GameWorld.jsx` | L2993-3022 |
+| `client/src/components/Level4Shooter.jsx` | L49 |
+| `client/src/components/TextAdventure.jsx` | L31 |
+| `client/src/components/CollaborationEngine.jsx` | L55-110 |
+| `client/src/components/GameWorld.jsx` | L2899-2939 |
+| `client/src/components/GameWorld.jsx` | L2956-2997 |
+| `client/src/components/MultiplayerChat.jsx` | L209-292 |
+| `client/src/components/GameWorld.jsx` | L2856-2902 |
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing the `otherPlayers` error and the prop warnings:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "worldId|const worldId" in "/home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx" • 4 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `client/src/components/GameWorld.jsx` | `worldId: MAPS[currentMapIndex].name,` | L2002 |
+| `client/src/components/GameWorld.jsx` | `(worldId) => \{` | L2195 |
+| `client/src/components/GameWorld.jsx` | `if (worldId === "hemingway") \{` | L2197 |
+| `client/src/components/GameWorld.jsx` | `\} else if (worldId === "text_adventure") \{` | L2200 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/Map.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -86,4 +86,5 @@
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [showLevelUpModal, setShowLevelUpModal] = useState(false);
++   const [otherPlayers, setOtherPlayers] = useState([]);
+  
+    // Use the custom game state hook
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 12, lines removed: 9
+
+```diff
+@@ -2876,13 +2876,16 @@
+  
+            {/* === CORE GAME WORLD === */}
+-           &lt;MapComponent
+-             currentMapIndex={currentMapIndex}
+-             exploredTiles={exploredTiles}
+-             viewport={viewport}
+-             characterPosition={characterPosition}
+-             artifacts={gameState.gameData.artifacts}
+-             showArtifactsOnMap={uiState.showArtifactsOnMap}
+-             inDungeon={uiState.inDungeon}
+-           /&gt;
++           {MAPS[currentMapIndex]?.data &amp;&amp; (
++             &lt;MapComponent
++               currentMapIndex={currentMapIndex}
++               mapData={MAPS[currentMapIndex].data}
++               exploredTiles={exploredTiles}
++               viewport={viewport}
++               characterPosition={characterPosition}
++               artifacts={gameState.gameData.artifacts}
++               showArtifactsOnMap={uiState.showArtifactsOnMap}
++               inDungeon={uiState.inDungeon}
++             /&gt;
++           )}
+  
+            &lt;Character
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `client/src/components/GameWorld.jsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing the `worldId` reference and ensuring `otherPlayers` is properly initialized:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /home/robwistrand/code/ga/projects/authentic-internet/client/src/components/GameWorld.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -3519,6 +3519,6 @@
+  
+            &lt;MultiplayerChat
+-             worldId={worldId}
+-             worldName={MAPS[gameState.currentMapIndex]?.name || "Unknown World"}
++             worldId={MAPS[currentMapIndex]?.name || "overworld"}
++             worldName={MAPS[currentMapIndex]?.name || "Unknown World"}
+              onPlayerClick={(player) =&gt; {
+                console.log("Player clicked:", player);
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `client/src/components/GameWorld.jsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the issues:
+
+1. **Added `otherPlayers` state** - Initialized as an empty array `useState([])` to prevent the reference error
+
+2. **Fixed first `MapComponent` missing `mapData` prop** - Added the `mapData` prop and wrapped it in a conditional check to ensure `MAPS[currentMapIndex]?.data` exists before rendering
+
+3. **Fixed `worldId` reference** - Changed from undefined `worldId` to `MAPS[currentMapIndex]?.name || "overworld"` in the `MultiplayerChat` component
+
+4. **Character position safety** - Already has a default value `{ x: 64, y: 64 }` if undefined, which should handle the prop warnings
+
+These changes should resolve the `otherPlayers` reference error and the prop warnings. The component should now render without these errors.
+
+---
+
