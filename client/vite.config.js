@@ -9,8 +9,14 @@ export default defineConfig({
   build: {
     sourcemap: true,
     chunkSizeWarningLimit: 1000, // Increase warning limit to 1MB
+    // Ensure consistent chunk loading order
+    commonjsOptions: {
+      include: [/node_modules/],
+    },
     rollupOptions: {
       output: {
+        // Ensure proper chunk loading order - critical for production
+        // React must be available before any code that depends on it
         manualChunks: (id) => {
           // Split vendor chunks
           if (id.includes("node_modules")) {
