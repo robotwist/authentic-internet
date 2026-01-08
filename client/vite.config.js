@@ -14,11 +14,15 @@ export default defineConfig({
         manualChunks: (id) => {
           // Split vendor chunks
           if (id.includes("node_modules")) {
+            // Keep Emotion together with MUI to prevent initialization issues
+            if (id.includes("@emotion")) {
+              return "mui-vendor";
+            }
             // React and React DOM in separate chunk
             if (id.includes("react") || id.includes("react-dom")) {
               return "react-vendor";
             }
-            // MUI libraries
+            // MUI libraries (including Emotion)
             if (id.includes("@mui")) {
               return "mui-vendor";
             }
@@ -109,7 +113,13 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-router-dom"],
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@emotion/react",
+      "@emotion/styled",
+    ],
     force: false, // Don't force dependency pre-bundling every time
     esbuildOptions: {
       define: {
