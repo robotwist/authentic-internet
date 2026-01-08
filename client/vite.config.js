@@ -18,7 +18,11 @@ export default defineConfig({
             if (id.includes("@emotion")) {
               return "mui-vendor";
             }
-            // React and React DOM in separate chunk
+            // Keep Zustand and use-sync-external-store with React to prevent initialization issues
+            if (id.includes("zustand") || id.includes("use-sync-external-store")) {
+              return "react-vendor";
+            }
+            // React and React DOM in separate chunk (must load first)
             if (id.includes("react") || id.includes("react-dom")) {
               return "react-vendor";
             }
@@ -119,6 +123,8 @@ export default defineConfig({
       "react-router-dom",
       "@emotion/react",
       "@emotion/styled",
+      "zustand",
+      "use-sync-external-store",
     ],
     force: false, // Don't force dependency pre-bundling every time
     esbuildOptions: {
