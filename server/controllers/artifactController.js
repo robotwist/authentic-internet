@@ -108,6 +108,44 @@ export const deleteArtifact = async (req, res) => {
   }
 };
 
+// Add a comment to an artifact
+export const addComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+    const userId = req.user._id;
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: "Comment content is required" });
+    }
+
+    const artifact = await Artifact.findById(id);
+    if (!artifact) {
+      return res.status(404).json({ message: "Artifact not found" });
+    }
+
+    const newComment = {
+      user: userId,
+      content: content.trim(),
+      createdAt: new Date()
+    };
+
+    artifact.comments = artifact.comments || [];
+    artifact.comments.push(newComment);
+
+    await artifact.save();
+    await artifact.populate('comments.user', 'username');
+
+    res.status(201).json({
+      message: "Comment added successfully",
+      comment: newComment
+    });
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
 // Get artifacts by area
 export const getArtifactsByArea = async (req, res) => {
   try {
@@ -118,4 +156,113 @@ export const getArtifactsByArea = async (req, res) => {
     console.error("Error fetching artifacts by area:", error);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
+};
+
+// Stub implementations for missing functions
+export const createCreativeArtifact = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const getGameProgress = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const saveGameProgress = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const completeArtifact = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const completeArtifactWithRewards = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const getHint = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const getInteractiveHint = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const getPlayerProgress = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const savePlayerProgress = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const voteOnArtifact = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const recordView = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const recordShare = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const recordInteraction = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const rateArtifact = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const addToCollection = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const getMessage = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const updateMessage = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const deleteMessage = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const seedArtifacts = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const getMarketplace = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const shareArtifact = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const unshareArtifact = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const discoverArtifact = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const listInMarketplace = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const removeFromMarketplace = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const getFeatured = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
+};
+
+export const searchArtifacts = async (req, res) => {
+  res.status(501).json({ message: "Not implemented" });
 };
