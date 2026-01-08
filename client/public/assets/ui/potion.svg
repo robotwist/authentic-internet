@@ -1,0 +1,13 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Potion bottle -->
+  <!-- Bottle body -->
+  <rect x="6" y="4" width="4" height="8" fill="#4169E1"/>
+  <!-- Bottle neck -->
+  <rect x="7" y="2" width="2" height="2" fill="#4169E1"/>
+  <!-- Cork -->
+  <rect x="7" y="1" width="2" height="1" fill="#8B4513"/>
+  <!-- Liquid -->
+  <rect x="7" y="5" width="2" height="6" fill="#00FF00"/>
+  <!-- Bubble -->
+  <rect x="8" y="6" width="1" height="1" fill="#FFFFFF"/>
+</svg>

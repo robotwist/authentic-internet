@@ -1,0 +1,16 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Full heart with Zelda-style pixel art personality -->
+  <rect x="6" y="2" width="4" height="2" fill="#FF0000"/>
+  <rect x="4" y="4" width="2" height="2" fill="#FF0000"/>
+  <rect x="10" y="4" width="2" height="2" fill="#FF0000"/>
+  <rect x="6" y="4" width="4" height="4" fill="#FF0000"/>
+  <rect x="2" y="6" width="2" height="2" fill="#FF0000"/>
+  <rect x="12" y="6" width="2" height="2" fill="#FF0000"/>
+  <rect x="4" y="8" width="2" height="2" fill="#FF0000"/>
+  <rect x="10" y="8" width="2" height="2" fill="#FF0000"/>
+  <rect x="6" y="10" width="4" height="2" fill="#FF0000"/>
+  <!-- Inner glow for personality -->
+  <rect x="7" y="5" width="2" height="2" fill="#FF4444"/>
+  <rect x="6" y="7" width="1" height="1" fill="#FFAAAA"/>
+  <rect x="9" y="7" width="1" height="1" fill="#FFAAAA"/>
+</svg>

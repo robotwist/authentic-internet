@@ -1,5 +1,6 @@
 import React from "react";
 import HeartDisplay from "../Combat/HeartDisplay";
+import ICONS from "../../constants/Icons";
 import "./GameHUD.css";
 
 /**
@@ -39,7 +40,11 @@ const GameHUD = ({
           {/* XP Bar and Level Display */}
           <div className="xp-display">
             <div className="level-badge" title={`Level ${level}`}>
-              <span className="level-icon">⭐</span>
+              <img
+                src={ICONS.ui.level}
+                alt="Level"
+                className="level-icon"
+              />
               <span className="level-number">{level}</span>
             </div>
             <div
@@ -73,7 +78,9 @@ const GameHUD = ({
         </div>
 
         <div className="hud-right">
-          {keys > 0 && <div className="key-count">🔑 × {keys}</div>}
+          {keys > 0 && <div className="key-count">
+            <img src={ICONS.ui.key} alt="Key" className="key-icon" /> × {keys}
+          </div>}
         </div>
       </div>
 
@@ -82,7 +89,9 @@ const GameHUD = ({
         <div className="hud-items">
           <div className="item-slot item-a">
             <span className="item-label">A</span>
-            <div className="item-icon">🗡️</div>
+            <div className="item-icon">
+              <img src={ICONS.ui.sword} alt="Sword" className="item-icon-image" />
+            </div>
           </div>
 
           <div className="item-slot item-b">
@@ -94,7 +103,7 @@ const GameHUD = ({
         </div>
 
         <div className="rupee-count">
-          💎 {rupees.toString().padStart(3, "0")}
+          <img src={ICONS.ui.rupee} alt="Rupee" className="rupee-icon" /> {rupees.toString().padStart(3, "0")}
         </div>
       </div>
     </div>
@@ -103,18 +112,11 @@ const GameHUD = ({
 
 // Helper function to get item icons
 const getItemIcon = (itemType) => {
-  const icons = {
-    bomb: "💣",
-    bow: "🏹",
-    boomerang: "🪃",
-    candle: "🕯️",
-    rod: "🪄",
-    key: "🔑",
-    potion: "🧪",
-    map: "🗺️",
-    compass: "🧭",
-  };
-  return icons[itemType] || "❓";
+  const iconPath = ICONS.items[itemType];
+  if (iconPath) {
+    return <img src={iconPath} alt={itemType} className="item-icon-image" />;
+  }
+  return <span className="item-icon-unknown">❓</span>; // Fallback for unknown items
 };
 
 // Helper function to calculate experience needed for a level

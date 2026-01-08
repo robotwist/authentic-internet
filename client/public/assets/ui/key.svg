@@ -1,0 +1,18 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dungeon key with Zelda-style personality -->
+  <!-- Key head -->
+  <rect x="1" y="6" width="4" height="4" fill="#C0C0C0"/>
+  <rect x="2" y="7" width="2" height="2" fill="#FFD700"/>
+  <!-- Key shaft -->
+  <rect x="5" y="8" width="8" height="2" fill="#C0C0C0"/>
+  <!-- Key teeth -->
+  <rect x="6" y="6" width="1" height="2" fill="#C0C0C0"/>
+  <rect x="8" y="6" width="1" height="2" fill="#C0C0C0"/>
+  <rect x="10" y="6" width="1" height="2" fill="#C0C0C0"/>
+  <!-- Key bow (handle) -->
+  <rect x="11" y="5" width="4" height="6" fill="#FFD700"/>
+  <rect x="12" y="6" width="2" height="4" fill="#FF6B00"/>
+  <!-- Decorative elements -->
+  <rect x="12" y="7" width="1" height="1" fill="#FFFFFF"/>
+  <rect x="13" y="8" width="1" height="1" fill="#FFFFFF"/>
+</svg>

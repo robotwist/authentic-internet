@@ -1,4 +1,5 @@
 import React from "react";
+import ICONS from "../../constants/Icons";
 import "./HeartDisplay.css";
 
 /**
@@ -24,9 +25,11 @@ const HeartDisplay = ({ currentHealth, maxHealth, isDamaged = false }) => {
 
     hearts.push(
       <div key={i} className={`heart heart-${heartState}`}>
-        {heartState === "full" && "❤️"}
-        {heartState === "half" && "💔"}
-        {heartState === "empty" && "🖤"}
+        <img
+          src={ICONS.ui.heart[heartState]}
+          alt={`${heartState} heart`}
+          className="heart-icon"
+        />
       </div>,
     );
   }

@@ -3,6 +3,7 @@ import Sword from "./Sword";
 import Enemy from "./Enemy";
 import Projectile from "./Projectile";
 import SoundManager from "../utils/SoundManager";
+import ICONS from "../../constants/Icons";
 import "./CombatManager.css";
 
 /**
@@ -477,9 +478,9 @@ const CombatManager = ({
           }}
           onClick={() => handleDropCollection(drop.id)}
         >
-          {drop.type === "heart" && "❤️"}
-          {drop.type === "rupee" && "💎"}
-          {drop.type === "key" && "🔑"}
+          {drop.type === "heart" && <img src={ICONS.drops.heart} alt="Heart" className="drop-icon" />}
+          {drop.type === "rupee" && <img src={ICONS.drops.rupee} alt="Rupee" className="drop-icon" />}
+          {drop.type === "key" && <img src={ICONS.ui.key} alt="Key" className="drop-icon" />}
         </div>
       ))}
     </div>

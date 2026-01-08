@@ -24,11 +24,41 @@ const ICONS = {
   // Character assets
   character: '/assets/character.png',  // Your Piskel-made character
 
-  // Future UI icons (when you create them)
+  // UI icons - custom pixel art for game interface
   ui: {
-    // level: '/assets/icons/level-star.png',  // For future
-    // key: '/assets/icons/key.png',          // For future
-    // rupees: '/assets/icons/rupee.png',      // For future
+    // Hearts for health display
+    heart: {
+      full: '/assets/ui/heart-full.svg',      // Full heart ❤️
+      half: '/assets/ui/heart-half.svg',      // Half heart 💔
+      empty: '/assets/ui/heart-empty.svg',    // Empty heart 🖤
+    },
+
+    // HUD elements
+    level: '/assets/ui/level-star.png',       // Level star ⭐
+    key: '/assets/ui/key.png',                // Dungeon key 🔑
+    rupee: '/assets/ui/rupee.png',            // Currency 💎
+
+    // Item slot icons (for GameHUD)
+    sword: '/assets/ui/sword-icon.png',       // Sword in item slot 🗡️
+  },
+
+  // Combat drops
+  drops: {
+    heart: '/assets/ui/heart-drop.png',       // Heart pickup ❤️
+    rupee: '/assets/ui/rupee-drop.png',       // Rupee pickup 💎
+  },
+
+  // Inventory items
+  items: {
+    bomb: '/assets/ui/bomb.png',              // 💣
+    bow: '/assets/ui/bow.png',                // 🏹
+    boomerang: '/assets/ui/boomerang.png',    // 🪃
+    candle: '/assets/ui/candle.png',          // 🕯️
+    rod: '/assets/ui/rod.png',                // 🪄
+    key: '/assets/ui/key.png',                // 🔑 (reuse)
+    potion: '/assets/ui/potion.png',          // 🧪
+    map: '/assets/ui/map.png',                // 🗺️
+    compass: '/assets/ui/compass.png',        // 🧭
   }
 };
 

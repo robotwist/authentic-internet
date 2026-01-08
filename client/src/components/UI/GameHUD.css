@@ -83,6 +83,13 @@
   gap: 8px;
 }
 
+.key-icon {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
 /* Bottom bar */
 .hud-bottom-bar {
   display: flex;
@@ -131,6 +138,16 @@
 
 .item-icon {
   font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-icon-image {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  object-fit: contain;
 }
 
 .item-a {
@@ -152,6 +169,13 @@
   gap: 8px;
   min-width: 120px;
   justify-content: center;
+}
+
+.rupee-icon {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+  object-fit: contain;
 }
 
 /* Responsive adjustments */
@@ -245,7 +269,10 @@
 }
 
 .level-icon {
-  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+  object-fit: contain;
   animation: level-glow 2s steps(2) infinite;
 }
 
