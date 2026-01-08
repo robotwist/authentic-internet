@@ -24,7 +24,7 @@ const Map = ({
   offset = { x: 0, y: 0 },
   onZoomChange,
   mapName = "",
-  questStatusMap = new Map(),
+  questStatusMap = new globalThis.Map(),
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -421,7 +421,7 @@ Map.propTypes = {
   }),
   onZoomChange: PropTypes.func,
   mapName: PropTypes.string,
-  questStatusMap: PropTypes.instanceOf(Map),
+  questStatusMap: PropTypes.instanceOf(globalThis.Map),
 };
 
 export default Map;
