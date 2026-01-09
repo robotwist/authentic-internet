@@ -7,11 +7,26 @@ import {
 } from "./GameConstants";
 import { isValidMapSize } from "./MapConstants";
 
+// Helper function to double map size (2x width and 2x height)
+const doubleMapSize = (mapData) => {
+  const doubled = [];
+  for (let row of mapData) {
+    // Double each row horizontally
+    const doubledRow = [];
+    for (let cell of row) {
+      doubledRow.push(cell, cell); // Duplicate each cell
+    }
+    // Add the doubled row twice
+    doubled.push(doubledRow, [...doubledRow]);
+  }
+  return doubled;
+};
+
 // Maps array
 export const MAPS = [
   {
     name: "Overworld",
-    data: [
+    data: doubleMapSize([
       [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -30,20 +45,20 @@ export const MAPS = [
       [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ],
+    ]),
     npcs: [
       {
         id: uuidv4(),
         _id: uuidv4(), // Add _id for NPCInteraction component compatibility
         name: "William Shakespeare",
         type: NPC_TYPES.SHAKESPEARE,
-        position: { x: 256, y: 512 }, // Central area (pixel coordinates: 4 tiles x, 8 tiles y)
+        position: { x: 512, y: 1024 }, // Central area (pixel coordinates: 8 tiles x, 16 tiles y) - doubled
         sprite: "/assets/npcs/shakespeare.webp",
         patrolArea: {
-          startX: 64, // 1 tile * 64px
-          startY: 384, // 6 tiles * 64px
-          width: 448, // 7 tiles * 64px
-          height: 384, // 6 tiles * 64px
+          startX: 128, // 2 tiles * 64px - doubled
+          startY: 768, // 12 tiles * 64px - doubled
+          width: 896, // 14 tiles * 64px - doubled
+          height: 768, // 12 tiles * 64px - doubled
         },
         dialogue: [
           "All the world's a stage, and all the men and women merely players. (As You Like It, Act II, Scene VII)",
@@ -95,13 +110,13 @@ export const MAPS = [
         type: NPC_TYPES.JOHN_MUIR,
         name: "John Muir",
         area: "Overworld",
-        position: { x: 384, y: 832 }, // Pixel coordinates (6 tiles x * 64px, 13 tiles y * 64px) - walkable grass tile
+        position: { x: 768, y: 1664 }, // Pixel coordinates (12 tiles x * 64px, 26 tiles y * 64px) - doubled
         sprite: "/assets/npcs/john_muir.webp",
         patrolArea: {
-          startX: 192, // 3 tiles * 64px
-          startY: 832, // 13 tiles * 64px
-          width: 640, // 10 tiles * 64px
-          height: 256, // 4 tiles * 64px
+          startX: 384, // 6 tiles * 64px - doubled
+          startY: 1664, // 26 tiles * 64px - doubled
+          width: 1280, // 20 tiles * 64px - doubled
+          height: 512, // 8 tiles * 64px - doubled
         },
         dialogue: [
           "The mountains are calling and I must go. (Letter to his sister Sarah Muir, 1873)",
@@ -114,7 +129,7 @@ export const MAPS = [
     ],
     specialPortals: [
       {
-        position: { x: 8, y: 15 }, // Near Shakespeare in the southern area
+        position: { x: 16, y: 30 }, // Near Shakespeare in the southern area - doubled
         type: "dungeon",
         destination: "Library of Alexandria",
         tileType: 9, // New tile type for dungeon entrance
@@ -129,7 +144,7 @@ export const MAPS = [
         type: "WEAPON",
         content: "The sword pulses with ancient power, its edge never dulling.",
         media: ["/assets/artifacts/ancient_sword.png"],
-        location: { x: 3, y: 2, mapName: "Overworld" },
+        location: { x: 6, y: 4, mapName: "Overworld" }, // Doubled
         exp: 15,
         visible: true,
         area: "Overworld",
@@ -174,7 +189,7 @@ export const MAPS = [
         content:
           "It hums with an ancient power, revealing secrets to those who are worthy.",
         media: ["/assets/artifacts/mystic_orb.png"],
-        location: { x: 7, y: 13, mapName: "Overworld" },
+        location: { x: 14, y: 26, mapName: "Overworld" }, // Doubled
         exp: 20,
         visible: true,
         area: "Overworld",
@@ -208,7 +223,7 @@ export const MAPS = [
   },
   {
     name: "Overworld 2",
-    data: [
+    data: doubleMapSize([
       [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -227,7 +242,7 @@ export const MAPS = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -238,7 +253,7 @@ export const MAPS = [
         content:
           "Whispers of ancient wisdom echo from its surface, waiting to be discovered.",
         media: ["/assets/artifacts/enchanted_mirror.png"],
-        location: { x: 3, y: 3, mapName: "Overworld 2" },
+        location: { x: 6, y: 6, mapName: "Overworld 2" }, // Doubled
         exp: 18,
         visible: true,
         area: "Overworld",
@@ -275,7 +290,7 @@ export const MAPS = [
         name: "Zeus the Weatherman",
         type: NPC_TYPES.ZEUS,
         apiType: "zeus",
-        position: { x: 3, y: 3 },
+        position: { x: 6, y: 6 }, // Doubled (tile coordinates)
         dialogue: [
           "By my thunderbolts! Today's forecast calls for partly cloudy with a chance of divine intervention!",
           "Expect high-pressure systems over Mount Olympus, with occasional lightning strikes... those are mine, by the way.",
@@ -288,7 +303,7 @@ export const MAPS = [
   },
   {
     name: "Overworld 3",
-    data: [
+    data: doubleMapSize([
       [0, 0, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -307,7 +322,7 @@ export const MAPS = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -317,7 +332,7 @@ export const MAPS = [
         content:
           "The pages contain knowledge of artifact creation and manipulation, with spaces for users to add their own discoveries.",
         media: ["/assets/artifacts/ancient_tome.png"],
-        location: { x: 3, y: 7, mapName: "Overworld 3" },
+        location: { x: 6, y: 14, mapName: "Overworld 3" }, // Doubled
         exp: 30,
         visible: true,
         area: "Overworld",
@@ -353,7 +368,7 @@ export const MAPS = [
         id: uuidv4(),
         name: "William Shakespeare",
         type: NPC_TYPES.SHAKESPEARE,
-        position: { x: 5, y: 7 },
+        position: { x: 10, y: 14 }, // Doubled (tile coordinates)
         dialogue: [
           "All the world's a stage, and all the men and women merely players.",
           "To be, or not to be, that is the question.",
@@ -366,7 +381,7 @@ export const MAPS = [
   },
   {
     name: "Desert 1",
-    data: [
+    data: doubleMapSize([
       [1, 1, 3, 3, 3, 1, 1, 1, 1, 1],
       [3, 3, 3, 3, 3, 3, 3, 3, 3, 1],
       [3, 3, 3, 3, 3, 3, 3, 1, 3, 1],
@@ -377,7 +392,7 @@ export const MAPS = [
       [1, 3, 3, 3, 3, 3, 3, 3, 3, 3],
       [1, 0, 1, 1, 1, 1, 1, 1, 5, 1],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -387,7 +402,7 @@ export const MAPS = [
         content:
           "This golden idol was worshipped by an ancient desert civilization.",
         media: ["/assets/artifacts/golden_idol.png"],
-        location: { x: 4, y: 6, mapName: "Desert 1" },
+        location: { x: 8, y: 12, mapName: "Desert 1" }, // Doubled
         exp: 20,
         visible: true,
         area: "Desert",
@@ -423,13 +438,13 @@ export const MAPS = [
         id: uuidv4(),
         name: "Alexander Pope",
         type: NPC_TYPES.ALEXANDER_POPE,
-        position: { x: 256, y: 192 }, // Central desert (4 tiles x, 3 tiles y)
+        position: { x: 512, y: 384 }, // Central desert (8 tiles x, 6 tiles y) - doubled
         sprite: "/assets/npcs/alexander_pope.svg",
         patrolArea: {
-          startX: 128, // 2 tiles * 64px
-          startY: 128, // 2 tiles * 64px
-          width: 256, // 4 tiles * 64px
-          height: 256, // 4 tiles * 64px
+          startX: 256, // 4 tiles * 64px - doubled
+          startY: 256, // 4 tiles * 64px - doubled
+          width: 512, // 8 tiles * 64px - doubled
+          height: 512, // 8 tiles * 64px - doubled
         },
         dialogue: [
           "To err is human, to forgive divine. (An Essay on Criticism, 1711)",
@@ -457,7 +472,7 @@ export const MAPS = [
   },
   {
     name: "Desert 2",
-    data: [
+    data: doubleMapSize([
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [3, 3, 3, 3, 3, 3, 3, 3, 3, 1],
       [3, 3, 1, 1, 1, 1, 1, 1, 3, 1],
@@ -468,7 +483,7 @@ export const MAPS = [
       [1, 0, 0, 0, 3, 3, 3, 3, 3, 3],
       [1, 0, 1, 1, 1, 1, 1, 1, 5, 1],
       [1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -479,7 +494,7 @@ export const MAPS = [
         content:
           "The needle spins wildly when near certain artifacts, perhaps it can help locate hidden treasures.",
         media: ["/assets/artifacts/desert_compass.png"],
-        location: { x: 1, y: 7, mapName: "Desert 2" },
+        location: { x: 2, y: 14, mapName: "Desert 2" }, // Doubled
         exp: 20,
         visible: true,
         area: "Desert",
@@ -515,13 +530,13 @@ export const MAPS = [
         id: uuidv4(),
         name: "Oscar Wilde",
         type: NPC_TYPES.OSCAR_WILDE,
-        position: { x: 320, y: 320 }, // Oasis area (5 tiles x, 5 tiles y)
+        position: { x: 640, y: 640 }, // Oasis area (10 tiles x, 10 tiles y) - doubled
         sprite: "/assets/npcs/oscar_wilde.svg",
         patrolArea: {
-          startX: 192, // 3 tiles * 64px
-          startY: 256, // 4 tiles * 64px
-          width: 320, // 5 tiles * 64px
-          height: 192, // 3 tiles * 64px
+          startX: 384, // 6 tiles * 64px - doubled
+          startY: 512, // 8 tiles * 64px - doubled
+          width: 640, // 10 tiles * 64px - doubled
+          height: 384, // 6 tiles * 64px - doubled
         },
         dialogue: [
           "I can resist everything except temptation. (Lady Windermere's Fan, 1892)",
@@ -549,7 +564,7 @@ export const MAPS = [
   },
   {
     name: "Desert 3",
-    data: [
+    data: doubleMapSize([
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [3, 3, 3, 3, 3, 3, 3, 3, 3, 1],
       [3, 3, 1, 1, 1, 1, 1, 1, 3, 1],
@@ -560,7 +575,7 @@ export const MAPS = [
       [1, 3, 3, 3, 3, 3, 3, 3, 3, 3],
       [1, 3, 3, 1, 1, 1, 3, 3, 3, 3],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 3],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -570,7 +585,7 @@ export const MAPS = [
         content:
           "The inscriptions tell of a great civilization and their powerful artifacts, now scattered across the lands.",
         media: ["/assets/artifacts/sandstone_tablet.png"],
-        location: { x: 2, y: 6, mapName: "Desert 3" },
+        location: { x: 4, y: 12, mapName: "Desert 3" }, // Doubled
         exp: 25,
         visible: true,
         area: "Desert",
@@ -606,13 +621,13 @@ export const MAPS = [
         id: uuidv4(),
         name: "Ada Lovelace",
         type: NPC_TYPES.ADA_LOVELACE,
-        position: { x: 256, y: 256 }, // Center of desert (4 tiles x, 4 tiles y)
+        position: { x: 512, y: 512 }, // Center of desert (8 tiles x, 8 tiles y) - doubled
         sprite: "/assets/npcs/ada_lovelace.webp",
         patrolArea: {
-          startX: 128, // 2 tiles * 64px
-          startY: 192, // 3 tiles * 64px
-          width: 384, // 6 tiles * 64px
-          height: 256, // 4 tiles * 64px
+          startX: 256, // 4 tiles * 64px - doubled
+          startY: 384, // 6 tiles * 64px - doubled
+          width: 768, // 12 tiles * 64px - doubled
+          height: 512, // 8 tiles * 64px - doubled
         },
         dialogue: [
           "That brain of mine is something more than merely mortal; as time will show. (Letter to her mother, 1843)",
@@ -640,7 +655,7 @@ export const MAPS = [
   },
   {
     name: "Yosemite",
-    data: [
+    data: doubleMapSize([
       // Row 0-9: Northern forest and mountains
       [
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -809,22 +824,22 @@ export const MAPS = [
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
       ],
-    ],
+    ]),
     specialPortals: [
       {
-        position: { x: 9, y: 14 },
+        position: { x: 18, y: 28 }, // Doubled
         type: "terminal",
         destination: "Terminal3",
         tileType: 6,
       },
       {
-        position: { x: 28, y: 24 },
+        position: { x: 56, y: 48 }, // Doubled
         type: "shooter",
         destination: "Level4Shooter",
         tileType: 7,
       },
       {
-        position: { x: 11, y: 34 },
+        position: { x: 22, y: 68 }, // Doubled
         type: "text",
         destination: "Text Adventure",
         tileType: 8,
@@ -835,13 +850,13 @@ export const MAPS = [
         id: uuidv4(),
         name: "John Muir",
         type: NPC_TYPES.JOHN_MUIR,
-        position: { x: 320, y: 1344 }, // Center valley area for easy finding (pixel coordinates)
+        position: { x: 640, y: 2688 }, // Center valley area for easy finding (pixel coordinates) - doubled
         sprite: "/assets/npcs/john_muir.png",
         patrolArea: {
-          startX: 256, // 4 tiles * 64px
-          startY: 1024, // 16 tiles * 64px
-          width: 768, // 12 tiles * 64px - larger patrol area for bigger map
-          height: 768, // 12 tiles * 64px
+          startX: 512, // 8 tiles * 64px - doubled
+          startY: 2048, // 32 tiles * 64px - doubled
+          width: 1536, // 24 tiles * 64px - doubled
+          height: 1536, // 24 tiles * 64px - doubled
         },
         dialogue: [
           "Welcome to Yosemite Valley! The grandeur of these peaks never ceases to amaze me.",
@@ -870,7 +885,7 @@ export const MAPS = [
   },
   {
     name: "Hemingway's Battleground",
-    data: [
+    data: doubleMapSize([
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
@@ -881,7 +896,7 @@ export const MAPS = [
       [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 5, 1],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -889,7 +904,7 @@ export const MAPS = [
         description: "A manuscript detailing the experiences of war",
         content:
           "The pages contain powerful descriptions of conflict and its impact on the human spirit.",
-        location: { x: 4, y: 4 },
+        location: { x: 8, y: 8 }, // Doubled
         exp: 40,
         visible: true,
         area: "Battleground",
@@ -918,7 +933,7 @@ export const MAPS = [
         id: "hemingway1",
         type: NPC_TYPES.WRITER,
         name: "Ernest Hemingway",
-        position: { x: 2, y: 2 },
+        position: { x: 4, y: 4 }, // Doubled (tile coordinates)
         sprite: "/assets/npcs/hemingway.png",
         dialogue: [
           "Write hard and clear about what hurts.",
@@ -930,7 +945,7 @@ export const MAPS = [
   },
   {
     name: "Text Adventure",
-    data: [
+    data: doubleMapSize([
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
@@ -941,7 +956,7 @@ export const MAPS = [
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -950,7 +965,7 @@ export const MAPS = [
           "A mystical compass that points to narrative possibilities",
         content:
           "This compass seems to react to the strength of nearby stories.",
-        location: { x: 4, y: 4 },
+        location: { x: 8, y: 8 }, // Doubled
         exp: 30,
         visible: true,
         area: "TextAdventure",
@@ -977,7 +992,7 @@ export const MAPS = [
   },
   {
     name: "Terminal3",
-    data: [
+    data: doubleMapSize([
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
@@ -988,7 +1003,7 @@ export const MAPS = [
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -996,7 +1011,7 @@ export const MAPS = [
         description: "An ancient terminal that holds forgotten digital wisdom",
         content:
           "The screen flickers with cryptic commands and mysterious data.",
-        location: { x: 4, y: 4 },
+        location: { x: 8, y: 8 }, // Doubled
         exp: 35,
         visible: true,
         area: "Terminal",
@@ -1023,7 +1038,7 @@ export const MAPS = [
   },
   {
     name: "Level4Shooter",
-    data: [
+    data: doubleMapSize([
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
@@ -1034,7 +1049,7 @@ export const MAPS = [
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -1043,7 +1058,7 @@ export const MAPS = [
         type: "WEAPON",
         content: "The keys still hold the echoes of countless adventures.",
         media: ["/assets/artifacts/hemingway_typewriter.png"],
-        location: { x: 4, y: 4, mapName: "Level4Shooter" },
+        location: { x: 8, y: 8, mapName: "Level4Shooter" }, // Doubled
         exp: 40,
         visible: true,
         area: "Shooter",
@@ -1077,7 +1092,7 @@ export const MAPS = [
   },
   {
     name: "Dungeon Level 1",
-    data: [
+    data: doubleMapSize([
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
@@ -1088,7 +1103,7 @@ export const MAPS = [
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -1098,7 +1113,7 @@ export const MAPS = [
         content:
           "This key seems to resonate with the deeper levels of the dungeon.",
         media: ["/assets/artifacts/dungeon_key.png"],
-        location: { x: 4, y: 4, mapName: "Dungeon Level 1" },
+        location: { x: 8, y: 8, mapName: "Dungeon Level 1" }, // Doubled
         exp: 20,
         visible: true,
         area: "Dungeon",
@@ -1126,7 +1141,7 @@ export const MAPS = [
   },
   {
     name: "Dungeon Level 2",
-    data: [
+    data: doubleMapSize([
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
       [4, 0, 4, 4, 0, 4, 4, 4, 0, 4],
@@ -1137,7 +1152,7 @@ export const MAPS = [
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -1147,7 +1162,7 @@ export const MAPS = [
         content:
           "The scroll tells of a powerful artifact hidden in the deepest level.",
         media: ["/assets/artifacts/ancient_scroll.png"],
-        location: { x: 4, y: 4, mapName: "Dungeon Level 2" },
+        location: { x: 8, y: 8, mapName: "Dungeon Level 2" }, // Doubled
         exp: 25,
         visible: true,
         area: "Dungeon",
@@ -1169,7 +1184,7 @@ export const MAPS = [
   },
   {
     name: "Dungeon Level 3",
-    data: [
+    data: doubleMapSize([
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 0, 4],
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
@@ -1180,7 +1195,7 @@ export const MAPS = [
       [4, 0, 4, 4, 4, 4, 4, 4, 0, 4],
       [4, 0, 0, 0, 0, 0, 0, 0, 5, 4],
       [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-    ],
+    ]),
     artifacts: [
       {
         id: uuidv4(),
@@ -1189,7 +1204,7 @@ export const MAPS = [
         type: "KEY",
         content: "This key seems to resonate with digital energy.",
         media: ["/assets/artifacts/terminal_key.png"],
-        location: { x: 4, y: 4, mapName: "Dungeon Level 3" },
+        location: { x: 8, y: 8, mapName: "Dungeon Level 3" }, // Doubled
         exp: 30,
         visible: true,
         area: "Dungeon",
