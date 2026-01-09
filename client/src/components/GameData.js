@@ -7,6 +7,14 @@ import {
 } from "./GameConstants";
 import { isValidMapSize } from "./MapConstants";
 
+/**
+ * COORDINATE SYSTEM DOCUMENTATION:
+ * - NPC positions: PIXEL coordinates (multiply tile coordinates by TILE_SIZE = 64)
+ * - Artifact locations: TILE coordinates (x, y represent tile indices)
+ * - Special portal positions: TILE coordinates (x, y represent tile indices)
+ * - Patrol areas: PIXEL coordinates (startX, startY, width, height in pixels)
+ */
+
 // Helper function to double map size (2x width and 2x height)
 const doubleMapSize = (mapData) => {
   const doubled = [];
@@ -290,7 +298,7 @@ export const MAPS = [
         name: "Zeus the Weatherman",
         type: NPC_TYPES.ZEUS,
         apiType: "zeus",
-        position: { x: 6, y: 6 }, // Doubled (tile coordinates)
+        position: { x: 6 * TILE_SIZE, y: 6 * TILE_SIZE }, // Doubled - converted to pixel coordinates (384, 384)
         dialogue: [
           "By my thunderbolts! Today's forecast calls for partly cloudy with a chance of divine intervention!",
           "Expect high-pressure systems over Mount Olympus, with occasional lightning strikes... those are mine, by the way.",
@@ -368,7 +376,7 @@ export const MAPS = [
         id: uuidv4(),
         name: "William Shakespeare",
         type: NPC_TYPES.SHAKESPEARE,
-        position: { x: 10, y: 14 }, // Doubled (tile coordinates)
+        position: { x: 10 * TILE_SIZE, y: 14 * TILE_SIZE }, // Doubled - converted to pixel coordinates (640, 896)
         dialogue: [
           "All the world's a stage, and all the men and women merely players.",
           "To be, or not to be, that is the question.",
@@ -933,7 +941,7 @@ export const MAPS = [
         id: "hemingway1",
         type: NPC_TYPES.WRITER,
         name: "Ernest Hemingway",
-        position: { x: 4, y: 4 }, // Doubled (tile coordinates)
+        position: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE }, // Doubled - converted to pixel coordinates (256, 256)
         sprite: "/assets/npcs/hemingway.png",
         dialogue: [
           "Write hard and clear about what hurts.",
