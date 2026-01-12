@@ -357,6 +357,16 @@ class SoundManager {
       source.connect(gainNode);
       gainNode.connect(this.audioContext.destination);
 
+      // Clean up nodes when sound finishes to prevent memory leaks
+      source.onended = () => {
+        try {
+          source.disconnect();
+          gainNode.disconnect();
+        } catch (error) {
+          // Ignore errors if already disconnected
+        }
+      };
+
       source.start(0);
       console.log(`🔊 Playing sound: ${name}`);
     } catch (error) {
@@ -387,7 +397,7 @@ class SoundManager {
     try {
       // Stop current music if playing
       if (this.currentMusic) {
-        this.currentMusic.stop();
+        this.stopMusic(false);
       }
 
       // Get the music (with fallback)
@@ -414,8 +424,10 @@ class SoundManager {
       source.connect(gainNode);
       gainNode.connect(this.audioContext.destination);
 
+      // Store both source and gainNode for proper cleanup
+      this.currentMusic = { source, gainNode, name };
+
       source.start(0);
-      this.currentMusic = source;
       console.log(`🎵 Playing music: ${name}${loop ? " (looped)" : ""}`);
     } catch (error) {
       console.error(`❌ Error playing music ${name}:`, error);
@@ -430,32 +442,67 @@ class SoundManager {
     if (!this.currentMusic) return;
 
     try {
+      const { source, gainNode } = this.currentMusic;
+
       if (fadeOut) {
-        const gainNode = this.audioContext.createGain();
+        // Use existing gainNode for fade-out
+        gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
         gainNode.gain.setValueAtTime(
-          this.musicVolume,
+          gainNode.gain.value,
           this.audioContext.currentTime,
         );
         gainNode.gain.exponentialRampToValueAtTime(
           0.001,
           this.audioContext.currentTime + 1,
         );
-        this.currentMusic.connect(gainNode);
 
-        // Stop after fade
+        // Stop after fade and clean up
+        source.onended = () => {
+          this.cleanupMusicNodes(source, gainNode);
+        };
+
         setTimeout(() => {
-          if (this.currentMusic) {
-            this.currentMusic.stop();
-            this.currentMusic = null;
+          if (this.currentMusic && this.currentMusic.source === source) {
+            try {
+              source.stop();
+            } catch (error) {
+              // Source may have already stopped
+            }
+            this.cleanupMusicNodes(source, gainNode);
           }
         }, 1000);
       } else {
-        this.currentMusic.stop();
-        this.currentMusic = null;
+        try {
+          source.stop();
+        } catch (error) {
+          // Source may have already stopped
+        }
+        this.cleanupMusicNodes(source, gainNode);
       }
       console.log("🛑 Stopped music");
     } catch (error) {
       console.error("❌ Error stopping music:", error);
+      // Ensure cleanup happens even on error
+      if (this.currentMusic) {
+        this.currentMusic = null;
+      }
+    }
+  }
+
+  /**
+   * Clean up music source and gain nodes
+   * @private
+   */
+  cleanupMusicNodes(source, gainNode) {
+    try {
+      source.disconnect();
+      gainNode.disconnect();
+    } catch (error) {
+      // Ignore errors if already disconnected
+    }
+    // Clear currentMusic if this is the active track
+    if (this.currentMusic && this.currentMusic.source === source) {
+      this.currentMusic = null;
     }
   }
 
@@ -501,7 +548,12 @@ class SoundManager {
    */
   cleanup() {
     if (this.currentMusic) {
-      this.currentMusic.stop();
+      try {
+        this.currentMusic.source.stop();
+      } catch (error) {
+        // Source may have already stopped
+      }
+      this.cleanupMusicNodes(this.currentMusic.source, this.currentMusic.gainNode);
       this.currentMusic = null;
     }
 

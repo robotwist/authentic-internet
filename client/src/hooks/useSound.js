@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import SoundManager from "../components/utils/SoundManager";
 
 /**
  * Custom hook for managing sounds in the application
@@ -238,15 +239,14 @@ const useSound = (src, { autoPlay = false, volume = 1, loop = false } = {}) => {
 
 /**
  * Sound utility functions that don't require a specific sound source
+ * Uses centralized SoundManager for consistency and efficiency
  */
 export const useSoundUtils = () => {
   const playSuccess = () => {
     try {
-      const audio = new Audio("/assets/sounds/level-complete.mp3");
-      audio.volume = 0.5;
-      audio
-        .play()
-        .catch((err) => console.error("Could not play success sound:", err));
+      // Use SoundManager singleton for consistent audio handling
+      const soundManager = SoundManager.getInstance();
+      soundManager.playSound("level_complete", 0.5);
     } catch (err) {
       console.error("Error playing success sound:", err);
     }
@@ -254,11 +254,8 @@ export const useSoundUtils = () => {
 
   const playError = () => {
     try {
-      const audio = new Audio("/assets/sounds/bump.mp3");
-      audio.volume = 0.5;
-      audio
-        .play()
-        .catch((err) => console.error("Could not play error sound:", err));
+      const soundManager = SoundManager.getInstance();
+      soundManager.playSound("bump", 0.5);
     } catch (err) {
       console.error("Error playing error sound:", err);
     }
@@ -266,13 +263,8 @@ export const useSoundUtils = () => {
 
   const playNotification = () => {
     try {
-      const audio = new Audio("/assets/sounds/page-turn.mp3");
-      audio.volume = 0.5;
-      audio
-        .play()
-        .catch((err) =>
-          console.error("Could not play notification sound:", err),
-        );
+      const soundManager = SoundManager.getInstance();
+      soundManager.playSound("page_turn", 0.5);
     } catch (err) {
       console.error("Error playing notification sound:", err);
     }

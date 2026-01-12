@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import SoundManager from "./utils/SoundManager";
 import "../styles/MagicalButton.css";
 
 const MagicalButton = () => {
@@ -21,21 +22,13 @@ const MagicalButton = () => {
     setIsVisible(false);
     setBirdVisible(true);
 
-    // Play sound effect with robust error handling
+    // Play sound effect using SoundManager
     try {
-      const poofSound = new Audio("/assets/sounds/poof.mp3");
-      poofSound.volume = 0.5;
-
-      // Only try to play if browser is likely to support Audio API
-      if (typeof poofSound.play === "function") {
-        poofSound.play().catch((err) => {
-          console.log("Audio play failed (expected if no interaction):", err);
-          // Continue with animation even if sound fails
-        });
-      }
+      const soundManager = SoundManager.getInstance();
+      soundManager.playSound("poof", 0.5);
     } catch (err) {
-      console.log("Audio creation failed:", err);
-      // Continue with animation even if sound creation fails
+      // Continue with animation even if sound fails
+      console.log("Audio play failed:", err);
     }
   };
 

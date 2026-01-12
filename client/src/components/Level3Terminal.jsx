@@ -336,25 +336,8 @@ const Level3Terminal = ({
     }, typingSpeed);
 
     // Play eerie typing sound
-    if (narrative.typingSpeed > 30) {
-      try {
-        const audio = new Audio("/assets/sounds/typing.mp3");
-        audio.volume = 0.2;
-
-        // Check if audio play is supported and function exists
-        if (typeof audio.play === "function") {
-          audio.play().catch((err) => {
-            console.log(
-              "Typing sound failed to play (expected if no interaction):",
-              err,
-            );
-            // Continue with typing animation even if sound fails
-          });
-        }
-      } catch (err) {
-        console.log("Failed to create typing audio:", err);
-        // Continue with typing animation even if sound creation fails
-      }
+    if (narrative.typingSpeed > 30 && soundManager) {
+      soundManager.playSound("typing", 0.2);
     }
 
     return () => clearInterval(typingInterval);
@@ -504,23 +487,8 @@ const Level3Terminal = ({
       }, 100);
 
       // Play subtle sound effect
-      try {
-        const audio = new Audio("/assets/sounds/whisper.mp3");
-        audio.volume = 0.1;
-
-        // Check if audio play is supported and function exists
-        if (typeof audio.play === "function") {
-          audio.play().catch((err) => {
-            console.log(
-              "Whisper sound failed to play (expected if no interaction):",
-              err,
-            );
-            // Continue with ghost typing animation even if sound fails
-          });
-        }
-      } catch (err) {
-        console.log("Failed to create whisper audio:", err);
-        // Continue with ghost typing animation even if sound creation fails
+      if (soundManager) {
+        soundManager.playSound("whisper", 0.1);
       }
 
       return () => clearInterval(ghostTypingInterval);

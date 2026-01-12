@@ -1822,14 +1822,14 @@ const GameWorld = React.memo(() => {
     if (newMusicTrack) {
       try {
         // Check if we're already playing this track by comparing current music
+        const currentMusicName = gameState.soundManager.currentMusic?.name;
         const shouldChangeMusic =
-          !gameState.soundManager.currentMusic ||
-          gameState.soundManager.currentMusic !== newMusicTrack;
+          !currentMusicName || currentMusicName !== newMusicTrack;
 
         if (shouldChangeMusic) {
           console.log(
             "Changing music from",
-            gameState.soundManager.currentMusic,
+            currentMusicName,
             "to",
             newMusicTrack,
           );
