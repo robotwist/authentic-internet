@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import ErrorBoundary from "./ErrorBoundary";
 import {
   fetchArtifacts,
   createArtifact,

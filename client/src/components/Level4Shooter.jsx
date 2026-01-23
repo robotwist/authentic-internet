@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import VictoryScreen from "./VictoryScreen";
+import ErrorBoundary from "./ErrorBoundary";
 import "./Level4Shooter.css";
 
 const Level4Shooter = ({ onComplete, onExit, character }) => {
@@ -1719,7 +1720,8 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
 
   // Component render
   return (
-    <div className="level4-shooter">
+    <ErrorBoundary fallback={<div className="shooter-error">Shooter Game Error - Please refresh</div>}>
+      <div className="level4-shooter">
       <div className="shooter-hud">
         <div className="score-display">SCORE: {score}</div>
         <div className="health-display">HEALTH: {playerHealth}</div>
