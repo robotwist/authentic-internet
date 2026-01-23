@@ -113,6 +113,9 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
   const lastFrameTimeRef = useRef(0);
   const keysPressed = useRef({});
 
+  // Refs for timeout cleanup
+  const gameTimeoutsRef = useRef([]);
+
   // Sound effects
   const playerImageRef = useRef(null);
   const hemingwayImageRef = useRef(null);
@@ -307,7 +310,7 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
-    // Ensure canvas is initialized before starting the game
+      // Ensure canvas is initialized before starting the game
     const ctx = initializeCanvas();
     if (ctx) {
       console.log("Canvas initialized successfully!");
@@ -316,6 +319,19 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
 
       // Start the game
       startGame();
+    } else {
+      // Retry canvas initialization after a delay
+      setTimeout(() => {
+        const retryCtx = initializeCanvas();
+        if (retryCtx) {
+          console.log("Canvas initialized on retry!");
+          initializeEnemies();
+          startGame();
+        } else {
+          console.error("Failed to initialize canvas after retry");
+        }
+      }, 1000);
+    }
 
       // Set backup interval to ensure updates happen
       backupInterval = setInterval(() => {
@@ -355,6 +371,10 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
       if (backupInterval) {
         clearInterval(backupInterval);
       }
+
+      // Clear all game timeouts
+      gameTimeoutsRef.current.forEach(clearTimeout);
+      gameTimeoutsRef.current = [];
     };
   }, []);
 
@@ -387,12 +407,13 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
     initializeEnemies();
 
     // Show initial Hemingway quote
-    setTimeout(() => {
+    const quoteTimeout = setTimeout(() => {
       showHemingwayQuote(0);
     }, 1000);
+    gameTimeoutsRef.current.push(quoteTimeout);
 
     // Introduce Hemingway after a delay
-    setTimeout(() => {
+    const introTimeout = setTimeout(() => {
       setHemingwayActive(true);
       setHemingwayDialog(
         "Let's collect manuscripts and fight through the memories of my life.",
@@ -400,10 +421,12 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
       setShowHemingwayDialog(true);
 
       // Hide dialog after a few seconds
-      setTimeout(() => {
+      const dialogTimeout = setTimeout(() => {
         setShowHemingwayDialog(false);
       }, 4000);
+      gameTimeoutsRef.current.push(dialogTimeout);
     }, 3000);
+    gameTimeoutsRef.current.push(introTimeout);
 
     // Start the game loop
     if (gameLoopRef.current) {
@@ -983,6 +1006,10 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
       cancelAnimationFrame(gameLoopRef.current);
       gameLoopRef.current = null;
     }
+
+    // Clear any remaining timeouts
+    gameTimeoutsRef.current.forEach(clearTimeout);
+    gameTimeoutsRef.current = [];
   };
 
   // Handle player jumping (Mario-style variable height)
