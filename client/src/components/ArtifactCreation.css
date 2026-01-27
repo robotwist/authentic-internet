@@ -416,6 +416,21 @@
 }
 
 /* Creation Options */
+.creation-token-notice {
+  margin: 0 1.5rem 1rem;
+  padding: 12px 16px;
+  background: rgba(241, 196, 15, 0.15);
+  border: 1px solid rgba(241, 196, 15, 0.4);
+  border-radius: 8px;
+  color: #f1c40f;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.creation-token-notice strong {
+  color: #f39c12;
+}
+
 .creation-options {
   padding: 30px;
   display: grid;

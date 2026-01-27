@@ -17,9 +17,7 @@ export const createArtifact = async (req, res) => {
       return res.status(400).json({ message: "Name, content, area, and location (x, y) are required." });
     }
 
-    const existingCount = await Artifact.countDocuments({
-      $or: [{ createdBy: uid }, { createdBy: resolvedCreatedBy }],
-    });
+    const existingCount = await Artifact.countDocuments({ createdBy: uid });
 
     const newArtifact = new Artifact({
       name,
@@ -62,7 +60,7 @@ export const getCreationStatus = async (req, res) => {
 
     const [user, artifactsCreated] = await Promise.all([
       User.findById(userId).select("creationTokens").lean(),
-      Artifact.countDocuments({ $or: [{ createdBy: uid }, { creator: uid }] }),
+      Artifact.countDocuments({ createdBy: uid }),
     ]);
 
     const tokens = Math.max(0, Number(user?.creationTokens) ?? 0);

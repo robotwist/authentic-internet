@@ -98,6 +98,7 @@ const ArtifactCreation = ({
       const artifactData = {
         ...formData,
         creator: user.id,
+        area: formData.area || currentArea,
         location: {
           x: position.x,
           y: position.y,
@@ -115,6 +116,7 @@ const ArtifactCreation = ({
       if (artifact?.id ?? artifact?._id) {
         if (soundManager) soundManager.playSound("artifact_create");
         onSuccess?.(artifact);
+        getCreationStatus().then((d) => d && setCreationStatus(d)).catch(() => {});
         onClose?.();
         playSuccess();
       } else {
@@ -156,30 +158,27 @@ const ArtifactCreation = ({
         body: JSON.stringify(puzzleData),
       });
 
+      const result = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        throw new Error("Failed to create puzzle artifact");
+        const msg =
+          response.status === 403 && result?.code === "CREATION_TOKEN_REQUIRED"
+            ? result?.message ?? "You need a creation token to create another artifact. Complete an artifact you didn't create to earn one."
+            : result?.message ?? "Failed to create puzzle artifact";
+        throw new Error(msg);
       }
 
-      const result = await response.json();
-
-      if (result.success) {
-        setNotification({
-          type: "success",
-          message: `Interactive puzzle "${result.artifact.name}" created successfully! Other players can now discover and solve it.`,
-        });
+      const artifact = result?.artifact ?? result;
+      if (artifact?.id ?? artifact?._id) {
         setShowPuzzleCreator(false);
-        onClose();
-        // Refresh artifacts list if available
+        onClose?.();
         if (typeof window !== "undefined" && window.refreshArtifacts) {
           window.refreshArtifacts();
         }
       }
-    } catch (error) {
-      console.error("Error creating puzzle artifact:", error);
-      setNotification({
-        type: "error",
-        message: error.message || "Failed to create puzzle artifact",
-      });
+    } catch (err) {
+      console.error("Error creating puzzle artifact:", err);
+      throw err;
     }
   };
 

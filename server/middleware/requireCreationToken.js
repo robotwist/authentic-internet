@@ -16,9 +16,7 @@ export const requireCreationToken = async (req, res, next) => {
     }
 
     const uid = userId.toString();
-    const count = await Artifact.countDocuments({
-      $or: [{ createdBy: uid }, { creator: uid }],
-    });
+    const count = await Artifact.countDocuments({ createdBy: uid });
 
     if (count === 0) {
       return next(); // First artifact is free
