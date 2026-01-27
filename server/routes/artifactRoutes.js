@@ -6,6 +6,7 @@ import {
   convertLegacyArtifact,
   ensureUnifiedResponse
 } from "../middleware/artifactValidation.js";
+import { requireCreationToken } from "../middleware/requireCreationToken.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -16,6 +17,7 @@ import {
   createCreativeArtifact,
   getArtifacts,
   getArtifactById,
+  getCreationStatus,
   updateArtifact,
   deleteArtifact,
   getGameProgress,
@@ -134,6 +136,7 @@ router.post("/",
   uploadFields,
   convertLegacyArtifact,
   validateUnifiedArtifact,
+  requireCreationToken,
   ensureUnifiedResponse,
   createArtifact
 );
@@ -142,6 +145,11 @@ router.post("/",
    🔹 FETCH ALL ARTIFACTS (UNIFIED)
 ──────────────────────────────── */
 router.get("/", ensureUnifiedResponse, getArtifacts);
+
+/* ────────────────────────────────
+   🔹 CREATION STATUS (2nd-artifact token gating)
+──────────────────────────────── */
+router.get("/creation-status", authenticateToken, getCreationStatus);
 
 /* ────────────────────────────────
 <<<<<<< HEAD

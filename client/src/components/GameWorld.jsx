@@ -53,6 +53,7 @@ import MultiplayerChat from "./MultiplayerChat";
 import NPCInteraction from "./NPCs/NPCInteraction";
 import Dungeon from "./Dungeons/Dungeon";
 import { LIBRARY_OF_ALEXANDRIA } from "./Dungeons/DungeonData";
+import { getLevelWinConfig } from "../constants/LevelWinConditions";
 import HamletFinale from "./MiniGames/HamletFinale";
 import QuestCompletionCelebration from "./QuestCompletionCelebration";
 import { useAuth } from "../context/AuthContext";
@@ -690,10 +691,14 @@ const GameWorld = React.memo(() => {
     [],
   );
 
-  // Optimized level completion handler
+  // Optimized level completion handler — explicit win conditions for levels 1–3
   const handleLevelCompletion = useCallback(
     (level) => {
       if (gameState.gameData.levelCompletion[level]) return; // Already completed
+
+      const config = getLevelWinConfig(level);
+      const winMessage = config?.message ?? `Level ${level} Complete!`;
+      const xpReward = config?.xpReward ?? 100;
 
       updateGameState({
         levelCompletion: { ...gameState.gameData.levelCompletion, [level]: true },
@@ -701,7 +706,9 @@ const GameWorld = React.memo(() => {
 
       updateUIState({
         showWinNotification: true,
-        winMessage: `Level ${level} Complete!`,
+        winMessage,
+        showRewardModal: true,
+        currentAchievement: level,
       });
 
       // Play completion sound
@@ -711,7 +718,7 @@ const GameWorld = React.memo(() => {
 
       // Award experience
       if (user) {
-        updateUserExperience(user.id, 100);
+        updateUserExperience(user.id, xpReward);
       }
 
       // Check achievements
@@ -719,8 +726,9 @@ const GameWorld = React.memo(() => {
     },
     [
       gameState.gameData.levelCompletion,
-      updateGameState,
       gameState.soundManager,
+      updateGameState,
+      updateUIState,
       user,
       checkLevelAchievements,
     ],
@@ -1469,10 +1477,12 @@ const GameWorld = React.memo(() => {
       // Mark dungeon as complete
       console.log("🏆 Dungeon complete! Treasure revealed.");
 
-      // Optionally: Track dungeon completion in gameData
-      // This allows for future features like dungeon tracker, etc.
+      // Level 2 win: beating The Librarian in Library of Alexandria
+      if (dungeonId === "library_alexandria") {
+        handleLevelCompletion("level2");
+      }
     },
-    [gameState.soundManager, handleGainExperience],
+    [gameState.soundManager, handleGainExperience, handleLevelCompletion],
   );
 
   // Optimized artifact creation
@@ -2762,7 +2772,10 @@ const GameWorld = React.memo(() => {
       hidePortalNotification();
       setPortalNotificationActive(false);
 
-      // Award XP and show notification
+      // Level 3 win: completing the Terminal (handles XP, reward modal, level completion state)
+      handleLevelCompletion("level3");
+
+      // Award additional XP for terminal completion
       awardXP(100, "Completed Terminal Adventure!");
 
       // Validate quest progress for game completion
@@ -2778,7 +2791,12 @@ const GameWorld = React.memo(() => {
       // Exit the terminal adventure
       setCurrentSpecialWorld(null);
     },
-    [awardXP, handleAchievementUnlocked, validateQuestProgress],
+    [
+      awardXP,
+      handleAchievementUnlocked,
+      handleLevelCompletion,
+      validateQuestProgress,
+    ],
   );
 
   // Handle terminal adventure exit

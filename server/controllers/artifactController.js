@@ -1,32 +1,88 @@
 import Artifact from "../models/Artifact.js";
+import User from "../models/User.js";
 
-// Create an artifact
+// Create an artifact. First is free; 2nd+ require 1 creation token (earned by completing others' artifacts).
 export const createArtifact = async (req, res) => {
   try {
-    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location } = req.body;
-    const user = req.user._id;
+    const userId = req.user?.userId ?? req.user?.id ?? req.user?._id;
+    const uid = userId?.toString?.();
+    if (!uid) {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
+    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location, type, createdBy } = req.body;
+    const resolvedCreatedBy = createdBy || uid;
 
     if (!name || !content || !area || !location || location.x === undefined || location.y === undefined) {
       return res.status(400).json({ message: "Name, content, area, and location (x, y) are required." });
     }
 
+    const existingCount = await Artifact.countDocuments({
+      $or: [{ createdBy: uid }, { createdBy: resolvedCreatedBy }],
+    });
+
     const newArtifact = new Artifact({
       name,
-      description,
+      description: description ?? "",
       content,
       riddle,
       unlockAnswer,
       area,
       isExclusive,
       location,
-      creator: user,
+      type: type || "artifact",
+      createdBy: resolvedCreatedBy,
+      id: `artifact-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
     });
 
     await newArtifact.save();
+
+    // Deduct 1 creation token when creating 2nd+ artifact
+    if (existingCount >= 1) {
+      await User.findByIdAndUpdate(userId, {
+        $inc: { creationTokens: -1 },
+      });
+    }
+
     res.status(201).json({ ...newArtifact.toObject(), id: newArtifact._id });
   } catch (error) {
     console.error("Error creating artifact:", error);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+/** GET /api/artifacts/creation-status — returns canCreate, creationTokens, artifactsCreated (for 2nd-artifact token gating). */
+export const getCreationStatus = async (req, res) => {
+  try {
+    const userId = req.user?.userId ?? req.user?.id ?? req.user?._id;
+    const uid = userId?.toString?.();
+    if (!uid) {
+      return res.status(401).json({ success: false, message: "Authentication required." });
+    }
+
+    const [user, artifactsCreated] = await Promise.all([
+      User.findById(userId).select("creationTokens").lean(),
+      Artifact.countDocuments({ $or: [{ createdBy: uid }, { creator: uid }] }),
+    ]);
+
+    const tokens = Math.max(0, Number(user?.creationTokens) ?? 0);
+    const canCreate = artifactsCreated === 0 || tokens >= 1;
+
+    res.json({
+      success: true,
+      canCreate,
+      creationTokens: tokens,
+      artifactsCreated,
+      message:
+        artifactsCreated === 0
+          ? "Your first artifact is free."
+          : tokens >= 1
+            ? `You have ${tokens} creation token(s).`
+            : "Complete an artifact you didn't create to earn a creation token for your next artifact.",
+    });
+  } catch (err) {
+    console.error("getCreationStatus error:", err);
+    res.status(500).json({ success: false, message: err?.message ?? "Failed to get creation status." });
   }
 };
 
@@ -171,8 +227,51 @@ export const saveGameProgress = async (req, res) => {
   res.status(501).json({ message: "Not implemented" });
 };
 
+/** Mark artifact complete, update user progress, award +1 creation token when completing another user's artifact (first time only). */
 export const completeArtifact = async (req, res) => {
-  res.status(501).json({ message: "Not implemented" });
+  try {
+    const { id } = req.params;
+    const userId = req.user?.userId ?? req.user?.id ?? req.user?._id;
+    const uid = userId?.toString?.();
+    if (!uid) {
+      return res.status(401).json({ success: false, message: "Authentication required." });
+    }
+
+    const artifact = await Artifact.findById(id).lean();
+    if (!artifact) {
+      return res.status(404).json({ success: false, message: "Artifact not found." });
+    }
+
+    const creatorId = (artifact.createdBy ?? artifact.creator)?.toString?.();
+    const { score = 0, attempts = 1, timeSpent = 0 } = req.body ?? {};
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    const alreadyCompleted = (user.completedArtifacts ?? []).some(
+      (c) => c.artifactId?.toString?.() === id
+    );
+
+    user.completeArtifact(id, score, attempts, timeSpent);
+    await user.save();
+
+    let creationTokenAwarded = false;
+    if (creatorId && creatorId !== uid && !alreadyCompleted) {
+      await User.findByIdAndUpdate(userId, { $inc: { creationTokens: 1 } });
+      creationTokenAwarded = true;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Artifact completed.",
+      rewards: { creationTokenAwarded },
+    });
+  } catch (err) {
+    console.error("completeArtifact error:", err);
+    res.status(500).json({ success: false, message: err.message || "Completion failed." });
+  }
 };
 
 export const completeArtifactWithRewards = async (req, res) => {

@@ -1,5 +1,6 @@
 import React from "react";
 import OptimizedImage from "./OptimizedImage";
+import { getLevelWinConfig } from "../constants/LevelWinConditions";
 import "./RewardModal.css";
 
 const RewardModal = ({ visible, onClose, achievement }) => {
@@ -11,6 +12,9 @@ const RewardModal = ({ visible, onClose, achievement }) => {
 
   // Different content based on achievement type
   let content;
+  const levelConfig = ["level1", "level2", "level3"].includes(achievement)
+    ? getLevelWinConfig(achievement)
+    : null;
 
   if (achievement === "level1") {
     content = (
@@ -72,13 +76,43 @@ const RewardModal = ({ visible, onClose, achievement }) => {
         </div>
       </>
     );
+  } else if (achievement === "level2" && levelConfig) {
+    content = (
+      <>
+        <div className="reward-icon">📚</div>
+        <h3>{levelConfig.title}</h3>
+        <p>{levelConfig.subtext}</p>
+        <div className="reward-item">
+          <div className="reward-details">
+            <h4>Rewards Unlocked</h4>
+            <p>White Sword, Heart Container, and the knowledge of the Library.</p>
+          </div>
+        </div>
+      </>
+    );
+  } else if (achievement === "level3" && levelConfig) {
+    content = (
+      <>
+        <div className="reward-icon">⌨️</div>
+        <h3>{levelConfig.title}</h3>
+        <p>{levelConfig.subtext}</p>
+        <div className="reward-item">
+          <div className="reward-details">
+            <h4>Terminal Master</h4>
+            <p>You've proven your worth in the digital shadow. New paths await.</p>
+          </div>
+        </div>
+      </>
+    );
   } else {
     // Default content for other achievements
     content = (
       <>
         <div className="reward-icon">🎉</div>
         <h3>Achievement Unlocked!</h3>
-        <p>Congratulations on your achievement!</p>
+        <p>
+          {levelConfig?.subtext ?? "Congratulations on your achievement!"}
+        </p>
       </>
     );
   }

@@ -362,16 +362,8 @@ export const usePortalCollisions = ({
       }
     }
 
-    // Legacy level completion logic (for backwards compatibility)
-    if (currentMapIndex === 1 && row === 0 && col === 19) {
-      handleLevelCompletion("level2");
-    } else if (
-      currentMapIndex === 2 &&
-      !gameData.levelCompletion.level3 &&
-      character?.qualifyingArtifacts?.level3
-    ) {
-      handleLevelCompletion("level3");
-    }
+    // Level 1 is completed via handlePortalTransition when reaching Yosemite.
+    // Level 2: handleBossDefeat (Library of Alexandria). Level 3: handleTerminalComplete.
   }, [
     characterPosition,
     currentMapIndex,
@@ -385,8 +377,6 @@ export const usePortalCollisions = ({
     setCharacterPosition,
     adjustViewport,
     setCurrentSpecialWorld,
-    gameData.levelCompletion,
-    handleLevelCompletion,
   ]);
 
   return { checkPortalCollisions };

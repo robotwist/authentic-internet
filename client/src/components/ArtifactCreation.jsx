@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { createArtifact } from "../api/api";
+import { createArtifact, getCreationStatus } from "../api/api";
 import SoundManager from "./utils/SoundManager";
 import { getRandomQuote, getCategoryQuote } from "../utils/quoteSystem.js";
 import "./ArtifactCreation.css";
@@ -38,6 +38,7 @@ const ArtifactCreation = ({
   });
   const { playSuccess, playError } = useSoundUtils();
   const [showPuzzleCreator, setShowPuzzleCreator] = useState(false);
+  const [creationStatus, setCreationStatus] = useState(null);
 
   // Initialize sound manager
   useEffect(() => {
@@ -48,6 +49,17 @@ const ArtifactCreation = ({
     };
     initSoundManager();
   }, []);
+
+  // Fetch creation status (2nd-artifact token gating)
+  useEffect(() => {
+    if (!user) {
+      setCreationStatus(null);
+      return;
+    }
+    getCreationStatus()
+      .then((data) => data && setCreationStatus(data))
+      .catch(() => setCreationStatus(null));
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -98,22 +110,30 @@ const ArtifactCreation = ({
 
       // Create the artifact
       const response = await createArtifact(artifactData);
+      const artifact = response?.artifact ?? response;
 
-      if (response.success) {
+      if (artifact?.id ?? artifact?._id) {
         if (soundManager) soundManager.playSound("artifact_create");
-        onSuccess?.(response.artifact);
+        onSuccess?.(artifact);
         onClose?.();
         playSuccess();
       } else {
-        setError(response.message || "Failed to create artifact");
+        setError(response?.message ?? "Failed to create artifact");
         if (soundManager) soundManager.playSound("error");
         playError();
       }
     } catch (err) {
       console.error("Error creating artifact:", err);
-      setError("Failed to create artifact. Please try again.");
+      setError(
+        err?.code === "CREATION_TOKEN_REQUIRED"
+          ? err.message
+          : "Failed to create artifact. Please try again."
+      );
       if (soundManager) soundManager.playSound("error");
       playError();
+      if (err?.code === "CREATION_TOKEN_REQUIRED" && creationStatus) {
+        setCreationStatus((s) => (s ? { ...s, canCreate: false, creationTokens: 0 } : s));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -173,6 +193,13 @@ const ArtifactCreation = ({
               ×
             </button>
           </div>
+
+          {creationStatus && !creationStatus.canCreate && (
+            <div className="creation-token-notice" role="status">
+              <strong>Creation token required.</strong>{" "}
+              {creationStatus.message ?? "Complete an artifact you didn't create to earn a creation token for your next artifact."}
+            </div>
+          )}
 
           <div className="creation-options">
             <button

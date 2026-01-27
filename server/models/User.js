@@ -191,6 +191,13 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+
+    /** Creation tokens: first artifact is free; 2nd+ require 1 token each. Earn tokens by completing artifacts you didn't create. */
+    creationTokens: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     
     // Challenge streak
     challengeStreak: {

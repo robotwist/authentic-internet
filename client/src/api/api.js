@@ -1111,6 +1111,17 @@ export const fetchArtifacts = withCache(
   { duration: cacheDurations.artifacts },
 );
 
+/** Fetch creation status (tokens, canCreate) for 2nd-artifact gating. */
+export const getCreationStatus = async () => {
+  try {
+    const response = await getApi().get("/api/artifacts/creation-status");
+    return response.data;
+  } catch (err) {
+    if (err?.response?.status === 401) return null;
+    throw err;
+  }
+};
+
 export const createArtifact = async (artifactData) => {
   try {
     let requestData = { ...artifactData };
@@ -1161,6 +1172,13 @@ export const createArtifact = async (artifactData) => {
     return response.data;
   } catch (error) {
     console.error("Create artifact failed:", error);
+    const data = error?.response?.data;
+    if (error?.response?.status === 403 && data?.code === "CREATION_TOKEN_REQUIRED") {
+      const e = new Error(data?.message ?? "You need a creation token to create another artifact. Complete an artifact you didn't create to earn one.");
+      e.code = "CREATION_TOKEN_REQUIRED";
+      e.artifactsCreated = data?.artifactsCreated;
+      throw e;
+    }
     throw error;
   }
 };
