@@ -4,6 +4,7 @@ import Enemy from "./Enemy";
 import Projectile from "./Projectile";
 import SoundManager from "../utils/SoundManager";
 import ICONS from "../../constants/Icons";
+import { maybeAwardFunnyXp } from "../../utils/funnyXp";
 import "./CombatManager.css";
 
 /**
@@ -247,6 +248,7 @@ const CombatManager = ({
       const xpReward = XP_REWARDS[enemyType] || XP_REWARDS.default;
       if (onGainExperience) {
         onGainExperience(xpReward, `Defeated ${enemyType}`);
+        maybeAwardFunnyXp(onGainExperience, 0.025);
       }
 
       // Track enemy defeat for quests

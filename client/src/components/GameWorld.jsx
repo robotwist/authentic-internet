@@ -54,6 +54,7 @@ import NPCInteraction from "./NPCs/NPCInteraction";
 import Dungeon from "./Dungeons/Dungeon";
 import { LIBRARY_OF_ALEXANDRIA } from "./Dungeons/DungeonData";
 import { getLevelWinConfig } from "../constants/LevelWinConditions";
+import { maybeAwardFunnyXp } from "../utils/funnyXp";
 import HamletFinale from "./MiniGames/HamletFinale";
 import QuestCompletionCelebration from "./QuestCompletionCelebration";
 import { useAuth } from "../context/AuthContext";
@@ -2086,6 +2087,7 @@ const GameWorld = React.memo(() => {
         // Award XP for discovering a new artifact - with safety check
         if (typeof awardXP === "function") {
           awardXP(15, `Discovered ${artifact.name}`);
+          maybeAwardFunnyXp(awardXP, 0.03);
         }
 
         // Check for discovery achievements
@@ -2096,6 +2098,7 @@ const GameWorld = React.memo(() => {
         // Award smaller XP for revisiting an artifact - with safety check
         if (typeof awardXP === "function") {
           awardXP(2, "Revisited an artifact");
+          maybeAwardFunnyXp(awardXP, 0.02);
         }
       }
 
@@ -2556,6 +2559,7 @@ const GameWorld = React.memo(() => {
         // Award XP for creating an artifact
         if (typeof awardXP === "function") {
           awardXP(50, "Created a new artifact");
+          maybeAwardFunnyXp(awardXP, 0.04);
         }
 
         // Check for creator achievement
@@ -2615,6 +2619,7 @@ const GameWorld = React.memo(() => {
 
         // Award XP for discovering a new artifact
         addExperiencePoints(15, `Discovered ${clickedArtifact.name}`);
+        if (typeof awardXP === "function") maybeAwardFunnyXp(awardXP, 0.03);
 
         // Validate quest progress for artifact discovery
         validateQuestProgress("artifact_discovered", {
@@ -2626,6 +2631,7 @@ const GameWorld = React.memo(() => {
       } else {
         // Award smaller XP for revisiting an artifact
         awardXP(2, "Revisited an artifact");
+        if (typeof awardXP === "function") maybeAwardFunnyXp(awardXP, 0.02);
       }
 
       // Select the artifact to display details

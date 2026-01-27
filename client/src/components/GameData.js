@@ -295,9 +295,11 @@ export const MAPS = [
     npcs: [
       {
         id: uuidv4(),
+        _id: uuidv4(),
         name: "Zeus the Weatherman",
         type: NPC_TYPES.ZEUS,
         apiType: "zeus",
+        sprite: "/assets/npcs/zeus.svg",
         position: { x: 6 * TILE_SIZE, y: 6 * TILE_SIZE }, // Doubled - converted to pixel coordinates (384, 384)
         dialogue: [
           "By my thunderbolts! Today's forecast calls for partly cloudy with a chance of divine intervention!",
@@ -374,8 +376,10 @@ export const MAPS = [
     npcs: [
       {
         id: uuidv4(),
+        _id: uuidv4(),
         name: "William Shakespeare",
         type: NPC_TYPES.SHAKESPEARE,
+        sprite: "/assets/npcs/shakespeare.webp",
         position: { x: 10 * TILE_SIZE, y: 14 * TILE_SIZE }, // Doubled - converted to pixel coordinates (640, 896)
         dialogue: [
           "All the world's a stage, and all the men and women merely players.",
@@ -939,10 +943,11 @@ export const MAPS = [
     npcs: [
       {
         id: "hemingway1",
+        _id: "hemingway1",
         type: NPC_TYPES.WRITER,
         name: "Ernest Hemingway",
         position: { x: 4 * TILE_SIZE, y: 4 * TILE_SIZE }, // Doubled - converted to pixel coordinates (256, 256)
-        sprite: "/assets/npcs/hemingway.png",
+        sprite: "/assets/hemingway.png",
         dialogue: [
           "Write hard and clear about what hurts.",
           "All you have to do is write one true sentence.",
