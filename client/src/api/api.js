@@ -38,6 +38,8 @@ const { buildEnv, apiUrl } = displayBuildInfo();
 
 // Function to create API instance with the given base URL
 const createApiInstance = (baseUrl) => {
+  const timeout =
+    typeof import.meta !== "undefined" && import.meta.env?.DEV ? 25000 : 10000;
   const instance = axios.create({
     baseURL: baseUrl,
     withCredentials: false,
@@ -45,7 +47,7 @@ const createApiInstance = (baseUrl) => {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    timeout: 10000, // 10 seconds timeout for all requests
+    timeout, // 25s in dev (slow backend startup), 10s in prod
   });
 
   // Add request interceptor

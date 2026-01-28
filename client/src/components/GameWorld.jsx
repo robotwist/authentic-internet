@@ -1949,14 +1949,21 @@ const GameWorld = React.memo(() => {
     portalState.portalNotificationActive,
   ]);
 
-  // Optimized artifact loading
+  // Optimized artifact loading (retry once on timeout)
   useEffect(() => {
-    const loadArtifacts = async () => {
+    const loadArtifacts = async (retries = 1) => {
       try {
         const artifactsData = await fetchArtifacts();
         updateGameState({ artifacts: artifactsData });
       } catch (error) {
-        console.error("Error loading artifacts:", error);
+        const isTimeout =
+          error?.message?.includes("timeout") ||
+          error?.code === "ECONNABORTED";
+        if (isTimeout && retries > 0) {
+          await new Promise((r) => setTimeout(r, 2000));
+          return loadArtifacts(retries - 1);
+        }
+        console.error("Error loading artifacts:", error?.message || error);
       }
     };
 

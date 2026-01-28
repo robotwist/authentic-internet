@@ -33,36 +33,19 @@ class SoundManager {
       // Set up user interaction detection for autoplay restrictions
       this.setupUserInteractionDetection();
 
-      // List of sounds to load with fallbacks
+      // Only load sounds that decode reliably; others use programmatic beep fallbacks
       const soundsToLoad = [
-        // Existing sounds
         ["bump", "/assets/sounds/bump.mp3"],
         ["portal", "/assets/sounds/portal.mp3"],
         ["level_complete", "/assets/sounds/level-complete.mp3"],
-        ["pickup", "/assets/sounds/artifact-pickup.mp3"], // Use existing artifact-pickup.mp3
+        ["pickup", "/assets/sounds/artifact-pickup.mp3"],
         ["artifact_create", "/assets/sounds/artifact-pickup.mp3"],
-        ["error", "/assets/sounds/bump.mp3"], // Use bump as error sound
+        ["error", "/assets/sounds/bump.mp3"],
         ["page_turn", "/assets/sounds/page-turn.mp3"],
-        ["discovery", "/assets/sounds/artifact-pickup.mp3"], // Use artifact-pickup for discovery
-        ["portal_standard", "/assets/sounds/portal.mp3"], // Use existing portal.mp3
-        ["typing", "/assets/sounds/page-turn.mp3"], // Use page-turn for typing
-        ["whisper", "/assets/sounds/whisper.mp3"],
-        ["digital_transition", "/assets/sounds/digital-transition.mp3"],
-        ["toilet_flush", "/assets/sounds/toilet-flush.mp3"],
-        ["poof", "/assets/sounds/poof.mp3"],
-        ["step", "/assets/sounds/page-turn.mp3"], // Footstep sound (use page-turn as fallback)
-
-        // Combat sounds: use existing hemingway/* assets (combat/ has no mp3s)
-        ["sword", "/assets/sounds/hemingway/weapon-pickup.mp3"],
-        ["sword_beam", "/assets/sounds/hemingway/special-shoot.mp3"],
-        ["damage", "/assets/sounds/hemingway/player-hit.mp3"],
-        ["heal", "/assets/sounds/hemingway/health-pickup.mp3"],
-        ["heart", "/assets/sounds/hemingway/health-pickup.mp3"],
-        ["rupee", "/assets/sounds/pickup.mp3"],
-        ["key", "/assets/sounds/pickup.mp3"],
-        ["enemy_hit", "/assets/sounds/hemingway/enemy-hit.mp3"],
-        ["enemy_defeat", "/assets/sounds/hemingway/boss-defeated.mp3"],
-        ["gameover", "/assets/sounds/hemingway/game-over.mp3"],
+        ["discovery", "/assets/sounds/artifact-pickup.mp3"],
+        ["portal_standard", "/assets/sounds/portal.mp3"],
+        ["typing", "/assets/sounds/page-turn.mp3"],
+        ["step", "/assets/sounds/page-turn.mp3"],
       ];
 
       // Load sounds with fallback strategy
