@@ -14,6 +14,7 @@ import {
   UNLOCKABLE_AREAS,
 } from "./GameConstants";
 import { updateUserProgress, awardPlayerPowers, unlockAreas } from "../api/api";
+import { trackArtifactCompletion } from "../api/recommendations";
 import PowerUnlockNotification from "./PowerUnlockNotification";
 import "./ArtifactGameLauncher.css";
 
@@ -168,6 +169,13 @@ const ArtifactGameLauncher = ({
 
         // Update artifact completion stats
         await updateArtifactStats(finalData);
+
+        // Feed completion into recommendation engine (completion-history signal)
+        try {
+          await trackArtifactCompletion(artifact.id ?? artifact._id);
+        } catch (e) {
+          // Non-fatal; recommendation learning continues without it
+        }
 
         // Show completion modal
         setShowCompletionModal(true);

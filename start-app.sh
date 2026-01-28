@@ -11,15 +11,11 @@ echo -e "${BLUE}=====================================${NC}"
 echo -e "${GREEN}Authentic Internet Application Launcher${NC}"
 echo -e "${BLUE}=====================================${NC}"
 
-# Step 1: Kill any existing Node processes that might conflict
-echo -e "${YELLOW}Cleaning up environment...${NC}"
-pkill -f node || true
-
-# Step 2: Clear Vite caches
+# Step 1: Clear Vite caches (avoids stale HMR/build issues)
 echo -e "${YELLOW}Clearing Vite cache...${NC}"
 rm -rf client/node_modules/.vite
 
-# Step 3: Check if ports are available
+# Step 2: Free app ports only (5001, 5176) — avoids killing Cursor/IDE processes
 echo -e "${YELLOW}Checking port availability...${NC}"
 check_port() {
   nc -z localhost $1 > /dev/null 2>&1
@@ -43,9 +39,9 @@ check_port() {
 
 # Check critical ports
 check_port 5001 # Backend API
-check_port 5175 # Frontend development server
+check_port 5176 # Frontend (Vite dev, see client/vite.config.js)
 
-# Step 4: Start the backend server
+# Step 3: Start the backend server
 echo -e "${YELLOW}Starting backend server...${NC}"
 cd server
 npm run dev > ../server.log 2>&1 &
@@ -72,7 +68,7 @@ else
   exit 1
 fi
 
-# Step 5: Start the frontend
+# Step 4: Start the frontend
 echo -e "${YELLOW}Starting frontend development server...${NC}"
 cd client
 npm run dev > ../client.log 2>&1 &
@@ -84,7 +80,7 @@ cd ..
 echo -e "${YELLOW}Waiting for frontend to be available...${NC}"
 timeout=30
 counter=0
-while ! curl -s http://localhost:5175 > /dev/null && [ $counter -lt $timeout ]; do
+while ! curl -s http://localhost:5176 > /dev/null && [ $counter -lt $timeout ]; do
   echo -e "${YELLOW}Waiting for frontend... ($counter/$timeout)${NC}"
   sleep 1
   counter=$((counter+1))
@@ -95,7 +91,7 @@ if [ $counter -lt $timeout ]; then
   echo -e "${GREEN}Application started successfully!${NC}"
   echo -e "${BLUE}------------------------------------${NC}"
   echo -e "${GREEN}Backend API:${NC} http://localhost:5001"
-  echo -e "${GREEN}Frontend:${NC} http://localhost:5175"
+  echo -e "${GREEN}Frontend:${NC} http://localhost:5176"
   echo -e "${BLUE}------------------------------------${NC}"
   echo -e "${YELLOW}Server logs: ${NC}tail -f server.log"
   echo -e "${YELLOW}Client logs: ${NC}tail -f client.log"

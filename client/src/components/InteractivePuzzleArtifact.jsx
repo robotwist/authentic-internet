@@ -404,6 +404,63 @@ const ApiQuizPuzzle = ({ artifact, onComplete }) => {
   );
 };
 
+/** Safe evaluator for math expressions (numbers, +, -, *, /, parentheses). Avoids eval(). */
+function safeMathEval(expr) {
+  const s = String(expr).replace(/\s/g, "");
+  if (!/^[\d+\-*/().]+$/.test(s)) return NaN;
+  let i = 0;
+  const tokens = s.match(/(\d+\.?\d*|[+\-*/()])/g) || [];
+  function parseExpr() {
+    let left = parseTerm();
+    while (i < tokens.length) {
+      if (tokens[i] === "+") {
+        i++;
+        left += parseTerm();
+      } else if (tokens[i] === "-") {
+        i++;
+        left -= parseTerm();
+      } else break;
+    }
+    return left;
+  }
+  function parseTerm() {
+    let left = parseFactor();
+    while (i < tokens.length) {
+      if (tokens[i] === "*") {
+        i++;
+        left *= parseFactor();
+      } else if (tokens[i] === "/") {
+        i++;
+        left /= parseFactor();
+      } else break;
+    }
+    return left;
+  }
+  function parseFactor() {
+    if (tokens[i] === "(") {
+      i++;
+      const v = parseExpr();
+      if (tokens[i] === ")") i++;
+      return v;
+    }
+    if (tokens[i] === "-") {
+      i++;
+      return -parseFactor();
+    }
+    if (tokens[i] === "+") {
+      i++;
+      return parseFactor();
+    }
+    const n = parseFloat(tokens[i++]);
+    return Number.isNaN(n) ? NaN : n;
+  }
+  try {
+    return parseExpr();
+  } catch {
+    return NaN;
+  }
+}
+
 const LogicChallengePuzzle = ({ artifact, onComplete }) => {
   const [userSolution, setUserSolution] = useState("");
   const [attempts, setAttempts] = useState(0);
@@ -417,7 +474,8 @@ const LogicChallengePuzzle = ({ artifact, onComplete }) => {
 
     switch (config.logicType) {
       case "math":
-        isCorrect = eval(userSolution) === config.challengeData.expectedResult;
+        isCorrect =
+          safeMathEval(userSolution) === config.challengeData.expectedResult;
         break;
       case "pattern":
         isCorrect = userSolution === config.challengeData.nextInSequence;

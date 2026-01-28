@@ -17,7 +17,7 @@ The following environment variables are set in the client deployment:
 
 ```
 VITE_API_URL=https://authentic-internet-api.onrender.com
-VITE_WEATHER_API_KEY=a5913e247d4c4ed5bd721932251402
+VITE_WEATHER_API_KEY=your-weather-api-key-here
 # No API key needed for Quotable, Folger Shakespeare, or ZenQuotes
 ```
 

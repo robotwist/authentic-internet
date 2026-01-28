@@ -35,6 +35,12 @@ const trackUserInteraction = (userId, interaction) => {
   userBehaviorStore.set(userId, userData);
 };
 
+// Completion counts as strong positive signal for preferences
+const isPositiveSignal = (interaction) =>
+  interaction.feedback === 'positive' || interaction.type === 'complete';
+const isNegativeSignal = (interaction) =>
+  interaction.feedback === 'negative' && interaction.type !== 'complete';
+
 // Update user preferences based on interactions
 const updateUserPreferences = (userId, interaction) => {
   const userData = userBehaviorStore.get(userId);
@@ -47,13 +53,15 @@ const updateUserPreferences = (userId, interaction) => {
     if (!artifact) return;
 
     const preferences = userData.preferences;
+    const positive = isPositiveSignal({ type, feedback });
+    const negative = isNegativeSignal({ type, feedback });
 
     // Update type preferences
     if (artifact.type) {
       preferences.types = preferences.types || {};
-      if (feedback === 'positive') {
-        preferences.types[artifact.type] = (preferences.types[artifact.type] || 0) + 1;
-      } else if (feedback === 'negative') {
+      if (positive) {
+        preferences.types[artifact.type] = (preferences.types[artifact.type] || 0) + (type === 'complete' ? 1.5 : 1);
+      } else if (negative) {
         preferences.types[artifact.type] = Math.max(0, (preferences.types[artifact.type] || 0) - 0.5);
       }
     }
@@ -61,9 +69,9 @@ const updateUserPreferences = (userId, interaction) => {
     // Update area preferences
     if (artifact.area) {
       preferences.areas = preferences.areas || {};
-      if (feedback === 'positive') {
-        preferences.areas[artifact.area] = (preferences.areas[artifact.area] || 0) + 1;
-      } else if (feedback === 'negative') {
+      if (positive) {
+        preferences.areas[artifact.area] = (preferences.areas[artifact.area] || 0) + (type === 'complete' ? 1.5 : 1);
+      } else if (negative) {
         preferences.areas[artifact.area] = Math.max(0, (preferences.areas[artifact.area] || 0) - 0.5);
       }
     }
@@ -71,9 +79,9 @@ const updateUserPreferences = (userId, interaction) => {
     // Update creator preferences
     if (artifact.createdBy) {
       preferences.creators = preferences.creators || {};
-      if (feedback === 'positive') {
-        preferences.creators[artifact.createdBy] = (preferences.creators[artifact.createdBy] || 0) + 1;
-      } else if (feedback === 'negative') {
+      if (positive) {
+        preferences.creators[artifact.createdBy] = (preferences.creators[artifact.createdBy] || 0) + (type === 'complete' ? 1.5 : 1);
+      } else if (negative) {
         preferences.creators[artifact.createdBy] = Math.max(0, (preferences.creators[artifact.createdBy] || 0) - 0.5);
       }
     }
@@ -82,9 +90,9 @@ const updateUserPreferences = (userId, interaction) => {
     if (artifact.tags && artifact.tags.length > 0) {
       preferences.tags = preferences.tags || {};
       artifact.tags.forEach(tag => {
-        if (feedback === 'positive') {
-          preferences.tags[tag] = (preferences.tags[tag] || 0) + 1;
-        } else if (feedback === 'negative') {
+        if (positive) {
+          preferences.tags[tag] = (preferences.tags[tag] || 0) + (type === 'complete' ? 1.5 : 1);
+        } else if (negative) {
           preferences.tags[tag] = Math.max(0, (preferences.tags[tag] || 0) - 0.5);
         }
       });
@@ -96,6 +104,17 @@ const updateUserPreferences = (userId, interaction) => {
   });
 };
 
+// Get set of completed artifact IDs for a user
+const getCompletedArtifactIds = (userData) => {
+  if (!userData?.interactions?.length) return new Set();
+  return new Set(
+    userData.interactions
+      .filter((i) => i.type === 'complete')
+      .map((i) => (i.artifactId != null ? String(i.artifactId) : ''))
+      .filter(Boolean)
+  );
+};
+
 // Collaborative filtering algorithm
 const collaborativeFiltering = async (userId, artifacts) => {
   try {
@@ -104,25 +123,30 @@ const collaborativeFiltering = async (userId, artifacts) => {
       return [];
     }
 
-    // Find users with similar preferences
+    const completedIds = getCompletedArtifactIds(userData);
     const similarUsers = findSimilarUsers(userId, userData);
-    
-    // Get artifacts liked by similar users
     const recommendedArtifacts = [];
-    
+
     for (const similarUserId of similarUsers) {
       const similarUserData = userBehaviorStore.get(similarUserId);
       if (!similarUserData) continue;
 
       const positiveInteractions = similarUserData.interactions.filter(
-        interaction => interaction.feedback === 'positive'
+        (i) => i.feedback === 'positive'
       );
 
       for (const interaction of positiveInteractions) {
-        const artifact = artifacts.find(a => a._id.toString() === interaction.artifactId);
-        if (artifact && !recommendedArtifacts.find(a => a._id.toString() === artifact._id.toString())) {
+        const aid = (interaction.artifactId || interaction.artifactId?.toString?.())?.toString?.();
+        if (completedIds.has(aid)) continue;
+        const artifact = artifacts.find((a) => (a._id || a.id)?.toString?.() === aid);
+        if (
+          artifact &&
+          !recommendedArtifacts.some(
+            (r) => (r._id || r.id)?.toString?.() === (artifact._id || artifact.id)?.toString?.()
+          )
+        ) {
           recommendedArtifacts.push({
-            ...artifact.toObject(),
+            ...(typeof artifact.toObject === 'function' ? artifact.toObject() : artifact),
             score: calculateCollaborativeScore(interaction, similarUserData),
             algorithm: 'collaborative'
           });
@@ -225,14 +249,21 @@ const calculateCollaborativeScore = (interaction, userData) => {
 const contentBasedFiltering = async (userId, artifacts) => {
   try {
     const userData = userBehaviorStore.get(userId);
-    if (!userData || !userData.preferences) {
-      return [];
-    }
+    const completedIds = getCompletedArtifactIds(userData || {});
+    const completedArtifacts = artifacts.filter((a) =>
+      completedIds.has((a._id || a.id)?.toString?.())
+    );
+    const completedTypes = new Set(completedArtifacts.map((a) => a.type).filter(Boolean));
+    const completedAreas = new Set(completedArtifacts.map((a) => a.area).filter(Boolean));
+    const completedTags = new Set(completedArtifacts.flatMap((a) => a.tags || []).filter(Boolean));
 
-    const preferences = userData.preferences;
+    const preferences = userData?.preferences || {};
     const scoredArtifacts = [];
 
     for (const artifact of artifacts) {
+      const aid = (artifact._id || artifact.id)?.toString?.();
+      if (completedIds.has(aid)) continue;
+
       let score = 0;
 
       // Type preference
@@ -252,27 +283,29 @@ const contentBasedFiltering = async (userId, artifacts) => {
 
       // Tag preferences
       if (artifact.tags && preferences.tags) {
-        artifact.tags.forEach(tag => {
-          if (preferences.tags[tag]) {
-            score += preferences.tags[tag] * 5;
-          }
+        artifact.tags.forEach((tag) => {
+          if (preferences.tags[tag]) score += preferences.tags[tag] * 5;
         });
       }
 
+      // Completion-history boost: same type/area/tags as completed
+      if (completedArtifacts.length > 0) {
+        if (artifact.type && completedTypes.has(artifact.type)) score += 12;
+        if (artifact.area && completedAreas.has(artifact.area)) score += 10;
+        if (artifact.tags?.length) {
+          const matchCount = artifact.tags.filter((t) => completedTags.has(t)).length;
+          if (matchCount > 0) score += matchCount * 6;
+        }
+      }
+
       // Content quality indicators
-      if (artifact.rating && artifact.rating >= 4) {
-        score += 20;
-      }
-      if (artifact.reviews && artifact.reviews.length >= 5) {
-        score += 15;
-      }
-      if (artifact.media && artifact.media.length > 0) {
-        score += 10;
-      }
+      if (artifact.rating && artifact.rating >= 4) score += 20;
+      if (artifact.reviews && artifact.reviews.length >= 5) score += 15;
+      if (artifact.media && artifact.media.length > 0) score += 10;
 
       if (score > 0) {
         scoredArtifacts.push({
-          ...artifact.toObject(),
+          ...(typeof artifact.toObject === 'function' ? artifact.toObject() : artifact),
           score,
           algorithm: 'content-based'
         });
@@ -292,17 +325,16 @@ const contentBasedFiltering = async (userId, artifacts) => {
 const contextualFiltering = async (userId, artifacts) => {
   try {
     const userData = userBehaviorStore.get(userId);
-    if (!userData) {
-      return [];
-    }
+    if (!userData) return [];
+    const completedIds = getCompletedArtifactIds(userData);
 
     const now = new Date();
     const hour = now.getHours();
     const dayOfWeek = now.getDay();
-    
     const scoredArtifacts = [];
 
     for (const artifact of artifacts) {
+      if (completedIds.has((artifact._id || artifact.id)?.toString?.())) continue;
       let score = 0;
 
       // Time-based recommendations
@@ -366,39 +398,31 @@ const contextualFiltering = async (userId, artifacts) => {
 const serendipityFiltering = async (userId, artifacts) => {
   try {
     const userData = userBehaviorStore.get(userId);
-    if (!userData) {
-      return [];
-    }
+    if (!userData) return [];
 
+    const completedIds = getCompletedArtifactIds(userData);
     const viewedArtifacts = new Set(
       userData.interactions
-        .filter(interaction => interaction.type === 'view')
-        .map(interaction => interaction.artifactId)
+        .filter((i) => i.type === 'view')
+        .map((i) => (i.artifactId || i.artifactId?.toString?.())?.toString?.())
     );
-
-    const viewedTypes = new Set(
-      userData.interactions
-        .filter(interaction => interaction.type === 'view')
-        .map(interaction => {
-          const artifact = artifacts.find(a => a._id.toString() === interaction.artifactId);
-          return artifact?.type;
-        })
-        .filter(Boolean)
-    );
-
-    const viewedCreators = new Set(
-      userData.interactions
-        .filter(interaction => interaction.type === 'view')
-        .map(interaction => {
-          const artifact = artifacts.find(a => a._id.toString() === interaction.artifactId);
-          return artifact?.createdBy;
-        })
-        .filter(Boolean)
-    );
+    const viewedTypes = new Set();
+    const viewedCreators = new Set();
+    userData.interactions
+      .filter((i) => i.type === 'view')
+      .forEach((i) => {
+        const a = artifacts.find(
+          (x) => (x._id || x.id)?.toString?.() === (i.artifactId || i.artifactId?.toString?.())?.toString?.()
+        );
+        if (a?.type) viewedTypes.add(a.type);
+        if (a?.createdBy) viewedCreators.add(a.createdBy);
+      });
 
     const scoredArtifacts = [];
 
     for (const artifact of artifacts) {
+      const aid = (artifact._id || artifact.id)?.toString?.();
+      if (completedIds.has(aid)) continue;
       let score = 0;
 
       // Reward new content types
@@ -417,7 +441,7 @@ const serendipityFiltering = async (userId, artifacts) => {
       }
 
       // Reward unseen artifacts
-      if (!viewedArtifacts.has(artifact._id.toString())) {
+      if (!viewedArtifacts.has(aid)) {
         score += 25;
       }
 
@@ -426,7 +450,7 @@ const serendipityFiltering = async (userId, artifacts) => {
 
       if (score > 0) {
         scoredArtifacts.push({
-          ...artifact.toObject(),
+          ...(typeof artifact.toObject === 'function' ? artifact.toObject() : artifact),
           score,
           algorithm: 'serendipity'
         });
