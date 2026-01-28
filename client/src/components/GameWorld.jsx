@@ -18,7 +18,6 @@ import {
 import Character from "./Character";
 import ArtifactCreation from "./ArtifactCreation";
 import InventoryManager from "./managers/InventoryManager";
-import ErrorBoundary from "./ErrorBoundary";
 import MapComponent from "./Map";
 import WorldMap from "./WorldMap";
 import FeedbackForm from "./FeedbackForm";

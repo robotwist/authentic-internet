@@ -343,19 +343,6 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
           console.log("Backup game tick executed");
         }
       }, 100); // Check 10 times per second
-    } else {
-      console.error("Canvas initialization failed! Trying again in 100ms...");
-      // Try to initialize again after a short delay
-      setTimeout(() => {
-        const retryCtx = initializeCanvas();
-        if (retryCtx) {
-          console.log("Canvas initialized successfully on retry!");
-          startGame();
-        } else {
-          console.error("Canvas initialization failed on retry!");
-        }
-      }, 100);
-    }
 
     // Cleanup function
     return () => {
@@ -1791,6 +1778,7 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
         </p>
       </div>
     </div>
+    </ErrorBoundary>
   );
 };
 
