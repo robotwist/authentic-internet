@@ -52,17 +52,17 @@ class SoundManager {
         ["poof", "/assets/sounds/poof.mp3"],
         ["step", "/assets/sounds/page-turn.mp3"], // Footstep sound (use page-turn as fallback)
 
-        // Combat sounds (Zelda-style)
-        ["sword", "/assets/sounds/combat/sword.mp3"],
-        ["sword_beam", "/assets/sounds/combat/sword_beam.mp3"],
-        ["damage", "/assets/sounds/combat/damage.mp3"],
-        ["heal", "/assets/sounds/combat/heal.mp3"],
-        ["rupee", "/assets/sounds/combat/rupee.mp3"],
-        ["key", "/assets/sounds/combat/key.mp3"],
-        ["enemy_hit", "/assets/sounds/combat/enemy_hit.mp3"],
-        ["enemy_defeat", "/assets/sounds/combat/enemy_defeat.mp3"],
-        ["gameover", "/assets/sounds/combat/gameover.mp3"],
-        ["heart", "/assets/sounds/combat/heart.mp3"],
+        // Combat sounds: use existing hemingway/* assets (combat/ has no mp3s)
+        ["sword", "/assets/sounds/hemingway/weapon-pickup.mp3"],
+        ["sword_beam", "/assets/sounds/hemingway/special-shoot.mp3"],
+        ["damage", "/assets/sounds/hemingway/player-hit.mp3"],
+        ["heal", "/assets/sounds/hemingway/health-pickup.mp3"],
+        ["heart", "/assets/sounds/hemingway/health-pickup.mp3"],
+        ["rupee", "/assets/sounds/pickup.mp3"],
+        ["key", "/assets/sounds/pickup.mp3"],
+        ["enemy_hit", "/assets/sounds/hemingway/enemy-hit.mp3"],
+        ["enemy_defeat", "/assets/sounds/hemingway/boss-defeated.mp3"],
+        ["gameover", "/assets/sounds/hemingway/game-over.mp3"],
       ];
 
       // Load sounds with fallback strategy
@@ -249,7 +249,7 @@ class SoundManager {
       return buffer;
     };
 
-    // Create fallbacks for missing sounds
+    // Create fallbacks for missing sounds (including combat + poof when load fails)
     const missingSounds = [
       "pickup",
       "portal_standard",
@@ -258,6 +258,17 @@ class SoundManager {
       "digital_transition",
       "toilet_flush",
       "discovery",
+      "poof",
+      "sword",
+      "sword_beam",
+      "damage",
+      "heal",
+      "heart",
+      "rupee",
+      "key",
+      "enemy_hit",
+      "enemy_defeat",
+      "gameover",
     ];
 
     missingSounds.forEach((soundName) => {
@@ -269,11 +280,16 @@ class SoundManager {
         switch (soundName) {
           case "pickup":
           case "discovery":
-            frequency = 800; // Higher pitch for pickup
+          case "heal":
+          case "heart":
+          case "rupee":
+          case "key":
+            frequency = 800; // Higher pitch for pickup/heal
             break;
           case "portal_standard":
           case "digital_transition":
-            frequency = 200; // Lower pitch for portals
+          case "sword_beam":
+            frequency = 200; // Lower pitch for portals / beam
             duration = 0.3;
             break;
           case "typing":
@@ -287,6 +303,24 @@ class SoundManager {
           case "toilet_flush":
             frequency = 150; // Very low pitch for toilet
             duration = 0.5;
+            break;
+          case "sword":
+            frequency = 400;
+            duration = 0.08;
+            break;
+          case "damage":
+          case "enemy_hit":
+            frequency = 150;
+            duration = 0.15;
+            break;
+          case "enemy_defeat":
+          case "poof":
+            frequency = 350;
+            duration = 0.2;
+            break;
+          case "gameover":
+            frequency = 120;
+            duration = 0.4;
             break;
         }
 

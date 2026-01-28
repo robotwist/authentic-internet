@@ -152,8 +152,11 @@ const createApiInstance = (baseUrl) => {
 const configuredApiUrl =
   import.meta.env.VITE_API_URL || "http://localhost:5001";
 
+// In dev, use relative URLs so Vite proxies /api -> backend (avoids CORS + "Network Error")
+const apiBaseUrl = import.meta.env.DEV ? "" : configuredApiUrl;
+
 // Initialize API with the configured URL - use default instance as fallback
-let API = createApiInstance(configuredApiUrl);
+let API = createApiInstance(apiBaseUrl);
 
 // Store alternative ports to try if the main one is unavailable
 const alternativePorts = [5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 5010];
