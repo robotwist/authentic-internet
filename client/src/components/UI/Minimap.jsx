@@ -99,13 +99,27 @@ const Minimap = ({
     return tiles;
   }, [mapData, exploredTiles, playerTileX, playerTileY, mapRows, mapCols]);
 
+  // Normalize position to pixels (data uses tile or pixel coords)
+  const toTileCoords = (pos, tileSz) => {
+    if (!pos) return null;
+    const isTileCoords = pos.x < 100 && pos.y < 100;
+    const pixelX = isTileCoords ? pos.x * tileSz : pos.x;
+    const pixelY = isTileCoords ? pos.y * tileSz : pos.y;
+    return {
+      x: Math.floor(pixelX / tileSz),
+      y: Math.floor(pixelY / tileSz),
+    };
+  };
+
   // Render NPCs on minimap
   const renderNPCs = useMemo(() => {
     return npcs.map((npc, index) => {
       if (!npc.position) return null;
 
-      const npcTileX = Math.floor(npc.position.x / tileSize);
-      const npcTileY = Math.floor(npc.position.y / tileSize);
+      const tilePos = toTileCoords(npc.position, tileSize);
+      if (!tilePos) return null;
+      const npcTileX = tilePos.x;
+      const npcTileY = tilePos.y;
       const npcKey = `${npcTileX},${npcTileY}`;
 
       // Only show if tile is explored

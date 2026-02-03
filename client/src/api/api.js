@@ -42,7 +42,7 @@ const createApiInstance = (baseUrl) => {
     typeof import.meta !== "undefined" && import.meta.env?.DEV ? 25000 : 10000;
   const instance = axios.create({
     baseURL: baseUrl,
-    withCredentials: false,
+    withCredentials: true, // Send cookies (e.g. refresh token) on cross-origin
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",

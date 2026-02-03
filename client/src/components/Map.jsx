@@ -183,13 +183,23 @@ const Map = ({
       return null;
     }
 
+    // Normalize NPC position to pixels (data uses either tile or pixel coords)
+    const toPixelPos = (pos) => {
+      if (!pos) return null;
+      const isTileCoords = pos.x < 100 && pos.y < 100;
+      return isTileCoords
+        ? { x: pos.x * TILE_SIZE, y: pos.y * TILE_SIZE }
+        : { x: pos.x, y: pos.y };
+    };
+
     // Filter NPCs to only render visible ones
-    // NPCs use pixel coordinates, so convert to tile coordinates for culling
     const visibleNPCs = npcs.filter((npc) => {
       if (!npc || !npc.position) return false;
+      const pixelPos = toPixelPos(npc.position);
+      if (!pixelPos) return false;
       const tilePos = {
-        x: Math.floor(npc.position.x / TILE_SIZE),
-        y: Math.floor(npc.position.y / TILE_SIZE),
+        x: Math.floor(pixelPos.x / TILE_SIZE),
+        y: Math.floor(pixelPos.y / TILE_SIZE),
       };
       return isEntityVisible(tilePos, visibleRange);
     });
@@ -213,14 +223,17 @@ const Map = ({
           return null;
         }
 
+        const pixelPos = toPixelPos(npc.position);
+        if (!pixelPos) return null;
+
         // Get the sprite with fallback logic
         const actualSprite =
           npc.sprite || getNPCImage(npc.type) || DEFAULT_NPC_SPRITE;
 
         const spriteStyle = {
           position: "absolute",
-          left: `${npc.position.x * TILE_SIZE}px`,
-          top: `${npc.position.y * TILE_SIZE}px`,
+          left: `${pixelPos.x}px`,
+          top: `${pixelPos.y}px`,
           width: `${TILE_SIZE}px`,
           height: `${TILE_SIZE}px`,
           backgroundImage: `url('${actualSprite}')`,
@@ -231,11 +244,6 @@ const Map = ({
           cursor: "pointer",
           filter: "drop-shadow(0 0 5px rgba(255,255,100,0.5))",
           transition: "all 0.2s ease",
-          // Add debugging styles in development
-          ...(process.env.NODE_ENV === "development" && {
-            border: "2px solid red",
-            backgroundColor: "rgba(255, 0, 0, 0.1)",
-          }),
         };
 
         // Create a stable, unique key with multiple fallbacks for reliability
