@@ -63,9 +63,11 @@ export const configureCorsOptions = (allowedOrigins) => {
         return callback(null, true);
       }
       
-      // Check against allowed origins
-      if (allowedOrigins.indexOf(origin) !== -1 || 
-          allowedOrigins.some(pattern => new RegExp(pattern).test(origin))) {
+      // Check against allowed origins (strings or RegExp patterns)
+      if (allowedOrigins.indexOf(origin) !== -1 ||
+          allowedOrigins.some(pattern =>
+            pattern instanceof RegExp ? pattern.test(origin) : false,
+          )) {
         return callback(null, true);
       }
       

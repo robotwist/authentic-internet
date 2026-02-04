@@ -45,9 +45,14 @@ const cleanupPort = () => {
 
 // CORS configuration
 const configureAllowedOrigins = () => {
-  return getEnv('NODE_ENV') === 'development' 
+  return getEnv('NODE_ENV') === 'development'
     ? ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://127.0.0.1:5175', 'http://localhost:5176', 'http://localhost:5177', 'http://localhost:5178', 'http://localhost:5179', 'http://localhost:5180', 'http://localhost:5181', 'http://localhost:5004', 'http://localhost:8080']
-    : [getEnv('CLIENT_URL'), 'https://flourishing-starburst-8cf88b.netlify.app'];
+    : [
+        getEnv('CLIENT_URL'),
+        'https://flourishing-starburst-8cf88b.netlify.app',
+        'https://authentic-internet.netlify.app',
+        /^https:\/\/[\w-]+\.netlify\.app$/, // Deploy previews
+      ];
 };
 
 // CORS options - use our centralized security configuration

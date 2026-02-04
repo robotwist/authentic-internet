@@ -28,7 +28,7 @@ export const usePortalCollisions = ({
       const currentMapName = MAPS[currentMapIndex]?.name || "";
 
       // Handle different maps with different portal logic
-      if (currentMapName === "Overworld 1") {
+      if (currentMapName === "Overworld") {
         // Transition to Overworld 2
         const destinationIndex = MAPS.findIndex(
           (map) => map.name === "Overworld 2",

@@ -6,6 +6,9 @@ import fs from "fs";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  esbuild: {
+    drop: process.env.NODE_ENV === "production" ? ["console", "debugger"] : [],
+  },
   build: {
     sourcemap: true,
     chunkSizeWarningLimit: 1000, // Increase warning limit to 1MB
