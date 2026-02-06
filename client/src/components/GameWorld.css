@@ -1,3 +1,14 @@
+/* Artifacts loading indicator (accessible, minimal) */
+.artifacts-loading-indicator {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  z-index: 100;
+  pointer-events: none;
+}
+
 /* Active Powers HUD */
 .active-powers-hud {
   position: fixed;

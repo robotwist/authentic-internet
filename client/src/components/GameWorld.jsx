@@ -88,6 +88,7 @@ const GameWorld = React.memo(() => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
   const [otherPlayers, setOtherPlayers] = useState([]);
+  const [artifactsLoading, setArtifactsLoading] = useState(true);
 
   // Use the custom game state hook
   const gameState = useGameState();
@@ -1952,6 +1953,7 @@ const GameWorld = React.memo(() => {
   // Optimized artifact loading (retry once on timeout)
   useEffect(() => {
     const loadArtifacts = async (retries = 1) => {
+      setArtifactsLoading(true);
       try {
         const artifactsData = await fetchArtifacts();
         updateGameState({ artifacts: artifactsData });
@@ -1964,6 +1966,8 @@ const GameWorld = React.memo(() => {
           return loadArtifacts(retries - 1);
         }
         console.error("Error loading artifacts:", error?.message || error);
+      } finally {
+        setArtifactsLoading(false);
       }
     };
 
@@ -3005,6 +3009,15 @@ const GameWorld = React.memo(() => {
             aria-atomic="true"
             className="sr-only"
           />
+          {artifactsLoading && (
+            <div
+              className="artifacts-loading-indicator"
+              aria-live="polite"
+              role="status"
+            >
+              Loading artifacts…
+            </div>
+          )}
 
           {/* === CORE GAME WORLD === */}
           {MAPS[currentMapIndex]?.data && (
