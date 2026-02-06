@@ -300,6 +300,7 @@ const GameWorld = React.memo(() => {
   const gameWorldRef = useRef(null);
   const characterRef = useRef(null);
   const characterControllerRef = useRef(null);
+  const hasRestoredSessionRef = useRef(false);
 
   // portalNotificationActive is now handled by NotificationSystem
 
@@ -1796,6 +1797,25 @@ const GameWorld = React.memo(() => {
 
     // Initialize game state manager
     gameStateManager.init();
+
+    // Restore session from persisted state once per mount (position, map, inventory)
+    if (!hasRestoredSessionRef.current) {
+      hasRestoredSessionRef.current = true;
+      const saved = gameStateManager.getState();
+      if (
+        saved &&
+        saved.characterPosition &&
+        typeof saved.characterPosition.x === "number" &&
+        typeof saved.characterPosition.y === "number" &&
+        typeof saved.currentMapIndex === "number"
+      ) {
+        setCharacterPosition(saved.characterPosition);
+        setCurrentMapIndex(saved.currentMapIndex);
+        if (Array.isArray(saved.inventory)) {
+          setInventory(saved.inventory);
+        }
+      }
+    }
 
     // Load character and NPCs
     loadCharacter();
