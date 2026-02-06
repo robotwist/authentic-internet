@@ -9,6 +9,8 @@ class ErrorBoundary extends React.Component {
       error: null,
       errorInfo: null,
       errorId: null,
+      childKey: 0,
+      copied: false,
     };
   }
 
@@ -63,30 +65,36 @@ class ErrorBoundary extends React.Component {
   };
 
   handleRetry = () => {
-    this.setState({
+    this.setState((s) => ({
       hasError: false,
       error: null,
       errorInfo: null,
       errorId: null,
-    });
+      childKey: s.childKey + 1,
+    }));
   };
 
   handleReload = () => {
     window.location.reload();
   };
 
-  render() {
-    // Only log when there's an actual error to avoid console spam
-    if (this.state.hasError) {
-      console.log(
-        "ErrorBoundary render - hasError:",
-        this.state.hasError,
-        "errorCount:",
-        this.state.errorCount,
-      );
-    }
+  handleCopyErrorId = () => {
+    if (!this.state.errorId) return;
+    navigator.clipboard
+      .writeText(this.state.errorId)
+      .then(() => {
+        this.setState({ copied: true });
+        if (this.copyTimeout) clearTimeout(this.copyTimeout);
+        this.copyTimeout = setTimeout(() => this.setState({ copied: false }), 2000);
+      })
+      .catch(() => {});
+  };
 
+  render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
       return (
         <div className="error-boundary" role="alert" aria-live="assertive">
           <div className="error-container">
@@ -100,6 +108,14 @@ class ErrorBoundary extends React.Component {
             {this.state.errorId && (
               <div className="error-id">
                 <strong>Error ID:</strong> {this.state.errorId}
+                <button
+                  type="button"
+                  onClick={this.handleCopyErrorId}
+                  className="copy-error-id-button"
+                  aria-label="Copy error ID"
+                >
+                  {this.state.copied ? "Copied!" : "Copy error ID"}
+                </button>
               </div>
             )}
 
@@ -143,7 +159,11 @@ class ErrorBoundary extends React.Component {
       );
     }
 
-    return this.props.children;
+    return (
+      <div key={this.state.childKey} style={{ display: "contents" }}>
+        {this.props.children}
+      </div>
+    );
   }
 }
 

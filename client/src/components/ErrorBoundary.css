@@ -7,6 +7,7 @@
   color: #ffffff;
 }
 
+.error-container,
 .error-content {
   background-color: #1b1b1b;
   padding: 2rem;
@@ -17,12 +18,14 @@
   text-align: center;
 }
 
+.error-container h1,
 .error-content h2 {
   color: #ff4444;
   margin-bottom: 1rem;
   font-size: 1.8rem;
 }
 
+.error-container p,
 .error-content p {
   margin-bottom: 1.5rem;
   font-size: 1.1rem;
@@ -116,6 +119,31 @@
   }
 }
 
+.error-container,
 .error-content {
   animation: fadeIn 0.3s ease-out;
+}
+
+.error-id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.copy-error-id-button {
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #666;
+  background: #333;
+  color: #ddd;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.copy-error-id-button:hover {
+  background: #444;
+  color: #fff;
 } 
