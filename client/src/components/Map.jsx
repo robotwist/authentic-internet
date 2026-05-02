@@ -15,7 +15,7 @@ const DEFAULT_NPC_SPRITE = "/assets/npcs/guide.png";
 
 const Map = ({
   mapData,
-  npcs,
+  npcs = [],
   artifacts,
   onTileClick,
   onNPCClick,
@@ -189,8 +189,7 @@ const Map = ({
 
   // Enhanced NPC rendering with better error handling and viewport culling
   const renderNPCs = useMemo(() => {
-    if (!npcs || !Array.isArray(npcs)) {
-      console.log("No NPCs provided or invalid format:", npcs);
+    if (!Array.isArray(npcs) || npcs.length === 0) {
       return null;
     }
 
@@ -247,10 +246,6 @@ const Map = ({
           top: `${pixelPos.y}px`,
           width: `${TILE_SIZE}px`,
           height: `${TILE_SIZE}px`,
-          backgroundImage: `url('${actualSprite}')`,
-          backgroundSize: "contain",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
           zIndex: 20,
           cursor: "pointer",
           filter: "drop-shadow(0 0 5px rgba(255,255,100,0.5))",
@@ -279,6 +274,19 @@ const Map = ({
             data-npc-name={npc.name || "Unknown"}
             title={`${npc.name || "NPC"} - Press 'T' to talk${questStatus ? ` (${questStatus.title})` : ""}`}
           >
+            <img
+              src={actualSprite}
+              alt=""
+              className="npc-sprite-img"
+              draggable={false}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                pointerEvents: "none",
+                imageRendering: "auto",
+              }}
+            />
             {/* Enhanced quest indicator with status-based styling */}
             {questStatus && (
               <div
@@ -316,15 +324,6 @@ const Map = ({
       };
     }
   }, [mapName, handleWheel]);
-
-  // Log culling stats in development mode
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      console.log(
-        `[Map ${mapName}] Rendering ${visibleRange.visibleTiles}/${visibleRange.totalTiles} tiles (${visibleRange.cullingRatio}%)`,
-      );
-    }
-  }, [visibleRange, mapName]);
 
   // Render only visible tiles for performance
   const renderVisibleTiles = useMemo(() => {

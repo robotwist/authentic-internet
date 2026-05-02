@@ -7,6 +7,7 @@ import {
   updateArtifact,
 } from "../api/api";
 import "./Inventory.css";
+import { isTextEntryFocused } from "../utils/textFieldFocus";
 
 const Inventory = ({
   artifacts = [],
@@ -45,7 +46,7 @@ const Inventory = ({
   // Handle escape key to close inventory
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !isTextEntryFocused()) {
         onClose();
       }
     };

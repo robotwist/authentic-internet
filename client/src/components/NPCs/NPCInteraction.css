@@ -496,4 +496,130 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  padding: 10px 12px;
+  gap: 10px;
+}
+
+/* —— Docked (embedded) compact layout —— */
+.npc-header--compact {
+  padding: 10px 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom-width: 1px;
+}
+
+.npc-header--compact .npc-info h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.npc-header--compact .npc-meta {
+  margin-top: 2px;
+  gap: 8px;
+}
+
+.npc-header--compact .npc-type,
+.npc-header--compact .npc-location {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+}
+
+.close-button--ghost {
+  width: auto;
+  height: auto;
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.close-button--ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: none;
+}
+
+.npc-interaction-container--embedded .current-quest--compact {
+  padding: 8px 12px;
+  border-left-width: 3px;
+}
+
+.npc-interaction-container--embedded .current-quest--compact h5 {
+  font-size: 0.85rem;
+  margin: 0 0 4px 0;
+}
+
+.npc-interaction-container--embedded .current-quest--compact .quest-progress {
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
+
+.npc-interaction-container--embedded .message-content {
+  max-width: 92%;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
+.npc-interaction-container--embedded .message-author {
+  font-size: 0.72rem;
+  margin-bottom: 2px;
+}
+
+.npc-interaction-container--embedded .message-text {
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.input-area--compact {
+  padding: 10px 12px;
+  border-top-width: 1px;
+}
+
+.quick-actions--chips {
+  margin-bottom: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.qa-chip {
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  background: rgba(59, 130, 246, 0.15) !important;
+  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+  color: #bfdbfe !important;
+}
+
+.qa-chip:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.28) !important;
+  transform: none !important;
+}
+
+.npc-interaction-container--embedded .input-container {
+  margin-bottom: 0;
+  gap: 8px;
+}
+
+.npc-interaction-container--embedded .input-container textarea {
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  border-width: 1px;
+  min-height: 38px;
+  line-height: 1.35;
+}
+
+.send-button--compact {
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+}
+
+.send-button--compact:hover:not(:disabled) {
+  transform: none;
 }

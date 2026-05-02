@@ -1,0 +1,37 @@
+.dock-combat-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 1rem;
+  pointer-events: auto;
+}
+
+.dock-combat-hud-hearts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.dock-combat-key-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--zelda-gold, #fce000);
+  font-size: 14px;
+  font-family: "Press Start 2P", "Courier New", monospace;
+  border: 2px solid var(--zelda-gold, #fce000);
+  padding: 6px 10px;
+}
+
+.dock-combat-hud-items-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dock-combat-rupees {
+  flex-shrink: 0;
+}

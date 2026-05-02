@@ -43,6 +43,10 @@
 }
 
 /* Improve NPC elements for better visibility */
+.npc-sprite-img {
+  display: block;
+}
+
 .npc-sprite {
   transition: transform 0.2s steps(4); /* Retro stepped transition */
   animation: npc-spin 8s linear infinite, npc-float 3s ease-in-out infinite;

@@ -19,6 +19,7 @@ const IMAGE_PATHS = {
 
 import { TILE_SIZE } from "./Constants";
 import { trackArtifactInteraction } from "../utils/apiService";
+import { isTextEntryFocused } from "../utils/textFieldFocus";
 
 const Artifact = ({
   artifact,
@@ -215,6 +216,7 @@ const Artifact = ({
   // Update the useEffect for handleKeyPress to depend on handlePickup
   useEffect(() => {
     const handleKeyPress = (e) => {
+      if (isTextEntryFocused()) return;
       if (e.key.toLowerCase() === "p" && isNearCharacter() && !isAnimating) {
         handlePickup();
       }

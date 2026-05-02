@@ -77,8 +77,8 @@ window.addEventListener("load", () => {
   const loadTime = performance.now() - startTime;
   console.info(`Page loaded in ${Math.round(loadTime)}ms`);
 
-  // Remove loading spinner
-  const spinner = document.getElementById("loading-spinner");
+  // Remove loading overlay (id matches index.html)
+  const spinner = document.getElementById("initial-loader");
   if (spinner) {
     spinner.style.opacity = "0";
     setTimeout(() => {

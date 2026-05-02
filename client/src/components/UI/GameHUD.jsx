@@ -5,9 +5,10 @@ import "./GameHUD.css";
 
 /**
  * GameHUD - Zelda-style heads-up display
- * Shows health, items, rupees, keys, current area, XP, and level
+ * `variant="minimal"` — XP / level only (combat HUD lives in GameDock Status panel).
  */
 const GameHUD = ({
+  variant = "full",
   health,
   maxHealth,
   rupees = 0,
@@ -31,6 +32,42 @@ const GameHUD = ({
           (experienceInCurrentLevel / experienceNeededForNextLevel) * 100,
         )
       : 100;
+
+  if (variant === "minimal") {
+    return (
+      <div className="game-hud game-hud--minimal">
+        <div className="hud-minimal-bar">
+          <div className="xp-display">
+            <div className="level-badge" title={`Level ${level}`}>
+              <img
+                src={ICONS.ui.level}
+                alt="Level"
+                className="level-icon"
+              />
+              <span className="level-number">{level}</span>
+            </div>
+            <div
+              className="xp-bar-container"
+              title={`${Math.floor(experienceInCurrentLevel)} / ${experienceNeededForNextLevel} XP`}
+            >
+              <div className="xp-bar-background">
+                <div
+                  className="xp-bar-fill"
+                  style={{ width: `${xpProgress}%` }}
+                >
+                  <div className="xp-bar-shine"></div>
+                </div>
+              </div>
+              <span className="xp-text">
+                {Math.floor(experienceInCurrentLevel)} /{" "}
+                {experienceNeededForNextLevel}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="game-hud">

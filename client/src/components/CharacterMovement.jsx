@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { TILE_SIZE, MAPS, isWalkable } from "./Constants";
 import SoundManager from "./utils/SoundManager";
+import { isTextEntryFocused } from "../utils/textFieldFocus";
 
 // Movement step size - half tile per button press for precise grid movement
 const MOVEMENT_STEP_SIZE = TILE_SIZE / 2; // 32px - half tile per move
@@ -24,7 +25,6 @@ const useCharacterMovement = (
   const [bumpDirection, setBumpDirection] = useState(null);
   const [movementDirection, setMovementDirection] = useState(null);
   const [movementCooldown, setMovementCooldown] = useState(false);
-  const [soundManager, setSoundManager] = useState(null);
   const [diagonalMovement, setDiagonalMovement] = useState({ x: 0, y: 0 });
   const lastMoveTime = useRef(Date.now());
   const processedKeys = useRef(new Set()); // Track keys that have been processed
@@ -41,16 +41,6 @@ const useCharacterMovement = (
     stepSize: hasSpeedBoost ? MOVEMENT_STEP_SIZE * 1.5 : MOVEMENT_STEP_SIZE, // Speed boost gives 1.5x movement
   };
 
-  // Add useEffect for initialization
-  useEffect(() => {
-    const initSoundManager = async () => {
-      const manager = SoundManager.getInstance();
-      await manager.initialize();
-      setSoundManager(manager);
-    };
-    initSoundManager();
-  }, []);
-
   // Trigger a bumping animation
   const triggerBump = useCallback(
     (direction) => {
@@ -59,8 +49,7 @@ const useCharacterMovement = (
       setBumpDirection(direction);
       setIsBumping(true);
 
-      // Update sound playing
-      if (soundManager) soundManager.playSound("bump", 0.3);
+      SoundManager.getInstance().playSound("bump", 0.3);
 
       // Reset after animation completes
       setTimeout(() => {
@@ -68,7 +57,7 @@ const useCharacterMovement = (
         setBumpDirection(null);
       }, 200); // Reduced from 400ms for more responsive feel
     },
-    [isBumping, soundManager],
+    [isBumping],
   );
 
   // Discrete movement system - move exactly one step per key press
@@ -248,12 +237,12 @@ const useCharacterMovement = (
   );
 
   useEffect(() => {
+    processedKeys.current.clear();
+  }, [currentMapIndex]);
+
+  useEffect(() => {
     const handleKeyDown = (event) => {
-      // Skip if input is focused
-      if (
-        document.activeElement.tagName === "INPUT" ||
-        document.activeElement.tagName === "TEXTAREA"
-      ) {
+      if (isTextEntryFocused()) {
         return;
       }
 
@@ -316,11 +305,17 @@ const useCharacterMovement = (
       processedKeys.current.delete(event.key);
     };
 
+    const clearProcessedKeys = () => {
+      processedKeys.current.clear();
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", clearProcessedKeys);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", clearProcessedKeys);
     };
   }, [
     handleMove,

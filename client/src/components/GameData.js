@@ -16,6 +16,24 @@ export { MAP_NAMES_IN_ORDER };
 export const MAPS = new Array(MAP_NAMES_IN_ORDER.length).fill(null);
 MAPS[0] = OVERWORLD_MAP;
 
+/**
+ * Returns a map index that has loaded grid data, or 0. Use after {@link loadRemainingMaps}
+ * and when restoring session so UI never indexes into a null lazy slot.
+ */
+export function getSafeMapIndex(preferredIndex) {
+  if (
+    typeof preferredIndex !== "number" ||
+    Number.isNaN(preferredIndex) ||
+    preferredIndex < 0 ||
+    preferredIndex >= MAPS.length
+  ) {
+    return 0;
+  }
+  const map = MAPS[preferredIndex];
+  if (!map?.data) return 0;
+  return preferredIndex;
+}
+
 let remainingMapsPromise = null;
 
 function devAuditAllMaps(maps) {

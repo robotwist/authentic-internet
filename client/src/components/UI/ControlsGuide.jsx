@@ -88,6 +88,13 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
           </button>
         </div>
 
+        {embedded && (
+          <p className="controls-guide-lede">
+            Quick dock: M map, U create, C help, F feedback, I bag, T talk — Esc
+            closes.
+          </p>
+        )}
+
         {/* Content */}
         <div className="controls-guide-content">
           {controlSections.map((section, index) => (

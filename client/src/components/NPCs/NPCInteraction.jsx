@@ -204,7 +204,12 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      if (onClose) onClose();
+      return;
+    }
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -232,6 +237,11 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     };
     return icons[relationship] || icons.stranger;
   };
+
+  const npcTypeLabel =
+    typeof npc.type === "string"
+      ? npc.type.replace(/_/g, " ")
+      : "character";
 
   const getPersonalityTraits = () => {
     if (!npc.personality?.traits) return [];
@@ -266,43 +276,52 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
         }
       >
         {/* Header */}
-        <div className="npc-header">
+        <div className={`npc-header${embedded ? " npc-header--compact" : ""}`}>
           <div className="npc-info">
             <h2>{npc.name}</h2>
             <div className="npc-meta">
-              <span className="npc-type">{npc.type.replace("_", " ")}</span>
-              <span className="npc-location">{npc.area}</span>
+              <span className="npc-type">{npcTypeLabel}</span>
+              {(npc.area || context.area) && (
+                <span className="npc-location">
+                  {npc.area || context.area}
+                </span>
+              )}
             </div>
           </div>
 
-          {/* Relationship Status */}
-          <div className="relationship-status">
-            <div
-              className="relationship-badge"
-              style={{ backgroundColor: getRelationshipColor(relationship) }}
-            >
-              <span className="relationship-icon">
-                {getRelationshipIcon(relationship)}
-              </span>
-              <span className="relationship-text">
-                {relationship.charAt(0).toUpperCase() +
-                  relationship.slice(1).replace("_", " ")}
-              </span>
+          {!embedded && (
+            <div className="relationship-status">
+              <div
+                className="relationship-badge"
+                style={{ backgroundColor: getRelationshipColor(relationship) }}
+              >
+                <span className="relationship-icon">
+                  {getRelationshipIcon(relationship)}
+                </span>
+                <span className="relationship-text">
+                  {relationship.charAt(0).toUpperCase() +
+                    relationship.slice(1).replace("_", " ")}
+                </span>
+              </div>
+              <div className="interaction-count">
+                Chats: {interactionCount}
+              </div>
             </div>
-            <div className="interaction-count">
-              Conversations: {interactionCount}
-            </div>
-          </div>
+          )}
 
-          <button className="close-button" onClick={onClose}>
-            ×
+          <button
+            type="button"
+            className={`close-button${embedded ? " close-button--ghost" : ""}`}
+            onClick={onClose}
+            aria-label="Close conversation"
+          >
+            {embedded ? "Close" : "×"}
           </button>
         </div>
 
-        {/* Personality Traits */}
-        {getPersonalityTraits().length > 0 && (
+        {!embedded && getPersonalityTraits().length > 0 && (
           <div className="personality-display">
-            <h4>Prominent Traits:</h4>
+            <h4>Prominent traits</h4>
             <div className="traits-list">
               {getPersonalityTraits().map(({ trait, value }) => (
                 <div key={trait} className="trait-item">
@@ -322,16 +341,18 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
           </div>
         )}
 
-        {/* Current Quest */}
         {currentQuest && (
-          <div className="current-quest">
-            <h4>📜 Available Quest</h4>
+          <div
+            className={`current-quest${embedded ? " current-quest--compact" : ""}`}
+          >
+            {!embedded && <h4>Available quest</h4>}
             <div className="quest-info">
               <h5>{currentQuest.title}</h5>
-              <p>{currentQuest.description}</p>
+              {!embedded && <p>{currentQuest.description}</p>}
               {currentQuest.stages && currentQuest.stages.length > 0 && (
                 <div className="quest-progress">
-                  <strong>Next Step:</strong> {currentQuest.stages[0].task}
+                  {!embedded ? <strong>Next: </strong> : null}
+                  {currentQuest.stages[0].task}
                 </div>
               )}
             </div>
@@ -347,9 +368,11 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
                   {message.type === "npc" ? message.author : "You"}
                 </div>
                 <div className="message-text">{message.text}</div>
-                <div className="message-timestamp">
-                  {formatTimestamp(message.timestamp)}
-                </div>
+                {!embedded && (
+                  <div className="message-timestamp">
+                    {formatTimestamp(message.timestamp)}
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -369,67 +392,104 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
         </div>
 
         {/* Input Area */}
-        <div className="input-area">
+        <div className={`input-area${embedded ? " input-area--compact" : ""}`}>
+          {!embedded && (
+            <div className="quick-actions">
+              <button
+                type="button"
+                onClick={() => setInput("Tell me about yourself")}
+                disabled={isLoading}
+              >
+                About them
+              </button>
+              <button
+                type="button"
+                onClick={() => setInput("What wisdom do you have for me?")}
+                disabled={isLoading}
+              >
+                Wisdom
+              </button>
+              {currentQuest && (
+                <button
+                  type="button"
+                  onClick={() => setInput("Tell me more about this quest")}
+                  disabled={isLoading}
+                >
+                  Quest
+                </button>
+              )}
+            </div>
+          )}
+          {embedded && (
+            <div className="quick-actions quick-actions--chips">
+              <button
+                type="button"
+                className="qa-chip"
+                onClick={() => setInput("Tell me about yourself")}
+                disabled={isLoading}
+              >
+                About
+              </button>
+              <button
+                type="button"
+                className="qa-chip"
+                onClick={() => setInput("What wisdom do you have for me?")}
+                disabled={isLoading}
+              >
+                Wisdom
+              </button>
+              {currentQuest && (
+                <button
+                  type="button"
+                  className="qa-chip"
+                  onClick={() => setInput("Tell me more about this quest")}
+                  disabled={isLoading}
+                >
+                  Quest
+                </button>
+              )}
+            </div>
+          )}
           <div className="input-container">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={`Say something to ${npc.name}...`}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                embedded ? `Message ${npc.name.split(" ")[0] || "them"}…`
+                  : `Say something to ${npc.name}…`
+              }
               disabled={isLoading}
-              rows={2}
+              rows={embedded ? 1 : 2}
             />
             <button
+              type="button"
               onClick={handleSendMessage}
               disabled={!input.trim() || isLoading}
-              className="send-button"
+              className={`send-button${embedded ? " send-button--compact" : ""}`}
             >
               Send
             </button>
           </div>
+        </div>
 
-          {/* Quick Actions */}
-          <div className="quick-actions">
-            <button
-              onClick={() => setInput("Tell me about yourself")}
-              disabled={isLoading}
-            >
-              Ask About Themselves
-            </button>
-            <button
-              onClick={() => setInput("What wisdom do you have for me?")}
-              disabled={isLoading}
-            >
-              Seek Wisdom
-            </button>
-            {currentQuest && (
-              <button
-                onClick={() => setInput("Tell me more about this quest")}
-                disabled={isLoading}
-              >
-                Ask About Quest
-              </button>
+        {!embedded && (
+          <div className="context-display">
+            <div className="context-item">
+              {context.area || "Unknown location"}
+            </div>
+            {context.weather && (
+              <div className="context-item">{context.weather}</div>
             )}
+            <div className="context-item">
+              {new Date().getHours() < 12
+                ? "Morning"
+                : new Date().getHours() < 18
+                  ? "Afternoon"
+                  : "Evening"}
+            </div>
           </div>
-        </div>
-
-        {/* Context Display */}
-        <div className="context-display">
-          <div className="context-item">
-            📍 {context.area || "Unknown Location"}
-          </div>
-          {context.weather && (
-            <div className="context-item">🌤️ {context.weather}</div>
-          )}
-          <div className="context-item">
-            🕐{" "}
-            {new Date().getHours() < 12
-              ? "Morning"
-              : new Date().getHours() < 18
-                ? "Afternoon"
-                : "Evening"}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

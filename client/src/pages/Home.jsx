@@ -65,7 +65,7 @@ const Home = () => {
 
   const handleSaveQuote = async (quote) => {
     if (!user) {
-      alert("You need to be logged in to save quotes. Please log in first.");
+      alert("Log in to save quotes to your in-game collection.");
       return;
     }
 
@@ -73,7 +73,7 @@ const Home = () => {
       // Get user's character data
       const storedUser = JSON.parse(localStorage.getItem("user"));
       if (!storedUser || !storedUser.id) {
-        alert("No user profile found. Please log in again.");
+        alert("We could not load your profile. Please sign in again.");
         return;
       }
 
@@ -86,7 +86,7 @@ const Home = () => {
       // Check if this quote is already saved
       const isAlreadySaved = savedQuotes.some((q) => q.text === quote.text);
       if (isAlreadySaved) {
-        alert("This quote is already in your saved quotes!");
+        alert("That quote is already in your collection.");
         return;
       }
 
@@ -112,7 +112,7 @@ const Home = () => {
       setTimeout(() => setShowSavedMessage(false), 3000);
     } catch (error) {
       console.error("Error saving quote:", error);
-      alert("Failed to save quote. Please try again.");
+      alert("Could not save the quote. Try again in a moment.");
     }
   };
 
@@ -125,9 +125,8 @@ const Home = () => {
     <div className="home-header">
       <TitleArea size="large" />
       <p className="subtitle">
-        Enter the place where you are free to experience the goodness of the
-        internet. Here you can experience a site with nothing glaring in the
-        way. You get to see creativity in an unadulterated form.
+        A quieter corner of the web: explore worlds, meet curious characters,
+        and leave behind artifacts that matter.
       </p>
     </div>
   );
@@ -136,35 +135,27 @@ const Home = () => {
     <div className="home-content-wrapper">
       {/* Main messaging */}
       <div className="create-artifacts-section">
-        <h2>The True, The Good, The Beautiful</h2>
+        <h2>The True, the Good, and the Beautiful</h2>
         <p className="creative-description">
-          This is the Authentic Internet. A place where creativity and
-          expression reign supreme, where your artifacts matter and others'
-          creations matter to you.
-        </p>
-        <p className="creative-description">
-          No one is selling your information, your data, or spamming you with
-          false products, ideas or things. When you enter here, you choose what
-          you want to see and strike everything else from your view.
+          Authentic Internet is a small game world built around discovery and
+          craft: your artifacts and other players&apos; work carry weight here.
         </p>
         <div className="creative-steps">
           <div className="creative-step">
             <div className="step-icon"></div>
             <h3>Freedom</h3>
-            <p>Choose your world that you want to see.</p>
-          </div>
-          <div className="creative-step">
-            <div className="step-icon"></div>
-            <h3>Authenticity</h3>
-            <p>Escape a world of the manipulative.</p>
           </div>
           <div className="creative-step">
             <div className="step-icon"></div>
             <h3>Creation</h3>
             <p>
-              Express yourself through meaningful artifacts that reflect your
-              wisdom and creativity.
+              Make artifacts that reflect what you care about—and collect what
+              others have left in the world.
             </p>
+          </div>
+          <div className="creative-step">
+            <div className="step-icon"></div>
+            <h3>Authenticity</h3>
           </div>
         </div>
         <Button
@@ -173,16 +164,18 @@ const Home = () => {
           variant="primary"
           className="create-button"
         >
-          Enter A New World
+          Explore the world
         </Button>
       </div>
 
       {user ? (
         <div className="authenticated-content">
-          <h2>Your Worlds</h2>
+          <h2>Your worlds</h2>
           <div className="worlds-grid">
-            {/* We'll add the worlds list here later */}
-            <p>Your worlds will appear here...</p>
+            <p className="worlds-placeholder">
+              Summaries of your worlds and progress will show up here as we
+              wire this section up.
+            </p>
           </div>
 
           {/* Show SecretMessage or buttons based on state */}
@@ -194,20 +187,23 @@ const Home = () => {
                 Create New World
               </Button>
               <Button as={Link} to="/dashboard" variant="secondary">
-                Go to Dashboard
+                Open dashboard
               </Button>
             </div>
           )}
         </div>
       ) : (
         <div className="unauthenticated-content">
-          <p>Please log in or register to start your journey</p>
+          <p>
+            Sign in to sync your character and save quotes, or create an account
+            to begin.
+          </p>
           <div className="action-buttons">
             <Button as={Link} to="/login" variant="primary">
-              Login
+              Log in
             </Button>
             <Button as={Link} to="/register" variant="secondary">
-              Register
+              Create account
             </Button>
           </div>
         </div>
@@ -215,14 +211,14 @@ const Home = () => {
 
       {/* Quotes section */}
       <div className="daily-wisdom-section">
-        <h2>Today's Wisdom</h2>
+        <h2>Today&apos;s wisdom</h2>
         <p className="wisdom-intro">
-          Collect these quotes and add them to your in-game quote collection.
-          Share them with friends or export them as a beautiful quote book.
+          Save lines you like to your in-game collection, share them with
+          friends, or export them when you want a keepsake.
         </p>
 
         {loading ? (
-          <div className="quotes-loading">Loading wisdom...</div>
+          <div className="quotes-loading">Loading quotes…</div>
         ) : (
           <div className="inspirational-quotes">
             {inspirationalQuotes.map((quote, index) => (
@@ -240,7 +236,7 @@ const Home = () => {
                   className="save-quote-button"
                   onClick={() => handleSaveQuote(quote)}
                 >
-                  Save to Collection
+                  Save to collection
                 </button>
               </div>
             ))}
@@ -249,25 +245,26 @@ const Home = () => {
 
         {/* Daily quote component */}
         <div className="daily-quote-container">
-          <h3>Quote of the Day</h3>
+          <h3>Quote of the day</h3>
           <DailyQuote onSave={handleSaveQuote} />
         </div>
 
         {/* Game CTA */}
         <div className="game-cta">
-          <h3>Continue Your Journey</h3>
+          <h3>Ready when you are</h3>
           <p>
-            Explore the world, meet historical figures, and collect more wisdom.
+            Roam the maps, talk to characters rooted in history and literature,
+            and grow your collection of artifacts and quotes.
           </p>
           <Button as={Link} to="/game" variant="primary">
-            Enter the Game
+            {user ? "Continue playing" : "Play now"}
           </Button>
         </div>
       </div>
 
       {/* Saved message notification */}
       {showSavedMessage && (
-        <div className="save-notification">Quote saved to your collection!</div>
+        <div className="save-notification">Saved to your collection.</div>
       )}
     </div>
   );

@@ -23,6 +23,16 @@
   transition: border-color 0.15s linear;
 }
 
+.minimap-container--embedded {
+  position: relative;
+  top: auto;
+  right: auto;
+  z-index: 1;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 1rem;
+}
+
 .minimap-container:hover {
   border-color: var(--zelda-gold);
 }

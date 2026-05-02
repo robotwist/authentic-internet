@@ -30,6 +30,22 @@
   font-family: 'Press Start 2P', 'Courier New', monospace;
 }
 
+.game-hud--minimal {
+  justify-content: flex-start;
+  bottom: auto;
+  height: auto;
+}
+
+.game-hud--minimal .hud-minimal-bar {
+  padding: 12px 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.game-hud--minimal .xp-display {
+  max-width: min(520px, 92vw);
+}
+
 /* Top bar */
 .hud-top-bar {
   display: flex;

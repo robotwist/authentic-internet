@@ -23,6 +23,7 @@ const GameDock = ({
   onSetDockTab,
   onToggleDockExpanded,
   onOpenBag,
+  onOpenKeyboardTips,
   areaName,
   level,
   experience,
@@ -96,6 +97,16 @@ const GameDock = ({
             </span>
           </div>
         )}
+        {typeof onOpenKeyboardTips === "function" && (
+          <button
+            type="button"
+            className="game-dock-tips-btn"
+            onClick={onOpenKeyboardTips}
+            aria-label="Open keyboard and game tips"
+          >
+            Tips
+          </button>
+        )}
         <button
           type="button"
           className="game-dock-toggle"
@@ -110,103 +121,114 @@ const GameDock = ({
       <div
         className={`game-dock-body ${dockExpanded ? "is-expanded" : "is-collapsed"}`}
       >
-        <div
-          id="game-dock-panel-status"
-          className="game-dock-panel"
-          role="tabpanel"
-          hidden={dockTab !== "status"}
-        >
-          {statusPanel ?? (
-            <div className="game-dock-status">
-              <dl>
-                <dt>Area</dt>
-                <dd>{areaName}</dd>
-                <dt>Level</dt>
-                <dd>{level}</dd>
-                <dt>Experience</dt>
-                <dd>
-                  {experience} / {experienceToNextLevel} to next level
-                </dd>
-                <dt>Health</dt>
-                <dd>
-                  {health} / {maxHealth}
-                </dd>
-              </dl>
-            </div>
-          )}
-        </div>
+        {/* Only mount the active tab when expanded — hidden panels used to stay
+            in the tree and blocked the main thread (minimap, world map, chat). */}
+        {dockExpanded && dockTab === "status" && (
+          <div
+            id="game-dock-panel-status"
+            className="game-dock-panel game-dock-panel--scroll"
+            role="tabpanel"
+          >
+            {statusPanel ?? (
+              <div className="game-dock-status">
+                <dl>
+                  <dt>Area</dt>
+                  <dd>{areaName}</dd>
+                  <dt>Level</dt>
+                  <dd>{level}</dd>
+                  <dt>Experience</dt>
+                  <dd>
+                    {experience} / {experienceToNextLevel} to next level
+                  </dd>
+                  <dt>Health</dt>
+                  <dd>
+                    {health} / {maxHealth}
+                  </dd>
+                </dl>
+              </div>
+            )}
+          </div>
+        )}
 
-        <div
-          id="game-dock-panel-talk"
-          className="game-dock-panel"
-          role="tabpanel"
-          hidden={dockTab !== "talk"}
-        >
-          {talkPanel}
-        </div>
+        {dockExpanded && dockTab === "talk" && (
+          <div
+            id="game-dock-panel-talk"
+            className="game-dock-panel"
+            role="tabpanel"
+          >
+            {talkPanel}
+          </div>
+        )}
 
-        <div
-          id="game-dock-panel-create"
-          className="game-dock-panel game-dock-panel--scroll"
-          role="tabpanel"
-          hidden={dockTab !== "create"}
-        >
-          {createPanel}
-        </div>
+        {dockExpanded && dockTab === "create" && (
+          <div
+            id="game-dock-panel-create"
+            className="game-dock-panel game-dock-panel--scroll"
+            role="tabpanel"
+          >
+            {createPanel}
+          </div>
+        )}
 
-        <div
-          id="game-dock-panel-bag"
-          className="game-dock-panel"
-          role="tabpanel"
-          hidden={dockTab !== "bag"}
-        >
-          {bagPanel}
-        </div>
+        {dockExpanded && dockTab === "bag" && (
+          <div
+            id="game-dock-panel-bag"
+            className="game-dock-panel"
+            role="tabpanel"
+          >
+            {bagPanel}
+          </div>
+        )}
 
-        <div
-          id="game-dock-panel-chat"
-          className="game-dock-panel game-dock-panel--chat"
-          role="tabpanel"
-          hidden={dockTab !== "chat"}
-        >
-          {chatPanel}
-        </div>
+        {dockExpanded && dockTab === "chat" && (
+          <div
+            id="game-dock-panel-chat"
+            className="game-dock-panel game-dock-panel--chat"
+            role="tabpanel"
+          >
+            {chatPanel}
+          </div>
+        )}
 
-        <div
-          id="game-dock-panel-map"
-          className="game-dock-panel game-dock-panel--scroll"
-          role="tabpanel"
-          hidden={dockTab !== "map"}
-        >
-          {mapPanel}
-        </div>
+        {dockExpanded && dockTab === "map" && (
+          <div
+            id="game-dock-panel-map"
+            className="game-dock-panel game-dock-panel--scroll"
+            role="tabpanel"
+          >
+            {mapPanel}
+          </div>
+        )}
 
-        <div
-          id="game-dock-panel-guide"
-          className="game-dock-panel game-dock-panel--scroll"
-          role="tabpanel"
-          hidden={dockTab !== "guide"}
-        >
-          {guidePanel}
-        </div>
+        {dockExpanded && dockTab === "guide" && (
+          <div
+            id="game-dock-panel-guide"
+            className="game-dock-panel game-dock-panel--scroll"
+            role="tabpanel"
+          >
+            {guidePanel}
+          </div>
+        )}
 
-        <div
-          id="game-dock-panel-quotes"
-          className="game-dock-panel game-dock-panel--scroll"
-          role="tabpanel"
-          hidden={dockTab !== "quotes"}
-        >
-          {quotesPanel}
-        </div>
+        {dockExpanded && dockTab === "quotes" && (
+          <div
+            id="game-dock-panel-quotes"
+            className="game-dock-panel game-dock-panel--scroll"
+            role="tabpanel"
+          >
+            {quotesPanel}
+          </div>
+        )}
 
-        <div
-          id="game-dock-panel-feedback"
-          className="game-dock-panel game-dock-panel--scroll"
-          role="tabpanel"
-          hidden={dockTab !== "feedback"}
-        >
-          {feedbackPanel}
-        </div>
+        {dockExpanded && dockTab === "feedback" && (
+          <div
+            id="game-dock-panel-feedback"
+            className="game-dock-panel game-dock-panel--scroll"
+            role="tabpanel"
+          >
+            {feedbackPanel}
+          </div>
+        )}
       </div>
     </footer>
   );
@@ -234,6 +256,7 @@ GameDock.propTypes = {
   health: PropTypes.number.isRequired,
   maxHealth: PropTypes.number.isRequired,
   onOpenBag: PropTypes.func,
+  onOpenKeyboardTips: PropTypes.func,
   showNPCDialog: PropTypes.bool.isRequired,
   statusPanel: PropTypes.node,
   talkPanel: PropTypes.node,

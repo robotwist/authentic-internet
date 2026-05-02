@@ -21,6 +21,8 @@ const Minimap = ({
   tileSize = 64,
   exploredTiles = new Set(),
   currentArea = "Overworld",
+  /** When true, use in-flow layout (e.g. dock panel) instead of fixed corner positioning */
+  embedded = false,
 }) => {
   // Minimap dimensions
   const MINIMAP_SIZE = 160; // pixels
@@ -176,7 +178,9 @@ const Minimap = ({
   );
 
   return (
-    <div className="minimap-container">
+    <div
+      className={`minimap-container${embedded ? " minimap-container--embedded" : ""}`}
+    >
       <div className="minimap-header">
         <span className="minimap-title">{currentArea}</span>
       </div>
@@ -240,6 +244,7 @@ Minimap.propTypes = {
   tileSize: PropTypes.number,
   exploredTiles: PropTypes.instanceOf(Set),
   currentArea: PropTypes.string,
+  embedded: PropTypes.bool,
 };
 
 export default Minimap;

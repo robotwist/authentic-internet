@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import XPNotification from '../XPNotification';
 import AchievementNotification from '../AchievementNotification';
 import { NotificationProvider } from './useNotification.jsx';
+import { isTextEntryFocused } from '../../utils/textFieldFocus';
 
 const NotificationSystem = ({ soundManager }) => {
   // Notifications state
@@ -95,6 +96,7 @@ const NotificationSystem = ({ soundManager }) => {
         setPortalNotificationActive(true);
 
         const handleInteraction = (e) => {
+          if (isTextEntryFocused()) return;
           if (e.code === "Space" && conditionFn()) {
             // Play portal sound
             if (soundManager) {

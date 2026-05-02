@@ -27,6 +27,17 @@
   animation: fadeIn 0.15s linear;
 }
 
+.controls-guide-lede {
+  margin: 0 16px 12px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .controls-guide-overlay--embedded {
   position: relative;
   inset: auto;

@@ -66,7 +66,6 @@ const Dungeon = ({
   onExit,
   playerKeys,
   hasBossKey,
-  characterRef,
   initialProgress = null,
   onProgressChange = null,
 }) => {
@@ -534,7 +533,6 @@ Dungeon.propTypes = {
   onExit: PropTypes.func,
   playerKeys: PropTypes.number,
   hasBossKey: PropTypes.bool,
-  characterRef: PropTypes.object,
   initialProgress: PropTypes.object,
   onProgressChange: PropTypes.func,
 };

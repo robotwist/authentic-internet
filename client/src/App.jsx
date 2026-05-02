@@ -32,8 +32,8 @@ function App() {
     const criticalImages = [
       "/assets/tiles/portal.webp",
       "/assets/tiles/dungeon.webp",
-      "/assets/npcs/jesus.webp",
-      "/assets/npcs/zeus.webp",
+      "/assets/npcs/jesus.svg",
+      "/assets/npcs/zeus.svg",
     ];
 
     criticalImages.forEach((src) => {

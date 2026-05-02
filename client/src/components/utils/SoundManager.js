@@ -158,6 +158,9 @@ class SoundManager {
    */
   async loadSound(name, path) {
     try {
+      if (!this.audioContext) {
+        throw new Error("AudioContext not available");
+      }
       const response = await fetch(path);
       if (!response.ok) {
         throw new Error(`Failed to load sound: ${response.statusText}`);
@@ -195,6 +198,9 @@ class SoundManager {
    */
   async loadMusic(name, path) {
     try {
+      if (!this.audioContext) {
+        throw new Error("AudioContext not available");
+      }
       const response = await fetch(path);
       if (!response.ok) {
         throw new Error(`Failed to load music: ${response.statusText}`);
@@ -214,6 +220,10 @@ class SoundManager {
    * Create fallback sounds for missing audio files
    */
   createFallbackSounds() {
+    if (!this.audioContext) {
+      console.warn("SoundManager: skipping fallback sounds — no AudioContext");
+      return;
+    }
     // Create a simple beep sound as fallback
     const createBeep = (frequency = 440, duration = 0.1) => {
       const sampleRate = this.audioContext.sampleRate;

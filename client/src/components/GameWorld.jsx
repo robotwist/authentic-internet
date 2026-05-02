@@ -16,7 +16,6 @@ import {
   fetchQuests,
   completeQuestStage,
 } from "../api/api";
-import Character from "./Character";
 import ArtifactCreation from "./ArtifactCreation";
 import InventoryManager from "./managers/InventoryManager";
 import MapComponent from "./Map";
@@ -24,6 +23,7 @@ import WorldMap from "./WorldMap";
 import FeedbackForm from "./FeedbackForm";
 import CharacterController from "./controllers/CharacterController";
 import GameHUD from "./UI/GameHUD";
+import DockCombatHud from "./UI/DockCombatHud";
 import GameDock from "./UI/GameDock";
 import { getPowerDefinition } from "../constants/Powers";
 import ControlsGuide from "./UI/ControlsGuide";
@@ -34,6 +34,7 @@ import { TILE_SIZE, MAP_COLS, MAP_ROWS } from "./Constants";
 import {
   MAPS,
   getMapIndexByKey,
+  getSafeMapIndex,
   loadRemainingMaps,
   prefetchRemainingMaps,
 } from "./GameData";
@@ -74,6 +75,7 @@ import { useGameState as useGameStateContext } from "../context/GameStateContext
 import { useGameState } from "../hooks/useGameState";
 import { useWebSocket } from "../context/WebSocketContext";
 import gameStateManager from "../utils/gameStateManager";
+import { isTextEntryFocused } from "../utils/textFieldFocus";
 import { IconButton } from "@mui/material";
 import { usePortalCollisions } from "../hooks/usePortalCollisions";
 
@@ -116,6 +118,7 @@ const GameWorld = React.memo(() => {
     visibleArtifact,
     currentSpecialWorld,
     characterStats,
+    characterState,
     uiState,
     questStatusMap,
     mobileState,
@@ -139,8 +142,11 @@ const GameWorld = React.memo(() => {
     setActiveNPC,
     setSelectedUserArtifact,
     setIsInvincible,
+    setIsAttacking,
     setRupees,
     setKeys,
+    setCurrentGameArtifact,
+    setShowGameLauncher,
     setCharacterState,
     setQuestStatusMap,
     setMobileState,
@@ -265,6 +271,47 @@ const GameWorld = React.memo(() => {
     }, 3000);
   }, []);
 
+  // Viewport adjustment function to follow character (declared before effects that depend on it)
+  const adjustViewport = useCallback(
+    (characterPos) => {
+      if (!characterPos || typeof gameState.currentMapIndex !== "number")
+        return;
+
+      const gameWorldElement = document.querySelector(".game-world");
+      if (!gameWorldElement) return;
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Calculate new viewport position to center character
+      const newViewportX = Math.max(0, characterPos.x - viewportWidth / 2);
+      const newViewportY = Math.max(0, characterPos.y - viewportHeight / 2);
+
+      // Get map dimensions
+      const currentMapData = MAPS[gameState.currentMapIndex];
+      if (!currentMapData?.data) {
+        setViewport({ x: 0, y: 0 });
+        return;
+      }
+
+      const mapWidth = currentMapData.data[0]?.length * TILE_SIZE || 800;
+      const mapHeight = currentMapData.data.length * TILE_SIZE || 600;
+
+      // Clamp viewport to map boundaries
+      const clampedX = Math.min(
+        newViewportX,
+        Math.max(0, mapWidth - viewportWidth),
+      );
+      const clampedY = Math.min(
+        newViewportY,
+        Math.max(0, mapHeight - viewportHeight),
+      );
+
+      setViewport({ x: clampedX, y: clampedY });
+    },
+    [gameState.currentMapIndex, setViewport],
+  );
+
   // Handle map transitions to neighbors — instant swap (slide animation moved only the map, not the player)
   useEffect(() => {
     if (!pendingTransition) return;
@@ -359,7 +406,6 @@ const GameWorld = React.memo(() => {
   // WebSocket connection for multiplayer
   const { socket, isConnected, sendMessage } = useWebSocket();
   const gameWorldRef = useRef(null);
-  const characterRef = useRef(null);
   const characterControllerRef = useRef(null);
   /** Last room snapshot for merging key saves with localStorage dungeon progress */
   const lastDungeonSnapshotRef = useRef({});
@@ -717,47 +763,6 @@ const GameWorld = React.memo(() => {
       handleGainExperience(amount, reason, null);
     },
     [handleGainExperience],
-  );
-
-  // Viewport adjustment function to follow character
-  const adjustViewport = useCallback(
-    (characterPos) => {
-      if (!characterPos || typeof gameState.currentMapIndex !== "number")
-        return;
-
-      const gameWorldElement = document.querySelector(".game-world");
-      if (!gameWorldElement) return;
-
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      // Calculate new viewport position to center character
-      const newViewportX = Math.max(0, characterPos.x - viewportWidth / 2);
-      const newViewportY = Math.max(0, characterPos.y - viewportHeight / 2);
-
-      // Get map dimensions
-      const currentMapData = MAPS[gameState.currentMapIndex];
-      if (!currentMapData?.data) {
-        setViewport({ x: 0, y: 0 });
-        return;
-      }
-
-      const mapWidth = currentMapData.data[0]?.length * TILE_SIZE || 800;
-      const mapHeight = currentMapData.data.length * TILE_SIZE || 600;
-
-      // Clamp viewport to map boundaries
-      const clampedX = Math.min(
-        newViewportX,
-        Math.max(0, mapWidth - viewportWidth),
-      );
-      const clampedY = Math.min(
-        newViewportY,
-        Math.max(0, mapHeight - viewportHeight),
-      );
-
-      setViewport({ x: clampedX, y: clampedY });
-    },
-    [gameState.currentMapIndex],
   );
 
   // After switching maps, camera scroll can still be from the previous (larger or scrolled) area — clamp once
@@ -1821,6 +1826,10 @@ const GameWorld = React.memo(() => {
   // Optimized key handler with throttling
   const handleKeyDown = useCallback(
     (event) => {
+      if (isTextEntryFocused()) {
+        return;
+      }
+
       const now = performance.now();
       if (now - lastUpdateTime.current < updateThrottle.current) {
         return; // Throttle key events
@@ -2127,26 +2136,45 @@ const GameWorld = React.memo(() => {
     prefetchRemainingMaps();
   }, []);
 
-  // Performance-optimized effects — load lazy map chunk before session restore / gameplay
+  // Boot: overworld (MAPS[0]) is already in the bundle — do not block the whole UI on the lazy
+  // map chunk unless the saved session needs a map that is still in that chunk.
   useEffect(() => {
     let cancelled = false;
     const handleKeyDownEvent = (e) => handleKeyDown(e);
 
     (async () => {
-      try {
-        await loadRemainingMaps();
-      } catch (err) {
-        console.error("Failed to load map data:", err);
+      gameStateManager.init();
+      const saved = gameStateManager.getState();
+      const hasSavedMapIndex =
+        saved &&
+        typeof saved.currentMapIndex === "number" &&
+        !Number.isNaN(saved.currentMapIndex);
+      const clampedSavedMapIndex = hasSavedMapIndex
+        ? Math.max(0, Math.min(MAPS.length - 1, saved.currentMapIndex))
+        : null;
+      const mustWaitForLazyMaps =
+        clampedSavedMapIndex !== null &&
+        !MAPS[clampedSavedMapIndex]?.data;
+
+      if (mustWaitForLazyMaps) {
+        try {
+          await loadRemainingMaps();
+        } catch (err) {
+          console.error("Failed to load map data:", err);
+        }
+        if (cancelled) return;
+      } else {
+        void loadRemainingMaps().catch((err) => {
+          console.error("Failed to load map data:", err);
+        });
       }
+
       if (cancelled) return;
 
       performance.mark(PERFORMANCE_MARKERS.RENDER_START);
 
-      gameStateManager.init();
-
       if (!hasRestoredSessionRef.current) {
         hasRestoredSessionRef.current = true;
-        const saved = gameStateManager.getState();
         if (
           saved &&
           saved.characterPosition &&
@@ -2155,10 +2183,12 @@ const GameWorld = React.memo(() => {
           typeof saved.currentMapIndex === "number"
         ) {
           setCharacterPosition(saved.characterPosition);
-          setCurrentMapIndex(saved.currentMapIndex);
+          setCurrentMapIndex(getSafeMapIndex(saved.currentMapIndex));
           if (Array.isArray(saved.inventory)) {
             setInventory(saved.inventory);
           }
+        } else {
+          setCurrentMapIndex((prev) => getSafeMapIndex(prev));
         }
       }
 
@@ -2173,9 +2203,8 @@ const GameWorld = React.memo(() => {
     return () => {
       cancelled = true;
       window.removeEventListener("keydown", handleKeyDownEvent);
-      if (gameState.soundManager) {
-        gameState.soundManager.cleanup();
-      }
+      // Do not call SoundManager.cleanup() here — effect deps churn would close
+      // AudioContext while initialize()/decodeAudioData is still in flight.
     };
   }, [
     loadCharacter,
@@ -2679,6 +2708,7 @@ const GameWorld = React.memo(() => {
 
             // Handle space key press to launch the game
             const handleGameLaunch = (e) => {
+              if (isTextEntryFocused()) return;
               if (e.code === "Space" && distance <= TILE_SIZE * 1.5) {
                 // Play interaction sound
                 if (gameState.soundManager) {
@@ -3427,7 +3457,7 @@ const GameWorld = React.memo(() => {
             textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
           }}
         >
-          Loading...
+          Loading areas…
         </div>
       ) : (
         <div
@@ -3445,7 +3475,9 @@ const GameWorld = React.memo(() => {
               Bag, Chat, Map, Help, Quotes, and Feedback. Keys: I bag, T talk, M
               map, C or question mark help, Q quotes, F feedback. H high
               contrast, R reduced motion, S screen reader. Escape closes
-              overlays and collapses the dock.
+              overlays and collapses the dock. While typing in a text field,
+              game shortcut keys are ignored; Escape in NPC chat closes the
+              chat panel.
             </div>
 
             <div
@@ -3464,64 +3496,18 @@ const GameWorld = React.memo(() => {
               </div>
             )}
 
-            {/* === CORE GAME WORLD === */}
-            {MAPS[currentMapIndex]?.data && (
-              <MapComponent
-                key={`overlay-map-${mapSchemaRevision}-${currentMapIndex}`}
-                currentMapIndex={currentMapIndex}
-                mapData={MAPS[currentMapIndex].data}
-                exploredTiles={exploredTiles}
-                viewport={viewport}
-                characterPosition={characterPosition}
-                artifacts={gameState.gameData.artifacts}
-                showArtifactsOnMap={uiState.showArtifactsOnMap}
-                inDungeon={uiState.inDungeon}
-              />
-            )}
-
-            <Character
-              ref={characterRef}
-              x={(characterPosition || { x: 64, y: 64 }).x}
-              y={(characterPosition || { x: 64, y: 64 }).y}
-              characterState={gameState.characterState}
-              direction={gameState.characterState?.direction || "down"}
-              isLoggedIn={isLoggedIn}
-              character={character}
-              soundManager={gameState.soundManager}
-              playerHealth={gameState.playerHealth}
-              maxPlayerHealth={gameState.maxPlayerHealth}
-              isInvincible={gameState.isInvincible}
-            />
+            {/* Playfield map renders inside `.viewport` below (single Map instance with npcs + scrollViewport). */}
 
             {/* === UI SYSTEMS === */}
 
-            {/* Zelda-style HUD */}
+            {/* XP / level only — hearts, rupees, items, minimap live in dock Status */}
             <GameHUD
-              health={gameState.playerHealth}
-              maxHealth={gameState.maxPlayerHealth}
-              rupees={gameState.rupees}
-              keys={gameState.keys}
-              currentArea={MAPS[gameState.currentMapIndex]?.name || "Overworld"}
-              equippedItem={gameState.equippedItem}
+              variant="minimal"
               experience={gameState.characterStats.experience}
               level={gameState.characterStats.level}
               experienceToNextLevel={calculateXPForLevel(
                 gameState.characterStats.level + 1,
               )}
-              isDamaged={gameState.characterState.isHit}
-            />
-
-            {/* Minimap with fog of war */}
-            <Minimap
-              mapData={MAPS[currentMapIndex]?.data || []}
-              playerPosition={characterPosition || { x: 64, y: 64 }}
-              npcs={MAPS[currentMapIndex]?.npcs || []}
-              portals={MAPS[currentMapIndex]?.specialPortals || []}
-              tileSize={TILE_SIZE}
-              exploredTiles={
-                exploredTiles instanceof Set ? exploredTiles : new Set()
-              }
-              currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
             />
 
             {gameState.uiState.showLevel4 && (
@@ -3571,7 +3557,6 @@ const GameWorld = React.memo(() => {
                     onExit={handleExitDungeon}
                     playerKeys={gameState.dungeonState.smallKeys}
                     hasBossKey={gameState.dungeonState.hasBossKey}
-                    characterRef={characterRef}
                     initialProgress={gameState.dungeonState.activeRunProgress}
                     onProgressChange={handlePersistDungeonProgress}
                   />
@@ -3804,27 +3789,7 @@ const GameWorld = React.memo(() => {
               <span className="feedback-text">Feedback</span>
             </div>
 
-            {/* Map key hint - only when no blocking overlay */}
-            {!gameState.uiState.showForm &&
-              !showLevelUpModal &&
-              !gameState.uiState.showWinNotification &&
-              !gameState.uiState.showRewardModal &&
-              !gameState.uiState.showLevel4 &&
-              !gameState.uiState.showNPCDialog && (
-                <div className="map-key-hint" role="status" aria-live="polite">
-                  {gameState.mobileState.isMobile ? (
-                    <span>
-                      Tap and drag to move | Tap NPCs to talk | Use the bottom
-                      dock for map, chat, and more
-                    </span>
-                  ) : (
-                    <span>
-                      Bottom dock: M map, U create, C help, F feedback, I bag, T
-                      talk — Esc closes
-                    </span>
-                  )}
-                </div>
-              )}
+            {/* Keyboard / mobile tips: use "Tips" in the bottom dock (opens Help). */}
 
             {/* Mobile touch controls - Directional pad for movement */}
             {gameState.mobileState.showTouchControls &&
@@ -3921,7 +3886,9 @@ const GameWorld = React.memo(() => {
             <ArtifactDiscovery
               artifacts={gameState.gameData.artifacts}
               characterPosition={characterPosition}
-              currentMapName={MAPS[currentMapIndex].name}
+              currentMapName={
+                MAPS[currentMapIndex]?.name ?? currentMap?.name ?? "Overworld"
+              }
               onArtifactFound={handleArtifactClick}
               character={character}
             />
@@ -4000,24 +3967,6 @@ const GameWorld = React.memo(() => {
               </div>
             )}
 
-            {/* Debug overlay to show currentSpecialWorld state */}
-            <div
-              className="debug-overlay"
-              style={{
-                position: "fixed",
-                top: "10px",
-                left: "10px",
-                background: "rgba(0,0,0,0.8)",
-                color: "#00ff00",
-                padding: "10px",
-                zIndex: 9999,
-                pointerEvents: "none",
-                fontFamily: "monospace",
-              }}
-            >
-              currentSpecialWorld: "{currentSpecialWorld}"
-            </div>
-
             {/* === SYSTEMS === */}
             <NotificationSystem soundManager={gameState.soundManager} />
           </div>
@@ -4040,6 +3989,9 @@ const GameWorld = React.memo(() => {
               updateUIState({ dockExpanded: expanded })
             }
             onOpenBag={openBagDock}
+            onOpenKeyboardTips={() =>
+              updateUIState({ dockTab: "guide", dockExpanded: true })
+            }
             areaName={
               Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
                 ? MAPS[currentMapIndex].name
@@ -4069,27 +4021,57 @@ const GameWorld = React.memo(() => {
                   achievement={uiState.currentAchievement}
                 />
               ) : (
-                <div className="game-dock-status">
-                  <dl>
-                    <dt>Area</dt>
-                    <dd>
-                      {Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
-                        ? MAPS[currentMapIndex].name
-                        : "Unknown"}
-                    </dd>
-                    <dt>Level</dt>
-                    <dd>{gameState.characterStats.level}</dd>
-                    <dt>Experience</dt>
-                    <dd>
-                      {gameState.characterStats.experience} /{" "}
-                      {calculateXPForLevel(gameState.characterStats.level + 1)}{" "}
-                      to next level
-                    </dd>
-                    <dt>Health</dt>
-                    <dd>
-                      {gameState.playerHealth} / {gameState.maxPlayerHealth}
-                    </dd>
-                  </dl>
+                <div className="game-dock-status-stack">
+                  <DockCombatHud
+                    health={gameState.playerHealth}
+                    maxHealth={gameState.maxPlayerHealth}
+                    rupees={gameState.rupees}
+                    keys={gameState.keys}
+                    equippedItem={gameState.equippedItem}
+                    isDamaged={!!gameState.characterState?.isHit}
+                  />
+                  {!uiState.inDungeon && (
+                    <Minimap
+                      embedded
+                      mapData={MAPS[currentMapIndex]?.data || []}
+                      playerPosition={characterPosition || { x: 64, y: 64 }}
+                      npcs={MAPS[currentMapIndex]?.npcs || []}
+                      portals={MAPS[currentMapIndex]?.specialPortals || []}
+                      tileSize={TILE_SIZE}
+                      exploredTiles={
+                        exploredTiles instanceof Set
+                          ? exploredTiles
+                          : new Set()
+                      }
+                      currentArea={
+                        MAPS[currentMapIndex]?.name || "Overworld"
+                      }
+                    />
+                  )}
+                  <div className="game-dock-status">
+                    <dl>
+                      <dt>Area</dt>
+                      <dd>
+                        {Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
+                          ? MAPS[currentMapIndex].name
+                          : "Unknown"}
+                      </dd>
+                      <dt>Level</dt>
+                      <dd>{gameState.characterStats.level}</dd>
+                      <dt>Experience</dt>
+                      <dd>
+                        {gameState.characterStats.experience} /{" "}
+                        {calculateXPForLevel(
+                          gameState.characterStats.level + 1,
+                        )}{" "}
+                        to next level
+                      </dd>
+                      <dt>Health</dt>
+                      <dd>
+                        {gameState.playerHealth} / {gameState.maxPlayerHealth}
+                      </dd>
+                    </dl>
+                  </div>
                 </div>
               )
             }
