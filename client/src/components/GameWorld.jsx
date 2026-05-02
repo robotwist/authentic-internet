@@ -58,7 +58,12 @@ import ArtifactGameLauncher from "./ArtifactGameLauncher";
 import MultiplayerChat from "./MultiplayerChat";
 import NPCInteraction from "./NPCs/NPCInteraction";
 import Dungeon from "./Dungeons/Dungeon";
-import { LIBRARY_OF_ALEXANDRIA } from "./Dungeons/DungeonData";
+import {
+  getDungeonByDestination,
+  loadDungeonRun,
+  saveDungeonRun,
+  clearDungeonProgress,
+} from "./Dungeons/dungeonRegistry";
 import { getLevelWinConfig } from "../constants/LevelWinConditions";
 import { maybeAwardFunnyXp } from "../utils/funnyXp";
 import HamletFinale from "./MiniGames/HamletFinale";
@@ -356,6 +361,10 @@ const GameWorld = React.memo(() => {
   const gameWorldRef = useRef(null);
   const characterRef = useRef(null);
   const characterControllerRef = useRef(null);
+  /** Last room snapshot for merging key saves with localStorage dungeon progress */
+  const lastDungeonSnapshotRef = useRef({});
+  /** Dedupe auto `portalCollision` while standing on the same dungeon tile */
+  const dungeonStepTileKeyRef = useRef("");
   const hasRestoredSessionRef = useRef(false);
 
   // portalNotificationActive is now handled by NotificationSystem
@@ -926,13 +935,9 @@ const GameWorld = React.memo(() => {
     ],
   );
 
-  const DUNGEON_BY_DESTINATION = {
-    "Library of Alexandria": LIBRARY_OF_ALEXANDRIA,
-  };
-
   const handleEnterDungeon = useCallback(
     (destinationName) => {
-      const dungeon = DUNGEON_BY_DESTINATION[destinationName];
+      const dungeon = getDungeonByDestination(destinationName);
       if (!dungeon) {
         console.warn("Unknown dungeon destination:", destinationName);
         return;
@@ -942,26 +947,65 @@ const GameWorld = React.memo(() => {
       }
       if (portalState.isTransitioning) return;
 
+      const saved = loadDungeonRun(dungeon.id, user?.id);
+      const smallKeys =
+        typeof saved?.smallKeys === "number" ? saved.smallKeys : 0;
+      const hasBossKeySaved = Boolean(saved?.hasBossKey);
+      const roomSlice =
+        saved && saved.version === 1
+          ? {
+              currentRoomId: saved.currentRoomId,
+              defeatedRoomIds: saved.defeatedRoomIds,
+              collectedItemIds: saved.collectedItemIds,
+              unlockedDoorKeys: saved.unlockedDoorKeys,
+              bossDefeated: saved.bossDefeated,
+            }
+          : null;
+
+      const entrance = dungeon.rooms?.entrance;
+      const sx = entrance?.startPosition?.x ?? 1;
+      const sy = entrance?.startPosition?.y ?? 1;
+      const defaultSpawn = { x: sx * TILE_SIZE, y: sy * TILE_SIZE };
+      const spawn =
+        saved?.playerPixel &&
+        typeof saved.playerPixel.x === "number" &&
+        typeof saved.playerPixel.y === "number"
+          ? { x: saved.playerPixel.x, y: saved.playerPixel.y }
+          : defaultSpawn;
+
+      lastDungeonSnapshotRef.current = {
+        currentRoomId:
+          (roomSlice && roomSlice.currentRoomId) || dungeon.rooms.entrance.id,
+        defeatedRoomIds: Array.isArray(roomSlice?.defeatedRoomIds)
+          ? roomSlice.defeatedRoomIds
+          : [],
+        collectedItemIds: Array.isArray(roomSlice?.collectedItemIds)
+          ? roomSlice.collectedItemIds
+          : [],
+        unlockedDoorKeys: Array.isArray(roomSlice?.unlockedDoorKeys)
+          ? roomSlice.unlockedDoorKeys
+          : [],
+        bossDefeated: Boolean(roomSlice?.bossDefeated),
+        playerPixel: { ...spawn },
+      };
+
       if (gameState.soundManager) {
         gameState.soundManager.playSound("portal");
       }
 
       setDungeonState({
         currentDungeon: dungeon,
-        smallKeys: 0,
-        hasBossKey: false,
+        smallKeys,
+        hasBossKey: hasBossKeySaved,
         dungeonEntryPosition: {
           x: characterPosition.x,
           y: characterPosition.y,
           mapIndex: currentMapIndex,
         },
+        activeRunProgress: roomSlice,
       });
       updateUIState({ inDungeon: true });
 
-      const entrance = dungeon.rooms?.entrance;
-      const sx = entrance?.startPosition?.x ?? 1;
-      const sy = entrance?.startPosition?.y ?? 1;
-      const spawn = { x: sx * TILE_SIZE, y: sy * TILE_SIZE };
       setCharacterPosition(spawn);
       if (adjustViewport) {
         adjustViewport(spawn);
@@ -979,6 +1023,26 @@ const GameWorld = React.memo(() => {
       characterPosition.y,
       currentMapIndex,
       adjustViewport,
+      user?.id,
+    ],
+  );
+
+  const handlePersistDungeonProgress = useCallback(
+    (snapshot) => {
+      lastDungeonSnapshotRef.current = snapshot;
+      const dungeonId = gameState.dungeonState?.currentDungeon?.id;
+      if (!dungeonId) return;
+      saveDungeonRun(dungeonId, user?.id, {
+        smallKeys: gameState.dungeonState.smallKeys || 0,
+        hasBossKey: Boolean(gameState.dungeonState.hasBossKey),
+        ...snapshot,
+      });
+    },
+    [
+      gameState.dungeonState?.currentDungeon?.id,
+      gameState.dungeonState.smallKeys,
+      gameState.dungeonState.hasBossKey,
+      user?.id,
     ],
   );
 
@@ -990,6 +1054,7 @@ const GameWorld = React.memo(() => {
       smallKeys: 0,
       hasBossKey: false,
       dungeonEntryPosition: null,
+      activeRunProgress: null,
     });
     updateUIState({ inDungeon: false });
 
@@ -1017,8 +1082,20 @@ const GameWorld = React.memo(() => {
   const handleDungeonItemCollect = useCallback(
     (itemType) => {
       const keys = gameState.dungeonState.smallKeys || 0;
+      const dungeonId = gameState.dungeonState?.currentDungeon?.id;
+      const persistKeys = (nextKeys, nextBossKey) => {
+        if (!dungeonId) return;
+        saveDungeonRun(dungeonId, user?.id, {
+          smallKeys: nextKeys,
+          hasBossKey: nextBossKey,
+          ...lastDungeonSnapshotRef.current,
+        });
+      };
+
       if (itemType === "small_key") {
-        setDungeonState({ smallKeys: keys + 1 });
+        const next = keys + 1;
+        setDungeonState({ smallKeys: next });
+        persistKeys(next, Boolean(gameState.dungeonState.hasBossKey));
         if (gameState.soundManager) {
           gameState.soundManager.playSound("powerup", 0.5);
         }
@@ -1026,16 +1103,26 @@ const GameWorld = React.memo(() => {
       }
       if (itemType === "boss_key") {
         setDungeonState({ hasBossKey: true });
+        persistKeys(keys, true);
         if (gameState.soundManager) {
           gameState.soundManager.playSound("powerup", 0.6);
         }
         return;
       }
       if (itemType === "use_small_key") {
-        setDungeonState({ smallKeys: Math.max(0, keys - 1) });
+        const next = Math.max(0, keys - 1);
+        setDungeonState({ smallKeys: next });
+        persistKeys(next, Boolean(gameState.dungeonState.hasBossKey));
       }
     },
-    [setDungeonState, gameState.dungeonState.smallKeys, gameState.soundManager],
+    [
+      setDungeonState,
+      gameState.dungeonState.smallKeys,
+      gameState.dungeonState.hasBossKey,
+      gameState.dungeonState?.currentDungeon?.id,
+      gameState.soundManager,
+      user?.id,
+    ],
   );
 
   const handleDungeonEnemyDefeat = useCallback(
@@ -1638,10 +1725,17 @@ const GameWorld = React.memo(() => {
 
       // Level 2 win: beating The Librarian in Library of Alexandria
       if (dungeonId === "library_alexandria") {
+        clearDungeonProgress(dungeonId, user?.id);
+        lastDungeonSnapshotRef.current = {};
         handleLevelCompletion("level2");
       }
     },
-    [gameState.soundManager, handleGainExperience, handleLevelCompletion],
+    [
+      gameState.soundManager,
+      handleGainExperience,
+      handleLevelCompletion,
+      user?.id,
+    ],
   );
 
   // Optimized artifact creation
@@ -2498,6 +2592,50 @@ const GameWorld = React.memo(() => {
   useEffect(() => {
     checkPortalCollisions();
   }, [checkPortalCollisions]);
+
+  useEffect(() => {
+    if (!uiState.inDungeon) {
+      dungeonStepTileKeyRef.current = "";
+    }
+  }, [uiState.inDungeon]);
+
+  // Step onto dungeon tile (type 9): dispatch portalCollision so auto-entry matches SPACE
+  useEffect(() => {
+    if (
+      uiState.inDungeon ||
+      portalState.isTransitioning ||
+      !characterPosition
+    ) {
+      return;
+    }
+    const mapData = MAPS[currentMapIndex]?.data;
+    if (!mapData?.length) return;
+    const tileX = Math.floor(characterPosition.x / TILE_SIZE);
+    const tileY = Math.floor(characterPosition.y / TILE_SIZE);
+    if (tileY < 0 || tileY >= mapData.length) return;
+    const row = mapData[tileY];
+    if (!row || tileX < 0 || tileX >= row.length) return;
+    const tileType = row[tileX];
+    if (tileType !== 9) {
+      dungeonStepTileKeyRef.current = "";
+      return;
+    }
+    const stepKey = `${currentMapIndex}:${tileX}:${tileY}`;
+    if (dungeonStepTileKeyRef.current === stepKey) return;
+    dungeonStepTileKeyRef.current = stepKey;
+    window.dispatchEvent(
+      new CustomEvent("portalCollision", {
+        detail: { tileX, tileY, tileType },
+      }),
+    );
+  }, [
+    characterPosition,
+    characterPosition?.x,
+    characterPosition?.y,
+    currentMapIndex,
+    uiState.inDungeon,
+    portalState.isTransitioning,
+  ]);
 
   useEffect(() => {
     // Subscribe to position changes to detect and handle artifact interactions
@@ -3434,6 +3572,8 @@ const GameWorld = React.memo(() => {
                     playerKeys={gameState.dungeonState.smallKeys}
                     hasBossKey={gameState.dungeonState.hasBossKey}
                     characterRef={characterRef}
+                    initialProgress={gameState.dungeonState.activeRunProgress}
+                    onProgressChange={handlePersistDungeonProgress}
                   />
                 ) : (
                   MAPS[currentMapIndex] &&

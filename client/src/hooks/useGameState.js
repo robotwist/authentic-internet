@@ -13,69 +13,69 @@ const INITIAL_LEVEL_COMPLETION = {
 // Action types
 const ACTIONS = {
   // Core game actions
-  SET_CURRENT_MAP_INDEX: 'SET_CURRENT_MAP_INDEX',
-  SET_INVENTORY: 'SET_INVENTORY',
-  SET_CHARACTER_POSITION: 'SET_CHARACTER_POSITION',
-  SET_CHARACTER: 'SET_CHARACTER',
-  SET_CHARACTER_STATE: 'SET_CHARACTER_STATE',
-  SET_VIEWPORT: 'SET_VIEWPORT',
-  SET_EXPLORED_TILES: 'SET_EXPLORED_TILES',
-  SET_FORM_POSITION: 'SET_FORM_POSITION',
+  SET_CURRENT_MAP_INDEX: "SET_CURRENT_MAP_INDEX",
+  SET_INVENTORY: "SET_INVENTORY",
+  SET_CHARACTER_POSITION: "SET_CHARACTER_POSITION",
+  SET_CHARACTER: "SET_CHARACTER",
+  SET_CHARACTER_STATE: "SET_CHARACTER_STATE",
+  SET_VIEWPORT: "SET_VIEWPORT",
+  SET_EXPLORED_TILES: "SET_EXPLORED_TILES",
+  SET_FORM_POSITION: "SET_FORM_POSITION",
 
   // UI state actions
-  UPDATE_UI_STATE: 'UPDATE_UI_STATE',
+  UPDATE_UI_STATE: "UPDATE_UI_STATE",
 
   // Dungeon actions
-  SET_DUNGEON_STATE: 'SET_DUNGEON_STATE',
+  SET_DUNGEON_STATE: "SET_DUNGEON_STATE",
 
   // Game data actions
-  SET_GAME_DATA: 'SET_GAME_DATA',
+  SET_GAME_DATA: "SET_GAME_DATA",
 
   // Portal actions
-  SET_PORTAL_STATE: 'SET_PORTAL_STATE',
+  SET_PORTAL_STATE: "SET_PORTAL_STATE",
 
   // Special world actions
-  SET_CURRENT_SPECIAL_WORLD: 'SET_CURRENT_SPECIAL_WORLD',
-  SET_ACTIVE_NPC: 'SET_ACTIVE_NPC',
-  SET_SOUND_MANAGER: 'SET_SOUND_MANAGER',
-  SET_SELECTED_USER_ARTIFACT: 'SET_SELECTED_USER_ARTIFACT',
-  SET_VISIBLE_ARTIFACT: 'SET_VISIBLE_ARTIFACT',
-  SET_MAP_ZOOM: 'SET_MAP_ZOOM',
-  SET_MAP_OFFSET: 'SET_MAP_OFFSET',
-  SET_IS_LOGGED_IN: 'SET_IS_LOGGED_IN',
+  SET_CURRENT_SPECIAL_WORLD: "SET_CURRENT_SPECIAL_WORLD",
+  SET_ACTIVE_NPC: "SET_ACTIVE_NPC",
+  SET_SOUND_MANAGER: "SET_SOUND_MANAGER",
+  SET_SELECTED_USER_ARTIFACT: "SET_SELECTED_USER_ARTIFACT",
+  SET_VISIBLE_ARTIFACT: "SET_VISIBLE_ARTIFACT",
+  SET_MAP_ZOOM: "SET_MAP_ZOOM",
+  SET_MAP_OFFSET: "SET_MAP_OFFSET",
+  SET_IS_LOGGED_IN: "SET_IS_LOGGED_IN",
 
   // Combat actions
-  SET_PLAYER_HEALTH: 'SET_PLAYER_HEALTH',
-  SET_MAX_PLAYER_HEALTH: 'SET_MAX_PLAYER_HEALTH',
-  SET_RUPEES: 'SET_RUPEES',
-  SET_KEYS: 'SET_KEYS',
-  SET_IS_ATTACKING: 'SET_IS_ATTACKING',
-  SET_SWORD_TYPE: 'SET_SWORD_TYPE',
-  SET_EQUIPPED_ITEM: 'SET_EQUIPPED_ITEM',
-  SET_IS_INVINCIBLE: 'SET_IS_INVINCIBLE',
+  SET_PLAYER_HEALTH: "SET_PLAYER_HEALTH",
+  SET_MAX_PLAYER_HEALTH: "SET_MAX_PLAYER_HEALTH",
+  SET_RUPEES: "SET_RUPEES",
+  SET_KEYS: "SET_KEYS",
+  SET_IS_ATTACKING: "SET_IS_ATTACKING",
+  SET_SWORD_TYPE: "SET_SWORD_TYPE",
+  SET_EQUIPPED_ITEM: "SET_EQUIPPED_ITEM",
+  SET_IS_INVINCIBLE: "SET_IS_INVINCIBLE",
 
   // XP/Leveling actions
-  SET_CHARACTER_STATS: 'SET_CHARACTER_STATS',
-  SET_MOVEMENT_TRANSITION: 'SET_MOVEMENT_TRANSITION',
-  SET_VERTICAL_DIRECTION: 'SET_VERTICAL_DIRECTION',
-  SET_HORIZONTAL_DIRECTION: 'SET_HORIZONTAL_DIRECTION',
+  SET_CHARACTER_STATS: "SET_CHARACTER_STATS",
+  SET_MOVEMENT_TRANSITION: "SET_MOVEMENT_TRANSITION",
+  SET_VERTICAL_DIRECTION: "SET_VERTICAL_DIRECTION",
+  SET_HORIZONTAL_DIRECTION: "SET_HORIZONTAL_DIRECTION",
 
   // Mobile actions
-  SET_MOBILE_STATE: 'SET_MOBILE_STATE',
+  SET_MOBILE_STATE: "SET_MOBILE_STATE",
 
   // Artifact game actions
-  SET_CURRENT_GAME_ARTIFACT: 'SET_CURRENT_GAME_ARTIFACT',
-  SET_SHOW_GAME_LAUNCHER: 'SET_SHOW_GAME_LAUNCHER',
+  SET_CURRENT_GAME_ARTIFACT: "SET_CURRENT_GAME_ARTIFACT",
+  SET_SHOW_GAME_LAUNCHER: "SET_SHOW_GAME_LAUNCHER",
 
   // Quest actions
-  SET_ACTIVE_QUESTS: 'SET_ACTIVE_QUESTS',
-  SET_COMPLETED_QUESTS: 'SET_COMPLETED_QUESTS',
-  SET_QUEST_STATUS_MAP: 'SET_QUEST_STATUS_MAP',
-  SET_QUEST_COMPLETION_CELEBRATION: 'SET_QUEST_COMPLETION_CELEBRATION',
-  SET_SHOW_HAMLET_FINALE: 'SET_SHOW_HAMLET_FINALE',
+  SET_ACTIVE_QUESTS: "SET_ACTIVE_QUESTS",
+  SET_COMPLETED_QUESTS: "SET_COMPLETED_QUESTS",
+  SET_QUEST_STATUS_MAP: "SET_QUEST_STATUS_MAP",
+  SET_QUEST_COMPLETION_CELEBRATION: "SET_QUEST_COMPLETION_CELEBRATION",
+  SET_SHOW_HAMLET_FINALE: "SET_SHOW_HAMLET_FINALE",
 
   // Map transition actions
-  TRANSITION_TO_NEIGHBOR: 'TRANSITION_TO_NEIGHBOR',
+  TRANSITION_TO_NEIGHBOR: "TRANSITION_TO_NEIGHBOR",
 };
 
 // Initial state
@@ -148,6 +148,8 @@ const initialState = {
     smallKeys: 0,
     hasBossKey: false,
     dungeonEntryPosition: null,
+    /** Hydrates <Dungeon /> once per run (from localStorage). Cleared on exit. */
+    activeRunProgress: null,
   },
 
   // Game data state
@@ -241,11 +243,17 @@ function gameStateReducer(state, action) {
     case ACTIONS.UPDATE_UI_STATE:
       return { ...state, uiState: { ...state.uiState, ...action.payload } };
     case ACTIONS.SET_DUNGEON_STATE:
-      return { ...state, dungeonState: { ...state.dungeonState, ...action.payload } };
+      return {
+        ...state,
+        dungeonState: { ...state.dungeonState, ...action.payload },
+      };
     case ACTIONS.SET_GAME_DATA:
       return { ...state, gameData: { ...state.gameData, ...action.payload } };
     case ACTIONS.SET_PORTAL_STATE:
-      return { ...state, portalState: { ...state.portalState, ...action.payload } };
+      return {
+        ...state,
+        portalState: { ...state.portalState, ...action.payload },
+      };
     case ACTIONS.SET_CURRENT_SPECIAL_WORLD:
       return { ...state, currentSpecialWorld: action.payload };
     case ACTIONS.SET_ACTIVE_NPC:
@@ -279,7 +287,10 @@ function gameStateReducer(state, action) {
     case ACTIONS.SET_IS_INVINCIBLE:
       return { ...state, isInvincible: action.payload };
     case ACTIONS.SET_CHARACTER_STATS:
-      return { ...state, characterStats: { ...state.characterStats, ...action.payload } };
+      return {
+        ...state,
+        characterStats: { ...state.characterStats, ...action.payload },
+      };
     case ACTIONS.SET_MOVEMENT_TRANSITION:
       return { ...state, movementTransition: action.payload };
     case ACTIONS.SET_VERTICAL_DIRECTION:
@@ -287,7 +298,10 @@ function gameStateReducer(state, action) {
     case ACTIONS.SET_HORIZONTAL_DIRECTION:
       return { ...state, horizontalDirection: action.payload };
     case ACTIONS.SET_MOBILE_STATE:
-      return { ...state, mobileState: { ...state.mobileState, ...action.payload } };
+      return {
+        ...state,
+        mobileState: { ...state.mobileState, ...action.payload },
+      };
     case ACTIONS.SET_CURRENT_GAME_ARTIFACT:
       return { ...state, currentGameArtifact: action.payload };
     case ACTIONS.SET_SHOW_GAME_LAUNCHER:
@@ -468,7 +482,10 @@ export function useGameState() {
   }, []);
 
   const setQuestCompletionCelebration = useCallback((value) => {
-    dispatch({ type: ACTIONS.SET_QUEST_COMPLETION_CELEBRATION, payload: value });
+    dispatch({
+      type: ACTIONS.SET_QUEST_COMPLETION_CELEBRATION,
+      payload: value,
+    });
   }, []);
 
   const setShowHamletFinale = useCallback((value) => {

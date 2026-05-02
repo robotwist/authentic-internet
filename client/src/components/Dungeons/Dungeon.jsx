@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import PropTypes from "prop-types";
 import "./Dungeon.css";
 import {
@@ -11,6 +17,35 @@ import Enemy from "../Combat/Enemy";
 import Boss from "../Combat/Boss";
 
 const TILE_SIZE = 64; // Same as overworld
+
+function hydrateProgressSets(progress) {
+  if (!progress) {
+    return {
+      defeated: new Set(),
+      collected: new Set(),
+      unlocked: new Set(),
+    };
+  }
+  return {
+    defeated: new Set(
+      Array.isArray(progress.defeatedRoomIds) ? progress.defeatedRoomIds : [],
+    ),
+    collected: new Set(
+      Array.isArray(progress.collectedItemIds) ? progress.collectedItemIds : [],
+    ),
+    unlocked: new Set(
+      Array.isArray(progress.unlockedDoorKeys) ? progress.unlockedDoorKeys : [],
+    ),
+  };
+}
+
+function initialRoomFromProgress(dungeonData, progress) {
+  const id = progress?.currentRoomId;
+  if (id && dungeonData.rooms?.[id]) {
+    return dungeonData.rooms[id];
+  }
+  return dungeonData.rooms.entrance;
+}
 
 /**
  * Dungeon Component
@@ -32,15 +67,67 @@ const Dungeon = ({
   playerKeys,
   hasBossKey,
   characterRef,
+  initialProgress = null,
+  onProgressChange = null,
 }) => {
-  const [currentRoom, setCurrentRoom] = useState(dungeonData.rooms.entrance);
+  const [currentRoom, setCurrentRoom] = useState(() =>
+    initialRoomFromProgress(dungeonData, initialProgress),
+  );
   const [roomEnemies, setRoomEnemies] = useState([]);
-  const [defeatedRooms, setDefeatedRooms] = useState(new Set());
-  const [collectedItems, setCollectedItems] = useState(new Set());
-  const [unlockedDoors, setUnlockedDoors] = useState(new Set());
-  const [bossDefeated, setBossDefeated] = useState(false);
+  const [defeatedRooms, setDefeatedRooms] = useState(() => {
+    const { defeated } = hydrateProgressSets(initialProgress);
+    return defeated;
+  });
+  const [collectedItems, setCollectedItems] = useState(() => {
+    const { collected } = hydrateProgressSets(initialProgress);
+    return collected;
+  });
+  const [unlockedDoors, setUnlockedDoors] = useState(() => {
+    const { unlocked } = hydrateProgressSets(initialProgress);
+    return unlocked;
+  });
+  const [bossDefeated, setBossDefeated] = useState(() =>
+    Boolean(initialProgress?.bossDefeated),
+  );
 
   const dungeonRef = useRef(null);
+
+  const progressFingerprint = useMemo(
+    () =>
+      JSON.stringify({
+        room: currentRoom.id,
+        def: [...defeatedRooms].sort(),
+        col: [...collectedItems].sort(),
+        unk: [...unlockedDoors].sort(),
+        boss: bossDefeated,
+        px: Math.round(playerPosition.x),
+        py: Math.round(playerPosition.y),
+      }),
+    [
+      currentRoom.id,
+      defeatedRooms,
+      collectedItems,
+      unlockedDoors,
+      bossDefeated,
+      playerPosition.x,
+      playerPosition.y,
+    ],
+  );
+
+  useEffect(() => {
+    if (typeof onProgressChange !== "function") return undefined;
+    const t = window.setTimeout(() => {
+      onProgressChange({
+        currentRoomId: currentRoom.id,
+        defeatedRoomIds: [...defeatedRooms],
+        collectedItemIds: [...collectedItems],
+        unlockedDoorKeys: [...unlockedDoors],
+        bossDefeated,
+        playerPixel: { x: playerPosition.x, y: playerPosition.y },
+      });
+    }, 400);
+    return () => window.clearTimeout(t);
+  }, [progressFingerprint, onProgressChange]);
 
   // Initialize current room enemies
   useEffect(() => {
@@ -448,11 +535,15 @@ Dungeon.propTypes = {
   playerKeys: PropTypes.number,
   hasBossKey: PropTypes.bool,
   characterRef: PropTypes.object,
+  initialProgress: PropTypes.object,
+  onProgressChange: PropTypes.func,
 };
 
 Dungeon.defaultProps = {
   playerKeys: 0,
   hasBossKey: false,
+  initialProgress: null,
+  onProgressChange: null,
 };
 
 export default Dungeon;
