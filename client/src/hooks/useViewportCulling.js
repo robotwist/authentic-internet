@@ -4,7 +4,9 @@ import { useMemo } from "react";
  * Custom hook for viewport culling optimization
  * Only returns tiles/entities that are visible in the current viewport
  *
- * @param {Object} viewport - Current viewport position {x, y}
+ * @param {Object|null} scrollOffset - World scroll in pixels {x, y}, same convention as GameWorld
+ *   viewport (top-left of the visible rectangle into the world). Pass `null` to disable culling
+ *   and use the full map (small maps / overlays).
  * @param {number} tileSize - Size of each tile in pixels
  * @param {number} mapRows - Total number of rows in the map
  * @param {number} mapCols - Total number of columns in the map
@@ -12,39 +14,56 @@ import { useMemo } from "react";
  * @returns {Object} Visible tile range {startX, endX, startY, endY, visibleTiles}
  */
 export function useViewportCulling(
-  viewport,
+  scrollOffset,
   tileSize = 64,
   mapRows = 40,
   mapCols = 40,
   bufferTiles = 2,
 ) {
   const visibleRange = useMemo(() => {
-    // Get window dimensions
+    if (scrollOffset == null) {
+      const visibleTiles = mapRows * mapCols;
+      return {
+        startX: 0,
+        endX: mapCols,
+        startY: 0,
+        endY: mapRows,
+        visibleTiles,
+        totalTiles: visibleTiles,
+        cullingRatio: "100.0",
+      };
+    }
+
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    // Calculate which tiles are visible based on viewport position
-    // viewport.x and viewport.y are negative when scrolled, so we need absolute values
-    const startX = Math.max(
-      0,
-      Math.floor(-viewport.x / tileSize) - bufferTiles,
-    );
-    const startY = Math.max(
-      0,
-      Math.floor(-viewport.y / tileSize) - bufferTiles,
-    );
+    const sx = scrollOffset.x ?? 0;
+    const sy = scrollOffset.y ?? 0;
 
-    // Calculate end positions with buffer
-    const tilesInViewWidth = Math.ceil(viewportWidth / tileSize);
-    const tilesInViewHeight = Math.ceil(viewportHeight / tileSize);
+    const leftTile = Math.floor(sx / tileSize);
+    const topTile = Math.floor(sy / tileSize);
+    const rightTile = Math.ceil((sx + viewportWidth) / tileSize);
+    const bottomTile = Math.ceil((sy + viewportHeight) / tileSize);
 
-    const endX = Math.min(mapCols, startX + tilesInViewWidth + bufferTiles * 2);
-    const endY = Math.min(
-      mapRows,
-      startY + tilesInViewHeight + bufferTiles * 2,
-    );
+    const startX = Math.max(0, leftTile - bufferTiles);
+    const startY = Math.max(0, topTile - bufferTiles);
+    let endX = Math.min(mapCols, rightTile + bufferTiles);
+    let endY = Math.min(mapRows, bottomTile + bufferTiles);
 
-    // Calculate total visible tiles for performance monitoring
+    // Camera scroll larger than map (e.g. after changing areas) → invalid range; render whole map
+    if (endX <= startX || endY <= startY) {
+      const visibleTiles = mapRows * mapCols;
+      return {
+        startX: 0,
+        endX: mapCols,
+        startY: 0,
+        endY: mapRows,
+        visibleTiles,
+        totalTiles: visibleTiles,
+        cullingRatio: "100.0",
+      };
+    }
+
     const visibleTiles = (endX - startX) * (endY - startY);
 
     return {
@@ -56,7 +75,7 @@ export function useViewportCulling(
       totalTiles: mapRows * mapCols,
       cullingRatio: ((visibleTiles / (mapRows * mapCols)) * 100).toFixed(1),
     };
-  }, [viewport, tileSize, mapRows, mapCols, bufferTiles]);
+  }, [scrollOffset, tileSize, mapRows, mapCols, bufferTiles]);
 
   return visibleRange;
 }

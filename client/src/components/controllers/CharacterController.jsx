@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useState } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { useCharacterMovement } from "../CharacterMovement";
 import { TILE_SIZE } from "../Constants";
 
@@ -20,6 +20,8 @@ const CharacterController = React.forwardRef(({
   onPositionChange,
   characterState,
   transitionToNeighbor,
+  /** Authoritative world position from GameWorld — keeps movement ref in sync after transitions / saves */
+  characterPosition: worldCharacterPosition,
 }, ref) => {
   // Use refs for position and state to avoid re-renders
   const characterPositionRef = useRef(INITIAL_CHARACTER_POSITION);
@@ -39,23 +41,14 @@ const CharacterController = React.forwardRef(({
   });
 
   const characterRef = useRef(null);
-  const lastPositionChangeTime = useRef(Date.now());
 
-  // Throttled position change callback - only call when movement stops or significant events
-  const throttledPositionChange = useCallback((position, reason = 'movement') => {
-    const now = Date.now();
-    const timeSinceLastChange = now - lastPositionChangeTime.current;
-
-    // Always call for portal events, throttle position updates
-    if (reason === 'portal' || timeSinceLastChange > 100) { // 100ms throttle
-      lastPositionChangeTime.current = now;
-      if (onPositionChange) {
-        onPositionChange(position, reason);
-      }
+  const notifyWorldPosition = useCallback((position, reason = "movement") => {
+    if (onPositionChange) {
+      onPositionChange(position, reason);
     }
   }, [onPositionChange]);
 
-  // Handle character move - updates ref and calls throttled callback
+  // Handle character move - updates ref and notifies GameWorld (same source of truth as React state)
   const handleCharacterMove = useCallback((newPosition, targetMapIndex) => {
     characterPositionRef.current = newPosition;
 
@@ -71,27 +64,58 @@ const CharacterController = React.forwardRef(({
       setCurrentMapIndex(targetMapIndex);
     }
 
-    // Call throttled position change
-    throttledPositionChange(newPosition, 'movement');
-  }, [currentMapIndex, setCurrentMapIndex, throttledPositionChange]);
+    notifyWorldPosition(newPosition, "movement");
+  }, [currentMapIndex, setCurrentMapIndex, notifyWorldPosition]);
+
+  // Keep local movement ref aligned when GameWorld sets position (neighbor transition, save load, teleport)
+  useEffect(() => {
+    if (
+      !worldCharacterPosition ||
+      typeof worldCharacterPosition.x !== "number" ||
+      typeof worldCharacterPosition.y !== "number"
+    ) {
+      return;
+    }
+    const cur = characterPositionRef.current;
+    if (
+      cur.x === worldCharacterPosition.x &&
+      cur.y === worldCharacterPosition.y
+    ) {
+      return;
+    }
+    characterPositionRef.current = {
+      x: worldCharacterPosition.x,
+      y: worldCharacterPosition.y,
+    };
+    characterStateRef.current.style = {
+      ...characterStateRef.current.style,
+      left: worldCharacterPosition.x,
+      top: worldCharacterPosition.y,
+    };
+    if (adjustViewport && typeof adjustViewport === "function") {
+      adjustViewport(worldCharacterPosition);
+    }
+  }, [
+    worldCharacterPosition?.x,
+    worldCharacterPosition?.y,
+    adjustViewport,
+  ]);
 
   // Portal collision handler
   useEffect(() => {
-    const handlePortalCollision = (event) => {
-      const { tileX, tileY, tileType } = event.detail;
-      // Call position change for portal events
-      throttledPositionChange(characterPositionRef.current, 'portal');
+    const handlePortalCollision = () => {
+      notifyWorldPosition(characterPositionRef.current, "portal");
     };
 
     window.addEventListener("portalCollision", handlePortalCollision);
     return () => {
       window.removeEventListener("portalCollision", handlePortalCollision);
     };
-  }, [throttledPositionChange]);
+  }, [notifyWorldPosition]);
 
   // Character movement hook
   const characterMovement = useCharacterMovement(
-    characterPositionRef.current,
+    characterPositionRef,
     characterState,
     handleCharacterMove,
     currentMapIndex,
@@ -106,13 +130,12 @@ const CharacterController = React.forwardRef(({
     transitionToNeighbor,
   );
 
-  // Update character style and viewport when position changes
+  // Initial viewport lock once layout exists (movement + sync effect handle updates afterward)
   useEffect(() => {
-    // Adjust viewport to follow character - ensure it's a function before calling
-    if (adjustViewport && typeof adjustViewport === 'function') {
+    if (adjustViewport && typeof adjustViewport === "function") {
       adjustViewport(characterPositionRef.current);
     }
-  }, [adjustViewport]);
+  }, [adjustViewport, currentMapIndex]);
 
   // Update movement state based on characterMovement
   useEffect(() => {

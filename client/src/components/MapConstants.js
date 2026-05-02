@@ -40,6 +40,52 @@ export const isValidMapSize = (mapData) => {
   );
 };
 
+const MAX_TILE_ID = 18;
+
+/**
+ * Iterable audit of a map grid: dimensions, per-tile-id counts, invalid cells.
+ * Use in dev/tests to catch bad map data and mismatch with {@link isWalkable}.
+ */
+export function auditMapGrid(mapData, mapName = "") {
+  const result = {
+    name: mapName,
+    ok: true,
+    rows: 0,
+    cols: 0,
+    invalidCells: [],
+    tileCounts: {},
+  };
+
+  if (!Array.isArray(mapData) || mapData.length === 0) {
+    result.ok = false;
+    result.invalidCells.push("empty or not an array");
+    return result;
+  }
+
+  result.rows = mapData.length;
+  result.cols = mapData[0]?.length ?? 0;
+  const width = result.cols;
+
+  for (let y = 0; y < mapData.length; y++) {
+    const row = mapData[y];
+    if (!Array.isArray(row) || row.length !== width) {
+      result.ok = false;
+      result.invalidCells.push(`row ${y}: width ${row?.length} !== ${width}`);
+      continue;
+    }
+    for (let x = 0; x < width; x++) {
+      const t = row[x];
+      result.tileCounts[t] = (result.tileCounts[t] || 0) + 1;
+      if (typeof t !== "number" || t < 0 || t > MAX_TILE_ID) {
+        result.ok = false;
+        result.invalidCells.push(`(${x},${y})=${String(t)}`);
+      }
+    }
+  }
+
+  return result;
+}
+
 // Map helper functions
 export const isWalkable = (x, y, mapData) => {
   if (!mapData || !Array.isArray(mapData)) return false;

@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { TILE_SIZE, MAP_COLS, MAP_ROWS, MAPS, isWalkable } from "./Constants";
+import { TILE_SIZE, MAPS, isWalkable } from "./Constants";
 import SoundManager from "./utils/SoundManager";
 
 // Movement step size - half tile per button press for precise grid movement
 const MOVEMENT_STEP_SIZE = TILE_SIZE / 2; // 32px - half tile per move
 
 const useCharacterMovement = (
-  characterPosition,
+  characterPositionRef,
   characterState,
   handleCharacterMove,
   currentMapIndex,
@@ -74,6 +74,7 @@ const useCharacterMovement = (
 
   // Discrete movement system - move exactly one step per key press
   const moveCharacter = useCallback((direction) => {
+    const characterPosition = characterPositionRef.current;
     const currentMapData = MAPS[currentMapIndex]?.data;
     if (!currentMapData) return characterPosition;
 
@@ -179,7 +180,14 @@ const useCharacterMovement = (
     }
 
     return newPosition;
-  }, [characterPosition, currentMapIndex, setCurrentMapIndex, movementConstants.stepSize, triggerBump]);
+  }, [
+    characterPositionRef,
+    currentMapIndex,
+    setCurrentMapIndex,
+    movementConstants.stepSize,
+    triggerBump,
+    transitionToNeighbor,
+  ]);
 
   // Discrete movement handling - one move per key press
   const handleDiscreteMove = useCallback((direction) => {
@@ -189,6 +197,7 @@ const useCharacterMovement = (
     lastMoveTime.current = now;
 
     const newPosition = moveCharacter(direction);
+    const characterPosition = characterPositionRef.current;
 
     // Only update if position actually changed
     if (newPosition.x !== characterPosition.x || newPosition.y !== characterPosition.y) {
@@ -198,13 +207,14 @@ const useCharacterMovement = (
       if (adjustViewport && typeof adjustViewport === 'function') {
         adjustViewport(newPosition);
       }
-
-      // Play movement sound
-      if (soundManager) {
-        soundManager.playSound("step", 0.2);
-      }
     }
-  }, [moveCharacter, characterPosition, handleCharacterMove, currentMapIndex, adjustViewport, soundManager]);
+  }, [
+    moveCharacter,
+    characterPositionRef,
+    handleCharacterMove,
+    currentMapIndex,
+    adjustViewport,
+  ]);
 
   // Handle key input for discrete movement
   const handleMove = useCallback((direction, pressed) => {
@@ -278,7 +288,10 @@ const useCharacterMovement = (
         case "F":
           processedKeys.current.add(event.key);
           setShowForm(true);
-          setFormPosition({ x: characterPosition.x, y: characterPosition.y });
+          setFormPosition({
+            x: characterPositionRef.current.x,
+            y: characterPositionRef.current.y,
+          });
           break;
       }
     };
@@ -298,7 +311,7 @@ const useCharacterMovement = (
     handleMove,
     visibleArtifact,
     handleArtifactPickup,
-    characterPosition,
+    characterPositionRef,
     setShowForm,
     setFormPosition,
     setShowInventory,

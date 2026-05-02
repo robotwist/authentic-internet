@@ -45,7 +45,6 @@ class SoundManager {
         ["discovery", "/assets/sounds/artifact-pickup.mp3"],
         ["portal_standard", "/assets/sounds/portal.mp3"],
         ["typing", "/assets/sounds/page-turn.mp3"],
-        ["step", "/assets/sounds/page-turn.mp3"],
       ];
 
       // Load sounds with fallback strategy

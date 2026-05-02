@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { TILE_SIZE, MAPS } from "../components/Constants";
+import { TILE_SIZE, MAPS, getMapIndexByKey } from "../components/Constants";
 
 export const usePortalCollisions = ({
   characterPosition,
@@ -30,9 +30,7 @@ export const usePortalCollisions = ({
       // Handle different maps with different portal logic
       if (currentMapName === "Overworld") {
         // Transition to Overworld 2
-        const destinationIndex = MAPS.findIndex(
-          (map) => map.name === "Overworld 2",
-        );
+        const destinationIndex = getMapIndexByKey("Overworld 2");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition({ x: 64, y: 64 });
@@ -53,9 +51,7 @@ export const usePortalCollisions = ({
         }
       } else if (currentMapName === "Overworld 2") {
         // Transition to Overworld 3
-        const destinationIndex = MAPS.findIndex(
-          (map) => map.name === "Overworld 3",
-        );
+        const destinationIndex = getMapIndexByKey("Overworld 3");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition({ x: 64, y: 64 });
@@ -76,9 +72,7 @@ export const usePortalCollisions = ({
         }
       } else if (currentMapName === "Overworld 3") {
         // Transition to Desert 1
-        const destinationIndex = MAPS.findIndex(
-          (map) => map.name === "Desert 1",
-        );
+        const destinationIndex = getMapIndexByKey("Desert 1");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition({ x: 64, y: 64 });
@@ -99,9 +93,7 @@ export const usePortalCollisions = ({
         }
       } else if (currentMapName === "Desert 1") {
         // Transition to Desert 2
-        const destinationIndex = MAPS.findIndex(
-          (map) => map.name === "Desert 2",
-        );
+        const destinationIndex = getMapIndexByKey("Desert 2");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition({ x: 64, y: 64 });
@@ -122,9 +114,7 @@ export const usePortalCollisions = ({
         }
       } else if (currentMapName === "Desert 2") {
         // Transition to Desert 3
-        const destinationIndex = MAPS.findIndex(
-          (map) => map.name === "Desert 3",
-        );
+        const destinationIndex = getMapIndexByKey("Desert 3");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition({ x: 64, y: 64 });
@@ -145,9 +135,7 @@ export const usePortalCollisions = ({
         }
       } else if (currentMapName === "Desert 3") {
         // Transition to Dungeon Level 1
-        const destinationIndex = MAPS.findIndex(
-          (map) => map.name === "Dungeon Level 1",
-        );
+        const destinationIndex = getMapIndexByKey("Dungeon Level 1");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition({ x: 64, y: 64 });
@@ -168,9 +156,7 @@ export const usePortalCollisions = ({
         }
       } else if (currentMapName === "Dungeon Level 1") {
         // Transition to Dungeon Level 2
-        const destinationIndex = MAPS.findIndex(
-          (map) => map.name === "Dungeon Level 2",
-        );
+        const destinationIndex = getMapIndexByKey("Dungeon Level 2");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition({ x: 64, y: 64 });
@@ -191,9 +177,7 @@ export const usePortalCollisions = ({
         }
       } else if (currentMapName === "Dungeon Level 2") {
         // Transition to Dungeon Level 3
-        const destinationIndex = MAPS.findIndex(
-          (map) => map.name === "Dungeon Level 3",
-        );
+        const destinationIndex = getMapIndexByKey("Dungeon Level 3");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition({ x: 64, y: 64 });
@@ -214,9 +198,7 @@ export const usePortalCollisions = ({
         }
       } else if (currentMapName === "Dungeon Level 3") {
         // Transition to Yosemite
-        const destinationIndex = MAPS.findIndex(
-          (map) => map.name === "Yosemite",
-        );
+        const destinationIndex = getMapIndexByKey("Yosemite");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition({ x: 64, y: 64 });
@@ -245,9 +227,7 @@ export const usePortalCollisions = ({
 
         const actionFn = () => {
           // Find Overworld 3 map index
-          const destinationIndex = MAPS.findIndex(
-            (map) => map.name === "Overworld 3",
-          );
+          const destinationIndex = getMapIndexByKey("Overworld 3");
           if (destinationIndex !== -1) {
             // Change map to Overworld 3
             setCurrentMapIndex(destinationIndex);

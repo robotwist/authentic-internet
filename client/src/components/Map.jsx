@@ -25,6 +25,8 @@ const Map = ({
   onZoomChange,
   mapName = "",
   questStatusMap = new globalThis.Map(),
+  /** Camera scroll (GameWorld `viewport`) — when set, tile culling follows the player. Omit for full-map render (e.g. static previews). */
+  scrollViewport = undefined,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -162,8 +164,17 @@ const Map = ({
   // Calculate viewport culling info early - MUST be before any conditional returns (Rules of Hooks)
   const mapRows = mapData?.length || 0;
   const mapCols = mapData?.[0]?.length || 0;
+
+  const scrollForCulling = useMemo(() => {
+    if (scrollViewport === undefined) return null;
+    return {
+      x: (scrollViewport?.x ?? 0) - (mapOffset?.x ?? 0),
+      y: (scrollViewport?.y ?? 0) - (mapOffset?.y ?? 0),
+    };
+  }, [scrollViewport, mapOffset]);
+
   const visibleRange = useViewportCulling(
-    mapOffset,
+    scrollForCulling,
     TILE_SIZE,
     mapRows,
     mapCols,
@@ -370,12 +381,13 @@ const Map = ({
             const pos = artifact.location || { x: artifact.x, y: artifact.y };
             return isEntityVisible(pos, visibleRange);
           })
-          .map((artifact) => {
+          .map((artifact, artifactIndex) => {
             // Support both unified model location and legacy x/y coordinates
+            const pos = artifact.location || { x: artifact.x, y: artifact.y };
             const artifactKey =
               artifact.id ||
               artifact._id ||
-              `artifact-${artifact.name || ""}-${artifact.location?.x || artifact.x || 0}-${artifact.location?.y || artifact.y || 0}-${Math.random().toString(36).substr(2, 5)}`;
+              `${mapName || "map"}:${artifact.name ?? ""}:${pos?.x ?? artifact.x ?? 0}:${pos?.y ?? artifact.y ?? 0}:${artifactIndex}`;
 
             return (
               <Artifact
@@ -430,6 +442,10 @@ Map.propTypes = {
   onZoomChange: PropTypes.func,
   mapName: PropTypes.string,
   questStatusMap: PropTypes.instanceOf(globalThis.Map),
+  scrollViewport: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+  }),
 };
 
 export default Map;
