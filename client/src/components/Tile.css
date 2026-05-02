@@ -101,32 +101,6 @@
   }
 }
 
-/* Add animated text labels for important portals */
-.tile.portal.yosemite-portal::before {
-  content: 'YOSEMITE';
-  color: white;
-  font-size: 9px;
-  font-weight: bold;
-  text-align: center;
-  top: -25px;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  width: auto;
-  height: auto;
-  background: none;
-  transform: translateX(-50%);
-  animation: portalLabelPulse 2s infinite;
-  z-index: 30;
-  text-shadow: 0 0 4px #000, 0 0 8px rgba(186, 85, 211, 0.8);
-}
-
-@keyframes portalLabelPulse {
-  0% { opacity: 0.7; transform: translateX(-50%) scale(0.9); }
-  50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
-  100% { opacity: 0.7; transform: translateX(-50%) scale(0.9); }
-}
-
 /* Special styling for level portals */
 .tile.portal[data-level="1"] {
   box-shadow: 0 0 25px 12px rgba(255, 215, 0, 0.7); /* Gold glow for level 1 portals */
@@ -430,25 +404,6 @@
   overflow: visible;
 }
 
-.tile.terminal-portal::before {
-  content: 'TERMINAL';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #1a991a;
-  color: white;
-  font-size: 9px;
-  font-weight: bold;
-  padding: 2px 5px;
-  border-radius: 3px;
-  white-space: nowrap;
-  z-index: 30;
-  pointer-events: none;
-  opacity: 0.9;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
 .tile.shooter-portal {
   background-color: #ff3333;
   animation: shooterPortalPulse 2s infinite;
@@ -459,25 +414,6 @@
   overflow: visible;
 }
 
-.tile.shooter-portal::before {
-  content: 'SHOOTER';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #cc1a1a;
-  color: white;
-  font-size: 9px;
-  font-weight: bold;
-  padding: 2px 5px;
-  border-radius: 3px;
-  white-space: nowrap;
-  z-index: 30;
-  pointer-events: none;
-  opacity: 0.9;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
 .tile.text-portal {
   background-color: #3333ff;
   animation: textPortalPulse 2s infinite;
@@ -486,25 +422,6 @@
   z-index: 25;
   position: relative;
   overflow: visible;
-}
-
-.tile.text-portal::before {
-  content: 'TEXT ADVENTURE';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #1a1acc;
-  color: white;
-  font-size: 9px;
-  font-weight: bold;
-  padding: 2px 5px;
-  border-radius: 3px;
-  white-space: nowrap;
-  z-index: 30;
-  pointer-events: none;
-  opacity: 0.9;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 @keyframes terminalPortalPulse {
@@ -550,31 +467,6 @@
   overflow: visible;
 }
 
-.tile.standard-portal::before {
-  content: 'PORTAL';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #773388;
-  color: white;
-  font-size: 9px;
-  font-weight: bold;
-  padding: 2px 5px;
-  border-radius: 3px;
-  white-space: nowrap;
-  z-index: 30;
-  pointer-events: none;
-  opacity: 0.9;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-/* Special label for portal back to Overworld 3 */
-.tile.standard-portal.portal-to-overworld3::before {
-  content: 'OVERWORLD 3';
-  background-color: #1a1acc;
-}
-
 /* ============================================
    DUNGEON PORTAL (Tile Type 9)
    ============================================ */
@@ -591,28 +483,6 @@
     rgba(0, 0, 0, 0.8) 0%, 
     rgba(139, 69, 19, 0.6) 50%, 
     rgba(139, 69, 19, 1) 100%);
-}
-
-.tile.dungeon-portal::before {
-  content: '🏰 LIBRARY';
-  position: absolute;
-  top: -25px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(139, 69, 19, 0.95);
-  color: #FFD700; /* Golden text */
-  font-size: 9px;
-  font-weight: bold;
-  padding: 3px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  z-index: 30;
-  pointer-events: none;
-  opacity: 1;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  border: 1px solid #FFD700;
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-  animation: dungeonLabelGlow 2s steps(4) infinite;
 }
 
 /* Inner portal effect - dark swirling vortex */
@@ -664,17 +534,6 @@
   100% {
     transform: rotate(360deg) scale(1);
     filter: brightness(0.8);
-  }
-}
-
-@keyframes dungeonLabelGlow {
-  0%, 100% { 
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-    text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-  }
-  50% { 
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
   }
 }
 
