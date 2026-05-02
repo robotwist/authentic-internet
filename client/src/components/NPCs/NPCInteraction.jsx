@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import "./NPCInteraction.css";
 
-const NPCInteraction = ({ npc, onClose, context = {} }) => {
+const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
   const { user } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -251,8 +251,20 @@ const NPCInteraction = ({ npc, onClose, context = {} }) => {
   };
 
   return (
-    <div className="npc-interaction-overlay">
-      <div className="npc-interaction-container">
+    <div
+      className={
+        embedded
+          ? "npc-interaction-docked"
+          : "npc-interaction-overlay"
+      }
+    >
+      <div
+        className={
+          embedded
+            ? "npc-interaction-container npc-interaction-container--embedded"
+            : "npc-interaction-container"
+        }
+      >
         {/* Header */}
         <div className="npc-header">
           <div className="npc-info">

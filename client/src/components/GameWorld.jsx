@@ -1,6 +1,7 @@
 import React, {
   useState,
   useEffect,
+  useLayoutEffect,
   useRef,
   useCallback,
   useMemo,
@@ -23,13 +24,19 @@ import WorldMap from "./WorldMap";
 import FeedbackForm from "./FeedbackForm";
 import CharacterController from "./controllers/CharacterController";
 import GameHUD from "./UI/GameHUD";
+import GameDock from "./UI/GameDock";
 import { getPowerDefinition } from "../constants/Powers";
 import ControlsGuide from "./UI/ControlsGuide";
 import TouchControls from "./TouchControls";
 import Minimap from "./UI/Minimap";
 import CombatManager from "./Combat/CombatManager";
 import { TILE_SIZE, MAP_COLS, MAP_ROWS } from "./Constants";
-import { MAPS } from "./GameData";
+import {
+  MAPS,
+  getMapIndexByKey,
+  loadRemainingMaps,
+  prefetchRemainingMaps,
+} from "./GameData";
 import "./GameWorld.css";
 import "./Character.css";
 import "./Artifact.css";
@@ -84,8 +91,7 @@ const INITIAL_LEVEL_COMPLETION = {
 };
 
 const GameWorld = React.memo(() => {
-  // Initialization guard to prevent render-order issues
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [mapsReady, setMapsReady] = useState(false);
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
   const [otherPlayers, setOtherPlayers] = useState([]);
   const [artifactsLoading, setArtifactsLoading] = useState(true);
@@ -138,6 +144,44 @@ const GameWorld = React.memo(() => {
     transitionToNeighbor: originalTransitionToNeighbor,
   } = gameState;
 
+  const openBagDock = useCallback(() => {
+    updateUIState({ showInventory: true, dockExpanded: true, dockTab: "bag" });
+  }, [updateUIState]);
+
+  const openDockTab = useCallback(
+    (tab) => {
+      if (tab === "bag") {
+        updateUIState({
+          dockExpanded: true,
+          dockTab: tab,
+          showInventory: true,
+        });
+      } else {
+        updateUIState({ dockExpanded: true, dockTab: tab });
+      }
+    },
+    [updateUIState],
+  );
+
+  const dismissDockPanel = useCallback(() => {
+    updateUIState({ dockTab: "status", dockExpanded: false });
+  }, [updateUIState]);
+
+  const setInventoryDockVisible = useCallback(
+    (show) => {
+      if (show) {
+        updateUIState({
+          showInventory: true,
+          dockExpanded: true,
+          dockTab: "bag",
+        });
+      } else {
+        updateUIState({ showInventory: false });
+      }
+    },
+    [updateUIState],
+  );
+
   // Override transitionToNeighbor to use our local state
   const transitionToNeighbor = useCallback((direction) => {
     setPendingTransition({ direction });
@@ -158,7 +202,14 @@ const GameWorld = React.memo(() => {
   // Context hooks
   // State to track pending map transitions
   const [pendingTransition, setPendingTransition] = useState(null);
-  const [transitionDirection, setTransitionDirection] = useState(null);
+  const [mapSchemaRevision, setMapSchemaRevision] = useState(0);
+  useEffect(() => {
+    if (!import.meta.env.DEV) return undefined;
+    const onMapsUpdated = () => setMapSchemaRevision((n) => n + 1);
+    window.addEventListener("vite:maps-updated", onMapsUpdated);
+    return () =>
+      window.removeEventListener("vite:maps-updated", onMapsUpdated);
+  }, []);
 
   // Show world announcement when transitioning to new area
   const showWorldAnnouncement = useCallback((worldName) => {
@@ -191,7 +242,7 @@ const GameWorld = React.memo(() => {
     }, 3000);
   }, []);
 
-  // Handle map transitions to neighbors
+  // Handle map transitions to neighbors — instant swap (slide animation moved only the map, not the player)
   useEffect(() => {
     if (!pendingTransition) return;
 
@@ -199,37 +250,27 @@ const GameWorld = React.memo(() => {
     const currentMap = MAPS[currentMapIndex];
     if (!currentMap?.neighbors) {
       setPendingTransition(null);
-      setTransitionDirection(null);
       return;
     }
 
     const neighborId = currentMap.neighbors[direction];
     if (!neighborId) {
       setPendingTransition(null);
-      setTransitionDirection(null);
       return;
     }
 
-    // Find the neighbor map index
-    const neighborIndex = MAPS.findIndex(map => map.id === neighborId || map.name === neighborId);
+    const neighborIndex = getMapIndexByKey(neighborId);
     if (neighborIndex === -1) {
       setPendingTransition(null);
-      setTransitionDirection(null);
       return;
     }
 
     const neighborMap = MAPS[neighborIndex];
     if (!neighborMap?.data) {
       setPendingTransition(null);
-      setTransitionDirection(null);
       return;
     }
 
-    // Set transitioning state and direction for CSS animation
-    updateUIState({ isTransitioning: true });
-    setTransitionDirection(direction);
-
-    // Calculate spawn position on the neighbor map based on direction
     let spawnX = characterPosition.x;
     let spawnY = characterPosition.y;
 
@@ -237,46 +278,37 @@ const GameWorld = React.memo(() => {
     const neighborMapHeight = neighborMap.data.length * TILE_SIZE;
 
     switch (direction) {
-      case 'left':
-        // Coming from right edge, spawn on left edge
-        spawnX = TILE_SIZE; // Small offset from edge
+      case "left":
+        spawnX = TILE_SIZE;
         break;
-      case 'right':
-        // Coming from left edge, spawn on right edge
-        spawnX = neighborMapWidth - 2 * TILE_SIZE; // Small offset from edge
+      case "right":
+        spawnX = neighborMapWidth - 2 * TILE_SIZE;
         break;
-      case 'up':
-        // Coming from bottom edge, spawn on top edge
-        spawnY = TILE_SIZE; // Small offset from edge
+      case "up":
+        spawnY = TILE_SIZE;
         break;
-      case 'down':
-        // Coming from top edge, spawn on bottom edge
-        spawnY = neighborMapHeight - 2 * TILE_SIZE; // Small offset from edge
+      case "down":
+        spawnY = neighborMapHeight - 2 * TILE_SIZE;
         break;
     }
 
-    // Ensure spawn position is within bounds and walkable
     spawnX = Math.max(TILE_SIZE, Math.min(spawnX, neighborMapWidth - TILE_SIZE));
     spawnY = Math.max(TILE_SIZE, Math.min(spawnY, neighborMapHeight - TILE_SIZE));
 
-    // Wait for animation to start, then change the map
-    setTimeout(() => {
-      // Transition to the neighbor map
-      setCurrentMapIndex(neighborIndex);
-      setCharacterPosition({ x: spawnX, y: spawnY });
-
-      // Show transition effect or announcement
-      showWorldAnnouncement(neighborMap.name || neighborId);
-
-      // Wait for animation to complete, then reset transitioning state
-      setTimeout(() => {
-        updateUIState({ isTransitioning: false });
-        setPendingTransition(null);
-        setTransitionDirection(null);
-      }, 250); // Half of the 500ms animation duration
-    }, 250); // Start map change halfway through animation
-
-  }, [pendingTransition, currentMapIndex, characterPosition, setCurrentMapIndex, setCharacterPosition, showWorldAnnouncement, updateUIState]);
+    setCurrentMapIndex(neighborIndex);
+    setCharacterPosition({ x: spawnX, y: spawnY });
+    adjustViewport({ x: spawnX, y: spawnY });
+    showWorldAnnouncement(neighborMap.name || neighborId);
+    setPendingTransition(null);
+  }, [
+    pendingTransition,
+    currentMapIndex,
+    characterPosition,
+    setCurrentMapIndex,
+    setCharacterPosition,
+    showWorldAnnouncement,
+    adjustViewport,
+  ]);
 
   const { user } = useAuth();
   const {
@@ -650,25 +682,49 @@ const GameWorld = React.memo(() => {
 
       // Get map dimensions
       const currentMapData = MAPS[gameState.currentMapIndex];
-      if (currentMapData && currentMapData.data) {
-        const mapWidth = currentMapData.data[0]?.length * TILE_SIZE || 800;
-        const mapHeight = currentMapData.data.length * TILE_SIZE || 600;
-
-        // Clamp viewport to map boundaries
-        const clampedX = Math.min(
-          newViewportX,
-          Math.max(0, mapWidth - viewportWidth),
-        );
-        const clampedY = Math.min(
-          newViewportY,
-          Math.max(0, mapHeight - viewportHeight),
-        );
-
-        setViewport({ x: clampedX, y: clampedY });
+      if (!currentMapData?.data) {
+        setViewport({ x: 0, y: 0 });
+        return;
       }
+
+      const mapWidth = currentMapData.data[0]?.length * TILE_SIZE || 800;
+      const mapHeight = currentMapData.data.length * TILE_SIZE || 600;
+
+      // Clamp viewport to map boundaries
+      const clampedX = Math.min(
+        newViewportX,
+        Math.max(0, mapWidth - viewportWidth),
+      );
+      const clampedY = Math.min(
+        newViewportY,
+        Math.max(0, mapHeight - viewportHeight),
+      );
+
+      setViewport({ x: clampedX, y: clampedY });
     },
     [gameState.currentMapIndex],
   );
+
+  // After switching maps, camera scroll can still be from the previous (larger or scrolled) area — clamp once
+  useEffect(() => {
+    const map = MAPS[currentMapIndex];
+    if (!map?.data?.[0]?.length) return;
+
+    const mapWidth = map.data[0].length * TILE_SIZE;
+    const mapHeight = map.data.length * TILE_SIZE;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const maxX = Math.max(0, mapWidth - vw);
+    const maxY = Math.max(0, mapHeight - vh);
+
+    const next = {
+      x: Math.min(Math.max(0, viewport.x), maxX),
+      y: Math.min(Math.max(0, viewport.y), maxY),
+    };
+    if (next.x !== viewport.x || next.y !== viewport.y) {
+      setViewport(next);
+    }
+  }, [currentMapIndex, viewport.x, viewport.y, setViewport]);
 
   // updateNotifications is now handled by NotificationSystem
 
@@ -762,9 +818,7 @@ const GameWorld = React.memo(() => {
           if (isSpecial) {
             setCurrentSpecialWorld(destinationMap);
           } else {
-            const destinationIndex = MAPS.findIndex(
-              (map) => map.name === destinationMap,
-            );
+            const destinationIndex = getMapIndexByKey(destinationMap);
             if (destinationIndex !== -1) {
               setCurrentMapIndex(destinationIndex);
               setCharacterPosition(spawnPosition);
@@ -855,9 +909,13 @@ const GameWorld = React.memo(() => {
         return; // Don't show regular dialogue
       }
 
-      // Set the active NPC and show dialog
+      // Set the active NPC and show dialog in bottom dock
       gameState.setActiveNPC(npc);
-      updateUIState({ showNPCDialog: true });
+      updateUIState({
+        showNPCDialog: true,
+        dockExpanded: true,
+        dockTab: "talk",
+      });
 
       // Play interaction sound if available
       if (gameState.soundManager) {
@@ -1553,6 +1611,20 @@ const GameWorld = React.memo(() => {
     }
   }, [user]);
 
+  // Optimized nearby NPC finder (declared before keyboard handler)
+  const findNearbyNPC = useCallback(() => {
+    const npcs = [...currentMapNPCs, ...gameState.gameData.databaseNPCs];
+    return npcs.find((npc) => {
+      const npcX = npc.position?.x || 0;
+      const npcY = npc.position?.y || 0;
+      const distance = Math.sqrt(
+        Math.pow(characterPosition.x - npcX, 2) +
+          Math.pow(characterPosition.y - npcY, 2),
+      );
+      return distance < TILE_SIZE * 2;
+    });
+  }, [currentMapNPCs, gameState.gameData.databaseNPCs, characterPosition]);
+
   // Optimized key handler with throttling
   const handleKeyDown = useCallback(
     (event) => {
@@ -1565,58 +1637,100 @@ const GameWorld = React.memo(() => {
       // Enhanced keyboard navigation with accessibility support
       switch (event.key) {
         case "i":
-        case "I":
-          updateUIState({ showInventory: !gameState.uiState.showInventory });
-          // Announce to screen readers
-          if (gameState.mobileState.screenReaderMode) {
-            const message = gameState.uiState.showInventory
-              ? "Closing inventory"
-              : "Opening inventory";
-            announceToScreenReader(message);
+        case "I": {
+          const bagOpen =
+            uiState.showInventory &&
+            uiState.dockExpanded &&
+            uiState.dockTab === "bag";
+          if (bagOpen) {
+            updateUIState({ showInventory: false, dockExpanded: false });
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Closing inventory");
+            }
+          } else {
+            updateUIState({
+              showInventory: true,
+              dockExpanded: true,
+              dockTab: "bag",
+            });
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Opening inventory");
+            }
           }
           break;
+        }
         case "q":
-        case "Q":
-          updateUIState({ showQuotes: !gameState.uiState.showQuotes });
-          if (gameState.mobileState.screenReaderMode) {
-            const message = gameState.uiState.showQuotes
-              ? "Closing quotes"
-              : "Opening saved quotes";
-            announceToScreenReader(message);
+        case "Q": {
+          const quotesOpen =
+            uiState.dockExpanded && uiState.dockTab === "quotes";
+          if (quotesOpen) {
+            updateUIState({ dockExpanded: false, dockTab: "status" });
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Closing quotes");
+            }
+          } else {
+            openDockTab("quotes");
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Opening saved quotes");
+            }
           }
           break;
+        }
         case "m":
-        case "M":
-          updateUIState({ showWorldMap: !gameState.uiState.showWorldMap });
-          if (gameState.mobileState.screenReaderMode) {
-            const message = gameState.uiState.showWorldMap
-              ? "Closing world map"
-              : "Opening world map";
-            announceToScreenReader(message);
+        case "M": {
+          const mapOpen = uiState.dockExpanded && uiState.dockTab === "map";
+          if (mapOpen) {
+            updateUIState({ dockExpanded: false, dockTab: "status" });
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Closing world map");
+            }
+          } else {
+            openDockTab("map");
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Opening world map");
+            }
           }
           break;
+        }
         case "f":
-        case "F":
-          updateUIState({ showFeedback: !gameState.uiState.showFeedback });
-          if (gameState.mobileState.screenReaderMode) {
-            const message = gameState.uiState.showFeedback
-              ? "Closing feedback form"
-              : "Opening feedback form";
-            announceToScreenReader(message);
+        case "F": {
+          const feedbackOpen =
+            uiState.dockExpanded && uiState.dockTab === "feedback";
+          if (feedbackOpen) {
+            updateUIState({ dockExpanded: false, dockTab: "status" });
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Closing feedback form");
+            }
+          } else {
+            openDockTab("feedback");
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Opening feedback form");
+            }
           }
           break;
+        }
         case "c":
         case "C":
-        case "?":
-          updateUIState({ showControlsGuide: !gameState.uiState.showControlsGuide });
-          if (gameState.mobileState.screenReaderMode) {
-            const message = gameState.uiState.showControlsGuide
-              ? "Closing controls guide"
-              : "Opening keyboard controls guide";
-            announceToScreenReader(message);
+        case "?": {
+          const guideOpen =
+            uiState.dockExpanded && uiState.dockTab === "guide";
+          if (guideOpen) {
+            updateUIState({ dockExpanded: false, dockTab: "status" });
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Closing controls guide");
+            }
+          } else {
+            openDockTab("guide");
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Opening keyboard controls guide");
+            }
           }
           break;
+        }
         case "Escape":
+          if (uiState.showNPCDialog) {
+            setActiveNPC(null);
+          }
           updateUIState({
             showInventory: false,
             showQuotes: false,
@@ -1624,6 +1738,9 @@ const GameWorld = React.memo(() => {
             showFeedback: false,
             showControlsGuide: false,
             showForm: false,
+            showNPCDialog: false,
+            dockExpanded: false,
+            dockTab: "status",
           });
           if (gameState.mobileState.screenReaderMode) {
             announceToScreenReader("Closed all menus");
@@ -1702,7 +1819,11 @@ const GameWorld = React.memo(() => {
           const nearbyNPC = findNearbyNPC();
           if (nearbyNPC) {
             gameState.setActiveNPC(nearbyNPC);
-            updateUIState({ showNPCDialog: true });
+            updateUIState({
+              showNPCDialog: true,
+              dockExpanded: true,
+              dockTab: "talk",
+            });
             if (gameState.mobileState.screenReaderMode) {
               announceToScreenReader(`Talking to ${nearbyNPC.name || "NPC"}`);
             }
@@ -1752,22 +1873,22 @@ const GameWorld = React.memo(() => {
           break;
       }
     },
-    [uiState, updateUIState, mobileState, setMobileState, announceToScreenReader],
+    [
+      uiState,
+      updateUIState,
+      mobileState,
+      setMobileState,
+      setActiveNPC,
+      announceToScreenReader,
+      gameState,
+      findNearbyNPC,
+      characterPosition,
+      characterState,
+      setCharacterState,
+      setIsAttacking,
+      openDockTab,
+    ],
   );
-
-  // Optimized nearby NPC finder
-  const findNearbyNPC = useCallback(() => {
-    const npcs = [...currentMapNPCs, ...gameState.gameData.databaseNPCs];
-    return npcs.find((npc) => {
-      const npcX = npc.position?.x || 0;
-      const npcY = npc.position?.y || 0;
-      const distance = Math.sqrt(
-        Math.pow(characterPosition.x - npcX, 2) +
-          Math.pow(characterPosition.y - npcY, 2),
-      );
-      return distance < TILE_SIZE * 2;
-    });
-  }, [currentMapNPCs, gameState.gameData.databaseNPCs, getCharacterPosition]);
 
   // Optimized sound manager initialization
   const initSoundManager = useCallback(async () => {
@@ -1783,52 +1904,56 @@ const GameWorld = React.memo(() => {
     }
   }, [gameState.soundManager]);
 
-  // Initialize component safely
+  // Begin fetching lazy map chunk before paint (same promise as await below)
+  useLayoutEffect(() => {
+    prefetchRemainingMaps();
+  }, []);
+
+  // Performance-optimized effects — load lazy map chunk before session restore / gameplay
   useEffect(() => {
-    // Mark as initialized after first render cycle completes
-    if (!isInitialized) {
-      setIsInitialized(true);
-    }
-  }, [isInitialized]);
+    let cancelled = false;
+    const handleKeyDownEvent = (e) => handleKeyDown(e);
 
-  // Performance-optimized effects
-  useEffect(() => {
-    performance.mark(PERFORMANCE_MARKERS.RENDER_START);
+    (async () => {
+      try {
+        await loadRemainingMaps();
+      } catch (err) {
+        console.error("Failed to load map data:", err);
+      }
+      if (cancelled) return;
 
-    // Initialize game state manager
-    gameStateManager.init();
+      performance.mark(PERFORMANCE_MARKERS.RENDER_START);
 
-    // Restore session from persisted state once per mount (position, map, inventory)
-    if (!hasRestoredSessionRef.current) {
-      hasRestoredSessionRef.current = true;
-      const saved = gameStateManager.getState();
-      if (
-        saved &&
-        saved.characterPosition &&
-        typeof saved.characterPosition.x === "number" &&
-        typeof saved.characterPosition.y === "number" &&
-        typeof saved.currentMapIndex === "number"
-      ) {
-        setCharacterPosition(saved.characterPosition);
-        setCurrentMapIndex(saved.currentMapIndex);
-        if (Array.isArray(saved.inventory)) {
-          setInventory(saved.inventory);
+      gameStateManager.init();
+
+      if (!hasRestoredSessionRef.current) {
+        hasRestoredSessionRef.current = true;
+        const saved = gameStateManager.getState();
+        if (
+          saved &&
+          saved.characterPosition &&
+          typeof saved.characterPosition.x === "number" &&
+          typeof saved.characterPosition.y === "number" &&
+          typeof saved.currentMapIndex === "number"
+        ) {
+          setCharacterPosition(saved.characterPosition);
+          setCurrentMapIndex(saved.currentMapIndex);
+          if (Array.isArray(saved.inventory)) {
+            setInventory(saved.inventory);
+          }
         }
       }
-    }
 
-    // Load character and NPCs
-    loadCharacter();
-    fetchNPCs();
+      loadCharacter();
+      fetchNPCs();
+      initSoundManager();
 
-    // Initialize sound manager
-    initSoundManager();
-
-    // Set up event listeners
-    const handleKeyDownEvent = (e) => handleKeyDown(e);
-    window.addEventListener("keydown", handleKeyDownEvent);
+      window.addEventListener("keydown", handleKeyDownEvent);
+      setMapsReady(true);
+    })();
 
     return () => {
+      cancelled = true;
       window.removeEventListener("keydown", handleKeyDownEvent);
       if (gameState.soundManager) {
         gameState.soundManager.cleanup();
@@ -2332,9 +2457,9 @@ const GameWorld = React.memo(() => {
 
   // Close NPC dialog
   const handleCloseNPCDialog = useCallback(() => {
-    updateUIState({ showNPCDialog: false });
-    gameState.setActiveNPC(null);
-  }, []);
+    updateUIState({ showNPCDialog: false, dockTab: "status" });
+    setActiveNPC(null);
+  }, [updateUIState, setActiveNPC]);
 
   // Add a handler for the World Map node click
   const handleWorldMapNodeClick = useCallback(
@@ -2342,14 +2467,12 @@ const GameWorld = React.memo(() => {
       // Check if it's a special world type
       if (worldId === "hemingway") {
         setCurrentSpecialWorld("hemingway");
-        updateUIState({ showWorldMap: false });
+        updateUIState({ dockTab: "status", dockExpanded: false });
       } else if (worldId === "text_adventure") {
         setCurrentSpecialWorld("text_adventure");
-        updateUIState({ showWorldMap: false });
+        updateUIState({ dockTab: "status", dockExpanded: false });
       } else {
-        // Handle normal world navigation here
-        // (This would depend on your existing world navigation logic)
-        updateUIState({ showWorldMap: false });
+        updateUIState({ dockTab: "status", dockExpanded: false });
       }
     },
     [updateUIState, setCurrentSpecialWorld],
@@ -2398,10 +2521,21 @@ const GameWorld = React.memo(() => {
     updateUIState({ showWorldGuide: true });
   }, [updateUIState]);
 
-  // Handle showing the world map
+  // Handle showing the world map (bottom dock)
   const handleShowWorldMap = useCallback(() => {
-    updateUIState({ showWorldMap: true });
-  }, [updateUIState]);
+    openDockTab("map");
+  }, [openDockTab]);
+
+  useEffect(() => {
+    const onNavInventory = () => openBagDock();
+    const onNavQuotes = () => openDockTab("quotes");
+    window.addEventListener("showInventory", onNavInventory);
+    window.addEventListener("showQuotes", onNavQuotes);
+    return () => {
+      window.removeEventListener("showInventory", onNavInventory);
+      window.removeEventListener("showQuotes", onNavQuotes);
+    };
+  }, [openBagDock, openDockTab]);
 
   // Handle deleting a quote from savedQuotes
   const handleDeleteQuote = useCallback(
@@ -2990,7 +3124,7 @@ const GameWorld = React.memo(() => {
   return (
     <ErrorBoundary>
       {/* Initialization guard to prevent render-order issues */}
-      {!isInitialized ? (
+      {!mapsReady ? (
         <div
           className="game-loading"
           style={{
@@ -3008,19 +3142,21 @@ const GameWorld = React.memo(() => {
         </div>
       ) : (
         <div
-          className={`game-container ${gameState.mobileState.highContrastMode ? "high-contrast" : ""} ${gameState.mobileState.reducedMotionMode ? "reduced-motion" : ""}`}
+          className={`game-container game-layout-with-dock ${gameState.mobileState.highContrastMode ? "high-contrast" : ""} ${gameState.mobileState.reducedMotionMode ? "reduced-motion" : ""}`}
           role="application"
           aria-label="Authentic Internet Game World"
           aria-describedby="game-instructions"
           tabIndex={0}
           onKeyDown={handleKeyDown}
         >
+          <div className="game-main-stage">
           {/* === ACCESSIBILITY === */}
           <div id="game-instructions" className="sr-only">
-            Use arrow keys or WASD to move. Press I for inventory, M for map, C
-            for controls guide, F for feedback, T to talk to NPCs, H for high
-            contrast mode, R for reduced motion, S for screen reader mode. Press
-            Escape to close menus.
+            Use arrow keys or WASD to move. The bottom dock has Status, Talk,
+            Bag, Chat, Map, Help, Quotes, and Feedback. Keys: I bag, T talk, M
+            map, C or question mark help, Q quotes, F feedback. H high contrast,
+            R reduced motion, S screen reader. Escape closes overlays and
+            collapses the dock.
           </div>
 
           <div
@@ -3042,6 +3178,7 @@ const GameWorld = React.memo(() => {
           {/* === CORE GAME WORLD === */}
           {MAPS[currentMapIndex]?.data && (
             <MapComponent
+              key={`overlay-map-${mapSchemaRevision}-${currentMapIndex}`}
               currentMapIndex={currentMapIndex}
               mapData={MAPS[currentMapIndex].data}
               exploredTiles={exploredTiles}
@@ -3145,12 +3282,9 @@ const GameWorld = React.memo(() => {
                 />
               ) : (
                 MAPS[currentMapIndex] && MAPS[currentMapIndex].data && (
-                  <div
-                    className={`map-transition-container ${
-                      uiState.isTransitioning ? `transitioning-${transitionDirection}` : ''
-                    }`}
-                  >
+                  <div className="map-transition-container">
                     <MapComponent
+                      key={`world-map-${mapSchemaRevision}-${currentMapIndex}`}
                       mapData={MAPS[currentMapIndex].data}
                       npcs={
                         MAPS[currentMapIndex].npcs?.filter(
@@ -3165,6 +3299,7 @@ const GameWorld = React.memo(() => {
                       onArtifactClick={handleArtifactClick}
                       mapName={MAPS[currentMapIndex].name}
                       questStatusMap={questStatusMap || new Map()}
+                      scrollViewport={viewport}
                     />
                   </div>
                 )
@@ -3178,7 +3313,7 @@ const GameWorld = React.memo(() => {
                 visibleArtifact={visibleArtifact}
                 handleArtifactPickup={handleArtifactPickup}
                 setFormPosition={setFormPosition}
-                setShowInventory={(show) => updateUIState({ showInventory: show })}
+                setShowInventory={setInventoryDockVisible}
                 adjustViewport={adjustViewport}
                 activePowers={activePowers}
                 user={user}
@@ -3186,9 +3321,8 @@ const GameWorld = React.memo(() => {
                 isInvincible={gameState.isInvincible}
                 characterState={gameState.characterState}
                 transitionToNeighbor={transitionToNeighbor}
+                characterPosition={characterPosition}
                 onPositionChange={(position, reason) => {
-                  // Update GameWorld characterPosition state for compatibility
-                  // This is throttled to prevent excessive re-renders
                   setCharacterPosition(position);
                   if (reason === 'portal') {
                     // Handle portal-specific logic if needed
@@ -3232,19 +3366,19 @@ const GameWorld = React.memo(() => {
               {/* Buttons Menu */}
               <div className="game-controls">
                 <IconButton
-                  onClick={() => updateUIState({ showInventory: true })}
+                  onClick={() => openBagDock()}
                   tooltip="Inventory"
                 >
                   <i className="fas fa-briefcase"></i>
                 </IconButton>
                 <IconButton
-                  onClick={() => updateUIState({ showWorldMap: true })}
+                  onClick={() => openDockTab("map")}
                   tooltip="World Map"
                 >
                   <i className="fas fa-map"></i>
                 </IconButton>
                 <IconButton
-                  onClick={() => updateUIState({ showQuotes: true })}
+                  onClick={() => openDockTab("quotes")}
                   tooltip="Saved Quotes"
                 >
                   <i className="fas fa-quote-right"></i>
@@ -3256,7 +3390,7 @@ const GameWorld = React.memo(() => {
                   <i className="fas fa-compass"></i>
                 </IconButton>
                 <IconButton
-                  onClick={() => updateUIState({ showControlsGuide: true })}
+                  onClick={() => openDockTab("guide")}
                   tooltip="Keyboard Controls (C)"
                 >
                   <i className="fas fa-keyboard"></i>
@@ -3328,28 +3462,6 @@ const GameWorld = React.memo(() => {
           </div>
 
           {/* === MODALS AND OVERLAYS === */}
-          {gameState.uiState.showWorldMap && (
-            <WorldMap
-              currentWorld={MAPS[gameState.currentMapIndex].name}
-              onClose={() => updateUIState({ showWorldMap: false })}
-              onNodeClick={handleWorldMapNodeClick}
-            />
-          )}
-
-          {/* Display feedback form when toggled */}
-          {gameState.uiState.showFeedback && (
-            <FeedbackForm
-              onClose={() => updateUIState({ showFeedback: false })}
-            />
-          )}
-
-          {/* Display keyboard controls guide */}
-          {gameState.uiState.showControlsGuide && (
-            <ControlsGuide
-              onClose={() => updateUIState({ showControlsGuide: false })}
-            />
-          )}
-
           {gameState.uiState.showWinNotification && (
             <div className="win-notification">
               <div className="win-content">
@@ -3380,23 +3492,6 @@ const GameWorld = React.memo(() => {
             />
           )}
 
-          <InventoryManager
-            showInventory={gameState.uiState.showInventory}
-            setShowInventory={(show) => updateUIState({ showInventory: show })}
-            character={character}
-            inventory={gameState.character?.inventory || []}
-            artifacts={gameState.gameData.artifacts}
-            currentArea={
-              Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
-                ? MAPS[currentMapIndex].name
-                : "Unknown Area"
-            }
-            setSelectedUserArtifact={setSelectedUserArtifact}
-            refreshArtifactList={refreshArtifactList}
-            setInventory={gameState.setInventory}
-            updateUIState={updateUIState}
-          />
-
           {/* Level Up Modal */}
           {showLevelUpModal && (
             <LevelUpModal
@@ -3414,43 +3509,6 @@ const GameWorld = React.memo(() => {
             />
           )}
 
-          {gameState.uiState.showQuotes && character && (
-            <SavedQuotes
-              quotes={character.savedQuotes || []}
-              onClose={() => updateUIState({ showQuotes: false })}
-              onDeleteQuote={handleDeleteQuote}
-            />
-          )}
-
-          {/* NPC Interaction Dialog */}
-          {gameState.uiState.showNPCDialog && gameState.activeNPC && (
-            <NPCInteraction
-              npc={gameState.activeNPC}
-              onClose={() => {
-                updateUIState({ showNPCDialog: false });
-                gameState.setActiveNPC(null);
-              }}
-              context={{
-                area: MAPS[currentMapIndex]?.name || "Unknown",
-                weather: "sunny", // Could be enhanced with real weather
-                timeOfDay:
-                  new Date().getHours() < 12
-                    ? "morning"
-                    : new Date().getHours() < 18
-                      ? "afternoon"
-                      : "evening",
-              }}
-              onQuestUpdate={async () => {
-                // Refresh quests when a quest is updated
-                const questResponse = await fetchQuests();
-                if (questResponse.success) {
-                  gameState.setActiveQuests(questResponse.data.activeQuests || []);
-                  gameState.setCompletedQuests(questResponse.data.completedQuests || []);
-                }
-              }}
-            />
-          )}
-
           {/* Quest Completion Celebration */}
           {gameState.questCompletionCelebration && (
             <QuestCompletionCelebration
@@ -3463,7 +3521,7 @@ const GameWorld = React.memo(() => {
           {/* Feedback button */}
           <div
             className="feedback-button"
-            onClick={() => updateUIState({ showFeedback: true })}
+            onClick={() => openDockTab("feedback")}
           >
             <span role="img" aria-label="Feedback">
               💬
@@ -3471,25 +3529,22 @@ const GameWorld = React.memo(() => {
             <span className="feedback-text">Feedback</span>
           </div>
 
-          {/* Map key hint - only shown when there's no other overlay */}
-          {!gameState.uiState.showInventory &&
-            !gameState.uiState.showForm &&
-            !gameState.uiState.showQuotes &&
-            !gameState.uiState.showWorldMap &&
+          {/* Map key hint - only when no blocking overlay */}
+          {!gameState.uiState.showForm &&
             !gameState.uiState.showWinNotification &&
             !gameState.uiState.showRewardModal &&
             !gameState.uiState.showLevel4 &&
-            !gameState.uiState.showFeedback &&
             !gameState.uiState.showNPCDialog && (
               <div className="map-key-hint" role="status" aria-live="polite">
                 {gameState.mobileState.isMobile ? (
                   <span>
-                    Tap and drag to move | Tap NPCs to talk | Use menu buttons
+                    Tap and drag to move | Tap NPCs to talk | Use the bottom dock
+                    for map, chat, and more
                   </span>
                 ) : (
                   <span>
-                    Press M to view World Map | Press F for Feedback | Press T
-                    to talk to NPCs
+                    Bottom dock: M map, C help, F feedback, I bag, T talk — Esc
+                    closes
                   </span>
                 )}
               </div>
@@ -3519,7 +3574,7 @@ const GameWorld = React.memo(() => {
               >
                 <button
                   className="mobile-control-btn inventory-btn"
-                  onClick={() => updateUIState({ showInventory: true })}
+                  onClick={() => openBagDock()}
                   aria-label="Open inventory"
                 >
                   <span role="img" aria-hidden="true">
@@ -3528,7 +3583,7 @@ const GameWorld = React.memo(() => {
                 </button>
                 <button
                   className="mobile-control-btn map-btn"
-                  onClick={() => updateUIState({ showWorldMap: true })}
+                  onClick={() => openDockTab("map")}
                   aria-label="Open world map"
                 >
                   <span role="img" aria-hidden="true">
@@ -3537,7 +3592,7 @@ const GameWorld = React.memo(() => {
                 </button>
                 <button
                   className="mobile-control-btn feedback-btn"
-                  onClick={() => updateUIState({ showFeedback: true })}
+                  onClick={() => openDockTab("feedback")}
                   aria-label="Open feedback form"
                 >
                   <span role="img" aria-hidden="true">
@@ -3689,14 +3744,134 @@ const GameWorld = React.memo(() => {
 
           {/* === SYSTEMS === */}
           <NotificationSystem soundManager={gameState.soundManager} />
+          </div>
 
-          <MultiplayerChat
-            worldId={MAPS[currentMapIndex]?.name || "overworld"}
-            worldName={MAPS[currentMapIndex]?.name || "Unknown World"}
-            onPlayerClick={(player) => {
-              console.log("Player clicked:", player);
-              // Handle player interaction
-            }}
+          <GameDock
+            dockExpanded={uiState.dockExpanded}
+            dockTab={uiState.dockTab}
+            onSetDockTab={(tab) => updateUIState({ dockTab: tab })}
+            onToggleDockExpanded={(expanded) =>
+              updateUIState({ dockExpanded: expanded })
+            }
+            onOpenBag={openBagDock}
+            areaName={
+              Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
+                ? MAPS[currentMapIndex].name
+                : "Unknown"
+            }
+            level={gameState.characterStats.level}
+            experience={gameState.characterStats.experience}
+            experienceToNextLevel={calculateXPForLevel(
+              gameState.characterStats.level + 1,
+            )}
+            health={gameState.playerHealth}
+            maxHealth={gameState.maxPlayerHealth}
+            showNPCDialog={uiState.showNPCDialog}
+            talkPanel={
+              uiState.showNPCDialog && gameState.activeNPC ? (
+                <NPCInteraction
+                  embedded
+                  npc={gameState.activeNPC}
+                  onClose={handleCloseNPCDialog}
+                  context={{
+                    area: MAPS[currentMapIndex]?.name || "Unknown",
+                    weather: "sunny",
+                    timeOfDay:
+                      new Date().getHours() < 12
+                        ? "morning"
+                        : new Date().getHours() < 18
+                          ? "afternoon"
+                          : "evening",
+                  }}
+                  onQuestUpdate={async () => {
+                    const questResponse = await fetchQuests();
+                    if (questResponse.success) {
+                      gameState.setActiveQuests(
+                        questResponse.data.activeQuests || [],
+                      );
+                      gameState.setCompletedQuests(
+                        questResponse.data.completedQuests || [],
+                      );
+                    }
+                  }}
+                />
+              ) : (
+                <p className="game-dock-empty">
+                  Approach an NPC and press T or tap them to talk.
+                </p>
+              )
+            }
+            bagPanel={
+              character && uiState.showInventory ? (
+                <InventoryManager
+                  embedded
+                  showInventory={uiState.showInventory}
+                  setShowInventory={(show) => {
+                    if (show) {
+                      openBagDock();
+                    } else {
+                      updateUIState({ showInventory: false });
+                    }
+                  }}
+                  character={character}
+                  inventory={gameState.character?.inventory || []}
+                  artifacts={gameState.gameData.artifacts}
+                  currentArea={
+                    Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
+                      ? MAPS[currentMapIndex].name
+                      : "Unknown Area"
+                  }
+                  setSelectedUserArtifact={setSelectedUserArtifact}
+                  refreshArtifactList={refreshArtifactList}
+                  setInventory={gameState.setInventory}
+                  updateUIState={updateUIState}
+                />
+              ) : (
+                <p className="game-dock-empty">
+                  Open your bag with I or the backpack control.
+                </p>
+              )
+            }
+            chatPanel={
+              <MultiplayerChat
+                variant="docked"
+                worldId={MAPS[currentMapIndex]?.name || "overworld"}
+                worldName={MAPS[currentMapIndex]?.name || "Unknown World"}
+                onPlayerClick={(player) => {
+                  console.log("Player clicked:", player);
+                }}
+              />
+            }
+            mapPanel={
+              <WorldMap
+                embedded
+                currentWorld={
+                  MAPS[currentMapIndex]?.name || "Overworld"
+                }
+                onClose={dismissDockPanel}
+                onNodeClick={handleWorldMapNodeClick}
+              />
+            }
+            guidePanel={
+              <ControlsGuide embedded onClose={dismissDockPanel} />
+            }
+            quotesPanel={
+              character ? (
+                <SavedQuotes
+                  embedded
+                  quotes={character.savedQuotes || []}
+                  onClose={dismissDockPanel}
+                  onDeleteQuote={handleDeleteQuote}
+                />
+              ) : (
+                <p className="game-dock-empty">
+                  Log in to collect and view saved quotes.
+                </p>
+              )
+            }
+            feedbackPanel={
+              <FeedbackForm embedded onClose={dismissDockPanel} />
+            }
           />
         </div>
       )}

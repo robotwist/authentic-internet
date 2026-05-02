@@ -3,7 +3,7 @@ import "./FeedbackForm.css";
 import { useAuth } from "../context/AuthContext"; // Import Auth context to get user info if logged in
 
 // Updated for automatic deployment testing - Added GitHub repository secrets
-const FeedbackForm = ({ onClose }) => {
+const FeedbackForm = ({ onClose, embedded = false }) => {
   const { user } = useAuth(); // Get current authenticated user if available
   const [feedback, setFeedback] = useState({
     gameplay: "",
@@ -137,7 +137,9 @@ const FeedbackForm = ({ onClose }) => {
 
   if (submitted) {
     return (
-      <div className="feedback-form-container">
+      <div
+        className={`feedback-form-container${embedded ? " feedback-form-container--embedded" : ""}`}
+      >
         <div className="feedback-form">
           <h2>Thank You!</h2>
           <p>Your feedback has been saved successfully.</p>
@@ -179,7 +181,9 @@ const FeedbackForm = ({ onClose }) => {
   }
 
   return (
-    <div className="feedback-form-container">
+    <div
+      className={`feedback-form-container${embedded ? " feedback-form-container--embedded" : ""}`}
+    >
       <div className="feedback-form">
         <div className="form-header">
           <h2>Game Feedback</h2>

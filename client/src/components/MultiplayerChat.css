@@ -440,3 +440,30 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
+/* Fills game dock panel; keeps socket mounted when panel is hidden */
+.multiplayer-chat.multiplayer-chat--docked {
+  position: relative;
+  bottom: auto;
+  right: auto;
+  left: auto;
+  top: auto;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  z-index: auto;
+}
+
+.multiplayer-chat--docked .chat-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.multiplayer-chat--docked .online-players {
+  max-height: 72px;
+  flex-shrink: 0;
+}

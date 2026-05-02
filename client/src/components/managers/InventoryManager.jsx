@@ -14,6 +14,7 @@ const InventoryManager = ({
   refreshArtifactList,
   setInventory,
   updateUIState,
+  embedded = false,
 }) => {
   // Function to handle user artifact management
   const handleUserArtifactUpdate = useCallback(
@@ -48,6 +49,7 @@ const InventoryManager = ({
 
   return (
     <Inventory
+      embedded={embedded}
       onClose={() => setShowInventory(false)}
       character={character}
       inventory={inventory}
@@ -69,6 +71,7 @@ InventoryManager.propTypes = {
   refreshArtifactList: PropTypes.func.isRequired,
   setInventory: PropTypes.func.isRequired,
   updateUIState: PropTypes.func.isRequired,
+  embedded: PropTypes.bool,
 };
 
 export default InventoryManager;

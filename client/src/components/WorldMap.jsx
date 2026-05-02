@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { WORLD_MAP } from "./Constants";
 import "./WorldMap.css";
 
-const WorldMap = ({ currentWorld, onClose, onNodeClick }) => {
+const WorldMap = ({ currentWorld, onClose, onNodeClick, embedded = false }) => {
   const [hoveredWorld, setHoveredWorld] = useState(null);
   const [isSpinning, setIsSpinning] = useState(false);
 
@@ -55,9 +55,11 @@ const WorldMap = ({ currentWorld, onClose, onNodeClick }) => {
   };
 
   return (
-    <div className={`world-map-overlay ${isSpinning ? "spinning" : ""}`}>
+    <div
+      className={`world-map-overlay${embedded ? " world-map-overlay--embedded" : ""} ${isSpinning ? "spinning" : ""}`}
+    >
       <div
-        className={`world-map-container ${isSpinning ? "spinning-content" : ""}`}
+        className={`world-map-container${embedded ? " world-map-container--embedded" : ""} ${isSpinning ? "spinning-content" : ""}`}
       >
         <h2>World Map</h2>
         <p className="map-subtitle">
@@ -162,6 +164,7 @@ WorldMap.propTypes = {
   currentWorld: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
   onNodeClick: PropTypes.func,
+  embedded: PropTypes.bool,
 };
 
 export default WorldMap;

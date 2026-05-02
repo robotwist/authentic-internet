@@ -1,0 +1,175 @@
+/* Bottom dock: one persistent surface for status, NPC, inventory, chat */
+
+.game-dock {
+  flex-shrink: 0;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  background: rgba(12, 14, 22, 0.94);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  font-family: var(--base-font, system-ui, sans-serif);
+}
+
+.game-dock-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 10px;
+}
+
+.game-dock-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.game-dock-tab {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.game-dock-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.game-dock-tab[aria-selected="true"] {
+  background: rgba(74, 144, 226, 0.25);
+  border-color: rgba(74, 144, 226, 0.5);
+  color: #fff;
+}
+
+.game-dock-toggle {
+  flex-shrink: 0;
+  width: 40px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.game-dock-toggle:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.game-dock-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+  padding-left: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.game-dock-strip strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.game-dock-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: min(38vh, 420px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  transition: max-height 0.2s ease, border-color 0.2s ease, opacity 0.15s ease;
+}
+
+.game-dock-body.is-collapsed {
+  max-height: 0;
+  border-top-color: transparent;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-dock-body {
+    transition: none;
+  }
+}
+
+.game-dock-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.game-dock-panel[hidden] {
+  display: none !important;
+}
+
+.game-dock-panel--scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.game-dock-status {
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+}
+
+.game-dock-status dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+}
+
+.game-dock-status dt {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.game-dock-status dd {
+  margin: 0;
+}
+
+.game-dock-empty {
+  margin: 0;
+  padding: 16px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .game-dock-body {
+    max-height: min(50vh, 480px);
+  }
+
+  .game-dock-tab {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-dock-tab,
+  .game-dock-toggle {
+    transition: none;
+  }
+}

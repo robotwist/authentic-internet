@@ -139,7 +139,6 @@
   }
 }
 
-/* Map Transition Animations - Zelda Style Sliding */
 .map-transition-container {
   position: relative;
   width: 100%;
@@ -147,66 +146,27 @@
   overflow: hidden;
 }
 
-.map-transition-container.transitioning-left {
-  animation: slideInFromRight 0.5s ease-in-out;
+/* Stack playfield above bottom dock */
+.game-layout-with-dock {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.map-transition-container.transitioning-right {
-  animation: slideInFromLeft 0.5s ease-in-out;
+.game-layout-with-dock .game-main-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-.map-transition-container.transitioning-up {
-  animation: slideInFromBottom 0.5s ease-in-out;
-}
-
-.map-transition-container.transitioning-down {
-  animation: slideInFromTop 0.5s ease-in-out;
-}
-
-@keyframes slideInFromRight {
-  0% {
-    transform: translateX(100%);
-  }
-  50% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(0%);
-  }
-}
-
-@keyframes slideInFromLeft {
-  0% {
-    transform: translateX(-100%);
-  }
-  50% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(0%);
-  }
-}
-
-@keyframes slideInFromBottom {
-  0% {
-    transform: translateY(100%);
-  }
-  50% {
-    transform: translateY(0%);
-  }
-  100% {
-    transform: translateY(0%);
-  }
-}
-
-@keyframes slideInFromTop {
-  0% {
-    transform: translateY(-100%);
-  }
-  50% {
-    transform: translateY(0%);
-  }
-  100% {
-    transform: translateY(0%);
-  }
+.game-layout-with-dock .viewport {
+  flex: 1;
+  min-height: 0;
 }

@@ -8,6 +8,8 @@ const MultiplayerChat = ({
   worldName,
   onPlayerClick,
   className = "",
+  /** When docked, layout fills the game dock (no floating window). */
+  variant = "floating",
 }) => {
   const { socket, isConnected, sendMessage } = useWebSocket();
   const { user } = useAuth();
@@ -284,7 +286,7 @@ const MultiplayerChat = ({
 
   const emojis = ["😊", "👍", "❤️", "🎉", "🔥", "💯", "👏", "🤔", "😅", "😎"];
 
-  if (isMinimized) {
+  if (isMinimized && variant !== "docked") {
     return (
       <div className={`multiplayer-chat minimized ${className}`}>
         <button className="chat-toggle" onClick={() => setIsMinimized(false)}>
@@ -299,7 +301,7 @@ const MultiplayerChat = ({
 
   return (
     <div
-      className={`multiplayer-chat ${className} ${!isConnected ? "disconnected" : ""}`}
+      className={`multiplayer-chat ${variant === "docked" ? "multiplayer-chat--docked" : ""} ${className} ${!isConnected ? "disconnected" : ""}`}
     >
       {/* Chat Header */}
       <div className="chat-header">
@@ -314,16 +316,18 @@ const MultiplayerChat = ({
             {isConnected ? "●" : "●"}
           </span>
         </div>
-        <div className="chat-controls">
-          <button
-            className="minimize-button"
-            onClick={() => setIsMinimized(true)}
-            aria-label="Minimize chat"
-            title="Minimize chat"
-          >
-            −
-          </button>
-        </div>
+        {variant !== "docked" && (
+          <div className="chat-controls">
+            <button
+              className="minimize-button"
+              onClick={() => setIsMinimized(true)}
+              aria-label="Minimize chat"
+              title="Minimize chat"
+            >
+              −
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Chat Messages */}

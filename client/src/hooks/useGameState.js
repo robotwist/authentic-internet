@@ -129,6 +129,10 @@ const initialState = {
     showRewardModal: false,
     currentAchievement: "",
     showNPCDialog: false,
+    /** Bottom dock: collapsed strip vs expanded sheet */
+    dockExpanded: false,
+    /** Active tab when expanded: status | talk | bag | chat */
+    dockTab: "status",
     showWorldGuide: true,
     isPlacingArtifact: false,
     showArtifactsOnMap: true,

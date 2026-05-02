@@ -15,6 +15,8 @@ const Inventory = ({
   onGainExperience = () => {},
   refreshArtifacts = () => {},
   characterPosition = { x: 0, y: 0 },
+  /** When true, render inside the game dock instead of a full-screen overlay */
+  embedded = false,
 }) => {
   const [messageContent, setMessageContent] = useState("");
   const [selectedArtifact, setSelectedArtifact] = useState(null);
@@ -282,7 +284,9 @@ const Inventory = ({
   };
 
   return (
-    <div className="inventory-overlay">
+    <div
+      className={`inventory-overlay${embedded ? " inventory-overlay--embedded" : ""}`}
+    >
       <div className="inventory-container">
         <div className="inventory-header">
           <h2>🎒 Inventory</h2>
@@ -591,6 +595,7 @@ Inventory.propTypes = {
     x: PropTypes.number,
     y: PropTypes.number,
   }),
+  embedded: PropTypes.bool,
 };
 
 export default Inventory;

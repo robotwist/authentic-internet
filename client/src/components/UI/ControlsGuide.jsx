@@ -5,7 +5,7 @@ import "./ControlsGuide.css";
  * ControlsGuide - Comprehensive keyboard controls reference
  * Shows all keyboard shortcuts and game controls
  */
-const ControlsGuide = ({ onClose }) => {
+const ControlsGuide = ({ onClose, embedded = false }) => {
   const controlSections = [
     {
       title: "Movement",
@@ -38,11 +38,12 @@ const ControlsGuide = ({ onClose }) => {
       title: "Menus & UI",
       icon: "📋",
       controls: [
-        { keys: ["I"], action: "Open Inventory" },
-        { keys: ["M"], action: "Open World Map" },
-        { keys: ["Q"], action: "Open Saved Quotes" },
-        { keys: ["F"], action: "Open Feedback Form" },
-        { keys: ["Esc"], action: "Close Menu / Back" },
+        { keys: ["I"], action: "Open Bag tab (bottom dock)" },
+        { keys: ["M"], action: "Open Map tab (bottom dock)" },
+        { keys: ["Q"], action: "Open Quotes tab (bottom dock)" },
+        { keys: ["C", "?"], action: "Open Help tab (bottom dock)" },
+        { keys: ["F"], action: "Open Feedback tab (bottom dock)" },
+        { keys: ["Esc"], action: "Close menus / collapse dock" },
       ],
     },
     {
@@ -66,10 +67,13 @@ const ControlsGuide = ({ onClose }) => {
   ];
 
   return (
-    <div className="controls-guide-overlay" onClick={onClose}>
+    <div
+      className={`controls-guide-overlay${embedded ? " controls-guide-overlay--embedded" : ""}`}
+      onClick={embedded ? undefined : onClose}
+    >
       <div
         className="controls-guide-modal"
-        onClick={(e) => e.stopPropagation()}
+        onClick={embedded ? undefined : (e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="controls-guide-header">

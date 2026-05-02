@@ -17,6 +17,21 @@
   overflow: hidden;
 }
 
+.saved-quotes-container--embedded {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  flex: 1;
+  min-height: 0;
+  z-index: auto;
+  border-radius: 0;
+}
+
 .saved-quotes-header {
   display: flex;
   justify-content: space-between;

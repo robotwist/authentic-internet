@@ -10,6 +10,7 @@ const SavedQuotes = ({
   onDeleteQuote,
   onShareQuote,
   onAddQuote,
+  embedded = false,
 }) => {
   const [selectedQuotes, setSelectedQuotes] = useState([]);
   const [shareEmail, setShareEmail] = useState("");
@@ -101,7 +102,9 @@ const SavedQuotes = ({
 
   if (!quotes || quotes.length === 0) {
     return (
-      <div className="saved-quotes-container">
+      <div
+        className={`saved-quotes-container${embedded ? " saved-quotes-container--embedded" : ""}`}
+      >
         <div className="saved-quotes-header">
           <h2>Saved Quotes</h2>
           <button className="close-button" onClick={onClose}>
@@ -122,7 +125,9 @@ const SavedQuotes = ({
   }
 
   return (
-    <div className="saved-quotes-container">
+    <div
+      className={`saved-quotes-container${embedded ? " saved-quotes-container--embedded" : ""}`}
+    >
       <div className="saved-quotes-header">
         <h2>Saved Quotes Collection</h2>
         <button className="close-button" onClick={onClose}>
