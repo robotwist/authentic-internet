@@ -26,11 +26,13 @@ const ArtifactCreation = ({
   isFirstArtifact = false,
   onCancel,
   currentArea,
+  embedded = false,
 }) => {
   const { user } = useAuth();
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [soundManager, setSoundManager] = useState(null);
+  const [showStandardForm, setShowStandardForm] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -116,7 +118,10 @@ const ArtifactCreation = ({
       if (artifact?.id ?? artifact?._id) {
         if (soundManager) soundManager.playSound("artifact_create");
         onSuccess?.(artifact);
-        getCreationStatus().then((d) => d && setCreationStatus(d)).catch(() => {});
+        refreshArtifacts?.();
+        getCreationStatus()
+          .then((d) => d && setCreationStatus(d))
+          .catch(() => {});
         onClose?.();
         playSuccess();
       } else {
@@ -129,12 +134,14 @@ const ArtifactCreation = ({
       setError(
         err?.code === "CREATION_TOKEN_REQUIRED"
           ? err.message
-          : "Failed to create artifact. Please try again."
+          : "Failed to create artifact. Please try again.",
       );
       if (soundManager) soundManager.playSound("error");
       playError();
       if (err?.code === "CREATION_TOKEN_REQUIRED" && creationStatus) {
-        setCreationStatus((s) => (s ? { ...s, canCreate: false, creationTokens: 0 } : s));
+        setCreationStatus((s) =>
+          s ? { ...s, canCreate: false, creationTokens: 0 } : s,
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -143,6 +150,7 @@ const ArtifactCreation = ({
 
   const handleCancel = () => {
     if (soundManager) soundManager.playSound("bump");
+    setShowStandardForm(false);
     onCancel?.();
     onClose?.();
   };
@@ -163,8 +171,9 @@ const ArtifactCreation = ({
       if (!response.ok) {
         const msg =
           response.status === 403 && result?.code === "CREATION_TOKEN_REQUIRED"
-            ? result?.message ?? "You need a creation token to create another artifact. Complete an artifact you didn't create to earn one."
-            : result?.message ?? "Failed to create puzzle artifact";
+            ? (result?.message ??
+              "You need a creation token to create another artifact. Complete an artifact you didn't create to earn one.")
+            : (result?.message ?? "Failed to create puzzle artifact");
         throw new Error(msg);
       }
 
@@ -182,10 +191,17 @@ const ArtifactCreation = ({
     }
   };
 
+  const shellClass = embedded
+    ? "artifact-creation-dock-root"
+    : "artifact-creation-overlay";
+  const modalClass = embedded
+    ? "artifact-creation-modal artifact-creation-modal--embedded"
+    : "artifact-creation-modal";
+
   return (
     <>
-      <div className="artifact-creation-overlay">
-        <div className="artifact-creation-modal">
+      <div className={shellClass}>
+        <div className={modalClass}>
           <div className="modal-header">
             <h2>Create New Artifact</h2>
             <button className="close-button" onClick={onClose}>
@@ -196,14 +212,15 @@ const ArtifactCreation = ({
           {creationStatus && !creationStatus.canCreate && (
             <div className="creation-token-notice" role="status">
               <strong>Creation token required.</strong>{" "}
-              {creationStatus.message ?? "Complete an artifact you didn't create to earn a creation token for your next artifact."}
+              {creationStatus.message ??
+                "Complete an artifact you didn't create to earn a creation token for your next artifact."}
             </div>
           )}
 
           <div className="creation-options">
             <button
               className="creation-option-btn"
-              onClick={() => setShowForm(true)}
+              onClick={() => setShowStandardForm(true)}
             >
               <div className="option-icon">📜</div>
               <h3>Standard Artifact</h3>
@@ -223,7 +240,7 @@ const ArtifactCreation = ({
             </button>
           </div>
 
-          {showForm && (
+          {showStandardForm && (
             <div className="artifact-form">
               {error && <div className="error-message">{error}</div>}
               <ArtifactForm
@@ -262,6 +279,7 @@ ArtifactCreation.propTypes = {
   isFirstArtifact: PropTypes.bool,
   onCancel: PropTypes.func,
   currentArea: PropTypes.string,
+  embedded: PropTypes.bool,
 };
 
 export default ArtifactCreation;

@@ -5,6 +5,7 @@ import "./GameDock.css";
 const TABS = [
   { id: "status", label: "Status" },
   { id: "talk", label: "Talk" },
+  { id: "create", label: "Create" },
   { id: "bag", label: "Bag" },
   { id: "chat", label: "Chat" },
   { id: "map", label: "Map" },
@@ -37,6 +38,7 @@ const GameDock = ({
   guidePanel,
   quotesPanel,
   feedbackPanel,
+  createPanel,
 }) => {
   const selectTab = useCallback(
     (id) => {
@@ -58,7 +60,11 @@ const GameDock = ({
       aria-label="Game menu and messages"
     >
       <div className="game-dock-bar">
-        <div className="game-dock-tabs" role="tablist" aria-label="Panel sections">
+        <div
+          className="game-dock-tabs"
+          role="tablist"
+          aria-label="Panel sections"
+        >
           {TABS.map(({ id, label }) => {
             const talkDisabled = id === "talk" && !showNPCDialog;
             return (
@@ -140,6 +146,15 @@ const GameDock = ({
         </div>
 
         <div
+          id="game-dock-panel-create"
+          className="game-dock-panel game-dock-panel--scroll"
+          role="tabpanel"
+          hidden={dockTab !== "create"}
+        >
+          {createPanel}
+        </div>
+
+        <div
           id="game-dock-panel-bag"
           className="game-dock-panel"
           role="tabpanel"
@@ -202,6 +217,7 @@ GameDock.propTypes = {
   dockTab: PropTypes.oneOf([
     "status",
     "talk",
+    "create",
     "bag",
     "chat",
     "map",
@@ -227,6 +243,7 @@ GameDock.propTypes = {
   guidePanel: PropTypes.node,
   quotesPanel: PropTypes.node,
   feedbackPanel: PropTypes.node,
+  createPanel: PropTypes.node,
 };
 
 export default GameDock;

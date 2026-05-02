@@ -39,6 +39,7 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
       icon: "📋",
       controls: [
         { keys: ["I"], action: "Open Bag tab (bottom dock)" },
+        { keys: ["U"], action: "Open Create tab (bottom dock)" },
         { keys: ["M"], action: "Open Map tab (bottom dock)" },
         { keys: ["Q"], action: "Open Quotes tab (bottom dock)" },
         { keys: ["C", "?"], action: "Open Help tab (bottom dock)" },

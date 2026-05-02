@@ -155,12 +155,27 @@ const GameWorld = React.memo(() => {
           dockExpanded: true,
           dockTab: tab,
           showInventory: true,
+          showForm: false,
+        });
+      } else if (tab === "create") {
+        setFormPosition({
+          x: characterPosition.x,
+          y: characterPosition.y,
+        });
+        updateUIState({
+          dockExpanded: true,
+          dockTab: tab,
+          showForm: true,
         });
       } else {
-        updateUIState({ dockExpanded: true, dockTab: tab });
+        updateUIState({
+          dockExpanded: true,
+          dockTab: tab,
+          showForm: false,
+        });
       }
     },
-    [updateUIState],
+    [updateUIState, setFormPosition, characterPosition],
   );
 
   const dismissDockPanel = useCallback(() => {
@@ -183,13 +198,16 @@ const GameWorld = React.memo(() => {
   );
 
   // Override transitionToNeighbor to use our local state
-  const transitionToNeighbor = useCallback((direction) => {
-    setPendingTransition({ direction });
-    // Also call the original function to maintain compatibility
-    if (originalTransitionToNeighbor) {
-      originalTransitionToNeighbor(direction);
-    }
-  }, [originalTransitionToNeighbor]);
+  const transitionToNeighbor = useCallback(
+    (direction) => {
+      setPendingTransition({ direction });
+      // Also call the original function to maintain compatibility
+      if (originalTransitionToNeighbor) {
+        originalTransitionToNeighbor(direction);
+      }
+    },
+    [originalTransitionToNeighbor],
+  );
 
   // Performance tracking
   const renderCount = useRef(0);
@@ -207,8 +225,7 @@ const GameWorld = React.memo(() => {
     if (!import.meta.env.DEV) return undefined;
     const onMapsUpdated = () => setMapSchemaRevision((n) => n + 1);
     window.addEventListener("vite:maps-updated", onMapsUpdated);
-    return () =>
-      window.removeEventListener("vite:maps-updated", onMapsUpdated);
+    return () => window.removeEventListener("vite:maps-updated", onMapsUpdated);
   }, []);
 
   // Show world announcement when transitioning to new area
@@ -292,8 +309,14 @@ const GameWorld = React.memo(() => {
         break;
     }
 
-    spawnX = Math.max(TILE_SIZE, Math.min(spawnX, neighborMapWidth - TILE_SIZE));
-    spawnY = Math.max(TILE_SIZE, Math.min(spawnY, neighborMapHeight - TILE_SIZE));
+    spawnX = Math.max(
+      TILE_SIZE,
+      Math.min(spawnX, neighborMapWidth - TILE_SIZE),
+    );
+    spawnY = Math.max(
+      TILE_SIZE,
+      Math.min(spawnY, neighborMapHeight - TILE_SIZE),
+    );
 
     setCurrentMapIndex(neighborIndex);
     setCharacterPosition({ x: spawnX, y: spawnY });
@@ -420,7 +443,12 @@ const GameWorld = React.memo(() => {
     });
 
     setQuestStatusMap(statusMap);
-  }, [gameState.activeQuests, gameState.completedQuests, currentMapIndex, setQuestStatusMap]);
+  }, [
+    gameState.activeQuests,
+    gameState.completedQuests,
+    currentMapIndex,
+    setQuestStatusMap,
+  ]);
 
   // Screen reader announcement function
   const announceToScreenReader = useCallback((message) => {
@@ -497,8 +525,12 @@ const GameWorld = React.memo(() => {
               // Refresh quests
               const questResponse = await fetchQuests();
               if (questResponse.success) {
-                gameState.setActiveQuests(questResponse.data.activeQuests || []);
-                gameState.setCompletedQuests(questResponse.data.completedQuests || []);
+                gameState.setActiveQuests(
+                  questResponse.data.activeQuests || [],
+                );
+                gameState.setCompletedQuests(
+                  questResponse.data.completedQuests || [],
+                );
               }
 
               const rewards = response.data.rewards;
@@ -567,7 +599,10 @@ const GameWorld = React.memo(() => {
 
   const handlePlayerHeal = useCallback(
     (amount) => {
-      const newHealth = Math.min(gameState.maxPlayerHealth, gameState.playerHealth + amount);
+      const newHealth = Math.min(
+        gameState.maxPlayerHealth,
+        gameState.playerHealth + amount,
+      );
       setPlayerHealth(newHealth);
 
       if (gameState.soundManager) {
@@ -630,6 +665,10 @@ const GameWorld = React.memo(() => {
 
           // Show level-up modal
           setShowLevelUpModal(true);
+          updateUIState({
+            dockExpanded: true,
+            dockTab: "status",
+          });
 
           // Play level-up sound
           if (gameState.soundManager) {
@@ -654,7 +693,12 @@ const GameWorld = React.memo(() => {
         return { ...prev, experience: newXP };
       });
     },
-    [calculateXPForLevel, gameState.maxPlayerHealth, gameState.soundManager],
+    [
+      calculateXPForLevel,
+      gameState.maxPlayerHealth,
+      gameState.soundManager,
+      updateUIState,
+    ],
   );
 
   // Alias for handleGainExperience to match existing code that uses awardXP
@@ -668,7 +712,8 @@ const GameWorld = React.memo(() => {
   // Viewport adjustment function to follow character
   const adjustViewport = useCallback(
     (characterPos) => {
-      if (!characterPos || typeof gameState.currentMapIndex !== "number") return;
+      if (!characterPos || typeof gameState.currentMapIndex !== "number")
+        return;
 
       const gameWorldElement = document.querySelector(".game-world");
       if (!gameWorldElement) return;
@@ -737,17 +782,14 @@ const GameWorld = React.memo(() => {
   }, []);
 
   // Optimized state update function
-  const updateGameState = useCallback(
-    (updates) => {
-      const now = performance.now();
-      if (now - lastUpdateTime.current < updateThrottle.current) {
-        return; // Throttle updates
-      }
-      lastUpdateTime.current = now;
-      setGameData((prev) => ({ ...prev, ...updates }));
-    },
-    [],
-  );
+  const updateGameState = useCallback((updates) => {
+    const now = performance.now();
+    if (now - lastUpdateTime.current < updateThrottle.current) {
+      return; // Throttle updates
+    }
+    lastUpdateTime.current = now;
+    setGameData((prev) => ({ ...prev, ...updates }));
+  }, []);
 
   // Optimized level completion handler — explicit win conditions for levels 1–3
   const handleLevelCompletion = useCallback(
@@ -759,7 +801,10 @@ const GameWorld = React.memo(() => {
       const xpReward = config?.xpReward ?? 100;
 
       updateGameState({
-        levelCompletion: { ...gameState.gameData.levelCompletion, [level]: true },
+        levelCompletion: {
+          ...gameState.gameData.levelCompletion,
+          [level]: true,
+        },
       });
 
       updateUIState({
@@ -767,6 +812,8 @@ const GameWorld = React.memo(() => {
         winMessage,
         showRewardModal: true,
         currentAchievement: level,
+        dockExpanded: true,
+        dockTab: "status",
       });
 
       // Play completion sound
@@ -833,9 +880,7 @@ const GameWorld = React.memo(() => {
                 }, 800);
               }
             } else {
-              console.error(
-                `Destination map "${destinationMap}" not found`,
-              );
+              console.error(`Destination map "${destinationMap}" not found`);
             }
           }
 
@@ -860,10 +905,7 @@ const GameWorld = React.memo(() => {
             );
           } catch (error) {
             // Performance timing not available, skip measurement
-            console.debug(
-              "Performance measurement skipped:",
-              error.message,
-            );
+            console.debug("Performance measurement skipped:", error.message);
           }
         }, 1000);
       };
@@ -980,7 +1022,13 @@ const GameWorld = React.memo(() => {
         }, 3000);
       }
     },
-    [gameState.soundManager, gameState.currentMapIndex, validateQuestProgress, showPortalNotification, hidePortalNotification],
+    [
+      gameState.soundManager,
+      gameState.currentMapIndex,
+      validateQuestProgress,
+      showPortalNotification,
+      hidePortalNotification,
+    ],
   );
 
   const handleGameExit = useCallback(() => {
@@ -1094,7 +1142,11 @@ const GameWorld = React.memo(() => {
   // Memoized current map data with safety check
   const currentMap = useMemo(() => {
     // Safety check to prevent initialization order issues
-    if (typeof gameState.currentMapIndex !== "number" || !MAPS || !Array.isArray(MAPS)) {
+    if (
+      typeof gameState.currentMapIndex !== "number" ||
+      !MAPS ||
+      !Array.isArray(MAPS)
+    ) {
       return MAPS?.[0] || null;
     }
     return MAPS[gameState.currentMapIndex] || MAPS[0];
@@ -1211,8 +1263,7 @@ const GameWorld = React.memo(() => {
             }
           } else {
             // Handle single portal (object)
-            const { destination, spawnPosition, condition } =
-              progressionPortal;
+            const { destination, spawnPosition, condition } = progressionPortal;
 
             // Check if portal condition is met (if any)
             if (!condition || condition(tileX, tileY)) {
@@ -1331,13 +1382,10 @@ const GameWorld = React.memo(() => {
             }
           }
           console.log(`❌ Portal condition not met`);
-          showWorldAnnouncement(
-            "Find the correct portal location to proceed",
-          );
+          showWorldAnnouncement("Find the correct portal location to proceed");
         } else {
           // Handle single portal (object)
-          const { destination, spawnPosition, condition } =
-            progressionPortal;
+          const { destination, spawnPosition, condition } = progressionPortal;
           console.log(
             `Checking progression portal to ${destination}, condition:`,
             condition,
@@ -1365,17 +1413,12 @@ const GameWorld = React.memo(() => {
         );
 
         if (specialPortal && playerTileY === 1) {
-          console.log(
-            `✅ Activating special portal: ${specialPortal.title}`,
-          );
+          console.log(`✅ Activating special portal: ${specialPortal.title}`);
           updatePortalState({
             activePortal: specialPortal,
             portalNotificationActive: true,
           });
-          showPortalNotification(
-            specialPortal.title,
-            specialPortal.message,
-          );
+          showPortalNotification(specialPortal.title, specialPortal.message);
           return;
         }
       }
@@ -1433,93 +1476,88 @@ const GameWorld = React.memo(() => {
     [handleGainExperience, gameState.soundManager],
   );
 
+  // Automatic portal activation on collision
+  useEffect(() => {
+    const handlePortalCollision = (event) => {
+      if (portalState.isTransitioning) return;
 
+      const { tileX, tileY, tileType } = event.detail;
+      const currentMapName = currentMap?.name;
 
+      if (!currentMapName) return;
 
+      console.log(
+        `Portal collision detected - Map: ${currentMapName}, Tile: (${tileX}, ${tileY}), Type: ${tileType}`,
+      );
 
-      // Automatic portal activation on collision
-      useEffect(() => {
-        const handlePortalCollision = (event) => {
-          if (portalState.isTransitioning) return;
+      // Handle progression portals (type 5)
+      if (tileType === 5) {
+        const progressionPortal = PORTAL_CONFIG.progression[currentMapName];
+        if (progressionPortal) {
+          // Handle multiple portals per map (array)
+          if (Array.isArray(progressionPortal)) {
+            for (const portal of progressionPortal) {
+              const { destination, spawnPosition, condition } = portal;
 
-          const { tileX, tileY, tileType } = event.detail;
-          const currentMapName = currentMap?.name;
-
-          if (!currentMapName) return;
-
-          console.log(
-            `Portal collision detected - Map: ${currentMapName}, Tile: (${tileX}, ${tileY}), Type: ${tileType}`,
-          );
-
-          // Handle progression portals (type 5)
-          if (tileType === 5) {
-            const progressionPortal = PORTAL_CONFIG.progression[currentMapName];
-            if (progressionPortal) {
-              // Handle multiple portals per map (array)
-              if (Array.isArray(progressionPortal)) {
-                for (const portal of progressionPortal) {
-                  const { destination, spawnPosition, condition } = portal;
-
-                  // Check if portal condition is met
-                  if (condition && condition(tileX, tileY)) {
-                    console.log(`✅ Auto-activating portal to ${destination}`);
-                    handlePortalTransition(destination, spawnPosition);
-                    return;
-                  }
-                }
-              } else {
-                // Handle single portal (object)
-                const { destination, spawnPosition, condition } =
-                  progressionPortal;
-
-                // Check if portal condition is met (if any)
-                if (!condition || condition(tileX, tileY)) {
-                  console.log(`✅ Auto-activating portal to ${destination}`);
-                  handlePortalTransition(destination, spawnPosition);
-                  return;
-                }
+              // Check if portal condition is met
+              if (condition && condition(tileX, tileY)) {
+                console.log(`✅ Auto-activating portal to ${destination}`);
+                handlePortalTransition(destination, spawnPosition);
+                return;
               }
             }
-          }
+          } else {
+            // Handle single portal (object)
+            const { destination, spawnPosition, condition } = progressionPortal;
 
-          // Handle special portals in Yosemite (types 6-8)
-          if (currentMapName === "Yosemite" && tileType >= 6 && tileType <= 8) {
-            const specialPortal = PORTAL_CONFIG.special[tileX];
-
-            if (specialPortal && tileY === 1) {
-              console.log(
-                `✅ Auto-activating special portal: ${specialPortal.title}`,
-              );
-
-              // Activate the special world directly
-              if (specialPortal.type === "terminal") {
-                setCurrentSpecialWorld("terminal");
-              } else if (specialPortal.type === "shooter") {
-                setCurrentSpecialWorld("shooter");
-              } else if (specialPortal.type === "text_adventure") {
-                setCurrentSpecialWorld("text_adventure");
-              }
-
-              updatePortalState({
-                activePortal: specialPortal,
-                portalNotificationActive: true,
-              });
+            // Check if portal condition is met (if any)
+            if (!condition || condition(tileX, tileY)) {
+              console.log(`✅ Auto-activating portal to ${destination}`);
+              handlePortalTransition(destination, spawnPosition);
               return;
             }
           }
-        };
+        }
+      }
 
-        window.addEventListener("portalCollision", handlePortalCollision);
-        return () => {
-          window.removeEventListener("portalCollision", handlePortalCollision);
-        };
-      }, [
-        portalState.isTransitioning,
-        currentMap,
-        PORTAL_CONFIG,
-        handlePortalTransition,
-        updatePortalState,
-      ]);
+      // Handle special portals in Yosemite (types 6-8)
+      if (currentMapName === "Yosemite" && tileType >= 6 && tileType <= 8) {
+        const specialPortal = PORTAL_CONFIG.special[tileX];
+
+        if (specialPortal && tileY === 1) {
+          console.log(
+            `✅ Auto-activating special portal: ${specialPortal.title}`,
+          );
+
+          // Activate the special world directly
+          if (specialPortal.type === "terminal") {
+            setCurrentSpecialWorld("terminal");
+          } else if (specialPortal.type === "shooter") {
+            setCurrentSpecialWorld("shooter");
+          } else if (specialPortal.type === "text_adventure") {
+            setCurrentSpecialWorld("text_adventure");
+          }
+
+          updatePortalState({
+            activePortal: specialPortal,
+            portalNotificationActive: true,
+          });
+          return;
+        }
+      }
+    };
+
+    window.addEventListener("portalCollision", handlePortalCollision);
+    return () => {
+      window.removeEventListener("portalCollision", handlePortalCollision);
+    };
+  }, [
+    portalState.isTransitioning,
+    currentMap,
+    PORTAL_CONFIG,
+    handlePortalTransition,
+    updatePortalState,
+  ]);
 
   // Boss defeat
   const handleBossDefeat = useCallback(
@@ -1676,6 +1714,29 @@ const GameWorld = React.memo(() => {
           }
           break;
         }
+        case "u":
+        case "U": {
+          const createOpen =
+            uiState.showForm &&
+            uiState.dockExpanded &&
+            uiState.dockTab === "create";
+          if (createOpen) {
+            updateUIState({
+              showForm: false,
+              dockExpanded: false,
+              dockTab: "status",
+            });
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Closed artifact creation");
+            }
+          } else {
+            openDockTab("create");
+            if (gameState.mobileState.screenReaderMode) {
+              announceToScreenReader("Opening artifact creation");
+            }
+          }
+          break;
+        }
         case "m":
         case "M": {
           const mapOpen = uiState.dockExpanded && uiState.dockTab === "map";
@@ -1712,8 +1773,7 @@ const GameWorld = React.memo(() => {
         case "c":
         case "C":
         case "?": {
-          const guideOpen =
-            uiState.dockExpanded && uiState.dockTab === "guide";
+          const guideOpen = uiState.dockExpanded && uiState.dockTab === "guide";
           if (guideOpen) {
             updateUIState({ dockExpanded: false, dockTab: "status" });
             if (gameState.mobileState.screenReaderMode) {
@@ -1731,6 +1791,7 @@ const GameWorld = React.memo(() => {
           if (uiState.showNPCDialog) {
             setActiveNPC(null);
           }
+          setShowLevelUpModal(false);
           updateUIState({
             showInventory: false,
             showQuotes: false,
@@ -1739,6 +1800,7 @@ const GameWorld = React.memo(() => {
             showControlsGuide: false,
             showForm: false,
             showNPCDialog: false,
+            showRewardModal: false,
             dockExpanded: false,
             dockTab: "status",
           });
@@ -1887,6 +1949,7 @@ const GameWorld = React.memo(() => {
       setCharacterState,
       setIsAttacking,
       openDockTab,
+      setShowLevelUpModal,
     ],
   );
 
@@ -1959,7 +2022,13 @@ const GameWorld = React.memo(() => {
         gameState.soundManager.cleanup();
       }
     };
-  }, [loadCharacter, fetchNPCs, initSoundManager, handleKeyDown, gameState.soundManager]);
+  }, [
+    loadCharacter,
+    fetchNPCs,
+    initSoundManager,
+    handleKeyDown,
+    gameState.soundManager,
+  ]);
 
   // Music management based on current map
   useEffect(() => {
@@ -2104,8 +2173,7 @@ const GameWorld = React.memo(() => {
         updateGameState({ artifacts: artifactsData });
       } catch (error) {
         const isTimeout =
-          error?.message?.includes("timeout") ||
-          error?.code === "ECONNABORTED";
+          error?.message?.includes("timeout") || error?.code === "ECONNABORTED";
         if (isTimeout && retries > 0) {
           await new Promise((r) => setTimeout(r, 2000));
           return loadArtifacts(retries - 1);
@@ -2297,8 +2365,9 @@ const GameWorld = React.memo(() => {
   );
 
   // Get active powers from user - ensure it's always an array
-  const activePowers = Array.isArray(user?.activePowers) ? user.activePowers : [];
-
+  const activePowers = Array.isArray(user?.activePowers)
+    ? user.activePowers
+    : [];
 
   // Portal collision detection hook
   const { checkPortalCollisions } = usePortalCollisions({
@@ -2317,8 +2386,6 @@ const GameWorld = React.memo(() => {
     gameData: gameState.gameData,
     handleLevelCompletion,
   });
-
-
 
   useEffect(() => {
     // Check for both map artifacts and server artifacts at the player's position
@@ -2339,7 +2406,8 @@ const GameWorld = React.memo(() => {
 
       // Check server artifacts
       const serverArtifact =
-        gameState.gameData.artifacts && Array.isArray(gameState.gameData.artifacts)
+        gameState.gameData.artifacts &&
+        Array.isArray(gameState.gameData.artifacts)
           ? gameState.gameData.artifacts.find(
               (artifact) =>
                 artifact &&
@@ -2484,7 +2552,9 @@ const GameWorld = React.memo(() => {
     // Give rewards, etc.
     updateUIState({
       currentAchievement: "Completed Hemingway's Adventure",
-      showRewardModal: true
+      showRewardModal: true,
+      dockExpanded: true,
+      dockTab: "status",
     });
   }, [setCurrentSpecialWorld, updateUIState]);
 
@@ -2497,7 +2567,9 @@ const GameWorld = React.memo(() => {
     // Give rewards, etc.
     updateUIState({
       currentAchievement: "Completed The Writer's Journey",
-      showRewardModal: true
+      showRewardModal: true,
+      dockExpanded: true,
+      dockTab: "status",
     });
   }, [setCurrentSpecialWorld, updateUIState]);
 
@@ -2718,7 +2790,9 @@ const GameWorld = React.memo(() => {
           createdAt: new Date().toISOString(),
         });
 
-        updateGameState({ artifacts: [...gameState.gameData.artifacts, newArtifact] });
+        updateGameState({
+          artifacts: [...gameState.gameData.artifacts, newArtifact],
+        });
 
         // Award XP for creating an artifact
         if (typeof awardXP === "function") {
@@ -2730,8 +2804,9 @@ const GameWorld = React.memo(() => {
         if (character && character.id) {
           const createdCount =
             (Array.isArray(gameState.gameData.artifacts)
-              ? gameState.gameData.artifacts.filter((a) => a.createdBy === character.id)
-                  .length
+              ? gameState.gameData.artifacts.filter(
+                  (a) => a.createdBy === character.id,
+                ).length
               : 0) + 1;
           if (createdCount >= 5) {
             handleAchievementUnlocked(
@@ -2754,7 +2829,12 @@ const GameWorld = React.memo(() => {
         throw error;
       }
     },
-    [gameState.gameData.artifacts, character, updateGameState, handleAchievementUnlocked],
+    [
+      gameState.gameData.artifacts,
+      character,
+      updateGameState,
+      handleAchievementUnlocked,
+    ],
   );
 
   // Update the handleArtifactClick function to include achievements
@@ -2767,7 +2847,8 @@ const GameWorld = React.memo(() => {
       if (!clickedArtifact) return;
 
       // Check if this artifact was already viewed
-      const isFirstView = !gameState.gameData.viewedArtifacts?.includes(artifactId);
+      const isFirstView =
+        !gameState.gameData.viewedArtifacts?.includes(artifactId);
 
       // Update viewed artifacts
       if (isFirstView) {
@@ -3060,10 +3141,11 @@ const GameWorld = React.memo(() => {
     }
   }, [updateGameState]);
 
-
   // Function to toggle artifacts visibility
   const toggleArtifactsVisibility = useCallback(() => {
-    updateUIState({ showArtifactsOnMap: !gameState.uiState.showArtifactsOnMap });
+    updateUIState({
+      showArtifactsOnMap: !gameState.uiState.showArtifactsOnMap,
+    });
   }, [gameState.uiState.showArtifactsOnMap, updateUIState]);
 
   // Calculate artifacts to show based on current map
@@ -3084,7 +3166,9 @@ const GameWorld = React.memo(() => {
 
     // Handle different naming conventions between MAPS and database
     if (artifactMapName === currentMapName) {
-      return gameState.gameData.artifacts.filter((artifact) => artifact.visible);
+      return gameState.gameData.artifacts.filter(
+        (artifact) => artifact.visible,
+      );
     }
 
     // Handle case-insensitive matching, only if artifactMapName and currentMapName are defined
@@ -3093,7 +3177,9 @@ const GameWorld = React.memo(() => {
       typeof currentMapName === "string" &&
       artifactMapName.toLowerCase() === currentMapName.toLowerCase()
     ) {
-      return gameState.gameData.artifacts.filter((artifact) => artifact.visible);
+      return gameState.gameData.artifacts.filter(
+        (artifact) => artifact.visible,
+      );
     }
 
     // Handle specific mappings
@@ -3104,7 +3190,9 @@ const GameWorld = React.memo(() => {
     };
 
     if (mapMappings[artifactMapName] === currentMapName) {
-      return gameState.gameData.artifacts.filter((artifact) => artifact.visible);
+      return gameState.gameData.artifacts.filter(
+        (artifact) => artifact.visible,
+      );
     }
 
     // Handle reverse mappings
@@ -3115,7 +3203,9 @@ const GameWorld = React.memo(() => {
     };
 
     if (reverseMappings[currentMapName] === artifactMapName) {
-      return gameState.gameData.artifacts.filter((artifact) => artifact.visible);
+      return gameState.gameData.artifacts.filter(
+        (artifact) => artifact.visible,
+      );
     }
 
     return [];
@@ -3150,606 +3240,601 @@ const GameWorld = React.memo(() => {
           onKeyDown={handleKeyDown}
         >
           <div className="game-main-stage">
-          {/* === ACCESSIBILITY === */}
-          <div id="game-instructions" className="sr-only">
-            Use arrow keys or WASD to move. The bottom dock has Status, Talk,
-            Bag, Chat, Map, Help, Quotes, and Feedback. Keys: I bag, T talk, M
-            map, C or question mark help, Q quotes, F feedback. H high contrast,
-            R reduced motion, S screen reader. Escape closes overlays and
-            collapses the dock.
-          </div>
+            {/* === ACCESSIBILITY === */}
+            <div id="game-instructions" className="sr-only">
+              Use arrow keys or WASD to move. The bottom dock has Status, Talk,
+              Bag, Chat, Map, Help, Quotes, and Feedback. Keys: I bag, T talk, M
+              map, C or question mark help, Q quotes, F feedback. H high
+              contrast, R reduced motion, S screen reader. Escape closes
+              overlays and collapses the dock.
+            </div>
 
-          <div
-            id="screen-reader-announcements"
-            aria-live="polite"
-            aria-atomic="true"
-            className="sr-only"
-          />
-          {artifactsLoading && (
             <div
-              className="artifacts-loading-indicator"
+              id="screen-reader-announcements"
               aria-live="polite"
-              role="status"
-            >
-              Loading artifacts…
-            </div>
-          )}
-
-          {/* === CORE GAME WORLD === */}
-          {MAPS[currentMapIndex]?.data && (
-            <MapComponent
-              key={`overlay-map-${mapSchemaRevision}-${currentMapIndex}`}
-              currentMapIndex={currentMapIndex}
-              mapData={MAPS[currentMapIndex].data}
-              exploredTiles={exploredTiles}
-              viewport={viewport}
-              characterPosition={characterPosition}
-              artifacts={gameState.gameData.artifacts}
-              showArtifactsOnMap={uiState.showArtifactsOnMap}
-              inDungeon={uiState.inDungeon}
+              aria-atomic="true"
+              className="sr-only"
             />
-          )}
-
-          <Character
-            ref={characterRef}
-            x={(characterPosition || { x: 64, y: 64 }).x}
-            y={(characterPosition || { x: 64, y: 64 }).y}
-            characterState={gameState.characterState}
-            direction={gameState.characterState?.direction || "down"}
-            isLoggedIn={isLoggedIn}
-            character={character}
-            soundManager={gameState.soundManager}
-            playerHealth={gameState.playerHealth}
-            maxPlayerHealth={gameState.maxPlayerHealth}
-            isInvincible={gameState.isInvincible}
-          />
-
-          {/* === UI SYSTEMS === */}
-
-          {/* Zelda-style HUD */}
-          <GameHUD
-            health={gameState.playerHealth}
-            maxHealth={gameState.maxPlayerHealth}
-            rupees={gameState.rupees}
-            keys={gameState.keys}
-            currentArea={MAPS[gameState.currentMapIndex]?.name || "Overworld"}
-            equippedItem={gameState.equippedItem}
-            experience={gameState.characterStats.experience}
-            level={gameState.characterStats.level}
-            experienceToNextLevel={calculateXPForLevel(
-              gameState.characterStats.level + 1,
-            )}
-            isDamaged={gameState.characterState.isHit}
-          />
-
-          {/* Minimap with fog of war */}
-          <Minimap
-            mapData={MAPS[currentMapIndex]?.data || []}
-            playerPosition={characterPosition || { x: 64, y: 64 }}
-            npcs={MAPS[currentMapIndex]?.npcs || []}
-            portals={MAPS[currentMapIndex]?.specialPortals || []}
-            tileSize={TILE_SIZE}
-            exploredTiles={exploredTiles instanceof Set ? exploredTiles : new Set()}
-            currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
-          />
-
-          {gameState.uiState.showLevel4 && (
-            <Level4Shooter
-              onComplete={handleLevel4Complete}
-              onExit={handleLevel4Exit}
-            />
-          )}
-          <div
-            className="viewport"
-            style={{ width: "100%", height: "100%" }}
-            role="region"
-            aria-label="Game viewport"
-          >
-            <div
-              className={`game-world ${currentMapIndex === 2 ? "level-3" : currentMapIndex === 1 ? "level-2" : "level-1"} ${gameState.mobileState.reducedMotionMode ? "no-animations" : ""}`}
-              style={{
-                transform: gameState.mobileState.reducedMotionMode
-                  ? `translate(${-viewport.x}px, ${-viewport.y}px)`
-                  : `translate(${-viewport.x}px, ${-viewport.y}px)`,
-                width: `${
-                  Array.isArray(MAPS) &&
-                  MAPS[currentMapIndex]?.data?.[0]?.length
-                    ? MAPS[currentMapIndex].data[0].length * TILE_SIZE
-                    : 800
-                }px`,
-                height: `${
-                  Array.isArray(MAPS) && MAPS[currentMapIndex]?.data?.length
-                    ? MAPS[currentMapIndex].data.length * TILE_SIZE
-                    : 600
-                }px`,
-              }}
-              role="region"
-              aria-label={`Current area: ${MAPS[currentMapIndex]?.name || "Unknown"}`}
-            >
-              {/* Conditional rendering: Dungeon or Overworld */}
-              {gameState.uiState.inDungeon && gameState.dungeonState.currentDungeon ? (
-                <Dungeon
-                  dungeonData={gameState.dungeonState.currentDungeon}
-                  playerPosition={characterPosition}
-                  onPlayerMove={setCharacterPosition}
-                  onCollectItem={handleDungeonItemCollect}
-                  onEnemyDefeat={handleDungeonEnemyDefeat}
-                  onBossDefeat={handleBossDefeat}
-                  onExit={handleExitDungeon}
-                  playerKeys={gameState.dungeonState.smallKeys}
-                  hasBossKey={gameState.dungeonState.hasBossKey}
-                  characterRef={characterRef}
-                />
-              ) : (
-                MAPS[currentMapIndex] && MAPS[currentMapIndex].data && (
-                  <div className="map-transition-container">
-                    <MapComponent
-                      key={`world-map-${mapSchemaRevision}-${currentMapIndex}`}
-                      mapData={MAPS[currentMapIndex].data}
-                      npcs={
-                        MAPS[currentMapIndex].npcs?.filter(
-                          (npc) => npc && npc.position,
-                        ) || []
-                      }
-                      artifacts={
-                        !uiState.showArtifactsOnMap ? [] : artifactsToShow
-                      }
-                      onTileClick={handleMapTileClick}
-                      onNPCClick={handleNPCClick}
-                      onArtifactClick={handleArtifactClick}
-                      mapName={MAPS[currentMapIndex].name}
-                      questStatusMap={questStatusMap || new Map()}
-                      scrollViewport={viewport}
-                    />
-                  </div>
-                )
-              )}
-
-              {/* Player Character */}
-              <CharacterController
-                currentMapIndex={currentMapIndex}
-                setCurrentMapIndex={setCurrentMapIndex}
-                isLoggedIn={isLoggedIn}
-                visibleArtifact={visibleArtifact}
-                handleArtifactPickup={handleArtifactPickup}
-                setFormPosition={setFormPosition}
-                setShowInventory={setInventoryDockVisible}
-                adjustViewport={adjustViewport}
-                activePowers={activePowers}
-                user={user}
-                uiState={uiState}
-                isInvincible={gameState.isInvincible}
-                characterState={gameState.characterState}
-                transitionToNeighbor={transitionToNeighbor}
-                characterPosition={characterPosition}
-                onPositionChange={(position, reason) => {
-                  setCharacterPosition(position);
-                  if (reason === 'portal') {
-                    // Handle portal-specific logic if needed
-                  }
-                }}
-              />
-
-              {/* Other Players */}
-              {otherPlayers.map((player) => (
-                <div
-                  key={player.userId}
-                  className="other-player"
-                  style={{
-                    position: "absolute",
-                    left: `${player.position.x}px`,
-                    top: `${player.position.y}px`,
-                    width: `${TILE_SIZE}px`,
-                    height: `${TILE_SIZE}px`,
-                    zIndex: 10,
-                  }}
-                >
-                  <div className="other-player-avatar">
-                    <img
-                      src={player.avatar || "/assets/default-avatar.svg"}
-                      alt={player.username}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: "50%",
-                        border: "2px solid #3498db",
-                      }}
-                    />
-                  </div>
-                  <div className="other-player-name">{player.username}</div>
-                </div>
-              ))}
-
-              {/* Environment Modifiers */}
-              {gameState.uiState.isDarkMode && <div className="darkmode-overlay" />}
-
-              {/* Buttons Menu */}
-              <div className="game-controls">
-                <IconButton
-                  onClick={() => openBagDock()}
-                  tooltip="Inventory"
-                >
-                  <i className="fas fa-briefcase"></i>
-                </IconButton>
-                <IconButton
-                  onClick={() => openDockTab("map")}
-                  tooltip="World Map"
-                >
-                  <i className="fas fa-map"></i>
-                </IconButton>
-                <IconButton
-                  onClick={() => openDockTab("quotes")}
-                  tooltip="Saved Quotes"
-                >
-                  <i className="fas fa-quote-right"></i>
-                </IconButton>
-                <IconButton
-                  onClick={() => updateUIState({ showWorldGuide: true })}
-                  tooltip="World Guide"
-                >
-                  <i className="fas fa-compass"></i>
-                </IconButton>
-                <IconButton
-                  onClick={() => openDockTab("guide")}
-                  tooltip="Keyboard Controls (C)"
-                >
-                  <i className="fas fa-keyboard"></i>
-                </IconButton>
-                <IconButton
-                  onClick={toggleArtifactsVisibility}
-                  tooltip={
-                    gameState.uiState.showArtifactsOnMap
-                      ? "Hide Artifacts"
-                      : "Show Artifacts"
-                  }
-                >
-                  <i
-                    className={`fas fa-${gameState.uiState.showArtifactsOnMap ? "eye-slash" : "eye"}`}
-                  ></i>
-                </IconButton>
-              </div>
-
-              {/* Active Quest Display */}
-              {gameState.activeQuests.length > 0 && (
-                <div className="active-quest-hud">
-                  <div className="quest-hud-header">
-                    <i className="fas fa-scroll"></i>
-                    <span>
-                      Active Quest{gameState.activeQuests.length > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  {gameState.activeQuests.slice(0, 2).map((quest) => {
-                    const completedStages =
-                      quest.stages?.filter((s) => s.completed).length || 0;
-                    const totalStages = quest.stages?.length || 0;
-                    const progress =
-                      totalStages > 0
-                        ? (completedStages / totalStages) * 100
-                        : 0;
-                    const currentStage = quest.stages?.[quest.currentStage];
-
-                    return (
-                      <div key={quest.questId} className="quest-hud-item">
-                        <div className="quest-hud-title">{quest.title}</div>
-                        <div className="quest-hud-progress">
-                          <div className="quest-hud-progress-bar">
-                            <div
-                              className="quest-hud-progress-fill"
-                              style={{ width: `${progress}%` }}
-                            ></div>
-                          </div>
-                          <span className="quest-hud-progress-text">
-                            {completedStages}/{totalStages}
-                          </span>
-                        </div>
-                        {currentStage && !currentStage.completed && (
-                          <div className="quest-hud-current-task">
-                            {currentStage.task}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                  {gameState.activeQuests.length > 2 && (
-                    <div className="quest-hud-more">
-                      +{gameState.activeQuests.length - 2} more quest
-                      {gameState.activeQuests.length - 2 > 1 ? "s" : ""}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* === MODALS AND OVERLAYS === */}
-          {gameState.uiState.showWinNotification && (
-            <div className="win-notification">
-              <div className="win-content">
-                <h2>Level Complete!</h2>
-                <p>{gameState.uiState.winMessage}</p>
-                <div className="win-stars">★★★</div>
-                <button
-                  onClick={() => updateUIState({ showWinNotification: false })}
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
-          )}
-
-          <RewardModal
-            visible={gameState.uiState.showRewardModal}
-            onClose={() => updateUIState({ showRewardModal: false })}
-            achievement={gameState.uiState.currentAchievement}
-          />
-
-          {gameState.uiState.showForm && (
-            <ArtifactCreation
-              position={gameState.formPosition}
-              onClose={() => updateUIState({ showForm: false })}
-              refreshArtifacts={refreshArtifactList}
-              currentArea={MAPS[currentMapIndex].name}
-            />
-          )}
-
-          {/* Level Up Modal */}
-          {showLevelUpModal && (
-            <LevelUpModal
-              level={gameState.characterStats.level}
-              stats={characterStats}
-              onClose={() => setShowLevelUpModal(false)}
-            />
-          )}
-
-          {/* Hamlet Finale Mini-Game */}
-          {gameState.showHamletFinale && (
-            <HamletFinale
-              onComplete={handleHamletFinaleComplete}
-              onExit={() => gameState.setShowHamletFinale(false)}
-            />
-          )}
-
-          {/* Quest Completion Celebration */}
-          {gameState.questCompletionCelebration && (
-            <QuestCompletionCelebration
-              quest={questCompletionCelebration.quest}
-              rewards={questCompletionCelebration.rewards}
-              onClose={() => gameState.setQuestCompletionCelebration(null)}
-            />
-          )}
-
-          {/* Feedback button */}
-          <div
-            className="feedback-button"
-            onClick={() => openDockTab("feedback")}
-          >
-            <span role="img" aria-label="Feedback">
-              💬
-            </span>
-            <span className="feedback-text">Feedback</span>
-          </div>
-
-          {/* Map key hint - only when no blocking overlay */}
-          {!gameState.uiState.showForm &&
-            !gameState.uiState.showWinNotification &&
-            !gameState.uiState.showRewardModal &&
-            !gameState.uiState.showLevel4 &&
-            !gameState.uiState.showNPCDialog && (
-              <div className="map-key-hint" role="status" aria-live="polite">
-                {gameState.mobileState.isMobile ? (
-                  <span>
-                    Tap and drag to move | Tap NPCs to talk | Use the bottom dock
-                    for map, chat, and more
-                  </span>
-                ) : (
-                  <span>
-                    Bottom dock: M map, C help, F feedback, I bag, T talk — Esc
-                    closes
-                  </span>
-                )}
-              </div>
-            )}
-
-          {/* Mobile touch controls - Directional pad for movement */}
-          {gameState.mobileState.showTouchControls &&
-            gameState.mobileState.touchControlsEnabled &&
-            characterMovement.handleMove && (
-              <TouchControls
-                onMove={(direction) => {
-                  characterMovement.handleMove(direction);
-                }}
-                onDrop={() => {
-                  // Handle drop action if needed
-                }}
-              />
-            )}
-
-          {/* Mobile UI controls */}
-          {gameState.mobileState.showTouchControls &&
-            gameState.mobileState.touchControlsEnabled && (
+            {artifactsLoading && (
               <div
-                className="mobile-controls"
-                role="group"
-                aria-label="Mobile game controls"
+                className="artifacts-loading-indicator"
+                aria-live="polite"
+                role="status"
               >
-                <button
-                  className="mobile-control-btn inventory-btn"
-                  onClick={() => openBagDock()}
-                  aria-label="Open inventory"
-                >
-                  <span role="img" aria-hidden="true">
-                    📦
-                  </span>
-                </button>
-                <button
-                  className="mobile-control-btn map-btn"
-                  onClick={() => openDockTab("map")}
-                  aria-label="Open world map"
-                >
-                  <span role="img" aria-hidden="true">
-                    🗺️
-                  </span>
-                </button>
-                <button
-                  className="mobile-control-btn feedback-btn"
-                  onClick={() => openDockTab("feedback")}
-                  aria-label="Open feedback form"
-                >
-                  <span role="img" aria-hidden="true">
-                    💬
-                  </span>
-                </button>
-                <button
-                  className="mobile-control-btn accessibility-btn"
-                  onClick={() =>
-                    setMobileState((prev) => ({
-                      ...prev,
-                      screenReaderMode: !prev.screenReaderMode,
-                    }))
-                  }
-                  aria-label={
-                    gameState.mobileState.screenReaderMode
-                      ? "Disable screen reader mode"
-                      : "Enable screen reader mode"
-                  }
-                >
-                  <span role="img" aria-hidden="true">
-                    🔊
-                  </span>
-                </button>
+                Loading artifacts…
               </div>
             )}
 
-          {/* Accessibility status indicator */}
-          {gameState.mobileState.screenReaderMode && (
-            <div
-              className="accessibility-status"
-              role="status"
-              aria-live="polite"
-            >
-              <span>Screen reader mode active</span>
-            </div>
-          )}
+            {/* === CORE GAME WORLD === */}
+            {MAPS[currentMapIndex]?.data && (
+              <MapComponent
+                key={`overlay-map-${mapSchemaRevision}-${currentMapIndex}`}
+                currentMapIndex={currentMapIndex}
+                mapData={MAPS[currentMapIndex].data}
+                exploredTiles={exploredTiles}
+                viewport={viewport}
+                characterPosition={characterPosition}
+                artifacts={gameState.gameData.artifacts}
+                showArtifactsOnMap={uiState.showArtifactsOnMap}
+                inDungeon={uiState.inDungeon}
+              />
+            )}
 
-          {currentSpecialWorld === "text_adventure" && (
-            <TextAdventure
-              username={character?.username || "traveler"}
-              onComplete={handleTextAdventureComplete}
-              onExit={handleTextAdventureExit}
-            />
-          )}
-
-          {/* Add ArtifactDiscovery component */}
-          <ArtifactDiscovery
-            artifacts={gameState.gameData.artifacts}
-            characterPosition={characterPosition}
-            currentMapName={MAPS[currentMapIndex].name}
-            onArtifactFound={handleArtifactClick}
-            character={character}
-          />
-
-
-
-          {/* === SPECIAL WORLDS AND MINI-GAMES === */}
-          {currentSpecialWorld === "textAdventure" && (
-            <TextAdventure
-              onComplete={handleTextAdventureComplete}
-              onExit={handleTextAdventureExit}
+            <Character
+              ref={characterRef}
+              x={(characterPosition || { x: 64, y: 64 }).x}
+              y={(characterPosition || { x: 64, y: 64 }).y}
+              characterState={gameState.characterState}
+              direction={gameState.characterState?.direction || "down"}
+              isLoggedIn={isLoggedIn}
               character={character}
+              soundManager={gameState.soundManager}
+              playerHealth={gameState.playerHealth}
+              maxPlayerHealth={gameState.maxPlayerHealth}
+              isInvincible={gameState.isInvincible}
             />
-          )}
 
-          {currentSpecialWorld === "terminal" && (
-            <Level3Terminal
-              onComplete={handleTerminalComplete}
-              onExit={handleTerminalExit}
-              character={character}
-              artifacts={gameState.gameData.artifacts}
-              username={gameState.character?.username || "User"}
-              inventory={inventory}
+            {/* === UI SYSTEMS === */}
+
+            {/* Zelda-style HUD */}
+            <GameHUD
+              health={gameState.playerHealth}
+              maxHealth={gameState.maxPlayerHealth}
+              rupees={gameState.rupees}
+              keys={gameState.keys}
+              currentArea={MAPS[gameState.currentMapIndex]?.name || "Overworld"}
+              equippedItem={gameState.equippedItem}
+              experience={gameState.characterStats.experience}
+              level={gameState.characterStats.level}
+              experienceToNextLevel={calculateXPForLevel(
+                gameState.characterStats.level + 1,
+              )}
+              isDamaged={gameState.characterState.isHit}
             />
-          )}
 
-          {currentSpecialWorld === "shooter" && (
-            <>
-              {console.log("GameWorld: Rendering Level4Shooter component")}
+            {/* Minimap with fog of war */}
+            <Minimap
+              mapData={MAPS[currentMapIndex]?.data || []}
+              playerPosition={characterPosition || { x: 64, y: 64 }}
+              npcs={MAPS[currentMapIndex]?.npcs || []}
+              portals={MAPS[currentMapIndex]?.specialPortals || []}
+              tileSize={TILE_SIZE}
+              exploredTiles={
+                exploredTiles instanceof Set ? exploredTiles : new Set()
+              }
+              currentArea={MAPS[currentMapIndex]?.name || "Overworld"}
+            />
+
+            {gameState.uiState.showLevel4 && (
               <Level4Shooter
                 onComplete={handleShooterComplete}
                 onExit={handleShooterExit}
                 character={character}
               />
-            </>
-          )}
-
-          {currentSpecialWorld === "hemingway" && (
-            <HemingwayChallenge
-              onComplete={handleHemingwayComplete}
-              onExit={handleHemingwayExit}
-              character={character}
-            />
-          )}
-
-          {/* Artifact Game Launcher */}
-          {gameState.showGameLauncher && gameState.currentGameArtifact && (
-            <ArtifactGameLauncher
-              artifact={gameState.currentGameArtifact}
-              character={character}
-              onComplete={handleGameComplete}
-              onExit={handleGameExit}
-              onProgressUpdate={(progress) => {
-                console.log("Game progress update:", progress);
-              }}
-            />
-          )}
-
-          {/* Active Powers Display */}
-          {activePowers.length > 0 && (
-            <div className="active-powers-hud">
-              <div className="powers-hud-label">Active Powers:</div>
-              <div className="powers-hud-list">
-                {activePowers.map((powerId) => {
-                  const powerDef = getPowerDefinition(powerId);
-                  return (
-                    <div
-                      key={powerId}
-                      className="power-hud-item"
-                      title={powerDef.description}
-                    >
-                      <span className="power-hud-icon">{powerDef.icon}</span>
-                      <span className="power-hud-name">{powerDef.name}</span>
+            )}
+            <div
+              className="viewport"
+              style={{ width: "100%", height: "100%" }}
+              role="region"
+              aria-label="Game viewport"
+            >
+              <div
+                className={`game-world ${currentMapIndex === 2 ? "level-3" : currentMapIndex === 1 ? "level-2" : "level-1"} ${gameState.mobileState.reducedMotionMode ? "no-animations" : ""}`}
+                style={{
+                  transform: gameState.mobileState.reducedMotionMode
+                    ? `translate(${-viewport.x}px, ${-viewport.y}px)`
+                    : `translate(${-viewport.x}px, ${-viewport.y}px)`,
+                  width: `${
+                    Array.isArray(MAPS) &&
+                    MAPS[currentMapIndex]?.data?.[0]?.length
+                      ? MAPS[currentMapIndex].data[0].length * TILE_SIZE
+                      : 800
+                  }px`,
+                  height: `${
+                    Array.isArray(MAPS) && MAPS[currentMapIndex]?.data?.length
+                      ? MAPS[currentMapIndex].data.length * TILE_SIZE
+                      : 600
+                  }px`,
+                }}
+                role="region"
+                aria-label={`Current area: ${MAPS[currentMapIndex]?.name || "Unknown"}`}
+              >
+                {/* Conditional rendering: Dungeon or Overworld */}
+                {gameState.uiState.inDungeon &&
+                gameState.dungeonState.currentDungeon ? (
+                  <Dungeon
+                    dungeonData={gameState.dungeonState.currentDungeon}
+                    playerPosition={characterPosition}
+                    onPlayerMove={setCharacterPosition}
+                    onCollectItem={handleDungeonItemCollect}
+                    onEnemyDefeat={handleDungeonEnemyDefeat}
+                    onBossDefeat={handleBossDefeat}
+                    onExit={handleExitDungeon}
+                    playerKeys={gameState.dungeonState.smallKeys}
+                    hasBossKey={gameState.dungeonState.hasBossKey}
+                    characterRef={characterRef}
+                  />
+                ) : (
+                  MAPS[currentMapIndex] &&
+                  MAPS[currentMapIndex].data && (
+                    <div className="map-transition-container">
+                      <MapComponent
+                        key={`world-map-${mapSchemaRevision}-${currentMapIndex}`}
+                        mapData={MAPS[currentMapIndex].data}
+                        npcs={
+                          MAPS[currentMapIndex].npcs?.filter(
+                            (npc) => npc && npc.position,
+                          ) || []
+                        }
+                        artifacts={
+                          !uiState.showArtifactsOnMap ? [] : artifactsToShow
+                        }
+                        onTileClick={handleMapTileClick}
+                        onNPCClick={handleNPCClick}
+                        onArtifactClick={handleArtifactClick}
+                        mapName={MAPS[currentMapIndex].name}
+                        questStatusMap={questStatusMap || new Map()}
+                        scrollViewport={viewport}
+                      />
                     </div>
-                  );
-                })}
+                  )
+                )}
+
+                {/* Player Character */}
+                <CharacterController
+                  ref={characterControllerRef}
+                  currentMapIndex={currentMapIndex}
+                  setCurrentMapIndex={setCurrentMapIndex}
+                  isLoggedIn={isLoggedIn}
+                  visibleArtifact={visibleArtifact}
+                  handleArtifactPickup={handleArtifactPickup}
+                  setFormPosition={setFormPosition}
+                  setShowInventory={setInventoryDockVisible}
+                  adjustViewport={adjustViewport}
+                  activePowers={activePowers}
+                  user={user}
+                  uiState={uiState}
+                  isInvincible={gameState.isInvincible}
+                  characterState={gameState.characterState}
+                  transitionToNeighbor={transitionToNeighbor}
+                  characterPosition={characterPosition}
+                  onPositionChange={(position, reason) => {
+                    setCharacterPosition(position);
+                    if (reason === "portal") {
+                      // Handle portal-specific logic if needed
+                    }
+                  }}
+                />
+
+                {/* Other Players */}
+                {otherPlayers.map((player) => (
+                  <div
+                    key={player.userId}
+                    className="other-player"
+                    style={{
+                      position: "absolute",
+                      left: `${player.position.x}px`,
+                      top: `${player.position.y}px`,
+                      width: `${TILE_SIZE}px`,
+                      height: `${TILE_SIZE}px`,
+                      zIndex: 10,
+                    }}
+                  >
+                    <div className="other-player-avatar">
+                      <img
+                        src={player.avatar || "/assets/default-avatar.svg"}
+                        alt={player.username}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: "50%",
+                          border: "2px solid #3498db",
+                        }}
+                      />
+                    </div>
+                    <div className="other-player-name">{player.username}</div>
+                  </div>
+                ))}
+
+                {/* Environment Modifiers */}
+                {gameState.uiState.isDarkMode && (
+                  <div className="darkmode-overlay" />
+                )}
+
+                {/* Buttons Menu */}
+                <div className="game-controls">
+                  <IconButton onClick={() => openBagDock()} tooltip="Inventory">
+                    <i className="fas fa-briefcase"></i>
+                  </IconButton>
+                  <IconButton
+                    onClick={() => openDockTab("map")}
+                    tooltip="World Map"
+                  >
+                    <i className="fas fa-map"></i>
+                  </IconButton>
+                  <IconButton
+                    onClick={() => openDockTab("quotes")}
+                    tooltip="Saved Quotes"
+                  >
+                    <i className="fas fa-quote-right"></i>
+                  </IconButton>
+                  <IconButton
+                    onClick={() => updateUIState({ showWorldGuide: true })}
+                    tooltip="World Guide"
+                  >
+                    <i className="fas fa-compass"></i>
+                  </IconButton>
+                  <IconButton
+                    onClick={() => openDockTab("guide")}
+                    tooltip="Keyboard Controls (C)"
+                  >
+                    <i className="fas fa-keyboard"></i>
+                  </IconButton>
+                  <IconButton
+                    onClick={toggleArtifactsVisibility}
+                    tooltip={
+                      gameState.uiState.showArtifactsOnMap
+                        ? "Hide Artifacts"
+                        : "Show Artifacts"
+                    }
+                  >
+                    <i
+                      className={`fas fa-${gameState.uiState.showArtifactsOnMap ? "eye-slash" : "eye"}`}
+                    ></i>
+                  </IconButton>
+                </div>
+
+                {/* Active Quest Display */}
+                {gameState.activeQuests.length > 0 && (
+                  <div className="active-quest-hud">
+                    <div className="quest-hud-header">
+                      <i className="fas fa-scroll"></i>
+                      <span>
+                        Active Quest
+                        {gameState.activeQuests.length > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    {gameState.activeQuests.slice(0, 2).map((quest) => {
+                      const completedStages =
+                        quest.stages?.filter((s) => s.completed).length || 0;
+                      const totalStages = quest.stages?.length || 0;
+                      const progress =
+                        totalStages > 0
+                          ? (completedStages / totalStages) * 100
+                          : 0;
+                      const currentStage = quest.stages?.[quest.currentStage];
+
+                      return (
+                        <div key={quest.questId} className="quest-hud-item">
+                          <div className="quest-hud-title">{quest.title}</div>
+                          <div className="quest-hud-progress">
+                            <div className="quest-hud-progress-bar">
+                              <div
+                                className="quest-hud-progress-fill"
+                                style={{ width: `${progress}%` }}
+                              ></div>
+                            </div>
+                            <span className="quest-hud-progress-text">
+                              {completedStages}/{totalStages}
+                            </span>
+                          </div>
+                          {currentStage && !currentStage.completed && (
+                            <div className="quest-hud-current-task">
+                              {currentStage.task}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {gameState.activeQuests.length > 2 && (
+                      <div className="quest-hud-more">
+                        +{gameState.activeQuests.length - 2} more quest
+                        {gameState.activeQuests.length - 2 > 1 ? "s" : ""}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-          )}
 
-          {/* Debug overlay to show currentSpecialWorld state */}
-          <div
-            className="debug-overlay"
-            style={{
-              position: "fixed",
-              top: "10px",
-              left: "10px",
-              background: "rgba(0,0,0,0.8)",
-              color: "#00ff00",
-              padding: "10px",
-              zIndex: 9999,
-              pointerEvents: "none",
-              fontFamily: "monospace",
-            }}
-          >
-            currentSpecialWorld: "{currentSpecialWorld}"
-          </div>
+            {/* === MODALS AND OVERLAYS === */}
+            {gameState.uiState.showWinNotification && (
+              <div className="win-notification">
+                <div className="win-content">
+                  <h2>Level Complete!</h2>
+                  <p>{gameState.uiState.winMessage}</p>
+                  <div className="win-stars">★★★</div>
+                  <button
+                    onClick={() =>
+                      updateUIState({ showWinNotification: false })
+                    }
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            )}
 
-          {/* === SYSTEMS === */}
-          <NotificationSystem soundManager={gameState.soundManager} />
+            {/* Hamlet Finale Mini-Game */}
+            {gameState.showHamletFinale && (
+              <HamletFinale
+                onComplete={handleHamletFinaleComplete}
+                onExit={() => gameState.setShowHamletFinale(false)}
+              />
+            )}
+
+            {/* Quest Completion Celebration */}
+            {gameState.questCompletionCelebration && (
+              <QuestCompletionCelebration
+                quest={gameState.questCompletionCelebration.quest}
+                rewards={gameState.questCompletionCelebration.rewards}
+                onClose={() => gameState.setQuestCompletionCelebration(null)}
+              />
+            )}
+
+            {/* Feedback button */}
+            <div
+              className="feedback-button"
+              onClick={() => openDockTab("feedback")}
+            >
+              <span role="img" aria-label="Feedback">
+                💬
+              </span>
+              <span className="feedback-text">Feedback</span>
+            </div>
+
+            {/* Map key hint - only when no blocking overlay */}
+            {!gameState.uiState.showForm &&
+              !showLevelUpModal &&
+              !gameState.uiState.showWinNotification &&
+              !gameState.uiState.showRewardModal &&
+              !gameState.uiState.showLevel4 &&
+              !gameState.uiState.showNPCDialog && (
+                <div className="map-key-hint" role="status" aria-live="polite">
+                  {gameState.mobileState.isMobile ? (
+                    <span>
+                      Tap and drag to move | Tap NPCs to talk | Use the bottom
+                      dock for map, chat, and more
+                    </span>
+                  ) : (
+                    <span>
+                      Bottom dock: M map, U create, C help, F feedback, I bag, T
+                      talk — Esc closes
+                    </span>
+                  )}
+                </div>
+              )}
+
+            {/* Mobile touch controls - Directional pad for movement */}
+            {gameState.mobileState.showTouchControls &&
+              gameState.mobileState.touchControlsEnabled && (
+                <TouchControls
+                  onMove={(direction) => {
+                    characterControllerRef.current?.handleMove?.(
+                      direction,
+                      true,
+                    );
+                  }}
+                  onDrop={() => {
+                    // Handle drop action if needed
+                  }}
+                />
+              )}
+
+            {/* Mobile UI controls */}
+            {gameState.mobileState.showTouchControls &&
+              gameState.mobileState.touchControlsEnabled && (
+                <div
+                  className="mobile-controls"
+                  role="group"
+                  aria-label="Mobile game controls"
+                >
+                  <button
+                    className="mobile-control-btn inventory-btn"
+                    onClick={() => openBagDock()}
+                    aria-label="Open inventory"
+                  >
+                    <span role="img" aria-hidden="true">
+                      📦
+                    </span>
+                  </button>
+                  <button
+                    className="mobile-control-btn map-btn"
+                    onClick={() => openDockTab("map")}
+                    aria-label="Open world map"
+                  >
+                    <span role="img" aria-hidden="true">
+                      🗺️
+                    </span>
+                  </button>
+                  <button
+                    className="mobile-control-btn feedback-btn"
+                    onClick={() => openDockTab("feedback")}
+                    aria-label="Open feedback form"
+                  >
+                    <span role="img" aria-hidden="true">
+                      💬
+                    </span>
+                  </button>
+                  <button
+                    className="mobile-control-btn accessibility-btn"
+                    onClick={() =>
+                      setMobileState((prev) => ({
+                        ...prev,
+                        screenReaderMode: !prev.screenReaderMode,
+                      }))
+                    }
+                    aria-label={
+                      gameState.mobileState.screenReaderMode
+                        ? "Disable screen reader mode"
+                        : "Enable screen reader mode"
+                    }
+                  >
+                    <span role="img" aria-hidden="true">
+                      🔊
+                    </span>
+                  </button>
+                </div>
+              )}
+
+            {/* Accessibility status indicator */}
+            {gameState.mobileState.screenReaderMode && (
+              <div
+                className="accessibility-status"
+                role="status"
+                aria-live="polite"
+              >
+                <span>Screen reader mode active</span>
+              </div>
+            )}
+
+            {currentSpecialWorld === "text_adventure" && (
+              <TextAdventure
+                username={character?.username || "traveler"}
+                onComplete={handleTextAdventureComplete}
+                onExit={handleTextAdventureExit}
+              />
+            )}
+
+            {/* Add ArtifactDiscovery component */}
+            <ArtifactDiscovery
+              artifacts={gameState.gameData.artifacts}
+              characterPosition={characterPosition}
+              currentMapName={MAPS[currentMapIndex].name}
+              onArtifactFound={handleArtifactClick}
+              character={character}
+            />
+
+            {/* === SPECIAL WORLDS AND MINI-GAMES === */}
+            {currentSpecialWorld === "textAdventure" && (
+              <TextAdventure
+                onComplete={handleTextAdventureComplete}
+                onExit={handleTextAdventureExit}
+                character={character}
+              />
+            )}
+
+            {currentSpecialWorld === "terminal" && (
+              <Level3Terminal
+                onComplete={handleTerminalComplete}
+                onExit={handleTerminalExit}
+                character={character}
+                artifacts={gameState.gameData.artifacts}
+                username={gameState.character?.username || "User"}
+                inventory={inventory}
+              />
+            )}
+
+            {currentSpecialWorld === "shooter" && (
+              <>
+                {console.log("GameWorld: Rendering Level4Shooter component")}
+                <Level4Shooter
+                  onComplete={handleShooterComplete}
+                  onExit={handleShooterExit}
+                  character={character}
+                />
+              </>
+            )}
+
+            {currentSpecialWorld === "hemingway" && (
+              <HemingwayChallenge
+                onComplete={handleHemingwayComplete}
+                onExit={handleHemingwayExit}
+                character={character}
+              />
+            )}
+
+            {/* Artifact Game Launcher */}
+            {gameState.showGameLauncher && gameState.currentGameArtifact && (
+              <ArtifactGameLauncher
+                artifact={gameState.currentGameArtifact}
+                character={character}
+                onComplete={handleGameComplete}
+                onExit={handleGameExit}
+                onProgressUpdate={(progress) => {
+                  console.log("Game progress update:", progress);
+                }}
+              />
+            )}
+
+            {/* Active Powers Display */}
+            {activePowers.length > 0 && (
+              <div className="active-powers-hud">
+                <div className="powers-hud-label">Active Powers:</div>
+                <div className="powers-hud-list">
+                  {activePowers.map((powerId) => {
+                    const powerDef = getPowerDefinition(powerId);
+                    return (
+                      <div
+                        key={powerId}
+                        className="power-hud-item"
+                        title={powerDef.description}
+                      >
+                        <span className="power-hud-icon">{powerDef.icon}</span>
+                        <span className="power-hud-name">{powerDef.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Debug overlay to show currentSpecialWorld state */}
+            <div
+              className="debug-overlay"
+              style={{
+                position: "fixed",
+                top: "10px",
+                left: "10px",
+                background: "rgba(0,0,0,0.8)",
+                color: "#00ff00",
+                padding: "10px",
+                zIndex: 9999,
+                pointerEvents: "none",
+                fontFamily: "monospace",
+              }}
+            >
+              currentSpecialWorld: "{currentSpecialWorld}"
+            </div>
+
+            {/* === SYSTEMS === */}
+            <NotificationSystem soundManager={gameState.soundManager} />
           </div>
 
           <GameDock
             dockExpanded={uiState.dockExpanded}
             dockTab={uiState.dockTab}
-            onSetDockTab={(tab) => updateUIState({ dockTab: tab })}
+            onSetDockTab={(tab) => {
+              if (tab === "create") {
+                setFormPosition({
+                  x: characterPosition.x,
+                  y: characterPosition.y,
+                });
+                updateUIState({ dockTab: tab, showForm: true });
+                return;
+              }
+              updateUIState({ dockTab: tab, showForm: false });
+            }}
             onToggleDockExpanded={(expanded) =>
               updateUIState({ dockExpanded: expanded })
             }
@@ -3767,6 +3852,71 @@ const GameWorld = React.memo(() => {
             health={gameState.playerHealth}
             maxHealth={gameState.maxPlayerHealth}
             showNPCDialog={uiState.showNPCDialog}
+            statusPanel={
+              showLevelUpModal ? (
+                <LevelUpModal
+                  embedded
+                  level={gameState.characterStats.level}
+                  stats={characterStats}
+                  onClose={() => setShowLevelUpModal(false)}
+                />
+              ) : uiState.showRewardModal ? (
+                <RewardModal
+                  embedded
+                  visible={uiState.showRewardModal}
+                  onClose={() => updateUIState({ showRewardModal: false })}
+                  achievement={uiState.currentAchievement}
+                />
+              ) : (
+                <div className="game-dock-status">
+                  <dl>
+                    <dt>Area</dt>
+                    <dd>
+                      {Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
+                        ? MAPS[currentMapIndex].name
+                        : "Unknown"}
+                    </dd>
+                    <dt>Level</dt>
+                    <dd>{gameState.characterStats.level}</dd>
+                    <dt>Experience</dt>
+                    <dd>
+                      {gameState.characterStats.experience} /{" "}
+                      {calculateXPForLevel(gameState.characterStats.level + 1)}{" "}
+                      to next level
+                    </dd>
+                    <dt>Health</dt>
+                    <dd>
+                      {gameState.playerHealth} / {gameState.maxPlayerHealth}
+                    </dd>
+                  </dl>
+                </div>
+              )
+            }
+            createPanel={
+              uiState.dockTab === "create" ? (
+                <ArtifactCreation
+                  embedded
+                  position={gameState.formPosition}
+                  onClose={() =>
+                    updateUIState({
+                      showForm: false,
+                      dockTab: "status",
+                      dockExpanded: false,
+                    })
+                  }
+                  refreshArtifacts={refreshArtifactList}
+                  currentArea={
+                    Array.isArray(MAPS) && MAPS[currentMapIndex]?.name
+                      ? MAPS[currentMapIndex].name
+                      : "Unknown"
+                  }
+                />
+              ) : (
+                <p className="game-dock-empty">
+                  Open the Create tab or press U to place an artifact.
+                </p>
+              )
+            }
             talkPanel={
               uiState.showNPCDialog && gameState.activeNPC ? (
                 <NPCInteraction
@@ -3845,16 +3995,12 @@ const GameWorld = React.memo(() => {
             mapPanel={
               <WorldMap
                 embedded
-                currentWorld={
-                  MAPS[currentMapIndex]?.name || "Overworld"
-                }
+                currentWorld={MAPS[currentMapIndex]?.name || "Overworld"}
                 onClose={dismissDockPanel}
                 onNodeClick={handleWorldMapNodeClick}
               />
             }
-            guidePanel={
-              <ControlsGuide embedded onClose={dismissDockPanel} />
-            }
+            guidePanel={<ControlsGuide embedded onClose={dismissDockPanel} />}
             quotesPanel={
               character ? (
                 <SavedQuotes
@@ -3869,9 +4015,7 @@ const GameWorld = React.memo(() => {
                 </p>
               )
             }
-            feedbackPanel={
-              <FeedbackForm embedded onClose={dismissDockPanel} />
-            }
+            feedbackPanel={<FeedbackForm embedded onClose={dismissDockPanel} />}
           />
         </div>
       )}

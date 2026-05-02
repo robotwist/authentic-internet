@@ -14,7 +14,6 @@ const useCharacterMovement = (
   isLoggedIn,
   visibleArtifact,
   handleArtifactPickup,
-  setShowForm,
   setFormPosition,
   setShowInventory,
   adjustViewport,
@@ -73,155 +72,180 @@ const useCharacterMovement = (
   );
 
   // Discrete movement system - move exactly one step per key press
-  const moveCharacter = useCallback((direction) => {
-    const characterPosition = characterPositionRef.current;
-    const currentMapData = MAPS[currentMapIndex]?.data;
-    if (!currentMapData) return characterPosition;
+  const moveCharacter = useCallback(
+    (direction) => {
+      const characterPosition = characterPositionRef.current;
+      const currentMapData = MAPS[currentMapIndex]?.data;
+      if (!currentMapData) return characterPosition;
 
-    let newPosition = { ...characterPosition };
-    let targetMapIndex = currentMapIndex;
+      let newPosition = { ...characterPosition };
+      let targetMapIndex = currentMapIndex;
 
-    // Calculate movement based on direction
-    switch (direction) {
-      case "left":
-        newPosition.x -= movementConstants.stepSize;
-        break;
-      case "right":
-        newPosition.x += movementConstants.stepSize;
-        break;
-      case "up":
-        newPosition.y -= movementConstants.stepSize;
-        break;
-      case "down":
-        newPosition.y += movementConstants.stepSize;
-        break;
-    }
-
-    const mapWidth = currentMapData[0].length * TILE_SIZE;
-    const mapHeight = currentMapData.length * TILE_SIZE;
-
-    // Check collision at new position
-    const canMove = isWalkable(newPosition.x, newPosition.y, currentMapData) &&
-                    isWalkable(newPosition.x + TILE_SIZE - 1, newPosition.y, currentMapData) &&
-                    isWalkable(newPosition.x, newPosition.y + TILE_SIZE - 1, currentMapData) &&
-                    isWalkable(newPosition.x + TILE_SIZE - 1, newPosition.y + TILE_SIZE - 1, currentMapData);
-
-    if (!canMove) {
-      // Trigger bump animation based on direction
-      triggerBump(direction);
-      return characterPosition; // Return original position if can't move
-    }
-
-    // Edge detection for map transitions
-    const currentMap = MAPS[currentMapIndex];
-    const neighbors = currentMap?.neighbors || {};
-
-    // Check if movement would go out of bounds
-    if (newPosition.x < 0) {
-      // Would go left off the map
-      if (neighbors.left) {
-        // Dispatch transition to neighbor instead of moving
-        if (transitionToNeighbor) {
-          transitionToNeighbor("left");
-        }
-        return characterPosition; // Don't move the character
-      } else {
-        // No neighbor - treat as wall
-        triggerBump("left");
-        return characterPosition;
+      // Calculate movement based on direction
+      switch (direction) {
+        case "left":
+          newPosition.x -= movementConstants.stepSize;
+          break;
+        case "right":
+          newPosition.x += movementConstants.stepSize;
+          break;
+        case "up":
+          newPosition.y -= movementConstants.stepSize;
+          break;
+        case "down":
+          newPosition.y += movementConstants.stepSize;
+          break;
       }
-    } else if (newPosition.x >= mapWidth) {
-      // Would go right off the map
-      if (neighbors.right) {
-        // Dispatch transition to neighbor instead of moving
-        if (transitionToNeighbor) {
-          transitionToNeighbor("right");
-        }
-        return characterPosition; // Don't move the character
-      } else {
-        // No neighbor - treat as wall
-        triggerBump("right");
-        return characterPosition;
-      }
-    }
 
-    // Vertical edge detection for map transitions
-    if (newPosition.y < 0) {
-      // Would go up off the map
-      if (neighbors.up) {
-        // Dispatch transition to neighbor instead of moving
-        if (transitionToNeighbor) {
-          transitionToNeighbor("up");
-        }
-        return characterPosition; // Don't move the character
-      } else {
-        // No neighbor - treat as wall
-        triggerBump("up");
-        return characterPosition;
-      }
-    } else if (newPosition.y >= mapHeight) {
-      // Would go down off the map
-      if (neighbors.down) {
-        // Dispatch transition to neighbor instead of moving
-        if (transitionToNeighbor) {
-          transitionToNeighbor("down");
-        }
-        return characterPosition; // Don't move the character
-      } else {
-        // No neighbor - treat as wall
-        triggerBump("down");
-        return characterPosition;
-      }
-    }
+      const mapWidth = currentMapData[0].length * TILE_SIZE;
+      const mapHeight = currentMapData.length * TILE_SIZE;
 
-    // Handle map transitions
-    if (targetMapIndex !== currentMapIndex) {
-      setCurrentMapIndex(targetMapIndex);
-    }
+      // Check collision at new position
+      const canMove =
+        isWalkable(newPosition.x, newPosition.y, currentMapData) &&
+        isWalkable(
+          newPosition.x + TILE_SIZE - 1,
+          newPosition.y,
+          currentMapData,
+        ) &&
+        isWalkable(
+          newPosition.x,
+          newPosition.y + TILE_SIZE - 1,
+          currentMapData,
+        ) &&
+        isWalkable(
+          newPosition.x + TILE_SIZE - 1,
+          newPosition.y + TILE_SIZE - 1,
+          currentMapData,
+        );
 
-    return newPosition;
-  }, [
-    characterPositionRef,
-    currentMapIndex,
-    setCurrentMapIndex,
-    movementConstants.stepSize,
-    triggerBump,
-    transitionToNeighbor,
-  ]);
+      if (!canMove) {
+        // Trigger bump animation based on direction
+        triggerBump(direction);
+        return characterPosition; // Return original position if can't move
+      }
+
+      // Edge detection for map transitions
+      const currentMap = MAPS[currentMapIndex];
+      const neighbors = currentMap?.neighbors || {};
+
+      // Check if movement would go out of bounds
+      if (newPosition.x < 0) {
+        // Would go left off the map
+        if (neighbors.left) {
+          // Dispatch transition to neighbor instead of moving
+          if (transitionToNeighbor) {
+            transitionToNeighbor("left");
+          }
+          return characterPosition; // Don't move the character
+        } else {
+          // No neighbor - treat as wall
+          triggerBump("left");
+          return characterPosition;
+        }
+      } else if (newPosition.x >= mapWidth) {
+        // Would go right off the map
+        if (neighbors.right) {
+          // Dispatch transition to neighbor instead of moving
+          if (transitionToNeighbor) {
+            transitionToNeighbor("right");
+          }
+          return characterPosition; // Don't move the character
+        } else {
+          // No neighbor - treat as wall
+          triggerBump("right");
+          return characterPosition;
+        }
+      }
+
+      // Vertical edge detection for map transitions
+      if (newPosition.y < 0) {
+        // Would go up off the map
+        if (neighbors.up) {
+          // Dispatch transition to neighbor instead of moving
+          if (transitionToNeighbor) {
+            transitionToNeighbor("up");
+          }
+          return characterPosition; // Don't move the character
+        } else {
+          // No neighbor - treat as wall
+          triggerBump("up");
+          return characterPosition;
+        }
+      } else if (newPosition.y >= mapHeight) {
+        // Would go down off the map
+        if (neighbors.down) {
+          // Dispatch transition to neighbor instead of moving
+          if (transitionToNeighbor) {
+            transitionToNeighbor("down");
+          }
+          return characterPosition; // Don't move the character
+        } else {
+          // No neighbor - treat as wall
+          triggerBump("down");
+          return characterPosition;
+        }
+      }
+
+      // Handle map transitions
+      if (targetMapIndex !== currentMapIndex) {
+        setCurrentMapIndex(targetMapIndex);
+      }
+
+      return newPosition;
+    },
+    [
+      characterPositionRef,
+      currentMapIndex,
+      setCurrentMapIndex,
+      movementConstants.stepSize,
+      triggerBump,
+      transitionToNeighbor,
+    ],
+  );
 
   // Discrete movement handling - one move per key press
-  const handleDiscreteMove = useCallback((direction) => {
-    // Prevent rapid successive moves
-    const now = Date.now();
-    if (now - lastMoveTime.current < 150) return; // Minimum 150ms between moves
-    lastMoveTime.current = now;
+  const handleDiscreteMove = useCallback(
+    (direction) => {
+      // Prevent rapid successive moves
+      const now = Date.now();
+      if (now - lastMoveTime.current < 150) return; // Minimum 150ms between moves
+      lastMoveTime.current = now;
 
-    const newPosition = moveCharacter(direction);
-    const characterPosition = characterPositionRef.current;
+      const newPosition = moveCharacter(direction);
+      const characterPosition = characterPositionRef.current;
 
-    // Only update if position actually changed
-    if (newPosition.x !== characterPosition.x || newPosition.y !== characterPosition.y) {
-      handleCharacterMove(newPosition, currentMapIndex);
+      // Only update if position actually changed
+      if (
+        newPosition.x !== characterPosition.x ||
+        newPosition.y !== characterPosition.y
+      ) {
+        handleCharacterMove(newPosition, currentMapIndex);
 
-      // Update viewport - ensure it's a function before calling
-      if (adjustViewport && typeof adjustViewport === 'function') {
-        adjustViewport(newPosition);
+        // Update viewport - ensure it's a function before calling
+        if (adjustViewport && typeof adjustViewport === "function") {
+          adjustViewport(newPosition);
+        }
       }
-    }
-  }, [
-    moveCharacter,
-    characterPositionRef,
-    handleCharacterMove,
-    currentMapIndex,
-    adjustViewport,
-  ]);
+    },
+    [
+      moveCharacter,
+      characterPositionRef,
+      handleCharacterMove,
+      currentMapIndex,
+      adjustViewport,
+    ],
+  );
 
   // Handle key input for discrete movement
-  const handleMove = useCallback((direction, pressed) => {
-    if (pressed) {
-      handleDiscreteMove(direction);
-    }
-  }, [handleDiscreteMove]);
+  const handleMove = useCallback(
+    (direction, pressed) => {
+      if (pressed) {
+        handleDiscreteMove(direction);
+      }
+    },
+    [handleDiscreteMove],
+  );
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -284,15 +308,6 @@ const useCharacterMovement = (
           processedKeys.current.add(event.key);
           setShowInventory(true);
           break;
-        case "f":
-        case "F":
-          processedKeys.current.add(event.key);
-          setShowForm(true);
-          setFormPosition({
-            x: characterPositionRef.current.x,
-            y: characterPositionRef.current.y,
-          });
-          break;
       }
     };
 
@@ -312,7 +327,6 @@ const useCharacterMovement = (
     visibleArtifact,
     handleArtifactPickup,
     characterPositionRef,
-    setShowForm,
     setFormPosition,
     setShowInventory,
   ]);

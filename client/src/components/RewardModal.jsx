@@ -3,7 +3,7 @@ import OptimizedImage from "./OptimizedImage";
 import { getLevelWinConfig } from "../constants/LevelWinConditions";
 import "./RewardModal.css";
 
-const RewardModal = ({ visible, onClose, achievement }) => {
+const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
   if (!visible) return null;
 
   // Updated URL to the Chrome Web Store, this should be replaced with the actual extension URL
@@ -85,7 +85,9 @@ const RewardModal = ({ visible, onClose, achievement }) => {
         <div className="reward-item">
           <div className="reward-details">
             <h4>Rewards Unlocked</h4>
-            <p>White Sword, Heart Container, and the knowledge of the Library.</p>
+            <p>
+              White Sword, Heart Container, and the knowledge of the Library.
+            </p>
           </div>
         </div>
       </>
@@ -99,7 +101,9 @@ const RewardModal = ({ visible, onClose, achievement }) => {
         <div className="reward-item">
           <div className="reward-details">
             <h4>Terminal Master</h4>
-            <p>You've proven your worth in the digital shadow. New paths await.</p>
+            <p>
+              You've proven your worth in the digital shadow. New paths await.
+            </p>
           </div>
         </div>
       </>
@@ -110,33 +114,39 @@ const RewardModal = ({ visible, onClose, achievement }) => {
       <>
         <div className="reward-icon">🎉</div>
         <h3>Achievement Unlocked!</h3>
-        <p>
-          {levelConfig?.subtext ?? "Congratulations on your achievement!"}
-        </p>
+        <p>{levelConfig?.subtext ?? "Congratulations on your achievement!"}</p>
       </>
     );
   }
 
-  return (
-    <div className="reward-modal-overlay">
-      <div className="reward-modal">
-        <div className="reward-modal-header">
-          <h2>🎉 Achievement Unlocked! 🎉</h2>
-          <button className="close-button" onClick={onClose}>
-            ×
-          </button>
-        </div>
+  const inner = (
+    <div
+      className={
+        embedded ? "reward-modal reward-modal--embedded" : "reward-modal"
+      }
+    >
+      <div className="reward-modal-header">
+        <h2>🎉 Achievement Unlocked! 🎉</h2>
+        <button className="close-button" onClick={onClose}>
+          ×
+        </button>
+      </div>
 
-        <div className="reward-content">{content}</div>
+      <div className="reward-content">{content}</div>
 
-        <div className="reward-footer">
-          <button className="continue-button" onClick={onClose}>
-            Continue Adventure
-          </button>
-        </div>
+      <div className="reward-footer">
+        <button className="continue-button" onClick={onClose}>
+          Continue Adventure
+        </button>
       </div>
     </div>
   );
+
+  if (embedded) {
+    return <div className="reward-modal-embedded">{inner}</div>;
+  }
+
+  return <div className="reward-modal-overlay">{inner}</div>;
 };
 
 export default RewardModal;

@@ -378,6 +378,31 @@
   overflow: hidden;
 }
 
+/* Embedded in bottom dock — no full-screen dimmer */
+.artifact-creation-dock-root {
+  width: 100%;
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.artifact-creation-modal--embedded {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  flex: 1;
+  min-height: 0;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.artifact-creation-modal--embedded .creation-options {
+  padding: 16px;
+  gap: 16px;
+}
+
 .modal-header {
   background: linear-gradient(90deg, #0f0f1e 0%, #1a1a2e 100%);
   padding: 20px;

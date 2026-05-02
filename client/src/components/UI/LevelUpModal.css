@@ -13,6 +13,23 @@
   animation: modal-fade-in 0.3s ease-out;
 }
 
+.level-up-embedded {
+  width: 100%;
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.level-up-modal--embedded {
+  width: 100%;
+  max-width: none;
+  padding: 24px 20px;
+  margin: 0;
+  animation: none;
+}
+
 .level-up-modal {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   border: 4px solid #FFD700;
