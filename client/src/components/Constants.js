@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { MAPS, WORLD_MAP } from "./GameData";
 import {
   TILE_SIZE,
@@ -20,13 +19,22 @@ export {
   MAP_COLS,
   TILE_TYPES,
   isWalkable,
+  auditMapGrid,
 } from "./MapConstants";
 export {
   ARTIFACT_TYPES,
   ARTIFACT_INTERACTIONS,
   NPC_TYPES,
 } from "./GameConstants";
-export { MAPS, WORLD_MAP } from "./GameData";
+export {
+  MAPS,
+  WORLD_MAP,
+  MAP_INDEX_BY_KEY,
+  getMapIndexByKey,
+  loadRemainingMaps,
+  prefetchRemainingMaps,
+  MAP_NAMES_IN_ORDER,
+} from "./GameData";
 
 // Helper functions
 export const canInteract = (tileType) => {
