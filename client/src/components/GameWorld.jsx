@@ -141,6 +141,7 @@ const GameWorld = React.memo(() => {
     setMobileState,
     setFormPosition,
     setSoundManager,
+    setDungeonState,
     transitionToNeighbor: originalTransitionToNeighbor,
   } = gameState;
 
@@ -925,6 +926,125 @@ const GameWorld = React.memo(() => {
     ],
   );
 
+  const DUNGEON_BY_DESTINATION = {
+    "Library of Alexandria": LIBRARY_OF_ALEXANDRIA,
+  };
+
+  const handleEnterDungeon = useCallback(
+    (destinationName) => {
+      const dungeon = DUNGEON_BY_DESTINATION[destinationName];
+      if (!dungeon) {
+        console.warn("Unknown dungeon destination:", destinationName);
+        return;
+      }
+      if (uiState.inDungeon || gameState.dungeonState?.currentDungeon) {
+        return;
+      }
+      if (portalState.isTransitioning) return;
+
+      if (gameState.soundManager) {
+        gameState.soundManager.playSound("portal");
+      }
+
+      setDungeonState({
+        currentDungeon: dungeon,
+        smallKeys: 0,
+        hasBossKey: false,
+        dungeonEntryPosition: {
+          x: characterPosition.x,
+          y: characterPosition.y,
+          mapIndex: currentMapIndex,
+        },
+      });
+      updateUIState({ inDungeon: true });
+
+      const entrance = dungeon.rooms?.entrance;
+      const sx = entrance?.startPosition?.x ?? 1;
+      const sy = entrance?.startPosition?.y ?? 1;
+      const spawn = { x: sx * TILE_SIZE, y: sy * TILE_SIZE };
+      setCharacterPosition(spawn);
+      if (adjustViewport) {
+        adjustViewport(spawn);
+      }
+    },
+    [
+      uiState.inDungeon,
+      gameState.dungeonState?.currentDungeon,
+      portalState.isTransitioning,
+      gameState.soundManager,
+      setDungeonState,
+      updateUIState,
+      setCharacterPosition,
+      characterPosition.x,
+      characterPosition.y,
+      currentMapIndex,
+      adjustViewport,
+    ],
+  );
+
+  const handleExitDungeon = useCallback(() => {
+    const entry = gameState.dungeonState?.dungeonEntryPosition;
+
+    setDungeonState({
+      currentDungeon: null,
+      smallKeys: 0,
+      hasBossKey: false,
+      dungeonEntryPosition: null,
+    });
+    updateUIState({ inDungeon: false });
+
+    if (entry && typeof entry.mapIndex === "number") {
+      setCurrentMapIndex(entry.mapIndex);
+      setCharacterPosition({ x: entry.x, y: entry.y });
+      if (adjustViewport) {
+        adjustViewport({ x: entry.x, y: entry.y });
+      }
+    }
+
+    if (gameState.soundManager) {
+      gameState.soundManager.playSound("portal");
+    }
+  }, [
+    gameState.dungeonState?.dungeonEntryPosition,
+    gameState.soundManager,
+    setDungeonState,
+    updateUIState,
+    setCurrentMapIndex,
+    setCharacterPosition,
+    adjustViewport,
+  ]);
+
+  const handleDungeonItemCollect = useCallback(
+    (itemType) => {
+      const keys = gameState.dungeonState.smallKeys || 0;
+      if (itemType === "small_key") {
+        setDungeonState({ smallKeys: keys + 1 });
+        if (gameState.soundManager) {
+          gameState.soundManager.playSound("powerup", 0.5);
+        }
+        return;
+      }
+      if (itemType === "boss_key") {
+        setDungeonState({ hasBossKey: true });
+        if (gameState.soundManager) {
+          gameState.soundManager.playSound("powerup", 0.6);
+        }
+        return;
+      }
+      if (itemType === "use_small_key") {
+        setDungeonState({ smallKeys: Math.max(0, keys - 1) });
+      }
+    },
+    [setDungeonState, gameState.dungeonState.smallKeys, gameState.soundManager],
+  );
+
+  const handleDungeonEnemyDefeat = useCallback(
+    (_enemyId, _drops) => {
+      awardXP(5, "Dungeon foe defeated");
+    },
+    [awardXP],
+  );
+
   // Handle NPC interaction
   const handleNPCInteraction = useCallback(
     (npc) => {
@@ -1236,7 +1356,16 @@ const GameWorld = React.memo(() => {
     const handlePortalCollision = (event) => {
       if (portalState.isTransitioning) return;
 
-      const { tileX, tileY, tileType } = event.detail;
+      const detail = event.detail;
+      if (
+        !detail ||
+        typeof detail.tileX !== "number" ||
+        typeof detail.tileY !== "number" ||
+        typeof detail.tileType !== "number"
+      ) {
+        return;
+      }
+      const { tileX, tileY, tileType } = detail;
       const currentMapName = currentMap?.name;
 
       if (!currentMapName) return;
@@ -1300,6 +1429,18 @@ const GameWorld = React.memo(() => {
           return;
         }
       }
+
+      if (tileType === 9) {
+        const dungeonPortal = currentMap?.specialPortals?.find(
+          (portal) =>
+            portal.position.x === tileX &&
+            portal.position.y === tileY &&
+            portal.type === "dungeon",
+        );
+        if (dungeonPortal) {
+          handleEnterDungeon(dungeonPortal.destination);
+        }
+      }
     };
 
     window.addEventListener("portalCollision", handlePortalCollision);
@@ -1312,6 +1453,8 @@ const GameWorld = React.memo(() => {
     PORTAL_CONFIG,
     handlePortalTransition,
     updatePortalState,
+    handleEnterDungeon,
+    setCurrentSpecialWorld,
   ]);
 
   // Optimized portal activation handler with improved detection and feedback (kept for manual SPACE activation)
@@ -1325,8 +1468,8 @@ const GameWorld = React.memo(() => {
         return;
       }
 
-      const playerTileX = Math.floor(gameState.characterPosition.x / TILE_SIZE);
-      const playerTileY = Math.floor(gameState.characterPosition.y / TILE_SIZE);
+      const playerTileX = Math.floor(characterPosition.x / TILE_SIZE);
+      const playerTileY = Math.floor(characterPosition.y / TILE_SIZE);
 
       console.log(
         `Manual portal activation attempt - Map: ${currentMapName}, Player position: (${playerTileX}, ${playerTileY})`,
@@ -1435,6 +1578,7 @@ const GameWorld = React.memo(() => {
       characterPosition,
       PORTAL_CONFIG,
       handlePortalTransition,
+      handleEnterDungeon,
       updatePortalState,
       showPortalNotification,
       showWorldAnnouncement,
@@ -1475,89 +1619,6 @@ const GameWorld = React.memo(() => {
     },
     [handleGainExperience, gameState.soundManager],
   );
-
-  // Automatic portal activation on collision
-  useEffect(() => {
-    const handlePortalCollision = (event) => {
-      if (portalState.isTransitioning) return;
-
-      const { tileX, tileY, tileType } = event.detail;
-      const currentMapName = currentMap?.name;
-
-      if (!currentMapName) return;
-
-      console.log(
-        `Portal collision detected - Map: ${currentMapName}, Tile: (${tileX}, ${tileY}), Type: ${tileType}`,
-      );
-
-      // Handle progression portals (type 5)
-      if (tileType === 5) {
-        const progressionPortal = PORTAL_CONFIG.progression[currentMapName];
-        if (progressionPortal) {
-          // Handle multiple portals per map (array)
-          if (Array.isArray(progressionPortal)) {
-            for (const portal of progressionPortal) {
-              const { destination, spawnPosition, condition } = portal;
-
-              // Check if portal condition is met
-              if (condition && condition(tileX, tileY)) {
-                console.log(`✅ Auto-activating portal to ${destination}`);
-                handlePortalTransition(destination, spawnPosition);
-                return;
-              }
-            }
-          } else {
-            // Handle single portal (object)
-            const { destination, spawnPosition, condition } = progressionPortal;
-
-            // Check if portal condition is met (if any)
-            if (!condition || condition(tileX, tileY)) {
-              console.log(`✅ Auto-activating portal to ${destination}`);
-              handlePortalTransition(destination, spawnPosition);
-              return;
-            }
-          }
-        }
-      }
-
-      // Handle special portals in Yosemite (types 6-8)
-      if (currentMapName === "Yosemite" && tileType >= 6 && tileType <= 8) {
-        const specialPortal = PORTAL_CONFIG.special[tileX];
-
-        if (specialPortal && tileY === 1) {
-          console.log(
-            `✅ Auto-activating special portal: ${specialPortal.title}`,
-          );
-
-          // Activate the special world directly
-          if (specialPortal.type === "terminal") {
-            setCurrentSpecialWorld("terminal");
-          } else if (specialPortal.type === "shooter") {
-            setCurrentSpecialWorld("shooter");
-          } else if (specialPortal.type === "text_adventure") {
-            setCurrentSpecialWorld("text_adventure");
-          }
-
-          updatePortalState({
-            activePortal: specialPortal,
-            portalNotificationActive: true,
-          });
-          return;
-        }
-      }
-    };
-
-    window.addEventListener("portalCollision", handlePortalCollision);
-    return () => {
-      window.removeEventListener("portalCollision", handlePortalCollision);
-    };
-  }, [
-    portalState.isTransitioning,
-    currentMap,
-    PORTAL_CONFIG,
-    handlePortalTransition,
-    updatePortalState,
-  ]);
 
   // Boss defeat
   const handleBossDefeat = useCallback(

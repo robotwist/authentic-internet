@@ -31,7 +31,7 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
       controls: [
         { keys: ["T"], action: "Talk to NPCs" },
         { keys: ["E", "P"], action: "Pick Up Artifact" },
-        { keys: ["Space"], action: "Activate Portal" },
+        { keys: ["Space"], action: "Activate Portal / enter dungeon on marked tile" },
       ],
     },
     {
