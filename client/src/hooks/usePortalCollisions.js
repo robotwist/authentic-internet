@@ -22,11 +22,36 @@ export const usePortalCollisions = ({
 
     const row = Math.floor(characterPosition.y / TILE_SIZE);
     const col = Math.floor(characterPosition.x / TILE_SIZE);
+    const currentMapName = MAPS[currentMapIndex]?.name || "";
+
+    // Dedicated Overworld Yosemite shortcut portal (tile 19)
+    if (
+      currentMapName === "Overworld" &&
+      MAPS[currentMapIndex]?.data?.[row]?.[col] === 19
+    ) {
+      const destinationIndex = getMapIndexByKey("Yosemite");
+      if (destinationIndex !== -1) {
+        setCurrentMapIndex(destinationIndex);
+        setCharacterPosition({ x: 10 * TILE_SIZE, y: 42 * TILE_SIZE });
+        adjustViewport({ x: 10 * TILE_SIZE, y: 42 * TILE_SIZE });
+
+        const portalAnnouncement = document.createElement("div");
+        portalAnnouncement.className = "world-announcement";
+        portalAnnouncement.innerHTML = `<h2>Welcome to Yosemite</h2>`;
+        document.body.appendChild(portalAnnouncement);
+
+        setTimeout(() => {
+          portalAnnouncement.classList.add("fade-out");
+          setTimeout(() => {
+            document.body.removeChild(portalAnnouncement);
+          }, 1000);
+        }, 3000);
+      }
+      return;
+    }
 
     // Handle regular portals (type 5) for any map
     if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 5) {
-      const currentMapName = MAPS[currentMapIndex]?.name || "";
-
       // Handle different maps with different portal logic
       if (currentMapName === "Overworld") {
         // Transition to Overworld 2
@@ -263,7 +288,6 @@ export const usePortalCollisions = ({
     }
 
     // Handle special portals in Yosemite map
-    const currentMapName = MAPS[currentMapIndex]?.name || "";
     if (currentMapName === "Yosemite") {
       // Terminal portal (code 6)
       if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 6) {

@@ -118,6 +118,10 @@
   box-shadow: 0 0 25px 12px rgba(255, 69, 0, 0.7); /* Red-orange glow for level 4 portals */
 }
 
+.tile.yosemite-warp {
+  box-shadow: 0 0 28px 12px rgba(34, 197, 94, 0.75);
+}
+
 /* Ensure portal images load with fallback styling */
 .tile.image-loading.portal {
   background-color: rgba(186, 85, 211, 0.7);

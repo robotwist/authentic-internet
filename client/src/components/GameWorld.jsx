@@ -226,6 +226,7 @@ const GameWorld = React.memo(() => {
   const lastRenderTime = useRef(performance.now());
   const lastUpdateTime = useRef(performance.now());
   const updateThrottle = useRef(16); // 16ms throttle (60fps)
+  const devSaveDebounceRef = useRef(null);
 
   // All state is now managed by the gameState hook
 
@@ -888,12 +889,6 @@ const GameWorld = React.memo(() => {
               // Show world announcement
               showWorldAnnouncement(destinationMap);
 
-              // Handle level completion for Yosemite
-              if (destinationMap === "Yosemite") {
-                setTimeout(() => {
-                  handleLevelCompletion("level1");
-                }, 800);
-              }
             } else {
               console.error(`Destination map "${destinationMap}" not found`);
             }
@@ -1163,6 +1158,12 @@ const GameWorld = React.memo(() => {
         return; // Don't show regular dialogue
       }
 
+      // Trigger level-1 victory when John Muir is reached in Yosemite.
+      const activeMapName = MAPS[currentMapIndex]?.name;
+      if (activeMapName === "Yosemite" && npc.name === "John Muir") {
+        handleLevelCompletion("level1");
+      }
+
       // Set the active NPC and show dialog in bottom dock
       gameState.setActiveNPC(npc);
       updateUIState({
@@ -1185,6 +1186,8 @@ const GameWorld = React.memo(() => {
     },
     [
       shakespeareQuest.stage,
+      currentMapIndex,
+      handleLevelCompletion,
       gameState.soundManager,
       gameState.mobileState.screenReaderMode,
       announceToScreenReader,
@@ -1297,7 +1300,7 @@ const GameWorld = React.memo(() => {
           },
           {
             destination: "Yosemite",
-            spawnPosition: { x: 10 * TILE_SIZE, y: 20 * TILE_SIZE }, // Central spawn for larger map
+            spawnPosition: { x: 10 * TILE_SIZE, y: 42 * TILE_SIZE }, // Central valley near John Muir
             condition: (x, y) => x === 8 && y === 11,
           },
         ],
@@ -1323,7 +1326,7 @@ const GameWorld = React.memo(() => {
         },
         "Dungeon Level 3": {
           destination: "Yosemite",
-          spawnPosition: { x: 10 * TILE_SIZE, y: 20 * TILE_SIZE }, // Central spawn for larger map
+          spawnPosition: { x: 10 * TILE_SIZE, y: 42 * TILE_SIZE }, // Central valley near John Muir
         },
       },
       yosemiteReturn: {
@@ -1496,11 +1499,19 @@ const GameWorld = React.memo(() => {
         }
       }
 
+      // Dedicated Overworld shortcut portal to Yosemite.
+      if (currentMapName === "Overworld" && tileType === 19) {
+        handlePortalTransition("Yosemite", {
+          x: 10 * TILE_SIZE,
+          y: 20 * TILE_SIZE,
+        });
+        return;
+      }
+
       // Handle special portals in Yosemite (types 6-8)
       if (currentMapName === "Yosemite" && tileType >= 6 && tileType <= 8) {
-        const specialPortal = PORTAL_CONFIG.special[tileX];
-
-        if (specialPortal && tileY === 1) {
+        const specialPortal = PORTAL_CONFIG.special[tileType];
+        if (specialPortal) {
           console.log(
             `✅ Auto-activating special portal: ${specialPortal.title}`,
           );
@@ -1639,15 +1650,33 @@ const GameWorld = React.memo(() => {
         }
       }
 
+      // Dedicated Overworld shortcut portal (tile 19)
+      if (
+        currentMapName === "Overworld" &&
+        currentMapData?.[playerTileY]?.[playerTileX] === 19
+      ) {
+        handlePortalTransition("Yosemite", {
+          x: 10 * TILE_SIZE,
+          y: 20 * TILE_SIZE,
+        });
+        return;
+      }
+
       // Check special portals in Yosemite
       if (currentMapName === "Yosemite") {
-        const specialPortal = PORTAL_CONFIG.special[playerTileX];
-        console.log(
-          `Checking special portal at X=${playerTileX}, Y=${playerTileY}:`,
+        const currentTileType = currentMapData?.[playerTileY]?.[playerTileX];
+        const specialPortal =
+          typeof currentTileType === "number"
+            ? PORTAL_CONFIG.special[currentTileType]
+            : null;
+        console.log("Checking special portal at player tile:", {
+          x: playerTileX,
+          y: playerTileY,
+          tileType: currentTileType,
           specialPortal,
-        );
+        });
 
-        if (specialPortal && playerTileY === 1) {
+        if (specialPortal) {
           console.log(`✅ Activating special portal: ${specialPortal.title}`);
           updatePortalState({
             activePortal: specialPortal,
@@ -2044,12 +2073,9 @@ const GameWorld = React.memo(() => {
           // NPC interaction
           const nearbyNPC = findNearbyNPC();
           if (nearbyNPC) {
-            gameState.setActiveNPC(nearbyNPC);
-            updateUIState({
-              showNPCDialog: true,
-              dockExpanded: true,
-              dockTab: "talk",
-            });
+            // Reuse the unified interaction path so victory/dialog side effects
+            // (e.g., John Muir level-complete trigger) behave the same for click and key.
+            handleNPCInteraction(nearbyNPC);
             if (gameState.mobileState.screenReaderMode) {
               announceToScreenReader(`Talking to ${nearbyNPC.name || "NPC"}`);
             }
@@ -2108,6 +2134,7 @@ const GameWorld = React.memo(() => {
       announceToScreenReader,
       gameState,
       findNearbyNPC,
+      handleNPCInteraction,
       characterPosition,
       characterState,
       setCharacterState,
@@ -2317,13 +2344,19 @@ const GameWorld = React.memo(() => {
 
     // Check special portals in Yosemite
     if (currentMapName === "Yosemite") {
-      // Check if player is near any special portal (1-tile radius)
+      const mapData = currentMap?.data;
+      // Check if player is near any special portal tile (types 6-8) in 1-tile radius
       for (let dx = -1; dx <= 1; dx++) {
-        const checkX = playerTileX + dx;
-        if (PORTAL_CONFIG.special[checkX] && Math.abs(playerTileY - 1) <= 1) {
-          nearPortal = true;
-          break;
+        for (let dy = -1; dy <= 1; dy++) {
+          const checkX = playerTileX + dx;
+          const checkY = playerTileY + dy;
+          const tileType = mapData?.[checkY]?.[checkX];
+          if (tileType === 6 || tileType === 7 || tileType === 8) {
+            nearPortal = true;
+            break;
+          }
         }
+        if (nearPortal) break;
       }
     }
 
@@ -2392,6 +2425,48 @@ const GameWorld = React.memo(() => {
     const autoSaveInterval = setInterval(saveGameProgress, 30000); // Save every 30 seconds
     return () => clearInterval(autoSaveInterval);
   }, [saveGameProgress]);
+
+  // Dev-only faster persistence: keep position/map during rapid HMR edits.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return undefined;
+    if (!user) return undefined;
+
+    if (devSaveDebounceRef.current) {
+      clearTimeout(devSaveDebounceRef.current);
+    }
+    devSaveDebounceRef.current = setTimeout(() => {
+      saveGameProgress();
+      devSaveDebounceRef.current = null;
+    }, 350);
+
+    return () => {
+      if (devSaveDebounceRef.current) {
+        clearTimeout(devSaveDebounceRef.current);
+        devSaveDebounceRef.current = null;
+      }
+    };
+  }, [user, characterPosition, currentMapIndex, inventory, saveGameProgress]);
+
+  // Persist immediately when the tab reloads / HMR swaps modules in dev.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return undefined;
+    if (!user) return undefined;
+
+    const handleBeforeUnload = () => {
+      saveGameProgress();
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    if (import.meta.hot) {
+      import.meta.hot.dispose(() => {
+        saveGameProgress();
+      });
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [user, saveGameProgress]);
 
   // Mobile and accessibility detection
   useEffect(() => {

@@ -44,6 +44,8 @@ const Tile = ({
         return "/assets/tiles/portal.webp"; // Base portal image, style overridden by CSS
       case 9: // dungeon portal
         return "/assets/tiles/portal.webp"; // Base portal image, style overridden by CSS
+      case 19: // yosemite warp portal
+        return "/assets/tiles/portal.webp";
       default:
         console.warn(`Unknown tile type: ${type}, defaulting to grass`);
         return "/assets/tiles/piskel_grass.png";
@@ -86,6 +88,9 @@ const Tile = ({
         return "overworld3"; // Portal in Yosemite leads back to Overworld 3
       }
     }
+    if (type === 19 && mapName === "Overworld") {
+      return "yosemite";
+    }
 
     // Special portals in Yosemite
     if (mapName === "Yosemite") {
@@ -107,9 +112,9 @@ const Tile = ({
   };
 
   // Generate additional classes and attributes for portals
-  const portalDestination =
-    type >= 5 && type <= 9 ? getPortalDestination() : null;
-  const portalLevel = type === 5 ? getPortalLevel() : null;
+  const isPortalTile = (type >= 5 && type <= 9) || type === 19;
+  const portalDestination = isPortalTile ? getPortalDestination() : null;
+  const portalLevel = type === 5 || type === 19 ? getPortalLevel() : null;
   const portalClasses = portalDestination
     ? `portal-to-${portalDestination}`
     : "";
@@ -122,6 +127,7 @@ const Tile = ({
     if (type === 7) return "shooter-portal";
     if (type === 8) return "text-portal";
     if (type === 9) return "dungeon-portal";
+    if (type === 19) return "yosemite-warp";
     return "";
   };
 
@@ -136,7 +142,7 @@ const Tile = ({
         width: `${size}px`,
         height: `${size}px`,
         backgroundImage:
-          type >= 5 && type <= 9
+          isPortalTile
             ? "none"
             : imageLoaded
               ? `url(${imagePath})`
@@ -149,7 +155,7 @@ const Tile = ({
       data-level={portalLevel}
     >
       {/* Inner elements for all portal types */}
-      {type === 5 && (
+      {(type === 5 || type === 19) && (
         <>
           <div className="portal-inner-vortex"></div>
           <div className="portal-glow"></div>

@@ -24,6 +24,7 @@ export const TILE_TYPES = {
   16: "ice",
   17: "mountain",
   18: "stone-floor",
+  19: "yosemite-warp",
 };
 
 // Map validation helper
@@ -36,11 +37,11 @@ export const isValidMapSize = (mapData) => {
     (row) =>
       Array.isArray(row) &&
       row.length === rowLength &&
-      row.every((cell) => typeof cell === "number" && cell >= 0 && cell <= 18),
+      row.every((cell) => typeof cell === "number" && cell >= 0 && cell <= 19),
   );
 };
 
-const MAX_TILE_ID = 18;
+const MAX_TILE_ID = 19;
 
 /**
  * Iterable audit of a map grid: dimensions, per-tile-id counts, invalid cells.
@@ -120,6 +121,7 @@ export const isWalkable = (x, y, mapData) => {
     case 12: // Flower
     case 14: // Path
     case 18: // Stone floor
+    case 19: // Yosemite warp portal
       return true;
     case 1: // Wall
     case 2: // Tree
