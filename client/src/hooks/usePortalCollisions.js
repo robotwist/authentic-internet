@@ -287,84 +287,8 @@ export const usePortalCollisions = ({
       }
     }
 
-    // Handle special portals in Yosemite map
-    if (currentMapName === "Yosemite") {
-      // Terminal portal (code 6)
-      if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 6) {
-        const conditionFn = () =>
-          MAPS[currentMapIndex]?.data?.[row]?.[col] === 6 &&
-          currentMapName === "Yosemite";
-
-        const actionFn = () => {
-          // Stop Yosemite music first
-          if (soundManager) {
-            soundManager.stopMusic(true);
-          }
-          // Launch terminal special world
-          setCurrentSpecialWorld("terminal");
-        };
-
-        createInteractiveNotification(
-          "Mysterious Portal",
-          "Press SPACE to investigate this strange energy",
-          conditionFn,
-          actionFn,
-        );
-      }
-
-      // Shooter portal (code 7)
-      else if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 7) {
-        const conditionFn = () =>
-          MAPS[currentMapIndex]?.data?.[row]?.[col] === 7 &&
-          currentMapName === "Yosemite";
-
-        const actionFn = () => {
-          console.log("SHOOTER PORTAL: Launching shooter");
-          // Stop Yosemite music first
-          if (soundManager) {
-            soundManager.stopMusic(true);
-          }
-          // Launch shooter special world
-          setCurrentSpecialWorld("shooter");
-        };
-
-        createInteractiveNotification(
-          "Mysterious Portal",
-          "Press SPACE to investigate this strange energy",
-          conditionFn,
-          actionFn,
-        );
-      }
-
-      // Text Adventure portal (code 8)
-      else if (MAPS[currentMapIndex]?.data?.[row]?.[col] === 8) {
-        const conditionFn = () =>
-          MAPS[currentMapIndex]?.data?.[row]?.[col] === 8 &&
-          currentMapName === "Yosemite";
-
-        const actionFn = () => {
-          // Stop Yosemite music first
-          if (soundManager) {
-            soundManager.stopMusic(true);
-          }
-          // Launch text adventure special world
-          setCurrentSpecialWorld("text_adventure");
-        };
-
-        createInteractiveNotification(
-          "Mysterious Portal",
-          "Press SPACE to investigate this strange energy",
-          conditionFn,
-          actionFn,
-        );
-      } else {
-        // Reset portal notification when not on a special portal
-        if (portalNotificationActive) {
-          hidePortalNotification();
-          setPortalNotificationActive(false);
-        }
-      }
-    }
+    // Yosemite mini-game sigils (tiles 6–8) are handled in GameWorld via
+    // portalCollision dispatch (same pattern as dungeon tile 9).
 
     // Level 1 is completed via handlePortalTransition when reaching Yosemite.
     // Level 2: handleBossDefeat (Library of Alexandria). Level 3: handleTerminalComplete.

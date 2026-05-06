@@ -1,206 +1,235 @@
-/* Enhanced NPC Interaction Styles */
+/* NPC talk — transcript / in-world conversation (not chat-app bubbles) */
 .npc-interaction-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  inset: 0;
+  background-color: rgba(12, 10, 9, 0.82);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(6px);
 }
 
 .npc-interaction-container {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  border-radius: 20px;
+  --talk-bg: #1c1917;
+  --talk-surface: #292524;
+  --talk-border: rgba(214, 211, 209, 0.18);
+  --talk-muted: #a8a29e;
+  --talk-text: #fafaf9;
+  --talk-accent: #d6d3d1;
+  --talk-npc-bar: rgba(180, 83, 9, 0.55);
+  --talk-user-bg: rgba(41, 37, 36, 0.85);
+
+  background: var(--talk-bg);
+  border-radius: 10px;
   width: 90%;
-  max-width: 800px;
+  max-width: 760px;
   height: 90%;
-  max-height: 700px;
+  max-height: 680px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-  border: 2px solid #475569;
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--talk-border);
   overflow: hidden;
 }
 
-/* Header Styles */
+/* Header — simple band, no glossy gradient */
 .npc-header {
-  background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-  padding: 20px;
+  background: var(--talk-surface);
+  padding: 16px 18px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid #6b7280;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 1px solid var(--talk-border);
 }
 
 .npc-info h2 {
-  color: #f8fafc;
+  color: var(--talk-text);
   margin: 0;
-  font-size: 1.8rem;
-  font-weight: bold;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
 .npc-meta {
   display: flex;
-  gap: 15px;
-  margin-top: 5px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
 }
 
-.npc-type, .npc-location {
-  color: #cbd5e1;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 12px;
+.npc-type,
+.npc-location {
+  color: var(--talk-muted);
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
   text-transform: capitalize;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .relationship-status {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
 }
 
 .relationship-badge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  color: white;
-  font-weight: bold;
-  font-size: 0.9rem;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: var(--talk-text);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
 }
 
 .relationship-icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .interaction-count {
-  color: #94a3b8;
-  font-size: 0.8rem;
+  color: var(--talk-muted);
+  font-size: 0.72rem;
 }
 
 .close-button {
-  background: #ef4444;
-  color: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  font-size: 1.5rem;
+  background: transparent;
+  color: var(--talk-muted);
+  border: 1px solid var(--talk-border);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  font-size: 1.35rem;
+  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
 }
 
 .close-button:hover {
-  background: #dc2626;
-  transform: scale(1.1);
+  color: var(--talk-text);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: none;
 }
 
-/* Personality Display */
+/* Personality */
 .personality-display {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 15px 20px;
-  border-bottom: 1px solid #475569;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--talk-border);
 }
 
 .personality-display h4 {
-  color: #f1f5f9;
-  margin: 0 0 10px 0;
-  font-size: 1rem;
+  color: var(--talk-accent);
+  margin: 0 0 8px 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .traits-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .trait-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .trait-name {
-  color: #cbd5e1;
-  font-size: 0.9rem;
-  min-width: 80px;
+  color: var(--talk-muted);
+  font-size: 0.82rem;
+  min-width: 72px;
 }
 
 .trait-bar {
   flex: 1;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .trait-fill {
   height: 100%;
-  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
-  border-radius: 4px;
+  background: rgba(120, 113, 108, 0.9);
+  border-radius: 3px;
   transition: width 0.3s ease;
 }
 
 .trait-value {
-  color: #94a3b8;
-  font-size: 0.8rem;
-  min-width: 30px;
+  color: var(--talk-muted);
+  font-size: 0.75rem;
+  min-width: 28px;
   text-align: right;
 }
 
-/* Quest Display */
+/* Quest */
 .current-quest {
-  background: rgba(139, 92, 246, 0.1);
-  padding: 15px 20px;
-  border-bottom: 1px solid #475569;
-  border-left: 4px solid #8b5cf6;
+  background: rgba(87, 83, 78, 0.2);
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--talk-border);
+  border-left: 3px solid rgba(180, 83, 9, 0.65);
 }
 
 .current-quest h4 {
-  color: #c4b5fd;
-  margin: 0 0 10px 0;
-  font-size: 1rem;
+  color: var(--talk-accent);
+  margin: 0 0 6px 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .quest-info h5 {
-  color: #f1f5f9;
-  margin: 0 0 5px 0;
-  font-size: 1.1rem;
+  color: var(--talk-text);
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .quest-info p {
-  color: #cbd5e1;
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  color: var(--talk-muted);
+  margin: 0 0 8px 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .quest-progress {
-  color: #a5b4fc;
-  font-size: 0.9rem;
+  color: var(--talk-accent);
+  font-size: 0.86rem;
   font-style: italic;
 }
 
-/* Conversation Area */
+/* Conversation — reading order: guide speaks, you answer */
 .conversation-area {
   flex: 1;
-  padding: 20px;
+  padding: 16px 18px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  background: rgba(0, 0, 0, 0.1);
+  gap: 18px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, transparent 48%);
 }
 
 .conversation-area::-webkit-scrollbar {
@@ -208,17 +237,32 @@
 }
 
 .conversation-area::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: transparent;
 }
 
 .conversation-area::-webkit-scrollbar-thumb {
-  background: #64748b;
+  background: rgba(120, 113, 108, 0.45);
   border-radius: 4px;
+}
+
+.conversation-area--revealing {
+  cursor: pointer;
+}
+
+.npc-reveal-hint {
+  margin: 0 0 4px 0;
+  padding: 0 4px;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  color: var(--talk-muted, #78716c);
+  opacity: 0.88;
+  flex-shrink: 0;
+  order: -1;
 }
 
 .message {
   display: flex;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.25s ease;
 }
 
 .message.user {
@@ -230,56 +274,81 @@
 }
 
 .message-content {
-  max-width: 70%;
-  padding: 12px 16px;
-  border-radius: 18px;
+  max-width: 100%;
+  padding: 0;
+  border-radius: 0;
   position: relative;
 }
 
-.message.user .message-content {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
-}
-
+/* NPC: dominant block — feels like spoken lines */
 .message.npc .message-content {
-  background: linear-gradient(135deg, #475569 0%, #334155 100%);
-  color: #f1f5f9;
-  border: 1px solid #64748b;
+  width: 100%;
+  max-width: 100%;
+  padding: 12px 14px 12px 16px;
+  background: transparent;
+  border: none;
+  border-left: 3px solid var(--talk-npc-bar);
+  box-shadow: none;
 }
 
-.message-author {
-  font-size: 0.8rem;
-  font-weight: bold;
-  margin-bottom: 4px;
-  opacity: 0.8;
+.message.npc .message-author {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  opacity: 1;
+  color: var(--talk-accent);
 }
 
-.message-text {
-  font-size: 0.95rem;
-  line-height: 1.4;
-  margin-bottom: 4px;
+.message.npc .message-text {
+  font-size: 1.02rem;
+  line-height: 1.55;
+  margin-bottom: 0;
+  color: var(--talk-text);
+  font-family: "Georgia", "Times New Roman", serif;
 }
 
-.message-timestamp {
+/* Traveler: quieter, secondary — not a bright “sent” bubble */
+.message.user .message-content {
+  max-width: min(88%, 28rem);
+  padding: 10px 14px;
+  background: var(--talk-user-bg);
+  border: 1px solid var(--talk-border);
+  border-radius: 6px;
+}
+
+.message.user .message-author {
   font-size: 0.7rem;
-  opacity: 0.6;
-  text-align: right;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  opacity: 0.85;
+  color: var(--talk-muted);
 }
 
-/* Typing Indicator */
+.message.user .message-text {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin-bottom: 0;
+  color: #e7e5e4;
+}
+
+/* Typing — understated */
 .typing-indicator {
   display: flex;
-  gap: 4px;
+  gap: 5px;
   align-items: center;
-  padding: 8px 0;
+  padding: 4px 0 2px;
 }
 
 .typing-indicator span {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #94a3b8;
-  animation: typing 1.4s infinite;
+  background: var(--talk-muted);
+  animation: typing 1.3s ease-in-out infinite;
 }
 
 .typing-indicator span:nth-child(2) {
@@ -291,124 +360,132 @@
 }
 
 @keyframes typing {
-  0%, 60%, 100% {
-    transform: scale(1);
-    opacity: 0.5;
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
   }
-  30% {
-    transform: scale(1.2);
-    opacity: 1;
+  35% {
+    transform: translateY(-3px);
+    opacity: 0.9;
   }
 }
 
-/* Input Area */
+/* Input — note margin, not messenger */
 .input-area {
-  padding: 20px;
-  border-top: 2px solid #475569;
-  background: rgba(0, 0, 0, 0.2);
+  padding: 14px 18px 16px;
+  border-top: 1px solid var(--talk-border);
+  background: var(--talk-surface);
 }
 
 .input-container {
   display: flex;
-  gap: 12px;
-  margin-bottom: 15px;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 0;
 }
 
 .input-container textarea {
   flex: 1;
-  padding: 12px 16px;
-  border: 2px solid #475569;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.3);
-  color: #f1f5f9;
-  font-size: 0.95rem;
+  padding: 10px 12px;
+  border: 1px solid var(--talk-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--talk-text);
+  font-size: 0.92rem;
   resize: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  line-height: 1.4;
+  font-family: inherit;
 }
 
 .input-container textarea:focus {
   outline: none;
-  border-color: #3b82f6;
-  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(214, 211, 209, 0.45);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .input-container textarea::placeholder {
-  color: #94a3b8;
+  color: #78716c;
 }
 
 .send-button {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: bold;
+  padding: 10px 18px;
+  background: rgba(87, 83, 78, 0.55);
+  color: var(--talk-text);
+  border: 1px solid var(--talk-border);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.88rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .send-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  transform: translateY(-2px);
-}
-
-.send-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  background: rgba(120, 113, 108, 0.45);
+  border-color: rgba(214, 211, 209, 0.28);
   transform: none;
 }
 
-/* Quick Actions */
-.quick-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.quick-actions button {
-  padding: 8px 16px;
-  background: rgba(59, 130, 246, 0.2);
-  color: #93c5fd;
-  border: 1px solid #3b82f6;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.quick-actions button:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.3);
-  color: #dbeafe;
-  transform: translateY(-1px);
-}
-
-.quick-actions button:disabled {
-  opacity: 0.5;
+.send-button:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-/* Context Display */
+/* Quick prompts — whispered suggestions, not pills */
+.quick-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.quick-actions button {
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--talk-muted);
+  border: 1px solid var(--talk-border);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.quick-actions button:hover:not(:disabled) {
+  color: var(--talk-text);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(214, 211, 209, 0.25);
+  transform: none;
+}
+
+.quick-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Context — small footnote */
 .context-display {
   display: flex;
-  gap: 15px;
-  padding: 15px 20px;
-  background: rgba(0, 0, 0, 0.3);
-  border-top: 1px solid #475569;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 18px 12px;
+  background: rgba(0, 0, 0, 0.18);
+  border-top: 1px solid var(--talk-border);
 }
 
 .context-item {
-  color: #94a3b8;
-  font-size: 0.85rem;
+  color: #78716c;
+  font-size: 0.78rem;
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -416,54 +493,58 @@
   }
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .npc-interaction-container {
     width: 95%;
     height: 95%;
   }
-  
+
   .npc-header {
-    padding: 15px;
+    padding: 14px;
     flex-direction: column;
-    gap: 15px;
-    text-align: center;
+    align-items: stretch;
+    text-align: left;
   }
-  
+
+  .relationship-status {
+    align-items: flex-start;
+  }
+
   .personality-display {
-    padding: 15px;
+    padding: 12px 14px;
   }
-  
+
   .trait-item {
     flex-direction: column;
     align-items: stretch;
-    gap: 5px;
+    gap: 4px;
   }
-  
+
   .trait-name {
     min-width: auto;
   }
-  
+
   .conversation-area {
-    padding: 15px;
+    padding: 12px 14px;
+    gap: 14px;
   }
-  
-  .message-content {
-    max-width: 85%;
+
+  .message.user .message-content {
+    max-width: 92%;
   }
-  
+
   .input-area {
-    padding: 15px;
+    padding: 12px 14px;
   }
-  
+
   .quick-actions {
-    justify-content: center;
+    justify-content: flex-start;
   }
-  
+
   .context-display {
     flex-direction: column;
-    gap: 8px;
-    padding: 10px 15px;
+    gap: 6px;
+    padding: 8px 14px 10px;
   }
 }
 
@@ -480,6 +561,34 @@
   overflow: hidden;
 }
 
+.npc-interaction-close-floating {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  border-radius: 6px;
+  border: 1px solid var(--talk-border, rgba(214, 211, 209, 0.18));
+  background: rgba(28, 25, 23, 0.85);
+  color: var(--talk-muted, #a8a29e);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.npc-interaction-close-floating:hover {
+  color: var(--talk-text, #fafaf9);
+  background: rgba(41, 37, 36, 0.92);
+  border-color: rgba(214, 211, 209, 0.28);
+}
+
 .npc-interaction-container--embedded {
   width: 100%;
   max-width: none;
@@ -490,6 +599,9 @@
   border-radius: 0;
   box-shadow: none;
   border: none;
+  background: transparent;
+  --talk-bg: transparent;
+  --talk-surface: rgba(28, 25, 23, 0.72);
 }
 
 .npc-interaction-container--embedded .conversation-area {
@@ -497,54 +609,14 @@
   min-height: 0;
   overflow-y: auto;
   padding: 10px 12px;
-  gap: 10px;
-}
-
-/* —— Docked (embedded) compact layout —— */
-.npc-header--compact {
-  padding: 10px 12px;
-  flex-wrap: wrap;
-  gap: 8px;
-  border-bottom-width: 1px;
-}
-
-.npc-header--compact .npc-info h2 {
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-
-.npc-header--compact .npc-meta {
-  margin-top: 2px;
-  gap: 8px;
-}
-
-.npc-header--compact .npc-type,
-.npc-header--compact .npc-location {
-  font-size: 0.72rem;
-  padding: 2px 8px;
-}
-
-.close-button--ghost {
-  width: auto;
-  height: auto;
-  min-height: 32px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #e2e8f0;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.close-button--ghost:hover {
-  background: rgba(255, 255, 255, 0.14);
-  transform: none;
+  gap: 14px;
+  background: transparent;
 }
 
 .npc-interaction-container--embedded .current-quest--compact {
-  padding: 8px 12px;
+  padding: 8px 40px 8px 12px;
   border-left-width: 3px;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .npc-interaction-container--embedded .current-quest--compact h5 {
@@ -557,25 +629,35 @@
   margin-top: 4px;
 }
 
-.npc-interaction-container--embedded .message-content {
-  max-width: 92%;
+.npc-interaction-container--embedded .message.npc .message-content {
+  padding: 10px 12px 10px 14px;
+}
+
+.npc-interaction-container--embedded .message.npc .message-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.npc-interaction-container--embedded .message.user .message-content {
+  max-width: min(92%, 24rem);
   padding: 8px 12px;
-  border-radius: 12px;
 }
 
 .npc-interaction-container--embedded .message-author {
-  font-size: 0.72rem;
-  margin-bottom: 2px;
+  font-size: 0.68rem;
+  margin-bottom: 4px;
 }
 
-.npc-interaction-container--embedded .message-text {
-  font-size: 0.85rem;
-  line-height: 1.35;
+.npc-interaction-container--embedded .message.user .message-text {
+  font-size: 0.84rem;
+  line-height: 1.4;
 }
 
 .input-area--compact {
   padding: 10px 12px;
   border-top-width: 1px;
+  background: var(--talk-surface);
+  backdrop-filter: blur(8px);
 }
 
 .quick-actions--chips {
@@ -586,16 +668,17 @@
 
 .qa-chip {
   padding: 4px 10px !important;
-  border-radius: 999px !important;
+  border-radius: 4px !important;
   font-size: 0.72rem !important;
   font-weight: 600 !important;
-  background: rgba(59, 130, 246, 0.15) !important;
-  border: 1px solid rgba(96, 165, 250, 0.35) !important;
-  color: #bfdbfe !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--talk-border) !important;
+  color: var(--talk-muted) !important;
 }
 
 .qa-chip:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.28) !important;
+  color: var(--talk-text) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
   transform: none !important;
 }
 
@@ -607,7 +690,7 @@
 .npc-interaction-container--embedded .input-container textarea {
   padding: 8px 10px;
   font-size: 0.85rem;
-  border-radius: 8px;
+  border-radius: 6px;
   border-width: 1px;
   min-height: 38px;
   line-height: 1.35;
@@ -615,7 +698,7 @@
 
 .send-button--compact {
   padding: 8px 14px !important;
-  border-radius: 8px !important;
+  border-radius: 6px !important;
   font-size: 0.8rem !important;
   font-weight: 600 !important;
 }

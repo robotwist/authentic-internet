@@ -408,13 +408,77 @@ const GameWorld = React.memo(() => {
   const { socket, isConnected, sendMessage } = useWebSocket();
   const gameWorldRef = useRef(null);
   const characterControllerRef = useRef(null);
+  const conversationViewportRef = useRef(null);
+  const conversationFocusActiveRef = useRef(false);
   /** Last room snapshot for merging key saves with localStorage dungeon progress */
   const lastDungeonSnapshotRef = useRef({});
   /** Dedupe auto `portalCollision` while standing on the same dungeon tile */
   const dungeonStepTileKeyRef = useRef("");
+  /** Dedupe auto `portalCollision` on Yosemite mini-game sigils (tiles 6–8) */
+  const yosemiteMiniGameStepKeyRef = useRef("");
+  const prevSpecialWorldRef = useRef(null);
   const hasRestoredSessionRef = useRef(false);
 
   // portalNotificationActive is now handled by NotificationSystem
+
+  const conversationFocusZoom =
+    uiState.showNPCDialog && gameState.activeNPC ? 1.28 : 1;
+
+  useEffect(() => {
+    const shouldFocus =
+      uiState.showNPCDialog &&
+      gameState.activeNPC &&
+      !uiState.inDungeon &&
+      !currentSpecialWorld;
+
+    if (!shouldFocus) {
+      if (conversationFocusActiveRef.current && conversationViewportRef.current) {
+        setViewport(conversationViewportRef.current);
+      }
+      conversationViewportRef.current = null;
+      conversationFocusActiveRef.current = false;
+      return;
+    }
+
+    if (!MAPS[currentMapIndex]?.data) return;
+
+    if (!conversationFocusActiveRef.current) {
+      conversationViewportRef.current = { x: viewport.x, y: viewport.y };
+    }
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const focusTargetX = (characterPosition.x + gameState.activeNPC.position.x) / 2;
+    const focusTargetY = (characterPosition.y + gameState.activeNPC.position.y) / 2;
+    const worldVisibleWidth = viewportWidth / conversationFocusZoom;
+    const worldVisibleHeight = viewportHeight / conversationFocusZoom;
+
+    const mapWidth = MAPS[currentMapIndex].data[0]?.length * TILE_SIZE || 800;
+    const mapHeight = MAPS[currentMapIndex].data.length * TILE_SIZE || 600;
+
+    const rawX = focusTargetX - worldVisibleWidth / 2;
+    const rawY = focusTargetY - worldVisibleHeight / 2;
+    const clampedX = Math.min(rawX, Math.max(0, mapWidth - worldVisibleWidth));
+    const clampedY = Math.min(rawY, Math.max(0, mapHeight - worldVisibleHeight));
+
+    setViewport({
+      x: Math.max(0, clampedX),
+      y: Math.max(0, clampedY),
+    });
+    conversationFocusActiveRef.current = true;
+  }, [
+    uiState.showNPCDialog,
+    uiState.inDungeon,
+    gameState.activeNPC,
+    currentSpecialWorld,
+    currentMapIndex,
+    characterPosition.x,
+    characterPosition.y,
+    conversationFocusZoom,
+    viewport.x,
+    viewport.y,
+    setViewport,
+  ]);
 
   // Update checkForLevelUpAchievements to use our context
   const checkForLevelUpAchievements = useCallback(
@@ -823,11 +887,14 @@ const GameWorld = React.memo(() => {
         },
       });
 
+      // Ensure victory UX takes over any active dialog panel.
+      setActiveNPC(null);
       updateUIState({
         showWinNotification: true,
         winMessage,
         showRewardModal: true,
         currentAchievement: level,
+        showNPCDialog: false,
         dockExpanded: true,
         dockTab: "status",
       });
@@ -850,6 +917,7 @@ const GameWorld = React.memo(() => {
       gameState.soundManager,
       updateGameState,
       updateUIState,
+      setActiveNPC,
       user,
       checkLevelAchievements,
     ],
@@ -1162,6 +1230,7 @@ const GameWorld = React.memo(() => {
       const activeMapName = MAPS[currentMapIndex]?.name;
       if (activeMapName === "Yosemite" && npc.name === "John Muir") {
         handleLevelCompletion("level1");
+        return;
       }
 
       // Set the active NPC and show dialog in bottom dock
@@ -1337,17 +1406,17 @@ const GameWorld = React.memo(() => {
         6: {
           type: "terminal",
           title: "Terminal Challenge",
-          message: "Press SPACE to enter the Terminal Challenge",
+          message: "Step onto the sigil and press SPACE to enter the Terminal Challenge",
         },
         7: {
           type: "shooter",
           title: "Arcade Shooter",
-          message: "Press SPACE to enter the Arcade Shooter",
+          message: "Step onto the sigil and press SPACE to enter the Arcade Shooter",
         },
         8: {
           type: "text_adventure",
           title: "Text Adventure",
-          message: "Press SPACE to enter the Text Adventure",
+          message: "Step onto the sigil and press SPACE to enter the Text Adventure",
         },
       },
     }),
@@ -1515,6 +1584,10 @@ const GameWorld = React.memo(() => {
           console.log(
             `✅ Auto-activating special portal: ${specialPortal.title}`,
           );
+
+          if (gameState.soundManager) {
+            gameState.soundManager.stopMusic(true);
+          }
 
           // Activate the special world directly
           if (specialPortal.type === "terminal") {
@@ -2367,7 +2440,7 @@ const GameWorld = React.memo(() => {
         const hint = document.createElement("div");
         hint.id = "portal-hint";
         hint.className = "portal-hint";
-        hint.innerHTML = "Press SPACE to activate portal";
+        hint.innerHTML = "Portal sigil ready: press SPACE to travel";
         document.body.appendChild(hint);
       }
       document.getElementById("portal-hint")?.classList.add("visible");
@@ -2741,6 +2814,77 @@ const GameWorld = React.memo(() => {
     portalState.isTransitioning,
   ]);
 
+  // Step onto Yosemite mini-game sigils (6–8): dispatch portalCollision like dungeon tiles
+  useEffect(() => {
+    if (
+      uiState.inDungeon ||
+      portalState.isTransitioning ||
+      !characterPosition ||
+      currentSpecialWorld
+    ) {
+      return;
+    }
+    const mapName = MAPS[currentMapIndex]?.name;
+    if (mapName !== "Yosemite") {
+      yosemiteMiniGameStepKeyRef.current = "";
+      return;
+    }
+    const mapData = MAPS[currentMapIndex]?.data;
+    if (!mapData?.length) return;
+    const tileX = Math.floor(characterPosition.x / TILE_SIZE);
+    const tileY = Math.floor(characterPosition.y / TILE_SIZE);
+    if (tileY < 0 || tileY >= mapData.length) return;
+    const row = mapData[tileY];
+    if (!row || tileX < 0 || tileX >= row.length) return;
+    const tileType = row[tileX];
+    if (tileType < 6 || tileType > 8) {
+      yosemiteMiniGameStepKeyRef.current = "";
+      return;
+    }
+    const stepKey = `${currentMapIndex}:${tileX}:${tileY}:${tileType}`;
+    if (yosemiteMiniGameStepKeyRef.current === stepKey) return;
+    yosemiteMiniGameStepKeyRef.current = stepKey;
+    window.dispatchEvent(
+      new CustomEvent("portalCollision", {
+        detail: { tileX, tileY, tileType },
+      }),
+    );
+  }, [
+    characterPosition,
+    characterPosition?.x,
+    characterPosition?.y,
+    currentMapIndex,
+    uiState.inDungeon,
+    portalState.isTransitioning,
+    currentSpecialWorld,
+  ]);
+
+  // After closing a mini-game: allow stepping on the same sigil again + resume Yosemite music
+  useEffect(() => {
+    const was = prevSpecialWorldRef.current;
+    if (was && !currentSpecialWorld) {
+      yosemiteMiniGameStepKeyRef.current = "";
+      const name = MAPS[currentMapIndex]?.name;
+      if (
+        name === "Yosemite" &&
+        gameState.soundManager &&
+        !uiState.inDungeon
+      ) {
+        try {
+          gameState.soundManager.playMusic("yosemite", true, 0.3);
+        } catch (e) {
+          console.warn("Yosemite music resume:", e);
+        }
+      }
+    }
+    prevSpecialWorldRef.current = currentSpecialWorld;
+  }, [
+    currentSpecialWorld,
+    currentMapIndex,
+    gameState.soundManager,
+    uiState.inDungeon,
+  ]);
+
   useEffect(() => {
     // Subscribe to position changes to detect and handle artifact interactions
     const checkArtifactGameInteractions = () => {
@@ -2777,7 +2921,7 @@ const GameWorld = React.memo(() => {
           if (!portalNotificationActive) {
             showPortalNotification(
               artifact.name,
-              `Press SPACE to play ${artifact.name}`,
+              `When ready, press SPACE to enter ${artifact.name}`,
             );
             setPortalNotificationActive(true);
 
@@ -3539,22 +3683,10 @@ const GameWorld = React.memo(() => {
           className={`game-container game-layout-with-dock ${gameState.mobileState.highContrastMode ? "high-contrast" : ""} ${gameState.mobileState.reducedMotionMode ? "reduced-motion" : ""}`}
           role="application"
           aria-label="Authentic Internet Game World"
-          aria-describedby="game-instructions"
           tabIndex={0}
           onKeyDown={handleKeyDown}
         >
           <div className="game-main-stage">
-            {/* === ACCESSIBILITY === */}
-            <div id="game-instructions" className="sr-only">
-              Use arrow keys or WASD to move. The bottom dock has Status, Talk,
-              Bag, Chat, Map, Help, Quotes, and Feedback. Keys: I bag, T talk, M
-              map, C or question mark help, Q quotes, F feedback. H high
-              contrast, R reduced motion, S screen reader. Escape closes
-              overlays and collapses the dock. While typing in a text field,
-              game shortcut keys are ignored; Escape in NPC chat closes the
-              chat panel.
-            </div>
-
             <div
               id="screen-reader-announcements"
               aria-live="polite"
@@ -3601,9 +3733,11 @@ const GameWorld = React.memo(() => {
               <div
                 className={`game-world ${currentMapIndex === 2 ? "level-3" : currentMapIndex === 1 ? "level-2" : "level-1"} ${gameState.mobileState.reducedMotionMode ? "no-animations" : ""}`}
                 style={{
-                  transform: gameState.mobileState.reducedMotionMode
-                    ? `translate(${-viewport.x}px, ${-viewport.y}px)`
-                    : `translate(${-viewport.x}px, ${-viewport.y}px)`,
+                  transform: `translate(${-viewport.x}px, ${-viewport.y}px) scale(${conversationFocusZoom})`,
+                  transformOrigin: "top left",
+                  transition: gameState.mobileState.reducedMotionMode
+                    ? "none"
+                    : "transform 220ms ease-out",
                   width: `${
                     Array.isArray(MAPS) &&
                     MAPS[currentMapIndex]?.data?.[0]?.length
@@ -3740,14 +3874,8 @@ const GameWorld = React.memo(() => {
                     <i className="fas fa-quote-right"></i>
                   </IconButton>
                   <IconButton
-                    onClick={() => updateUIState({ showWorldGuide: true })}
-                    tooltip="World Guide"
-                  >
-                    <i className="fas fa-compass"></i>
-                  </IconButton>
-                  <IconButton
                     onClick={() => openDockTab("guide")}
-                    tooltip="Keyboard Controls (C)"
+                    tooltip="Field Notes (C)"
                   >
                     <i className="fas fa-keyboard"></i>
                   </IconButton>
@@ -3864,7 +3992,7 @@ const GameWorld = React.memo(() => {
               <span className="feedback-text">Feedback</span>
             </div>
 
-            {/* Keyboard / mobile tips: use "Tips" in the bottom dock (opens Help). */}
+            {/* Keyboard / mobile notes live in Field Notes (dock tab). */}
 
             {/* Mobile touch controls - Directional pad for movement */}
             {gameState.mobileState.showTouchControls &&

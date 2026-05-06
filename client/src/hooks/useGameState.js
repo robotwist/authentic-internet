@@ -133,7 +133,7 @@ const initialState = {
     dockExpanded: false,
     /** Active tab when expanded: status | talk | bag | chat */
     dockTab: "status",
-    showWorldGuide: true,
+    showWorldGuide: false,
     isPlacingArtifact: false,
     showArtifactsOnMap: true,
     isMoving: false,

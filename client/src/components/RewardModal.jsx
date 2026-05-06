@@ -5,6 +5,7 @@ import "./RewardModal.css";
 
 const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
   if (!visible) return null;
+  const isLevelVictory = ["level1", "level2", "level3"].includes(achievement);
 
   // Updated URL to the Chrome Web Store, this should be replaced with the actual extension URL
   const nkdManExtensionURL =
@@ -19,7 +20,7 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
   if (achievement === "level1") {
     content = (
       <>
-        <div className="reward-icon">🏆</div>
+        <div className="reward-icon" aria-hidden="true">WIN</div>
         <h3>Level 1 Complete!</h3>
         <p>
           Congratulations! You've completed level 1 by exploring the Digital
@@ -79,7 +80,7 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
   } else if (achievement === "level2" && levelConfig) {
     content = (
       <>
-        <div className="reward-icon">📚</div>
+        <div className="reward-icon" aria-hidden="true">LVL 2</div>
         <h3>{levelConfig.title}</h3>
         <p>{levelConfig.subtext}</p>
         <div className="reward-item">
@@ -95,7 +96,7 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
   } else if (achievement === "level3" && levelConfig) {
     content = (
       <>
-        <div className="reward-icon">⌨️</div>
+        <div className="reward-icon" aria-hidden="true">LVL 3</div>
         <h3>{levelConfig.title}</h3>
         <p>{levelConfig.subtext}</p>
         <div className="reward-item">
@@ -112,7 +113,7 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
     // Default content for other achievements
     content = (
       <>
-        <div className="reward-icon">🎉</div>
+        <div className="reward-icon" aria-hidden="true">WIN</div>
         <h3>Achievement Unlocked!</h3>
         <p>{levelConfig?.subtext ?? "Congratulations on your achievement!"}</p>
       </>
@@ -125,8 +126,18 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
         embedded ? "reward-modal reward-modal--embedded" : "reward-modal"
       }
     >
+      {isLevelVictory && (
+        <div className="reward-fireworks" aria-hidden="true">
+          <span className="firework firework--1"></span>
+          <span className="firework firework--2"></span>
+          <span className="firework firework--3"></span>
+          <span className="firework firework--4"></span>
+          <span className="firework firework--5"></span>
+          <span className="firework firework--6"></span>
+        </div>
+      )}
       <div className="reward-modal-header">
-        <h2>🎉 Achievement Unlocked! 🎉</h2>
+        <h2>Achievement Unlocked</h2>
         <button className="close-button" onClick={onClose}>
           ×
         </button>
@@ -142,7 +153,8 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
     </div>
   );
 
-  if (embedded) {
+  // Level wins should take over the screen for a proper celebration.
+  if (embedded && !isLevelVictory) {
     return <div className="reward-modal-embedded">{inner}</div>;
   }
 

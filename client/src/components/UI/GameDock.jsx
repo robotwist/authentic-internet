@@ -9,7 +9,7 @@ const TABS = [
   { id: "bag", label: "Bag" },
   { id: "chat", label: "Chat" },
   { id: "map", label: "Map" },
-  { id: "guide", label: "Help" },
+  { id: "guide", label: "Field Notes" },
   { id: "quotes", label: "Quotes" },
   { id: "feedback", label: "Feedback" },
 ];
@@ -102,9 +102,9 @@ const GameDock = ({
             type="button"
             className="game-dock-tips-btn"
             onClick={onOpenKeyboardTips}
-            aria-label="Open keyboard and game tips"
+            aria-label="Open field notes and controls"
           >
-            Tips
+            Notes
           </button>
         )}
         <button

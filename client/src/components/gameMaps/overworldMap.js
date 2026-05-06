@@ -27,6 +27,28 @@ export default {
   ]),
   npcs: [
     {
+      id: "overworld_npc_world_guide",
+      _id: "overworld_npc_world_guide",
+      name: "World Guide",
+      type: NPC_TYPES.GUIDE,
+      area: "Overworld",
+      position: { x: 384, y: 192 }, // Near spawn path for immediate onboarding
+      sprite: "/assets/npcs/Socrates1Crop.png",
+      patrolArea: {
+        startX: 256,
+        startY: 128,
+        width: 256,
+        height: 192,
+      },
+      dialogue: [
+        "I am the humble world guide, unassuming, I know. Beautiful, of course.  All knowing, a decent cook by all accounts. I know all! I know all! Welcome, traveler. Press T near me anytime and I will guide you.",
+        "You look like a smart kid but you also look a bit lost. By the way, where are your clothes? Anyway, this is actually all I know. They put me on sort of a loop so you'll have to excuse me if I repeat myself. Core controls: move with WASD or arrow keys, press T to talk, I opens Bag, C opens Field Notes, and M opens the map.",
+        "Here's a tip if you get bored or lost or are dumber than you look. World route: Overworld -> Desert -> Dungeon -> Yosemite. Portals drive progression, and your blue-gold warp takes fast travel to Yosemite.",
+        "If you haven't left on the adventure yet maybe you have gotten hit on the head too many times: reach John Muir in Yosemite and trigger level victory for your reward moment.",
+        "Tip: Just keep goiong really fast and if anything gets in your way, turn. Charles DeMarr said that.",
+      ],
+    },
+    {
       id: "overworld_npc_shakespeare",
       _id: "overworld_npc_shakespeare", // Add _id for NPCInteraction component compatibility
       name: "William Shakespeare",

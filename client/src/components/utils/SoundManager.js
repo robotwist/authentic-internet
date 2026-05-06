@@ -401,6 +401,67 @@ class SoundManager {
   }
 
   /**
+   * Short “trainer mumble” blurb (Punch-Out–style) for NPC text unfurl.
+   * Synthesized — no asset file. Safe to call often; keep volume modest.
+   * @param {number} volume - 0–1 scale (multiplied by soundVolume)
+   */
+  playNpcDialogBlurb(volume = 0.85) {
+    if (this.isMuted) return;
+    if (!this.userInteracted) return;
+    if (!this.audioContext) return;
+
+    if (this.audioContext.state === "suspended") {
+      this.audioContext.resume().catch(() => {});
+    }
+
+    try {
+      const ctx = this.audioContext;
+      const now = ctx.currentTime;
+      const dur = 0.038 + Math.random() * 0.032;
+      const sampleRate = ctx.sampleRate;
+      const n = Math.max(1, Math.floor(sampleRate * dur));
+      const buf = ctx.createBuffer(1, n, sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.42;
+      }
+
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+
+      const band = ctx.createBiquadFilter();
+      band.type = "bandpass";
+      band.frequency.value = 320 + Math.random() * 520;
+      band.Q.value = 0.65 + Math.random() * 0.35;
+
+      const gain = ctx.createGain();
+      const peak = Math.min(0.95, volume * this.soundVolume * 0.55);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(peak, now + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+      src.connect(band);
+      band.connect(gain);
+      gain.connect(ctx.destination);
+
+      src.onended = () => {
+        try {
+          src.disconnect();
+          band.disconnect();
+          gain.disconnect();
+        } catch {
+          /* ignore */
+        }
+      };
+
+      src.start(now);
+      src.stop(now + dur + 0.02);
+    } catch (error) {
+      console.warn("playNpcDialogBlurb:", error);
+    }
+  }
+
+  /**
    * Play background music with user interaction check
    * @param {string} name - Music identifier
    * @param {boolean} loop - Whether to loop the music

@@ -2,14 +2,13 @@ import React from "react";
 import "./ControlsGuide.css";
 
 /**
- * ControlsGuide - Comprehensive keyboard controls reference
- * Shows all keyboard shortcuts and game controls
+ * ControlsGuide - Field notes with keyboard references
  */
 const ControlsGuide = ({ onClose, embedded = false }) => {
   const controlSections = [
     {
       title: "Movement",
-      icon: "🎮",
+      icon: "Route",
       controls: [
         { keys: ["↑", "W"], action: "Move Up" },
         { keys: ["↓", "S"], action: "Move Down" },
@@ -19,7 +18,7 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
     },
     {
       title: "Combat",
-      icon: "⚔️",
+      icon: "Combat",
       controls: [
         { keys: ["Z"], action: "Sword Attack" },
         { keys: ["Z"], action: "Sword Beam (at full health)", secondary: true },
@@ -27,7 +26,7 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
     },
     {
       title: "Interactions",
-      icon: "💬",
+      icon: "Encounters",
       controls: [
         { keys: ["T"], action: "Talk to NPCs" },
         { keys: ["E", "P"], action: "Pick Up Artifact" },
@@ -36,20 +35,20 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
     },
     {
       title: "Menus & UI",
-      icon: "📋",
+      icon: "Journal",
       controls: [
         { keys: ["I"], action: "Open Bag tab (bottom dock)" },
         { keys: ["U"], action: "Open Create tab (bottom dock)" },
         { keys: ["M"], action: "Open Map tab (bottom dock)" },
         { keys: ["Q"], action: "Open Quotes tab (bottom dock)" },
-        { keys: ["C", "?"], action: "Open Help tab (bottom dock)" },
+        { keys: ["C", "?"], action: "Open Field Notes tab (bottom dock)" },
         { keys: ["F"], action: "Open Feedback tab (bottom dock)" },
         { keys: ["Esc"], action: "Close menus / collapse dock" },
       ],
     },
     {
       title: "Accessibility",
-      icon: "♿",
+      icon: "Access",
       controls: [
         { keys: ["H"], action: "Toggle High Contrast Mode" },
         { keys: ["R"], action: "Toggle Reduced Motion" },
@@ -58,7 +57,7 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
     },
     {
       title: "Shooter Mini-Game",
-      icon: "🎯",
+      icon: "Arcade",
       controls: [
         { keys: ["Space", "↑", "W"], action: "Jump" },
         { keys: ["←", "→", "A", "D"], action: "Move Left/Right" },
@@ -78,11 +77,11 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
       >
         {/* Header */}
         <div className="controls-guide-header">
-          <h2>⌨️ Keyboard Controls</h2>
+          <h2>Field Notes</h2>
           <button
             className="controls-close-btn"
             onClick={onClose}
-            aria-label="Close controls guide"
+            aria-label="Close field notes"
           >
             ✕
           </button>
@@ -90,8 +89,8 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
 
         {embedded && (
           <p className="controls-guide-lede">
-            Quick dock: M map, U create, C help, F feedback, I bag, T talk — Esc
-            closes.
+            Journal quick view: M map, U create, C field notes, F feedback, I
+            bag, T talk; Esc closes.
           </p>
         )}
 
@@ -130,7 +129,7 @@ const ControlsGuide = ({ onClose, embedded = false }) => {
         {/* Footer */}
         <div className="controls-guide-footer">
           <p className="controls-hint">
-            💡 Tip: Most actions have alternative keys for convenience
+            Field note: most actions support alternate keys for travel comfort.
           </p>
           <button className="controls-close-btn-footer" onClick={onClose}>
             Close (Esc)
