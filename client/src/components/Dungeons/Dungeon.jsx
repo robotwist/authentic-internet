@@ -148,11 +148,6 @@ const Dungeon = ({
     }
   }, [currentRoom, defeatedRooms]);
 
-  // Check for door interaction when player moves
-  useEffect(() => {
-    checkDoorInteraction(playerPosition.x, playerPosition.y);
-  }, [playerPosition, checkDoorInteraction]);
-
   // Get enemy health based on type
   const getEnemyHealth = (type) => {
     const healthMap = {
@@ -224,6 +219,64 @@ const Dungeon = ({
       console.log(`Collected: ${itemType}`);
     },
     [collectedItems, onCollectItem],
+  );
+
+  // Transition to new room
+  const transitionToRoom = useCallback(
+    (roomId, entryDirection) => {
+      if (roomId === "overworld_exit") {
+        // Exit dungeon
+        if (onExit) {
+          onExit();
+        }
+        return;
+      }
+
+      const newRoom = dungeonData.rooms[roomId];
+      if (!newRoom) {
+        console.error(`Room not found: ${roomId}`);
+        return;
+      }
+
+      setCurrentRoom(newRoom);
+
+      // Position player at appropriate entrance
+      const oppositeDirection = {
+        north: "south",
+        south: "north",
+        east: "west",
+        west: "east",
+      };
+
+      const entrySide = oppositeDirection[entryDirection];
+      let newPlayerX, newPlayerY;
+
+      // Calculate spawn position based on entry direction
+      if (entrySide === "north") {
+        newPlayerX = Math.floor(newRoom.width / 2) * TILE_SIZE;
+        newPlayerY = TILE_SIZE;
+      } else if (entrySide === "south") {
+        newPlayerX = Math.floor(newRoom.width / 2) * TILE_SIZE;
+        newPlayerY = (newRoom.height - 2) * TILE_SIZE;
+      } else if (entrySide === "east") {
+        newPlayerX = (newRoom.width - 2) * TILE_SIZE;
+        newPlayerY = Math.floor(newRoom.height / 2) * TILE_SIZE;
+      } else if (entrySide === "west") {
+        newPlayerX = TILE_SIZE;
+        newPlayerY = Math.floor(newRoom.height / 2) * TILE_SIZE;
+      } else {
+        // Default to room start position
+        newPlayerX = newRoom.startPosition.x * TILE_SIZE;
+        newPlayerY = newRoom.startPosition.y * TILE_SIZE;
+      }
+
+      if (onPlayerMove) {
+        onPlayerMove({ x: newPlayerX, y: newPlayerY });
+      }
+
+      console.log(`Entered: ${newRoom.name}`);
+    },
+    [dungeonData, onPlayerMove, onExit],
   );
 
   // Check door interaction - called when player moves
@@ -309,66 +362,20 @@ const Dungeon = ({
         },
       );
     },
-    [currentRoom, playerKeys, hasBossKey, unlockedDoors, onCollectItem],
+    [
+      currentRoom,
+      playerKeys,
+      hasBossKey,
+      unlockedDoors,
+      onCollectItem,
+      transitionToRoom,
+    ],
   );
 
-  // Transition to new room
-  const transitionToRoom = useCallback(
-    (roomId, entryDirection) => {
-      if (roomId === "overworld_exit") {
-        // Exit dungeon
-        if (onExit) {
-          onExit();
-        }
-        return;
-      }
-
-      const newRoom = dungeonData.rooms[roomId];
-      if (!newRoom) {
-        console.error(`Room not found: ${roomId}`);
-        return;
-      }
-
-      setCurrentRoom(newRoom);
-
-      // Position player at appropriate entrance
-      const oppositeDirection = {
-        north: "south",
-        south: "north",
-        east: "west",
-        west: "east",
-      };
-
-      const entrySide = oppositeDirection[entryDirection];
-      let newPlayerX, newPlayerY;
-
-      // Calculate spawn position based on entry direction
-      if (entrySide === "north") {
-        newPlayerX = Math.floor(newRoom.width / 2) * TILE_SIZE;
-        newPlayerY = TILE_SIZE;
-      } else if (entrySide === "south") {
-        newPlayerX = Math.floor(newRoom.width / 2) * TILE_SIZE;
-        newPlayerY = (newRoom.height - 2) * TILE_SIZE;
-      } else if (entrySide === "east") {
-        newPlayerX = (newRoom.width - 2) * TILE_SIZE;
-        newPlayerY = Math.floor(newRoom.height / 2) * TILE_SIZE;
-      } else if (entrySide === "west") {
-        newPlayerX = TILE_SIZE;
-        newPlayerY = Math.floor(newRoom.height / 2) * TILE_SIZE;
-      } else {
-        // Default to room start position
-        newPlayerX = newRoom.startPosition.x * TILE_SIZE;
-        newPlayerY = newRoom.startPosition.y * TILE_SIZE;
-      }
-
-      if (onPlayerMove) {
-        onPlayerMove({ x: newPlayerX, y: newPlayerY });
-      }
-
-      console.log(`Entered: ${newRoom.name}`);
-    },
-    [dungeonData, onPlayerMove, onExit],
-  );
+  // Check for door interaction when player moves
+  useEffect(() => {
+    checkDoorInteraction(playerPosition.x, playerPosition.y);
+  }, [playerPosition, checkDoorInteraction]);
 
   // Render dungeon tiles
   const renderRoom = () => {
