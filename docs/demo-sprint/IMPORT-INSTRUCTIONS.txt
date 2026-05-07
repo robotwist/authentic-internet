@@ -1,0 +1,61 @@
+Demo sprint pack — Jira + Airtable
+==================================
+Jira project: **AIC** (Authentic Internet Capstone). Use issue keys like AIC-12 in links,
+Airtable "Jira key" field, and Epic Link / Parent columns after import.
+
+JIRA (Cloud / Data Center)
+--------------------------
+1. Use your **AIC** Scrum or Kanban project (Authentic Internet Capstone). Project key: **AIC**.
+
+2. Import epics FIRST:
+   - Administration → System → Import & export → External system → CSV
+   - Or: Project settings → Import issues → CSV (wording varies by Jira version)
+   - Map columns: Issue Type → Epic, Summary → Summary, Description → Description,
+     Labels → Labels (create if missing)
+
+3. After epics exist, confirm the four epic **issue keys** (e.g. **AIC-1** … **AIC-4** if those
+   were the next numbers in project **AIC**). If they differ, edit the **Parent** column in
+   02-stories-tasks.csv to match (see jira-epic-keys-template.txt).
+
+4. Import stories/tasks SECOND — **Option 1: Quick CSV fix (recommended)**
+   - File: **02-stories-tasks.csv**
+   - Columns included:
+     - **Issue Id** — numbers 1–15 (reference id for the importer only).
+     - **Parent** — Jira epic keys (**AIC-1** … **AIC-4**), not epic names. Mapping:
+       E1 spine → AIC-1, E2 stability → AIC-2, E3 juice → AIC-3, E4 PM → AIC-4.
+   - On the Jira CSV **mapping** screen:
+     - Map **Issue Id** → **Work item Id** (or **Issue Id**), per your Jira wording.
+     - Map **Parent** → **Parent** (links each story/task under the correct epic).
+   - Map other columns as usual: Issue Type, Summary, Description, Priority, Story Points, Labels.
+
+5. Team-managed vs Company-managed:
+   - Team-managed: often use "Parent" instead of Epic Link for hierarchy.
+   - If CSV import fails, paste Summary + Description + Acceptance Criteria from the CSV
+     into Jira manually — still valid for coursework.
+
+6. Suggested labels (create in Jira): spine, demo-only, out-of-scope, ai-assisted, stability, pm-practice
+
+
+AIRTABLE
+--------
+1. Create a base: e.g. "AIC — Authentic Internet Capstone — May Demo" (aligns with Jira **AIC**)
+
+2. Create table "Stories" with the fields listed in airtable-stories-fields.txt (add each field
+   with the listed type).
+
+3. Optional table "Risks" with fields: Title (single line), Severity (single select: Low/Med/High),
+   Mitigation (long text), Status (Open/Closed), Linked story (link to Stories).
+
+4. Import airtable-stories-seed.csv into Stories after your field names match the header row
+   (you may need to rename columns in Airtable to match, or adjust the CSV header to your names).
+
+5. Views to add for portfolio look:
+   - Kanban by Status
+   - Gallery (cover field = attachment screenshot of game)
+   - Calendar by Due date (if you add a Due date field)
+
+
+AI "ASSIGNEE" (course-safe)
+-----------------------------
+Use field "Execution mode": Human | AI-assisted (Cursor) | Automation
+Do not invent fake people; use evidence links in Notes or Demo evidence URL.

@@ -1,0 +1,16 @@
+Issue Id,Issue Type,Summary,Description,Acceptance Criteria,Parent,Priority,Story Points,Labels
+1,Story,Happy path script (Overworld → Yosemite → Muir),"Document every step a presenter takes: start, movement, portal/tile triggers, map transition, Muir interaction, victory.","1) Google Doc or Confluence link attached to ticket. 2) 20-step max checklist. 3) One 'known bad' path listed (e.g. disabled tab).",AIC-1,High,3,"spine;pm-practice"
+2,Story,Yosemite chunk load / travel gate,"Ensure lazy map bundle is loaded before Yosemite is required OR block travel with clear message until ready.","Cold start + saved game on Overworld: entering Yosemite never shows blank map. Evidence: screen recording.",AIC-1,High,5,"spine;stability"
+3,Story,Define and implement victory at Muir,"Pick one: quest completion flag OR post-dialog modal OR reward modal. Muir must acknowledge in copy.","1) Victory fires once per run (or correct reset). 2) Playtester signs checklist. 3) Copy in Airtable Copy table.",AIC-1,High,5,spine
+4,Story,Dry-run #1 (internal),"Run full spine; log bugs in Jira; fix P0 only.","Checklist 100% or P0s logged with owner.",AIC-1,High,2,spine
+5,Story,Demo mode UI gate,"Hide or disable dock tabs / special worlds that are out of scope for demo build (env flag or build config).","List of disabled UI in ticket + screenshot of main UI. No crash when clicking removed areas.",AIC-2,High,5,"demo-only;stability"
+6,Story,Keyboard + typing regression,"NPC/dock text fields do not trigger movement or hotkeys; Escape behavior documented.","Manual test steps in ticket; optional link to PR/commit.",AIC-2,Medium,2,"stability;ai-assisted"
+7,Story,Session smoke (optional if in scope),"Refresh mid-spine: player not bricked; map index safe.","Pass/fail in ticket; if fail, document as known limitation for demo.",AIC-2,Medium,3,stability
+8,Story,Copy pass: Muir + portals + win,"Short punchy lines; one 'funny' beat approved; typos fixed.","All strings listed in Airtable Copy table with Final? checkbox.",AIC-3,Medium,3,spine
+9,Story,Win juice (sound or modal),"One of: victory sound, modal, short animation.","Plays once; reduced-motion respected if applicable.",AIC-3,Low,3,spine
+10,Story,Sprint board hygiene,"Labels spine / out-of-scope; top of backlog = spine only; WIP limit 3 stories.","Screenshot of board + filter URL.",AIC-4,Medium,2,pm-practice
+11,Story,Mid-sprint review notes,"What shipped; what slipped; next 3 priorities.","Notes in Jira or linked doc; date on ticket.",AIC-4,Medium,1,pm-practice
+12,Story,Retrospective,"Start/stop/continue; one process improvement for week 2.","Linked note or Jira comment.",AIC-4,Medium,1,pm-practice
+13,Story,AI-assisted task evidence,"At least 3 tasks completed with AI help: each has Execution mode + PR/commit link.","Table in Airtable or comment links on stories.",AIC-4,Low,2,"pm-practice;ai-assisted"
+14,Task,Record 3-min demo video,"Screen + audio; show spine end-to-end.","Video link in ticket + Airtable.",AIC-1,High,2,spine
+15,Task,Presenter cheat sheet,"One-page: controls, win trigger, what not to click.","PDF or doc linked.",AIC-4,Medium,1,pm-practice

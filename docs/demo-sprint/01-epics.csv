@@ -1,0 +1,5 @@
+Issue Type,Summary,Description,Priority,Labels
+Epic,E1 – Demo spine: Overworld → Yosemite → Muir,"Single playable path: start on Overworld, reach Yosemite map, interact with John Muir, trigger defined victory moment. All other content secondary.",High,"spine;demo-only"
+Epic,E2 – Stability & no traps,"Loading, saves, keyboard focus, demo gating so players cannot wander into broken systems. Regression checklist.",High,"stability;demo-only"
+Epic,E3 – Fun & funny (juice),"Micro-copy, timing, one memorable joke beat, win feedback (sound/modal). Content pass only — no new mechanics.",Medium,"spine;demo-only"
+Epic,E4 – PM practice (Jira + Airtable),"Ceremonies, backlog hygiene, risk log, stakeholder/instructor notes, AI-assisted task evidence. Deliverable: board + Airtable + retrospective.",Medium,"pm-practice"

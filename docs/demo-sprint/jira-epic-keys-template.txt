@@ -1,0 +1,19 @@
+AIC (Authentic Internet Capstone) — epic keys after import
+===========================================================
+
+Stories CSV (02-stories-tasks.csv) uses Parent = **AIC-1** … **AIC-4** assuming your four
+epics imported in the same order as 01-epics.csv:
+
+  AIC-1  ←  E1 – Demo spine: Overworld → Yosemite → Muir
+  AIC-2  ←  E2 – Stability & no traps
+  AIC-3  ←  E3 – Fun & funny (juice)
+  AIC-4  ←  E4 – PM practice (Jira + Airtable)
+
+If your project already had issues and epics are **not** AIC-1…4, open 02-stories-tasks.csv
+and replace Parent values: every AIC-1 → your E1 epic key, AIC-2 → E2, etc., then import.
+
+Epic summaries (must match 01-epics.csv exactly if you re-import epics):
+  E1 – Demo spine: Overworld → Yosemite → Muir
+  E2 – Stability & no traps
+  E3 – Fun & funny (juice)
+  E4 – PM practice (Jira + Airtable)

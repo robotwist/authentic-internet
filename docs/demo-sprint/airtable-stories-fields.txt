@@ -1,0 +1,31 @@
+Airtable table: Stories
+=======================
+Create these fields (types in parentheses):
+
+Title                    (Single line text)     — primary field
+Epic                     (Single select)        — options: E1 Spine, E2 Stability, E3 Juice, E4 PM
+Status                   (Single select)        — Backlog, Ready, In Progress, In Review, Done
+Sprint week              (Single select)        — W1, W2
+Owner                    (Single select)        — Self, Instructor, AI-assisted
+Execution mode           (Single select)        — Human, AI-assisted (Cursor), Automation
+Story points               (Number)             — 1–8, allow empty
+Jira key                 (Single line text)     — e.g. AIC-42 (AIC = Authentic Internet Capstone)
+Priority                 (Single select)        — High, Medium, Low
+Acceptance criteria      (Long text)
+Demo evidence URL        (URL)
+Risk                     (Checkbox)             — optional
+Notes                    (Long text)
+Due date                   (Date)               — optional
+Attachments              (Attachment)           — screenshots / recordings
+
+Optional second table: Copy deck
+================================
+Line ID (Autonumber or text)
+Context (Single select) — Muir, Portal, Win screen, Error
+Draft text (Long text)
+Final (Checkbox)
+Owner
+
+Optional third table: Risks
+===========================
+Title, Severity (Low/Med/High), Mitigation, Status, Linked story (Link to Stories)

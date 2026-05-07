@@ -1,0 +1,16 @@
+Title,Epic,Status,Sprint week,Owner,Execution mode,Story points,Priority,Acceptance criteria,Demo evidence URL,Risk,Notes
+Happy path script,E1 Spine,Backlog,W1,Self,Human,3,High,"Doc link + 20-step checklist + one bad path",,,Mirror Jira story
+Yosemite load gate,E1 Spine,Backlog,W1,Self,Human,5,High,Screen recording cold start + save,,,May pair with AI for code
+Victory at Muir,E1 Spine,Backlog,W1,Self,Human,5,High,Win once + checklist + Airtable copy,,,
+Dry-run #1,E1 Spine,Backlog,W1,Self,Human,2,High,Checklist green or P0 bugs filed,,,
+Demo mode UI gate,E2 Stability,Backlog,W1,Self,AI-assisted (Cursor),5,High,Disabled list + screenshot,,,Link PR when done
+Keyboard typing regression,E2 Stability,Backlog,W1,Self,AI-assisted (Cursor),2,Medium,Steps in Jira,,,
+Session smoke,E2 Stability,Backlog,W2,Self,Human,3,Medium,Pass/fail documented,,,
+Copy pass,E3 Juice,Backlog,W2,Self,Human,3,Medium,Airtable Copy table,,,
+Win juice,E3 Juice,Backlog,W2,Self,Human,3,Low,Sound or modal once,,,
+Sprint board hygiene,E4 PM,Backlog,W1,Self,Human,2,Medium,Screenshot + filter URL,,,
+Mid-sprint review,E4 PM,Backlog,W1,Self,Human,1,Medium,Linked notes,,,
+Retrospective,E4 PM,Backlog,W2,Self,Human,1,Medium,Start/stop/continue,,,
+AI-assisted evidence,E4 PM,Backlog,W2,Self,AI-assisted (Cursor),2,Low,3 tasks with PR links,,,
+Demo video (3 min),E1 Spine,Backlog,W2,Self,Human,2,High,Link in Airtable,,,
+Presenter cheat sheet,E4 PM,Backlog,W2,Self,Human,1,Medium,PDF one-pager,,,

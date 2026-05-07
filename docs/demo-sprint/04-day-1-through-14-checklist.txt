@@ -1,0 +1,119 @@
+Authentic Internet — 14-day demo sprint (game-first)
+North star: cold start → Overworld play → reach Yosemite → meet John Muir → clear WIN.
+Jira project: AIC. PM tools: minimal; every ticket must map to the north star or “stability for demo.”
+
+Legend: SHIP GATE = must be true before you end the day (or declare slip in Jira with new date).
+
+────────────────────────────────────────────────────────────
+DAY 1 (TODAY)
+────────────────────────────────────────────────────────────
+□ Write the “Happy path script” — 15–20 numbered steps from launch to WIN (Google Doc OK).
+□ Play once without fixing: note P0 (blocks path) vs P1 (annoying) only.
+□ Define WIN in one sentence (e.g. “After Muir dialogue, show X modal / complete quest Y”).
+□ Create/label AIC filter: “spine-only” — only epics/stories for this path visible.
+□ Pick demo build approach: branch name (e.g. demo/yosemite-win) OR feature flag list to hide.
+SHIP GATE: Happy path doc link is in Jira + WIN definition is written + P0 list exists.
+
+────────────────────────────────────────────────────────────
+DAY 2
+────────────────────────────────────────────────────────────
+□ Fix every P0 from Day 1 that blocks the path (max 3; split the rest).
+□ Verify Overworld → Yosemite transition: never blank map / never soft-lock.
+□ One full dry-run against happy path script; tick every step.
+SHIP GATE: Full path completable once without cheats OR exactly one documented workaround.
+
+────────────────────────────────────────────────────────────
+DAY 3
+────────────────────────────────────────────────────────────
+□ Implement or wire WIN trigger (minimal: modal + copy OR existing reward flow).
+□ Smoke: WIN fires once per run; no duplicate spam on re-talk.
+□ Draft Muir + victory copy (bullet list OK).
+SHIP GATE: Someone naive can trigger WIN following your script.
+
+────────────────────────────────────────────────────────────
+DAY 4
+────────────────────────────────────────────────────────────
+□ Demo mode / UI gate: hide or disable worst offenders (dock tabs, specials).
+□ Regression: keyboard focus still OK in NPC chat after changes.
+□ Trim HUD noise on demo route if needed (small CSS/copy only).
+SHIP GATE: Presenter cannot accidentally wander into known broken areas in <30s.
+
+────────────────────────────────────────────────────────────
+DAY 5 — Mid-sprint checkpoint
+────────────────────────────────────────────────────────────
+□ Formal dry-run #1 recorded (screen capture OK).
+□ Backlog chop: defer everything not on path to “Post-demo.”
+□ Mid-sprint note: shipped / slipped / next 3 priorities only.
+SHIP GATE: Video + written P0 count = 0 for the path.
+
+────────────────────────────────────────────────────────────
+DAY 6
+────────────────────────────────────────────────────────────
+□ Copy pass: portals, hints, Muir, win — short, one “funny” beat.
+□ Audio: one win sting OR skip if risky (document).
+□ Loading: cold start feels acceptable on your target machine.
+SHIP GATE: Playtester (you, fresh eyes) laughs or nods once at one line.
+
+────────────────────────────────────────────────────────────
+DAY 7
+────────────────────────────────────────────────────────────
+□ Session/refresh smoke: reload mid-path — document pass or known limitation.
+□ Save/restore: if broken, document “demo starts fresh” for presentation.
+□ Fix any new P0 from week 1 video review.
+SHIP GATE: No undocumented surprises for demo day.
+
+────────────────────────────────────────────────────────────
+DAY 8
+────────────────────────────────────────────────────────────
+□ Week 2 start: freeze features; bugs and polish only.
+□ Second full path run; log only P0/P1.
+□ Presenter cheat sheet v1 (one page: controls, WIN, don’t-click list).
+SHIP GATE: Cheat sheet exists + shared with future-you.
+
+────────────────────────────────────────────────────────────
+DAY 9
+────────────────────────────────────────────────────────────
+□ Juice pass: small win feedback (modal style, sound volume, timing).
+□ Reduced motion / a11y: no flashing abuse; Esc behavior documented.
+□ Bugfix burn-down: P0 = 0.
+SHIP GATE: WIN moment feels intentional, not accidental.
+
+────────────────────────────────────────────────────────────
+DAY 10
+────────────────────────────────────────────────────────────
+□ Third dry-run; time the run (target <8 min playable to WIN for class).
+□ Trim copy if too long; fix pacing bugs.
+□ Prepare “if API down” fallback (offline dialogue already in game? verify).
+SHIP GATE: Scripted run completes under time budget.
+
+────────────────────────────────────────────────────────────
+DAY 11
+────────────────────────────────────────────────────────────
+□ Record **demo master** video (best take).
+□ Backup build tag in git (annotated tag or release branch).
+□ Known issues list (max 5 bullets) for honesty in presentation.
+SHIP GATE: Master video link stored (Jira comment or your PM tool).
+
+────────────────────────────────────────────────────────────
+DAY 12
+────────────────────────────────────────────────────────────
+□ Dress rehearsal with cheat sheet only (no code except P0).
+□ Fix only P0 regressions.
+□ Instructor/audience narrative: problem → demo → WIN → learnings (3 min).
+SHIP GATE: Clean run twice in a row.
+
+────────────────────────────────────────────────────────────
+DAY 13 — Buffer
+────────────────────────────────────────────────────────────
+□ Only P0 from dress rehearsal.
+□ Polish: typo pass, asset load check, volume levels.
+□ Sleep + short run in the morning.
+SHIP GATE: You would bet a coffee the live demo works.
+
+────────────────────────────────────────────────────────────
+DAY 14 — Present
+────────────────────────────────────────────────────────────
+□ Pre-flight: restart machine, one full run 2 hours before.
+□ Submit/ present per course requirements.
+□ Retro (15 min): start / stop / continue — one improvement for next project.
+SHIP GATE: Done + retro note filed.
