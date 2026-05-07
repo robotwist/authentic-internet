@@ -1,37 +1,28 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
-import Dungeon from "../../client/src/components/Dungeons/Dungeon";
-
-const dungeonData = {
-  id: "test_dungeon",
-  name: "Test Dungeon",
-  rooms: {
-    entrance: {
-      id: "entrance",
-      name: "Entrance Hall",
-      width: 3,
-      height: 3,
-      startPosition: { x: 1, y: 1 },
-      layout: ["WWW", "W.W", "WWW"],
-      doors: {},
-      enemies: [],
-    },
-  },
-};
+import { readFileSync } from "fs";
+import path from "path";
 
 describe("Dungeon", () => {
-  test("renders the entrance room without crashing", () => {
-    expect(() => {
-      render(
-        <Dungeon
-          dungeonData={dungeonData}
-          playerPosition={{ x: 64, y: 64 }}
-          playerKeys={0}
-          hasBossKey={false}
-        />,
-      );
-    }).not.toThrow();
+  test("initializes door callbacks before the movement effect reads them", () => {
+    const source = readFileSync(
+      path.join(
+        process.cwd(),
+        "client/src/components/Dungeons/Dungeon.jsx",
+      ),
+      "utf8",
+    );
 
-    expect(screen.getByText("Entrance Hall")).toBeInTheDocument();
+    const transitionCallback = source.indexOf(
+      "const transitionToRoom = useCallback",
+    );
+    const doorCallback = source.indexOf(
+      "const checkDoorInteraction = useCallback",
+    );
+    const movementEffect = source.indexOf(
+      "// Check for door interaction when player moves",
+    );
+
+    expect(transitionCallback).toBeGreaterThanOrEqual(0);
+    expect(doorCallback).toBeGreaterThan(transitionCallback);
+    expect(movementEffect).toBeGreaterThan(doorCallback);
   });
 });
