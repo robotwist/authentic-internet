@@ -121,7 +121,7 @@
 
 .game-dock-body.is-collapsed {
   max-height: 0;
-  border-top-color: transparent;
+  border-bottom-color: transparent;
   opacity: 0;
   pointer-events: none;
   overflow: hidden;

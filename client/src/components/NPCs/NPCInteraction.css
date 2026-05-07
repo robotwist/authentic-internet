@@ -682,6 +682,12 @@
   transform: none !important;
 }
 
+.qa-chip--close {
+  color: #f5f5f4 !important;
+  border-color: rgba(214, 211, 209, 0.28) !important;
+  background: rgba(120, 113, 108, 0.22) !important;
+}
+
 .npc-interaction-container--embedded .input-container {
   margin-bottom: 0;
   gap: 8px;

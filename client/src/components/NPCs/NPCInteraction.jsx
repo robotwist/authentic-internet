@@ -541,6 +541,13 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
             <div className="quick-actions quick-actions--chips">
               <button
                 type="button"
+                className="qa-chip qa-chip--close"
+                onClick={onClose}
+              >
+                Done
+              </button>
+              <button
+                type="button"
                 className="qa-chip"
                 onClick={() => setInput("Tell me about yourself")}
                 disabled={inputLocked}

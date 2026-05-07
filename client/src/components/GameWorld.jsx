@@ -2973,7 +2973,11 @@ const GameWorld = React.memo(() => {
 
   // Close NPC dialog
   const handleCloseNPCDialog = useCallback(() => {
-    updateUIState({ showNPCDialog: false, dockTab: "status" });
+    updateUIState({
+      showNPCDialog: false,
+      dockExpanded: false,
+      dockTab: "status",
+    });
     setActiveNPC(null);
   }, [updateUIState, setActiveNPC]);
 
