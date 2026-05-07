@@ -12,13 +12,24 @@ import "./NPCInteraction.css";
 /** Comic-timing delay before the next NPC character appears */
 function npcCharRevealDelay(ch, shiftHeld) {
   let ms;
-  if (".!?".includes(ch)) ms = 260 + Math.random() * 90;
-  else if (",;:—–-".includes(ch)) ms = 95 + Math.random() * 45;
-  else if (ch === "\n") ms = 170;
-  else if (ch === " ") ms = 26 + Math.random() * 18;
-  else ms = 32 + Math.random() * 16;
+  if (".!?".includes(ch)) ms = 130 + Math.random() * 50;
+  else if (",;:—–-".includes(ch)) ms = 58 + Math.random() * 24;
+  else if (ch === "\n") ms = 90;
+  else if (ch === " ") ms = 12 + Math.random() * 8;
+  else ms = 16 + Math.random() * 8;
   if (shiftHeld) ms *= 0.3;
   return Math.max(6, Math.round(ms));
+}
+
+const NPC_API_TIMEOUT_MS = 3500;
+
+function npcApiFetch(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), NPC_API_TIMEOUT_MS);
+  return fetch(url, {
+    ...options,
+    signal: controller.signal,
+  }).finally(() => window.clearTimeout(timeout));
 }
 
 const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
@@ -40,10 +51,6 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
   messagesRef.current = messages;
   const shiftFastRef = useRef(false);
   const lastBlurbAtRef = useRef(0);
-
-  useEffect(() => {
-    SoundManager.getInstance().initialize().catch(() => {});
-  }, []);
 
   useEffect(() => {
     const last = messages[messages.length - 1];
@@ -71,11 +78,11 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     const ch = full[revealNpcLen];
     const delay = npcCharRevealDelay(ch, shiftFastRef.current);
     const id = window.setTimeout(() => {
-      if (ch.trim() && performance.now() - lastBlurbAtRef.current > 48) {
-        const punchBeat = ".!?".includes(ch) || (Math.random() < 0.62 && ch !== " ");
+      if (ch.trim() && performance.now() - lastBlurbAtRef.current > 160) {
+        const punchBeat = ".!?".includes(ch) || (Math.random() < 0.18 && ch !== " ");
         if (punchBeat) {
           lastBlurbAtRef.current = performance.now();
-          SoundManager.getInstance().playNpcDialogBlurb(0.4);
+          SoundManager.getInstance().playNpcDialogBlurb(0.25);
         }
       }
       setRevealNpcLen((n) => n + 1);
@@ -123,23 +130,33 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     return () => document.removeEventListener("keydown", onKey, true);
   }, [revealNpcIndex, skipNpcReveal]);
 
+  const localNpcMessage = (text) => ({
+    type: "npc",
+    text: text || npc.dialogue?.[0] || "Hello there, traveler!",
+    author: npc.name,
+    timestamp: new Date(),
+  });
+
+  const getFallbackDialogueResponse = () => {
+    const npcLineCount = messagesRef.current.filter((m) => m.type === "npc").length;
+    const dialogueIndex = npcLineCount % (npc.dialogue?.length || 1);
+    return localNpcMessage(
+      npc.dialogue?.[dialogueIndex] ||
+        "Thank you for sharing that with me.",
+    );
+  };
+
   const initializeConversation = async () => {
-    // Use fallback dialogue if no API endpoint or _id
+    // Always greet locally first so production API slowness never creates a dead conversation.
+    setMessages([localNpcMessage()]);
+
     if (!npc._id || !npc._id.trim()) {
       console.log("Using fallback dialogue for NPC:", npc.name);
-      setMessages([
-        {
-          type: "npc",
-          text: npc.dialogue?.[0] || "Hello there, traveler!",
-          author: npc.name,
-          timestamp: new Date(),
-        },
-      ]);
       return;
     }
 
     try {
-      const response = await fetch(`/api/npcs/${npc._id}/interact`, {
+      const response = await npcApiFetch(`/api/npcs/${npc._id}/interact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -182,15 +199,7 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
         throw new Error("API response not successful");
       }
     } catch (error) {
-      console.log("Using fallback dialogue due to API error:", error.message);
-      setMessages([
-        {
-          type: "npc",
-          text: npc.dialogue?.[0] || "Hello there, traveler!",
-          author: npc.name,
-          timestamp: new Date(),
-        },
-      ]);
+      console.log("Keeping local greeting due to API error:", error.message);
     }
   };
 
@@ -214,19 +223,7 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     if (!npc._id || !npc._id.trim()) {
       console.log("Using fallback dialogue for NPC response");
       setTimeout(() => {
-        // Pick a random dialogue line or cycle through them
-        const dialogueIndex =
-          messages.filter((m) => m.type === "npc").length %
-          (npc.dialogue?.length || 1);
-        const npcResponse = {
-          type: "npc",
-          text:
-            npc.dialogue?.[dialogueIndex] ||
-            "Thank you for sharing that with me.",
-          author: npc.name,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, npcResponse]);
+        setMessages((prev) => [...prev, getFallbackDialogueResponse()]);
         setIsLoading(false);
         setInput("");
         setInteractionCount((prev) => prev + 1);
@@ -235,7 +232,7 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     }
 
     try {
-      const response = await fetch(`/api/npcs/${npc._id}/interact`, {
+      const response = await npcApiFetch(`/api/npcs/${npc._id}/interact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -289,21 +286,7 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
       }
     } catch (error) {
       console.log("Using fallback dialogue due to API error:", error.message);
-      // Pick a random dialogue line
-      const dialogueIndex =
-        messages.filter((m) => m.type === "npc").length %
-        (npc.dialogue?.length || 1);
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: "npc",
-          text:
-            npc.dialogue?.[dialogueIndex] ||
-            "Thank you for sharing that with me.",
-          author: npc.name,
-          timestamp: new Date(),
-        },
-      ]);
+      setMessages((prev) => [...prev, getFallbackDialogueResponse()]);
       setInteractionCount((prev) => prev + 1);
     } finally {
       setIsLoading(false);
