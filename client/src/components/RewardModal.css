@@ -54,6 +54,34 @@
   animation: scaleIn 0.5s ease;
 }
 
+.reward-modal--yosemite {
+  overflow: hidden auto;
+  color: #f8fafc;
+  background:
+    radial-gradient(circle at 50% -8%, rgba(241, 245, 249, 0.92), transparent 22%),
+    linear-gradient(180deg, rgba(56, 189, 248, 0.24) 0%, rgba(15, 23, 42, 0) 42%),
+    linear-gradient(135deg, #082f49 0%, #0f3f3a 52%, #10231f 100%);
+  border: 1px solid rgba(226, 232, 240, 0.76);
+  border-radius: 6px;
+  box-shadow:
+    0 24px 80px rgba(2, 6, 23, 0.75),
+    0 0 0 1px rgba(125, 211, 252, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.reward-modal--yosemite::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(132deg, transparent 0 42%, rgba(248, 250, 252, 0.88) 42% 45%, transparent 45%),
+    linear-gradient(124deg, transparent 0 54%, rgba(226, 232, 240, 0.42) 54% 56%, transparent 56%),
+    linear-gradient(180deg, transparent 0 66%, rgba(20, 83, 45, 0.58) 66% 100%);
+  opacity: 0.58;
+  z-index: 0;
+}
+
 .reward-fireworks {
   pointer-events: none;
   position: absolute;
@@ -74,6 +102,16 @@
     0 0 34px rgba(255, 165, 0, 0.45);
   animation: fireworkBurst 1.8s ease-out infinite;
   opacity: 0;
+}
+
+.reward-modal--yosemite .reward-fireworks .firework {
+  width: 7px;
+  height: 7px;
+  background: radial-gradient(circle, #ffffff 0%, #bae6fd 48%, transparent 78%);
+  box-shadow:
+    0 0 0 1px rgba(226, 232, 240, 0.5),
+    0 0 18px rgba(125, 211, 252, 0.55);
+  animation-duration: 2.8s;
 }
 
 .firework--1 {
@@ -132,11 +170,25 @@
   z-index: 1;
 }
 
+.reward-modal--yosemite .reward-modal-header {
+  background: rgba(8, 47, 73, 0.48);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.42);
+  backdrop-filter: blur(6px);
+}
+
 .reward-modal-header h2 {
   color: #ffd700;
   margin: 0;
   font-size: 1.5rem;
   text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+}
+
+.reward-modal--yosemite .reward-modal-header h2 {
+  color: #f8fafc;
+  font-size: 0.85rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 16px rgba(186, 230, 253, 0.52);
 }
 
 .close-button {
@@ -176,11 +228,36 @@
   text-shadow: none;
 }
 
+.reward-modal--yosemite .reward-icon {
+  min-width: 112px;
+  height: 30px;
+  border-color: rgba(226, 232, 240, 0.72);
+  background: rgba(240, 249, 255, 0.12);
+  color: #f8fafc;
+  letter-spacing: 0.18em;
+}
+
 .reward-content h3 {
   color: #ffd700;
   font-size: 1.8rem;
   margin-bottom: 15px;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.reward-modal--yosemite .reward-content h3 {
+  color: #f8fafc;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  margin-bottom: 12px;
+  text-shadow:
+    0 2px 0 rgba(15, 23, 42, 0.3),
+    0 0 34px rgba(186, 230, 253, 0.44);
+}
+
+.reward-modal--yosemite .reward-content p {
+  color: #e0f2fe;
 }
 
 .reward-content p {
@@ -198,6 +275,13 @@
   align-items: center;
   margin-bottom: 25px;
   border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.reward-modal--yosemite .reward-item {
+  background: rgba(8, 47, 73, 0.38);
+  border-color: rgba(187, 247, 208, 0.34);
+  border-radius: 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 @media (min-width: 768px) {
@@ -219,6 +303,14 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.reward-modal--yosemite .reward-image {
+  background:
+    linear-gradient(180deg, rgba(240, 249, 255, 0.82), rgba(186, 230, 253, 0.22)),
+    rgba(255, 255, 255, 0.1);
+  border-color: rgba(226, 232, 240, 0.62);
+  border-radius: 4px;
+}
+
 @media (min-width: 768px) {
   .reward-image {
     margin-bottom: 0;
@@ -236,6 +328,13 @@
   text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
 
+.reward-modal--yosemite .reward-details h4 {
+  color: #f8fafc;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+  text-shadow: none;
+}
+
 .download-button {
   display: inline-block;
   background: linear-gradient(135deg, #ffd700 0%, #f7971e 100%);
@@ -251,6 +350,21 @@
   cursor: pointer;
 }
 
+.reward-modal--yosemite .download-button {
+  background: rgba(236, 253, 245, 0.12);
+  color: #ecfeff;
+  border: 1px solid rgba(187, 247, 208, 0.58);
+  border-radius: 4px;
+  box-shadow: 0 0 24px rgba(14, 165, 233, 0.18);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.reward-modal--yosemite .download-button:hover {
+  background: rgba(187, 247, 208, 0.18);
+  box-shadow: 0 0 28px rgba(186, 230, 253, 0.3);
+}
+
 .download-button:hover {
   transform: translateY(-3px);
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
@@ -264,10 +378,22 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.reward-modal--yosemite .reward-instructions {
+  background-color: rgba(2, 44, 34, 0.35);
+  border-color: rgba(226, 232, 240, 0.28);
+  border-radius: 4px;
+}
+
 .reward-instructions h4 {
   color: #ffd700;
   margin-bottom: 15px;
   font-size: 1.2rem;
+}
+
+.reward-modal--yosemite .reward-instructions h4 {
+  color: #f8fafc;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
 }
 
 .reward-instructions ol {
@@ -290,6 +416,12 @@
   z-index: 1;
 }
 
+.reward-modal--yosemite .reward-footer {
+  background: rgba(8, 47, 73, 0.5);
+  border-top: 1px solid rgba(226, 232, 240, 0.32);
+  backdrop-filter: blur(6px);
+}
+
 .continue-button {
   background: linear-gradient(135deg, #4a3f8d 0%, #392d69 100%);
   color: #ffffff;
@@ -301,9 +433,29 @@
   transition: all 0.3s ease;
 }
 
+.reward-modal--yosemite .continue-button {
+  background: rgba(248, 250, 252, 0.11);
+  color: #f8fafc;
+  border-color: rgba(226, 232, 240, 0.48);
+  border-radius: 4px;
+}
+
+.reward-modal--yosemite .continue-button:hover {
+  background: rgba(187, 247, 208, 0.16);
+}
+
 .continue-button:hover {
   background: linear-gradient(135deg, #5a4f9d 0%, #493d79 100%);
   transform: translateY(-2px);
+}
+
+.reward-modal--yosemite .download-button:hover {
+  background: rgba(187, 247, 208, 0.18);
+  box-shadow: 0 0 28px rgba(186, 230, 253, 0.3);
+}
+
+.reward-modal--yosemite .continue-button:hover {
+  background: rgba(187, 247, 208, 0.16);
 }
 
 @keyframes fadeIn {

@@ -16,15 +16,19 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
   const levelConfig = ["level1", "level2", "level3"].includes(achievement)
     ? getLevelWinConfig(achievement)
     : null;
+  const headerTitle =
+    achievement === "level1" ? "A Mark In The Valley" : "Achievement Unlocked";
+  const continueLabel =
+    achievement === "level1" ? "Return To The Valley" : "Continue Adventure";
 
   if (achievement === "level1") {
     content = (
       <>
-        <div className="reward-icon" aria-hidden="true">WIN</div>
-        <h3>Level 1 Complete!</h3>
+        <div className="reward-icon" aria-hidden="true">ARRIVAL</div>
+        <h3>Yosemite Opens</h3>
         <p>
-          Congratulations! You've completed level 1 by exploring the Digital
-          Wilderness!
+          Granite light. Blue air. The trail has carried you out of the digital
+          wilderness and into the valley.
         </p>
 
         <div className="reward-item">
@@ -51,10 +55,10 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
             }}
           />
           <div className="reward-details">
-            <h4>Your Reward: Summon NKD Man Chrome Extension</h4>
+            <h4>A quiet mark on the map</h4>
             <p>
-              This exclusive $1000 value extension is now available for you to
-              download for FREE!
+              Phase 1 is complete. John Muir is nearby, and the valley portals
+              are open for those who keep walking.
             </p>
             <a
               href={nkdManExtensionURL}
@@ -62,17 +66,17 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
               rel="noopener noreferrer"
               className="download-button"
             >
-              Download Extension
+              Carry the Mark
             </a>
           </div>
         </div>
 
         <div className="reward-instructions">
-          <h4>How to use your reward:</h4>
+          <h4>What remains in the valley:</h4>
           <ol>
-            <li>Click the "Download Extension" button</li>
-            <li>Install the extension from the Chrome Web Store</li>
-            <li>Use the extension to summon NKD Man in your browser</li>
+            <li>Speak with John Muir without retriggering the win.</li>
+            <li>Step onto a portal sigil to try a mini-game.</li>
+            <li>Return to the trail when you are ready.</li>
           </ol>
         </div>
       </>
@@ -123,7 +127,13 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
   const inner = (
     <div
       className={
-        embedded ? "reward-modal reward-modal--embedded" : "reward-modal"
+        [
+          "reward-modal",
+          embedded ? "reward-modal--embedded" : "",
+          achievement === "level1" ? "reward-modal--yosemite" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")
       }
     >
       {isLevelVictory && (
@@ -137,7 +147,7 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
         </div>
       )}
       <div className="reward-modal-header">
-        <h2>Achievement Unlocked</h2>
+        <h2>{headerTitle}</h2>
         <button className="close-button" onClick={onClose}>
           ×
         </button>
@@ -147,7 +157,7 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
 
       <div className="reward-footer">
         <button className="continue-button" onClick={onClose}>
-          Continue Adventure
+          {continueLabel}
         </button>
       </div>
     </div>
