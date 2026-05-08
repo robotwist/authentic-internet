@@ -3,6 +3,10 @@ import PropTypes from "prop-types";
 import SoundManager from "./utils/SoundManager";
 import "./Level3Terminal.css";
 
+const TERMINAL_TYPE_SPEED_MULTIPLIER = 0.35;
+const MIN_TERMINAL_TYPE_SPEED_MS = 10;
+const TERMINAL_TYPE_SOUND_GAP_MS = 45;
+
 // Define narrative structure for the terminal experience
 const NARRATIVE_PATHS = {
   intro: {
@@ -209,6 +213,7 @@ const Level3Terminal = ({
   const [soundManager, setSoundManager] = useState(null);
   const inputRef = useRef(null);
   const terminalRef = useRef(null);
+  const lastTypeSoundAtRef = useRef(0);
 
   // Initialize sound manager
   useEffect(() => {
@@ -216,12 +221,6 @@ const Level3Terminal = ({
       try {
         const manager = SoundManager.getInstance();
         await manager.initialize();
-
-        // Load keyboard typing sound
-        await manager.loadSound(
-          "keyboard_typing",
-          "/assets/sounds/keyboard_typing.mp3",
-        );
 
         setSoundManager(manager);
       } catch (error) {
@@ -303,15 +302,23 @@ const Level3Terminal = ({
     setTypingComplete(false);
     setDisplayedText("");
 
-    // Type out the text character by character
-    const typingSpeed = narrative.typingSpeed || 50;
+    // Type out the text quickly enough for demo play while keeping the terminal feel.
+    const typingSpeed = Math.max(
+      MIN_TERMINAL_TYPE_SPEED_MS,
+      Math.round((narrative.typingSpeed || 50) * TERMINAL_TYPE_SPEED_MULTIPLIER),
+    );
     const typingInterval = setInterval(() => {
-      // Play typing sound occasionally (not for every character to avoid sound overload)
-      if (index % 3 === 0 && soundManager) {
-        soundManager.playSound("keyboard_typing", 0.15);
-      }
-
       if (index < processedText.length) {
+        const ch = processedText.charAt(index);
+        const now = performance.now();
+        if (
+          soundManager &&
+          ch.trim() &&
+          now - lastTypeSoundAtRef.current > TERMINAL_TYPE_SOUND_GAP_MS
+        ) {
+          lastTypeSoundAtRef.current = now;
+          soundManager.playSound("typing", 0.08);
+        }
         setDisplayedText((prev) => prev + processedText.charAt(index));
         index++;
       } else {
@@ -335,11 +342,6 @@ const Level3Terminal = ({
       }
     }, typingSpeed);
 
-    // Play eerie typing sound
-    if (narrative.typingSpeed > 30 && soundManager) {
-      soundManager.playSound("typing", 0.2);
-    }
-
     return () => clearInterval(typingInterval);
   }, [currentNarrative, username, artifacts, qualifyingArtifact, soundManager]);
 
@@ -355,14 +357,14 @@ const Level3Terminal = ({
 
     // Play typing sound
     if (soundManager && e.target.value.length > userInput.length) {
-      soundManager.playSound("keyboard_typing", 0.2);
+      soundManager.playSound("typing", 0.08);
     }
   };
 
   const handleKeyDown = (e) => {
     // Play typing sound for special keys
     if (e.key === "Enter" && soundManager) {
-      soundManager.playSound("keyboard_typing", 0.3);
+      soundManager.playSound("typing", 0.12);
     }
 
     if (e.key === "Enter" && typingComplete && waitingForInput) {
@@ -547,19 +549,21 @@ const Level3Terminal = ({
       </div>
 
       <div className="terminal-input-area">
-        <span className="input-prompt">{waitingForInput ? ">" : ""}</span>
-        <input
-          ref={inputRef}
-          type="text"
-          value={userInput}
-          onChange={handleUserInput}
-          onKeyDown={handleKeyDown}
-          disabled={!waitingForInput || !typingComplete}
-          className={`terminal-input ${waitingForInput && typingComplete ? "active" : ""}`}
-          placeholder={waitingForInput ? "Enter your response..." : ""}
-          autoFocus
-        />
-        {showCursor && waitingForInput && <span className="cursor">█</span>}
+        <div className="terminal-input-shell">
+          <span className="input-prompt">{waitingForInput ? ">" : ""}</span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={userInput}
+            onChange={handleUserInput}
+            onKeyDown={handleKeyDown}
+            disabled={!waitingForInput || !typingComplete}
+            className={`terminal-input ${waitingForInput && typingComplete ? "active" : ""}`}
+            placeholder={waitingForInput ? "Type your response..." : ""}
+            autoFocus
+          />
+          {showCursor && waitingForInput && <span className="cursor">█</span>}
+        </div>
       </div>
     </div>
   );
