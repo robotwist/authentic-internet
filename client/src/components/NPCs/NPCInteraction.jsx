@@ -6,7 +6,6 @@ import React, {
   useCallback,
 } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import SoundManager from "../utils/SoundManager";
 import "./NPCInteraction.css";
 
 /** Comic-timing delay before the next NPC character appears */
@@ -50,7 +49,7 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
   const shiftFastRef = useRef(false);
-  const lastBlurbAtRef = useRef(0);
+  const usesLocalDialogue = Array.isArray(npc.dialogue) && npc.dialogue.length > 0;
 
   useEffect(() => {
     const last = messages[messages.length - 1];
@@ -78,13 +77,6 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     const ch = full[revealNpcLen];
     const delay = npcCharRevealDelay(ch, shiftFastRef.current);
     const id = window.setTimeout(() => {
-      if (ch.trim() && performance.now() - lastBlurbAtRef.current > 160) {
-        const punchBeat = ".!?".includes(ch) || (Math.random() < 0.18 && ch !== " ");
-        if (punchBeat) {
-          lastBlurbAtRef.current = performance.now();
-          SoundManager.getInstance().playNpcDialogBlurb(0.25);
-        }
-      }
       setRevealNpcLen((n) => n + 1);
     }, delay);
 
@@ -150,7 +142,7 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     // Always greet locally first so production API slowness never creates a dead conversation.
     setMessages([localNpcMessage()]);
 
-    if (!npc._id || !npc._id.trim()) {
+    if (usesLocalDialogue || !npc._id || !npc._id.trim()) {
       console.log("Using fallback dialogue for NPC:", npc.name);
       return;
     }
@@ -219,8 +211,8 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
-    // If no API endpoint, use fallback dialogue rotation
-    if (!npc._id || !npc._id.trim()) {
+    // Local map NPCs have authored dialogue and should not depend on backend NPC records.
+    if (usesLocalDialogue || !npc._id || !npc._id.trim()) {
       console.log("Using fallback dialogue for NPC response");
       setTimeout(() => {
         setMessages((prev) => [...prev, getFallbackDialogueResponse()]);

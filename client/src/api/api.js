@@ -154,8 +154,14 @@ const createApiInstance = (baseUrl) => {
 const configuredApiUrl =
   import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-// In dev, use relative URLs so Vite proxies /api -> backend (avoids CORS + "Network Error")
-const apiBaseUrl = import.meta.env.DEV ? "" : configuredApiUrl;
+// In dev, use relative URLs so Vite proxies /api -> backend. On Netlify,
+// also use relative URLs so netlify.toml redirects /api/* to the backend
+// without browser CORS preflight failures.
+const shouldUseRelativeApi =
+  import.meta.env.DEV ||
+  (typeof window !== "undefined" &&
+    window.location.hostname.endsWith(".netlify.app"));
+const apiBaseUrl = shouldUseRelativeApi ? "" : configuredApiUrl;
 
 // Initialize API with the configured URL - use default instance as fallback
 let API = createApiInstance(apiBaseUrl);
