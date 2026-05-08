@@ -423,6 +423,7 @@ const GameWorld = React.memo(() => {
   const dungeonStepTileKeyRef = useRef("");
   /** Dedupe auto `portalCollision` on Yosemite mini-game sigils (tiles 6–8) */
   const yosemiteMiniGameStepKeyRef = useRef("");
+  const prevMapNameRef = useRef(null);
   const prevSpecialWorldRef = useRef(null);
   const hasRestoredSessionRef = useRef(false);
 
@@ -965,10 +966,6 @@ const GameWorld = React.memo(() => {
               // Show world announcement
               showWorldAnnouncement(destinationMap);
 
-              if (destinationMap === "Yosemite") {
-                handleLevelCompletion("level1");
-              }
-
             } else {
               console.error(`Destination map "${destinationMap}" not found`);
             }
@@ -1008,7 +1005,6 @@ const GameWorld = React.memo(() => {
       setCurrentSpecialWorld,
       updatePortalState,
       showWorldAnnouncement,
-      handleLevelCompletion,
       hidePortalNotification,
       setCurrentMapIndex,
       setCharacterPosition,
@@ -2309,6 +2305,30 @@ const GameWorld = React.memo(() => {
     initSoundManager,
     handleKeyDown,
     gameState.soundManager,
+  ]);
+
+  // Level 1 is the Yosemite arrival beat. Keep it tied to the map entry itself
+  // so the overworld shortcut and the final dungeon route behave the same.
+  useEffect(() => {
+    const mapName = MAPS[currentMapIndex]?.name || "";
+    const previousMapName = prevMapNameRef.current;
+    prevMapNameRef.current = mapName;
+
+    if (
+      mapName === "Yosemite" &&
+      previousMapName !== "Yosemite" &&
+      !uiState.inDungeon &&
+      !currentSpecialWorld &&
+      !gameState.gameData.levelCompletion.level1
+    ) {
+      handleLevelCompletion("level1");
+    }
+  }, [
+    currentMapIndex,
+    currentSpecialWorld,
+    gameState.gameData.levelCompletion.level1,
+    handleLevelCompletion,
+    uiState.inDungeon,
   ]);
 
   // Music management based on current map

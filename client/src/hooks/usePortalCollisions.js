@@ -20,7 +20,6 @@ export const usePortalCollisions = ({
   adjustViewport,
   setCurrentSpecialWorld,
   gameData,
-  handleLevelCompletion,
 }) => {
   const checkPortalCollisions = useCallback(() => {
     if (!characterPosition) return;
@@ -39,7 +38,6 @@ export const usePortalCollisions = ({
         setCurrentMapIndex(destinationIndex);
         setCharacterPosition(YOSEMITE_DEMO_ENTRY_POSITION);
         adjustViewport(YOSEMITE_DEMO_ENTRY_POSITION);
-        handleLevelCompletion?.("level1");
 
         const portalAnnouncement = document.createElement("div");
         portalAnnouncement.className = "world-announcement";
@@ -234,7 +232,6 @@ export const usePortalCollisions = ({
           setCurrentMapIndex(destinationIndex);
           setCharacterPosition(YOSEMITE_DEMO_ENTRY_POSITION);
           adjustViewport(YOSEMITE_DEMO_ENTRY_POSITION);
-          handleLevelCompletion?.("level1");
 
           // Announce the world name
           const portalAnnouncement = document.createElement("div");
@@ -297,7 +294,7 @@ export const usePortalCollisions = ({
     // Yosemite mini-game sigils (tiles 6–8) are handled in GameWorld via
     // portalCollision dispatch (same pattern as dungeon tile 9).
 
-    // Level 1 is completed on Yosemite entry.
+    // Level 1 is completed by GameWorld when the current map becomes Yosemite.
     // Level 2: handleBossDefeat (Library of Alexandria). Level 3: handleTerminalComplete.
   }, [
     characterPosition,
@@ -312,7 +309,6 @@ export const usePortalCollisions = ({
     setCharacterPosition,
     adjustViewport,
     setCurrentSpecialWorld,
-    handleLevelCompletion,
   ]);
 
   return { checkPortalCollisions };
