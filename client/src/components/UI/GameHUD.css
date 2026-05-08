@@ -40,10 +40,45 @@
   padding: 12px 16px;
   width: 100%;
   box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .game-hud--minimal .xp-display {
   max-width: min(520px, 92vw);
+}
+
+.hud-music-toggle {
+  pointer-events: auto;
+  min-height: 32px;
+  padding: 7px 10px;
+  color: var(--nes-white);
+  background: rgba(0, 88, 248, 0.32);
+  border: 2px solid rgba(255, 255, 255, 0.78);
+  font-family: inherit;
+  font-size: 9px;
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-shadow:
+    -1px -1px 0 var(--nes-black),
+    1px -1px 0 var(--nes-black),
+    -1px 1px 0 var(--nes-black),
+    1px 1px 0 var(--nes-black);
+}
+
+.hud-music-toggle.is-muted {
+  color: var(--nes-gray);
+  background: rgba(0, 0, 0, 0.38);
+  border-color: rgba(136, 136, 136, 0.86);
+}
+
+.hud-music-toggle:hover,
+.hud-music-toggle:focus-visible {
+  border-color: var(--zelda-gold);
+  outline: none;
 }
 
 /* Top bar */

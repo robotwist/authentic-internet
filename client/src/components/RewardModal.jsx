@@ -55,10 +55,10 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
             }}
           />
           <div className="reward-details">
-            <h4>A quiet mark on the map</h4>
+            <h4>NKD Man Chrome download</h4>
             <p>
-              Phase 1 is complete. John Muir is nearby, and the valley portals
-              are open for those who keep walking.
+              Phase 1 is complete. Claim the NKD Man Chrome extension, then
+              return to John Muir and the valley portals.
             </p>
             <a
               href={nkdManExtensionURL}
@@ -66,7 +66,7 @@ const RewardModal = ({ visible, onClose, achievement, embedded = false }) => {
               rel="noopener noreferrer"
               className="download-button"
             >
-              Carry the Mark
+              Download NKD Man for Chrome
             </a>
           </div>
         </div>

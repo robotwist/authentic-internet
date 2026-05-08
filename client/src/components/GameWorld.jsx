@@ -109,6 +109,7 @@ const GameWorld = React.memo(() => {
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
   const [otherPlayers, setOtherPlayers] = useState([]);
   const [artifactsLoading, setArtifactsLoading] = useState(true);
+  const [musicMuted, setMusicMuted] = useState(false);
 
   // Use the custom game state hook
   const gameState = useGameState();
@@ -431,6 +432,40 @@ const GameWorld = React.memo(() => {
 
   const conversationFocusZoom =
     uiState.showNPCDialog && gameState.activeNPC ? 1.28 : 1;
+
+  const handleToggleMusicMute = useCallback(() => {
+    setMusicMuted((current) => {
+      const nextMuted = !current;
+      const manager = gameState.soundManager;
+
+      if (!manager) {
+        return nextMuted;
+      }
+
+      manager.setMusicVolume(nextMuted ? 0 : 0.3);
+
+      if (nextMuted) {
+        manager.stopMusic(true);
+      } else {
+        const mapName = MAPS[currentMapIndex]?.name || "";
+        const track =
+          mapName === "Yosemite"
+            ? "yosemite"
+            : mapName.includes("Overworld")
+              ? "overworld"
+              : mapName.includes("Dungeon")
+                ? "terminal"
+                : mapName.includes("Desert")
+                  ? "desert"
+                  : null;
+        if (track) {
+          manager.playMusic(track, true, 0.3);
+        }
+      }
+
+      return nextMuted;
+    });
+  }, [currentMapIndex, gameState.soundManager]);
 
   useEffect(() => {
     const shouldFocus =
@@ -2334,7 +2369,7 @@ const GameWorld = React.memo(() => {
   // Music management based on current map
   useEffect(() => {
     if (!gameState.soundManager || !currentMap) return;
-    if (uiState.showRewardModal) {
+    if (uiState.showRewardModal || musicMuted) {
       return;
     }
 
@@ -2386,6 +2421,7 @@ const GameWorld = React.memo(() => {
     gameState.soundManager,
     gameState.currentMapIndex,
     currentMap,
+    musicMuted,
     uiState.showRewardModal,
   ]);
 
@@ -3744,6 +3780,8 @@ const GameWorld = React.memo(() => {
               experienceToNextLevel={calculateXPForLevel(
                 gameState.characterStats.level + 1,
               )}
+              musicMuted={musicMuted}
+              onToggleMusicMute={handleToggleMusicMute}
             />
 
             {gameState.uiState.showLevel4 && (

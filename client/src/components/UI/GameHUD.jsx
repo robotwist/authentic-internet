@@ -20,6 +20,8 @@ const GameHUD = ({
   level = 1,
   experienceToNextLevel = 100,
   isDamaged = false,
+  musicMuted = false,
+  onToggleMusicMute,
 }) => {
   // Calculate XP progress percentage
   const experienceInCurrentLevel = experience - getExperienceForLevel(level);
@@ -64,6 +66,18 @@ const GameHUD = ({
               </span>
             </div>
           </div>
+          {onToggleMusicMute && (
+            <button
+              type="button"
+              className={`hud-music-toggle${musicMuted ? " is-muted" : ""}`}
+              onClick={onToggleMusicMute}
+              aria-pressed={musicMuted}
+              aria-label={musicMuted ? "Unmute music" : "Mute music"}
+              title={musicMuted ? "Unmute music" : "Mute music"}
+            >
+              {musicMuted ? "Music Off" : "Music On"}
+            </button>
+          )}
         </div>
       </div>
     );
