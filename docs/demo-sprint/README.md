@@ -1,6 +1,8 @@
 # Demo sprint pack
 
-Planning artifacts for the **14-day, game-first demo**: Overworld → Yosemite → John Muir → WIN.
+Planning artifacts for the **14-day, game-first demo**: Overworld → Yosemite → WIN → John Muir conversation.
+
+**Phase 1 status:** complete/frozen for selective friend demos. Backend recovery, CI hardening, and engine migration planning move to phase 2.
 
 ## Start here
 

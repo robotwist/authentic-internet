@@ -1,8 +1,8 @@
 # Demo sprint — plan vs reality & pacing
 
-**North star (unchanged):** cold start → Overworld → reach **Yosemite** → interact with **John Muir** → clear a defined **WIN** moment.
+**North star (completed):** cold start → Overworld → reach **Yosemite** → clear a defined **WIN** moment → independently talk with **John Muir**.
 
-This doc ties the **demo-sprint pack** (CSV/checklist) to **what is already in the codebase** and what still belongs on the board. Use it to avoid scope creep without losing good work you already shipped.
+This doc ties the **demo-sprint pack** (CSV/checklist) to **what shipped in phase 1** and what moves into the next phase. Use it to keep the sprint closed without losing good follow-up work.
 
 ---
 
@@ -38,17 +38,17 @@ These are **not** all required by the minimal spine, but they **landed in `main`
 
 ---
 
-## 3. Gaps vs the sprint pack (still open or blocked)
+## 3. Phase 1 closeout status
 
 | Pack item | Status | Notes |
 |-----------|--------|--------|
-| Happy path script + WIN one-liner in Jira | PM / docs | Day 1 gate in checklist |
-| **Demo mode UI gate** (Story 5) | Likely **not** done | Hide/disable dock tabs / specials for presenter-safe build |
-| **CI/CD Pipeline** | **Failing** | Security/audit, **lint**, **server tests**, **accessibility** jobs red; build/deploy jobs skipped |
-| **Deploy to Netlify** (GitHub Action) | **Failing** | `Unauthorized` on Netlify action → rotate **`NETLIFY_AUTH_TOKEN`**, verify **`NETLIFY_SITE_ID`** |
-| Production URL smoke | **404** on `authentic-internet.netlify.app` at last check | Aligns with failed deploys |
-| Airtable copy table / presenter cheat sheet | PM | Stories 8, 15, cheat sheet |
-| Session/save smoke | Verify | Story 7 |
+| Happy path script + WIN one-liner | **Done for demo** | Win now triggers on Yosemite entry; John Muir remains conversational after the win |
+| Yosemite entry/spawn | **Done** | Character enters on a walkable meadow tile near John Muir |
+| NPC talk dock | **Done** | Natural transcript UI, close behavior, local fallback responses, and throttled dialogue mumble |
+| Yosemite mini-game portals | **Done / stretch shipped** | Terminal, Shooter, and Text Adventure sigils are wired as step-on portals |
+| Friend demo readiness | **Ready for selective demo** | Share with a small trusted group; ask them to test the spine first, then free explore |
+| Backend services | **Deferred** | Heroku/backend recovery moves to next phase |
+| CI/CD full hardening | **Deferred** | Client production build passes locally; broader CI cleanup is next phase |
 
 ---
 
@@ -56,18 +56,19 @@ These are **not** all required by the minimal spine, but they **landed in `main`
 
 Use this as the **default filter** when choosing work.
 
-### Now (protect the demo)
+### Now (freeze phase 1)
 
-1. **Spine P0 only:** Overworld → Yosemite → Muir → **WIN** fires once; no blank map; no soft-lock on that path.
-2. **Presenter safety:** implement or document **Story 5** (demo gate) *or* a one-page “do not click” list until the gate exists.
-3. **Deploy path:** fix Netlify secrets → confirm one **green** deploy → smoke test production URL.
+1. **Commit and push** the phase-1 demo freeze.
+2. **Friend demo:** ask testers to try Overworld → Yosemite → win → John Muir → one mini-game portal.
+3. **Collect notes only:** do not expand phase-1 scope unless the demo path breaks.
 
-### Next (stability without boiling the ocean)
+### Next (phase 2)
 
-1. **CI:** either fix ESLint + server tests + a11y scripts, or **narrow** `.github/workflows/ci.yml` to “install + client build” until you can afford the full matrix.
-2. **Dependency audits:** treat `npm audit` failures as a **scheduled** task, not a merge blocker, unless course requires otherwise.
+1. Evaluate a lighter game engine path, likely **React shell + Phaser game core**.
+2. Recover or replace backend services.
+3. Decide whether to keep this repo as the phase-1 artifact or branch into phase 2.
 
-### Later (post-demo / stretch)
+### Later
 
 - Yosemite **three** mini-games as hero features (marketing / portfolio).
 - Full NPC unfurl + SFX polish across all NPCs.
@@ -98,4 +99,4 @@ Use this as the **default filter** when choosing work.
 
 ---
 
-*Last updated: 2026-05-06 (aligned with CI/Netlify investigation and client feature commit).*
+*Last updated: 2026-05-08 (phase-1 demo freeze and friend-demo readiness).*

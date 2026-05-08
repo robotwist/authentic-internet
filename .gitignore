@@ -7,5 +7,13 @@ server/node_modules/
 dist/
 .qodo
 
+# Local editor/agent metadata and runtime files
+.client_pid
+client.log
+.specstory/
+.vscode/
+*.pid
+*.log
+
 # Local Netlify folder
 .netlify

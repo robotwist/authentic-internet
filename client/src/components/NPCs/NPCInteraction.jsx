@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import SoundManager from "../utils/SoundManager";
 import "./NPCInteraction.css";
 
 /** Comic-timing delay before the next NPC character appears */
@@ -49,6 +50,7 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
   const shiftFastRef = useRef(false);
+  const lastBlurbAtRef = useRef(0);
   const usesLocalDialogue = Array.isArray(npc.dialogue) && npc.dialogue.length > 0;
 
   useEffect(() => {
@@ -77,6 +79,15 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     const ch = full[revealNpcLen];
     const delay = npcCharRevealDelay(ch, shiftFastRef.current);
     const id = window.setTimeout(() => {
+      const now = performance.now();
+      if (/[A-Za-z0-9]/.test(ch) && now - lastBlurbAtRef.current > 120) {
+        lastBlurbAtRef.current = now;
+        try {
+          SoundManager.getInstance().playNpcDialogBlurb(0.16);
+        } catch {
+          // Dialogue should keep flowing even if the browser refuses audio.
+        }
+      }
       setRevealNpcLen((n) => n + 1);
     }, delay);
 

@@ -1,6 +1,11 @@
 import { useCallback } from "react";
 import { TILE_SIZE, MAPS, getMapIndexByKey } from "../components/Constants";
 
+const YOSEMITE_DEMO_ENTRY_POSITION = {
+  x: 12 * TILE_SIZE,
+  y: 42 * TILE_SIZE,
+};
+
 export const usePortalCollisions = ({
   characterPosition,
   currentMapIndex,
@@ -32,8 +37,9 @@ export const usePortalCollisions = ({
       const destinationIndex = getMapIndexByKey("Yosemite");
       if (destinationIndex !== -1) {
         setCurrentMapIndex(destinationIndex);
-        setCharacterPosition({ x: 10 * TILE_SIZE, y: 42 * TILE_SIZE });
-        adjustViewport({ x: 10 * TILE_SIZE, y: 42 * TILE_SIZE });
+        setCharacterPosition(YOSEMITE_DEMO_ENTRY_POSITION);
+        adjustViewport(YOSEMITE_DEMO_ENTRY_POSITION);
+        handleLevelCompletion?.("level1");
 
         const portalAnnouncement = document.createElement("div");
         portalAnnouncement.className = "world-announcement";
@@ -226,8 +232,9 @@ export const usePortalCollisions = ({
         const destinationIndex = getMapIndexByKey("Yosemite");
         if (destinationIndex !== -1) {
           setCurrentMapIndex(destinationIndex);
-          setCharacterPosition({ x: 64, y: 64 });
-          adjustViewport({ x: 64, y: 64 });
+          setCharacterPosition(YOSEMITE_DEMO_ENTRY_POSITION);
+          adjustViewport(YOSEMITE_DEMO_ENTRY_POSITION);
+          handleLevelCompletion?.("level1");
 
           // Announce the world name
           const portalAnnouncement = document.createElement("div");
@@ -290,7 +297,7 @@ export const usePortalCollisions = ({
     // Yosemite mini-game sigils (tiles 6–8) are handled in GameWorld via
     // portalCollision dispatch (same pattern as dungeon tile 9).
 
-    // Level 1 is completed via handlePortalTransition when reaching Yosemite.
+    // Level 1 is completed on Yosemite entry.
     // Level 2: handleBossDefeat (Library of Alexandria). Level 3: handleTerminalComplete.
   }, [
     characterPosition,
@@ -305,6 +312,7 @@ export const usePortalCollisions = ({
     setCharacterPosition,
     adjustViewport,
     setCurrentSpecialWorld,
+    handleLevelCompletion,
   ]);
 
   return { checkPortalCollisions };

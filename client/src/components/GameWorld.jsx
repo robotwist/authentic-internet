@@ -90,6 +90,13 @@ const PERFORMANCE_MARKERS = {
 // Memoized constants to prevent recreation
 const INITIAL_CHARACTER_POSITION = { x: 64, y: 64 };
 const INITIAL_VIEWPORT = { x: 0, y: 0 };
+// Safe open Yosemite meadow tile near John Muir. Tile (12, 42) maps to walkable
+// terrain in remainingMapsBundle's doubled Yosemite data and avoids spawning on
+// top of John Muir at tile (10, 42).
+const YOSEMITE_DEMO_ENTRY_POSITION = {
+  x: 12 * TILE_SIZE,
+  y: 42 * TILE_SIZE,
+};
 const INITIAL_LEVEL_COMPLETION = {
   level1: false,
   level2: false,
@@ -901,6 +908,7 @@ const GameWorld = React.memo(() => {
 
       // Play completion sound
       if (gameState.soundManager) {
+        gameState.soundManager.stopMusic(true);
         gameState.soundManager.playSound("level_complete");
       }
 
@@ -956,6 +964,10 @@ const GameWorld = React.memo(() => {
 
               // Show world announcement
               showWorldAnnouncement(destinationMap);
+
+              if (destinationMap === "Yosemite") {
+                handleLevelCompletion("level1");
+              }
 
             } else {
               console.error(`Destination map "${destinationMap}" not found`);
@@ -1226,13 +1238,6 @@ const GameWorld = React.memo(() => {
         return; // Don't show regular dialogue
       }
 
-      // Trigger level-1 victory when John Muir is reached in Yosemite.
-      const activeMapName = MAPS[currentMapIndex]?.name;
-      if (activeMapName === "Yosemite" && npc.name === "John Muir") {
-        handleLevelCompletion("level1");
-        return;
-      }
-
       // Set the active NPC and show dialog in bottom dock
       gameState.setActiveNPC(npc);
       updateUIState({
@@ -1255,8 +1260,6 @@ const GameWorld = React.memo(() => {
     },
     [
       shakespeareQuest.stage,
-      currentMapIndex,
-      handleLevelCompletion,
       gameState.soundManager,
       gameState.mobileState.screenReaderMode,
       announceToScreenReader,
@@ -1369,7 +1372,7 @@ const GameWorld = React.memo(() => {
           },
           {
             destination: "Yosemite",
-            spawnPosition: { x: 10 * TILE_SIZE, y: 42 * TILE_SIZE }, // Central valley near John Muir
+            spawnPosition: YOSEMITE_DEMO_ENTRY_POSITION,
             condition: (x, y) => x === 8 && y === 11,
           },
         ],
@@ -1395,7 +1398,7 @@ const GameWorld = React.memo(() => {
         },
         "Dungeon Level 3": {
           destination: "Yosemite",
-          spawnPosition: { x: 10 * TILE_SIZE, y: 42 * TILE_SIZE }, // Central valley near John Muir
+          spawnPosition: YOSEMITE_DEMO_ENTRY_POSITION,
         },
       },
       yosemiteReturn: {
@@ -1570,10 +1573,7 @@ const GameWorld = React.memo(() => {
 
       // Dedicated Overworld shortcut portal to Yosemite.
       if (currentMapName === "Overworld" && tileType === 19) {
-        handlePortalTransition("Yosemite", {
-          x: 10 * TILE_SIZE,
-          y: 20 * TILE_SIZE,
-        });
+        handlePortalTransition("Yosemite", YOSEMITE_DEMO_ENTRY_POSITION);
         return;
       }
 
@@ -1728,10 +1728,7 @@ const GameWorld = React.memo(() => {
         currentMapName === "Overworld" &&
         currentMapData?.[playerTileY]?.[playerTileX] === 19
       ) {
-        handlePortalTransition("Yosemite", {
-          x: 10 * TILE_SIZE,
-          y: 20 * TILE_SIZE,
-        });
+        handlePortalTransition("Yosemite", YOSEMITE_DEMO_ENTRY_POSITION);
         return;
       }
 
@@ -2317,6 +2314,9 @@ const GameWorld = React.memo(() => {
   // Music management based on current map
   useEffect(() => {
     if (!gameState.soundManager || !currentMap) return;
+    if (uiState.showRewardModal) {
+      return;
+    }
 
     const currentMapName = currentMap.name || "";
     const newMusicTrack = getMusicTrackForMap(currentMapName);
@@ -2362,7 +2362,12 @@ const GameWorld = React.memo(() => {
         console.error("Error changing music:", error);
       }
     }
-  }, [gameState.soundManager, gameState.currentMapIndex]); // Only trigger on map index change
+  }, [
+    gameState.soundManager,
+    gameState.currentMapIndex,
+    currentMap,
+    uiState.showRewardModal,
+  ]);
 
   // Helper function to get music track for map
   const getMusicTrackForMap = useCallback((mapName) => {
