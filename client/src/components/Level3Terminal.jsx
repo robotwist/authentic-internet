@@ -7,6 +7,50 @@ const TERMINAL_TYPE_SPEED_MULTIPLIER = 0.35;
 const MIN_TERMINAL_TYPE_SPEED_MS = 10;
 const TERMINAL_TYPE_SOUND_GAP_MS = 45;
 
+function playTerminalTypeClick(manager, volume = 0.05) {
+  if (!manager || manager.isMuted || !manager.userInteracted) return;
+  const ctx = manager.audioContext;
+  if (!ctx) return;
+
+  if (ctx.state === "suspended") {
+    ctx.resume().catch(() => {});
+  }
+
+  try {
+    const now = ctx.currentTime;
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    oscillator.type = "square";
+    oscillator.frequency.value = 760 + Math.random() * 220;
+    filter.type = "highpass";
+    filter.frequency.value = 520;
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(volume, now + 0.002);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+
+    oscillator.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.03);
+    oscillator.onended = () => {
+      try {
+        oscillator.disconnect();
+        filter.disconnect();
+        gain.disconnect();
+      } catch {
+        // Ignore cleanup errors after short-lived terminal clicks.
+      }
+    };
+  } catch {
+    // Terminal text should never block on audio.
+  }
+}
+
 // Define narrative structure for the terminal experience
 const NARRATIVE_PATHS = {
   intro: {
@@ -317,7 +361,7 @@ const Level3Terminal = ({
           now - lastTypeSoundAtRef.current > TERMINAL_TYPE_SOUND_GAP_MS
         ) {
           lastTypeSoundAtRef.current = now;
-          soundManager.playSound("typing", 0.08);
+          playTerminalTypeClick(soundManager);
         }
         setDisplayedText((prev) => prev + processedText.charAt(index));
         index++;
@@ -357,14 +401,14 @@ const Level3Terminal = ({
 
     // Play typing sound
     if (soundManager && e.target.value.length > userInput.length) {
-      soundManager.playSound("typing", 0.08);
+      playTerminalTypeClick(soundManager);
     }
   };
 
   const handleKeyDown = (e) => {
     // Play typing sound for special keys
     if (e.key === "Enter" && soundManager) {
-      soundManager.playSound("typing", 0.12);
+      playTerminalTypeClick(soundManager, 0.07);
     }
 
     if (e.key === "Enter" && typingComplete && waitingForInput) {

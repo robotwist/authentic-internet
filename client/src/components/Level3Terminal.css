@@ -140,6 +140,8 @@
   position: relative;
   z-index: 5;
   width: min(760px, 100%);
+  box-sizing: border-box;
+  padding-inline: 1.1rem;
   margin-left: auto;
   margin-right: auto;
   font-size: clamp(1rem, 2vw, 1.35rem);
@@ -189,6 +191,8 @@
   gap: 10px;
   margin-top: 20px;
   width: min(760px, 100%);
+  box-sizing: border-box;
+  padding-inline: 1.1rem;
   margin-left: auto;
   margin-right: auto;
 }
@@ -225,8 +229,9 @@
   display: flex;
   align-items: center;
   width: min(760px, 100%);
+  box-sizing: border-box;
   min-height: 42px;
-  padding: 0 14px;
+  padding: 0 1.1rem;
   background: rgba(0, 0, 0, 0.48);
   border: 1px solid rgba(51, 255, 51, 0.45);
   box-shadow:
