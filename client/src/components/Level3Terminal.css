@@ -76,7 +76,7 @@
   position: sticky;
   bottom: 10px;
   width: fit-content;
-  max-width: min(760px, 100%);
+  max-width: 100%;
   margin: 28px auto 0;
   color: rgba(51, 255, 51, 0.5);
   font-size: 0.8em;
@@ -96,7 +96,7 @@
 
 .terminal-screen {
   flex: 1;
-  padding: clamp(18px, 5vh, 56px) clamp(16px, 6vw, 72px);
+  padding: clamp(18px, 5vh, 56px) clamp(18px, 6vw, 80px);
   overflow-y: auto;
   background-color: #000;
   background-image: 
@@ -129,21 +129,27 @@
   left: 0;
   right: 0;
   bottom: 0;
-  box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
+  box-shadow: inset 0 0 96px rgba(0, 0, 0, 0.78);
   pointer-events: none;
   z-index: 3;
+}
+
+.terminal-content {
+  position: relative;
+  z-index: 5;
+  width: min(800px, 100%);
+  box-sizing: border-box;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 0 clamp(26px, 4vw, 46px);
 }
 
 .terminal-line {
   margin-bottom: 12px;
   line-height: 1.5;
   position: relative;
-  z-index: 5;
-  width: min(760px, 100%);
+  width: 100%;
   box-sizing: border-box;
-  padding-inline: 1.1rem;
-  margin-left: auto;
-  margin-right: auto;
   font-size: clamp(1rem, 2vw, 1.35rem);
 }
 
@@ -190,11 +196,8 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 20px;
-  width: min(760px, 100%);
+  width: 100%;
   box-sizing: border-box;
-  padding-inline: 1.1rem;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .terminal-choice {
@@ -329,6 +332,10 @@
   
   .terminal-screen {
     padding: 12px;
+  }
+
+  .terminal-content {
+    padding: 0 18px;
   }
   
   .terminal-choice {

@@ -552,43 +552,45 @@ const Level3Terminal = ({
       </div>
 
       <div className="terminal-screen" ref={terminalRef}>
-        {/* Display history */}
-        {terminalHistory.map((entry, index) => (
-          <div
-            key={index}
-            className={`terminal-line ${entry.type === "user" ? "user-input" : "system-output"}`}
-          >
-            {entry.type === "user" ? "> " : ""}
-            {entry.text}
-          </div>
-        ))}
+        <div className="terminal-content">
+          {/* Display history */}
+          {terminalHistory.map((entry, index) => (
+            <div
+              key={index}
+              className={`terminal-line ${entry.type === "user" ? "user-input" : "system-output"}`}
+            >
+              {entry.type === "user" ? "> " : ""}
+              {entry.text}
+            </div>
+          ))}
 
-        {/* Current narrative text */}
-        <div className="terminal-line system-output current-line">
-          {displayedText}
-          {showCursor && typingComplete && !waitingForInput && (
-            <span className="cursor">█</span>
+          {/* Current narrative text */}
+          <div className="terminal-line system-output current-line">
+            {displayedText}
+            {showCursor && typingComplete && !waitingForInput && (
+              <span className="cursor">█</span>
+            )}
+          </div>
+
+          {/* Choice buttons if available */}
+          {showChoices && typingComplete && waitingForInput && (
+            <div className="terminal-choices">
+              {NARRATIVE_PATHS[currentNarrative].choices.map((choice, index) => (
+                <button
+                  key={index}
+                  className="terminal-choice"
+                  onClick={() => handleChoiceClick(choice)}
+                >
+                  {index + 1}. {choice.label}
+                </button>
+              ))}
+            </div>
           )}
-        </div>
 
-        {/* Choice buttons if available */}
-        {showChoices && typingComplete && waitingForInput && (
-          <div className="terminal-choices">
-            {NARRATIVE_PATHS[currentNarrative].choices.map((choice, index) => (
-              <button
-                key={index}
-                className="terminal-choice"
-                onClick={() => handleChoiceClick(choice)}
-              >
-                {index + 1}. {choice.label}
-              </button>
-            ))}
+          {/* Exit reminder */}
+          <div className="terminal-exit-reminder">
+            Press ESC key at any time to exit the terminal
           </div>
-        )}
-
-        {/* Exit reminder */}
-        <div className="terminal-exit-reminder">
-          Press ESC key at any time to exit the terminal
         </div>
       </div>
 
