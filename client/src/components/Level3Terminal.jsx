@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import SoundManager from "./utils/SoundManager";
+import {
+  getTerminalAdvanceAction,
+  TERMINAL_ADVANCE_ACTIONS,
+} from "./Level3TerminalFlow";
 import "./Level3Terminal.css";
 
 const TERMINAL_TYPE_SPEED_MULTIPLIER = 0.35;
@@ -241,6 +245,7 @@ const NARRATIVE_PATHS = {
 const Level3Terminal = ({
   character,
   artifacts,
+  onComplete,
   onExit,
   username,
   inventory,
@@ -351,6 +356,7 @@ const Level3Terminal = ({
       MIN_TERMINAL_TYPE_SPEED_MS,
       Math.round((narrative.typingSpeed || 50) * TERMINAL_TYPE_SPEED_MULTIPLIER),
     );
+    let advanceTimeoutId;
     const typingInterval = setInterval(() => {
       if (index < processedText.length) {
         const ch = processedText.charAt(index);
@@ -369,25 +375,42 @@ const Level3Terminal = ({
         clearInterval(typingInterval);
         setTypingComplete(true);
 
+        const advanceAction = getTerminalAdvanceAction(narrative);
+
         // Show choices or wait for input if needed
-        if (narrative.choices) {
+        if (advanceAction.type === TERMINAL_ADVANCE_ACTIONS.CHOICES) {
           setShowChoices(true);
           setWaitingForInput(true);
-        } else if (narrative.next) {
+        } else if (advanceAction.type === TERMINAL_ADVANCE_ACTIONS.NEXT) {
           // Auto-advance after delay if no choices
-          setTimeout(() => {
-            if (narrative.isExit) {
-              onExit();
+          advanceTimeoutId = setTimeout(() => {
+            setCurrentNarrative(advanceAction.next);
+          }, 1500);
+        } else if (advanceAction.type === TERMINAL_ADVANCE_ACTIONS.COMPLETE) {
+          advanceTimeoutId = setTimeout(() => {
+            if (onComplete) {
+              onComplete({ score: 0, finalNarrative: currentNarrative });
             } else {
-              setCurrentNarrative(narrative.next);
+              onExit();
             }
           }, 1500);
         }
       }
     }, typingSpeed);
 
-    return () => clearInterval(typingInterval);
-  }, [currentNarrative, username, artifacts, qualifyingArtifact, soundManager]);
+    return () => {
+      clearInterval(typingInterval);
+      clearTimeout(advanceTimeoutId);
+    };
+  }, [
+    currentNarrative,
+    username,
+    artifacts,
+    qualifyingArtifact,
+    soundManager,
+    onComplete,
+    onExit,
+  ]);
 
   // Auto-scroll to bottom of terminal
   useEffect(() => {
@@ -618,6 +641,7 @@ const Level3Terminal = ({
 Level3Terminal.propTypes = {
   character: PropTypes.object,
   artifacts: PropTypes.array,
+  onComplete: PropTypes.func,
   onExit: PropTypes.func.isRequired,
   username: PropTypes.string,
   inventory: PropTypes.array,
