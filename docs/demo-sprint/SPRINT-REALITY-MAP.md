@@ -84,7 +84,39 @@ Use this as the **default filter** when choosing work.
 
 ---
 
-## 6. Files in this folder
+## 6. Jira closeout map
+
+Use this table to update the Jira sprint board. Keep phase-1 issues closed or deferred; do not reopen phase-1 scope unless the friend-demo spine breaks.
+
+| CSV issue | Jira action | Closeout status | Evidence / method |
+|-----------|-------------|-----------------|-------------------|
+| 1 — Happy path script | Move to **Done** | **Done** | Demo route is documented here: Overworld → Desert → Dungeon → Yosemite → WIN → John Muir → optional mini-game |
+| 2 — Yosemite chunk load / travel gate | Move to **Done** | **Done** | Yosemite route is operational from the main progression path and developer shortcut |
+| 3 — Define and implement victory at Muir | Move to **Done** with note | **Done, changed trigger** | Win now triggers on Yosemite map entry; John Muir conversation is independent after the win |
+| 4 — Dry-run #1 | Move to **Done** | **Done** | User-tested route confirmed: Overworld → Desert → Dungeon → Yosemite is operative |
+| 5 — Demo mode UI gate | Move to **Deferred / Phase 2** | **Deferred** | We chose a frozen friend-demo path instead of gating all UI |
+| 6 — Keyboard + typing regression | Move to **Done** | **Done** | NPC talk no longer traps movement flow; Terminal input/typing was polished |
+| 7 — Session smoke | Move to **Deferred / Known limitation** | **Deferred** | Backend/session recovery moves to phase 2 |
+| 8 — Copy pass: Muir + portals + win | Move to **Done** | **Done** | Yosemite win modal and NPC/dialogue copy were updated for demo tone |
+| 9 — Win juice | Move to **Done** | **Done** | Yosemite-specific victory modal, music handling, and reward link are shipped |
+| 10 — Sprint board hygiene | Move to **Done** | **Done** | Labels/method below; phase-1 docs identify Done vs Deferred |
+| 11 — Mid-sprint review notes | Move to **Done** | **Done** | This doc is the review note and reality map |
+| 12 — Retrospective | Move to **Done / lightweight** | **Done** | Process improvement: freeze phase 1; move backend/engine/CI to phase 2 |
+| 13 — AI-assisted task evidence | Move to **Done** | **Done** | Commits on `main` document AI-assisted implementation and fixes |
+| 14 — Record 3-min demo video | Move to **To Do / Optional** | **Open optional** | Record after final deployed smoke test |
+| 15 — Presenter cheat sheet | Move to **Done / this doc** | **Done enough** | Friend-demo path and known method are listed here |
+
+### Method We Are Using
+
+- **Sprint rule:** close phase 1 around the working demo spine; no new systems inside this sprint.
+- **Board rule:** move finished spine/polish work to **Done**; move backend, CI hardening, and engine migration to **Deferred / Phase 2**.
+- **Evidence rule:** use merged commits on `main`, this closeout map, and friend-demo smoke notes as proof.
+- **Demo rule:** testers should run the spine first, then optionally explore Yosemite mini-game portals.
+- **Phase-2 rule:** create new Jira cards for backend recovery, CI cleanup, and React shell + Phaser evaluation instead of carrying them as sprint leftovers.
+
+---
+
+## 7. Files in this folder
 
 | File | Purpose |
 |------|---------|
@@ -99,4 +131,4 @@ Use this as the **default filter** when choosing work.
 
 ---
 
-*Last updated: 2026-05-08 (phase-1 demo freeze and friend-demo readiness).*
+*Last updated: 2026-05-11 (Jira closeout map and phase-1 Done/Deferred method).*
