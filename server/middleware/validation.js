@@ -163,6 +163,10 @@ export const xssProtection = (req, res, next) => {
     const sanitize = (obj) => {
       for (let key in obj) {
         if (typeof obj[key] === 'string') {
+          if (obj[key].startsWith('data:image/')) {
+            continue;
+          }
+
           obj[key] = obj[key]
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')

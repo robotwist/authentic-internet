@@ -56,6 +56,7 @@ const CharacterCreator = () => {
       console.error("Failed to save character:", err);
       setError(
         err.response?.data?.message ||
+          err.message ||
           "Failed to save character. Please try again.",
       );
     } finally {
