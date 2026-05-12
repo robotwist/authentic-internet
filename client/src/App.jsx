@@ -27,18 +27,18 @@ import "./App.css";
 console.log("App starting at", new Date().toISOString());
 
 function App() {
-  // Preload critical images
+  // Warm likely game assets without triggering preload warnings if they are unused on first paint.
   useEffect(() => {
-    const criticalImages = [
+    const likelyGameImages = [
       "/assets/tiles/portal.webp",
       "/assets/tiles/dungeon.webp",
       "/assets/npcs/jesus.svg",
       "/assets/npcs/zeus.svg",
     ];
 
-    criticalImages.forEach((src) => {
+    likelyGameImages.forEach((src) => {
       const link = document.createElement("link");
-      link.rel = "preload";
+      link.rel = "prefetch";
       link.as = "image";
       link.href = src;
       document.head.appendChild(link);
