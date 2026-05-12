@@ -4,10 +4,19 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
+  z-index: 5000;
   max-width: 600px;
   width: 90%;
   animation: slideInUp 0.5s ease-out;
+}
+
+.onboarding-prompt::before {
+  content: "";
+  position: fixed;
+  inset: -100vh -100vw;
+  background: rgba(5, 10, 20, 0.72);
+  backdrop-filter: blur(4px);
+  z-index: -1;
 }
 
 @keyframes slideInUp {
@@ -21,12 +30,23 @@
   }
 }
 
-.prompt-card {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.onboarding-prompt .prompt-card {
+  background: linear-gradient(135deg, #111827 0%, #16213e 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(20px);
+  max-height: min(86vh, 720px);
+  overflow-y: auto;
+}
+
+.onboarding-prompt .prompt-card .MuiCardContent-root {
+  color: #ffffff;
+}
+
+.onboarding-prompt .prompt-card .MuiTypography-root {
+  color: inherit;
 }
 
 .prompt-header {
@@ -36,21 +56,22 @@
   margin-bottom: 1.5rem;
 }
 
-.prompt-avatar {
-  background: linear-gradient(45deg, #64b5f6, #42a5f5);
+.onboarding-prompt .prompt-avatar {
+  background: linear-gradient(45deg, #64b5f6, #42a5f5) !important;
+  color: #ffffff !important;
   width: 50px;
   height: 50px;
   margin-right: 1rem;
 }
 
-.prompt-title {
+.onboarding-prompt .prompt-title {
   font-weight: 700;
-  color: #ffffff;
+  color: #ffffff !important;
   flex-grow: 1;
 }
 
-.close-button {
-  color: rgba(255, 255, 255, 0.7);
+.onboarding-prompt .close-button {
+  color: rgba(255, 255, 255, 0.82) !important;
   transition: color 0.3s ease;
 }
 
@@ -58,8 +79,8 @@
   color: #ffffff;
 }
 
-.prompt-description {
-  color: rgba(255, 255, 255, 0.8);
+.onboarding-prompt .prompt-description {
+  color: rgba(255, 255, 255, 0.9) !important;
   line-height: 1.6;
   margin-bottom: 2rem;
   font-size: 1.1rem;
@@ -73,14 +94,15 @@
   margin-bottom: 2rem;
 }
 
-.feature-item {
+.onboarding-prompt .feature-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   transition: all 0.3s ease;
 }
 
@@ -89,13 +111,14 @@
   transform: translateY(-2px);
 }
 
-.feature-icon {
-  color: #64b5f6;
+.onboarding-prompt .feature-icon {
+  color: #90caf9 !important;
   font-size: 1.5rem;
 }
 
-.feature-item p {
-  color: rgba(255, 255, 255, 0.9);
+.onboarding-prompt .feature-item p,
+.onboarding-prompt .feature-item .MuiTypography-root {
+  color: rgba(255, 255, 255, 0.95) !important;
   font-weight: 500;
   margin: 0;
 }
@@ -184,9 +207,9 @@
 }
 
 /* Button Styles */
-.primary-button {
-  background: linear-gradient(45deg, #64b5f6, #42a5f5);
-  color: white;
+.onboarding-prompt .primary-button {
+  background: linear-gradient(45deg, #64b5f6, #42a5f5) !important;
+  color: #07111f !important;
   font-weight: 700;
   padding: 1rem 2rem;
   border-radius: 50px;
@@ -197,8 +220,8 @@
   margin-top: 1rem;
 }
 
-.primary-button:hover {
-  background: linear-gradient(45deg, #42a5f5, #2196f3);
+.onboarding-prompt .primary-button:hover {
+  background: linear-gradient(45deg, #90caf9, #64b5f6) !important;
   transform: translateY(-2px);
   box-shadow: 0 12px 35px rgba(100, 181, 246, 0.4);
 }
