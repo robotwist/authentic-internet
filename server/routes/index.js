@@ -11,6 +11,7 @@ import characterRoutes from "./characterRoutes.js";
 import questRoutes from "./questRoutes.js";
 import recommendationRoutes from "./recommendations.js";
 import collaborationRoutes from "./collaboration.js";
+import mongoose from "mongoose";
 
 /**
  * Apply all routes to Express app
@@ -42,7 +43,14 @@ export const applyRoutes = (app) => {
    */
   // Health check endpoint
   app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'OK', serverTime: new Date().toISOString() });
+    res.status(200).json({
+      status: 'OK',
+      serverTime: new Date().toISOString(),
+      database: {
+        connected: mongoose.connection.readyState === 1,
+        state: mongoose.connection.readyState
+      }
+    });
   });
 
   // API routes

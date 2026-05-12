@@ -53,6 +53,7 @@ const Register = () => {
             type="text"
             id="username"
             name="username"
+            autoComplete="username"
             value={formData.username}
             onChange={handleChange}
             required
@@ -65,6 +66,7 @@ const Register = () => {
             type="email"
             id="email"
             name="email"
+            autoComplete="email"
             value={formData.email}
             onChange={handleChange}
             required
@@ -76,6 +78,7 @@ const Register = () => {
             type="password"
             id="password"
             name="password"
+            autoComplete="new-password"
             value={formData.password}
             onChange={handleChange}
             required
@@ -99,10 +102,11 @@ const Register = () => {
             type="password"
             id="confirmPassword"
             name="confirmPassword"
+            autoComplete="new-password"
             value={formData.confirmPassword}
             onChange={handleChange}
             required
-            minLength={6}
+            minLength={8}
           />
         </div>
         <button type="submit" className="btn" disabled={loading}>
