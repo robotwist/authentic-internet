@@ -76,6 +76,7 @@ import { useGameState } from "../hooks/useGameState";
 import { useWebSocket } from "../context/WebSocketContext";
 import gameStateManager from "../utils/gameStateManager";
 import { isTextEntryFocused } from "../utils/textFieldFocus";
+import { getStepPortalCollision } from "../utils/portalStepDedupe";
 import { IconButton } from "@mui/material";
 import { usePortalCollisions } from "../hooks/usePortalCollisions";
 
@@ -2831,12 +2832,6 @@ const GameWorld = React.memo(() => {
     checkPortalCollisions();
   }, [checkPortalCollisions]);
 
-  useEffect(() => {
-    if (!uiState.inDungeon) {
-      dungeonStepTileKeyRef.current = "";
-    }
-  }, [uiState.inDungeon]);
-
   // Step onto dungeon tile (type 9): dispatch portalCollision so auto-entry matches SPACE
   useEffect(() => {
     if (
@@ -2846,24 +2841,24 @@ const GameWorld = React.memo(() => {
     ) {
       return;
     }
-    const mapData = MAPS[currentMapIndex]?.data;
-    if (!mapData?.length) return;
-    const tileX = Math.floor(characterPosition.x / TILE_SIZE);
-    const tileY = Math.floor(characterPosition.y / TILE_SIZE);
-    if (tileY < 0 || tileY >= mapData.length) return;
-    const row = mapData[tileY];
-    if (!row || tileX < 0 || tileX >= row.length) return;
-    const tileType = row[tileX];
-    if (tileType !== 9) {
-      dungeonStepTileKeyRef.current = "";
-      return;
-    }
-    const stepKey = `${currentMapIndex}:${tileX}:${tileY}`;
-    if (dungeonStepTileKeyRef.current === stepKey) return;
-    dungeonStepTileKeyRef.current = stepKey;
+
+    const collision = getStepPortalCollision({
+      characterPosition,
+      currentMapIndex,
+      mapData: MAPS[currentMapIndex]?.data,
+      tileSize: TILE_SIZE,
+      portalTileTypes: [9],
+      previousStepKey: dungeonStepTileKeyRef.current,
+      includeTileTypeInKey: false,
+    });
+
+    dungeonStepTileKeyRef.current = collision.nextStepKey;
+
+    if (!collision.shouldDispatch) return;
+
     window.dispatchEvent(
       new CustomEvent("portalCollision", {
-        detail: { tileX, tileY, tileType },
+        detail: collision.detail,
       }),
     );
   }, [
