@@ -7,7 +7,7 @@ import "./PixelGridEditor.css";
  */
 const PixelGridEditor = ({ onSave, initialSprite = null }) => {
   const GRID_SIZE = 32; // 32x32 pixel grid
-  const CELL_SIZE = 12; // Display size of each pixel
+  const CELL_SIZE = 16; // Display size of each pixel
 
   // Color palette (retro NES style)
   const COLOR_PALETTE = [
