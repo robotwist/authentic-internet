@@ -152,7 +152,10 @@ const createApiInstance = (baseUrl) => {
 
 // Get the configured API URL or default to localhost:5001
 const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5001";
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV
+    ? "http://localhost:5001"
+    : "https://authentic-internet.onrender.com");
 
 // In dev, use relative URLs so Vite proxies /api -> backend. On Netlify,
 // also use relative URLs so netlify.toml redirects /api/* to the backend
@@ -228,6 +231,12 @@ const checkServerHealth = async (url) => {
 
 // Initialize API with port detection
 const initApi = async () => {
+  if (shouldUseRelativeApi) {
+    currentApiUrl = "";
+    isApiInitialized = true;
+    return API;
+  }
+
   // Return existing API if already initialized and working
   if (isApiInitialized) {
     console.log("API already initialized, using existing instance");

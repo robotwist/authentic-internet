@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'client/**'
+      - 'netlify.toml'
       - '.github/workflows/netlify-deploy.yml'  # So that changes to this file trigger a deploy
   workflow_dispatch:  # Allow manual trigger from GitHub UI
 
@@ -40,7 +41,7 @@ jobs:
           echo "Build completed"
           ls -la dist  # Verify output files
         env:
-          VITE_API_URL: 'https://authentic-internet-api-9739ffaa9c5f.herokuapp.com'
+          VITE_API_URL: 'https://authentic-internet.onrender.com'
           NODE_ENV: 'production'
 
       - name: Deploy to Netlify
