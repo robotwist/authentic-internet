@@ -1,6 +1,5 @@
-import { getStepPortalCollision } from "../../client/src/utils/portalStepDedupe";
-
 describe("getStepPortalCollision", () => {
+  let getStepPortalCollision;
   const mapData = [
     [0, 9],
     [0, 0],
@@ -12,6 +11,12 @@ describe("getStepPortalCollision", () => {
     portalTileTypes: [9],
     includeTileTypeInKey: false,
   };
+
+  beforeAll(async () => {
+    ({ getStepPortalCollision } = await import(
+      "../../client/src/utils/portalStepDedupe.js"
+    ));
+  });
 
   it("does not dispatch again while still standing on the same dungeon portal", () => {
     const firstStep = getStepPortalCollision({
