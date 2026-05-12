@@ -3,6 +3,8 @@ import { useAuth } from "../context/AuthContext";
 import Button from "./shared/Button";
 import "../styles/OnboardingGuide.css";
 
+const ROB_GUIDE_AVATAR = "/assets/npcs/guide.png";
+
 const OnboardingGuide = ({ onComplete, onSkip }) => {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
@@ -90,7 +92,8 @@ const OnboardingGuide = ({ onComplete, onSkip }) => {
 
     const typeInterval = setInterval(() => {
       if (index < text.length) {
-        setDisplayedText((prev) => prev + text[index]);
+        const nextCharacter = text[index];
+        setDisplayedText((prev) => prev + nextCharacter);
         index++;
       } else {
         clearInterval(typeInterval);
@@ -172,7 +175,7 @@ const OnboardingGuide = ({ onComplete, onSkip }) => {
     <div className="onboarding-overlay">
       <div className="onboarding-container">
         <div className="guide-avatar">
-          <div className="avatar-image">👨‍💻</div>
+          <img className="avatar-image" src={ROB_GUIDE_AVATAR} alt="Rob" />
           <div className="guide-name">Rob</div>
           <div className="guide-title">Creator & World Guide</div>
         </div>
