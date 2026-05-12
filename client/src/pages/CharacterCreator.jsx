@@ -170,7 +170,7 @@ const CharacterCreator = () => {
                 onClick={handleConfirmCharacter}
                 disabled={saving}
               >
-                {saving ? "Saving..." : "Start Adventure! 🚀"}
+                {saving ? "Saving..." : "Save To Account & Start Adventure! 🚀"}
               </button>
               <button
                 className="btn-secondary"

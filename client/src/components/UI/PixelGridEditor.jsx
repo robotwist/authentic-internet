@@ -245,6 +245,12 @@ const PixelGridEditor = ({ onSave, initialSprite = null }) => {
                 }}
               />
             </div>
+            <button
+              className="action-btn primary preview-save-btn"
+              onClick={exportSprite}
+            >
+              💾 Continue to Save
+            </button>
           </div>
         </div>
 
@@ -305,7 +311,7 @@ const PixelGridEditor = ({ onSave, initialSprite = null }) => {
               🖌️ Fill All
             </button>
             <button className="action-btn primary" onClick={exportSprite}>
-              💾 Save Character
+              💾 Continue to Save
             </button>
           </div>
         </div>
