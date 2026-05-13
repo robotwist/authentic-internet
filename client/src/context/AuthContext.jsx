@@ -98,9 +98,9 @@ const scheduleTokenRefreshWithFallback = (
       if (currentToken) {
         const remainingTime = calculateTimeUntilExpiry(currentToken);
         if (remainingTime <= 0) {
-          console.error("Token expired while device was asleep");
-          onRefreshFailure("Token expired during device sleep");
-          return;
+          console.warn(
+            "Token expired while device was asleep; attempting cookie refresh",
+          );
         }
       }
     }
@@ -463,21 +463,26 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const storedToken = localStorage.getItem("token");
-      const storedRefreshToken = localStorage.getItem("refreshToken");
 
-      if (!storedToken || !storedRefreshToken) {
-        console.log("No tokens found in storage");
+      if (!storedToken) {
+        console.log("No access token found in storage");
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
         return false;
       }
 
-      const response = await refreshUserToken(storedRefreshToken);
+      const response = await refreshUserToken();
 
       if (response && response.token) {
         localStorage.setItem("token", response.token);
+
+        if (response.user) {
+          localStorage.setItem("user", JSON.stringify(response.user));
+          dispatch({ type: AUTH_ACTIONS.SET_USER, payload: response.user });
+        }
+
         scheduleTokenRefresh(response.token);
 
-        if (!state.isAuthenticated && state.user) {
+        if (!state.isAuthenticated && (state.user || response.user)) {
           dispatch({ type: AUTH_ACTIONS.SET_AUTH_STATUS, payload: true });
         }
 
@@ -516,7 +521,6 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       try {
         const storedToken = localStorage.getItem("token");
-        const storedRefreshToken = localStorage.getItem("refreshToken");
         const storedUser = localStorage.getItem("user");
 
         if (!storedToken || !storedUser) {
@@ -542,6 +546,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         const timeUntilExpiry = calculateTimeUntilExpiry(storedToken);
+        let activeToken = storedToken;
 
         // Check if token is expired or expiring soon
         if (timeUntilExpiry <= TOKEN_REFRESH_BUFFER_MS) {
@@ -549,26 +554,26 @@ export const AuthProvider = ({ children }) => {
             `Token expired or expiring soon (${Math.floor(timeUntilExpiry / 1000)}s remaining), attempting refresh`,
           );
 
-          if (storedRefreshToken) {
-            const refreshSuccessful = await refreshToken(true);
+          const refreshSuccessful = await refreshToken(true);
 
-            if (!refreshSuccessful) {
-              console.log("Token refresh failed, clearing auth data");
-              clearStoredAuthData();
-              dispatch({
-                type: AUTH_ACTIONS.INIT_AUTH,
-                payload: { user: null, isAuthenticated: false },
-              });
-              return;
-            }
-          } else {
-            console.log("No refresh token available, clearing auth data");
+          if (!refreshSuccessful) {
+            console.log("Token refresh failed, clearing auth data");
             clearStoredAuthData();
             dispatch({
               type: AUTH_ACTIONS.INIT_AUTH,
               payload: { user: null, isAuthenticated: false },
             });
             return;
+          }
+
+          activeToken = localStorage.getItem("token") || storedToken;
+          const refreshedUser = localStorage.getItem("user");
+          if (refreshedUser) {
+            try {
+              parsedUser = JSON.parse(refreshedUser);
+            } catch (error) {
+              console.error("Error parsing refreshed user:", error);
+            }
           }
         } else {
           // Token is still valid, schedule refresh
@@ -579,7 +584,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         // Set up axios interceptors for the current token
-        setupAxiosInterceptors(storedToken);
+        setupAxiosInterceptors(activeToken);
 
         dispatch({
           type: AUTH_ACTIONS.INIT_AUTH,
