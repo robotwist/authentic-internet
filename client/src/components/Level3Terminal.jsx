@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import SoundManager from "./utils/SoundManager";
 import "./Level3Terminal.css";
@@ -241,6 +241,7 @@ const NARRATIVE_PATHS = {
 const Level3Terminal = ({
   character,
   artifacts,
+  onComplete,
   onExit,
   username,
   inventory,
@@ -258,6 +259,14 @@ const Level3Terminal = ({
   const inputRef = useRef(null);
   const terminalRef = useRef(null);
   const lastTypeSoundAtRef = useRef(0);
+
+  const handleTerminalCompletion = useCallback(() => {
+    if (onComplete) {
+      onComplete();
+    } else {
+      onExit();
+    }
+  }, [onComplete, onExit]);
 
   // Initialize sound manager
   useEffect(() => {
@@ -373,21 +382,28 @@ const Level3Terminal = ({
         if (narrative.choices) {
           setShowChoices(true);
           setWaitingForInput(true);
+        } else if (narrative.isExit) {
+          setTimeout(() => {
+            handleTerminalCompletion();
+          }, 1500);
         } else if (narrative.next) {
           // Auto-advance after delay if no choices
           setTimeout(() => {
-            if (narrative.isExit) {
-              onExit();
-            } else {
-              setCurrentNarrative(narrative.next);
-            }
+            setCurrentNarrative(narrative.next);
           }, 1500);
         }
       }
     }, typingSpeed);
 
     return () => clearInterval(typingInterval);
-  }, [currentNarrative, username, artifacts, qualifyingArtifact, soundManager]);
+  }, [
+    currentNarrative,
+    username,
+    artifacts,
+    qualifyingArtifact,
+    soundManager,
+    handleTerminalCompletion,
+  ]);
 
   // Auto-scroll to bottom of terminal
   useEffect(() => {
@@ -618,6 +634,7 @@ const Level3Terminal = ({
 Level3Terminal.propTypes = {
   character: PropTypes.object,
   artifacts: PropTypes.array,
+  onComplete: PropTypes.func,
   onExit: PropTypes.func.isRequired,
   username: PropTypes.string,
   inventory: PropTypes.array,
