@@ -20,6 +20,21 @@ const advanceTerminal = async (ms = 60000) => {
   });
 };
 
+const renderTerminal = async (props = {}) => {
+  const result = render(
+    <Level3Terminal
+      artifacts={[]}
+      character={{}}
+      username="Tester"
+      {...props}
+    />,
+  );
+
+  await act(async () => {});
+
+  return result;
+};
+
 describe("Level3Terminal", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -36,15 +51,7 @@ describe("Level3Terminal", () => {
     const onComplete = jest.fn();
     const onExit = jest.fn();
 
-    render(
-      <Level3Terminal
-        artifacts={[]}
-        character={{}}
-        onComplete={onComplete}
-        onExit={onExit}
-        username="Tester"
-      />,
-    );
+    await renderTerminal({ onComplete, onExit });
 
     await advanceTerminal();
     fireEvent.click(
@@ -65,19 +72,11 @@ describe("Level3Terminal", () => {
     expect(onExit).not.toHaveBeenCalled();
   });
 
-  it("keeps the explicit exit control as a non-completion exit", () => {
+  it("keeps the explicit exit control as a non-completion exit", async () => {
     const onComplete = jest.fn();
     const onExit = jest.fn();
 
-    render(
-      <Level3Terminal
-        artifacts={[]}
-        character={{}}
-        onComplete={onComplete}
-        onExit={onExit}
-        username="Tester"
-      />,
-    );
+    await renderTerminal({ onComplete, onExit });
 
     fireEvent.click(screen.getByRole("button", { name: /EXIT TERMINAL/i }));
 
