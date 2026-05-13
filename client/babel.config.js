@@ -1,3 +1,3 @@
 export default {
-  plugins: ["@babel/plugin-syntax-jsx"],
+  presets: [["@babel/preset-react", { runtime: "automatic" }]],
 };
