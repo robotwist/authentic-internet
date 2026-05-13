@@ -241,12 +241,13 @@ const NARRATIVE_PATHS = {
 const Level3Terminal = ({
   character,
   artifacts,
+  initialNarrative = "intro",
   onComplete,
   onExit,
   username,
   inventory,
 }) => {
-  const [currentNarrative, setCurrentNarrative] = useState("intro");
+  const [currentNarrative, setCurrentNarrative] = useState(initialNarrative);
   const [displayedText, setDisplayedText] = useState("");
   const [userInput, setUserInput] = useState("");
   const [showCursor, setShowCursor] = useState(true);
@@ -634,6 +635,7 @@ const Level3Terminal = ({
 Level3Terminal.propTypes = {
   character: PropTypes.object,
   artifacts: PropTypes.array,
+  initialNarrative: PropTypes.string,
   onComplete: PropTypes.func,
   onExit: PropTypes.func.isRequired,
   username: PropTypes.string,

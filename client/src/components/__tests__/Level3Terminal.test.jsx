@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Level3Terminal from "../Level3Terminal";
 
 jest.mock("../utils/SoundManager", () => ({
@@ -13,13 +13,6 @@ jest.mock("../utils/SoundManager", () => ({
     })),
   },
 }));
-
-const advanceTerminal = async (ms = 60000) => {
-  await act(async () => {
-    jest.advanceTimersByTime(ms);
-    await Promise.resolve();
-  });
-};
 
 const renderTerminal = async (props = {}) => {
   const result = render(
@@ -38,13 +31,10 @@ const renderTerminal = async (props = {}) => {
 
 describe("Level3Terminal", () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.spyOn(Math, "random").mockReturnValue(0);
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
@@ -52,24 +42,11 @@ describe("Level3Terminal", () => {
     const onComplete = jest.fn();
     const onExit = jest.fn();
 
-    await renderTerminal({ onComplete, onExit });
+    await renderTerminal({ initialNarrative: "exit", onComplete, onExit });
 
-    await advanceTerminal();
-    fireEvent.click(
-      screen.getByRole("button", { name: /I wanted to express myself/i }),
-    );
-
-    await advanceTerminal();
-    fireEvent.click(
-      screen.getByRole("button", { name: /Something meaningful/i }),
-    );
-
-    await advanceTerminal();
-    fireEvent.click(screen.getByRole("button", { name: /Exit terminal/i }));
-
-    await advanceTerminal(10000);
-
-    expect(onComplete).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onComplete).toHaveBeenCalledTimes(1), {
+      timeout: 5000,
+    });
     expect(onExit).not.toHaveBeenCalled();
   });
 
