@@ -17,6 +17,7 @@ jest.mock("../utils/SoundManager", () => ({
 const advanceTerminal = async (ms = 60000) => {
   await act(async () => {
     jest.advanceTimersByTime(ms);
+    await Promise.resolve();
   });
 };
 
