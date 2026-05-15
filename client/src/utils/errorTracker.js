@@ -126,7 +126,7 @@ export const trackError = (message, options = {}) => {
  */
 const reportErrorToServer = async (errorData) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
     const headers = {
       "Content-Type": "application/json",
     };
