@@ -585,7 +585,10 @@ export const AuthProvider = ({ children }) => {
           type: AUTH_ACTIONS.INIT_AUTH,
           payload: { user: parsedUser, isAuthenticated: true },
         });
-        console.log("Auth initialized from storage successfully");
+        console.log("Auth initialized from storage successfully", {
+          user: parsedUser,
+          isAuthenticated: true,
+        });
       } catch (error) {
         console.error("Error initializing auth:", error);
         logPersistentError("AuthContext - initializeAuth", error);

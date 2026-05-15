@@ -9,6 +9,8 @@ const Navbar = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  console.log("[Navbar] user:", user);
+
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -26,6 +28,13 @@ const Navbar = () => {
       <div className="navbar-brand">
         <Link to="/">Authentic Internet</Link>
       </div>
+
+      {/* Show user indicator when logged in */}
+      {user && (
+        <div className="user-indicator">
+          {user.username || user.email}
+        </div>
+      )}
 
       {/* Mobile menu toggle */}
       <button

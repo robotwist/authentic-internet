@@ -75,11 +75,21 @@ export const configureCorsOptions = (allowedOrigins) => {
       console.warn(`CORS blocked request from origin: ${origin}`);
       callback(null, false);
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Origin', 
+      'X-Requested-With', 
+      'Content-Type', 
+      'Accept', 
+      'Authorization',
+      'X-CSRF-Token',
+      'Cache-Control'
+    ],
+    exposedHeaders: ['Content-Length', 'Content-Type'],
     credentials: true,
     maxAge: 86400, // 24 hours
-    preflightContinue: false
+    preflightContinue: false,
+    optionsSuccessStatus: 204 // Some legacy browsers choke on 204
   };
 };
 
