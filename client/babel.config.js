@@ -1,3 +1,6 @@
 export default {
-  plugins: ["@babel/plugin-syntax-jsx"],
+  presets: [
+    ["@babel/preset-env", { targets: { node: "current" } }],
+    ["@babel/preset-react", { runtime: "automatic" }],
+  ],
 };
