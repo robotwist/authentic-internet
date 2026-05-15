@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import PixelGridEditor from "../components/UI/PixelGridEditor";
+import PixelCharacterCreator from "../components/PixelCharacterCreator";
 import API from "../api/api";
 import "./CharacterCreator.css";
 
@@ -118,13 +118,18 @@ const CharacterCreator = () => {
   if (step === 2) {
     return (
       <div className="character-creator-container">
-        <div className="editor-screen">
-          <button className="back-btn" onClick={() => setStep(1)}>
-            ← Back
-          </button>
-
-          <PixelGridEditor onSave={handleSaveFromEditor} />
-        </div>
+        <PixelCharacterCreator
+          skipSave={true}
+          onCharacterCreated={(data) => {
+            setCharacterData({
+              dataURL: data.sprite || data.dataURL,
+              grid: data.grid,
+            });
+            setCharacterName(data.name || user?.username || "");
+            setStep(3);
+          }}
+          onClose={() => setStep(1)}
+        />
       </div>
     );
   }
