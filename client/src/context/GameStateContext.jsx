@@ -1,4 +1,10 @@
-import React, { createContext, useReducer, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  useReducer,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import PropTypes from "prop-types";
 
 // Create the context
@@ -129,6 +135,7 @@ const gameStateReducer = (state, action) => {
 // Provider component
 export const GameStateProvider = ({ children }) => {
   const [state, dispatch] = useReducer(gameStateReducer, initialState);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   // Load game state from localStorage on mount
   useEffect(() => {
@@ -143,11 +150,15 @@ export const GameStateProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Failed to load game state:", error);
+    } finally {
+      setHasHydrated(true);
     }
   }, []);
 
   // Save to localStorage when state changes
   useEffect(() => {
+    if (!hasHydrated) return;
+
     try {
       localStorage.setItem(
         "gameState",
@@ -174,6 +185,7 @@ export const GameStateProvider = ({ children }) => {
     state.quests,
     state.currentWorld,
     state.gameProgress,
+    hasHydrated,
   ]);
 
   // Action creators

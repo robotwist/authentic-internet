@@ -2528,7 +2528,7 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressSnapshot = {
       characterPosition,
       currentMapIndex,
       inventory,
@@ -2537,7 +2537,7 @@ const GameWorld = React.memo(() => {
       viewedArtifacts: gameState.gameData.viewedArtifacts,
     };
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(progressSnapshot);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
@@ -2671,15 +2671,19 @@ const GameWorld = React.memo(() => {
       const isFirstView =
         !Array.isArray(gameState.gameData.viewedArtifacts) ||
         !gameState.gameData.viewedArtifacts.includes(artifact.id);
+      let viewedArtifactsForProgress = Array.isArray(
+        gameState.gameData.viewedArtifacts,
+      )
+        ? gameState.gameData.viewedArtifacts
+        : [];
 
       // Update viewed artifacts
       if (isFirstView) {
         const updatedViewedArtifacts = [
-          ...(Array.isArray(gameState.gameData.viewedArtifacts)
-            ? gameState.gameData.viewedArtifacts
-            : []),
+          ...viewedArtifactsForProgress,
           artifact.id,
         ];
+        viewedArtifactsForProgress = updatedViewedArtifacts;
         updateGameState({ viewedArtifacts: updatedViewedArtifacts });
         localStorage.setItem(
           "viewedArtifacts",
@@ -2711,9 +2715,9 @@ const GameWorld = React.memo(() => {
 
       // Save game state if user is logged in
       if (user && typeof updateGameProgress === "function") {
-        const gameState = {
+        const progressUpdate = {
           inventory,
-          viewedArtifacts: gameState.gameData.viewedArtifacts,
+          viewedArtifacts: viewedArtifactsForProgress,
           lastPosition: {
             x: characterPosition.x,
             y: characterPosition.y,
@@ -2726,7 +2730,7 @@ const GameWorld = React.memo(() => {
           },
         };
 
-        updateGameProgress(gameState);
+        updateGameProgress(progressUpdate);
       }
     },
     [
