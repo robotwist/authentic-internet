@@ -729,24 +729,6 @@ const GameWorld = React.memo(() => {
     [gameState.activeQuests, showPortalNotification, hidePortalNotification],
   );
 
-  // Function to add XP and show notification
-  const addExperiencePoints = useCallback(
-    (amount, reason = 'Gameplay') => {
-      if (!amount || amount <= 0) return;
-
-      // Award XP using the existing system
-      awardXP(amount, reason);
-
-      // Show XP notification
-      showNotification({
-        type: 'xp',
-        message: `+${amount} XP: ${reason}`,
-        duration: 2000,
-      });
-    },
-    [awardXP, showNotification],
-  );
-
   const handlePlayerHeal = useCallback(
     (amount) => {
       const newHealth = Math.min(
@@ -857,6 +839,22 @@ const GameWorld = React.memo(() => {
       handleGainExperience(amount, reason, null);
     },
     [handleGainExperience],
+  );
+
+  // Function to add XP and show notification
+  const addExperiencePoints = useCallback(
+    (amount, reason = "Gameplay") => {
+      if (!amount || amount <= 0) return;
+
+      awardXP(amount, reason);
+
+      showNotification({
+        type: "xp",
+        message: `+${amount} XP: ${reason}`,
+        duration: 2000,
+      });
+    },
+    [awardXP, showNotification],
   );
 
   // After switching maps, camera scroll can still be from the previous (larger or scrolled) area — clamp once
