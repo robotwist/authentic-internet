@@ -77,30 +77,8 @@ const CharacterCreator = () => {
           <div className="welcome-content">
             <h1>Welcome to the Authentic Internet</h1>
             <p className="welcome-subtitle">
-              A space for the True, the Good, and the Beautiful
+              Let's create your character to begin your journey
             </p>
-
-            <div className="welcome-info">
-              <div className="info-card">
-                <span className="info-icon">🎨</span>
-                <h3>Create Your Character</h3>
-                <p>Design a unique pixel art sprite that represents you</p>
-              </div>
-
-              <div className="info-card">
-                <span className="info-icon">🌍</span>
-                <h3>Explore & Discover</h3>
-                <p>
-                  Meet characters from history and literature, collect wisdom
-                </p>
-              </div>
-
-              <div className="info-card">
-                <span className="info-icon">✨</span>
-                <h3>Leave Your Mark</h3>
-                <p>Create artifacts that matter and share them with others</p>
-              </div>
-            </div>
 
             <div className="welcome-actions">
               <button className="btn-primary" onClick={() => setStep(2)}>
@@ -142,7 +120,7 @@ const CharacterCreator = () => {
       <div className="character-creator-container">
         <div className="confirm-screen">
           <div className="confirm-content">
-            <h2>🎉 Your Character is Ready!</h2>
+            <h2>Ready to begin?</h2>
 
             <div className="character-preview-large">
               {characterData?.dataURL && (
@@ -170,7 +148,7 @@ const CharacterCreator = () => {
               />
             </div>
 
-            {error && <div className="error-message">⚠️ {error}</div>}
+            {error && <div className="error-message">{error}</div>}
 
             <div className="confirm-actions">
               <button
@@ -178,7 +156,7 @@ const CharacterCreator = () => {
                 onClick={handleConfirmCharacter}
                 disabled={saving}
               >
-                {saving ? "Saving..." : "Save To Account & Start Adventure! 🚀"}
+                {saving ? "Saving..." : "Start Playing"}
               </button>
               <button
                 className="btn-secondary"
