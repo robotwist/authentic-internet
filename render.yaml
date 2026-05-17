@@ -19,20 +19,18 @@ services:
     buildCommand: npm install
     startCommand: npm start
     
-    # Node version
-    envVars:
-      - key: NODE_VERSION
-        value: 20
-    
     # ============================================
     # Environment Variables
     # ============================================
     # IMPORTANT: Secret values (marked with 'sync: false') must be set 
     # in the Render Dashboard under Environment Variables
     # ============================================
-    
-    # --- Authentication & Security ---
     envVars:
+      # --- Node Configuration ---
+      - key: NODE_VERSION
+        value: 20
+      
+      # --- Authentication & Security ---
       - key: NODE_ENV
         value: production
       
