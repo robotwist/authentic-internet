@@ -6,6 +6,7 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose, skipSave = false }
   const { user, updateUser } = useAuth();
   const [mode, setMode] = useState("create"); // 'create' or 'import'
   const [canvasSize, setCanvasSize] = useState(32);
+  const [pixelSize, setPixelSize] = useState(12); // Size of each pixel cell in pixels
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [pixels, setPixels] = useState({});
   const [isDrawing, setIsDrawing] = useState(false);
@@ -262,18 +263,34 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose, skipSave = false }
               />
             </div>
 
-            {/* Canvas Size Selector */}
+            {/* Canvas Size and Zoom Controls */}
             <div className="canvas-controls">
-              <label htmlFor="canvas-size">Canvas Size:</label>
-              <select
-                id="canvas-size"
-                value={canvasSize}
-                onChange={(e) => setCanvasSize(Number(e.target.value))}
-              >
-                <option value={16}>16x16</option>
-                <option value={32}>32x32</option>
-                <option value={64}>64x64</option>
-              </select>
+              <div className="control-group">
+                <label htmlFor="canvas-size">Canvas Size:</label>
+                <select
+                  id="canvas-size"
+                  value={canvasSize}
+                  onChange={(e) => setCanvasSize(Number(e.target.value))}
+                >
+                  <option value={16}>16x16 (Tiny)</option>
+                  <option value={32}>32x32 (Standard)</option>
+                  <option value={64}>64x64 (Large)</option>
+                </select>
+              </div>
+              
+              <div className="control-group">
+                <label htmlFor="pixel-size">Zoom:</label>
+                <select
+                  id="pixel-size"
+                  value={pixelSize}
+                  onChange={(e) => setPixelSize(Number(e.target.value))}
+                >
+                  <option value={8}>Small (8px)</option>
+                  <option value={12}>Medium (12px)</option>
+                  <option value={16}>Large (16px)</option>
+                  <option value={20}>X-Large (20px)</option>
+                </select>
+              </div>
             </div>
 
             {/* Color Palette */}
@@ -307,11 +324,17 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose, skipSave = false }
 
             {/* Canvas */}
             <div className="canvas-container">
+              <div className="canvas-info">
+                <span>Canvas: {canvasSize}×{canvasSize} pixels</span>
+                <span>Current Color: <span className="color-indicator" style={{ backgroundColor: selectedColor }}></span> {selectedColor}</span>
+              </div>
               <div
                 className="pixel-canvas"
                 style={{
-                  gridTemplateColumns: `repeat(${canvasSize}, 1px)`,
-                  gridTemplateRows: `repeat(${canvasSize}, 1px)`,
+                  gridTemplateColumns: `repeat(${canvasSize}, ${pixelSize}px)`,
+                  gridTemplateRows: `repeat(${canvasSize}, ${pixelSize}px)`,
+                  width: `${canvasSize * pixelSize}px`,
+                  height: `${canvasSize * pixelSize}px`,
                 }}
                 onMouseLeave={handleMouseUp}
               >
@@ -325,7 +348,11 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose, skipSave = false }
                     <div
                       key={key}
                       className="pixel"
-                      style={{ backgroundColor: color }}
+                      style={{ 
+                        backgroundColor: color,
+                        width: `${pixelSize}px`,
+                        height: `${pixelSize}px`,
+                      }}
                       onMouseDown={() => handleMouseDown(x, y)}
                       onMouseEnter={() => handleMouseEnter(x, y)}
                       onMouseUp={handleMouseUp}

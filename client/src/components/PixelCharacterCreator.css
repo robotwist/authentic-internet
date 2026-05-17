@@ -133,17 +133,25 @@
 /* Canvas Controls */
 .canvas-controls {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.canvas-controls label {
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 150px;
+}
+
+.control-group label {
   color: #3498db;
   font-weight: 500;
   font-size: 14px;
 }
 
-.canvas-controls select {
+.control-group select {
   padding: 8px 12px;
   border: 2px solid rgba(52, 152, 219, 0.3);
   border-radius: 6px;
@@ -153,7 +161,7 @@
   cursor: pointer;
 }
 
-.canvas-controls select:focus {
+.control-group select:focus {
   outline: none;
   border-color: #3498db;
 }
@@ -232,31 +240,54 @@
 /* Canvas */
 .canvas-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   border: 2px solid rgba(52, 152, 219, 0.2);
+  gap: 12px;
+}
+
+.canvas-info {
+  display: flex;
+  gap: 20px;
+  color: #3498db;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.color-indicator {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid white;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin: 0 4px;
 }
 
 .pixel-canvas {
   display: grid;
   gap: 0;
-  border: 2px solid rgba(52, 152, 219, 0.5);
+  border: 3px solid rgba(52, 152, 219, 0.5);
   background: white;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  cursor: crosshair;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
 }
 
 .pixel {
-  width: 1px;
-  height: 1px;
   cursor: crosshair;
-  transition: all 0.1s ease;
+  transition: opacity 0.05s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 .pixel:hover {
-  transform: scale(1.5);
-  z-index: 10;
+  opacity: 0.8;
 }
 
 /* Canvas Actions */
@@ -463,6 +494,7 @@
     margin: 20px;
     max-width: calc(100% - 40px);
     max-height: calc(100vh - 40px);
+    padding: 16px;
   }
 
   .color-grid {
@@ -471,11 +503,26 @@
 
   .canvas-container {
     padding: 10px;
+    overflow-x: auto;
   }
 
   .pixel-canvas {
     max-width: 100%;
-    max-height: 300px;
+  }
+  
+  .canvas-controls {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .control-group {
+    width: 100%;
+  }
+  
+  .canvas-info {
+    flex-direction: column;
+    gap: 8px;
+    font-size: 11px;
   }
 }
 
