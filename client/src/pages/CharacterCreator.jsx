@@ -75,17 +75,17 @@ const CharacterCreator = () => {
       <div className="character-creator-container">
         <div className="welcome-screen">
           <div className="welcome-content">
-            <h1>Welcome to the Authentic Internet</h1>
+            <h1>Create Your Character</h1>
             <p className="welcome-subtitle">
-              Let's create your character to begin your journey
+              Design your pixel character or use the default
             </p>
 
             <div className="welcome-actions">
               <button className="btn-primary" onClick={() => setStep(2)}>
-                Create My Character
+                Create Character
               </button>
               <button className="btn-secondary" onClick={handleSkip}>
-                Use Default Character
+                Use Default
               </button>
             </div>
           </div>
@@ -120,7 +120,7 @@ const CharacterCreator = () => {
       <div className="character-creator-container">
         <div className="confirm-screen">
           <div className="confirm-content">
-            <h2>Ready to begin?</h2>
+            <h2>Your Character</h2>
 
             <div className="character-preview-large">
               {characterData?.dataURL && (
@@ -137,7 +137,7 @@ const CharacterCreator = () => {
             </div>
 
             <div className="character-name-input">
-              <label htmlFor="character-name">Character Name:</label>
+              <label htmlFor="character-name">Name:</label>
               <input
                 id="character-name"
                 type="text"
@@ -156,14 +156,14 @@ const CharacterCreator = () => {
                 onClick={handleConfirmCharacter}
                 disabled={saving}
               >
-                {saving ? "Saving..." : "Start Playing"}
+                {saving ? "Saving..." : "Continue"}
               </button>
               <button
                 className="btn-secondary"
                 onClick={() => setStep(2)}
                 disabled={saving}
               >
-                Edit Character
+                Edit
               </button>
             </div>
           </div>
