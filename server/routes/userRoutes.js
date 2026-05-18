@@ -7,6 +7,10 @@ import path from "path";
 import fs from "fs";
 import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 import { validate, schemas } from "../middleware/validation.js";
+import {
+  CHARACTER_SPRITE_VALIDATION_MESSAGE,
+  isValidCharacterSpriteReference,
+} from "../utils/characterSprites.js";
 
 const router = express.Router();
 
@@ -246,9 +250,8 @@ router.put('/me/character', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Valid character sprite data is required' });
     }
     
-    // Validate that it's a data URL (base64 image)
-    if (!spriteData.startsWith('data:image/')) {
-      return res.status(400).json({ message: 'Character sprite must be a valid image data URL' });
+    if (!isValidCharacterSpriteReference(spriteData)) {
+      return res.status(400).json({ message: CHARACTER_SPRITE_VALIDATION_MESSAGE });
     }
     
     // Update user's character sprite in database
