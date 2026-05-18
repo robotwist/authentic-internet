@@ -1,7 +1,7 @@
 import {
   CHARACTER_SPRITE_VALIDATION_MESSAGE,
   isValidCharacterSpriteReference,
-} from "../../server/utils/characterSprites.js";
+} from "../utils/characterSprites.js";
 
 describe("character sprite reference validation", () => {
   it("accepts generated sprite data URLs", () => {
