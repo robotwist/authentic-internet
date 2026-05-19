@@ -9,6 +9,7 @@ import jwt from 'jsonwebtoken';
 import { MAPS_STRUCTURE } from '../constants.js';
 
 const router = express.Router();
+const World = WorldInstance;
 
 // Validation middleware
 const validateWorld = [
