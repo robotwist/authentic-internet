@@ -4,46 +4,38 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from "react";
 import { useAuth } from "./AuthContext";
 import { io } from "socket.io-client";
 
-// Create context
 const WebSocketContext = createContext(null);
 
 export function WebSocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
-  const { token, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const socketRef = useRef(null);
 
-  // Make sure to use the correct port
   const SERVER_PORT = import.meta.env.VITE_SERVER_PORT || "5001";
   const SERVER_URL =
     import.meta.env.VITE_SERVER_URL || `http://localhost:${SERVER_PORT}`;
 
-  // Function to create a new Socket.io connection
   const connectSocket = useCallback(() => {
+    const token = localStorage.getItem("token");
     if (!isAuthenticated || !token) {
-      console.log(
-        "Socket.io connection not established: User not authenticated",
-      );
       return;
     }
 
     try {
-      console.log(`Connecting to Socket.io at: ${SERVER_URL}`);
-
-      // Close existing socket if it exists
-      if (socket) {
-        socket.disconnect();
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
       }
 
-      // Create new Socket.io connection
       const newSocket = io(SERVER_URL, {
-        auth: {
-          token: token,
-        },
+        auth: { token },
         transports: ["websocket", "polling"],
         reconnection: true,
         reconnectionAttempts: 5,
@@ -52,102 +44,83 @@ export function WebSocketProvider({ children }) {
         timeout: 20000,
       });
 
-      // Setup event handlers
       newSocket.on("connect", () => {
-        console.log("Socket.io connected");
         setIsConnected(true);
         setReconnectAttempts(0);
       });
 
-      newSocket.on("disconnect", (reason) => {
-        console.log(`Socket.io disconnected: ${reason}`);
+      newSocket.on("disconnect", () => {
         setIsConnected(false);
       });
 
-      newSocket.on("connect_error", (error) => {
-        console.error("Socket.io connection error:", error);
+      newSocket.on("connect_error", () => {
         setIsConnected(false);
       });
 
-      newSocket.on("reconnect", (attemptNumber) => {
-        console.log(`Socket.io reconnected after ${attemptNumber} attempts`);
+      newSocket.on("reconnect", () => {
         setIsConnected(true);
         setReconnectAttempts(0);
       });
 
       newSocket.on("reconnect_attempt", (attemptNumber) => {
-        console.log(`Socket.io reconnection attempt ${attemptNumber}`);
         setReconnectAttempts(attemptNumber);
       });
 
       newSocket.on("reconnect_failed", () => {
-        console.log("Socket.io reconnection failed");
         setIsConnected(false);
       });
 
+      socketRef.current = newSocket;
       setSocket(newSocket);
     } catch (error) {
       console.error("Error establishing Socket.io connection:", error);
     }
-  }, [isAuthenticated, token, socket, SERVER_URL]);
+  }, [isAuthenticated, SERVER_URL]);
 
-  // Connect Socket.io when authenticated
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       connectSocket();
     }
 
-    // Clean up Socket.io connection on unmount
     return () => {
-      if (socket) {
-        socket.disconnect();
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
       }
     };
-  }, [isAuthenticated, token, connectSocket]);
+  }, [isAuthenticated, connectSocket]);
 
-  // Function to send a message through Socket.io
   const sendMessage = useCallback(
     (event, data) => {
-      if (!socket || !isConnected) {
-        console.error("Socket.io is not connected");
+      const active = socketRef.current;
+      if (!active || !isConnected) {
         return false;
       }
-
       try {
-        socket.emit(event, data);
+        active.emit(event, data);
         return true;
       } catch (error) {
         console.error("Error sending Socket.io message:", error);
         return false;
       }
     },
-    [socket, isConnected],
+    [isConnected],
   );
 
-  // Function to listen to events
-  const onEvent = useCallback(
-    (event, callback) => {
-      if (!socket) return;
+  const onEvent = useCallback((event, callback) => {
+    const active = socketRef.current;
+    if (!active) return undefined;
 
-      socket.on(event, callback);
+    active.on(event, callback);
+    return () => {
+      active.off(event, callback);
+    };
+  }, []);
 
-      // Return cleanup function
-      return () => {
-        socket.off(event, callback);
-      };
-    },
-    [socket],
-  );
-
-  // Function to manually reconnect
   const reconnect = useCallback(() => {
-    if (socket) {
-      socket.disconnect();
-    }
     connectSocket();
-  }, [socket, connectSocket]);
+  }, [connectSocket]);
 
-  // The value provided to consumers of this context
   const value = {
     socket,
     isConnected,
@@ -157,13 +130,10 @@ export function WebSocketProvider({ children }) {
   };
 
   return (
-    <WebSocketContext.Provider value={value}>
-      {children}
-    </WebSocketContext.Provider>
+    <WebSocketContext.Provider value={value}>{children}</WebSocketContext.Provider>
   );
 }
 
-// Custom hook to use WebSocket context
 export function useWebSocket() {
   const context = useContext(WebSocketContext);
   if (!context) {

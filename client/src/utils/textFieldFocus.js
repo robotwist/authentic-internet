@@ -9,6 +9,7 @@ export function isTextEntryFocused(doc = typeof document !== "undefined" ? docum
 
   const tag = el.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+    if (el.disabled || el.readOnly) return false;
     return true;
   }
   if (el.isContentEditable) {

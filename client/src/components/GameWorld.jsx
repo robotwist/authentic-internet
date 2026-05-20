@@ -235,6 +235,7 @@ const GameWorld = React.memo(() => {
   const lastUpdateTime = useRef(performance.now());
   const updateThrottle = useRef(16); // 16ms throttle (60fps)
   const devSaveDebounceRef = useRef(null);
+  const handleKeyDownRef = useRef(null);
 
   // All state is now managed by the gameState hook
 
@@ -430,8 +431,8 @@ const GameWorld = React.memo(() => {
 
   // portalNotificationActive is now handled by NotificationSystem
 
-  const conversationFocusZoom =
-    uiState.showNPCDialog && gameState.activeNPC ? 1.28 : 1;
+  // Dock-embedded NPC talk — keep playfield at 1:1 so movement and clicks stay aligned.
+  const conversationFocusZoom = 1;
 
   const handleToggleMusicMute = useCallback(() => {
     setMusicMuted((current) => {
@@ -466,62 +467,6 @@ const GameWorld = React.memo(() => {
       return nextMuted;
     });
   }, [currentMapIndex, gameState.soundManager]);
-
-  useEffect(() => {
-    const shouldFocus =
-      uiState.showNPCDialog &&
-      gameState.activeNPC &&
-      !uiState.inDungeon &&
-      !currentSpecialWorld;
-
-    if (!shouldFocus) {
-      if (conversationFocusActiveRef.current && conversationViewportRef.current) {
-        setViewport(conversationViewportRef.current);
-      }
-      conversationViewportRef.current = null;
-      conversationFocusActiveRef.current = false;
-      return;
-    }
-
-    if (!MAPS[currentMapIndex]?.data) return;
-
-    if (!conversationFocusActiveRef.current) {
-      conversationViewportRef.current = { x: viewport.x, y: viewport.y };
-    }
-
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const focusTargetX = (characterPosition.x + gameState.activeNPC.position.x) / 2;
-    const focusTargetY = (characterPosition.y + gameState.activeNPC.position.y) / 2;
-    const worldVisibleWidth = viewportWidth / conversationFocusZoom;
-    const worldVisibleHeight = viewportHeight / conversationFocusZoom;
-
-    const mapWidth = MAPS[currentMapIndex].data[0]?.length * TILE_SIZE || 800;
-    const mapHeight = MAPS[currentMapIndex].data.length * TILE_SIZE || 600;
-
-    const rawX = focusTargetX - worldVisibleWidth / 2;
-    const rawY = focusTargetY - worldVisibleHeight / 2;
-    const clampedX = Math.min(rawX, Math.max(0, mapWidth - worldVisibleWidth));
-    const clampedY = Math.min(rawY, Math.max(0, mapHeight - worldVisibleHeight));
-
-    setViewport({
-      x: Math.max(0, clampedX),
-      y: Math.max(0, clampedY),
-    });
-    conversationFocusActiveRef.current = true;
-  }, [
-    uiState.showNPCDialog,
-    uiState.inDungeon,
-    gameState.activeNPC,
-    currentSpecialWorld,
-    currentMapIndex,
-    characterPosition.x,
-    characterPosition.y,
-    conversationFocusZoom,
-    viewport.x,
-    viewport.y,
-    setViewport,
-  ]);
 
   // Update checkForLevelUpAchievements to use our context
   const checkForLevelUpAchievements = useCallback(
@@ -1459,8 +1404,8 @@ const GameWorld = React.memo(() => {
 
   // Update explored tiles for minimap fog of war
   useEffect(() => {
-    const tileX = Math.floor(gameState.characterPosition.x / TILE_SIZE);
-    const tileY = Math.floor(gameState.characterPosition.y / TILE_SIZE);
+    const tileX = Math.floor(characterPosition.x / TILE_SIZE);
+    const tileY = Math.floor(characterPosition.y / TILE_SIZE);
 
     // Explore tiles in a radius around the player (view distance)
     const viewRadius = 3; // Explore 3 tiles in all directions
@@ -1488,7 +1433,7 @@ const GameWorld = React.memo(() => {
       // Only update if new tiles were explored
       return hasNewTiles ? newExploredTiles : prevExploredTiles;
     });
-  }, [getCharacterPosition]); // Remove exploredTiles from dependencies
+  }, [characterPosition.x, characterPosition.y]);
 
   // Performance monitoring - only run occasionally to avoid render loops
   useEffect(() => {
@@ -2074,6 +2019,9 @@ const GameWorld = React.memo(() => {
             dockExpanded: false,
             dockTab: "status",
           });
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
           if (gameState.mobileState.screenReaderMode) {
             announceToScreenReader("Closed all menus");
           }
@@ -2188,17 +2136,17 @@ const GameWorld = React.memo(() => {
             announceToScreenReader(message);
           }
           break;
-        case "s":
         case "S":
-          // Toggle screen reader mode
-          setMobileState({
-            ...mobileState,
-            screenReaderMode: !mobileState.screenReaderMode,
-          });
-          const message = mobileState.screenReaderMode
-            ? "Screen reader mode disabled"
-            : "Screen reader mode enabled";
-          announceToScreenReader(message);
+          if (event.shiftKey) {
+            setMobileState({
+              ...mobileState,
+              screenReaderMode: !mobileState.screenReaderMode,
+            });
+            const message = mobileState.screenReaderMode
+              ? "Screen reader mode disabled"
+              : "Screen reader mode enabled";
+            announceToScreenReader(message);
+          }
           break;
       }
     },
@@ -2220,6 +2168,8 @@ const GameWorld = React.memo(() => {
       setShowLevelUpModal,
     ],
   );
+
+  handleKeyDownRef.current = handleKeyDown;
 
   // Optimized sound manager initialization
   const initSoundManager = useCallback(async () => {
@@ -2244,7 +2194,7 @@ const GameWorld = React.memo(() => {
   // map chunk unless the saved session needs a map that is still in that chunk.
   useEffect(() => {
     let cancelled = false;
-    const handleKeyDownEvent = (e) => handleKeyDown(e);
+    const handleKeyDownEvent = (e) => handleKeyDownRef.current?.(e);
 
     (async () => {
       gameStateManager.init();
@@ -2302,6 +2252,16 @@ const GameWorld = React.memo(() => {
 
       window.addEventListener("keydown", handleKeyDownEvent);
       setMapsReady(true);
+
+      const loader = document.getElementById("initial-loader");
+      if (loader?.parentNode) {
+        loader.parentNode.removeChild(loader);
+      }
+
+      const gameEl = document.querySelector(".game-container");
+      if (gameEl instanceof HTMLElement) {
+        gameEl.focus({ preventScroll: true });
+      }
     })();
 
     return () => {
@@ -2310,13 +2270,7 @@ const GameWorld = React.memo(() => {
       // Do not call SoundManager.cleanup() here — effect deps churn would close
       // AudioContext while initialize()/decodeAudioData is still in flight.
     };
-  }, [
-    loadCharacter,
-    fetchNPCs,
-    initSoundManager,
-    handleKeyDown,
-    gameState.soundManager,
-  ]);
+  }, [loadCharacter, fetchNPCs, initSoundManager, gameState.soundManager]);
 
   // Level 1 is the Yosemite arrival beat. Keep it tied to the map entry itself
   // so the overworld shortcut and the final dungeon route behave the same.
@@ -3016,6 +2970,9 @@ const GameWorld = React.memo(() => {
       dockTab: "status",
     });
     setActiveNPC(null);
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   }, [updateUIState, setActiveNPC]);
 
   // Add a handler for the World Map node click
@@ -3726,6 +3683,17 @@ const GameWorld = React.memo(() => {
           aria-label="Authentic Internet Game World"
           tabIndex={0}
           onKeyDown={handleKeyDown}
+          onPointerDown={(e) => {
+            if (e.target.closest(".game-dock")) return;
+            const active = document.activeElement;
+            if (
+              active instanceof HTMLElement &&
+              active.closest(".game-dock") &&
+              !active.disabled
+            ) {
+              active.blur();
+            }
+          }}
         >
           <div className="game-main-stage">
             <div

@@ -67,6 +67,11 @@ const CharacterController = React.forwardRef(
           top: newPosition.y,
         };
 
+        if (characterRef.current) {
+          characterRef.current.style.left = `${newPosition.x}px`;
+          characterRef.current.style.top = `${newPosition.y}px`;
+        }
+
         // Handle map transitions
         if (targetMapIndex !== currentMapIndex) {
           setCurrentMapIndex(targetMapIndex);

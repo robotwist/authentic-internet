@@ -250,36 +250,24 @@ const useCharacterMovement = (
         case "ArrowUp":
         case "w":
         case "W":
-          // Prevent key repeat for movement keys
-          if (processedKeys.current.has(event.key)) return;
-          processedKeys.current.add(event.key);
           handleMove("up", true);
           event.preventDefault();
           break;
         case "ArrowDown":
         case "s":
         case "S":
-          // Prevent key repeat for movement keys
-          if (processedKeys.current.has(event.key)) return;
-          processedKeys.current.add(event.key);
           handleMove("down", true);
           event.preventDefault();
           break;
         case "ArrowLeft":
         case "a":
         case "A":
-          // Prevent key repeat for movement keys
-          if (processedKeys.current.has(event.key)) return;
-          processedKeys.current.add(event.key);
           handleMove("left", true);
           event.preventDefault();
           break;
         case "ArrowRight":
         case "d":
         case "D":
-          // Prevent key repeat for movement keys
-          if (processedKeys.current.has(event.key)) return;
-          processedKeys.current.add(event.key);
           handleMove("right", true);
           event.preventDefault();
           break;
@@ -309,13 +297,21 @@ const useCharacterMovement = (
       processedKeys.current.clear();
     };
 
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        clearProcessedKeys();
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", clearProcessedKeys);
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", clearProcessedKeys);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [
     handleMove,

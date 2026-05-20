@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Suspense } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AchievementProvider } from "./context/AchievementContext";
 import { useGameState } from "./context/GameStateContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -27,6 +27,18 @@ import "./App.css";
 console.log("App starting at", new Date().toISOString());
 
 function App() {
+  const location = useLocation();
+  const isGameRoute = location.pathname.startsWith("/game");
+
+  useEffect(() => {
+    const loader = document.getElementById("initial-loader");
+    if (loader?.parentNode) {
+      loader.style.pointerEvents = "none";
+      loader.style.opacity = "0";
+      loader.parentNode.removeChild(loader);
+    }
+  }, []);
+
   // Warm likely game assets without triggering preload warnings if they are unused on first paint.
   useEffect(() => {
     const likelyGameImages = [
@@ -91,7 +103,9 @@ function App() {
     <div className="app">
       <AchievementProvider>
         <Navbar />
-        <main className="main-content">
+        <main
+          className={`main-content${isGameRoute ? " main-content--game" : ""}`}
+        >
           <Routes>
             <Route
               path="/"

@@ -45,8 +45,14 @@ body {
   height: 100%;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
-  position: fixed; /* Prevent bounce on iOS */
+  position: relative;
   width: 100%;
+}
+
+@supports (-webkit-touch-callout: none) {
+  body {
+    position: fixed;
+  }
 }
 
 #root {
@@ -149,6 +155,24 @@ input:focus, textarea:focus, select:focus {
   margin: 0 auto;
   width: 100%;
   overflow-y: auto;
+}
+
+.main-content--game {
+  padding: 0;
+  max-width: none;
+  margin: 0;
+  overflow: hidden;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.app:has(.main-content--game) {
+  justify-content: flex-start;
+  align-items: stretch;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 /* Dashboard styles */

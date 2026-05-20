@@ -54,6 +54,10 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
   const usesLocalDialogue = Array.isArray(npc.dialogue) && npc.dialogue.length > 0;
 
   useEffect(() => {
+    if (embedded) {
+      setRevealNpcIndex(null);
+      return;
+    }
     const last = messages[messages.length - 1];
     if (last?.type === "npc") {
       setRevealNpcIndex(messages.length - 1);
@@ -61,7 +65,7 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     } else {
       setRevealNpcIndex(null);
     }
-  }, [messages]);
+  }, [messages, embedded]);
 
   useEffect(() => {
     if (revealNpcIndex === null) return;
@@ -359,7 +363,8 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
     return message.text;
   };
 
-  const inputLocked = isLoading || revealNpcIndex !== null;
+  const inputLocked =
+    isLoading || (!embedded && revealNpcIndex !== null);
 
   return (
     <div

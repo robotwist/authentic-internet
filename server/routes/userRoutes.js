@@ -128,6 +128,8 @@ router.get("/me", authenticateToken, async (req, res) => {
       id: user._id,
       username: user.username,
       avatar: user.avatar,
+      characterSprite: user.characterSprite,
+      characterName: user.characterName,
       friends: user.friends,
       exp: user.experience,
       level: user.level,

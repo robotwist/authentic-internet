@@ -132,11 +132,20 @@ const clearStoredAuthData = () => {
   localStorage.removeItem("user");
 };
 
+/** Keep large blobs (characterSprite) out of localStorage — they block the main thread on parse. */
+const userForLocalStorage = (user) => {
+  if (!user || typeof user !== "object") return user;
+  const { characterSprite: _sprite, ...rest } = user;
+  return rest;
+};
+
 const storeAuthData = (data) => {
   if (data.token) localStorage.setItem("token", data.token);
   if (data.refreshToken)
     localStorage.setItem("refreshToken", data.refreshToken);
-  if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+  if (data.user) {
+    localStorage.setItem("user", JSON.stringify(userForLocalStorage(data.user)));
+  }
 };
 
 // Create the Auth Context
@@ -504,10 +513,10 @@ export const AuthProvider = ({ children }) => {
 
   // Update user data
   const updateUser = (updatedUser) => {
-    // Update local storage
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-
-    // Update state
+    localStorage.setItem(
+      "user",
+      JSON.stringify(userForLocalStorage(updatedUser)),
+    );
     dispatch({ type: AUTH_ACTIONS.SET_USER, payload: updatedUser });
   };
 
@@ -581,9 +590,19 @@ export const AuthProvider = ({ children }) => {
         // Set up axios interceptors for the current token
         setupAxiosInterceptors(storedToken);
 
+        let hydratedUser = parsedUser;
+        try {
+          const profileRes = await API.get("/api/users/me");
+          if (profileRes.data) {
+            hydratedUser = { ...parsedUser, ...profileRes.data };
+          }
+        } catch (profileErr) {
+          console.warn("Profile hydrate skipped:", profileErr?.message);
+        }
+
         dispatch({
           type: AUTH_ACTIONS.INIT_AUTH,
-          payload: { user: parsedUser, isAuthenticated: true },
+          payload: { user: hydratedUser, isAuthenticated: true },
         });
         console.log("Auth initialized from storage successfully");
       } catch (error) {
