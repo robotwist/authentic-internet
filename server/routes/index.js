@@ -11,6 +11,7 @@ import characterRoutes from "./characterRoutes.js";
 import questRoutes from "./questRoutes.js";
 import recommendationRoutes from "./recommendations.js";
 import collaborationRoutes from "./collaboration.js";
+import diagnosticsRoutes from "./diagnosticsRoutes.js";
 import mongoose from "mongoose";
 
 /**
@@ -67,6 +68,8 @@ export const applyRoutes = (app) => {
   app.use("/api/quests", questRoutes);
   app.use("/api/recommendations", recommendationRoutes);
   app.use("/api/collaboration", collaborationRoutes);
+  app.use("/api/diagnostics", diagnosticsRoutes);
+  app.use("/api/errors", diagnosticsRoutes); // Alternative endpoint
 
   /**
    * @swagger
@@ -147,6 +150,8 @@ export const applyRoutes = (app) => {
         "/api/quests",
         "/api/recommendations",
         "/api/collaboration",
+        "/api/diagnostics",
+        "/api/errors",
         "/api/socket-test"
       ],
       documentation: "See /api-docs for detailed API documentation"

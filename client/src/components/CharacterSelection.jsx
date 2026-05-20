@@ -70,7 +70,7 @@ const CharacterSelection = ({ onCharacterSelected, onSkip }) => {
     }
 
     try {
-      // Update user with selected character
+      // Update user with selected character sprite
       const response = await fetch("/api/users/me/character", {
         method: "PUT",
         headers: {
@@ -78,7 +78,8 @@ const CharacterSelection = ({ onCharacterSelected, onSkip }) => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
-          characterId: selectedCharacter._id,
+          characterSprite: selectedCharacter.imageUrl || selectedCharacter.dataURL,
+          characterName: selectedCharacter.name,
         }),
       });
 
@@ -87,7 +88,9 @@ const CharacterSelection = ({ onCharacterSelected, onSkip }) => {
         updateUser(updatedUser);
         onCharacterSelected(selectedCharacter);
       } else {
-        throw new Error("Failed to update character");
+        const errorData = await response.json();
+        console.error("Server error:", errorData);
+        throw new Error(errorData.message || "Failed to update character");
       }
     } catch (error) {
       console.error("Error updating character:", error);

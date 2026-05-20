@@ -101,7 +101,7 @@ router.get('/main', async (req, res) => {
 // Get user's development worlds
 router.get('/my-worlds', auth, async (req, res) => {
   try {
-    const worlds = await World.find({
+    const worlds = await WorldInstance.find({
       creator: req.user.userId,
       isMainWorld: false // Only get development worlds
     })
@@ -111,6 +111,7 @@ router.get('/my-worlds', auth, async (req, res) => {
     .populate('sharedWith.user', 'username');
     res.json(worlds);
   } catch (error) {
+    console.error('Error fetching my-worlds:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
