@@ -12,7 +12,7 @@ export const configureSecurityHeaders = () => {
     res.setHeader(
       'Content-Security-Policy',
       "default-src 'self'; " +
-      "connect-src 'self' https://authentic-internet-api-9739ffaa9c5f.herokuapp.com https://flourishing-starburst-8cf88b.netlify.app https://*.dicebear.com https://netlify.app localhost:* ws://localhost:*; " +
+      "connect-src 'self' https://authentic-internet.onrender.com https://flourishing-starburst-8cf88b.netlify.app https://*.netlify.app https://*.dicebear.com localhost:* ws://localhost:*; " +
       "img-src 'self' data: https: blob:; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +

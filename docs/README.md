@@ -7,6 +7,7 @@ This folder is the **canonical place** for human-maintained project documentatio
 | Kind | Location | Purpose |
 |------|----------|---------|
 | **Project overview & setup** | [`README.md`](../README.md) | Install, env, run, build, tests |
+| **Deployment (Render + Netlify)** | [`DEPLOYMENT.md`](DEPLOYMENT.md), [`RENDER_SETUP.md`](RENDER_SETUP.md) | Production URLs, deploy flow, Render secrets |
 | **Demo sprint (Jira/Airtable pack + pacing)** | [`demo-sprint/`](demo-sprint/) | CSV/checklist imports; **[demo-sprint/SPRINT-REALITY-MAP.md](demo-sprint/SPRINT-REALITY-MAP.md)** = plan vs shipped code vs CI |
 | **Full archive (historical)** | [`PROJECT_DOCUMENTATION.md`](PROJECT_DOCUMENTATION.md) | All former root/client/server `*.md` files merged into one file with `## Source: <original-filename>` sections |
 | **Cursor session logs** | [`.specstory/`](../.specstory/) | Tooling transcripts—not product docs, not merged |
@@ -38,7 +39,7 @@ In [`PROJECT_DOCUMENTATION.md`](PROJECT_DOCUMENTATION.md):
 | Topic | Jump (GitHub / compatible viewers) |
 |-------|-------------------------------------|
 | API endpoints | [PROJECT_DOCUMENTATION.md#doc-api-documentation](PROJECT_DOCUMENTATION.md#doc-api-documentation) |
-| Deployment | Search **Source: DEPLOYMENT** or **DEPLOYMENT_GUIDE** in [`PROJECT_DOCUMENTATION.md`](PROJECT_DOCUMENTATION.md) |
+| Deployment | [`DEPLOYMENT.md`](DEPLOYMENT.md) (current); archive: **Source: DEPLOYMENT** in [`PROJECT_DOCUMENTATION.md`](PROJECT_DOCUMENTATION.md) |
 | Local testing | **Source: LOCAL_TESTING_TIPS.md** |
 | Auth troubleshooting | **Source: AUTH_TROUBLESHOOTING.md** |
 | Client CORS / ports | **Source: CORS-TROUBLESHOOTING.md**, **README-PORT-MANAGEMENT.md** |

@@ -1,2 +1,2 @@
-// Updated for automatic deployment testing - Heroku with GitHub integration
+// Backend API — deployed on Render (auto-deploy from main)
  

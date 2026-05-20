@@ -47,7 +47,7 @@ These are **not** all required by the minimal spine, but they **landed in `main`
 | NPC talk dock | **Done** | Natural transcript UI, close behavior, local fallback responses, and throttled dialogue mumble |
 | Yosemite mini-game portals | **Done / stretch shipped** | Terminal, Shooter, and Text Adventure sigils are wired as step-on portals |
 | Friend demo readiness | **Ready for selective demo** | Share with a small trusted group; ask them to test the spine first, then free explore |
-| Backend services | **Deferred** | Heroku/backend recovery moves to next phase |
+| Backend services | **On Render** | API at `https://authentic-internet.onrender.com`; see [DEPLOYMENT.md](../DEPLOYMENT.md) |
 | CI/CD full hardening | **Deferred** | Client production build passes locally; broader CI cleanup is next phase |
 
 ---

@@ -284,7 +284,7 @@
       "created": 1616413013006,
       "name": "Base Environment",
       "data": {
-        "base_url": "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com",
+        "base_url": "https://authentic-internet.onrender.com",
         "token": ""
       },
       "_type": "environment"
@@ -307,7 +307,7 @@
       "created": 1616413013006,
       "name": "Production",
       "data": {
-        "base_url": "https://authentic-internet-api-9739ffaa9c5f.herokuapp.com"
+        "base_url": "https://authentic-internet.onrender.com"
       },
       "_type": "environment"
     }

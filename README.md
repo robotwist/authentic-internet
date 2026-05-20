@@ -40,7 +40,7 @@ NODE_ENV=development
 CLIENT_URL=http://localhost:5176
 ```
 
-See [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md) (search **Source: DEPLOYMENT** or environment sections) for fuller lists.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production URLs and hosting. Fuller env lists: [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md).
 
 **Client** — create `client/.env`:
 
@@ -72,6 +72,12 @@ npm run build
 ```bash
 npm test
 ```
+
+## Deployment
+
+- **Backend:** Render — [`render.yaml`](render.yaml), [docs/RENDER_SETUP.md](docs/RENDER_SETUP.md)
+- **Frontend:** Netlify — root [`netlify.toml`](netlify.toml)
+- **Runbook:** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · helper: `./deploy.sh`
 
 ## Repository layout
 
