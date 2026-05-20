@@ -41,11 +41,10 @@ export default {
         height: 192,
       },
       dialogue: [
-        "I am the humble world guide, unassuming, I know. Beautiful, of course.  All knowing, a decent cook by all accounts. I know all! I know all! Welcome, traveler. Press T near me anytime and I will guide you.",
-        "You look like a smart kid but you also look a bit lost. By the way, where are your clothes? Anyway, this is actually all I know. They put me on sort of a loop so you'll have to excuse me if I repeat myself. Core controls: move with WASD or arrow keys, press T to talk, I opens Bag, C opens Field Notes, and M opens the map.",
-        "Here's a tip if you get bored or lost or are dumber than you look. World route: Overworld -> Desert -> Dungeon -> Yosemite. Portals drive progression, and your blue-gold warp takes fast travel to Yosemite.",
-        "If you haven't left on the adventure yet maybe you have gotten hit on the head too many times: reach John Muir in Yosemite and trigger level victory for your reward moment.",
-        "Tip: Just keep goiong really fast and if anything gets in your way, turn. Charles DeMarr said that.",
+        "Welcome, young traveler! I am your humble World Guide. Some call me wise, others call me eccentric. I know all! Well... mostly all.",
+        "Here, take this twig. *hands you a small branch* I call it... THE SWORD OF WISDOM! It may look like a twig, but true power comes from understanding synergy.",
+        "The portal ahead leads to Zeus. He will grant you power. But remember - power alone is nothing. Combine what you learn, and you will prevail!",
+        "Core controls: WASD to move, T to talk, I opens Bag, C opens Field Notes, M opens map. Now go! Zeus awaits!",
       ],
     },
     {

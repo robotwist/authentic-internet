@@ -729,38 +729,6 @@ const GameWorld = React.memo(() => {
     [gameState.activeQuests, showPortalNotification, hidePortalNotification],
   );
 
-  // Function to add XP and show notification
-  const addExperiencePoints = useCallback(
-    (amount, reason) => {
-      // Update local experience state
-      const newExperience = (user?.experience || 0) + amount;
-
-      const newHealth = Math.max(0, gameState.playerHealth - damage);
-      setPlayerHealth(newHealth);
-
-      // Play damage sound
-      if (gameState.soundManager) {
-        gameState.soundManager.playSound("damage", 0.5);
-      }
-
-      // Trigger hit animation (retreat and flash)
-      setCharacterState((prev) => ({ ...prev, isHit: true }));
-      setTimeout(() => {
-        setCharacterState((prev) => ({ ...prev, isHit: false }));
-      }, 400); // Match CSS animation duration
-
-      // Invincibility frames
-      setIsInvincible(true);
-      setTimeout(() => setIsInvincible(false), 1000);
-
-      // Check for game over
-      if (newHealth <= 0) {
-        handleGameOver();
-      }
-    },
-    [gameState.playerHealth, gameState.isInvincible, gameState.soundManager],
-  );
-
   const handlePlayerHeal = useCallback(
     (amount) => {
       const newHealth = Math.min(
@@ -871,6 +839,17 @@ const GameWorld = React.memo(() => {
       handleGainExperience(amount, reason, null);
     },
     [handleGainExperience],
+  );
+
+  // Function to add XP and show notification
+  const addExperiencePoints = useCallback(
+    (amount, reason = "Gameplay") => {
+      if (!amount || amount <= 0) return;
+
+      awardXP(amount, reason);
+      addXPNotification(amount, reason);
+    },
+    [awardXP, addXPNotification],
   );
 
   // After switching maps, camera scroll can still be from the previous (larger or scrolled) area — clamp once

@@ -878,7 +878,7 @@ export const getUserGameState = withCache(
   async (idToken) => {
     try {
       if (!idToken) {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         if (!token) {
           throw new Error("Authentication required");
         }
@@ -918,7 +918,7 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       throw new Error("Authentication required");
@@ -955,7 +955,7 @@ export const updateUserExperience = async (experience) => {
  */
 export const addUserAchievement = async (achievement) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       throw new Error("Authentication required");
@@ -989,7 +989,7 @@ export const addUserAchievement = async (achievement) => {
  */
 export const saveGameState = async (gameState) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       throw new Error("Authentication required");
@@ -1018,7 +1018,7 @@ export const saveGameState = async (gameState) => {
 
 export const updateGameState = async (gameState) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       throw new Error("Authentication required");

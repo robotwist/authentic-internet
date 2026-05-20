@@ -233,6 +233,52 @@ router.put('/character-sprite', authenticateToken, async (req, res) => {
   }
 });
 
+// Alternative endpoint for updating character (same as character-sprite)
+router.put('/me/character', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { characterSprite, characterName, sprite } = req.body;
+    
+    // Accept either characterSprite or sprite field
+    const spriteData = characterSprite || sprite;
+    
+    if (!spriteData || typeof spriteData !== 'string') {
+      return res.status(400).json({ message: 'Valid character sprite data is required' });
+    }
+    
+    // Validate that it's a data URL (base64 image)
+    if (!spriteData.startsWith('data:image/')) {
+      return res.status(400).json({ message: 'Character sprite must be a valid image data URL' });
+    }
+    
+    // Update user's character sprite in database
+    const updateData = { characterSprite: spriteData };
+    if (characterName) {
+      updateData.characterName = characterName;
+    }
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { $set: updateData },
+      { new: true }
+    ).select('username email characterSprite characterName experience level');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    console.log(`Character updated for user: ${updatedUser.username}`);
+    res.json({ 
+      success: true,
+      message: 'Character updated successfully',
+      user: updatedUser 
+    });
+  } catch (error) {
+    console.error('Error updating character:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // Update user's experience points
 router.put('/experience', authenticateToken, async (req, res) => {
   try {
