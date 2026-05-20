@@ -1,5 +1,8 @@
 #!/bin/bash
 
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT" || exit 1
+
 # Script to download free images for the Authentic Internet project
 # These images are from public domain or open source repositories
 

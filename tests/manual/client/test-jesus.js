@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Basic axios instance for tests
 const api = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "http://localhost:5001",
   timeout: 5000,
   headers: {
     "Content-Type": "application/json",

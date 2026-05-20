@@ -61,6 +61,8 @@ npm run dev
 
 Manual alternative: `cd server && npm run dev` and `cd client && npm run dev` in two terminals.
 
+Other helpers: `./start-app.sh`, `./stop-app.sh`, `./scripts/dev/diagnose.sh` (see [scripts/README.md](scripts/README.md)).
+
 ## Build
 
 ```bash
@@ -84,7 +86,8 @@ npm test
 - `client/` — React + Vite app
 - `server/` — Express API
 - `docs/` — **canonical documentation**; start at [docs/README.md](docs/README.md)
-- `scripts/` — includes `consolidate-markdown.mjs` (destructive archive rebuild) and `annotate-doc-archive.mjs` (anchors + link fixes for `PROJECT_DOCUMENTATION.md`)
+- `scripts/` — dev launcher, asset tools, doc archive scripts ([scripts/README.md](scripts/README.md))
+- `tests/` — Jest/Playwright; ad-hoc scripts in [tests/manual/](tests/manual/)
 
 ## License
 

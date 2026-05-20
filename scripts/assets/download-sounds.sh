@@ -1,5 +1,8 @@
 #!/bin/bash
 
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT" || exit 1
+
 # Script to download free sound effects for the Authentic Internet project
 # These sounds are from Freesound.org under Creative Commons licenses
 

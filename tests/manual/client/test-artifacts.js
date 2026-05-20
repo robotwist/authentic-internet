@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Basic axios instance for tests
 const api = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "http://localhost:5001",
   timeout: 5000,
   headers: {
     "Content-Type": "application/json",
@@ -57,7 +57,7 @@ async function testBasicUpdate() {
 async function testDirectFetch() {
   console.log("\nTesting Direct Fetch Update...");
   try {
-    const url = `http://localhost:5000/api/artifacts/${TEST_ARTIFACT_ID}?testMode=true`;
+    const url = `http://localhost:5001/api/artifacts/${TEST_ARTIFACT_ID}?testMode=true`;
     const response = await fetch(url, {
       method: "PUT",
       headers: {
@@ -107,7 +107,7 @@ async function testArtifactCreate() {
 
     // Create a special instance just for this request with the auth header
     const authApi = axios.create({
-      baseURL: "http://localhost:5000",
+      baseURL: "http://localhost:5001",
       timeout: 5000,
       headers: headers,
     });

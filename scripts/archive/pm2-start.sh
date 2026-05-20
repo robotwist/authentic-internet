@@ -1,4 +1,7 @@
 #!/bin/bash
+# Legacy PM2 launcher — prefer: npm run dev
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT" || exit 1
 
 # Color definitions
 RED='\033[0;31m'
@@ -8,7 +11,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Log file
-LOG_FILE="pm2-operations.log"
+LOG_FILE="$ROOT/pm2-operations.log"
 DATE_FORMAT=$(date +"%Y-%m-%d %H:%M:%S")
 
 # Create logs directories if they don't exist
@@ -61,7 +64,7 @@ start_services() {
   
   # Start services with PM2
   log "INFO" "Starting server and client with PM2..."
-  pm2 start ecosystem.config.js
+  pm2 start "$ROOT/scripts/archive/ecosystem.config.js"
   
   if [ $? -eq 0 ]; then
     log "SUCCESS" "Services started successfully with PM2."

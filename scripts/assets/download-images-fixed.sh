@@ -1,5 +1,8 @@
 #!/bin/bash
 
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT" || exit 1
+
 # Script to download and generate placeholder images for the Authentic Internet project
 # This version uses reliable placeholder services and local generation
 

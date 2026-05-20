@@ -7,6 +7,9 @@ const fs = require('fs');
 const path = require('path');
 const { createCanvas } = require('canvas');
 
+const rootDir = path.join(__dirname, '..', '..');
+process.chdir(rootDir);
+
 console.log('Generating placeholder images...');
 
 // Configuration for the images to generate

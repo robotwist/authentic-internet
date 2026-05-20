@@ -1,5 +1,8 @@
 #!/bin/bash
 
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT" || exit 1
+
 # Script to generate placeholder images locally for the Authentic Internet project
 # This uses ImageMagick to create images without relying on external services
 

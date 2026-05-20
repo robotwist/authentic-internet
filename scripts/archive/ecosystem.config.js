@@ -11,7 +11,7 @@ export default {
       max_memory_restart: '500M',
       env: {
         NODE_ENV: 'development',
-        PORT: 5000
+        PORT: 5001
       },
       error_file: './server/logs/server-error.log',
       out_file: './server/logs/server-output.log',
@@ -35,7 +35,7 @@ export default {
       max_memory_restart: '500M',
       env: {
         NODE_ENV: 'development',
-        VITE_API_URL: 'http://localhost:5000/api'
+        VITE_API_URL: 'http://localhost:5001'
       },
       error_file: './client/logs/client-error.log',
       out_file: './client/logs/client-output.log',
