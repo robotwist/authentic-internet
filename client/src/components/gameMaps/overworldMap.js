@@ -41,11 +41,10 @@ export default {
         height: 192,
       },
       dialogue: [
-        "I am the humble world guide, unassuming, I know. Beautiful, of course.  All knowing, a decent cook by all accounts. I know all! I know all! Welcome, traveler. Press T near me anytime and I will guide you.",
-        "You look like a smart kid but you also look a bit lost. By the way, where are your clothes? Anyway, this is actually all I know. They put me on sort of a loop so you'll have to excuse me if I repeat myself. Core controls: move with WASD or arrow keys, press T to talk, I opens Bag, C opens Field Notes, and M opens the map.",
-        "Here's a tip if you get bored or lost or are dumber than you look. World route: Overworld -> Desert -> Dungeon -> Yosemite. Portals drive progression, and your blue-gold warp takes fast travel to Yosemite.",
-        "If you haven't left on the adventure yet maybe you have gotten hit on the head too many times: reach John Muir in Yosemite and trigger level victory for your reward moment.",
-        "Tip: Just keep goiong really fast and if anything gets in your way, turn. Charles DeMarr said that.",
+        "Oh — a traveler. I'm the World Guide. Talk to folk you meet (press T) — that's how you'll learn what matters here.",
+        "See that twig? Call it the Sword of Wisdom. Silly, maybe. The portal ahead leads to Zeus — he'll stir up a storm and a power for you.",
+        "WASD to move. I bag, C field notes, M map. Paths open as you explore: desert, then dungeon, then Yosemite.",
+        "Find John Muir in Yosemite when the road takes you there. That's the heart of this journey.",
       ],
     },
     {

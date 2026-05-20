@@ -13,6 +13,47 @@
   overflow-y: auto;
 }
 
+.character-creator-container--editor {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 16px 20px 24px;
+  max-width: none;
+}
+
+.creator-top-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.creator-top-bar h1 {
+  font-family: "Press Start 2P", monospace;
+  font-size: 18px;
+  color: #4ecdc4;
+  margin: 0 0 8px 0;
+}
+
+.creator-hint {
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  color: #a8a8a8;
+  margin: 0;
+}
+
+.btn-skip {
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.creator-error {
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
 /* ========================================
    Welcome Screen (Step 1)
    ======================================== */

@@ -5,9 +5,18 @@ import "./PixelGridEditor.css";
  * PixelGridEditor - A retro pixel art character creator
  * Allows users to paint on a 32x32 grid to create their custom character sprite
  */
-const PixelGridEditor = ({ onSave, initialSprite = null }) => {
-  const GRID_SIZE = 32; // 32x32 pixel grid
-  const CELL_SIZE = 16; // Display size of each pixel
+const PixelGridEditor = ({
+  onSave,
+  initialSprite = null,
+  cellSize = 24,
+  fullscreen = false,
+  compact = false,
+  characterName = "",
+  onCharacterNameChange,
+  saving = false,
+}) => {
+  const GRID_SIZE = 32;
+  const CELL_SIZE = cellSize;
 
   // Color palette (retro NES style)
   const COLOR_PALETTE = [
@@ -81,7 +90,7 @@ const PixelGridEditor = ({ onSave, initialSprite = null }) => {
       ctx.lineTo(GRID_SIZE * CELL_SIZE, i * CELL_SIZE);
       ctx.stroke();
     }
-  }, [grid]);
+  }, [grid, CELL_SIZE]);
 
   const handleCanvasInteraction = useCallback(
     (e) => {
@@ -192,14 +201,24 @@ const PixelGridEditor = ({ onSave, initialSprite = null }) => {
     }
   };
 
+  const editorClass = [
+    "pixel-grid-editor",
+    fullscreen ? "pixel-grid-editor--fullscreen" : "",
+    compact ? "pixel-grid-editor--compact" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div className="pixel-grid-editor">
-      <div className="editor-header">
-        <h2>🎨 Create Your Character</h2>
-        <p className="editor-subtitle">
-          Paint your pixel art character (32x32)
-        </p>
-      </div>
+    <div className={editorClass}>
+      {!compact && (
+        <div className="editor-header">
+          <h2>🎨 Create Your Character</h2>
+          <p className="editor-subtitle">
+            Paint your pixel art character (32×32)
+          </p>
+        </div>
+      )}
 
       <div className="editor-workspace">
         {/* Canvas area */}
@@ -245,12 +264,15 @@ const PixelGridEditor = ({ onSave, initialSprite = null }) => {
                 }}
               />
             </div>
-            <button
-              className="action-btn primary preview-save-btn"
-              onClick={exportSprite}
-            >
-              💾 Continue to Save
-            </button>
+            {!compact && (
+              <button
+                className="action-btn primary preview-save-btn"
+                onClick={exportSprite}
+                disabled={saving}
+              >
+                {saving ? "Saving…" : "💾 Continue to Save"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -310,22 +332,55 @@ const PixelGridEditor = ({ onSave, initialSprite = null }) => {
             <button className="action-btn" onClick={fillGrid}>
               🖌️ Fill All
             </button>
-            <button className="action-btn primary" onClick={exportSprite}>
-              💾 Continue to Save
-            </button>
+            {!compact && (
+              <button
+                className="action-btn primary"
+                onClick={exportSprite}
+                disabled={saving}
+              >
+                {saving ? "Saving…" : "💾 Continue to Save"}
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="editor-tips">
-        <h4>💡 Tips:</h4>
-        <ul>
-          <li>Start with a simple silhouette</li>
-          <li>Use darker colors for outlines</li>
-          <li>Keep your design recognizable at small size</li>
-          <li>Test how it looks in the preview window</li>
-        </ul>
-      </div>
+      {compact && (
+        <div className="editor-save-bar">
+          {onCharacterNameChange && (
+            <label className="save-bar-name">
+              <span>Name</span>
+              <input
+                type="text"
+                value={characterName}
+                onChange={(e) => onCharacterNameChange(e.target.value)}
+                placeholder="Hero"
+                maxLength={20}
+                disabled={saving}
+              />
+            </label>
+          )}
+          <button
+            type="button"
+            className="action-btn primary"
+            onClick={exportSprite}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Save & play"}
+          </button>
+        </div>
+      )}
+
+      {!compact && (
+        <div className="editor-tips">
+          <h4>💡 Tips:</h4>
+          <ul>
+            <li>Start with a simple silhouette</li>
+            <li>Use darker colors for outlines</li>
+            <li>Keep your design recognizable at small size</li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

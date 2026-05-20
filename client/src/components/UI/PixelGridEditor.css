@@ -14,6 +14,70 @@
   color: #e0e0e0;
 }
 
+.pixel-grid-editor--fullscreen {
+  flex: 1;
+  max-width: none;
+  margin: 0;
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 8px;
+}
+
+.pixel-grid-editor--fullscreen .editor-workspace {
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 0;
+}
+
+.pixel-grid-editor--compact .tools-sidebar {
+  min-width: 220px;
+}
+
+.pixel-grid-editor--compact .sprite-preview {
+  display: none;
+}
+
+.editor-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px solid #2a2a3e;
+  flex-shrink: 0;
+}
+
+.save-bar-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 8px;
+  color: #4ecdc4;
+}
+
+.save-bar-name input {
+  padding: 10px 14px;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 2px solid #4ecdc4;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 10px;
+  min-width: 160px;
+}
+
+.editor-save-bar .action-btn.primary {
+  min-width: 180px;
+  padding: 14px 24px;
+  font-size: 10px;
+}
+
 .editor-header {
   text-align: center;
   margin-bottom: 30px;

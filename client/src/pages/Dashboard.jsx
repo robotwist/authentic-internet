@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 import API from "../api/api";
 import { MAPS } from "../components/Constants";
 import DailyQuote from "../components/DailyQuote";
-import CharacterSelection from "../components/CharacterSelection";
 import SkillTree from "../components/SkillTree";
 import DailyChallenges from "../components/DailyChallenges";
 import TitleArea from "../components/TitleArea";
@@ -25,7 +24,6 @@ const Dashboard = () => {
     mapType: "",
   });
   const [character, setCharacter] = useState(null);
-  const [showCharacterSelection, setShowCharacterSelection] = useState(false);
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   const [showQuestLog, setShowQuestLog] = useState(false);
@@ -40,11 +38,14 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    // Show character selection if user doesn't have a character
-    if (user && !character && !showCharacterSelection) {
-      setShowCharacterSelection(true);
+    if (
+      user &&
+      !user.characterSprite &&
+      !localStorage.getItem("characterCreatorSkipped")
+    ) {
+      navigate("/character-creator", { replace: true });
     }
-  }, [user, character, showCharacterSelection]);
+  }, [user, navigate]);
 
   const fetchCharacter = async () => {
     if (!user?.id) return;
@@ -65,15 +66,6 @@ const Dashboard = () => {
         savedQuotes: [],
       });
     }
-  };
-
-  const handleCharacterSelected = (selectedCharacter) => {
-    setCharacter(selectedCharacter);
-    setShowCharacterSelection(false);
-  };
-
-  const handleCharacterSkipped = () => {
-    setShowCharacterSelection(false);
   };
 
   // Calculate level and progress based on experience
@@ -187,16 +179,6 @@ const Dashboard = () => {
 
   if (loading) return <div className="loading">Loading worlds...</div>;
 
-  // Show character selection if needed
-  if (showCharacterSelection) {
-    return (
-      <CharacterSelection
-        onCharacterSelected={handleCharacterSelected}
-        onSkip={handleCharacterSkipped}
-      />
-    );
-  }
-
   // Show skill tree if needed
   if (showSkillTree) {
     return <SkillTree onClose={() => setShowSkillTree(false)} />;
@@ -261,8 +243,8 @@ const Dashboard = () => {
         <div className="character-actions">
           <button onClick={() => navigate("/profile")}>View Profile</button>
           <button onClick={() => navigate("/game")}>Continue Adventure</button>
-          <button onClick={() => setShowCharacterSelection(true)}>
-            Change Character
+          <button onClick={() => navigate("/character-creator")}>
+            Edit character
           </button>
           <button onClick={() => setShowSkillTree(true)}>🎯 Skill Tree</button>
           <button onClick={() => setShowDailyChallenges(true)}>
