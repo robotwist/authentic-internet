@@ -15,6 +15,19 @@ client.log
 .vscode/
 *.pid
 *.log
+*.backup
+logs/
+managed_context/
+.server_pid
+
+# Test / tooling artifacts
+mobile-accessibility-*-test-report.json
+pm2-operations.log
+client/test-results/
+client/playwright-report/
+
+# Accidental Windows Lighthouse/Chromium cache under client/
+client/C*/
 
 # Local Netlify folder
 .netlify
