@@ -63,6 +63,34 @@ const CharacterSelection = ({ onCharacterSelected, onSkip }) => {
     setSelectedCharacter(character);
   };
 
+  const resolveCharacterSprite = async (character) => {
+    if (character.dataURL?.startsWith("data:image/")) {
+      return character.dataURL;
+    }
+    if (character.sprite?.startsWith("data:image/")) {
+      return character.sprite;
+    }
+    const path = character.imageUrl;
+    if (!path) {
+      throw new Error("Selected character has no image");
+    }
+    if (path.startsWith("data:image/")) {
+      return path;
+    }
+    const url = path.startsWith("http") ? path : `${window.location.origin}${path}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error("Could not load character image");
+    }
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const handleConfirmSelection = async () => {
     if (!selectedCharacter) {
       alert("Please select a character first");
@@ -70,7 +98,7 @@ const CharacterSelection = ({ onCharacterSelected, onSkip }) => {
     }
 
     try {
-      // Update user with selected character
+      const characterSprite = await resolveCharacterSprite(selectedCharacter);
       const response = await fetch("/api/users/me/character", {
         method: "PUT",
         headers: {
@@ -78,20 +106,31 @@ const CharacterSelection = ({ onCharacterSelected, onSkip }) => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
-          characterId: selectedCharacter._id,
+          characterSprite,
+          characterName: selectedCharacter.name,
         }),
       });
 
       if (response.ok) {
-        const updatedUser = { ...user, character: selectedCharacter };
+        const data = await response.json();
+        const updatedUser = {
+          ...user,
+          ...data.user,
+          character: selectedCharacter,
+          characterSprite,
+        };
         updateUser(updatedUser);
         onCharacterSelected(selectedCharacter);
       } else {
-        throw new Error("Failed to update character");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Server error:", errorData);
+        throw new Error(errorData.message || "Failed to update character");
       }
     } catch (error) {
       console.error("Error updating character:", error);
-      alert("Failed to select character. Please try again.");
+      alert(
+        error.message || "Failed to select character. Please try again.",
+      );
     }
   };
 

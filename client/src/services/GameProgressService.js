@@ -256,24 +256,13 @@ class GameProgressService {
     this.syncInProgress = true;
 
     try {
-      // Prepare update data
-      const updateData = {
+      const expResponse = await API.put("/api/users/experience", {
         experience: this.experience,
-        level: this.level,
-        inventory: this.inventory.map((item) => item.id), // Send only IDs to server
-      };
+      });
 
-      // Update user data on server
-      const response = await API.put("/api/users/profile", updateData);
-
-      // Update local data with server response
-      if (response.data) {
-        this.userData = response.data;
-
-        // Clear pending updates
+      if (expResponse.data) {
+        this.userData = { ...this.userData, ...expResponse.data };
         this.pendingUpdates.experience = false;
-        this.pendingUpdates.inventory = false;
-
         console.log("Game progress synced with server successfully");
       }
 

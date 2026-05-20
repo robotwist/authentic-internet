@@ -73,9 +73,14 @@ schemas.character = characterValidation;
 /* ────────────────────────────────
    🔹 CREATE CHARACTER
 ──────────────────────────────── */
-router.post("/create", authenticateToken, upload.single('characterImage'), validate(schemas.character.create), async (req, res) => {
+router.post("/create", authenticateToken, upload.single('characterImage'), async (req, res) => {
   try {
-    const { name, description, tags, isPublic, pixelData, canvasSize } = req.body;
+    const characterName = req.body.name || req.body.characterName;
+    const { description, tags, isPublic, pixelData, canvasSize } = req.body;
+
+    if (!characterName || characterName.trim() === '') {
+      return res.status(400).json({ error: "Character name is required" });
+    }
 
     if (!req.file) {
       return res.status(400).json({ error: "Character image is required" });
@@ -86,14 +91,14 @@ router.post("/create", authenticateToken, upload.single('characterImage'), valid
 
     // Create character
     const character = new Character({
-      name,
+      name: characterName,
       description: description || '',
-      tags: tags ? JSON.parse(tags) : [],
-      isPublic: isPublic === 'true',
+      tags: tags ? (typeof tags === 'string' ? JSON.parse(tags) : tags) : [],
+      isPublic: isPublic === 'true' || isPublic === true,
       creator: req.user.userId,
       imageUrl: '/uploads/characters/' + path.basename(processedImagePath),
-      pixelData: pixelData ? JSON.parse(pixelData) : {},
-      canvasSize: canvasSize || 32
+      pixelData: pixelData ? (typeof pixelData === 'string' ? JSON.parse(pixelData) : pixelData) : {},
+      canvasSize: parseInt(canvasSize, 10) || 32
     });
 
     await character.save();
@@ -107,7 +112,8 @@ router.post("/create", authenticateToken, upload.single('characterImage'), valid
     });
   } catch (error) {
     console.error('Error creating character:', error);
-    
+    console.error('Request body:', req.body);
+
     // Clean up uploaded file if character creation fails
     if (req.file) {
       try {
@@ -116,8 +122,11 @@ router.post("/create", authenticateToken, upload.single('characterImage'), valid
         console.error('Error deleting uploaded file:', unlinkError);
       }
     }
-    
-    res.status(500).json({ error: "Failed to create character" });
+
+    res.status(500).json({
+      error: "Failed to create character",
+      message: error.message,
+    });
   }
 });
 
