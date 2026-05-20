@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import PixelGridEditor from "../components/UI/PixelGridEditor";
+import PixelCharacterCreator from "../components/PixelCharacterCreator";
 import API from "../api/api";
 import "./CharacterCreator.css";
 
@@ -75,37 +75,17 @@ const CharacterCreator = () => {
       <div className="character-creator-container">
         <div className="welcome-screen">
           <div className="welcome-content">
-            <h1>🎮 Welcome to the Authentic Internet!</h1>
-            <p className="welcome-subtitle">Let's create your character</p>
-
-            <div className="welcome-info">
-              <div className="info-card">
-                <span className="info-icon">🎨</span>
-                <h3>Design Your Hero</h3>
-                <p>Use our pixel art editor to create a unique 32x32 sprite</p>
-              </div>
-
-              <div className="info-card">
-                <span className="info-icon">⚔️</span>
-                <h3>Explore the World</h3>
-                <p>
-                  Adventure through dungeons, meet NPCs, and collect artifacts
-                </p>
-              </div>
-
-              <div className="info-card">
-                <span className="info-icon">📈</span>
-                <h3>Level Up</h3>
-                <p>Gain XP, unlock abilities, and become a legend</p>
-              </div>
-            </div>
+            <h1>Create Your Character</h1>
+            <p className="welcome-subtitle">
+              Design your pixel character or use the default
+            </p>
 
             <div className="welcome-actions">
               <button className="btn-primary" onClick={() => setStep(2)}>
-                Create My Character
+                Create Character
               </button>
               <button className="btn-secondary" onClick={handleSkip}>
-                Use Default Character
+                Use Default
               </button>
             </div>
           </div>
@@ -118,13 +98,18 @@ const CharacterCreator = () => {
   if (step === 2) {
     return (
       <div className="character-creator-container">
-        <div className="editor-screen">
-          <button className="back-btn" onClick={() => setStep(1)}>
-            ← Back
-          </button>
-
-          <PixelGridEditor onSave={handleSaveFromEditor} />
-        </div>
+        <PixelCharacterCreator
+          skipSave={true}
+          onCharacterCreated={(data) => {
+            setCharacterData({
+              dataURL: data.sprite || data.dataURL,
+              grid: data.grid,
+            });
+            setCharacterName(data.name || user?.username || "");
+            setStep(3);
+          }}
+          onClose={() => setStep(1)}
+        />
       </div>
     );
   }
@@ -135,7 +120,7 @@ const CharacterCreator = () => {
       <div className="character-creator-container">
         <div className="confirm-screen">
           <div className="confirm-content">
-            <h2>🎉 Your Character is Ready!</h2>
+            <h2>Your Character</h2>
 
             <div className="character-preview-large">
               {characterData?.dataURL && (
@@ -152,7 +137,7 @@ const CharacterCreator = () => {
             </div>
 
             <div className="character-name-input">
-              <label htmlFor="character-name">Character Name:</label>
+              <label htmlFor="character-name">Name:</label>
               <input
                 id="character-name"
                 type="text"
@@ -163,7 +148,7 @@ const CharacterCreator = () => {
               />
             </div>
 
-            {error && <div className="error-message">⚠️ {error}</div>}
+            {error && <div className="error-message">{error}</div>}
 
             <div className="confirm-actions">
               <button
@@ -171,14 +156,14 @@ const CharacterCreator = () => {
                 onClick={handleConfirmCharacter}
                 disabled={saving}
               >
-                {saving ? "Saving..." : "Save To Account & Start Adventure! 🚀"}
+                {saving ? "Saving..." : "Continue"}
               </button>
               <button
                 className="btn-secondary"
                 onClick={() => setStep(2)}
                 disabled={saving}
               >
-                Edit Character
+                Edit
               </button>
             </div>
           </div>

@@ -1,0 +1,150 @@
+# Render Blueprint - Infrastructure as Code for Authentic Internet
+# Documentation: https://render.com/docs/blueprint-spec
+
+services:
+  # ============================================
+  # Backend API Server
+  # ============================================
+  - type: web
+    name: authentic-internet-api
+    runtime: node
+    region: oregon  # Change to your preferred region
+    plan: free  # Options: free, starter, standard, pro
+    
+    # Repository configuration
+    branch: main
+    rootDir: server
+    
+    # Build configuration
+    buildCommand: npm install
+    startCommand: npm start
+    
+    # ============================================
+    # Environment Variables
+    # ============================================
+    # IMPORTANT: Secret values (marked with 'sync: false') must be set 
+    # in the Render Dashboard under Environment Variables
+    # ============================================
+    envVars:
+      # --- Node Configuration ---
+      - key: NODE_VERSION
+        value: 20
+      
+      # --- Authentication & Security ---
+      - key: NODE_ENV
+        value: production
+      
+      - key: PORT
+        value: 5001
+      
+      # REQUIRED: Set these in Render Dashboard
+      - key: JWT_SECRET
+        sync: false  # Must be set in dashboard - use a strong random string
+      
+      - key: SESSION_SECRET
+        sync: false  # Must be set in dashboard - use a strong random string
+      
+      - key: CSRF_SECRET
+        sync: false  # Must be set in dashboard - use a strong random string
+      
+      # --- Database ---
+      # REQUIRED: Set in Render Dashboard
+      - key: MONGO_URI
+        sync: false  # Your MongoDB connection string (MongoDB Atlas recommended)
+      
+      # --- Client Configuration ---
+      - key: CLIENT_URL
+        value: https://flourishing-starburst-8cf88b.netlify.app
+      
+      - key: ALLOWED_ORIGINS
+        value: https://flourishing-starburst-8cf88b.netlify.app,https://authentic-internet.netlify.app
+      
+      # --- Email Configuration (Optional) ---
+      # If you want email functionality, set these in Render Dashboard
+      - key: ENABLE_EMAIL
+        value: true
+      
+      - key: EMAIL_HOST
+        sync: false  # e.g., smtp.gmail.com, smtp.sendgrid.net
+      
+      - key: EMAIL_PORT
+        value: 587
+      
+      - key: EMAIL_USER
+        sync: false  # Your email service username
+      
+      - key: EMAIL_PASS
+        sync: false  # Your email service password/API key
+      
+      # --- Feature Flags ---
+      - key: ENABLE_WEBSOCKETS
+        value: true
+      
+      - key: ENABLE_RATE_LIMITING
+        value: true
+    
+    # ============================================
+    # Health Check Configuration
+    # ============================================
+    healthCheckPath: /api/health
+    
+    # ============================================
+    # Auto-Deploy Configuration
+    # ============================================
+    autoDeploy: true  # Auto-deploy on push to main branch
+    
+    # ============================================
+    # Scaling Configuration
+    # ============================================
+    # Free tier: 1 instance (0.1 CPU, 512MB RAM)
+    # Upgrade plan for more instances and resources
+    numInstances: 1
+    
+    # ============================================
+    # Disk Storage (if needed)
+    # ============================================
+    # Uncomment if you need persistent disk storage
+    # disk:
+    #   name: authentic-internet-uploads
+    #   mountPath: /app/public/uploads
+    #   sizeGB: 1
+
+# ============================================
+# Additional Configuration Notes
+# ============================================
+# 
+# 1. FIRST TIME SETUP:
+#    - Push this file to your repository
+#    - Go to Render Dashboard > Blueprint > New Blueprint Instance
+#    - Connect your GitHub repository
+#    - Render will read this file and create the service
+#
+# 2. REQUIRED SECRETS (Set in Render Dashboard):
+#    Go to your service > Environment > Add Environment Variable
+#    - JWT_SECRET: Generate with: openssl rand -base64 32
+#    - SESSION_SECRET: Generate with: openssl rand -base64 32
+#    - CSRF_SECRET: Generate with: openssl rand -base64 32
+#    - MONGO_URI: Your MongoDB connection string
+#    - EMAIL_HOST, EMAIL_USER, EMAIL_PASS: If using email
+#
+# 3. MONGODB SETUP:
+#    Recommended: Use MongoDB Atlas (free tier available)
+#    - https://www.mongodb.com/cloud/atlas
+#    - Create cluster, get connection string
+#    - Add to MONGO_URI in Render Dashboard
+#
+# 4. DEPLOYMENT:
+#    - Auto-deploys on push to main branch
+#    - Manual deploy: Render Dashboard > Manual Deploy
+#    - View logs: Render Dashboard > Logs tab
+#
+# 5. CUSTOM DOMAIN (Optional):
+#    - Render Dashboard > Settings > Custom Domain
+#    - Add your domain and configure DNS
+#
+# 6. MONITORING:
+#    - Health checks run automatically at /api/health
+#    - View metrics in Render Dashboard > Metrics
+#    - Check logs for errors: Dashboard > Logs
+#
+# ============================================

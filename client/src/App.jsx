@@ -208,11 +208,13 @@ function App() {
             <Route
               path="/game/:worldId?/:areaId?"
               element={
-                <Suspense fallback={<LoadingScreen />}>
-                  <ErrorBoundary>
-                    <GameWorld />
-                  </ErrorBoundary>
-                </Suspense>
+                <ProtectedRoute>
+                  <Suspense fallback={<LoadingScreen />}>
+                    <ErrorBoundary>
+                      <GameWorld />
+                    </ErrorBoundary>
+                  </Suspense>
+                </ProtectedRoute>
               }
             />
             <Route path="*" element={<Navigate to="/" />} />
