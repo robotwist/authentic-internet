@@ -82,16 +82,9 @@ const createApiInstance = (baseUrl) => {
               requestUrl.includes("/api/auth/register"));
 
           if (!isAuthEndpoint) {
-            // Only handle as session expiration if NOT a login/register request
+            // Preserve the response so AuthContext can refresh and retry.
             console.warn("Session expired or invalid token");
-            localStorage.removeItem("token");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("user");
-            localStorage.removeItem("isAuthenticated");
-            window.location.href = "/login";
-            return Promise.reject(
-              new Error("Session expired. Please log in again."),
-            );
+            return Promise.reject(error);
           } else {
             // For login/register endpoints, pass through the original error
             console.log(
@@ -805,25 +798,15 @@ export const verifyToken = async () => {
 };
 
 /**
- * Refresh access token using refresh token
- * @param {string} refreshToken - Refresh token
+ * Refresh access token using the HTTP-only refresh cookie
  * @returns {Promise<Object>} Refresh response with new token
  */
-export const refreshUserToken = async (refreshToken) => {
+export const refreshUserToken = async () => {
   try {
-    // Basic validation - don't even try if token looks invalid
-    if (!refreshToken || refreshToken.length < 10) {
-      console.warn("Invalid refresh token format - too short or missing");
-      throw new Error("Invalid refresh token format");
-    }
-
-    // Log refresh attempt (without showing token)
-    console.log(
-      `Attempting to refresh token (${refreshToken.substring(0, 5)}...)`,
-    );
+    console.log("Attempting to refresh token with refresh cookie");
 
     // Send refresh request
-    const response = await getApi().post("/api/auth/refresh", { refreshToken });
+    const response = await getApi().post("/api/auth/refresh");
 
     // Check for success flag in response
     if (!response.data.success) {
@@ -878,7 +861,7 @@ export const getUserGameState = withCache(
   async (idToken) => {
     try {
       if (!idToken) {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         if (!token) {
           throw new Error("Authentication required");
         }
@@ -918,7 +901,7 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       throw new Error("Authentication required");
@@ -955,7 +938,7 @@ export const updateUserExperience = async (experience) => {
  */
 export const addUserAchievement = async (achievement) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       throw new Error("Authentication required");
@@ -989,7 +972,7 @@ export const addUserAchievement = async (achievement) => {
  */
 export const saveGameState = async (gameState) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       throw new Error("Authentication required");
@@ -1018,7 +1001,7 @@ export const saveGameState = async (gameState) => {
 
 export const updateGameState = async (gameState) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       throw new Error("Authentication required");

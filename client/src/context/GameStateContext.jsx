@@ -1,4 +1,10 @@
-import React, { createContext, useReducer, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  useReducer,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import PropTypes from "prop-types";
 
 // Create the context
@@ -9,6 +15,8 @@ const initialState = {
   experience: 0,
   level: 1,
   inventory: [],
+  equippedItem: null, // Currently equipped weapon/tool
+  powers: [], // Unlocked powers/abilities
   achievements: [],
   quests: [],
   currentWorld: "default",
@@ -24,6 +32,9 @@ const ACTION_TYPES = {
   UPDATE_EXPERIENCE: "UPDATE_EXPERIENCE",
   ADD_INVENTORY_ITEM: "ADD_INVENTORY_ITEM",
   REMOVE_INVENTORY_ITEM: "REMOVE_INVENTORY_ITEM",
+  EQUIP_ITEM: "EQUIP_ITEM",
+  UNEQUIP_ITEM: "UNEQUIP_ITEM",
+  UNLOCK_POWER: "UNLOCK_POWER",
   ADD_ACHIEVEMENT: "ADD_ACHIEVEMENT",
   SET_CURRENT_WORLD: "SET_CURRENT_WORLD",
   UPDATE_GAME_PROGRESS: "UPDATE_GAME_PROGRESS",
@@ -60,6 +71,28 @@ const gameStateReducer = (state, action) => {
       return {
         ...state,
         inventory: state.inventory.filter((item) => item.id !== action.payload),
+      };
+
+    case ACTION_TYPES.EQUIP_ITEM:
+      return {
+        ...state,
+        equippedItem: action.payload,
+      };
+
+    case ACTION_TYPES.UNEQUIP_ITEM:
+      return {
+        ...state,
+        equippedItem: null,
+      };
+
+    case ACTION_TYPES.UNLOCK_POWER:
+      // Only add power if it doesn't already exist
+      if (state.powers.some((p) => p.id === action.payload.id)) {
+        return state;
+      }
+      return {
+        ...state,
+        powers: [...state.powers, action.payload],
       };
 
     case ACTION_TYPES.ADD_ACHIEVEMENT:
@@ -102,6 +135,7 @@ const gameStateReducer = (state, action) => {
 // Provider component
 export const GameStateProvider = ({ children }) => {
   const [state, dispatch] = useReducer(gameStateReducer, initialState);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   // Load game state from localStorage on mount
   useEffect(() => {
@@ -116,17 +150,23 @@ export const GameStateProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Failed to load game state:", error);
+    } finally {
+      setHasHydrated(true);
     }
   }, []);
 
   // Save to localStorage when state changes
   useEffect(() => {
+    if (!hasHydrated) return;
+
     try {
       localStorage.setItem(
         "gameState",
         JSON.stringify({
           experience: state.experience,
           inventory: state.inventory,
+          equippedItem: state.equippedItem,
+          powers: state.powers,
           achievements: state.achievements,
           quests: state.quests,
           currentWorld: state.currentWorld,
@@ -139,10 +179,13 @@ export const GameStateProvider = ({ children }) => {
   }, [
     state.experience,
     state.inventory,
+    state.equippedItem,
+    state.powers,
     state.achievements,
     state.quests,
     state.currentWorld,
     state.gameProgress,
+    hasHydrated,
   ]);
 
   // Action creators
@@ -156,6 +199,18 @@ export const GameStateProvider = ({ children }) => {
 
   const removeInventoryItem = (itemId) => {
     dispatch({ type: ACTION_TYPES.REMOVE_INVENTORY_ITEM, payload: itemId });
+  };
+
+  const equipItem = (item) => {
+    dispatch({ type: ACTION_TYPES.EQUIP_ITEM, payload: item });
+  };
+
+  const unequipItem = () => {
+    dispatch({ type: ACTION_TYPES.UNEQUIP_ITEM });
+  };
+
+  const unlockPower = (power) => {
+    dispatch({ type: ACTION_TYPES.UNLOCK_POWER, payload: power });
   };
 
   const addAchievement = (achievement) => {
@@ -179,6 +234,9 @@ export const GameStateProvider = ({ children }) => {
     updateExperience,
     addInventoryItem,
     removeInventoryItem,
+    equipItem,
+    unequipItem,
+    unlockPower,
     addAchievement,
     setCurrentWorld,
     updateGameProgress,

@@ -731,34 +731,20 @@ const GameWorld = React.memo(() => {
 
   // Function to add XP and show notification
   const addExperiencePoints = useCallback(
-    (amount, reason) => {
-      // Update local experience state
-      const newExperience = (user?.experience || 0) + amount;
+    (amount, reason = 'Gameplay') => {
+      if (!amount || amount <= 0) return;
 
-      const newHealth = Math.max(0, gameState.playerHealth - damage);
-      setPlayerHealth(newHealth);
+      // Award XP using the existing system
+      awardXP(amount, reason);
 
-      // Play damage sound
-      if (gameState.soundManager) {
-        gameState.soundManager.playSound("damage", 0.5);
-      }
-
-      // Trigger hit animation (retreat and flash)
-      setCharacterState((prev) => ({ ...prev, isHit: true }));
-      setTimeout(() => {
-        setCharacterState((prev) => ({ ...prev, isHit: false }));
-      }, 400); // Match CSS animation duration
-
-      // Invincibility frames
-      setIsInvincible(true);
-      setTimeout(() => setIsInvincible(false), 1000);
-
-      // Check for game over
-      if (newHealth <= 0) {
-        handleGameOver();
-      }
+      // Show XP notification
+      showNotification({
+        type: 'xp',
+        message: `+${amount} XP: ${reason}`,
+        duration: 2000,
+      });
     },
-    [gameState.playerHealth, gameState.isInvincible, gameState.soundManager],
+    [awardXP, showNotification],
   );
 
   const handlePlayerHeal = useCallback(
@@ -2542,7 +2528,7 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressSnapshot = {
       characterPosition,
       currentMapIndex,
       inventory,
@@ -2551,7 +2537,7 @@ const GameWorld = React.memo(() => {
       viewedArtifacts: gameState.gameData.viewedArtifacts,
     };
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(progressSnapshot);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
@@ -2685,15 +2671,19 @@ const GameWorld = React.memo(() => {
       const isFirstView =
         !Array.isArray(gameState.gameData.viewedArtifacts) ||
         !gameState.gameData.viewedArtifacts.includes(artifact.id);
+      let viewedArtifactsForProgress = Array.isArray(
+        gameState.gameData.viewedArtifacts,
+      )
+        ? gameState.gameData.viewedArtifacts
+        : [];
 
       // Update viewed artifacts
       if (isFirstView) {
         const updatedViewedArtifacts = [
-          ...(Array.isArray(gameState.gameData.viewedArtifacts)
-            ? gameState.gameData.viewedArtifacts
-            : []),
+          ...viewedArtifactsForProgress,
           artifact.id,
         ];
+        viewedArtifactsForProgress = updatedViewedArtifacts;
         updateGameState({ viewedArtifacts: updatedViewedArtifacts });
         localStorage.setItem(
           "viewedArtifacts",
@@ -2725,9 +2715,9 @@ const GameWorld = React.memo(() => {
 
       // Save game state if user is logged in
       if (user && typeof updateGameProgress === "function") {
-        const gameState = {
+        const progressUpdate = {
           inventory,
-          viewedArtifacts: gameState.gameData.viewedArtifacts,
+          viewedArtifacts: viewedArtifactsForProgress,
           lastPosition: {
             x: characterPosition.x,
             y: characterPosition.y,
@@ -2740,7 +2730,7 @@ const GameWorld = React.memo(() => {
           },
         };
 
-        updateGameProgress(gameState);
+        updateGameProgress(progressUpdate);
       }
     },
     [
