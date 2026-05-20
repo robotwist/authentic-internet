@@ -13,14 +13,14 @@
 }
 
 .creator-container {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(to bottom, rgba(44, 62, 80, 0.98), #1a2634);
   border-radius: 16px;
   padding: 24px;
   max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(52, 152, 219, 0.3);
 }
 
 .creator-header {
@@ -29,11 +29,11 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(52, 152, 219, 0.3);
 }
 
 .creator-header h2 {
-  color: white;
+  color: #3498db;
   margin: 0;
   font-size: 24px;
   font-weight: 600;
@@ -70,9 +70,9 @@
 .mode-button {
   flex: 1;
   padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  background: rgba(52, 152, 219, 0.1);
+  border: 2px solid rgba(52, 152, 219, 0.3);
+  color: #3498db;
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
@@ -81,14 +81,14 @@
 }
 
 .mode-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(52, 152, 219, 0.2);
+  border-color: rgba(52, 152, 219, 0.5);
 }
 
 .mode-button.active {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(52, 152, 219, 0.3);
+  border-color: #3498db;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
 /* Create Mode */
@@ -105,16 +105,16 @@
 }
 
 .input-group label {
-  color: white;
+  color: #3498db;
   font-weight: 500;
   font-size: 14px;
 }
 
 .input-group input {
   padding: 12px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(52, 152, 219, 0.3);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(26, 38, 52, 0.6);
   color: white;
   font-size: 16px;
   transition: all 0.3s ease;
@@ -122,8 +122,8 @@
 
 .input-group input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.15);
+  border-color: #3498db;
+  background: rgba(26, 38, 52, 0.8);
 }
 
 .input-group input::placeholder {
@@ -138,16 +138,16 @@
 }
 
 .canvas-controls label {
-  color: white;
+  color: #3498db;
   font-weight: 500;
   font-size: 14px;
 }
 
 .canvas-controls select {
   padding: 8px 12px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(52, 152, 219, 0.3);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(26, 38, 52, 0.6);
   color: white;
   font-size: 14px;
   cursor: pointer;
@@ -155,7 +155,7 @@
 
 .canvas-controls select:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: #3498db;
 }
 
 /* Color Palette */
@@ -166,7 +166,7 @@
 }
 
 .color-palette label {
-  color: white;
+  color: #3498db;
   font-weight: 500;
   font-size: 14px;
 }
@@ -206,7 +206,7 @@
 }
 
 .custom-color label {
-  color: white;
+  color: #3498db;
   font-weight: 500;
   font-size: 14px;
 }
@@ -214,7 +214,7 @@
 .custom-color input[type="color"] {
   width: 48px;
   height: 48px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(52, 152, 219, 0.5);
   border-radius: 8px;
   cursor: pointer;
   background: none;
@@ -234,17 +234,17 @@
   display: flex;
   justify-content: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(52, 152, 219, 0.2);
 }
 
 .pixel-canvas {
   display: grid;
   gap: 0;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(52, 152, 219, 0.5);
   background: white;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 .pixel {
@@ -293,7 +293,7 @@
 
 .save-button {
   padding: 16px 32px;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: linear-gradient(to right, #3498db, #2980b9);
   border: none;
   color: white;
   border-radius: 12px;
@@ -301,12 +301,12 @@
   font-size: 18px;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
 }
 
 .save-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.6);
 }
 
 .save-button:disabled {
@@ -434,7 +434,7 @@
 
 .import-button {
   padding: 16px 32px;
-  background: linear-gradient(135deg, #2196F3, #1976D2);
+  background: linear-gradient(to right, #3498db, #2980b9);
   border: none;
   color: white;
   border-radius: 12px;
@@ -442,12 +442,12 @@
   font-size: 18px;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
 }
 
 .import-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.6);
 }
 
 .import-button:disabled {

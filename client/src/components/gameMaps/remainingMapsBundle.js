@@ -82,11 +82,10 @@ export default [
         sprite: "/assets/npcs/zeus.svg",
         position: { x: 6 * TILE_SIZE, y: 6 * TILE_SIZE }, // Doubled - converted to pixel coordinates (384, 384)
         dialogue: [
-          "By my thunderbolts! Today's forecast calls for partly cloudy with a chance of divine intervention!",
-          "Expect high-pressure systems over Mount Olympus, with occasional lightning strikes... those are mine, by the way.",
-          "Warning: Areas of dense fog in the Underworld region. Cerberus visibility down to three heads.",
-          "I am the Thunderer! Here in my cloud-girded hall, what mortal dares challenge the might of Zeus?",
-          "Even the gods cannot alter the past, but the future is yet in my power.",
+          "I am ZEUS, the Thunderer! You seek power, mortal?",
+          "Very well! I grant you the power of LIGHTNING and THUNDER! *lightning crackles around you*",
+          "Press L to cast lightning! Now go forth - there is a challenge ahead that awaits your newfound might!",
+          "Remember: Even divine power can be amplified when combined with wisdom and tools. The gods themselves use artifacts!",
         ],
       },
     ],

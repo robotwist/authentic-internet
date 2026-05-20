@@ -4,7 +4,7 @@
 
 .character-creator-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%);
+  background: linear-gradient(to bottom, rgba(44, 62, 80, 0.95), #1a2634);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,19 +24,19 @@
 }
 
 .welcome-content {
-  background: rgba(15, 15, 30, 0.9);
+  background: rgba(26, 38, 52, 0.9);
   padding: 50px 40px;
   border-radius: 16px;
-  border: 3px solid #4ecdc4;
-  box-shadow: 0 8px 32px rgba(78, 205, 196, 0.3);
+  border: 3px solid #3498db;
+  box-shadow: 0 8px 32px rgba(52, 152, 219, 0.3);
 }
 
 .welcome-content h1 {
   font-family: 'Press Start 2P', monospace;
   font-size: 28px;
-  color: #4ecdc4;
+  color: #3498db;
   margin: 0 0 10px 0;
-  text-shadow: 2px 2px 8px rgba(78, 205, 196, 0.5);
+  text-shadow: 2px 2px 8px rgba(52, 152, 219, 0.5);
 }
 
 .welcome-subtitle {
@@ -54,17 +54,17 @@
 }
 
 .info-card {
-  background: #0f3460;
+  background: rgba(44, 62, 80, 0.6);
   padding: 30px 20px;
   border-radius: 12px;
-  border: 2px solid #2a2a3e;
+  border: 2px solid rgba(52, 152, 219, 0.3);
   transition: all 0.3s ease;
 }
 
 .info-card:hover {
-  border-color: #4ecdc4;
+  border-color: #3498db;
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(78, 205, 196, 0.3);
+  box-shadow: 0 8px 16px rgba(52, 152, 219, 0.4);
 }
 
 .info-icon {
@@ -76,7 +76,7 @@
 .info-card h3 {
   font-family: 'Press Start 2P', monospace;
   font-size: 12px;
-  color: #4ecdc4;
+  color: #3498db;
   margin: 0 0 10px 0;
 }
 
@@ -110,9 +110,9 @@
   top: -60px;
   left: 0;
   padding: 12px 24px;
-  background: #0f3460;
-  color: #4ecdc4;
-  border: 2px solid #4ecdc4;
+  background: rgba(44, 62, 80, 0.8);
+  color: #3498db;
+  border: 2px solid #3498db;
   border-radius: 8px;
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
@@ -121,8 +121,8 @@
 }
 
 .back-btn:hover {
-  background: #4ecdc4;
-  color: #0f0f1e;
+  background: #3498db;
+  color: #1a2634;
   transform: translateX(-5px);
 }
 
@@ -136,30 +136,30 @@
 }
 
 .confirm-content {
-  background: rgba(15, 15, 30, 0.9);
+  background: rgba(26, 38, 52, 0.9);
   padding: 50px 40px;
   border-radius: 16px;
-  border: 3px solid #4ecdc4;
-  box-shadow: 0 8px 32px rgba(78, 205, 196, 0.3);
+  border: 3px solid #3498db;
+  box-shadow: 0 8px 32px rgba(52, 152, 219, 0.3);
   text-align: center;
 }
 
 .confirm-content h2 {
   font-family: 'Press Start 2P', monospace;
   font-size: 20px;
-  color: #4ecdc4;
+  color: #3498db;
   margin: 0 0 30px 0;
-  text-shadow: 2px 2px 8px rgba(78, 205, 196, 0.5);
+  text-shadow: 2px 2px 8px rgba(52, 152, 219, 0.5);
 }
 
 .character-preview-large {
   background: #0f0f0f;
   padding: 30px;
   border-radius: 12px;
-  border: 3px solid #4ecdc4;
+  border: 3px solid #3498db;
   display: inline-block;
   margin-bottom: 30px;
-  box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+  box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
 }
 
 .character-name-input {
@@ -170,7 +170,7 @@
   display: block;
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
-  color: #4ecdc4;
+  color: #3498db;
   margin-bottom: 10px;
   text-transform: uppercase;
 }
@@ -179,9 +179,9 @@
   width: 100%;
   max-width: 300px;
   padding: 15px;
-  background: #0f3460;
+  background: rgba(44, 62, 80, 0.6);
   color: #e0e0e0;
-  border: 2px solid #4ecdc4;
+  border: 2px solid #3498db;
   border-radius: 8px;
   font-family: 'Press Start 2P', monospace;
   font-size: 12px;
@@ -191,8 +191,8 @@
 
 .character-name-input input:focus {
   outline: none;
-  border-color: #4ecdc4;
-  box-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+  border-color: #3498db;
+  box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
 }
 
 .error-message {
@@ -231,14 +231,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #4ecdc4 0%, #44a8a0 100%);
-  color: #0f0f1e;
-  box-shadow: 0 4px 16px rgba(78, 205, 196, 0.4);
+  background: linear-gradient(to right, #3498db, #2980b9);
+  color: white;
+  box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5edede 0%, #54b8b0 100%);
-  box-shadow: 0 6px 24px rgba(78, 205, 196, 0.6);
+  background: linear-gradient(to right, #5dade2, #3498db);
+  box-shadow: 0 6px 24px rgba(52, 152, 219, 0.6);
   transform: translateY(-3px);
 }
 
@@ -248,16 +248,16 @@
 }
 
 .btn-secondary {
-  background: #0f3460;
-  color: #4ecdc4;
-  border: 2px solid #4ecdc4;
+  background: rgba(44, 62, 80, 0.8);
+  color: #3498db;
+  border: 2px solid #3498db;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #1a4570;
-  border-color: #5edede;
+  background: rgba(52, 152, 219, 0.2);
+  border-color: #5dade2;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
 .btn-secondary:disabled {

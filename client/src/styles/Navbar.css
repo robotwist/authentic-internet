@@ -35,6 +35,13 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.user-indicator {
+  color: #eeeeee;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  display: none; /* Hidden on desktop, shown on mobile */
+}
+
 .mobile-menu-toggle {
   display: none;
   background: none;
@@ -82,6 +89,10 @@
 
 /* Mobile styles */
 @media (max-width: 768px) {
+  .user-indicator {
+    display: block;
+  }
+  
   .mobile-menu-toggle {
     display: block;
   }

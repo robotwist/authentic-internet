@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import "./PixelCharacterCreator.css";
 
-const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
+const PixelCharacterCreator = ({ onCharacterCreated, onClose, skipSave = false }) => {
   const { user, updateUser } = useAuth();
   const [mode, setMode] = useState("create"); // 'create' or 'import'
   const [canvasSize, setCanvasSize] = useState(32);
@@ -149,7 +149,22 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
         }
       }
 
-      // Convert to blob
+      // Convert to data URL
+      const dataURL = canvas.toDataURL("image/png");
+
+      // If skipSave mode, just return data to parent
+      if (skipSave) {
+        onCharacterCreated({
+          sprite: dataURL,
+          dataURL: dataURL,
+          name: characterName,
+          grid: pixels,
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Otherwise save to backend
       canvas.toBlob(async (blob) => {
         const formData = new FormData();
         formData.append("characterImage", blob, "character.png");
@@ -171,11 +186,11 @@ const PixelCharacterCreator = ({ onCharacterCreated, onClose }) => {
         } else {
           throw new Error("Failed to save character");
         }
+        setIsLoading(false);
       }, "image/png");
     } catch (error) {
       console.error("Error saving character:", error);
       alert("Failed to save character. Please try again.");
-    } finally {
       setIsLoading(false);
     }
   };

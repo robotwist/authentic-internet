@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import PixelGridEditor from "../components/UI/PixelGridEditor";
+import PixelCharacterCreator from "../components/PixelCharacterCreator";
 import API from "../api/api";
 import "./CharacterCreator.css";
 
@@ -75,28 +75,30 @@ const CharacterCreator = () => {
       <div className="character-creator-container">
         <div className="welcome-screen">
           <div className="welcome-content">
-            <h1>🎮 Welcome to the Authentic Internet!</h1>
-            <p className="welcome-subtitle">Let's create your character</p>
+            <h1>Welcome to the Authentic Internet</h1>
+            <p className="welcome-subtitle">
+              A space for the True, the Good, and the Beautiful
+            </p>
 
             <div className="welcome-info">
               <div className="info-card">
                 <span className="info-icon">🎨</span>
-                <h3>Design Your Hero</h3>
-                <p>Use our pixel art editor to create a unique 32x32 sprite</p>
+                <h3>Create Your Character</h3>
+                <p>Design a unique pixel art sprite that represents you</p>
               </div>
 
               <div className="info-card">
-                <span className="info-icon">⚔️</span>
-                <h3>Explore the World</h3>
+                <span className="info-icon">🌍</span>
+                <h3>Explore & Discover</h3>
                 <p>
-                  Adventure through dungeons, meet NPCs, and collect artifacts
+                  Meet characters from history and literature, collect wisdom
                 </p>
               </div>
 
               <div className="info-card">
-                <span className="info-icon">📈</span>
-                <h3>Level Up</h3>
-                <p>Gain XP, unlock abilities, and become a legend</p>
+                <span className="info-icon">✨</span>
+                <h3>Leave Your Mark</h3>
+                <p>Create artifacts that matter and share them with others</p>
               </div>
             </div>
 
@@ -118,13 +120,18 @@ const CharacterCreator = () => {
   if (step === 2) {
     return (
       <div className="character-creator-container">
-        <div className="editor-screen">
-          <button className="back-btn" onClick={() => setStep(1)}>
-            ← Back
-          </button>
-
-          <PixelGridEditor onSave={handleSaveFromEditor} />
-        </div>
+        <PixelCharacterCreator
+          skipSave={true}
+          onCharacterCreated={(data) => {
+            setCharacterData({
+              dataURL: data.sprite || data.dataURL,
+              grid: data.grid,
+            });
+            setCharacterName(data.name || user?.username || "");
+            setStep(3);
+          }}
+          onClose={() => setStep(1)}
+        />
       </div>
     );
   }
