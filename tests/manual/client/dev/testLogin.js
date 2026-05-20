@@ -6,7 +6,7 @@ import {
   checkAuthStatus,
   clearStorageData,
   getCurrentUser,
-} from "./api/api";
+} from "../../../../client/src/api/api.js";
 
 export const testLogin = async () => {
   console.log("📝 Login Test Utility");

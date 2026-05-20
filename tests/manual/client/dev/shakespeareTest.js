@@ -1,6 +1,6 @@
-import { API, login, checkAuthStatus } from "./api/api";
+import { API, login, checkAuthStatus } from "../../../../client/src/api/api.js";
 import axios from "axios";
-import { API_CONFIG } from "./utils/apiConfig";
+import { API_CONFIG } from "../../../../client/src/utils/externalApiConfig.js";
 
 // Function to ensure we're authenticated before running tests
 const ensureAuthentication = async () => {

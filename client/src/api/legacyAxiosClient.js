@@ -1,3 +1,6 @@
+/**
+ * @deprecated Legacy axios client with port-scanning init. Use `api.js` (`getApi()`, exports) for new code.
+ */
 import axios from "axios";
 
 // Display build information in console for tracking deployments

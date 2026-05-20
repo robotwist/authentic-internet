@@ -1,4 +1,9 @@
-import { updateArtifact, API, login, checkAuthStatus } from "./api/api";
+import {
+  updateArtifact,
+  API,
+  login,
+  checkAuthStatus,
+} from "../../../../client/src/api/api.js";
 
 // Function to ensure we're authenticated before running tests
 const ensureAuthentication = async () => {

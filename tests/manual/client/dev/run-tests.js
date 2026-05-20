@@ -1,4 +1,9 @@
-import { login, checkAuthStatus, clearStorageData, API } from "./api/api";
+import {
+  login,
+  checkAuthStatus,
+  clearStorageData,
+  API,
+} from "../../../../client/src/api/api.js";
 import { testLogin } from "./testLogin";
 import { testArtifactUpdate } from "./artifactTests";
 import { testShakespeare } from "./shakespeareTest";

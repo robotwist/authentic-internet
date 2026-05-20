@@ -88,6 +88,7 @@ npm test
 - `docs/` — **canonical documentation**; start at [docs/README.md](docs/README.md)
 - `scripts/` — dev launcher, asset tools, doc archive scripts ([scripts/README.md](scripts/README.md))
 - `tests/` — Jest/Playwright; ad-hoc scripts in [tests/manual/](tests/manual/)
+- **Client API:** [client/src/api/api.js](client/src/api/api.js) (canonical); see [client/src/api/README.md](client/src/api/README.md)
 
 ## License
 

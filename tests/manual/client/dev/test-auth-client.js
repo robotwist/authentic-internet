@@ -3,8 +3,12 @@
  * This script tests authentication and game state persistence
  */
 
-import { loginUser, registerUser } from "./api/authService.js";
-import { getUserGameState, updateGameState } from "./api/api.js";
+import {
+  loginUser,
+  registerUser,
+  getUserGameState,
+  updateGameState,
+} from "../../../../client/src/api/api.js";
 
 // Test credentials
 const testUser = {

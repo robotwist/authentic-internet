@@ -1,6 +1,6 @@
 /**
- * Central configuration for all external APIs used in the project
- * This file consolidates all API endpoints and keys in one place
+ * Third-party API URLs and keys (weather, quotes, etc.).
+ * For the Authentic Internet backend, use `api/api.js` — not this file.
  */
 
 // Environment variables

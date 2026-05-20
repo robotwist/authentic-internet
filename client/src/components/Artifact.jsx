@@ -18,7 +18,7 @@ const IMAGE_PATHS = {
 };
 
 import { TILE_SIZE } from "./Constants";
-import { trackArtifactInteraction } from "../utils/apiService";
+import { trackArtifactInteraction } from "../api/api";
 import { isTextEntryFocused } from "../utils/textFieldFocus";
 
 const Artifact = ({

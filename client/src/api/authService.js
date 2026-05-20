@@ -1,4 +1,4 @@
-import API, { handleApiError } from "./apiConfig";
+import API, { handleApiError } from "./legacyAxiosClient";
 
 /**
  * Logs in a user

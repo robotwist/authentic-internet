@@ -1271,6 +1271,24 @@ export const deleteArtifact = async (artifactId) => {
   }
 };
 
+export const trackArtifactInteraction = async (artifactId, interactionType) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.log("User not authenticated, skipping interaction tracking");
+      return null;
+    }
+    const response = await getApi().post(
+      `/api/artifacts/${artifactId}/interact`,
+      { interactionType },
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Error tracking ${interactionType} interaction:`, error);
+    return null;
+  }
+};
+
 /* ────────────────────────────────
    🔹 MESSAGING ENDPOINTS (CRUD)
 ──────────────────────────────── */

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { handleNPCInteraction } from "../../api/api";
-import { API_CONFIG, buildApiUrl } from "../../utils/apiConfig";
+import { API_CONFIG, buildApiUrl } from "../../utils/externalApiConfig";
 import axios from "axios";
 import "./Shakespeare.css";
 import "./NPC.css";

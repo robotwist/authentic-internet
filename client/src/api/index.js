@@ -1,5 +1,7 @@
-// Base API config
-import API, { initApi, getCurrentApiUrl, handleApiError } from "./apiConfig";
+/**
+ * @deprecated Prefer importing from `./api.js`. This barrel exists for legacy manual tests.
+ */
+import API, { initApi, getCurrentApiUrl, handleApiError } from "./legacyAxiosClient";
 
 // Export all services
 export * from "./authService";
