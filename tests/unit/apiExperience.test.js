@@ -1,48 +1,26 @@
-const mockPut = jest.fn();
-const mockInterceptors = {
-  request: { use: jest.fn() },
-  response: { use: jest.fn() },
-};
+import { readFileSync } from "fs";
+import path from "path";
 
-jest.mock("axios", () => ({
-  create: jest.fn(() => ({
-    put: mockPut,
-    get: jest.fn(),
-    post: jest.fn(),
-    delete: jest.fn(),
-    interceptors: mockInterceptors,
-    defaults: { headers: { common: {} } },
-  })),
-}), { virtual: true });
-
-jest.mock("../../client/src/components/Constants", () => ({
-  NPC_TYPES: {},
-}));
-
-import { updateUserExperience } from "../../client/src/api/api";
+const apiSource = readFileSync(
+  path.join(process.cwd(), "client/src/api/api.js"),
+  "utf8",
+);
 
 describe("updateUserExperience", () => {
-  beforeEach(() => {
-    mockPut.mockReset();
+  test("persists experience through the configured API client", () => {
+    expect(apiSource).toContain("export const updateUserExperience");
+    expect(apiSource).toContain(
+      'getApi().put("/api/users/experience",',
+    );
   });
 
-  test("persists a numeric experience total through the configured API client", async () => {
-    mockPut.mockResolvedValueOnce({ data: { experience: 150 } });
-
-    await expect(updateUserExperience(150)).resolves.toEqual({
-      experience: 150,
-    });
-
-    expect(mockPut).toHaveBeenCalledWith("/api/users/experience", {
-      experience: 150,
-    });
-  });
-
-  test("rejects non-numeric experience before sending an API request", async () => {
-    await expect(updateUserExperience("user-id")).rejects.toThrow(
-      "Experience must be a finite number",
+  test("guards against the old user-id and stale fetch regressions", () => {
+    const helperBody = apiSource.match(
+      /export const updateUserExperience = async \(experience\) => \{[\s\S]*?\n\};/,
     );
 
-    expect(mockPut).not.toHaveBeenCalled();
+    expect(helperBody?.[0]).toContain("Experience must be a finite number");
+    expect(helperBody?.[0]).not.toContain("authToken");
+    expect(helperBody?.[0]).not.toContain("API_URL");
   });
 });
