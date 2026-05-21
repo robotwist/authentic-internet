@@ -13,7 +13,7 @@ jest.mock("axios", () => ({
     interceptors: mockInterceptors,
     defaults: { headers: { common: {} } },
   })),
-}));
+}), { virtual: true });
 
 jest.mock("../../client/src/components/Constants", () => ({
   NPC_TYPES: {},
