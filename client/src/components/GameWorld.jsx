@@ -871,7 +871,16 @@ const GameWorld = React.memo(() => {
 
       // Award experience
       if (user) {
-        updateUserExperience(user.id, xpReward);
+        const currentExperience =
+          Number(gameState.characterStats?.experience) ||
+          Number(user.experience ?? user.exp) ||
+          0;
+        const nextExperience = currentExperience + xpReward;
+
+        addExperiencePoints(xpReward, winMessage);
+        updateUserExperience(nextExperience).catch((error) => {
+          console.error("Failed to persist level completion XP:", error);
+        });
       }
 
       // Check achievements
@@ -880,10 +889,12 @@ const GameWorld = React.memo(() => {
     [
       gameState.gameData.levelCompletion,
       gameState.soundManager,
+      gameState.characterStats?.experience,
       updateGameState,
       updateUIState,
       setActiveNPC,
       user,
+      addExperiencePoints,
       checkLevelAchievements,
     ],
   );
@@ -2472,7 +2483,7 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const gameProgress = {
       characterPosition,
       currentMapIndex,
       inventory,
@@ -2481,7 +2492,7 @@ const GameWorld = React.memo(() => {
       viewedArtifacts: gameState.gameData.viewedArtifacts,
     };
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(gameProgress);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
@@ -2655,7 +2666,7 @@ const GameWorld = React.memo(() => {
 
       // Save game state if user is logged in
       if (user && typeof updateGameProgress === "function") {
-        const gameState = {
+        const progressUpdate = {
           inventory,
           viewedArtifacts: gameState.gameData.viewedArtifacts,
           lastPosition: {
@@ -2670,7 +2681,7 @@ const GameWorld = React.memo(() => {
           },
         };
 
-        updateGameProgress(gameState);
+        updateGameProgress(progressUpdate);
       }
     },
     [
