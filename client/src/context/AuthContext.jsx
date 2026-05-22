@@ -14,6 +14,7 @@ import {
   logPersistentError,
 } from "../api/api";
 import API from "../api/api";
+import gameProgressService from "../services/GameProgressService";
 
 // Constants
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes before expiry
@@ -145,6 +146,7 @@ const storeAuthData = (data) => {
     localStorage.setItem("refreshToken", data.refreshToken);
   if (data.user) {
     localStorage.setItem("user", JSON.stringify(userForLocalStorage(data.user)));
+    gameProgressService.init(data.user);
   }
 };
 
@@ -517,6 +519,7 @@ export const AuthProvider = ({ children }) => {
       "user",
       JSON.stringify(userForLocalStorage(updatedUser)),
     );
+    gameProgressService.init(updatedUser);
     dispatch({ type: AUTH_ACTIONS.SET_USER, payload: updatedUser });
   };
 
@@ -604,6 +607,11 @@ export const AuthProvider = ({ children }) => {
           type: AUTH_ACTIONS.INIT_AUTH,
           payload: { user: hydratedUser, isAuthenticated: true },
         });
+        localStorage.setItem(
+          "user",
+          JSON.stringify(userForLocalStorage(hydratedUser)),
+        );
+        gameProgressService.init(hydratedUser);
         console.log("Auth initialized from storage successfully");
       } catch (error) {
         console.error("Error initializing auth:", error);
