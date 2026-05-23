@@ -39,9 +39,32 @@ class GameProgressService {
     if (!userData) return false;
 
     this.userData = userData;
-    this.experience = userData.experience || 0;
-    this.level = userData.level || 1;
+    const serverExperience = this.getExperienceFromUserData(userData);
+    const serverLevel = this.getNumericProgressValue(userData.level, 1);
+    const offlineExperience = this.getNumericProgressValue(
+      getGameProgress("offlineExperience", 0),
+      0,
+    );
+    const offlineLevel = this.getNumericProgressValue(
+      getGameProgress("offlineLevel", 1),
+      1,
+    );
+
+    this.experience = Math.max(
+      serverExperience,
+      offlineExperience,
+      this.experience,
+    );
+    this.level = Math.max(
+      serverLevel,
+      offlineLevel,
+      this.calculateLevel(this.experience),
+    );
     this.inventory = userData.inventory || [];
+    this.pendingUpdates.experience =
+      this.pendingUpdates.experience ||
+      this.experience > serverExperience ||
+      this.level > serverLevel;
 
     this.initialized = true;
 
@@ -57,8 +80,14 @@ class GameProgressService {
   loadLocalProgress() {
     try {
       // Load offline experience and level
-      const offlineExp = getGameProgress("offlineExperience", 0);
-      const offlineLevel = getGameProgress("offlineLevel", 1);
+      const offlineExp = this.getNumericProgressValue(
+        getGameProgress("offlineExperience", 0),
+        0,
+      );
+      const offlineLevel = this.getNumericProgressValue(
+        getGameProgress("offlineLevel", 1),
+        1,
+      );
 
       // Only use offline data if it's higher than current values
       if (offlineExp > this.experience) {
@@ -83,6 +112,19 @@ class GameProgressService {
       console.error("Error loading local progress:", error);
       return false;
     }
+  }
+
+  getNumericProgressValue(value, fallback) {
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) ? numberValue : fallback;
+  }
+
+  getExperienceFromUserData(userData, fallback = 0) {
+    if (!userData) return fallback;
+    return Math.max(
+      this.getNumericProgressValue(userData.experience, fallback),
+      this.getNumericProgressValue(userData.exp, fallback),
+    );
   }
 
   /**
@@ -252,6 +294,10 @@ class GameProgressService {
    */
   async syncWithServer() {
     if (!getAuthToken() || this.syncInProgress) return false;
+    if (!this.initialized) {
+      this.pendingUpdates.experience = true;
+      return false;
+    }
 
     this.syncInProgress = true;
 
@@ -262,6 +308,16 @@ class GameProgressService {
 
       if (expResponse.data) {
         this.userData = { ...this.userData, ...expResponse.data };
+        this.experience = this.getExperienceFromUserData(
+          expResponse.data,
+          this.experience,
+        );
+        this.level = this.getNumericProgressValue(
+          expResponse.data.level,
+          this.level,
+        );
+        saveGameProgress("offlineExperience", this.experience);
+        saveGameProgress("offlineLevel", this.level);
         this.pendingUpdates.experience = false;
         console.log("Game progress synced with server successfully");
       }
