@@ -11,6 +11,7 @@ import QuestLog from "../components/QuestLog";
 import PowerManagement from "../components/PowerManagement";
 import "../styles/Dashboard.css";
 import { useAchievements, ACHIEVEMENTS } from "../context/AchievementContext";
+import { shouldRedirectToCharacterCreator } from "./dashboardCharacter";
 
 const Dashboard = () => {
   const [mainWorld, setMainWorld] = useState(null);
@@ -23,7 +24,8 @@ const Dashboard = () => {
     description: "",
     mapType: "",
   });
-  const [character, setCharacter] = useState(null);
+  const [character, setCharacter] = useState(undefined);
+  const [characterLoadFailed, setCharacterLoadFailed] = useState(false);
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   const [showQuestLog, setShowQuestLog] = useState(false);
@@ -34,37 +36,41 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchWorlds();
-    fetchCharacter();
   }, []);
 
   useEffect(() => {
-    if (
+    fetchCharacter();
+  }, [user?.id]);
+
+  useEffect(() => {
+    const shouldRedirect =
       user &&
-      !user.characterSprite &&
-      !localStorage.getItem("characterCreatorSkipped")
-    ) {
+      shouldRedirectToCharacterCreator({
+        user,
+        character,
+        characterLoadFailed,
+        characterCreatorSkipped: localStorage.getItem("characterCreatorSkipped"),
+      });
+
+    if (shouldRedirect) {
       navigate("/character-creator", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, character, characterLoadFailed, navigate]);
 
   const fetchCharacter = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setCharacter(null);
+      return;
+    }
 
     try {
+      setCharacterLoadFailed(false);
       const response = await API.get(`/api/users/${user.id}`);
-      setCharacter(response.data);
+      setCharacter(response.data || null);
     } catch (error) {
       console.error("Failed to load character data:", error);
-      // If character data doesn't exist, create a default character
-      setCharacter({
-        id: user.id,
-        username: user.username,
-        experience: 0,
-        level: 1,
-        avatar: null,
-        inventory: [],
-        savedQuotes: [],
-      });
+      setCharacterLoadFailed(true);
+      setCharacter(null);
     }
   };
 
