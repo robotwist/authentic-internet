@@ -11,14 +11,7 @@ import QuestLog from "../components/QuestLog";
 import PowerManagement from "../components/PowerManagement";
 import "../styles/Dashboard.css";
 import { useAchievements, ACHIEVEMENTS } from "../context/AchievementContext";
-
-export const hasSavedCharacter = (user, character) =>
-  Boolean(
-    user?.characterSprite ||
-      user?.hasCharacterSprite ||
-      character?.characterSprite ||
-      character?.hasCharacterSprite,
-  );
+import { shouldRedirectToCharacterCreator } from "./dashboardCharacter";
 
 const Dashboard = () => {
   const [mainWorld, setMainWorld] = useState(null);
@@ -50,13 +43,16 @@ const Dashboard = () => {
   }, [user?.id]);
 
   useEffect(() => {
-    if (
+    const shouldRedirect =
       user &&
-      character !== undefined &&
-      !characterLoadFailed &&
-      !hasSavedCharacter(user, character) &&
-      !localStorage.getItem("characterCreatorSkipped")
-    ) {
+      shouldRedirectToCharacterCreator({
+        user,
+        character,
+        characterLoadFailed,
+        characterCreatorSkipped: localStorage.getItem("characterCreatorSkipped"),
+      });
+
+    if (shouldRedirect) {
       navigate("/character-creator", { replace: true });
     }
   }, [user, character, characterLoadFailed, navigate]);
