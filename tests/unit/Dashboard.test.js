@@ -9,7 +9,7 @@ const mockUnlockAchievement = jest.fn();
 
 jest.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
-}));
+}), { virtual: true });
 
 jest.mock("../../client/src/context/AuthContext", () => ({
   useAuth: jest.fn(),
