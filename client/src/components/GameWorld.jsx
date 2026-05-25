@@ -2472,7 +2472,7 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressState = {
       characterPosition,
       currentMapIndex,
       inventory,
@@ -2481,7 +2481,7 @@ const GameWorld = React.memo(() => {
       viewedArtifacts: gameState.gameData.viewedArtifacts,
     };
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(progressState);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
