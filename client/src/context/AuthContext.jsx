@@ -14,6 +14,7 @@ import {
   logPersistentError,
 } from "../api/api";
 import API from "../api/api";
+import gameProgressService from "../services/GameProgressService";
 
 // Constants
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes before expiry
@@ -145,6 +146,28 @@ const storeAuthData = (data) => {
     localStorage.setItem("refreshToken", data.refreshToken);
   if (data.user) {
     localStorage.setItem("user", JSON.stringify(userForLocalStorage(data.user)));
+  }
+};
+
+const mergeProfileData = (user, profile) => {
+  if (!profile) return user;
+
+  const mergedUser = { ...user, ...profile };
+  const profileExperience = profile.experience ?? profile.exp;
+  if (typeof profileExperience === "number") {
+    mergedUser.experience = profileExperience;
+  }
+
+  return mergedUser;
+};
+
+const hydrateUserProfile = async (user) => {
+  try {
+    const profileRes = await API.get("/api/users/me");
+    return mergeProfileData(user, profileRes.data);
+  } catch (profileErr) {
+    console.warn("Profile hydrate skipped:", profileErr?.message);
+    return user;
   }
 };
 
@@ -334,10 +357,21 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.CLEAR_MESSAGES });
 
       const data = await registerUser(username, email, password);
-      dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: data });
+      let authData = data;
 
       if (data.token) {
-        scheduleTokenRefresh(data.token);
+        localStorage.setItem("token", data.token);
+        setupAxiosInterceptors(data.token);
+      }
+
+      if (data.user) {
+        authData = { ...data, user: await hydrateUserProfile(data.user) };
+      }
+
+      dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: authData });
+
+      if (authData.token) {
+        scheduleTokenRefresh(authData.token);
       }
 
       return true;
@@ -388,17 +422,21 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Invalid response from server. Please try again.");
       }
 
-      // Store token in localStorage (access token only)
+      // Store the token before hydrating so /api/users/me is authenticated.
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
 
       // Set up axios interceptors for Authorization headers
       setupAxiosInterceptors(data.token);
 
-      dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: data });
+      const authData = {
+        ...data,
+        user: await hydrateUserProfile(data.user),
+      };
 
-      if (data.token) {
-        scheduleTokenRefresh(data.token);
+      dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: authData });
+
+      if (authData.token) {
+        scheduleTokenRefresh(authData.token);
       }
 
       return true;
@@ -590,15 +628,11 @@ export const AuthProvider = ({ children }) => {
         // Set up axios interceptors for the current token
         setupAxiosInterceptors(storedToken);
 
-        let hydratedUser = parsedUser;
-        try {
-          const profileRes = await API.get("/api/users/me");
-          if (profileRes.data) {
-            hydratedUser = { ...parsedUser, ...profileRes.data };
-          }
-        } catch (profileErr) {
-          console.warn("Profile hydrate skipped:", profileErr?.message);
-        }
+        const hydratedUser = await hydrateUserProfile(parsedUser);
+        localStorage.setItem(
+          "user",
+          JSON.stringify(userForLocalStorage(hydratedUser)),
+        );
 
         dispatch({
           type: AUTH_ACTIONS.INIT_AUTH,
@@ -630,6 +664,12 @@ export const AuthProvider = ({ children }) => {
       setupAxiosInterceptors(token);
     }
   }, []);
+
+  useEffect(() => {
+    if (state.isAuthenticated && state.user) {
+      gameProgressService.init(state.user);
+    }
+  }, [state.isAuthenticated, state.user]);
 
   // Create context value
   const authContextValue = {

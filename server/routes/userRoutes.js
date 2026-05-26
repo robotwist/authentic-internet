@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 import { validate, schemas } from "../middleware/validation.js";
+import { normalizeExperienceUpdate } from "../utils/experience.js";
 
 const router = express.Router();
 
@@ -131,6 +132,7 @@ router.get("/me", authenticateToken, async (req, res) => {
       characterSprite: user.characterSprite,
       characterName: user.characterName,
       friends: user.friends,
+      experience: user.experience,
       exp: user.experience,
       level: user.level,
       inventory: user.inventory,
@@ -283,22 +285,21 @@ router.put('/experience', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const { experience } = req.body;
     
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
-    }
-    
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
-    
-    if (!updatedUser) {
+    const user = await User.findById(userId).select('username email experience level');
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    const normalized = normalizeExperienceUpdate(user.experience, experience);
+    if (!normalized.valid) {
+      return res.status(400).json({ message: normalized.message });
+    }
+
+    user.experience = normalized.experience;
+    user.level = Math.floor(normalized.experience / 100) + 1;
+    await user.save();
     
-    res.json(updatedUser);
+    res.json(user);
   } catch (error) {
     console.error('Error updating experience:', error);
     res.status(500).json({ message: 'Server error' });
