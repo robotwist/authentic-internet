@@ -411,7 +411,11 @@ class GameStateManager {
     if (!hasAllFields) return false;
 
     // Validate character position
-    if (!state.characterPosition?.x || !state.characterPosition?.y)
+    if (
+      !state.characterPosition ||
+      !Number.isFinite(state.characterPosition.x) ||
+      !Number.isFinite(state.characterPosition.y)
+    )
       return false;
 
     // Validate arrays
