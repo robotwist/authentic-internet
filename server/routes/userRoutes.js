@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 import { validate, schemas } from "../middleware/validation.js";
+import { mergeGameState } from "../utils/gameStateMerge.js";
 
 const router = express.Router();
 
@@ -172,20 +173,26 @@ router.get('/game-state', authenticateToken, gameStateReadLimiter, async (req, r
 router.put('/game-state', authenticateToken, gameStateWriteLimiter, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const gameState = req.body;
-    
-    // Update user's game state in database
+    const existingUser = await User.findById(userId).select('gameState');
+
+    if (!existingUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const gameState = mergeGameState(existingUser.gameState || {}, req.body || {});
+
+    // Merge partial saves so omitted progress branches are not wiped.
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
       { $set: { gameState } },
       { new: true }
     ).select('gameState');
-    
+
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
-    res.json(updatedUser.gameState);
+
+    res.json({ success: true, gameState: updatedUser.gameState });
   } catch (error) {
     console.error('Error updating game state:', error);
     res.status(500).json({ message: 'Server error' });
