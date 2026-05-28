@@ -2472,7 +2472,7 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressState = {
       characterPosition,
       currentMapIndex,
       inventory,
@@ -2481,7 +2481,7 @@ const GameWorld = React.memo(() => {
       viewedArtifacts: gameState.gameData.viewedArtifacts,
     };
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(progressState);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
@@ -2610,6 +2610,7 @@ const GameWorld = React.memo(() => {
   const handleArtifactPickup = useCallback(
     (artifact) => {
       if (!artifact) return;
+      let viewedArtifactsToSave = gameState.gameData.viewedArtifacts;
 
       // Check if this artifact was already viewed
       const isFirstView =
@@ -2624,6 +2625,7 @@ const GameWorld = React.memo(() => {
             : []),
           artifact.id,
         ];
+        viewedArtifactsToSave = updatedViewedArtifacts;
         updateGameState({ viewedArtifacts: updatedViewedArtifacts });
         localStorage.setItem(
           "viewedArtifacts",
@@ -2655,9 +2657,9 @@ const GameWorld = React.memo(() => {
 
       // Save game state if user is logged in
       if (user && typeof updateGameProgress === "function") {
-        const gameState = {
+        const progressState = {
           inventory,
-          viewedArtifacts: gameState.gameData.viewedArtifacts,
+          viewedArtifacts: viewedArtifactsToSave,
           lastPosition: {
             x: characterPosition.x,
             y: characterPosition.y,
@@ -2670,7 +2672,7 @@ const GameWorld = React.memo(() => {
           },
         };
 
-        updateGameProgress(gameState);
+        updateGameProgress(progressState);
       }
     },
     [

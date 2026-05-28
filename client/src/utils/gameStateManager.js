@@ -150,8 +150,9 @@ class GameStateManager {
 
         const result = await response.json();
 
-        // Validate server response
-        if (!result.success) {
+        // User game-state endpoints return the saved state directly; only a
+        // structured success:false response should be treated as a failure.
+        if (result?.success === false) {
           throw new Error(
             result.message || "Server returned unsuccessful response",
           );
