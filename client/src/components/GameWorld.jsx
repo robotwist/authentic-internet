@@ -714,15 +714,10 @@ const GameWorld = React.memo(() => {
     return Math.floor(100 * Math.pow(1.5, level - 1));
   }, []);
 
-  // Handle gaining experience with level-up logic
-  const handleGainExperience = useCallback(
-    (amount, source = "Unknown", position = null) => {
-      console.log(`Gained ${amount} XP from: ${source}`);
-
-      // Add XP notification at enemy position
-      if (position) {
-        addXPNotification(amount, source, position);
-      }
+  // Function to add XP and show notification
+  const addExperiencePoints = useCallback(
+    (amount, reason = "Unknown") => {
+      console.log(`Gained ${amount} XP from: ${reason}`);
 
       setCharacterStats((prev) => {
         const newXP = prev.experience + amount;
@@ -776,6 +771,19 @@ const GameWorld = React.memo(() => {
       gameState.soundManager,
       updateUIState,
     ],
+  );
+
+  // Handle gaining experience with level-up logic
+  const handleGainExperience = useCallback(
+    (amount, source = "Unknown", position = null) => {
+      // Add XP notification at enemy position
+      if (position) {
+        addXPNotification(amount, source, position);
+      }
+
+      addExperiencePoints(amount, source);
+    },
+    [addExperiencePoints, addXPNotification],
   );
 
   // Alias for handleGainExperience to match existing code that uses awardXP
