@@ -1,41 +1,62 @@
 import { waitFor } from "@testing-library/react";
+import API from "../../client/src/api/api";
+import gameProgressService from "../../client/src/services/GameProgressService";
 
-const loadGameProgressService = async ({ token = "token" } = {}) => {
-  jest.resetModules();
+let mockToken = "token";
+const mockProgressStore = {};
 
-  const mockProgressStore = {};
-  const mockApi = {
-    put: jest.fn().mockResolvedValue({ data: { experience: 0, level: 1 } }),
-    post: jest.fn().mockResolvedValue({ data: { success: true } }),
+jest.mock("../../client/src/api/api", () => ({
+  __esModule: true,
+  default: {
+    put: jest.fn(),
+    post: jest.fn(),
+  },
+}));
+
+jest.mock("../../client/src/utils/authUtils", () => ({
+  __esModule: true,
+  getAuthToken: jest.fn(() => mockToken),
+  saveGameProgress: jest.fn((key, data) => {
+    mockProgressStore[key] = data;
+    return true;
+  }),
+  getGameProgress: jest.fn((key, defaultValue) =>
+    Object.prototype.hasOwnProperty.call(mockProgressStore, key)
+      ? mockProgressStore[key]
+      : defaultValue,
+  ),
+}));
+
+const resetService = () => {
+  Object.keys(mockProgressStore).forEach((key) => {
+    delete mockProgressStore[key];
+  });
+  mockToken = "token";
+
+  API.put.mockReset();
+  API.put.mockResolvedValue({ data: { experience: 0, level: 1 } });
+  API.post.mockReset();
+  API.post.mockResolvedValue({ data: { success: true } });
+
+  gameProgressService.initialized = false;
+  gameProgressService.syncInProgress = false;
+  gameProgressService.userData = null;
+  gameProgressService.inventory = [];
+  gameProgressService.experience = 0;
+  gameProgressService.level = 1;
+  gameProgressService.pendingUpdates = {
+    inventory: false,
+    experience: false,
+    achievements: false,
   };
-
-  jest.doMock("../../client/src/api/api", () => ({
-    __esModule: true,
-    default: mockApi,
-  }));
-
-  jest.doMock("../../client/src/utils/authUtils", () => ({
-    __esModule: true,
-    getAuthToken: jest.fn(() => token),
-    saveGameProgress: jest.fn((key, data) => {
-      mockProgressStore[key] = data;
-      return true;
-    }),
-    getGameProgress: jest.fn((key, defaultValue) =>
-      Object.prototype.hasOwnProperty.call(mockProgressStore, key)
-        ? mockProgressStore[key]
-        : defaultValue,
-    ),
-  }));
-
-  const module = require("../../client/src/services/GameProgressService");
-  return { gameProgressService: module.default, mockApi, mockProgressStore };
 };
 
 describe("GameProgressService", () => {
-  test("initializes inventory from persisted game state before legacy inventory", async () => {
-    const { gameProgressService } = await loadGameProgressService();
+  beforeEach(() => {
+    resetService();
+  });
 
+  test("initializes inventory from persisted game state before legacy inventory", () => {
     gameProgressService.init({
       id: "user-1",
       inventory: ["legacy-artifact-id"],
@@ -50,7 +71,6 @@ describe("GameProgressService", () => {
   });
 
   test("syncs authenticated inventory rewards to persisted game state", async () => {
-    const { gameProgressService, mockApi } = await loadGameProgressService();
     const reward = { id: "reward-1", name: "Reward" };
 
     gameProgressService.init({ id: "user-1", gameState: { inventory: [] } });
@@ -58,7 +78,7 @@ describe("GameProgressService", () => {
 
     await expect(
       waitFor(() =>
-        expect(mockApi.post).toHaveBeenCalledWith("/api/progress/save", {
+        expect(API.post).toHaveBeenCalledWith("/api/progress/save", {
           gameState: { inventory: [reward] },
         }),
       ),
@@ -67,10 +87,9 @@ describe("GameProgressService", () => {
 
   test("does not drop inventory updates queued during an in-flight XP sync", async () => {
     let resolveExperienceSync;
-    const { gameProgressService, mockApi } = await loadGameProgressService();
     const reward = { id: "reward-2", name: "Queued Reward" };
 
-    mockApi.put.mockImplementation(
+    API.put.mockImplementation(
       () =>
         new Promise((resolve) => {
           resolveExperienceSync = resolve;
@@ -80,18 +99,18 @@ describe("GameProgressService", () => {
     gameProgressService.init({ id: "user-1", gameState: { inventory: [] } });
     gameProgressService.addExperience(10);
 
-    expect(mockApi.put).toHaveBeenCalledWith("/api/users/experience", {
+    expect(API.put).toHaveBeenCalledWith("/api/users/experience", {
       experience: 10,
     });
 
     gameProgressService.addToInventory(reward);
-    expect(mockApi.post).not.toHaveBeenCalled();
+    expect(API.post).not.toHaveBeenCalled();
 
     resolveExperienceSync({ data: { experience: 10, level: 1 } });
 
     await expect(
       waitFor(() =>
-        expect(mockApi.post).toHaveBeenCalledWith("/api/progress/save", {
+        expect(API.post).toHaveBeenCalledWith("/api/progress/save", {
           gameState: { inventory: [reward] },
         }),
       ),
