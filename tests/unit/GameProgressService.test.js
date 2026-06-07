@@ -2,8 +2,13 @@ import { waitFor } from "@testing-library/react";
 import API from "../../client/src/api/api";
 import gameProgressService from "../../client/src/services/GameProgressService";
 
-let mockToken = "token";
-const mockProgressStore = {};
+var mockToken;
+var mockProgressStore;
+
+const getMockProgressStore = () => {
+  if (!mockProgressStore) mockProgressStore = {};
+  return mockProgressStore;
+};
 
 jest.mock("../../client/src/api/api", () => ({
   __esModule: true,
@@ -15,22 +20,20 @@ jest.mock("../../client/src/api/api", () => ({
 
 jest.mock("../../client/src/utils/authUtils", () => ({
   __esModule: true,
-  getAuthToken: jest.fn(() => mockToken),
+  getAuthToken: jest.fn(() => mockToken || "token"),
   saveGameProgress: jest.fn((key, data) => {
-    mockProgressStore[key] = data;
+    getMockProgressStore()[key] = data;
     return true;
   }),
   getGameProgress: jest.fn((key, defaultValue) =>
-    Object.prototype.hasOwnProperty.call(mockProgressStore, key)
-      ? mockProgressStore[key]
+    Object.prototype.hasOwnProperty.call(getMockProgressStore(), key)
+      ? getMockProgressStore()[key]
       : defaultValue,
   ),
 }));
 
 const resetService = () => {
-  Object.keys(mockProgressStore).forEach((key) => {
-    delete mockProgressStore[key];
-  });
+  mockProgressStore = {};
   mockToken = "token";
 
   API.put.mockReset();
