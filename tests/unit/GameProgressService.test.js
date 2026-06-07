@@ -28,7 +28,7 @@ const loadGameProgressService = async ({ token = "token" } = {}) => {
     ),
   }));
 
-  const module = await import("../../client/src/services/GameProgressService");
+  const module = require("../../client/src/services/GameProgressService");
   return { gameProgressService: module.default, mockApi, mockProgressStore };
 };
 
