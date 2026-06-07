@@ -286,11 +286,13 @@ router.put('/experience', authenticateToken, async (req, res) => {
     if (typeof experience !== 'number') {
       return res.status(400).json({ message: 'Experience must be a number' });
     }
+
+    const level = Math.floor(experience / 100) + 1;
     
-    // Update user's experience points in database
+    // findByIdAndUpdate does not run save middleware, so keep level in sync here.
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
-      { $set: { experience } },
+      { $set: { experience, level } },
       { new: true }
     ).select('username email experience level');
     

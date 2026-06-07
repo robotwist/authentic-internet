@@ -37,6 +37,18 @@ const generateRefreshToken = (payload) => {
   return jwt.sign(payload, secretKey, { expiresIn: refreshTokenExpiration });
 };
 
+const buildAuthUserPayload = (user) => ({
+  id: user._id,
+  username: user.username,
+  email: user.email,
+  experience: user.experience || 0,
+  level: user.level || 1,
+  avatar: user.avatar,
+  inventory: user.inventory || [],
+  gameState: user.gameState || {},
+  lastLogin: user.lastLogin,
+});
+
 /**
  * Store a refresh token in the user's account
  * @param {string} userId - User ID
@@ -210,14 +222,7 @@ export const register = async (req, res) => {
     res.status(201).json({ 
       success: true,
       token: accessToken,
-      user: { 
-        id: newUser._id, 
-        username: newUser.username,
-        email: newUser.email,
-        experience: newUser.experience || 0,
-        level: newUser.level || 1,
-        avatar: newUser.avatar
-      },
+      user: buildAuthUserPayload(newUser),
       message: "Registration successful! Please check your email to verify your account."
     });
   } catch (error) {
@@ -353,15 +358,7 @@ export const login = async (req, res) => {
     res.json({ 
       success: true,
       token: accessToken,
-      user: { 
-        id: user._id, 
-        username: user.username,
-        email: user.email,
-        experience: user.experience || 0,
-        level: user.level || 1,
-        avatar: user.avatar,
-        lastLogin: user.lastLogin
-      },
+      user: buildAuthUserPayload(user),
       message: "Login successful! Welcome back."
     });
   } catch (error) {
@@ -405,15 +402,7 @@ export const verifyToken = async (req, res) => {
     res.json({
       success: true,
       token: newToken,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        experience: user.experience || 0,
-        level: user.level || 1,
-        avatar: user.avatar,
-        lastLogin: user.lastLogin
-      },
+      user: buildAuthUserPayload(user),
       message: "Token verified and refreshed successfully"
     });
   } catch (error) {
@@ -823,14 +812,7 @@ export const resetPassword = async (req, res) => {
     res.status(200).json({
       success: true,
       token: accessToken,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        experience: user.experience || 0,
-        level: user.level || 1,
-        avatar: user.avatar
-      },
+      user: buildAuthUserPayload(user),
       message: "Password has been reset successfully. You are now logged in."
     });
   } catch (error) {
