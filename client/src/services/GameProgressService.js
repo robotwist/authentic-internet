@@ -41,7 +41,7 @@ class GameProgressService {
     this.userData = userData;
     this.experience = userData.experience || 0;
     this.level = userData.level || 1;
-    this.inventory = userData.inventory || [];
+    this.inventory = userData.gameState?.inventory || userData.inventory || [];
 
     this.initialized = true;
 
@@ -104,13 +104,12 @@ class GameProgressService {
           }
         });
 
-        // Clear offline inventory
+        // Clear offline inventory but keep the merged inventory marked for sync.
         saveGameProgress("offlineInventory", []);
-        this.pendingUpdates.inventory = false;
       }
 
-      // If we have pending experience updates, sync with server
-      if (this.pendingUpdates.experience) {
+      // If we have pending progress updates, sync with server.
+      if (this.pendingUpdates.experience || this.pendingUpdates.inventory) {
         this.syncWithServer();
       }
 
@@ -141,6 +140,7 @@ class GameProgressService {
     // Save progress locally
     saveGameProgress("offlineExperience", this.experience);
     saveGameProgress("offlineLevel", this.level);
+    this.pendingUpdates.experience = true;
 
     // If authenticated, sync with server
     if (getAuthToken()) {
@@ -186,6 +186,7 @@ class GameProgressService {
     const offlineInventory = getGameProgress("offlineInventory", []);
     offlineInventory.push(item);
     saveGameProgress("offlineInventory", offlineInventory);
+    this.pendingUpdates.inventory = true;
 
     // If authenticated, sync with server
     if (getAuthToken()) {
@@ -214,6 +215,7 @@ class GameProgressService {
       (item) => item.id !== itemId,
     );
     saveGameProgress("offlineInventory", updatedOfflineInventory);
+    this.pendingUpdates.inventory = true;
 
     // If authenticated, sync with server
     if (getAuthToken()) {
@@ -256,16 +258,47 @@ class GameProgressService {
     this.syncInProgress = true;
 
     try {
-      const expResponse = await API.put("/api/users/experience", {
-        experience: this.experience,
-      });
+      while (this.pendingUpdates.experience || this.pendingUpdates.inventory) {
+        const syncExperience = this.pendingUpdates.experience;
+        const syncInventory = this.pendingUpdates.inventory;
 
-      if (expResponse.data) {
-        this.userData = { ...this.userData, ...expResponse.data };
-        this.pendingUpdates.experience = false;
-        console.log("Game progress synced with server successfully");
+        if (syncExperience) this.pendingUpdates.experience = false;
+        if (syncInventory) this.pendingUpdates.inventory = false;
+
+        try {
+          if (syncExperience) {
+            const expResponse = await API.put("/api/users/experience", {
+              experience: this.experience,
+            });
+
+            if (expResponse.data) {
+              this.userData = { ...this.userData, ...expResponse.data };
+            }
+          }
+
+          if (syncInventory) {
+            await API.post("/api/progress/save", {
+              gameState: {
+                inventory: this.inventory,
+              },
+            });
+
+            this.userData = {
+              ...this.userData,
+              gameState: {
+                ...(this.userData?.gameState || {}),
+                inventory: this.inventory,
+              },
+            };
+          }
+        } catch (error) {
+          if (syncExperience) this.pendingUpdates.experience = true;
+          if (syncInventory) this.pendingUpdates.inventory = true;
+          throw error;
+        }
       }
 
+      console.log("Game progress synced with server successfully");
       return true;
     } catch (error) {
       console.error("Error syncing progress with server:", error);
@@ -326,6 +359,8 @@ class GameProgressService {
       saveGameProgress("offlineLevel", 1);
       saveGameProgress("offlineInventory", []);
       saveGameProgress("completedAchievements", []);
+      this.pendingUpdates.experience = true;
+      this.pendingUpdates.inventory = true;
 
       // If authenticated, sync with server
       if (getAuthToken()) {

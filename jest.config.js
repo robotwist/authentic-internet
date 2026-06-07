@@ -27,7 +27,14 @@ export default {
     }
   },
   transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest'
+    '^.+\\.(js|jsx)$': ['babel-jest', {
+      babelrc: false,
+      configFile: false,
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic' }]
+      ]
+    }]
   },
   moduleFileExtensions: ['js', 'jsx', 'json'],
   testPathIgnorePatterns: [
