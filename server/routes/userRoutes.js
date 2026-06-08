@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 import { validate, schemas } from "../middleware/validation.js";
+import { buildExperienceUpdatePipeline, normalizeExperienceInput } from "../utils/experienceProgress.js";
 
 const router = express.Router();
 
@@ -46,29 +47,6 @@ const upload = multer({
 });
 
 const getAuthenticatedUserId = (req) => req.user?.userId || req.user?.id;
-
-const normalizeExperienceInput = (experience) => {
-  if (!Number.isFinite(experience) || experience < 0) {
-    return null;
-  }
-
-  return Math.floor(experience);
-};
-
-const buildExperienceUpdatePipeline = (experience) => {
-  const currentExperience = { $ifNull: ["$experience", 0] };
-  const mergedExperience = { $max: [currentExperience, experience] };
-  const calculatedLevel = {
-    $add: [{ $floor: { $divide: [mergedExperience, 100] } }, 1],
-  };
-
-  return [{
-    $set: {
-      experience: mergedExperience,
-      level: { $max: [{ $ifNull: ["$level", 1] }, calculatedLevel] },
-    },
-  }];
-};
 
 const updateUserExperienceFloor = (userId, experience) => User.findByIdAndUpdate(
   userId,
