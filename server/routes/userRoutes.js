@@ -45,6 +45,37 @@ const upload = multer({
   }
 });
 
+const getAuthenticatedUserId = (req) => req.user?.userId || req.user?.id;
+
+const normalizeExperienceInput = (experience) => {
+  if (!Number.isFinite(experience) || experience < 0) {
+    return null;
+  }
+
+  return Math.floor(experience);
+};
+
+const buildExperienceUpdatePipeline = (experience) => {
+  const currentExperience = { $ifNull: ["$experience", 0] };
+  const mergedExperience = { $max: [currentExperience, experience] };
+  const calculatedLevel = {
+    $add: [{ $floor: { $divide: [mergedExperience, 100] } }, 1],
+  };
+
+  return [{
+    $set: {
+      experience: mergedExperience,
+      level: { $max: [{ $ifNull: ["$level", 1] }, calculatedLevel] },
+    },
+  }];
+};
+
+const updateUserExperienceFloor = (userId, experience) => User.findByIdAndUpdate(
+  userId,
+  buildExperienceUpdatePipeline(experience),
+  { new: true },
+).select('username email experience level');
+
 // 📌 Upload Avatar (🔐 Requires Authentication)
 router.post("/me/avatar", authenticateToken, upload.single('avatar'), async (req, res) => {
   try {
@@ -280,19 +311,15 @@ router.put('/me/character', authenticateToken, async (req, res) => {
 // Update user's experience points
 router.put('/experience', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = getAuthenticatedUserId(req);
     const { experience } = req.body;
+    const normalizedExperience = normalizeExperienceInput(experience);
     
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    if (normalizedExperience === null) {
+      return res.status(400).json({ message: 'Experience must be a non-negative finite number' });
     }
     
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
+    const updatedUser = await updateUserExperienceFloor(userId, normalizedExperience);
     
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
@@ -461,19 +488,15 @@ router.put('/game-state', authenticateToken, async (req, res) => {
 // Update user's experience points
 router.put('/experience', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getAuthenticatedUserId(req);
     const { experience } = req.body;
+    const normalizedExperience = normalizeExperienceInput(experience);
     
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    if (normalizedExperience === null) {
+      return res.status(400).json({ message: 'Experience must be a non-negative finite number' });
     }
     
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
+    const updatedUser = await updateUserExperienceFloor(userId, normalizedExperience);
     
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
