@@ -877,28 +877,11 @@ export const refreshUserToken = async (refreshToken) => {
 export const getUserGameState = withCache(
   async (idToken) => {
     try {
-      if (!idToken) {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-          throw new Error("Authentication required");
-        }
-        idToken = token;
-      }
-
-      const response = await fetch(`${API_URL}/api/users/game-state`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch game state");
-      }
-
-      return await response.json();
+      const config = idToken
+        ? { headers: { Authorization: `Bearer ${idToken}` } }
+        : undefined;
+      const response = await getApi().get("/api/users/game-state", config);
+      return response.data;
     } catch (error) {
       console.error("Error fetching game state:", error);
       throw error;
@@ -918,27 +901,10 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      throw new Error("Authentication required");
-    }
-
-    const response = await fetch(`${API_URL}/api/users/experience`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ experience }),
+    const response = await getApi().put("/api/users/experience", {
+      experience,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to update experience");
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error("Error updating experience:", error);
     throw error;
@@ -955,27 +921,10 @@ export const updateUserExperience = async (experience) => {
  */
 export const addUserAchievement = async (achievement) => {
   try {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      throw new Error("Authentication required");
-    }
-
-    const response = await fetch(`${API_URL}/api/users/achievements`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ achievement }),
+    const response = await getApi().post("/api/users/achievements", {
+      achievement,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to add achievement");
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error("Error adding achievement:", error);
     throw error;
@@ -989,27 +938,8 @@ export const addUserAchievement = async (achievement) => {
  */
 export const saveGameState = async (gameState) => {
   try {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      throw new Error("Authentication required");
-    }
-
-    const response = await fetch(`${API_URL}/api/users/game-state`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(gameState),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to save game state");
-    }
-
-    return await response.json();
+    const response = await getApi().put("/api/users/game-state", gameState);
+    return response.data;
   } catch (error) {
     console.error("Error saving game state:", error);
     throw error;
@@ -1018,27 +948,8 @@ export const saveGameState = async (gameState) => {
 
 export const updateGameState = async (gameState) => {
   try {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      throw new Error("Authentication required");
-    }
-
-    const response = await fetch(`${API_URL}/api/users/game-state`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(gameState),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to update game state");
-    }
-
-    return await response.json();
+    const response = await getApi().put("/api/users/game-state", gameState);
+    return response.data;
   } catch (error) {
     console.error("Error updating game state:", error);
     throw error;

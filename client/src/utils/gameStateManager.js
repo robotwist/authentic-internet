@@ -9,7 +9,7 @@ const CHECKPOINT_KEY = "last_checkpoint";
 const OFFLINE_QUEUE_KEY = "offline_save_queue";
 const SYNC_LOCK_KEY = "sync_lock";
 
-class GameStateManager {
+export class GameStateManager {
   constructor() {
     this.state = null;
     this.lastSavedState = null;
@@ -150,14 +150,15 @@ class GameStateManager {
 
         const result = await response.json();
 
-        // Validate server response
-        if (!result.success) {
+        // Older servers returned the raw gameState object; newer ones return
+        // { success, gameState }. Only an explicit false is a failed save.
+        if (result.success === false) {
           throw new Error(
             result.message || "Server returned unsuccessful response",
           );
         }
 
-        return result;
+        return result.success ? result : { success: true, gameState: result };
       } catch (error) {
         lastError = error;
         console.warn(`Save attempt ${attempt} failed:`, error);
