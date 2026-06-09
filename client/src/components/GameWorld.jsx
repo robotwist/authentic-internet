@@ -871,7 +871,12 @@ const GameWorld = React.memo(() => {
 
       // Award experience
       if (user) {
-        updateUserExperience(user.id, xpReward);
+        const currentExperience = Number(
+          user.experience ?? user.exp ?? characterStats.experience ?? 0,
+        );
+        updateUserExperience(currentExperience + xpReward).catch((error) => {
+          console.error("Failed to persist level completion XP:", error);
+        });
       }
 
       // Check achievements
@@ -884,6 +889,7 @@ const GameWorld = React.memo(() => {
       updateUIState,
       setActiveNPC,
       user,
+      characterStats.experience,
       checkLevelAchievements,
     ],
   );

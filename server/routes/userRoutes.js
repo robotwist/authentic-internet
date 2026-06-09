@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 import { validate, schemas } from "../middleware/validation.js";
+import { isPlainObject, mergeGameState } from "../utils/gameState.js";
 
 const router = express.Router();
 
@@ -173,19 +174,22 @@ router.put('/game-state', authenticateToken, gameStateWriteLimiter, async (req, 
   try {
     const userId = req.user.userId;
     const gameState = req.body;
-    
-    // Update user's game state in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { gameState } },
-      { new: true }
-    ).select('gameState');
-    
-    if (!updatedUser) {
+
+    if (!isPlainObject(gameState)) {
+      return res.status(400).json({ success: false, message: 'Game state must be an object' });
+    }
+
+    const user = await User.findById(userId).select('gameState');
+
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    user.gameState = mergeGameState(user.gameState || {}, gameState);
+    user.markModified('gameState');
+    await user.save();
     
-    res.json(updatedUser.gameState);
+    res.json({ success: true, gameState: user.gameState });
   } catch (error) {
     console.error('Error updating game state:', error);
     res.status(500).json({ message: 'Server error' });
