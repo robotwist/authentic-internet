@@ -1,4 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import {
+  DEFAULT_GRID_SIZE,
+  colorFromPixel,
+  createEmptyGrid,
+  gridHasPaintedPixels,
+} from "../../utils/pixelGrid";
 import "./PixelGridEditor.css";
 
 /**
@@ -15,7 +21,7 @@ const PixelGridEditor = ({
   onCharacterNameChange,
   saving = false,
 }) => {
-  const GRID_SIZE = 32;
+  const GRID_SIZE = DEFAULT_GRID_SIZE;
   const CELL_SIZE = cellSize;
 
   // Color palette (retro NES style)
@@ -42,15 +48,58 @@ const PixelGridEditor = ({
   const [selectedColor, setSelectedColor] = useState(COLOR_PALETTE[0]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [grid, setGrid] = useState(() => {
-    // Initialize grid with transparent pixels
-    if (initialSprite) {
+    if (Array.isArray(initialSprite)) {
       return initialSprite;
     }
-    return Array(GRID_SIZE)
-      .fill(null)
-      .map(() => Array(GRID_SIZE).fill("transparent"));
+    return createEmptyGrid(GRID_SIZE);
   });
   const [tool, setTool] = useState("draw"); // 'draw' or 'erase'
+
+  useEffect(() => {
+    if (!initialSprite) return;
+
+    if (Array.isArray(initialSprite)) {
+      setGrid(initialSprite);
+      return;
+    }
+
+    if (
+      typeof initialSprite !== "string" ||
+      !initialSprite.startsWith("data:image/")
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    const image = new Image();
+    image.onload = () => {
+      if (cancelled) return;
+
+      const importCanvas = document.createElement("canvas");
+      importCanvas.width = GRID_SIZE;
+      importCanvas.height = GRID_SIZE;
+      const ctx = importCanvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, GRID_SIZE, GRID_SIZE);
+      ctx.drawImage(image, 0, 0, GRID_SIZE, GRID_SIZE);
+
+      const { data } = ctx.getImageData(0, 0, GRID_SIZE, GRID_SIZE);
+      const importedGrid = createEmptyGrid(GRID_SIZE);
+
+      for (let y = 0; y < GRID_SIZE; y++) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+          importedGrid[y][x] = colorFromPixel(data, (y * GRID_SIZE + x) * 4);
+        }
+      }
+
+      setGrid(importedGrid);
+    };
+    image.src = initialSprite;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialSprite]);
 
   // Render the grid to canvas
   useEffect(() => {
@@ -129,11 +178,7 @@ const PixelGridEditor = ({
 
   const clearGrid = () => {
     if (window.confirm("Clear the entire canvas?")) {
-      setGrid(
-        Array(GRID_SIZE)
-          .fill(null)
-          .map(() => Array(GRID_SIZE).fill("transparent")),
-      );
+      setGrid(createEmptyGrid(GRID_SIZE));
     }
   };
 
@@ -146,6 +191,13 @@ const PixelGridEditor = ({
   };
 
   const exportSprite = () => {
+    if (!gridHasPaintedPixels(grid)) {
+      if (onSave) {
+        onSave({ dataURL: null, grid, isBlank: true });
+      }
+      return null;
+    }
+
     // Create a temporary canvas to export the sprite at actual size (32x32)
     const exportCanvas = document.createElement("canvas");
     exportCanvas.width = GRID_SIZE;

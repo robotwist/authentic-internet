@@ -15,9 +15,13 @@ const CharacterCreator = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSaveFromEditor = async ({ dataURL }) => {
+  const handleSaveFromEditor = async ({ dataURL, isBlank }) => {
     if (!dataURL) {
-      setError("Paint at least a few pixels on your character");
+      setError(
+        isBlank
+          ? "Paint at least a few pixels before saving your character"
+          : "Could not export your character. Please try again.",
+      );
       return;
     }
 
@@ -85,6 +89,7 @@ const CharacterCreator = () => {
         cellSize={28}
         fullscreen
         compact
+        initialSprite={user?.characterSprite}
         characterName={characterName}
         onCharacterNameChange={setCharacterName}
         saving={saving}
