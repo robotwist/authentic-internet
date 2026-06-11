@@ -1,11 +1,19 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
 import CharacterCreator from "../../client/src/pages/CharacterCreator";
 import API from "../../client/src/api/api";
 
 const mockUpdateUser = jest.fn();
 const mockExistingSprite = "data:image/png;base64,saved-character";
+const mockNavigate = jest.fn();
+
+jest.mock(
+  "react-router-dom",
+  () => ({
+    useNavigate: () => mockNavigate,
+  }),
+  { virtual: true },
+);
 
 jest.mock("../../client/src/context/AuthContext", () => ({
   useAuth: () => ({
@@ -58,11 +66,7 @@ describe("CharacterCreator regression coverage", () => {
   });
 
   it("loads the existing sprite and refuses to overwrite it with a blank grid", () => {
-    render(
-      <MemoryRouter>
-        <CharacterCreator />
-      </MemoryRouter>,
-    );
+    render(<CharacterCreator />);
 
     expect(screen.getByTestId("pixel-editor")).toHaveAttribute(
       "data-initial-sprite",
