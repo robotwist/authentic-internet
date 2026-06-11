@@ -262,6 +262,12 @@ class GameProgressService {
 
       if (expResponse.data) {
         this.userData = { ...this.userData, ...expResponse.data };
+        if (typeof expResponse.data.experience === "number") {
+          this.experience = expResponse.data.experience;
+        }
+        if (typeof expResponse.data.level === "number") {
+          this.level = expResponse.data.level;
+        }
         this.pendingUpdates.experience = false;
         console.log("Game progress synced with server successfully");
       }

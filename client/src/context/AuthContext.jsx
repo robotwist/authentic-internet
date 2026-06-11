@@ -14,6 +14,7 @@ import {
   logPersistentError,
 } from "../api/api";
 import API from "../api/api";
+import gameProgressService from "../services/GameProgressService";
 
 // Constants
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes before expiry
@@ -235,8 +236,9 @@ const setupAxiosInterceptors = (token) => {
   // Request interceptor to add the auth token
   API.interceptors.request.use(
     (config) => {
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      const currentToken = localStorage.getItem("token") || token;
+      if (currentToken) {
+        config.headers.Authorization = `Bearer ${currentToken}`;
       }
       return config;
     },
@@ -335,6 +337,7 @@ export const AuthProvider = ({ children }) => {
 
       const data = await registerUser(username, email, password);
       dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: data });
+      gameProgressService.init(data.user);
 
       if (data.token) {
         scheduleTokenRefresh(data.token);
@@ -388,14 +391,14 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Invalid response from server. Please try again.");
       }
 
-      // Store token in localStorage (access token only)
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // Store auth data without large sprite blobs in localStorage.
+      storeAuthData(data);
 
       // Set up axios interceptors for Authorization headers
       setupAxiosInterceptors(data.token);
 
       dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: data });
+      gameProgressService.init(data.user);
 
       if (data.token) {
         scheduleTokenRefresh(data.token);
@@ -604,6 +607,7 @@ export const AuthProvider = ({ children }) => {
           type: AUTH_ACTIONS.INIT_AUTH,
           payload: { user: hydratedUser, isAuthenticated: true },
         });
+        gameProgressService.init(hydratedUser);
         console.log("Auth initialized from storage successfully");
       } catch (error) {
         console.error("Error initializing auth:", error);

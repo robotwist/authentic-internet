@@ -283,14 +283,14 @@ router.put('/experience', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const { experience } = req.body;
     
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    if (typeof experience !== 'number' || !Number.isFinite(experience) || experience < 0) {
+      return res.status(400).json({ message: 'Experience must be a non-negative number' });
     }
     
-    // Update user's experience points in database
+    // Prevent stale clients from clobbering a higher persisted XP total.
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
-      { $set: { experience } },
+      { $max: { experience } },
       { new: true }
     ).select('username email experience level');
     
