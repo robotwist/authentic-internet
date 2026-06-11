@@ -11,7 +11,7 @@ jest.mock("../../client/src/api/api", () => ({
 
 jest.mock("../../client/src/utils/authUtils", () => ({
   getAuthToken: jest.fn(),
-  getGameProgress: jest.fn(),
+  getGameProgress: jest.fn((_, defaultValue) => defaultValue),
   saveGameProgress: jest.fn(),
 }));
 
