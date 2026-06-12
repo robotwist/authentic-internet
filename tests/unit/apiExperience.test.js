@@ -11,7 +11,7 @@ const mockApiClient = {
 jest.mock("axios", () => ({
   create: jest.fn(() => mockApiClient),
   get: jest.fn(),
-}));
+}), { virtual: true });
 
 import {
   awardUserExperience,
