@@ -918,29 +918,39 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      throw new Error("Authentication required");
-    }
-
-    const response = await fetch(`${API_URL}/api/users/experience`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ experience }),
+    const response = await getApi().put("/api/users/experience", {
+      experience,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to update experience");
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error("Error updating experience:", error);
+    throw error;
+  }
+};
+
+/**
+ * Award experience points to the current user.
+ * @param {number} amount - Experience points to add
+ * @param {string} reason - Reason shown in progression logs/responses
+ * @param {string} [artifactId] - Optional artifact to associate with the award
+ * @returns {Promise<Object>} Updated progress data
+ */
+export const awardUserExperience = async (
+  amount,
+  reason = "Gameplay",
+  artifactId,
+) => {
+  try {
+    const payload = { amount, reason };
+    if (artifactId) {
+      payload.artifactId = artifactId;
+    }
+
+    const response = await getApi().post("/api/progress/experience", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error awarding experience:", error);
     throw error;
   }
 };
