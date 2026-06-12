@@ -2,6 +2,10 @@ import axios from "axios";
 import { NPC_TYPES } from "../components/Constants";
 import cacheManager from "../utils/cacheManager";
 import { createErrorHandler, ERROR_CATEGORIES } from "../utils/errorTracker";
+import {
+  awardUserExperienceWithClient,
+  updateUserExperienceWithClient,
+} from "./experienceApi";
 const { withCache, createCacheKey, cacheDurations } = cacheManager;
 
 // Display build information in console for tracking deployments
@@ -918,29 +922,34 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      throw new Error("Authentication required");
-    }
-
-    const response = await fetch(`${API_URL}/api/users/experience`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ experience }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to update experience");
-    }
-
-    return await response.json();
+    return await updateUserExperienceWithClient(getApi(), experience);
   } catch (error) {
     console.error("Error updating experience:", error);
+    throw error;
+  }
+};
+
+/**
+ * Award experience points to the current user.
+ * @param {number} amount - Experience points to add
+ * @param {string} reason - Reason shown in progression logs/responses
+ * @param {string} [artifactId] - Optional artifact to associate with the award
+ * @returns {Promise<Object>} Updated progress data
+ */
+export const awardUserExperience = async (
+  amount,
+  reason = "Gameplay",
+  artifactId,
+) => {
+  try {
+    return await awardUserExperienceWithClient(
+      getApi(),
+      amount,
+      reason,
+      artifactId,
+    );
+  } catch (error) {
+    console.error("Error awarding experience:", error);
     throw error;
   }
 };

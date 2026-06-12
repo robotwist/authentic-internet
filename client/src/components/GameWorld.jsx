@@ -12,7 +12,7 @@ import {
   createArtifact,
   fetchCharacter,
   updateCharacter,
-  updateUserExperience,
+  awardUserExperience,
   fetchQuests,
   completeQuestStage,
 } from "../api/api";
@@ -871,7 +871,9 @@ const GameWorld = React.memo(() => {
 
       // Award experience
       if (user) {
-        updateUserExperience(user.id, xpReward);
+        awardUserExperience(xpReward, winMessage).catch((error) => {
+          console.error("Failed to persist level completion XP:", error);
+        });
       }
 
       // Check achievements
