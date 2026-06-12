@@ -2,6 +2,10 @@ import axios from "axios";
 import { NPC_TYPES } from "../components/Constants";
 import cacheManager from "../utils/cacheManager";
 import { createErrorHandler, ERROR_CATEGORIES } from "../utils/errorTracker";
+import {
+  awardUserExperienceWithClient,
+  updateUserExperienceWithClient,
+} from "./experienceApi";
 const { withCache, createCacheKey, cacheDurations } = cacheManager;
 
 // Display build information in console for tracking deployments
@@ -918,11 +922,7 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const response = await getApi().put("/api/users/experience", {
-      experience,
-    });
-
-    return response.data;
+    return await updateUserExperienceWithClient(getApi(), experience);
   } catch (error) {
     console.error("Error updating experience:", error);
     throw error;
@@ -942,13 +942,12 @@ export const awardUserExperience = async (
   artifactId,
 ) => {
   try {
-    const payload = { amount, reason };
-    if (artifactId) {
-      payload.artifactId = artifactId;
-    }
-
-    const response = await getApi().post("/api/progress/experience", payload);
-    return response.data;
+    return await awardUserExperienceWithClient(
+      getApi(),
+      amount,
+      reason,
+      artifactId,
+    );
   } catch (error) {
     console.error("Error awarding experience:", error);
     throw error;
