@@ -1,6 +1,8 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import request from 'supertest';
+import { jest } from '@jest/globals';
 import User from '../models/User.js';
 import WorldInstance from '../models/World.js';
 import userRoutes from '../routes/userRoutes.js';
@@ -50,6 +52,10 @@ describe('world and experience regressions', () => {
     WorldInstance.findById = originals.findWorldById;
     WorldInstance.findOne = originals.findWorldOne;
     WorldInstance.prototype.save = originals.saveWorld;
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
   });
 
   it('creates development worlds with a renderable legacy response shape', async () => {
