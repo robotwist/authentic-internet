@@ -283,22 +283,27 @@ router.put('/experience', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const { experience } = req.body;
     
-    if (typeof experience !== 'number') {
+    if (typeof experience !== 'number' || !Number.isFinite(experience) || experience < 0) {
       return res.status(400).json({ message: 'Experience must be a number' });
     }
     
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
+    const user = await User.findById(userId).select('username email experience level');
     
-    if (!updatedUser) {
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    user.experience = Math.max(user.experience || 0, experience);
+    user.level = Math.floor(user.experience / 100) + 1;
+    await user.save();
     
-    res.json(updatedUser);
+    res.json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      experience: user.experience,
+      level: user.level
+    });
   } catch (error) {
     console.error('Error updating experience:', error);
     res.status(500).json({ message: 'Server error' });
@@ -464,22 +469,27 @@ router.put('/experience', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { experience } = req.body;
     
-    if (typeof experience !== 'number') {
+    if (typeof experience !== 'number' || !Number.isFinite(experience) || experience < 0) {
       return res.status(400).json({ message: 'Experience must be a number' });
     }
     
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
+    const user = await User.findById(userId).select('username email experience level');
     
-    if (!updatedUser) {
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    user.experience = Math.max(user.experience || 0, experience);
+    user.level = Math.floor(user.experience / 100) + 1;
+    await user.save();
     
-    res.json(updatedUser);
+    res.json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      experience: user.experience,
+      level: user.level
+    });
   } catch (error) {
     console.error('Error updating experience:', error);
     res.status(500).json({ message: 'Server error' });
