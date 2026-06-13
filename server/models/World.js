@@ -31,6 +31,7 @@ const WorldInstanceSchema = new mongoose.Schema({
   worldId: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   description: { type: String },
+  mapType: { type: String, default: 'Home' },
   
   // World configuration
   maxPlayers: { type: Number, default: 50 },
