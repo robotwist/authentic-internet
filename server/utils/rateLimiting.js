@@ -235,7 +235,7 @@ const getRetryAfterSeconds = (ip) => {
 };
 
 // Periodically clean up the failedAttempts map to prevent memory leaks
-setInterval(() => {
+const failedAttemptsCleanupInterval = setInterval(() => {
   const now = Date.now();
   failedAttempts.forEach((record, ip) => {
     // Remove entries that are no longer needed
@@ -245,3 +245,5 @@ setInterval(() => {
     }
   });
 }, 60 * 60 * 1000); // Run cleanup hourly 
+
+failedAttemptsCleanupInterval.unref?.();
