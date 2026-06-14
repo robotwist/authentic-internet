@@ -27,7 +27,7 @@ export default {
     }
   },
   transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest'
+    '^.+\\.(js|jsx)$': ['babel-jest', { configFile: './.babelrc' }]
   },
   moduleFileExtensions: ['js', 'jsx', 'json'],
   testPathIgnorePatterns: [
