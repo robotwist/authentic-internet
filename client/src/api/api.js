@@ -2,6 +2,8 @@ import axios from "axios";
 import { NPC_TYPES } from "../components/Constants";
 import cacheManager from "../utils/cacheManager";
 import { createErrorHandler, ERROR_CATEGORIES } from "../utils/errorTracker";
+import { getAuthToken } from "../utils/authUtils";
+import { persistUserExperience } from "./userProgressApi";
 const { withCache, createCacheKey, cacheDurations } = cacheManager;
 
 // Display build information in console for tracking deployments
@@ -918,27 +920,11 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      throw new Error("Authentication required");
-    }
-
-    const response = await fetch(`${API_URL}/api/users/experience`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ experience }),
+    return await persistUserExperience({
+      apiClient: API,
+      getToken: getAuthToken,
+      experience,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to update experience");
-    }
-
-    return await response.json();
   } catch (error) {
     console.error("Error updating experience:", error);
     throw error;

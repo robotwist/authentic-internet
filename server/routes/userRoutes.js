@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 import { validate, schemas } from "../middleware/validation.js";
+import { mergeGameState } from "../utils/gameStateMerge.js";
 
 const router = express.Router();
 
@@ -172,20 +173,23 @@ router.get('/game-state', authenticateToken, gameStateReadLimiter, async (req, r
 router.put('/game-state', authenticateToken, gameStateWriteLimiter, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const gameState = req.body;
-    
-    // Update user's game state in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { gameState } },
-      { new: true }
-    ).select('gameState');
-    
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+    const gameStateUpdate = req.body;
+
+    if (!gameStateUpdate || typeof gameStateUpdate !== 'object' || Array.isArray(gameStateUpdate)) {
+      return res.status(400).json({ message: 'Game state update must be an object' });
     }
     
-    res.json(updatedUser.gameState);
+    const user = await User.findById(userId).select('gameState');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.gameState = mergeGameState(user.gameState, gameStateUpdate);
+    user.markModified('gameState');
+    await user.save();
+    
+    res.json({ success: true, gameState: user.gameState });
   } catch (error) {
     console.error('Error updating game state:', error);
     res.status(500).json({ message: 'Server error' });
@@ -287,16 +291,14 @@ router.put('/experience', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Experience must be a number' });
     }
     
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
+    const updatedUser = await User.findById(userId).select('username email experience level');
     
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    updatedUser.experience = experience;
+    await updatedUser.save();
     
     res.json(updatedUser);
   } catch (error) {
