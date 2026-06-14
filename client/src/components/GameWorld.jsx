@@ -75,6 +75,7 @@ import { useGameState as useGameStateContext } from "../context/GameStateContext
 import { useGameState } from "../hooks/useGameState";
 import { useWebSocket } from "../context/WebSocketContext";
 import gameStateManager from "../utils/gameStateManager";
+import { buildGameProgressSnapshot } from "../utils/gameProgressSnapshot";
 import { isTextEntryFocused } from "../utils/textFieldFocus";
 import { IconButton } from "@mui/material";
 import { usePortalCollisions } from "../hooks/usePortalCollisions";
@@ -869,9 +870,14 @@ const GameWorld = React.memo(() => {
         gameState.soundManager.playSound("level_complete");
       }
 
-      // Award experience
+      // Award experience locally, then persist the absolute total expected by the API.
+      addExperiencePoints(xpReward, `Level ${level} complete`);
       if (user) {
-        updateUserExperience(user.id, xpReward);
+        updateUserExperience(characterStats.experience + xpReward).catch(
+          (error) => {
+            console.error("Failed to persist level completion XP:", error);
+          },
+        );
       }
 
       // Check achievements
@@ -880,6 +886,8 @@ const GameWorld = React.memo(() => {
     [
       gameState.gameData.levelCompletion,
       gameState.soundManager,
+      addExperiencePoints,
+      characterStats.experience,
       updateGameState,
       updateUIState,
       setActiveNPC,
@@ -2472,17 +2480,23 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressSnapshot = buildGameProgressSnapshot({
       characterPosition,
       currentMapIndex,
       inventory,
-      levelCompletion: gameState.gameData.levelCompletion,
-      achievements: gameState.gameData.achievements,
-      viewedArtifacts: gameState.gameData.viewedArtifacts,
-    };
+      gameData: gameState.gameData,
+      characterStats,
+    });
 
-    gameStateManager.updateState(gameState);
-  }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
+    gameStateManager.updateState(progressSnapshot);
+  }, [
+    user,
+    characterPosition,
+    currentMapIndex,
+    inventory,
+    gameState.gameData,
+    characterStats,
+  ]);
 
   // Auto-save effect
   useEffect(() => {
