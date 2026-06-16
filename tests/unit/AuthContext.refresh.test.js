@@ -86,7 +86,7 @@ describe("AuthContext refresh", () => {
 
     expect(refreshUserToken).not.toHaveBeenCalled();
     expect(localStorage.getItem("token")).toBe(refreshedToken);
-    expect(screen.getByTestId("auth-state")).toHaveTextContent(
+    expect(await screen.findByTestId("auth-state")).toHaveTextContent(
       "authenticated:tester",
     );
   });
