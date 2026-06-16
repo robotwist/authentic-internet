@@ -76,6 +76,10 @@ import { useGameState } from "../hooks/useGameState";
 import { useWebSocket } from "../context/WebSocketContext";
 import gameStateManager from "../utils/gameStateManager";
 import { isTextEntryFocused } from "../utils/textFieldFocus";
+import {
+  buildArtifactProgressPayload,
+  buildGameProgressSnapshot,
+} from "../utils/gameProgressPayloads";
 import { IconButton } from "@mui/material";
 import { usePortalCollisions } from "../hooks/usePortalCollisions";
 
@@ -871,19 +875,32 @@ const GameWorld = React.memo(() => {
 
       // Award experience
       if (user) {
-        updateUserExperience(user.id, xpReward);
+        const persistedExperience = Number(user.experience ?? user.exp ?? 0);
+        const currentExperience = Math.max(
+          characterStats.experience,
+          Number.isFinite(persistedExperience) ? persistedExperience : 0,
+        );
+        const nextExperience = currentExperience + xpReward;
+        handleGainExperience(xpReward, `Completed level ${level}`);
+        updateUserExperience(nextExperience).catch((error) => {
+          console.error("Failed to persist level completion XP:", error);
+        });
       }
 
       // Check achievements
       checkLevelAchievements(level);
     },
     [
+      characterStats.experience,
       gameState.gameData.levelCompletion,
       gameState.soundManager,
+      handleGainExperience,
       updateGameState,
       updateUIState,
       setActiveNPC,
       user,
+      user?.experience,
+      user?.exp,
       checkLevelAchievements,
     ],
   );
@@ -2472,16 +2489,14 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressSnapshot = buildGameProgressSnapshot({
       characterPosition,
       currentMapIndex,
       inventory,
-      levelCompletion: gameState.gameData.levelCompletion,
-      achievements: gameState.gameData.achievements,
-      viewedArtifacts: gameState.gameData.viewedArtifacts,
-    };
+      gameData: gameState.gameData,
+    });
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(progressSnapshot);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
@@ -2617,8 +2632,12 @@ const GameWorld = React.memo(() => {
         !gameState.gameData.viewedArtifacts.includes(artifact.id);
 
       // Update viewed artifacts
+      let nextViewedArtifacts = Array.isArray(gameState.gameData.viewedArtifacts)
+        ? gameState.gameData.viewedArtifacts
+        : [];
+
       if (isFirstView) {
-        const updatedViewedArtifacts = [
+        nextViewedArtifacts = [
           ...(Array.isArray(gameState.gameData.viewedArtifacts)
             ? gameState.gameData.viewedArtifacts
             : []),
@@ -2655,22 +2674,14 @@ const GameWorld = React.memo(() => {
 
       // Save game state if user is logged in
       if (user && typeof updateGameProgress === "function") {
-        const gameState = {
+        const progressPayload = buildArtifactProgressPayload({
           inventory,
-          viewedArtifacts: gameState.gameData.viewedArtifacts,
-          lastPosition: {
-            x: characterPosition.x,
-            y: characterPosition.y,
-            worldId: MAPS[currentMapIndex].name,
-          },
-          gameProgress: {
-            currentQuest: "Artifact Exploration",
-            completedQuests: [],
-            discoveredLocations: [MAPS[currentMapIndex].name],
-          },
-        };
+          viewedArtifacts: nextViewedArtifacts,
+          characterPosition,
+          currentMapName: MAPS[currentMapIndex].name,
+        });
 
-        updateGameProgress(gameState);
+        updateGameProgress(progressPayload);
       }
     },
     [

@@ -918,7 +918,8 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token =
+      localStorage.getItem("token") || localStorage.getItem("authToken");
 
     if (!token) {
       throw new Error("Authentication required");

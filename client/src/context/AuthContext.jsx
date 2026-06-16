@@ -230,10 +230,20 @@ export function useAuth() {
   return context;
 }
 
+let requestInterceptorId = null;
+let responseInterceptorId = null;
+
 // Set up axios interceptor for attaching Authorization header
-const setupAxiosInterceptors = (token) => {
+const setupAxiosInterceptors = (token, onRefreshFailure) => {
+  if (requestInterceptorId !== null) {
+    API.interceptors.request.eject(requestInterceptorId);
+  }
+  if (responseInterceptorId !== null) {
+    API.interceptors.response.eject(responseInterceptorId);
+  }
+
   // Request interceptor to add the auth token
-  API.interceptors.request.use(
+  requestInterceptorId = API.interceptors.request.use(
     (config) => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -244,7 +254,7 @@ const setupAxiosInterceptors = (token) => {
   );
 
   // Response interceptor to handle 401 errors (token expired)
-  API.interceptors.response.use(
+  responseInterceptorId = API.interceptors.response.use(
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
@@ -271,8 +281,7 @@ const setupAxiosInterceptors = (token) => {
             return API(originalRequest);
           }
         } catch (refreshError) {
-          // If refreshing failed, logout the user
-          logout();
+          onRefreshFailure?.();
           return Promise.reject(refreshError);
         }
       }
@@ -323,6 +332,11 @@ export const AuthProvider = ({ children }) => {
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       },
     );
+  };
+
+  const handleRefreshFailure = () => {
+    clearRefreshTimeout();
+    dispatch({ type: AUTH_ACTIONS.LOGOUT });
   };
 
   // API Functions
@@ -393,7 +407,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // Set up axios interceptors for Authorization headers
-      setupAxiosInterceptors(data.token);
+      setupAxiosInterceptors(data.token, handleRefreshFailure);
 
       dispatch({ type: AUTH_ACTIONS.AUTH_SUCCESS, payload: data });
 
@@ -471,19 +485,21 @@ export const AuthProvider = ({ children }) => {
     refreshInProgressRef.current = true;
 
     try {
-      const storedToken = localStorage.getItem("token");
       const storedRefreshToken = localStorage.getItem("refreshToken");
 
-      if (!storedToken || !storedRefreshToken) {
-        console.log("No tokens found in storage");
+      if (!localStorage.getItem("token")) {
+        console.log("No access token found in storage");
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
         return false;
       }
 
-      const response = await refreshUserToken(storedRefreshToken);
+      const response = storedRefreshToken
+        ? await refreshUserToken(storedRefreshToken)
+        : (await API.post("/api/auth/refresh")).data;
 
       if (response && response.token) {
         localStorage.setItem("token", response.token);
+        setupAxiosInterceptors(response.token, handleRefreshFailure);
         scheduleTokenRefresh(response.token);
 
         if (!state.isAuthenticated && state.user) {
@@ -525,7 +541,6 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       try {
         const storedToken = localStorage.getItem("token");
-        const storedRefreshToken = localStorage.getItem("refreshToken");
         const storedUser = localStorage.getItem("user");
 
         if (!storedToken || !storedUser) {
@@ -558,20 +573,10 @@ export const AuthProvider = ({ children }) => {
             `Token expired or expiring soon (${Math.floor(timeUntilExpiry / 1000)}s remaining), attempting refresh`,
           );
 
-          if (storedRefreshToken) {
-            const refreshSuccessful = await refreshToken(true);
+          const refreshSuccessful = await refreshToken(true);
 
-            if (!refreshSuccessful) {
-              console.log("Token refresh failed, clearing auth data");
-              clearStoredAuthData();
-              dispatch({
-                type: AUTH_ACTIONS.INIT_AUTH,
-                payload: { user: null, isAuthenticated: false },
-              });
-              return;
-            }
-          } else {
-            console.log("No refresh token available, clearing auth data");
+          if (!refreshSuccessful) {
+            console.log("Token refresh failed, clearing auth data");
             clearStoredAuthData();
             dispatch({
               type: AUTH_ACTIONS.INIT_AUTH,
@@ -588,7 +593,10 @@ export const AuthProvider = ({ children }) => {
         }
 
         // Set up axios interceptors for the current token
-        setupAxiosInterceptors(storedToken);
+        setupAxiosInterceptors(
+          localStorage.getItem("token") || storedToken,
+          handleRefreshFailure,
+        );
 
         let hydratedUser = parsedUser;
         try {
@@ -627,7 +635,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      setupAxiosInterceptors(token);
+      setupAxiosInterceptors(token, handleRefreshFailure);
     }
   }, []);
 
