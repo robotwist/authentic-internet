@@ -1,6 +1,51 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./PixelGridEditor.css";
 
+const GRID_SIZE = 32;
+
+// Color palette (retro NES style)
+const COLOR_PALETTE = [
+  "#000000", // Black
+  "#FFFFFF", // White
+  "#FF0000", // Red
+  "#00FF00", // Green
+  "#0000FF", // Blue
+  "#FFFF00", // Yellow
+  "#FF00FF", // Magenta
+  "#00FFFF", // Cyan
+  "#FFA500", // Orange
+  "#8B4513", // Brown
+  "#FFD700", // Gold
+  "#C0C0C0", // Silver
+  "#808080", // Gray
+  "#800000", // Maroon
+  "#008000", // Dark Green
+  "#000080", // Navy
+];
+
+const createTransparentGrid = () =>
+  Array(GRID_SIZE)
+    .fill(null)
+    .map(() => Array(GRID_SIZE).fill("transparent"));
+
+const componentToHex = (value) => value.toString(16).padStart(2, "0");
+
+const pixelToColor = (r, g, b, a) => {
+  if (a === 0) return "transparent";
+  if (a === 255) {
+    return `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
+  }
+  return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
+};
+
+export const hasPaintedPixels = (grid) =>
+  Array.isArray(grid) &&
+  grid.some(
+    (row) =>
+      Array.isArray(row) &&
+      row.some((color) => typeof color === "string" && color !== "transparent"),
+  );
+
 /**
  * PixelGridEditor - A retro pixel art character creator
  * Allows users to paint on a 32x32 grid to create their custom character sprite
@@ -15,42 +60,88 @@ const PixelGridEditor = ({
   onCharacterNameChange,
   saving = false,
 }) => {
-  const GRID_SIZE = 32;
   const CELL_SIZE = cellSize;
-
-  // Color palette (retro NES style)
-  const COLOR_PALETTE = [
-    "#000000", // Black
-    "#FFFFFF", // White
-    "#FF0000", // Red
-    "#00FF00", // Green
-    "#0000FF", // Blue
-    "#FFFF00", // Yellow
-    "#FF00FF", // Magenta
-    "#00FFFF", // Cyan
-    "#FFA500", // Orange
-    "#8B4513", // Brown
-    "#FFD700", // Gold
-    "#C0C0C0", // Silver
-    "#808080", // Gray
-    "#800000", // Maroon
-    "#008000", // Dark Green
-    "#000080", // Navy
-  ];
 
   const canvasRef = useRef(null);
   const [selectedColor, setSelectedColor] = useState(COLOR_PALETTE[0]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [grid, setGrid] = useState(() => {
-    // Initialize grid with transparent pixels
-    if (initialSprite) {
+    if (Array.isArray(initialSprite)) {
       return initialSprite;
     }
-    return Array(GRID_SIZE)
-      .fill(null)
-      .map(() => Array(GRID_SIZE).fill("transparent"));
+    return createTransparentGrid();
   });
+  const [loadingInitialSprite, setLoadingInitialSprite] = useState(
+    typeof initialSprite === "string",
+  );
   const [tool, setTool] = useState("draw"); // 'draw' or 'erase'
+
+  useEffect(() => {
+    if (Array.isArray(initialSprite)) {
+      setGrid(initialSprite);
+      setLoadingInitialSprite(false);
+      return undefined;
+    }
+
+    if (typeof initialSprite !== "string" || !initialSprite) {
+      setLoadingInitialSprite(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    setLoadingInitialSprite(true);
+
+    const image = new Image();
+    image.onload = () => {
+      if (cancelled) return;
+
+      try {
+        const importCanvas = document.createElement("canvas");
+        importCanvas.width = GRID_SIZE;
+        importCanvas.height = GRID_SIZE;
+        const ctx = importCanvas.getContext("2d");
+        if (!ctx) {
+          throw new Error("Canvas context unavailable");
+        }
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, GRID_SIZE, GRID_SIZE);
+        ctx.drawImage(image, 0, 0, GRID_SIZE, GRID_SIZE);
+
+        const { data } = ctx.getImageData(0, 0, GRID_SIZE, GRID_SIZE);
+        const nextGrid = createTransparentGrid();
+
+        for (let y = 0; y < GRID_SIZE; y++) {
+          for (let x = 0; x < GRID_SIZE; x++) {
+            const idx = (y * GRID_SIZE + x) * 4;
+            nextGrid[y][x] = pixelToColor(
+              data[idx],
+              data[idx + 1],
+              data[idx + 2],
+              data[idx + 3],
+            );
+          }
+        }
+
+        setGrid(nextGrid);
+      } catch (error) {
+        console.error("Failed to load existing character sprite:", error);
+      } finally {
+        setLoadingInitialSprite(false);
+      }
+    };
+    image.onerror = () => {
+      if (!cancelled) {
+        console.error("Failed to load existing character sprite");
+        setLoadingInitialSprite(false);
+      }
+    };
+    image.src = initialSprite;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialSprite]);
 
   // Render the grid to canvas
   useEffect(() => {
@@ -58,6 +149,7 @@ const PixelGridEditor = ({
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
     ctx.imageSmoothingEnabled = false; // Keep pixels crisp
 
     // Clear canvas
@@ -129,11 +221,7 @@ const PixelGridEditor = ({
 
   const clearGrid = () => {
     if (window.confirm("Clear the entire canvas?")) {
-      setGrid(
-        Array(GRID_SIZE)
-          .fill(null)
-          .map(() => Array(GRID_SIZE).fill("transparent")),
-      );
+      setGrid(createTransparentGrid());
     }
   };
 
@@ -146,11 +234,19 @@ const PixelGridEditor = ({
   };
 
   const exportSprite = () => {
+    if (!hasPaintedPixels(grid)) {
+      if (onSave) {
+        onSave({ dataURL: null, grid, isEmpty: true });
+      }
+      return null;
+    }
+
     // Create a temporary canvas to export the sprite at actual size (32x32)
     const exportCanvas = document.createElement("canvas");
     exportCanvas.width = GRID_SIZE;
     exportCanvas.height = GRID_SIZE;
     const ctx = exportCanvas.getContext("2d");
+    if (!ctx) return null;
     ctx.imageSmoothingEnabled = false;
 
     // Draw each pixel
@@ -268,9 +364,11 @@ const PixelGridEditor = ({
               <button
                 className="action-btn primary preview-save-btn"
                 onClick={exportSprite}
-                disabled={saving}
+                disabled={saving || loadingInitialSprite}
               >
-                {saving ? "Saving…" : "💾 Continue to Save"}
+                {saving || loadingInitialSprite
+                  ? "Saving…"
+                  : "💾 Continue to Save"}
               </button>
             )}
           </div>
@@ -336,9 +434,11 @@ const PixelGridEditor = ({
               <button
                 className="action-btn primary"
                 onClick={exportSprite}
-                disabled={saving}
+                disabled={saving || loadingInitialSprite}
               >
-                {saving ? "Saving…" : "💾 Continue to Save"}
+                {saving || loadingInitialSprite
+                  ? "Saving…"
+                  : "💾 Continue to Save"}
               </button>
             )}
           </div>
@@ -364,9 +464,9 @@ const PixelGridEditor = ({
             type="button"
             className="action-btn primary"
             onClick={exportSprite}
-            disabled={saving}
+            disabled={saving || loadingInitialSprite}
           >
-            {saving ? "Saving…" : "Save & play"}
+            {saving || loadingInitialSprite ? "Saving…" : "Save & play"}
           </button>
         </div>
       )}

@@ -281,18 +281,38 @@ router.put('/me/character', authenticateToken, async (req, res) => {
 router.put('/experience', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { experience } = req.body;
+    const { experience, level, inventory } = req.body;
     
-    if (typeof experience !== 'number') {
+    if (
+      experience === undefined &&
+      level === undefined &&
+      inventory === undefined
+    ) {
+      return res.status(400).json({ message: 'No progress fields provided' });
+    }
+
+    if (experience !== undefined && typeof experience !== 'number') {
       return res.status(400).json({ message: 'Experience must be a number' });
     }
+
+    if (level !== undefined && typeof level !== 'number') {
+      return res.status(400).json({ message: 'Level must be a number' });
+    }
+
+    if (inventory !== undefined && !Array.isArray(inventory)) {
+      return res.status(400).json({ message: 'Inventory must be an array' });
+    }
+
+    const updateData = {};
+    if (experience !== undefined) updateData.experience = experience;
+    if (level !== undefined) updateData.level = level;
+    if (inventory !== undefined) updateData.inventory = inventory;
     
-    // Update user's experience points in database
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
-      { $set: { experience } },
+      { $set: updateData },
       { new: true }
-    ).select('username email experience level');
+    ).select('username email experience level inventory');
     
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
