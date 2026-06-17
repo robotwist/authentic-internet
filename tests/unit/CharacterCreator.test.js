@@ -9,9 +9,13 @@ const mockUpdateUser = jest.fn();
 let mockUser;
 let mockEditorProps;
 
-jest.mock("react-router-dom", () => ({
-  useNavigate: () => mockNavigate,
-}));
+jest.mock(
+  "react-router-dom",
+  () => ({
+    useNavigate: () => mockNavigate,
+  }),
+  { virtual: true },
+);
 
 jest.mock("../../client/src/context/AuthContext", () => ({
   useAuth: () => ({
