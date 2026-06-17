@@ -11,7 +11,13 @@ import {
  * Handles player progression, inventory management, and achievements.
  * Provides methods to synchronize local data with the server.
  */
-class GameProgressService {
+const getInventoryItemId = (item) => {
+  if (!item) return null;
+  const id = item._id || item.id;
+  return id ? String(id) : null;
+};
+
+export class GameProgressService {
   constructor() {
     this.initialized = false;
     this.syncInProgress = false;
@@ -98,19 +104,21 @@ class GameProgressService {
 
         // Add unique items from offline inventory
         offlineInventory.forEach((item) => {
-          const exists = this.inventory.some((i) => i.id === item.id);
+          const itemId = getInventoryItemId(item);
+          const exists = this.inventory.some(
+            (i) => getInventoryItemId(i) === itemId,
+          );
           if (!exists) {
             this.inventory.push(item);
           }
         });
 
-        // Clear offline inventory
+        // Clear offline inventory after merging; keep the pending flag so the
+        // merged inventory is written back to the server below.
         saveGameProgress("offlineInventory", []);
-        this.pendingUpdates.inventory = false;
       }
 
-      // If we have pending experience updates, sync with server
-      if (this.pendingUpdates.experience) {
+      if (this.pendingUpdates.experience || this.pendingUpdates.inventory) {
         this.syncWithServer();
       }
 
@@ -141,12 +149,11 @@ class GameProgressService {
     // Save progress locally
     saveGameProgress("offlineExperience", this.experience);
     saveGameProgress("offlineLevel", this.level);
+    this.pendingUpdates.experience = true;
 
     // If authenticated, sync with server
     if (getAuthToken()) {
       this.syncWithServer();
-    } else {
-      this.pendingUpdates.experience = true;
     }
 
     return {
@@ -173,10 +180,11 @@ class GameProgressService {
    * @returns {boolean} - Success status
    */
   addToInventory(item) {
-    if (!item || !item.id) return false;
+    const itemId = getInventoryItemId(item);
+    if (!itemId) return false;
 
     // Check if item already exists in inventory
-    const exists = this.inventory.some((i) => i.id === item.id);
+    const exists = this.inventory.some((i) => getInventoryItemId(i) === itemId);
     if (exists) return true; // Item already in inventory
 
     // Add to inventory
@@ -186,12 +194,11 @@ class GameProgressService {
     const offlineInventory = getGameProgress("offlineInventory", []);
     offlineInventory.push(item);
     saveGameProgress("offlineInventory", offlineInventory);
+    this.pendingUpdates.inventory = true;
 
     // If authenticated, sync with server
     if (getAuthToken()) {
       this.syncWithServer();
-    } else {
-      this.pendingUpdates.inventory = true;
     }
 
     return true;
@@ -204,22 +211,24 @@ class GameProgressService {
    */
   removeFromInventory(itemId) {
     if (!itemId) return false;
+    const itemIdString = String(itemId);
 
     // Remove from inventory
-    this.inventory = this.inventory.filter((item) => item.id !== itemId);
+    this.inventory = this.inventory.filter(
+      (item) => getInventoryItemId(item) !== itemIdString,
+    );
 
     // Update offline inventory
     const offlineInventory = getGameProgress("offlineInventory", []);
     const updatedOfflineInventory = offlineInventory.filter(
-      (item) => item.id !== itemId,
+      (item) => getInventoryItemId(item) !== itemIdString,
     );
     saveGameProgress("offlineInventory", updatedOfflineInventory);
+    this.pendingUpdates.inventory = true;
 
     // If authenticated, sync with server
     if (getAuthToken()) {
       this.syncWithServer();
-    } else {
-      this.pendingUpdates.inventory = true;
     }
 
     return true;
@@ -256,13 +265,37 @@ class GameProgressService {
     this.syncInProgress = true;
 
     try {
+      const updateData = {};
+      const syncsExperience = this.pendingUpdates.experience;
+      const syncsInventory = this.pendingUpdates.inventory;
+
+      if (syncsExperience) {
+        updateData.experience = this.experience;
+        updateData.level = this.level;
+      }
+
+      if (syncsInventory) {
+        updateData.inventory = this.inventory
+          .map((item) => getInventoryItemId(item))
+          .filter(Boolean);
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return true;
+      }
+
       const expResponse = await API.put("/api/users/experience", {
-        experience: this.experience,
+        ...updateData,
       });
 
       if (expResponse.data) {
         this.userData = { ...this.userData, ...expResponse.data };
-        this.pendingUpdates.experience = false;
+        if (syncsExperience) {
+          this.pendingUpdates.experience = false;
+        }
+        if (syncsInventory) {
+          this.pendingUpdates.inventory = false;
+        }
         console.log("Game progress synced with server successfully");
       }
 
@@ -329,6 +362,8 @@ class GameProgressService {
 
       // If authenticated, sync with server
       if (getAuthToken()) {
+        this.pendingUpdates.experience = true;
+        this.pendingUpdates.inventory = true;
         this.syncWithServer();
       }
 

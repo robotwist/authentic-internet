@@ -17,7 +17,7 @@ const CharacterCreator = () => {
 
   const handleSaveFromEditor = async ({ dataURL }) => {
     if (!dataURL) {
-      setError("Paint at least a few pixels on your character");
+      setError("Paint at least a few pixels on your character before saving.");
       return;
     }
 
@@ -82,6 +82,7 @@ const CharacterCreator = () => {
 
       <PixelGridEditor
         onSave={handleSaveFromEditor}
+        initialSprite={user?.characterSprite || null}
         cellSize={28}
         fullscreen
         compact
