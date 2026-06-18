@@ -23,6 +23,11 @@ jest.unstable_mockModule('../middleware/authMiddleware.js', () => ({
   },
 }));
 
+jest.unstable_mockModule('../utils/rateLimiting.js', () => ({
+  gameStateReadLimiter: (req, res, next) => next(),
+  gameStateWriteLimiter: (req, res, next) => next(),
+}));
+
 const { default: userRoutes } = await import('../routes/userRoutes.js');
 
 const app = express();
