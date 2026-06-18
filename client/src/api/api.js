@@ -912,11 +912,11 @@ export const getUserGameState = withCache(
 );
 
 /**
- * Update the user's experience points in the database
- * @param {number} experience - The new experience points total
+ * Award experience points to the current user.
+ * @param {number} amount - The experience points earned
  * @returns {Promise<Object>} Updated user data
  */
-export const updateUserExperience = async (experience) => {
+export const updateUserExperience = async (amount) => {
   try {
     const token = localStorage.getItem("authToken");
 
@@ -930,7 +930,7 @@ export const updateUserExperience = async (experience) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ experience }),
+      body: JSON.stringify({ amount }),
     });
 
     if (!response.ok) {
