@@ -19,6 +19,7 @@ class GameProgressService {
     this.inventory = [];
     this.experience = 0;
     this.level = 1;
+    this.pendingExperienceDelta = 0;
 
     // Track offline progress that needs to be synced
     this.pendingUpdates = {
@@ -39,9 +40,13 @@ class GameProgressService {
     if (!userData) return false;
 
     this.userData = userData;
-    this.experience = userData.experience || 0;
-    this.level = userData.level || 1;
+    const serverExperience = userData.experience ?? userData.exp ?? 0;
+    const offlineExperience = getGameProgress("offlineExperience", 0);
+    this.experience = Math.max(serverExperience, offlineExperience);
+    this.level = userData.level || this.calculateLevel(this.experience);
     this.inventory = userData.inventory || [];
+    this.pendingExperienceDelta = Math.max(0, offlineExperience - serverExperience);
+    this.pendingUpdates.experience = this.pendingExperienceDelta > 0;
 
     this.initialized = true;
 
@@ -132,6 +137,7 @@ class GameProgressService {
 
     // Add experience
     this.experience += amount;
+    this.pendingExperienceDelta += amount;
 
     // Check for level up
     const newLevel = this.calculateLevel(this.experience);
@@ -256,13 +262,23 @@ class GameProgressService {
     this.syncInProgress = true;
 
     try {
-      const expResponse = await API.put("/api/users/experience", {
-        experience: this.experience,
-      });
+      const amount = this.pendingExperienceDelta;
+      if (amount <= 0) return true;
+
+      const expResponse = await API.put("/api/users/experience", { amount });
 
       if (expResponse.data) {
         this.userData = { ...this.userData, ...expResponse.data };
-        this.pendingUpdates.experience = false;
+        this.pendingExperienceDelta = Math.max(
+          0,
+          this.pendingExperienceDelta - amount,
+        );
+        this.experience = Math.max(
+          this.experience,
+          expResponse.data.experience ?? expResponse.data.exp ?? this.experience,
+        );
+        this.level = expResponse.data.level ?? this.level;
+        this.pendingUpdates.experience = this.pendingExperienceDelta > 0;
         console.log("Game progress synced with server successfully");
       }
 
@@ -272,6 +288,9 @@ class GameProgressService {
       return false;
     } finally {
       this.syncInProgress = false;
+      if (this.pendingExperienceDelta > 0 && getAuthToken()) {
+        this.syncWithServer();
+      }
     }
   }
 
@@ -320,6 +339,7 @@ class GameProgressService {
       this.experience = 0;
       this.level = 1;
       this.inventory = [];
+      this.pendingExperienceDelta = 0;
 
       // Clear local storage keys
       saveGameProgress("offlineExperience", 0);

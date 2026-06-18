@@ -9,6 +9,55 @@ import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiti
 import { validate, schemas } from "../middleware/validation.js";
 
 const router = express.Router();
+const MAX_EXPERIENCE_AWARD = 1000;
+
+const parseExperienceAward = (req) => {
+  const { amount, experience } = req.body;
+
+  if (experience !== undefined) {
+    return {
+      error: 'Experience updates must send the amount earned, not an absolute total',
+    };
+  }
+
+  if (typeof amount !== 'number' || !Number.isFinite(amount) || !Number.isInteger(amount)) {
+    return { error: 'Experience amount must be an integer' };
+  }
+
+  if (amount <= 0 || amount > MAX_EXPERIENCE_AWARD) {
+    return { error: `Experience amount must be between 1 and ${MAX_EXPERIENCE_AWARD}` };
+  }
+
+  return { amount };
+};
+
+const awardExperienceToUser = (userId, amount) => {
+  const nextExperience = {
+    $add: [{ $ifNull: ['$experience', 0] }, amount],
+  };
+
+  return User.findOneAndUpdate(
+    { _id: userId },
+    [
+      {
+        $set: {
+          experience: nextExperience,
+          level: {
+            $add: [
+              {
+                $floor: {
+                  $divide: [nextExperience, 100],
+                },
+              },
+              1,
+            ],
+          },
+        },
+      },
+    ],
+    { new: true },
+  ).select('username email experience level');
+};
 
 // Configure multer for avatar uploads
 const storage = multer.diskStorage({
@@ -280,19 +329,14 @@ router.put('/me/character', authenticateToken, async (req, res) => {
 // Update user's experience points
 router.put('/experience', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.userId;
-    const { experience } = req.body;
-    
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    const userId = req.user.userId || req.user.id;
+    const { amount, error } = parseExperienceAward(req);
+
+    if (error) {
+      return res.status(400).json({ message: error });
     }
-    
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
+
+    const updatedUser = await awardExperienceToUser(userId, amount);
     
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
@@ -461,19 +505,14 @@ router.put('/game-state', authenticateToken, async (req, res) => {
 // Update user's experience points
 router.put('/experience', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { experience } = req.body;
-    
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    const userId = req.user.userId || req.user.id;
+    const { amount, error } = parseExperienceAward(req);
+
+    if (error) {
+      return res.status(400).json({ message: error });
     }
-    
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
+
+    const updatedUser = await awardExperienceToUser(userId, amount);
     
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });

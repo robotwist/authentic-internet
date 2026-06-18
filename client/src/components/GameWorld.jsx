@@ -871,7 +871,7 @@ const GameWorld = React.memo(() => {
 
       // Award experience
       if (user) {
-        updateUserExperience(user.id, xpReward);
+        updateUserExperience(xpReward);
       }
 
       // Check achievements
