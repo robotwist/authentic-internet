@@ -97,10 +97,13 @@ router.get('/main', async (req, res) => {
       const npc = new NPC({
         name: 'World Guide',
         description: 'A helpful guide for the main world',
+        type: 'GUIDE',
         world: mainWorld._id,
         creator: req.user?.userId || null,
-        apiType: 'gpt',
-        position: mainWorld.spawnPoints[0] || { x: 1, y: 1 }
+        apiType: 'quotes',
+        apiConfig: {},
+        position: mainWorld.spawnPoints[0] || { x: 1, y: 1 },
+        dialogue: ['Welcome to Authentic Internet.']
       });
 
       await npc.save();
@@ -177,10 +180,13 @@ router.post('/', auth, validateWorld, async (req, res) => {
     const npc = new NPC({
       name: 'Development Guide',
       description: 'A helpful guide for your development world',
+      type: 'GUIDE',
       world: world._id,
       creator: req.user.userId,
-      apiType: 'gpt',
-      position: defaultSpawnPoint
+      apiType: 'quotes',
+      apiConfig: {},
+      position: defaultSpawnPoint,
+      dialogue: ['Welcome to your development world.']
     });
 
     await npc.save();
