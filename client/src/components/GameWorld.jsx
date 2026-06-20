@@ -869,9 +869,13 @@ const GameWorld = React.memo(() => {
         gameState.soundManager.playSound("level_complete");
       }
 
-      // Award experience
+      // Award experience locally and persist the resulting total.
+      addExperiencePoints(xpReward, `Level ${level} completion`);
       if (user) {
-        updateUserExperience(user.id, xpReward);
+        const nextExperience = (characterStats?.experience || 0) + xpReward;
+        updateUserExperience(nextExperience).catch((error) => {
+          console.error("Failed to persist level completion XP:", error);
+        });
       }
 
       // Check achievements
@@ -883,6 +887,8 @@ const GameWorld = React.memo(() => {
       updateGameState,
       updateUIState,
       setActiveNPC,
+      addExperiencePoints,
+      characterStats?.experience,
       user,
       checkLevelAchievements,
     ],

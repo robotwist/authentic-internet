@@ -2,7 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { auth } from '../middleware/auth.js';
 import NPC from '../models/NPC.js';
-import World from '../models/World.js';
+import { World } from '../models/World.js';
 import { fetchJohnMuirQuote } from '../services/apiIntegrations.js';
 
 const router = express.Router();

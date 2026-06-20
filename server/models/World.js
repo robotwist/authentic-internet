@@ -1,5 +1,154 @@
 import mongoose from "mongoose";
 
+const QuestSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String },
+  rewardExp: { type: Number, default: 0 },
+  isCompleted: { type: Boolean, default: false }
+});
+
+const WorldSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  isPublic: {
+    type: Boolean,
+    default: true
+  },
+  isMainWorld: {
+    type: Boolean,
+    default: false
+  },
+  mapType: {
+    type: String,
+    default: 'DEFAULT'
+  },
+  mapData: {
+    type: [[Number]],
+    required: true
+  },
+  mapSize: {
+    width: { type: Number, default: 20 },
+    height: { type: Number, default: 20 }
+  },
+  spawnPoints: [{
+    x: { type: Number, required: true },
+    y: { type: Number, required: true }
+  }],
+  npcs: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'NPC'
+  }],
+  portals: [{
+    name: String,
+    position: {
+      x: Number,
+      y: Number
+    },
+    destination: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'World'
+    }
+  }],
+  sharedWith: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    role: {
+      type: String,
+      enum: ['viewer', 'editor', 'admin'],
+      default: 'viewer'
+    }
+  }],
+  games: [{
+    name: String,
+    description: String,
+    type: String,
+    config: mongoose.Schema.Types.Mixed
+  }],
+  artifacts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Artifact" }],
+  quests: [QuestSchema]
+}, {
+  timestamps: true
+});
+
+WorldSchema.pre('validate', function(next) {
+  if (Array.isArray(this.mapData)) {
+    this.mapSize = {
+      width: this.mapData[0]?.length || this.mapSize?.width || 0,
+      height: this.mapData.length
+    };
+  }
+  next();
+});
+
+WorldSchema.methods.expandMap = async function(direction, size) {
+  const rowsToAdd = Number(size);
+  if (!Number.isInteger(rowsToAdd) || rowsToAdd <= 0) {
+    throw new Error('Expansion size must be a positive integer');
+  }
+
+  const { width } = this.mapSize;
+  let newMapData = this.mapData.map((row) => [...row]);
+
+  switch (direction) {
+    case 'north':
+      for (let i = 0; i < rowsToAdd; i++) {
+        newMapData.unshift(Array(width).fill(0));
+      }
+      break;
+    case 'south':
+      for (let i = 0; i < rowsToAdd; i++) {
+        newMapData.push(Array(width).fill(0));
+      }
+      break;
+    case 'east':
+      newMapData = newMapData.map((row) => [...row, ...Array(rowsToAdd).fill(0)]);
+      break;
+    case 'west':
+      newMapData = newMapData.map((row) => [...Array(rowsToAdd).fill(0), ...row]);
+      break;
+    default:
+      throw new Error('Invalid expansion direction');
+  }
+
+  this.mapData = newMapData;
+  await this.save();
+};
+
+WorldSchema.methods.shareWith = async function(userId, role = 'viewer') {
+  if (this.sharedWith.some((share) => share.user.toString() === userId)) {
+    throw new Error('World is already shared with this user');
+  }
+
+  this.sharedWith.push({ user: userId, role });
+  await this.save();
+};
+
+WorldSchema.methods.removeShare = async function(userId) {
+  this.sharedWith = this.sharedWith.filter((share) => share.user.toString() !== userId);
+  await this.save();
+};
+
+WorldSchema.methods.addGame = async function(gameData) {
+  this.games.push(gameData);
+  await this.save();
+};
+
+export const World = mongoose.models.World || mongoose.model("World", WorldSchema);
+
 // Player position in world
 const PlayerPositionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -150,5 +299,5 @@ WorldInstanceSchema.methods.canPlayerJoin = function(userId) {
   return true;
 };
 
-const WorldInstance = mongoose.model('WorldInstance', WorldInstanceSchema);
+const WorldInstance = mongoose.models.WorldInstance || mongoose.model('WorldInstance', WorldInstanceSchema);
 export default WorldInstance;
