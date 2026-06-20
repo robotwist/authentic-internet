@@ -287,10 +287,10 @@ router.put('/experience', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Experience must be a number' });
     }
     
-    // Update user's experience points in database
+    // Never allow stale client state to lower persisted progress.
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
-      { $set: { experience } },
+      { $max: { experience } },
       { new: true }
     ).select('username email experience level');
     
@@ -468,10 +468,10 @@ router.put('/experience', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Experience must be a number' });
     }
     
-    // Update user's experience points in database
+    // Never allow stale client state to lower persisted progress.
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
-      { $set: { experience } },
+      { $max: { experience } },
       { new: true }
     ).select('username email experience level');
     

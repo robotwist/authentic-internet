@@ -15,9 +15,15 @@ const NPCSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  description: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   type: {
     type: String,
     required: true,
+    default: 'GUIDE',
     enum: [
       'WRITER', 'PHILOSOPHER', 'ARTIST', 'SCIENTIST', 'EXPLORER', 
       'MENTOR', 'GUIDE', 'SAGE', 'POET', 'NATURALIST',
@@ -28,6 +34,33 @@ const NPCSchema = new mongoose.Schema({
   position: {
     x: { type: Number, required: true },
     y: { type: Number, required: true }
+  },
+  sprite: {
+    type: String,
+    default: '/assets/npcs/default.png'
+  },
+  world: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'World',
+    default: null
+  },
+  creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  apiType: {
+    type: String,
+    enum: [
+      'weather', 'quotes', 'shakespeare', 'keats', 'socrates',
+      'michelangelo', 'oscar_wilde', 'alexander_pope', 'zeus',
+      'jesus', 'john_muir'
+    ],
+    default: 'quotes'
+  },
+  apiConfig: {
+    type: Object,
+    default: {}
   },
   area: {
     type: String,

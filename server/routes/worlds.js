@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { auth } from '../middleware/auth.js';
-import WorldInstance from '../models/World.js';
+import WorldInstance, { World } from '../models/World.js';
 import ChatMessage from '../models/Chat.js';
 import User from '../models/User.js';
 import NPC from '../models/NPC.js';
@@ -9,6 +9,26 @@ import jwt from 'jsonwebtoken';
 import { MAPS_STRUCTURE } from '../constants.js';
 
 const router = express.Router();
+const DEFAULT_SPAWN_POINTS = [{ x: 1, y: 1 }];
+
+const getMapDefinition = (mapType = 'DEFAULT') => {
+  if (Array.isArray(MAPS_STRUCTURE)) {
+    const requestedName = mapType === 'DEFAULT' ? 'Home' : mapType;
+    return MAPS_STRUCTURE.find(
+      (map) => map.name.toLowerCase() === requestedName.toLowerCase()
+    ) || MAPS_STRUCTURE[0];
+  }
+
+  return MAPS_STRUCTURE[mapType] || MAPS_STRUCTURE.DEFAULT;
+};
+
+const getMapTiles = (mapDefinition) => mapDefinition?.tiles || mapDefinition?.data;
+
+const getSpawnPoints = (mapDefinition) => (
+  Array.isArray(mapDefinition?.spawnPoints) && mapDefinition.spawnPoints.length > 0
+    ? mapDefinition.spawnPoints
+    : DEFAULT_SPAWN_POINTS
+);
 
 // Validation middleware
 const validateWorld = [
@@ -67,8 +87,8 @@ router.get('/main', async (req, res) => {
         isMainWorld: true,
         creator: req.user?.userId || null, // System-created
         mapType: 'DEFAULT',
-        mapData: MAPS_STRUCTURE.DEFAULT.tiles,
-        spawnPoints: MAPS_STRUCTURE.DEFAULT.spawnPoints || [{ x: 1, y: 1 }]
+        mapData: getMapTiles(getMapDefinition('DEFAULT')),
+        spawnPoints: getSpawnPoints(getMapDefinition('DEFAULT'))
       });
 
       await mainWorld.save();
@@ -77,10 +97,13 @@ router.get('/main', async (req, res) => {
       const npc = new NPC({
         name: 'World Guide',
         description: 'A helpful guide for the main world',
+        type: 'GUIDE',
         world: mainWorld._id,
         creator: req.user?.userId || null,
-        apiType: 'gpt',
-        position: mainWorld.spawnPoints[0] || { x: 1, y: 1 }
+        apiType: 'quotes',
+        apiConfig: {},
+        position: mainWorld.spawnPoints[0] || { x: 1, y: 1 },
+        dialogue: ['Welcome to Authentic Internet.']
       });
 
       await npc.save();
@@ -133,8 +156,9 @@ router.post('/', auth, validateWorld, async (req, res) => {
     }
 
     // Get predefined map data
-    const selectedMap = MAPS_STRUCTURE[mapType] || MAPS_STRUCTURE.DEFAULT;
-    if (!selectedMap) {
+    const selectedMap = getMapDefinition(mapType);
+    const selectedMapTiles = getMapTiles(selectedMap);
+    if (!selectedMap || !selectedMapTiles) {
       return res.status(400).json({ message: 'Invalid map type' });
     }
 
@@ -145,8 +169,8 @@ router.post('/', auth, validateWorld, async (req, res) => {
       isMainWorld: false, // Cannot create new main worlds
       creator: req.user.userId,
       mapType,
-      mapData: selectedMap.tiles,
-      spawnPoints: selectedMap.spawnPoints || [{ x: 1, y: 1 }]
+      mapData: selectedMapTiles,
+      spawnPoints: getSpawnPoints(selectedMap)
     });
 
     await world.save();
@@ -156,10 +180,13 @@ router.post('/', auth, validateWorld, async (req, res) => {
     const npc = new NPC({
       name: 'Development Guide',
       description: 'A helpful guide for your development world',
+      type: 'GUIDE',
       world: world._id,
       creator: req.user.userId,
-      apiType: 'gpt',
-      position: defaultSpawnPoint
+      apiType: 'quotes',
+      apiConfig: {},
+      position: defaultSpawnPoint,
+      dialogue: ['Welcome to your development world.']
     });
 
     await npc.save();
