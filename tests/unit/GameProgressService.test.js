@@ -23,6 +23,8 @@ describe("GameProgressService XP sync", () => {
   let GameProgressService;
 
   beforeAll(() => {
+    mockGetAuthToken.mockReturnValue(null);
+    mockGetGameProgress.mockImplementation((_, defaultValue) => defaultValue);
     ({ GameProgressService } = require(
       "../../client/src/services/GameProgressService",
     ));
