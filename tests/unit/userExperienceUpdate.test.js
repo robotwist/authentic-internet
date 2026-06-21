@@ -2,7 +2,7 @@ import {
   buildExperienceUpdatePipeline,
   updateUserExperience,
   validateExperienceUpdatePayload,
-} from "../../server/routes/userRoutes";
+} from "../../server/utils/experienceUpdate";
 
 describe("user experience updates", () => {
   test("legacy absolute totals cannot lower stored experience", () => {

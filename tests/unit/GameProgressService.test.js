@@ -17,11 +17,17 @@ jest.mock("../../client/src/utils/authUtils", () => ({
   getGameProgress: (...args) => mockGetGameProgress(...args),
 }));
 
-import { GameProgressService } from "../../client/src/services/GameProgressService";
-
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("GameProgressService XP sync", () => {
+  let GameProgressService;
+
+  beforeAll(() => {
+    ({ GameProgressService } = require(
+      "../../client/src/services/GameProgressService",
+    ));
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetAuthToken.mockReturnValue("token");
