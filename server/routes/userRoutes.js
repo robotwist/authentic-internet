@@ -45,6 +45,101 @@ const upload = multer({
   }
 });
 
+const EXPERIENCE_PER_LEVEL = 100;
+
+const getAuthenticatedUserId = (req) => req.user?.userId || req.user?.id;
+
+export const isValidExperienceNumber = (value) => (
+  typeof value === 'number' && Number.isFinite(value) && value >= 0
+);
+
+export const validateExperienceUpdatePayload = ({ experience, experienceDelta }) => {
+  const hasExperience = experience !== undefined;
+  const hasExperienceDelta = experienceDelta !== undefined;
+
+  if (!hasExperience && !hasExperienceDelta) {
+    return 'Experience must be a number';
+  }
+
+  if (hasExperience && !isValidExperienceNumber(experience)) {
+    return 'Experience must be a non-negative number';
+  }
+
+  if (hasExperienceDelta && !isValidExperienceNumber(experienceDelta)) {
+    return 'Experience delta must be a non-negative number';
+  }
+
+  return null;
+};
+
+export const buildExperienceUpdatePipeline = ({ experience, experienceDelta }) => {
+  const hasExperience = experience !== undefined;
+  const hasExperienceDelta = experienceDelta !== undefined;
+  const currentExperience = { $ifNull: ['$experience', 0] };
+  const experienceCandidates = [currentExperience];
+
+  if (hasExperience) {
+    experienceCandidates.push(experience);
+  }
+
+  if (hasExperienceDelta) {
+    experienceCandidates.push({ $add: [currentExperience, experienceDelta] });
+  }
+
+  return [
+    { $set: { experience: { $max: experienceCandidates } } },
+    {
+      $set: {
+        level: {
+          $add: [
+            { $floor: { $divide: ['$experience', EXPERIENCE_PER_LEVEL] } },
+            1,
+          ],
+        },
+      },
+    },
+  ];
+};
+
+export const updateUserExperience = async (UserModel, userId, payload) => {
+  const validationError = validateExperienceUpdatePayload(payload);
+  if (validationError) {
+    const error = new Error(validationError);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return UserModel.findByIdAndUpdate(
+    userId,
+    buildExperienceUpdatePipeline(payload),
+    { new: true },
+  ).select('username email experience level');
+};
+
+export const handleExperienceUpdate = async (req, res, UserModel = User) => {
+  try {
+    const userId = getAuthenticatedUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    const updatedUser = await updateUserExperience(UserModel, userId, req.body);
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(updatedUser);
+  } catch (error) {
+    if (error.statusCode === 400) {
+      return res.status(400).json({ message: error.message });
+    }
+
+    console.error('Error updating experience:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // 📌 Upload Avatar (🔐 Requires Authentication)
 router.post("/me/avatar", authenticateToken, upload.single('avatar'), async (req, res) => {
   try {
@@ -278,32 +373,7 @@ router.put('/me/character', authenticateToken, async (req, res) => {
 });
 
 // Update user's experience points
-router.put('/experience', authenticateToken, async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const { experience } = req.body;
-    
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
-    }
-    
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
-    
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    res.json(updatedUser);
-  } catch (error) {
-    console.error('Error updating experience:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+router.put('/experience', authenticateToken, handleExperienceUpdate);
 
 // Add achievement for user
 router.post('/achievements', authenticateToken, async (req, res) => {
@@ -459,32 +529,7 @@ router.put('/game-state', authenticateToken, async (req, res) => {
 });
 
 // Update user's experience points
-router.put('/experience', authenticateToken, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { experience } = req.body;
-    
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
-    }
-    
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
-    
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    res.json(updatedUser);
-  } catch (error) {
-    console.error('Error updating experience:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+router.put('/experience', authenticateToken, handleExperienceUpdate);
 
 // Add achievement for user
 router.post('/achievements', authenticateToken, async (req, res) => {
