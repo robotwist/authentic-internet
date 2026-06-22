@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { auth } from '../middleware/auth.js';
-import WorldInstance from '../models/World.js';
+import World from '../models/World.js';
 import ChatMessage from '../models/Chat.js';
 import User from '../models/User.js';
 import NPC from '../models/NPC.js';
@@ -22,7 +22,7 @@ const validateWorld = [
 // Get all public worlds
 router.get('/', async (req, res) => {
   try {
-    const worlds = await WorldInstance.find({ 
+    const worlds = await World.find({ 
       isPublic: true, 
       isActive: true 
     })
@@ -101,7 +101,7 @@ router.get('/main', async (req, res) => {
 // Get user's development worlds
 router.get('/my-worlds', auth, async (req, res) => {
   try {
-    const worlds = await WorldInstance.find({
+    const worlds = await World.find({
       creator: req.user.userId,
       isMainWorld: false // Only get development worlds
     })
@@ -393,7 +393,7 @@ router.get('/instance/:worldId', async (req, res) => {
   try {
     const { worldId } = req.params;
     
-    const world = await WorldInstance.findOne({ worldId })
+    const world = await World.findOne({ worldId })
       .populate('creator', 'username avatar')
       .populate('moderators', 'username avatar');
 
@@ -444,7 +444,7 @@ router.post('/instance', auth, async (req, res) => {
     // Generate unique world ID
     const worldId = `world_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    const world = new WorldInstance({
+    const world = new World({
       worldId,
       name,
       description,
@@ -505,7 +505,7 @@ router.get('/instance/:worldId/players', async (req, res) => {
   try {
     const { worldId } = req.params;
 
-    const world = await WorldInstance.findOne({ worldId });
+    const world = await World.findOne({ worldId });
     if (!world) {
       return res.status(404).json({ success: false, message: 'World not found' });
     }
