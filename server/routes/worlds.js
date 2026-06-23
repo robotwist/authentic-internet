@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { auth } from '../middleware/auth.js';
-import WorldInstance from '../models/World.js';
+import World from '../models/World.js';
 import ChatMessage from '../models/Chat.js';
 import User from '../models/User.js';
 import NPC from '../models/NPC.js';
@@ -22,7 +22,7 @@ const validateWorld = [
 // Get all public worlds
 router.get('/', async (req, res) => {
   try {
-    const worlds = await WorldInstance.find({ 
+    const worlds = await World.find({ 
       isPublic: true, 
       isActive: true 
     })
@@ -52,46 +52,36 @@ router.get('/', async (req, res) => {
 // Get main world
 router.get('/main', async (req, res) => {
   try {
-    const mainWorld = await World.findOne({ isMainWorld: true })
-      .populate('creator', 'username')
-      .populate('npcs', 'name description apiType sprite position')
-      .populate('games', 'name description type config')
-      .populate('sharedWith.user', 'username');
-
+    const mainWorld = await World.findOne({ worldId: 'main' })
+      .populate('creator', 'username');
     if (!mainWorld) {
-      // Create the main world if it doesn't exist
-      const mainWorld = new World({
+      return res.json({
+        _id: 'main-world',
+        worldId: 'main',
         name: "Authentic Internet",
         description: "The shared world where all users can interact and explore together",
         isPublic: true,
         isMainWorld: true,
-        creator: req.user?.userId || null, // System-created
-        mapType: 'DEFAULT',
         mapData: MAPS_STRUCTURE.DEFAULT.tiles,
-        spawnPoints: MAPS_STRUCTURE.DEFAULT.spawnPoints || [{ x: 1, y: 1 }]
+        spawnPoints: MAPS_STRUCTURE.DEFAULT.spawnPoints || [{ x: 1, y: 1 }],
+        artifacts: [],
+        npcs: [],
+        games: [],
+        portals: [],
       });
-
-      await mainWorld.save();
-
-      // Create default Guide NPC
-      const npc = new NPC({
-        name: 'World Guide',
-        description: 'A helpful guide for the main world',
-        world: mainWorld._id,
-        creator: req.user?.userId || null,
-        apiType: 'gpt',
-        position: mainWorld.spawnPoints[0] || { x: 1, y: 1 }
-      });
-
-      await npc.save();
-
-      // Add NPC to world
-      mainWorld.npcs = [npc._id];
-      await mainWorld.save();
-      await mainWorld.populate('npcs');
     }
 
-    res.json(mainWorld);
+    const worldData = mainWorld.toObject();
+    res.json({
+      ...worldData,
+      isMainWorld: worldData.worldId === 'main',
+      mapData: worldData.mapData || MAPS_STRUCTURE.DEFAULT.tiles,
+      spawnPoints: worldData.spawnPoints || MAPS_STRUCTURE.DEFAULT.spawnPoints || [{ x: 1, y: 1 }],
+      artifacts: worldData.artifacts || [],
+      npcs: worldData.npcs || [],
+      games: worldData.games || [],
+      portals: worldData.portals || [],
+    });
   } catch (error) {
     console.error('Error fetching main world:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -101,14 +91,8 @@ router.get('/main', async (req, res) => {
 // Get user's development worlds
 router.get('/my-worlds', auth, async (req, res) => {
   try {
-    const worlds = await WorldInstance.find({
-      creator: req.user.userId,
-      isMainWorld: false // Only get development worlds
-    })
-    .populate('creator', 'username')
-    .populate('npcs', 'name description apiType')
-    .populate('games', 'name description type')
-    .populate('sharedWith.user', 'username');
+    const worlds = await World.find({ creator: req.user.userId })
+      .populate('creator', 'username');
     res.json(worlds);
   } catch (error) {
     console.error('Error fetching my-worlds:', error);
@@ -124,7 +108,7 @@ router.post('/', auth, validateWorld, async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, description, mapType = 'DEFAULT' } = req.body;
+    const { name, description } = req.body;
 
     // Check if world name already exists
     const existingWorld = await World.findOne({ name, creator: req.user.userId });
@@ -132,47 +116,24 @@ router.post('/', auth, validateWorld, async (req, res) => {
       return res.status(400).json({ message: 'You already have a world with this name' });
     }
 
-    // Get predefined map data
-    const selectedMap = MAPS_STRUCTURE[mapType] || MAPS_STRUCTURE.DEFAULT;
-    if (!selectedMap) {
-      return res.status(400).json({ message: 'Invalid map type' });
-    }
-
+    const worldId = `world_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
     const world = new World({
+      worldId,
       name,
       description,
       isPublic: false, // Development worlds are private by default
-      isMainWorld: false, // Cannot create new main worlds
       creator: req.user.userId,
-      mapType,
-      mapData: selectedMap.tiles,
-      spawnPoints: selectedMap.spawnPoints || [{ x: 1, y: 1 }]
+      moderators: [req.user.userId],
     });
 
     await world.save();
-
-    // Create default NPC for the world
-    const defaultSpawnPoint = world.spawnPoints[0] || { x: 1, y: 1 };
-    const npc = new NPC({
-      name: 'Development Guide',
-      description: 'A helpful guide for your development world',
-      world: world._id,
-      creator: req.user.userId,
-      apiType: 'gpt',
-      position: defaultSpawnPoint
-    });
-
-    await npc.save();
-
-    // Add NPC to world
-    world.npcs = [npc._id];
-    await world.save();
-    await world.populate('npcs');
 
     res.status(201).json({
       world: {
         ...world.toObject(),
-        npcs: [npc]
+        npcs: [],
+        games: [],
+        portals: [],
       }
     });
   } catch (error) {
@@ -268,11 +229,7 @@ router.post('/:id/games', auth, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const world = await World.findById(req.params.id)
-      .populate('creator', 'username avatar')
-      .populate({
-        path: 'npcs',
-        model: 'NPC'
-      });
+      .populate('creator', 'username avatar');
     
     if (!world) {
       return res.status(404).json({ message: 'World not found' });
@@ -282,7 +239,14 @@ router.get('/:id', async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    res.json(world);
+    const worldData = world.toObject();
+    res.json({
+      ...worldData,
+      mapData: worldData.mapData || MAPS_STRUCTURE.DEFAULT?.tiles || [],
+      npcs: worldData.npcs || [],
+      artifacts: worldData.artifacts || [],
+      portals: worldData.portals || [],
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -393,7 +357,7 @@ router.get('/instance/:worldId', async (req, res) => {
   try {
     const { worldId } = req.params;
     
-    const world = await WorldInstance.findOne({ worldId })
+    const world = await World.findOne({ worldId })
       .populate('creator', 'username avatar')
       .populate('moderators', 'username avatar');
 
@@ -444,7 +408,7 @@ router.post('/instance', auth, async (req, res) => {
     // Generate unique world ID
     const worldId = `world_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    const world = new WorldInstance({
+    const world = new World({
       worldId,
       name,
       description,
@@ -505,7 +469,7 @@ router.get('/instance/:worldId/players', async (req, res) => {
   try {
     const { worldId } = req.params;
 
-    const world = await WorldInstance.findOne({ worldId });
+    const world = await World.findOne({ worldId });
     if (!world) {
       return res.status(404).json({ success: false, message: 'World not found' });
     }
