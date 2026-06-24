@@ -7,6 +7,10 @@ import path from "path";
 import fs from "fs";
 import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 import { validate, schemas } from "../middleware/validation.js";
+import {
+  buildMonotonicExperienceUpdate,
+  isValidExperienceTotal,
+} from "../utils/experience.js";
 
 const router = express.Router();
 
@@ -283,14 +287,14 @@ router.put('/experience', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const { experience } = req.body;
     
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    if (!isValidExperienceTotal(experience)) {
+      return res.status(400).json({ message: 'Experience must be a finite non-negative number' });
     }
     
-    // Update user's experience points in database
+    // Never allow a stale client/tab to overwrite a higher XP total.
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
-      { $set: { experience } },
+      buildMonotonicExperienceUpdate(experience),
       { new: true }
     ).select('username email experience level');
     
@@ -464,14 +468,14 @@ router.put('/experience', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { experience } = req.body;
     
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    if (!isValidExperienceTotal(experience)) {
+      return res.status(400).json({ message: 'Experience must be a finite non-negative number' });
     }
     
-    // Update user's experience points in database
+    // Never allow a stale client/tab to overwrite a higher XP total.
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
-      { $set: { experience } },
+      buildMonotonicExperienceUpdate(experience),
       { new: true }
     ).select('username email experience level');
     

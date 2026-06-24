@@ -918,27 +918,12 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      throw new Error("Authentication required");
+    if (typeof experience !== "number" || !Number.isFinite(experience)) {
+      throw new Error("Experience must be a finite number");
     }
 
-    const response = await fetch(`${API_URL}/api/users/experience`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ experience }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to update experience");
-    }
-
-    return await response.json();
+    const response = await API.put("/api/users/experience", { experience });
+    return response.data;
   } catch (error) {
     console.error("Error updating experience:", error);
     throw error;
