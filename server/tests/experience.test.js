@@ -1,7 +1,7 @@
 import {
   buildMonotonicExperienceUpdate,
   isValidExperienceTotal,
-} from "../../server/utils/experience.js";
+} from "../utils/experience.js";
 
 describe("experience persistence helpers", () => {
   it("builds a monotonic Mongo update so stale totals cannot lower XP", () => {
