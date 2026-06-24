@@ -104,6 +104,24 @@ const INITIAL_LEVEL_COMPLETION = {
   level4: false,
 };
 
+const calculateXPForLevelValue = (level) =>
+  Math.floor(100 * Math.pow(1.5, level - 1));
+
+const calculateLevelForExperience = (experience) => {
+  let level = 1;
+  while (experience >= calculateXPForLevelValue(level + 1)) {
+    level += 1;
+  }
+  return level;
+};
+
+const getUserExperienceTotal = (user) => {
+  const experience = user?.experience ?? user?.exp;
+  return typeof experience === "number" && Number.isFinite(experience)
+    ? experience
+    : null;
+};
+
 const GameWorld = React.memo(() => {
   const [mapsReady, setMapsReady] = useState(false);
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
@@ -396,7 +414,7 @@ const GameWorld = React.memo(() => {
     adjustViewport,
   ]);
 
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const {
     unlockAchievement,
     checkLevelAchievements,
@@ -428,6 +446,7 @@ const GameWorld = React.memo(() => {
   const prevMapNameRef = useRef(null);
   const prevSpecialWorldRef = useRef(null);
   const hasRestoredSessionRef = useRef(false);
+  const lastSyncedExperienceRef = useRef(null);
 
   // portalNotificationActive is now handled by NotificationSystem
 
@@ -467,6 +486,51 @@ const GameWorld = React.memo(() => {
       return nextMuted;
     });
   }, [currentMapIndex, gameState.soundManager]);
+
+  useEffect(() => {
+    const storedExperience = getUserExperienceTotal(user);
+    if (storedExperience === null) return;
+
+    setCharacterStats((prev) => {
+      if (prev.experience >= storedExperience) return prev;
+
+      const hydratedLevel = calculateLevelForExperience(storedExperience);
+      return {
+        ...prev,
+        experience: storedExperience,
+        level: Math.max(prev.level, hydratedLevel),
+      };
+    });
+
+    lastSyncedExperienceRef.current = storedExperience;
+  }, [setCharacterStats, user?.exp, user?.experience]);
+
+  useEffect(() => {
+    const experience = characterStats.experience;
+    if (!user || !Number.isFinite(experience) || experience < 0) return;
+    const storedExperience = getUserExperienceTotal(user);
+    if (storedExperience !== null && experience < storedExperience) return;
+    if (lastSyncedExperienceRef.current === experience) return;
+
+    lastSyncedExperienceRef.current = experience;
+
+    updateUserExperience(experience)
+      .then((updatedUser) => {
+        const updatedExperience = getUserExperienceTotal(updatedUser);
+        if (updatedExperience === null) return;
+
+        updateUser({
+          ...user,
+          ...updatedUser,
+          exp: updatedExperience,
+          experience: updatedExperience,
+        });
+      })
+      .catch((error) => {
+        lastSyncedExperienceRef.current = null;
+        console.error("Failed to sync experience:", error);
+      });
+  }, [characterStats.experience, updateUser, user]);
 
   // Update checkForLevelUpAchievements to use our context
   const checkForLevelUpAchievements = useCallback(
@@ -711,7 +775,7 @@ const GameWorld = React.memo(() => {
   // XP and Leveling System
   // Calculate XP required for next level
   const calculateXPForLevel = useCallback((level) => {
-    return Math.floor(100 * Math.pow(1.5, level - 1));
+    return calculateXPForLevelValue(level);
   }, []);
 
   // Handle gaining experience with level-up logic
@@ -869,10 +933,7 @@ const GameWorld = React.memo(() => {
         gameState.soundManager.playSound("level_complete");
       }
 
-      // Award experience
-      if (user) {
-        updateUserExperience(user.id, xpReward);
-      }
+      awardXP(xpReward, winMessage);
 
       // Check achievements
       checkLevelAchievements(level);
@@ -883,7 +944,7 @@ const GameWorld = React.memo(() => {
       updateGameState,
       updateUIState,
       setActiveNPC,
-      user,
+      awardXP,
       checkLevelAchievements,
     ],
   );
