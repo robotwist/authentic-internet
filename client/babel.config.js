@@ -1,6 +1,3 @@
-export default (api) => ({
-  presets: api.env("test")
-    ? [["@babel/preset-env", { targets: { node: "current" } }]]
-    : [],
+export default {
   plugins: ["@babel/plugin-syntax-jsx"],
-});
+};
