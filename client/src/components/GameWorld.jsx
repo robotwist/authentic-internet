@@ -75,6 +75,10 @@ import { useGameState as useGameStateContext } from "../context/GameStateContext
 import { useGameState } from "../hooks/useGameState";
 import { useWebSocket } from "../context/WebSocketContext";
 import gameStateManager from "../utils/gameStateManager";
+import {
+  buildArtifactProgress,
+  buildAutoSaveProgress,
+} from "../utils/gameProgressPayload";
 import { isTextEntryFocused } from "../utils/textFieldFocus";
 import { IconButton } from "@mui/material";
 import { usePortalCollisions } from "../hooks/usePortalCollisions";
@@ -2472,16 +2476,14 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressState = buildAutoSaveProgress({
       characterPosition,
       currentMapIndex,
       inventory,
-      levelCompletion: gameState.gameData.levelCompletion,
-      achievements: gameState.gameData.achievements,
-      viewedArtifacts: gameState.gameData.viewedArtifacts,
-    };
+      gameData: gameState.gameData,
+    });
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(progressState);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
@@ -2612,22 +2614,22 @@ const GameWorld = React.memo(() => {
       if (!artifact) return;
 
       // Check if this artifact was already viewed
-      const isFirstView =
-        !Array.isArray(gameState.gameData.viewedArtifacts) ||
-        !gameState.gameData.viewedArtifacts.includes(artifact.id);
+      const currentViewedArtifacts = Array.isArray(
+        gameState.gameData.viewedArtifacts,
+      )
+        ? gameState.gameData.viewedArtifacts
+        : [];
+      const isFirstView = !currentViewedArtifacts.includes(artifact.id);
+      const viewedArtifactsForSave = isFirstView
+        ? [...currentViewedArtifacts, artifact.id]
+        : currentViewedArtifacts;
 
       // Update viewed artifacts
       if (isFirstView) {
-        const updatedViewedArtifacts = [
-          ...(Array.isArray(gameState.gameData.viewedArtifacts)
-            ? gameState.gameData.viewedArtifacts
-            : []),
-          artifact.id,
-        ];
-        updateGameState({ viewedArtifacts: updatedViewedArtifacts });
+        updateGameState({ viewedArtifacts: viewedArtifactsForSave });
         localStorage.setItem(
           "viewedArtifacts",
-          JSON.stringify(updatedViewedArtifacts),
+          JSON.stringify(viewedArtifactsForSave),
         );
 
         // Award XP for discovering a new artifact - with safety check
@@ -2638,7 +2640,7 @@ const GameWorld = React.memo(() => {
 
         // Check for discovery achievements
         if (typeof checkDiscoveryAchievements === "function") {
-          checkDiscoveryAchievements(updatedViewedArtifacts.length);
+          checkDiscoveryAchievements(viewedArtifactsForSave.length);
         }
       } else {
         // Award smaller XP for revisiting an artifact - with safety check
@@ -2655,22 +2657,14 @@ const GameWorld = React.memo(() => {
 
       // Save game state if user is logged in
       if (user && typeof updateGameProgress === "function") {
-        const gameState = {
+        const progressState = buildArtifactProgress({
           inventory,
-          viewedArtifacts: gameState.gameData.viewedArtifacts,
-          lastPosition: {
-            x: characterPosition.x,
-            y: characterPosition.y,
-            worldId: MAPS[currentMapIndex].name,
-          },
-          gameProgress: {
-            currentQuest: "Artifact Exploration",
-            completedQuests: [],
-            discoveredLocations: [MAPS[currentMapIndex].name],
-          },
-        };
+          viewedArtifacts: viewedArtifactsForSave,
+          characterPosition,
+          currentMapName: MAPS[currentMapIndex].name,
+        });
 
-        updateGameProgress(gameState);
+        updateGameProgress(progressState);
       }
     },
     [

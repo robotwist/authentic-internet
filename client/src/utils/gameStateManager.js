@@ -150,8 +150,13 @@ class GameStateManager {
 
         const result = await response.json();
 
-        // Validate server response
-        if (!result.success) {
+        // Some game-state endpoints return the saved state object directly.
+        if (
+          result &&
+          typeof result === "object" &&
+          Object.prototype.hasOwnProperty.call(result, "success") &&
+          !result.success
+        ) {
           throw new Error(
             result.message || "Server returned unsuccessful response",
           );
