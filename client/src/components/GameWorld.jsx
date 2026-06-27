@@ -76,6 +76,10 @@ import { useGameState } from "../hooks/useGameState";
 import { useWebSocket } from "../context/WebSocketContext";
 import gameStateManager from "../utils/gameStateManager";
 import { isTextEntryFocused } from "../utils/textFieldFocus";
+import {
+  buildArtifactProgressSnapshot,
+  buildGameProgressSnapshot,
+} from "../utils/gameProgressSnapshots";
 import { IconButton } from "@mui/material";
 import { usePortalCollisions } from "../hooks/usePortalCollisions";
 
@@ -2472,16 +2476,14 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressSnapshot = buildGameProgressSnapshot({
       characterPosition,
       currentMapIndex,
       inventory,
-      levelCompletion: gameState.gameData.levelCompletion,
-      achievements: gameState.gameData.achievements,
-      viewedArtifacts: gameState.gameData.viewedArtifacts,
-    };
+      gameData: gameState.gameData,
+    });
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(progressSnapshot);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
@@ -2615,6 +2617,7 @@ const GameWorld = React.memo(() => {
       const isFirstView =
         !Array.isArray(gameState.gameData.viewedArtifacts) ||
         !gameState.gameData.viewedArtifacts.includes(artifact.id);
+      let viewedArtifactsForProgress = gameState.gameData.viewedArtifacts;
 
       // Update viewed artifacts
       if (isFirstView) {
@@ -2624,6 +2627,7 @@ const GameWorld = React.memo(() => {
             : []),
           artifact.id,
         ];
+        viewedArtifactsForProgress = updatedViewedArtifacts;
         updateGameState({ viewedArtifacts: updatedViewedArtifacts });
         localStorage.setItem(
           "viewedArtifacts",
@@ -2655,22 +2659,14 @@ const GameWorld = React.memo(() => {
 
       // Save game state if user is logged in
       if (user && typeof updateGameProgress === "function") {
-        const gameState = {
+        const progressSnapshot = buildArtifactProgressSnapshot({
           inventory,
-          viewedArtifacts: gameState.gameData.viewedArtifacts,
-          lastPosition: {
-            x: characterPosition.x,
-            y: characterPosition.y,
-            worldId: MAPS[currentMapIndex].name,
-          },
-          gameProgress: {
-            currentQuest: "Artifact Exploration",
-            completedQuests: [],
-            discoveredLocations: [MAPS[currentMapIndex].name],
-          },
-        };
+          viewedArtifacts: viewedArtifactsForProgress,
+          characterPosition,
+          worldId: MAPS[currentMapIndex].name,
+        });
 
-        updateGameProgress(gameState);
+        updateGameProgress(progressSnapshot);
       }
     },
     [
