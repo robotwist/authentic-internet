@@ -2472,7 +2472,7 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressSnapshot = {
       characterPosition,
       currentMapIndex,
       inventory,
@@ -2481,7 +2481,7 @@ const GameWorld = React.memo(() => {
       viewedArtifacts: gameState.gameData.viewedArtifacts,
     };
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(progressSnapshot);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
@@ -2655,7 +2655,7 @@ const GameWorld = React.memo(() => {
 
       // Save game state if user is logged in
       if (user && typeof updateGameProgress === "function") {
-        const gameState = {
+        const progressPayload = {
           inventory,
           viewedArtifacts: gameState.gameData.viewedArtifacts,
           lastPosition: {
@@ -2670,7 +2670,7 @@ const GameWorld = React.memo(() => {
           },
         };
 
-        updateGameProgress(gameState);
+        updateGameProgress(progressPayload);
       }
     },
     [

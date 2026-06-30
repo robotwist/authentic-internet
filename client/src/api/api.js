@@ -805,25 +805,12 @@ export const verifyToken = async () => {
 };
 
 /**
- * Refresh access token using refresh token
- * @param {string} refreshToken - Refresh token
+ * Refresh access token using the HTTP-only refresh-token cookie.
  * @returns {Promise<Object>} Refresh response with new token
  */
-export const refreshUserToken = async (refreshToken) => {
+export const refreshUserToken = async () => {
   try {
-    // Basic validation - don't even try if token looks invalid
-    if (!refreshToken || refreshToken.length < 10) {
-      console.warn("Invalid refresh token format - too short or missing");
-      throw new Error("Invalid refresh token format");
-    }
-
-    // Log refresh attempt (without showing token)
-    console.log(
-      `Attempting to refresh token (${refreshToken.substring(0, 5)}...)`,
-    );
-
-    // Send refresh request
-    const response = await getApi().post("/api/auth/refresh", { refreshToken });
+    const response = await getApi().post("/api/auth/refresh");
 
     // Check for success flag in response
     if (!response.data.success) {
