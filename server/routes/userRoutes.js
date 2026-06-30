@@ -10,6 +10,83 @@ import { validate, schemas } from "../middleware/validation.js";
 
 const router = express.Router();
 
+const DEFAULT_GAME_STATE = {
+  inventory: [],
+  viewedArtifacts: [],
+  achievements: [],
+  gameProgress: {
+    currentQuest: null,
+    completedQuests: [],
+    discoveredLocations: []
+  },
+  lastPosition: {
+    worldId: null,
+    x: 0,
+    y: 0
+  }
+};
+
+const isRecord = (value) =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+const mergeUniqueArray = (...arrays) => {
+  const seen = new Set();
+  const merged = [];
+
+  arrays.forEach((array) => {
+    if (!Array.isArray(array)) return;
+
+    array.forEach((item) => {
+      const key = isRecord(item) ? JSON.stringify(item) : String(item);
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(item);
+      }
+    });
+  });
+
+  return merged;
+};
+
+export const mergeUserGameState = (existingState = {}, incomingState = {}) => {
+  const existing = isRecord(existingState) ? existingState : {};
+  const incoming = isRecord(incomingState) ? incomingState : {};
+  const existingProgress = isRecord(existing.gameProgress) ? existing.gameProgress : {};
+  const incomingProgress = isRecord(incoming.gameProgress) ? incoming.gameProgress : {};
+
+  return {
+    ...DEFAULT_GAME_STATE,
+    ...existing,
+    ...incoming,
+    inventory: Array.isArray(incoming.inventory)
+      ? incoming.inventory
+      : (Array.isArray(existing.inventory) ? existing.inventory : []),
+    viewedArtifacts: mergeUniqueArray(
+      existing.viewedArtifacts,
+      incoming.viewedArtifacts
+    ),
+    achievements: mergeUniqueArray(existing.achievements, incoming.achievements),
+    gameProgress: {
+      ...DEFAULT_GAME_STATE.gameProgress,
+      ...existingProgress,
+      ...incomingProgress,
+      completedQuests: mergeUniqueArray(
+        existingProgress.completedQuests,
+        incomingProgress.completedQuests
+      ),
+      discoveredLocations: mergeUniqueArray(
+        existingProgress.discoveredLocations,
+        incomingProgress.discoveredLocations
+      )
+    },
+    lastPosition: {
+      ...DEFAULT_GAME_STATE.lastPosition,
+      ...(isRecord(existing.lastPosition) ? existing.lastPosition : {}),
+      ...(isRecord(incoming.lastPosition) ? incoming.lastPosition : {})
+    }
+  };
+};
+
 // Configure multer for avatar uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -172,23 +249,37 @@ router.get('/game-state', authenticateToken, gameStateReadLimiter, async (req, r
 router.put('/game-state', authenticateToken, gameStateWriteLimiter, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const gameState = req.body;
+    const incomingGameState = req.body;
+
+    if (!isRecord(incomingGameState)) {
+      return res.status(400).json({ success: false, message: 'Invalid game state data' });
+    }
     
-    // Update user's game state in database
+    const user = await User.findById(userId).select('gameState');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const gameState = mergeUserGameState(user.gameState, incomingGameState);
+
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
       { $set: { gameState } },
-      { new: true }
+      { new: true, runValidators: true }
     ).select('gameState');
     
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
     
-    res.json(updatedUser.gameState);
+    res.json({
+      success: true,
+      message: 'Game state saved successfully',
+      gameState: updatedUser.gameState
+    });
   } catch (error) {
     console.error('Error updating game state:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -628,8 +719,8 @@ router.post("/friends/accept", authenticateToken, validate(schemas.friend.accept
     }
     
     // Update the sent request status
-    const sentRequest = fromUser.friendRequests.sent.find(req => 
-      req.userId.toString() === req.user.userId
+    const sentRequest = fromUser.friendRequests.sent.find(sentReq => 
+      sentReq.userId.toString() === req.user.userId
     );
     if (sentRequest) {
       sentRequest.status = 'accepted';
@@ -680,8 +771,8 @@ router.post("/friends/decline", authenticateToken, validate(schemas.friend.decli
     await user.save();
     
     // Update the sent request status
-    const sentRequest = fromUser.friendRequests.sent.find(req => 
-      req.userId.toString() === req.user.userId
+    const sentRequest = fromUser.friendRequests.sent.find(sentReq => 
+      sentReq.userId.toString() === req.user.userId
     );
     if (sentRequest) {
       sentRequest.status = 'declined';

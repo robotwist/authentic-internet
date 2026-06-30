@@ -122,6 +122,13 @@ export const discoverArtifact = async (req, res) => {
       });
     }
     
+    if (!user.gameState || typeof user.gameState !== 'object') {
+      user.gameState = {};
+    }
+    if (!Array.isArray(user.gameState.viewedArtifacts)) {
+      user.gameState.viewedArtifacts = [];
+    }
+
     // Check if user already discovered this artifact
     if (!user.gameState.viewedArtifacts.includes(artifactId)) {
       // Add to viewed artifacts

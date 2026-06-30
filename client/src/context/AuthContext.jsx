@@ -271,8 +271,8 @@ const setupAxiosInterceptors = (token) => {
             return API(originalRequest);
           }
         } catch (refreshError) {
-          // If refreshing failed, logout the user
-          logout();
+          // If refreshing failed, clear stale auth without throwing a second error.
+          clearStoredAuthData();
           return Promise.reject(refreshError);
         }
       }
@@ -472,15 +472,14 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const storedToken = localStorage.getItem("token");
-      const storedRefreshToken = localStorage.getItem("refreshToken");
 
-      if (!storedToken || !storedRefreshToken) {
-        console.log("No tokens found in storage");
+      if (!storedToken) {
+        console.log("No access token found in storage");
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
         return false;
       }
 
-      const response = await refreshUserToken(storedRefreshToken);
+      const response = await refreshUserToken();
 
       if (response && response.token) {
         localStorage.setItem("token", response.token);
@@ -525,7 +524,6 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       try {
         const storedToken = localStorage.getItem("token");
-        const storedRefreshToken = localStorage.getItem("refreshToken");
         const storedUser = localStorage.getItem("user");
 
         if (!storedToken || !storedUser) {
@@ -558,20 +556,10 @@ export const AuthProvider = ({ children }) => {
             `Token expired or expiring soon (${Math.floor(timeUntilExpiry / 1000)}s remaining), attempting refresh`,
           );
 
-          if (storedRefreshToken) {
-            const refreshSuccessful = await refreshToken(true);
+          const refreshSuccessful = await refreshToken(true);
 
-            if (!refreshSuccessful) {
-              console.log("Token refresh failed, clearing auth data");
-              clearStoredAuthData();
-              dispatch({
-                type: AUTH_ACTIONS.INIT_AUTH,
-                payload: { user: null, isAuthenticated: false },
-              });
-              return;
-            }
-          } else {
-            console.log("No refresh token available, clearing auth data");
+          if (!refreshSuccessful) {
+            console.log("Token refresh failed, clearing auth data");
             clearStoredAuthData();
             dispatch({
               type: AUTH_ACTIONS.INIT_AUTH,
