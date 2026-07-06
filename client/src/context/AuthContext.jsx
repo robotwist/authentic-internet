@@ -14,6 +14,7 @@ import {
   logPersistentError,
 } from "../api/api";
 import API from "../api/api";
+import { storedUserNeedsMigration, userForLocalStorage } from "./authStorage";
 
 // Constants
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes before expiry
@@ -130,13 +131,6 @@ const clearStoredAuthData = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
-};
-
-/** Keep large blobs (characterSprite) out of localStorage — they block the main thread on parse. */
-const userForLocalStorage = (user) => {
-  if (!user || typeof user !== "object") return user;
-  const { characterSprite: _sprite, ...rest } = user;
-  return rest;
 };
 
 const storeAuthData = (data) => {
@@ -390,7 +384,10 @@ export const AuthProvider = ({ children }) => {
 
       // Store token in localStorage (access token only)
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(userForLocalStorage(data.user)),
+      );
 
       // Set up axios interceptors for Authorization headers
       setupAxiosInterceptors(data.token);
@@ -539,7 +536,11 @@ export const AuthProvider = ({ children }) => {
 
         let parsedUser;
         try {
-          parsedUser = JSON.parse(storedUser);
+          const rawParsedUser = JSON.parse(storedUser);
+          parsedUser = userForLocalStorage(rawParsedUser);
+          if (storedUserNeedsMigration(rawParsedUser)) {
+            localStorage.setItem("user", JSON.stringify(parsedUser));
+          }
         } catch (error) {
           console.error("Error parsing stored user:", error);
           clearStoredAuthData();
