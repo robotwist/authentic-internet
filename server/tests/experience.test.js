@@ -1,7 +1,7 @@
 import {
   calculateLevelFromExperience,
   normalizeExperience,
-} from "../../server/utils/experience";
+} from "../utils/experience.js";
 
 describe("experience utilities", () => {
   test("normalizes persisted experience to a non-negative integer", () => {
