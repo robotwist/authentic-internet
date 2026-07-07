@@ -428,6 +428,8 @@ const GameWorld = React.memo(() => {
   const prevMapNameRef = useRef(null);
   const prevSpecialWorldRef = useRef(null);
   const hasRestoredSessionRef = useRef(false);
+  const pendingExperienceSyncRef = useRef(false);
+  const lastSyncedExperienceRef = useRef(null);
 
   // portalNotificationActive is now handled by NotificationSystem
 
@@ -718,6 +720,7 @@ const GameWorld = React.memo(() => {
   const handleGainExperience = useCallback(
     (amount, source = "Unknown", position = null) => {
       console.log(`Gained ${amount} XP from: ${source}`);
+      pendingExperienceSyncRef.current = true;
 
       // Add XP notification at enemy position
       if (position) {
@@ -777,6 +780,32 @@ const GameWorld = React.memo(() => {
       updateUIState,
     ],
   );
+
+  useEffect(() => {
+    if (!user || !pendingExperienceSyncRef.current) return undefined;
+
+    const experience = characterStats.experience;
+    if (typeof experience !== "number" || !Number.isFinite(experience)) {
+      return undefined;
+    }
+    if (lastSyncedExperienceRef.current === experience) {
+      pendingExperienceSyncRef.current = false;
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      updateUserExperience(experience)
+        .then(() => {
+          lastSyncedExperienceRef.current = experience;
+          pendingExperienceSyncRef.current = false;
+        })
+        .catch((error) => {
+          console.error("Failed to sync experience after XP award:", error);
+        });
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [user, characterStats.experience]);
 
   // Alias for handleGainExperience to match existing code that uses awardXP
   const awardXP = useCallback(
@@ -869,10 +898,7 @@ const GameWorld = React.memo(() => {
         gameState.soundManager.playSound("level_complete");
       }
 
-      // Award experience
-      if (user) {
-        updateUserExperience(user.id, xpReward);
-      }
+      handleGainExperience(xpReward, `${level} completed`);
 
       // Check achievements
       checkLevelAchievements(level);
@@ -883,7 +909,7 @@ const GameWorld = React.memo(() => {
       updateGameState,
       updateUIState,
       setActiveNPC,
-      user,
+      handleGainExperience,
       checkLevelAchievements,
     ],
   );
