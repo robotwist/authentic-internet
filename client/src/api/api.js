@@ -165,6 +165,10 @@ const shouldUseRelativeApi =
   (typeof window !== "undefined" &&
     window.location.hostname.endsWith(".netlify.app"));
 const apiBaseUrl = shouldUseRelativeApi ? "" : configuredApiUrl;
+const API_URL = apiBaseUrl;
+
+const getStoredAuthToken = () =>
+  localStorage.getItem("token") || localStorage.getItem("authToken");
 
 // Initialize API with the configured URL - use default instance as fallback
 let API = createApiInstance(apiBaseUrl);
@@ -878,7 +882,7 @@ export const getUserGameState = withCache(
   async (idToken) => {
     try {
       if (!idToken) {
-        const token = localStorage.getItem("authToken");
+        const token = getStoredAuthToken();
         if (!token) {
           throw new Error("Authentication required");
         }
@@ -918,7 +922,7 @@ export const getUserGameState = withCache(
  */
 export const updateUserExperience = async (experience) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = getStoredAuthToken();
 
     if (!token) {
       throw new Error("Authentication required");
@@ -955,7 +959,7 @@ export const updateUserExperience = async (experience) => {
  */
 export const addUserAchievement = async (achievement) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = getStoredAuthToken();
 
     if (!token) {
       throw new Error("Authentication required");
@@ -989,7 +993,7 @@ export const addUserAchievement = async (achievement) => {
  */
 export const saveGameState = async (gameState) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = getStoredAuthToken();
 
     if (!token) {
       throw new Error("Authentication required");
@@ -1018,7 +1022,7 @@ export const saveGameState = async (gameState) => {
 
 export const updateGameState = async (gameState) => {
   try {
-    const token = localStorage.getItem("authToken");
+    const token = getStoredAuthToken();
 
     if (!token) {
       throw new Error("Authentication required");

@@ -10,6 +10,9 @@ import { validate, schemas } from "../middleware/validation.js";
 
 const router = express.Router();
 
+const calculateLevelFromExperience = (experience) =>
+  Math.floor(experience / 100) + 1;
+
 // Configure multer for avatar uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -286,19 +289,31 @@ router.put('/experience', authenticateToken, async (req, res) => {
     if (typeof experience !== 'number') {
       return res.status(400).json({ message: 'Experience must be a number' });
     }
+
+    const normalizedExperience = Math.max(0, Math.floor(experience));
+    const level = calculateLevelFromExperience(normalizedExperience);
     
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
+    // Never let a stale client overwrite newer progress with a lower total.
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        $or: [
+          { experience: { $lt: normalizedExperience } },
+          { experience: { $exists: false } },
+        ],
+      },
+      { $set: { experience: normalizedExperience, level } },
+      { new: true },
     ).select('username email experience level');
+
+    const user = updatedUser || await User.findById(userId)
+      .select('username email experience level');
     
-    if (!updatedUser) {
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    res.json(updatedUser);
+    res.json(user);
   } catch (error) {
     console.error('Error updating experience:', error);
     res.status(500).json({ message: 'Server error' });
@@ -360,7 +375,12 @@ router.post('/achievements', authenticateToken, async (req, res) => {
 // 📌 Get Character by ID (🔐 Requires Authentication)
 router.get("/:id", authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const isSelf = req.user.userId === req.params.id;
+    const selectFields = isSelf
+      ? "-password"
+      : "username avatar characterSprite characterName level";
+
+    const user = await User.findById(req.params.id).select(selectFields);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

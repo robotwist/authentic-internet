@@ -221,101 +221,199 @@ const initialState = {
   showHamletFinale: false,
 };
 
+const resolveValue = (payload, currentValue) =>
+  typeof payload === "function" ? payload(currentValue) : payload;
+
+const mergeValue = (currentValue, payload) => ({
+  ...currentValue,
+  ...resolveValue(payload, currentValue),
+});
+
 // Reducer function
 function gameStateReducer(state, action) {
   switch (action.type) {
     case ACTIONS.SET_CURRENT_MAP_INDEX:
-      return { ...state, currentMapIndex: action.payload };
+      return {
+        ...state,
+        currentMapIndex: resolveValue(action.payload, state.currentMapIndex),
+      };
     case ACTIONS.SET_INVENTORY:
-      return { ...state, inventory: action.payload };
+      return { ...state, inventory: resolveValue(action.payload, state.inventory) };
     case ACTIONS.SET_CHARACTER_POSITION:
-      return { ...state, characterPosition: action.payload };
+      return {
+        ...state,
+        characterPosition: resolveValue(action.payload, state.characterPosition),
+      };
     case ACTIONS.SET_CHARACTER:
-      return { ...state, character: action.payload };
+      return { ...state, character: resolveValue(action.payload, state.character) };
     case ACTIONS.SET_CHARACTER_STATE:
-      return { ...state, characterState: action.payload };
+      return {
+        ...state,
+        characterState: resolveValue(action.payload, state.characterState),
+      };
     case ACTIONS.SET_VIEWPORT:
-      return { ...state, viewport: action.payload };
+      return { ...state, viewport: resolveValue(action.payload, state.viewport) };
     case ACTIONS.SET_EXPLORED_TILES:
-      return { ...state, exploredTiles: action.payload };
+      return {
+        ...state,
+        exploredTiles: resolveValue(action.payload, state.exploredTiles),
+      };
     case ACTIONS.SET_FORM_POSITION:
-      return { ...state, formPosition: action.payload };
+      return {
+        ...state,
+        formPosition: resolveValue(action.payload, state.formPosition),
+      };
     case ACTIONS.UPDATE_UI_STATE:
-      return { ...state, uiState: { ...state.uiState, ...action.payload } };
+      return { ...state, uiState: mergeValue(state.uiState, action.payload) };
     case ACTIONS.SET_DUNGEON_STATE:
       return {
         ...state,
-        dungeonState: { ...state.dungeonState, ...action.payload },
+        dungeonState: mergeValue(state.dungeonState, action.payload),
       };
     case ACTIONS.SET_GAME_DATA:
-      return { ...state, gameData: { ...state.gameData, ...action.payload } };
+      return { ...state, gameData: mergeValue(state.gameData, action.payload) };
     case ACTIONS.SET_PORTAL_STATE:
       return {
         ...state,
-        portalState: { ...state.portalState, ...action.payload },
+        portalState: mergeValue(state.portalState, action.payload),
       };
     case ACTIONS.SET_CURRENT_SPECIAL_WORLD:
-      return { ...state, currentSpecialWorld: action.payload };
+      return {
+        ...state,
+        currentSpecialWorld: resolveValue(
+          action.payload,
+          state.currentSpecialWorld,
+        ),
+      };
     case ACTIONS.SET_ACTIVE_NPC:
-      return { ...state, activeNPC: action.payload };
+      return { ...state, activeNPC: resolveValue(action.payload, state.activeNPC) };
     case ACTIONS.SET_SOUND_MANAGER:
-      return { ...state, soundManager: action.payload };
+      return {
+        ...state,
+        soundManager: resolveValue(action.payload, state.soundManager),
+      };
     case ACTIONS.SET_SELECTED_USER_ARTIFACT:
-      return { ...state, selectedUserArtifact: action.payload };
+      return {
+        ...state,
+        selectedUserArtifact: resolveValue(
+          action.payload,
+          state.selectedUserArtifact,
+        ),
+      };
     case ACTIONS.SET_VISIBLE_ARTIFACT:
-      return { ...state, visibleArtifact: action.payload };
+      return {
+        ...state,
+        visibleArtifact: resolveValue(action.payload, state.visibleArtifact),
+      };
     case ACTIONS.SET_MAP_ZOOM:
-      return { ...state, mapZoom: action.payload };
+      return { ...state, mapZoom: resolveValue(action.payload, state.mapZoom) };
     case ACTIONS.SET_MAP_OFFSET:
-      return { ...state, mapOffset: action.payload };
+      return { ...state, mapOffset: resolveValue(action.payload, state.mapOffset) };
     case ACTIONS.SET_IS_LOGGED_IN:
-      return { ...state, isLoggedIn: action.payload };
+      return {
+        ...state,
+        isLoggedIn: resolveValue(action.payload, state.isLoggedIn),
+      };
     case ACTIONS.SET_PLAYER_HEALTH:
-      return { ...state, playerHealth: action.payload };
+      return {
+        ...state,
+        playerHealth: resolveValue(action.payload, state.playerHealth),
+      };
     case ACTIONS.SET_MAX_PLAYER_HEALTH:
-      return { ...state, maxPlayerHealth: action.payload };
+      return {
+        ...state,
+        maxPlayerHealth: resolveValue(action.payload, state.maxPlayerHealth),
+      };
     case ACTIONS.SET_RUPEES:
-      return { ...state, rupees: action.payload };
+      return { ...state, rupees: resolveValue(action.payload, state.rupees) };
     case ACTIONS.SET_KEYS:
-      return { ...state, keys: action.payload };
+      return { ...state, keys: resolveValue(action.payload, state.keys) };
     case ACTIONS.SET_IS_ATTACKING:
-      return { ...state, isAttacking: action.payload };
+      return {
+        ...state,
+        isAttacking: resolveValue(action.payload, state.isAttacking),
+      };
     case ACTIONS.SET_SWORD_TYPE:
-      return { ...state, swordType: action.payload };
+      return { ...state, swordType: resolveValue(action.payload, state.swordType) };
     case ACTIONS.SET_EQUIPPED_ITEM:
-      return { ...state, equippedItem: action.payload };
+      return {
+        ...state,
+        equippedItem: resolveValue(action.payload, state.equippedItem),
+      };
     case ACTIONS.SET_IS_INVINCIBLE:
-      return { ...state, isInvincible: action.payload };
+      return {
+        ...state,
+        isInvincible: resolveValue(action.payload, state.isInvincible),
+      };
     case ACTIONS.SET_CHARACTER_STATS:
       return {
         ...state,
-        characterStats: { ...state.characterStats, ...action.payload },
+        characterStats: mergeValue(state.characterStats, action.payload),
       };
     case ACTIONS.SET_MOVEMENT_TRANSITION:
-      return { ...state, movementTransition: action.payload };
+      return {
+        ...state,
+        movementTransition: resolveValue(action.payload, state.movementTransition),
+      };
     case ACTIONS.SET_VERTICAL_DIRECTION:
-      return { ...state, verticalDirection: action.payload };
+      return {
+        ...state,
+        verticalDirection: resolveValue(action.payload, state.verticalDirection),
+      };
     case ACTIONS.SET_HORIZONTAL_DIRECTION:
-      return { ...state, horizontalDirection: action.payload };
+      return {
+        ...state,
+        horizontalDirection: resolveValue(
+          action.payload,
+          state.horizontalDirection,
+        ),
+      };
     case ACTIONS.SET_MOBILE_STATE:
       return {
         ...state,
-        mobileState: { ...state.mobileState, ...action.payload },
+        mobileState: mergeValue(state.mobileState, action.payload),
       };
     case ACTIONS.SET_CURRENT_GAME_ARTIFACT:
-      return { ...state, currentGameArtifact: action.payload };
+      return {
+        ...state,
+        currentGameArtifact: resolveValue(
+          action.payload,
+          state.currentGameArtifact,
+        ),
+      };
     case ACTIONS.SET_SHOW_GAME_LAUNCHER:
-      return { ...state, showGameLauncher: action.payload };
+      return {
+        ...state,
+        showGameLauncher: resolveValue(action.payload, state.showGameLauncher),
+      };
     case ACTIONS.SET_ACTIVE_QUESTS:
-      return { ...state, activeQuests: action.payload };
+      return {
+        ...state,
+        activeQuests: resolveValue(action.payload, state.activeQuests),
+      };
     case ACTIONS.SET_COMPLETED_QUESTS:
-      return { ...state, completedQuests: action.payload };
+      return {
+        ...state,
+        completedQuests: resolveValue(action.payload, state.completedQuests),
+      };
     case ACTIONS.SET_QUEST_STATUS_MAP:
-      return { ...state, questStatusMap: action.payload };
+      return {
+        ...state,
+        questStatusMap: resolveValue(action.payload, state.questStatusMap),
+      };
     case ACTIONS.SET_QUEST_COMPLETION_CELEBRATION:
-      return { ...state, questCompletionCelebration: action.payload };
+      return {
+        ...state,
+        questCompletionCelebration: resolveValue(
+          action.payload,
+          state.questCompletionCelebration,
+        ),
+      };
     case ACTIONS.SET_SHOW_HAMLET_FINALE:
-      return { ...state, showHamletFinale: action.payload };
+      return {
+        ...state,
+        showHamletFinale: resolveValue(action.payload, state.showHamletFinale),
+      };
     case ACTIONS.TRANSITION_TO_NEIGHBOR:
       // This action is handled by the GameWorld component to trigger map transitions
       return state;

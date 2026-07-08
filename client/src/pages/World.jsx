@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api/api";
 import Map from "../components/Map";
 import "../styles/World.css";
 
@@ -19,7 +19,7 @@ const World = () => {
   useEffect(() => {
     const fetchWorld = async () => {
       try {
-        const response = await axios.get(`/api/worlds/${worldId}`);
+        const response = await API.get(`/api/worlds/${worldId}`);
         setWorld(response.data);
         setLoading(false);
       } catch (err) {
@@ -44,7 +44,7 @@ const World = () => {
 
   const handleArtifactClick = async (artifact) => {
     try {
-      const response = await axios.post(
+      const response = await API.post(
         `/api/artifacts/${artifact._id}/interact`,
       );
       setInteractionResult(response.data);
@@ -58,7 +58,7 @@ const World = () => {
     if (!selectedNPC || !interactionPrompt) return;
 
     try {
-      const response = await axios.post(
+      const response = await API.post(
         `/api/npcs/${selectedNPC._id}/interact`,
         {
           prompt: interactionPrompt,

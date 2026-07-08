@@ -53,8 +53,32 @@ const WorldInstanceSchema = new mongoose.Schema({
   },
   
   // World creator and moderators
-  creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   moderators: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+
+  // Legacy development-world fields used by the dashboard/world editor routes.
+  isMainWorld: { type: Boolean, default: false },
+  mapType: { type: String, default: 'Home' },
+  mapData: { type: mongoose.Schema.Types.Mixed },
+  spawnPoints: [{
+    x: { type: Number, required: true },
+    y: { type: Number, required: true }
+  }],
+  npcs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'NPC' }],
+  games: [{
+    name: String,
+    description: String,
+    type: String,
+    config: mongoose.Schema.Types.Mixed
+  }],
+  sharedWith: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    role: { type: String, enum: ['viewer', 'editor'], default: 'viewer' }
+  }],
+  weather: {
+    temperature: Number,
+    condition: String
+  },
   
   // World statistics
   stats: {
@@ -148,6 +172,47 @@ WorldInstanceSchema.methods.canPlayerJoin = function(userId) {
   if (this.requiresInvite && !this.moderators.includes(userId)) return false;
   if (this.activePlayers.length >= this.maxPlayers) return false;
   return true;
+};
+
+WorldInstanceSchema.methods.expandMap = function(direction, size = 1) {
+  if (!Array.isArray(this.mapData) || this.mapData.length === 0) return;
+
+  const rowsToAdd = Math.max(1, Number(size) || 1);
+  const width = Array.isArray(this.mapData[0]) ? this.mapData[0].length : 0;
+  const emptyRow = () => Array(width).fill(0);
+
+  if (direction === 'north') {
+    this.mapData = [...Array.from({ length: rowsToAdd }, emptyRow), ...this.mapData];
+  } else if (direction === 'south') {
+    this.mapData = [...this.mapData, ...Array.from({ length: rowsToAdd }, emptyRow)];
+  } else if (direction === 'west' || direction === 'east') {
+    this.mapData = this.mapData.map((row) => {
+      const extra = Array(rowsToAdd).fill(0);
+      return direction === 'west' ? [...extra, ...row] : [...row, ...extra];
+    });
+  }
+};
+
+WorldInstanceSchema.methods.shareWith = function(userId, role = 'viewer') {
+  const existingShare = this.sharedWith.find(
+    (share) => share.user?.toString() === userId.toString(),
+  );
+
+  if (existingShare) {
+    existingShare.role = role;
+  } else {
+    this.sharedWith.push({ user: userId, role });
+  }
+};
+
+WorldInstanceSchema.methods.removeShare = function(userId) {
+  this.sharedWith = this.sharedWith.filter(
+    (share) => share.user?.toString() !== userId.toString(),
+  );
+};
+
+WorldInstanceSchema.methods.addGame = function(game) {
+  this.games.push(game);
 };
 
 const WorldInstance = mongoose.model('WorldInstance', WorldInstanceSchema);

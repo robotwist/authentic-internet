@@ -150,14 +150,16 @@ class GameStateManager {
 
         const result = await response.json();
 
-        // Validate server response
-        if (!result.success) {
+        // Some server routes return the saved state directly, while newer routes
+        // may wrap it in { success, gameState }. Only an explicit false is a
+        // failed save.
+        if (result?.success === false) {
           throw new Error(
             result.message || "Server returned unsuccessful response",
           );
         }
 
-        return result;
+        return result?.gameState || result;
       } catch (error) {
         lastError = error;
         console.warn(`Save attempt ${attempt} failed:`, error);
