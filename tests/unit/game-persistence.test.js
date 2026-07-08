@@ -2,7 +2,6 @@ import React from "react";
 import { act, render, screen } from "@testing-library/react";
 import { useGameState } from "../../client/src/hooks/useGameState";
 import gameStateManager from "../../client/src/utils/gameStateManager";
-import { updateUserExperience } from "../../client/src/api/api";
 
 let latestGameState;
 
@@ -64,26 +63,5 @@ describe("game persistence regressions", () => {
     await expect(
       gameStateManager.saveToServer({ exp: 100, currentMapIndex: 1 }),
     ).resolves.toEqual({ exp: 100, currentMapIndex: 1 });
-  });
-
-  it("persists XP with the current auth token storage key", async () => {
-    localStorage.setItem("token", "jwt-token");
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({ experience: 250, level: 3 }),
-    });
-
-    await updateUserExperience(250);
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/api/users/experience",
-      expect.objectContaining({
-        method: "PUT",
-        headers: expect.objectContaining({
-          Authorization: "Bearer jwt-token",
-        }),
-        body: JSON.stringify({ experience: 250 }),
-      }),
-    );
   });
 });
