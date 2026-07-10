@@ -10,8 +10,16 @@ const INITIAL_LEVEL_COMPLETION = {
   level4: false,
 };
 
+const resolvePayload = (payload, currentValue) =>
+  typeof payload === "function" ? payload(currentValue) : payload;
+
+const mergePayload = (currentValue, payload) => ({
+  ...currentValue,
+  ...resolvePayload(payload, currentValue),
+});
+
 // Action types
-const ACTIONS = {
+export const ACTIONS = {
   // Core game actions
   SET_CURRENT_MAP_INDEX: "SET_CURRENT_MAP_INDEX",
   SET_INVENTORY: "SET_INVENTORY",
@@ -79,7 +87,7 @@ const ACTIONS = {
 };
 
 // Initial state
-const initialState = {
+export const initialState = {
   // Core game state
   currentMapIndex: 0,
   inventory: [],
@@ -222,7 +230,7 @@ const initialState = {
 };
 
 // Reducer function
-function gameStateReducer(state, action) {
+export function gameStateReducer(state, action) {
   switch (action.type) {
     case ACTIONS.SET_CURRENT_MAP_INDEX:
       return { ...state, currentMapIndex: action.payload };
@@ -233,7 +241,10 @@ function gameStateReducer(state, action) {
     case ACTIONS.SET_CHARACTER:
       return { ...state, character: action.payload };
     case ACTIONS.SET_CHARACTER_STATE:
-      return { ...state, characterState: action.payload };
+      return {
+        ...state,
+        characterState: resolvePayload(action.payload, state.characterState),
+      };
     case ACTIONS.SET_VIEWPORT:
       return { ...state, viewport: action.payload };
     case ACTIONS.SET_EXPLORED_TILES:
@@ -248,11 +259,14 @@ function gameStateReducer(state, action) {
         dungeonState: { ...state.dungeonState, ...action.payload },
       };
     case ACTIONS.SET_GAME_DATA:
-      return { ...state, gameData: { ...state.gameData, ...action.payload } };
+      return {
+        ...state,
+        gameData: mergePayload(state.gameData, action.payload),
+      };
     case ACTIONS.SET_PORTAL_STATE:
       return {
         ...state,
-        portalState: { ...state.portalState, ...action.payload },
+        portalState: mergePayload(state.portalState, action.payload),
       };
     case ACTIONS.SET_CURRENT_SPECIAL_WORLD:
       return { ...state, currentSpecialWorld: action.payload };
