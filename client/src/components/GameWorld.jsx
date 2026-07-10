@@ -75,6 +75,7 @@ import { useGameState as useGameStateContext } from "../context/GameStateContext
 import { useGameState } from "../hooks/useGameState";
 import { useWebSocket } from "../context/WebSocketContext";
 import gameStateManager from "../utils/gameStateManager";
+import { buildGameProgressSnapshot } from "../utils/gameProgressSnapshot";
 import { isTextEntryFocused } from "../utils/textFieldFocus";
 import { IconButton } from "@mui/material";
 import { usePortalCollisions } from "../hooks/usePortalCollisions";
@@ -2472,16 +2473,14 @@ const GameWorld = React.memo(() => {
   const saveGameProgress = useCallback(() => {
     if (!user) return;
 
-    const gameState = {
+    const progressSnapshot = buildGameProgressSnapshot({
       characterPosition,
       currentMapIndex,
       inventory,
-      levelCompletion: gameState.gameData.levelCompletion,
-      achievements: gameState.gameData.achievements,
-      viewedArtifacts: gameState.gameData.viewedArtifacts,
-    };
+      gameData: gameState.gameData,
+    });
 
-    gameStateManager.updateState(gameState);
+    gameStateManager.updateState(progressSnapshot);
   }, [user, characterPosition, currentMapIndex, inventory, gameState.gameData]);
 
   // Auto-save effect
