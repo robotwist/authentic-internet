@@ -558,5 +558,3 @@ export function useGameState() {
     transitionToNeighbor,
   };
 }
-
-export { ACTIONS };
