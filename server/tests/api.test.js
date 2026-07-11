@@ -1,5 +1,6 @@
 import request from 'supertest';
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { setupTestDB, clearTestDB, teardownTestDB, createTestUser, createTestArtifact } from './setup.js';
 import User from '../models/User.js';
 import Artifact from '../models/Artifact.js';
@@ -14,6 +15,7 @@ app.use('/api/users', userRoutes);
 
 describe('API Tests', () => {
   beforeAll(async () => {
+    process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
     await setupTestDB();
   });
 
@@ -96,12 +98,51 @@ describe('API Tests', () => {
   describe('User API', () => {
     let testUser1;
     let testUser2;
+    let authToken;
 
     beforeEach(async () => {
       testUser1 = new User(createTestUser({ username: 'user1', email: 'user1@test.com' }));
       testUser2 = new User(createTestUser({ username: 'user2', email: 'user2@test.com' }));
       await testUser1.save();
       await testUser2.save();
+      authToken = jwt.sign({ userId: testUser1._id.toString() }, process.env.JWT_SECRET);
+    });
+
+    describe('PUT /api/users/experience', () => {
+      it('updates experience and persists the recalculated level', async () => {
+        const response = await request(app)
+          .put('/api/users/experience')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ experience: 250 })
+          .expect(200);
+
+        expect(response.body.experience).toBe(250);
+        expect(response.body.level).toBe(3);
+
+        const updatedUser = await User.findById(testUser1._id);
+        expect(updatedUser.experience).toBe(250);
+        expect(updatedUser.level).toBe(3);
+      });
+
+      it('does not let a stale client decrease persisted experience', async () => {
+        await User.updateOne(
+          { _id: testUser1._id },
+          { $set: { experience: 350, level: 1 } },
+        );
+
+        const response = await request(app)
+          .put('/api/users/experience')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ experience: 120 })
+          .expect(200);
+
+        expect(response.body.experience).toBe(350);
+        expect(response.body.level).toBe(4);
+
+        const updatedUser = await User.findById(testUser1._id);
+        expect(updatedUser.experience).toBe(350);
+        expect(updatedUser.level).toBe(4);
+      });
     });
 
     describe('GET /api/users/friends', () => {

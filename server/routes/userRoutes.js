@@ -283,21 +283,20 @@ router.put('/experience', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const { experience } = req.body;
     
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    if (typeof experience !== 'number' || !Number.isFinite(experience) || experience < 0) {
+      return res.status(400).json({ message: 'Experience must be a non-negative number' });
     }
-    
-    // Update user's experience points in database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: { experience } },
-      { new: true }
-    ).select('username email experience level');
-    
-    if (!updatedUser) {
+
+    const user = await User.findById(userId).select('username email experience level');
+
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
+    user.experience = Math.max(user.experience || 0, experience);
+    user.level = Math.floor(user.experience / 100) + 1;
+    const updatedUser = await user.save();
+
     res.json(updatedUser);
   } catch (error) {
     console.error('Error updating experience:', error);
