@@ -11,6 +11,15 @@ jest.unstable_mockModule('../models/User.js', () => ({
   },
 }));
 
+jest.unstable_mockModule('../utils/rateLimiting.js', () => {
+  const passthrough = (req, res, next) => next();
+
+  return {
+    gameStateReadLimiter: passthrough,
+    gameStateWriteLimiter: passthrough,
+  };
+});
+
 const { default: userRoutes } = await import('../routes/userRoutes.js');
 
 const app = express();
