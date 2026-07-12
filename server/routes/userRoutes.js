@@ -283,15 +283,17 @@ router.put('/experience', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const { experience } = req.body;
     
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    if (!Number.isFinite(experience) || experience < 0) {
+      return res.status(400).json({ message: 'Experience must be a non-negative number' });
     }
-    
-    // Update user's experience points in database
+
+    const level = Math.floor(experience / 100) + 1;
+
+    // Client sync sends an absolute total; never allow a stale client to lower persisted progress.
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
-      { $set: { experience } },
-      { new: true }
+      { $max: { experience, level } },
+      { new: true, runValidators: true }
     ).select('username email experience level');
     
     if (!updatedUser) {
@@ -464,15 +466,17 @@ router.put('/experience', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { experience } = req.body;
     
-    if (typeof experience !== 'number') {
-      return res.status(400).json({ message: 'Experience must be a number' });
+    if (!Number.isFinite(experience) || experience < 0) {
+      return res.status(400).json({ message: 'Experience must be a non-negative number' });
     }
-    
-    // Update user's experience points in database
+
+    const level = Math.floor(experience / 100) + 1;
+
+    // Client sync sends an absolute total; never allow a stale client to lower persisted progress.
     const updatedUser = await User.findByIdAndUpdate(
       userId, 
-      { $set: { experience } },
-      { new: true }
+      { $max: { experience, level } },
+      { new: true, runValidators: true }
     ).select('username email experience level');
     
     if (!updatedUser) {
