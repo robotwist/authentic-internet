@@ -1,6 +1,64 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./PixelGridEditor.css";
 
+const GRID_SIZE = 32;
+
+const createTransparentGrid = () =>
+  Array(GRID_SIZE)
+    .fill(null)
+    .map(() => Array(GRID_SIZE).fill("transparent"));
+
+const pixelToCssColor = (red, green, blue, alpha) => {
+  if (alpha === 255) {
+    return `rgb(${red}, ${green}, ${blue})`;
+  }
+
+  return `rgba(${red}, ${green}, ${blue}, ${Number((alpha / 255).toFixed(3))})`;
+};
+
+const dataUrlToGrid = (dataUrl) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = GRID_SIZE;
+        canvas.height = GRID_SIZE;
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, GRID_SIZE, GRID_SIZE);
+        ctx.drawImage(image, 0, 0, GRID_SIZE, GRID_SIZE);
+
+        const { data } = ctx.getImageData(0, 0, GRID_SIZE, GRID_SIZE);
+        const nextGrid = createTransparentGrid();
+
+        for (let y = 0; y < GRID_SIZE; y++) {
+          for (let x = 0; x < GRID_SIZE; x++) {
+            const index = (y * GRID_SIZE + x) * 4;
+            const alpha = data[index + 3];
+
+            if (alpha > 0) {
+              nextGrid[y][x] = pixelToCssColor(
+                data[index],
+                data[index + 1],
+                data[index + 2],
+                alpha,
+              );
+            }
+          }
+        }
+
+        resolve(nextGrid);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    image.onerror = () => reject(new Error("Failed to load character sprite"));
+    image.src = dataUrl;
+  });
+
 /**
  * PixelGridEditor - A retro pixel art character creator
  * Allows users to paint on a 32x32 grid to create their custom character sprite
@@ -15,7 +73,6 @@ const PixelGridEditor = ({
   onCharacterNameChange,
   saving = false,
 }) => {
-  const GRID_SIZE = 32;
   const CELL_SIZE = cellSize;
 
   // Color palette (retro NES style)
@@ -41,16 +98,56 @@ const PixelGridEditor = ({
   const canvasRef = useRef(null);
   const [selectedColor, setSelectedColor] = useState(COLOR_PALETTE[0]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [grid, setGrid] = useState(() => {
-    // Initialize grid with transparent pixels
-    if (initialSprite) {
+  const initialGrid = () => {
+    if (Array.isArray(initialSprite)) {
       return initialSprite;
     }
-    return Array(GRID_SIZE)
-      .fill(null)
-      .map(() => Array(GRID_SIZE).fill("transparent"));
-  });
+
+    return createTransparentGrid();
+  };
+  const gridRef = useRef(initialGrid());
+  const [grid, setGridState] = useState(gridRef.current);
   const [tool, setTool] = useState("draw"); // 'draw' or 'erase'
+
+  const setGrid = useCallback((nextGridOrUpdater) => {
+    const nextGrid =
+      typeof nextGridOrUpdater === "function"
+        ? nextGridOrUpdater(gridRef.current)
+        : nextGridOrUpdater;
+
+    gridRef.current = nextGrid;
+    setGridState(nextGrid);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (Array.isArray(initialSprite)) {
+      setGrid(initialSprite);
+      return undefined;
+    }
+
+    if (
+      typeof initialSprite !== "string" ||
+      !initialSprite.startsWith("data:image/")
+    ) {
+      return undefined;
+    }
+
+    dataUrlToGrid(initialSprite)
+      .then((nextGrid) => {
+        if (!cancelled) {
+          setGrid(nextGrid);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to hydrate character sprite:", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialSprite]);
 
   // Render the grid to canvas
   useEffect(() => {
@@ -109,7 +206,7 @@ const PixelGridEditor = ({
         });
       }
     },
-    [selectedColor, tool],
+    [CELL_SIZE, selectedColor, tool],
   );
 
   const handleMouseDown = (e) => {
@@ -129,11 +226,7 @@ const PixelGridEditor = ({
 
   const clearGrid = () => {
     if (window.confirm("Clear the entire canvas?")) {
-      setGrid(
-        Array(GRID_SIZE)
-          .fill(null)
-          .map(() => Array(GRID_SIZE).fill("transparent")),
-      );
+      setGrid(createTransparentGrid());
     }
   };
 
@@ -146,6 +239,8 @@ const PixelGridEditor = ({
   };
 
   const exportSprite = () => {
+    const currentGrid = gridRef.current;
+
     // Create a temporary canvas to export the sprite at actual size (32x32)
     const exportCanvas = document.createElement("canvas");
     exportCanvas.width = GRID_SIZE;
@@ -156,7 +251,7 @@ const PixelGridEditor = ({
     // Draw each pixel
     for (let y = 0; y < GRID_SIZE; y++) {
       for (let x = 0; x < GRID_SIZE; x++) {
-        const color = grid[y][x];
+        const color = currentGrid[y][x];
         if (color !== "transparent") {
           ctx.fillStyle = color;
           ctx.fillRect(x, y, 1, 1);
@@ -168,7 +263,7 @@ const PixelGridEditor = ({
     const dataURL = exportCanvas.toDataURL("image/png");
 
     if (onSave) {
-      onSave({ dataURL, grid });
+      onSave({ dataURL, grid: currentGrid });
     }
 
     return dataURL;
