@@ -28,31 +28,51 @@ const Dashboard = () => {
   const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   const [showQuestLog, setShowQuestLog] = useState(false);
   const [showPowerManagement, setShowPowerManagement] = useState(false);
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const { unlockAchievement } = useAchievements();
+  const [characterLoading, setCharacterLoading] = useState(true);
 
   useEffect(() => {
     fetchWorlds();
-    fetchCharacter();
   }, []);
 
   useEffect(() => {
+    fetchCharacter();
+  }, [user?.id]);
+
+  useEffect(() => {
+    const hasCharacterSprite = Boolean(
+      user?.characterSprite || character?.characterSprite,
+    );
+
     if (
+      !characterLoading &&
       user &&
-      !user.characterSprite &&
+      !hasCharacterSprite &&
       !localStorage.getItem("characterCreatorSkipped")
     ) {
       navigate("/character-creator", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, character, characterLoading, navigate]);
 
   const fetchCharacter = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setCharacterLoading(false);
+      return;
+    }
 
     try {
+      setCharacterLoading(true);
       const response = await API.get(`/api/users/${user.id}`);
       setCharacter(response.data);
+      if (response.data?.characterSprite && !user.characterSprite && updateUser) {
+        updateUser({
+          ...user,
+          ...response.data,
+          id: user.id,
+        });
+      }
     } catch (error) {
       console.error("Failed to load character data:", error);
       // If character data doesn't exist, create a default character
@@ -65,6 +85,8 @@ const Dashboard = () => {
         inventory: [],
         savedQuotes: [],
       });
+    } finally {
+      setCharacterLoading(false);
     }
   };
 

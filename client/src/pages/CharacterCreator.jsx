@@ -5,6 +5,14 @@ import PixelGridEditor from "../components/UI/PixelGridEditor";
 import API from "../api/api";
 import "./CharacterCreator.css";
 
+const hasPaintedPixels = (grid) =>
+  Array.isArray(grid) &&
+  grid.some(
+    (row) =>
+      Array.isArray(row) &&
+      row.some((color) => color && color !== "transparent"),
+  );
+
 /**
  * Streamlined character onboarding: large pixel editor first, minimal copy.
  */
@@ -15,8 +23,8 @@ const CharacterCreator = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSaveFromEditor = async ({ dataURL }) => {
-    if (!dataURL) {
+  const handleSaveFromEditor = async ({ dataURL, grid }) => {
+    if (!dataURL || !hasPaintedPixels(grid)) {
       setError("Paint at least a few pixels on your character");
       return;
     }
@@ -88,6 +96,7 @@ const CharacterCreator = () => {
         characterName={characterName}
         onCharacterNameChange={setCharacterName}
         saving={saving}
+        initialSprite={user?.characterSprite}
       />
     </div>
   );
