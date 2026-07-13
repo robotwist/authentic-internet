@@ -98,14 +98,26 @@ const PixelGridEditor = ({
   const canvasRef = useRef(null);
   const [selectedColor, setSelectedColor] = useState(COLOR_PALETTE[0]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [grid, setGrid] = useState(() => {
+  const initialGrid = () => {
     if (Array.isArray(initialSprite)) {
       return initialSprite;
     }
 
     return createTransparentGrid();
-  });
+  };
+  const gridRef = useRef(initialGrid());
+  const [grid, setGridState] = useState(gridRef.current);
   const [tool, setTool] = useState("draw"); // 'draw' or 'erase'
+
+  const setGrid = useCallback((nextGridOrUpdater) => {
+    const nextGrid =
+      typeof nextGridOrUpdater === "function"
+        ? nextGridOrUpdater(gridRef.current)
+        : nextGridOrUpdater;
+
+    gridRef.current = nextGrid;
+    setGridState(nextGrid);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -227,6 +239,8 @@ const PixelGridEditor = ({
   };
 
   const exportSprite = () => {
+    const currentGrid = gridRef.current;
+
     // Create a temporary canvas to export the sprite at actual size (32x32)
     const exportCanvas = document.createElement("canvas");
     exportCanvas.width = GRID_SIZE;
@@ -237,7 +251,7 @@ const PixelGridEditor = ({
     // Draw each pixel
     for (let y = 0; y < GRID_SIZE; y++) {
       for (let x = 0; x < GRID_SIZE; x++) {
-        const color = grid[y][x];
+        const color = currentGrid[y][x];
         if (color !== "transparent") {
           ctx.fillStyle = color;
           ctx.fillRect(x, y, 1, 1);
@@ -249,7 +263,7 @@ const PixelGridEditor = ({
     const dataURL = exportCanvas.toDataURL("image/png");
 
     if (onSave) {
-      onSave({ dataURL, grid });
+      onSave({ dataURL, grid: currentGrid });
     }
 
     return dataURL;
