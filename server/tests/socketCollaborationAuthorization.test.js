@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import mongoose from 'mongoose';
 import Collaboration from '../models/Collaboration.js';
 import { setupCollaborationEvents } from '../services/socketService.js';
