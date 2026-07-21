@@ -251,6 +251,50 @@ describe('collaboration socket authorization', () => {
     });
   });
 
+  test('preserves content update order while authorization queries are pending', async () => {
+    const creatorId = new mongoose.Types.ObjectId();
+    const editorId = new mongoose.Types.ObjectId();
+    const sessionId = new mongoose.Types.ObjectId().toString();
+    const collaboration = {
+      creator: creatorId,
+      participants: [{ user: editorId, role: 'editor' }]
+    };
+    jest.spyOn(Collaboration, 'findOne')
+      .mockReturnValueOnce({
+        select: jest.fn().mockResolvedValue(collaboration)
+      })
+      .mockReturnValueOnce({
+        select: jest.fn().mockImplementation(
+          () => new Promise(resolve => setTimeout(() => resolve(collaboration), 20))
+        )
+      })
+      .mockReturnValueOnce({
+        select: jest.fn().mockResolvedValue(collaboration)
+      });
+    const server = new FakeSocketServer();
+    const editor = makeSocket(server, editorId, 'editor');
+
+    await editor.trigger('collaboration:join', { sessionId });
+    server.broadcasts = [];
+    const firstUpdate = editor.trigger('collaboration:content-update', {
+      sessionId,
+      field: 'content',
+      value: 'a'
+    });
+    const secondUpdate = editor.trigger('collaboration:content-update', {
+      sessionId,
+      field: 'content',
+      value: 'ab'
+    });
+    await Promise.all([firstUpdate, secondUpdate]);
+
+    expect(
+      server.broadcasts
+        .filter(({ event }) => event === 'collaboration:content-update')
+        .map(({ data }) => data.value)
+    ).toEqual(['a', 'ab']);
+  });
+
   test('immediately removes all user sockets when REST access is revoked', async () => {
     const userId = new mongoose.Types.ObjectId();
     const sessionId = new mongoose.Types.ObjectId().toString();
