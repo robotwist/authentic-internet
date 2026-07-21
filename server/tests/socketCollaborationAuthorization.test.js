@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, jest, test } from '@jest/globals';
 import mongoose from 'mongoose';
+import { setTimeout } from 'node:timers';
 import Collaboration from '../models/Collaboration.js';
 import {
   revokeCollaborationSocketAccess,
