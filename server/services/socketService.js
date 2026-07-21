@@ -563,7 +563,11 @@ const setupArtifactEvents = (socket) => {
  * Set up collaboration-related event handlers
  * @param {Object} socket - Socket instance
  */
-const getAuthorizedCollaborationRoom = (socket, sessionId, allowedRoles = null) => {
+const getAuthorizedCollaborationRoom = async (
+  socket,
+  sessionId,
+  { allowedRoles = null, creatorOnly = false } = {}
+) => {
   if (!sessionId) {
     socket.emit('error', { message: 'Collaboration session ID is required' });
     return null;
@@ -571,19 +575,49 @@ const getAuthorizedCollaborationRoom = (socket, sessionId, allowedRoles = null) 
 
   const normalizedSessionId = sessionId.toString();
   const roomId = `collaboration:${normalizedSessionId}`;
-  const role = socket.data?.collaborationRoles?.get(normalizedSessionId);
 
-  if (!socket.rooms.has(roomId) || !role) {
+  if (!socket.rooms.has(roomId)) {
     socket.emit('error', { message: 'Not authorized for this collaboration session' });
     return null;
   }
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
-    socket.emit('error', { message: 'Insufficient collaboration permissions' });
+  try {
+    const collaboration = await Collaboration.findOne({
+      _id: normalizedSessionId,
+      $or: [
+        { creator: socket.user.id },
+        { 'participants.user': socket.user.id }
+      ]
+    }).select('creator participants.user participants.role');
+
+    if (!collaboration) {
+      await socket.leave(roomId);
+      socket.emit('error', { message: 'Not authorized for this collaboration session' });
+      return null;
+    }
+
+    const isCreator = collaboration.creator.toString() === socket.user.id.toString();
+    const participant = collaboration.participants.find(
+      entry => entry.user.toString() === socket.user.id.toString()
+    );
+    const role = isCreator ? 'owner' : participant.role;
+
+    if (creatorOnly && !isCreator) {
+      socket.emit('error', { message: 'Insufficient collaboration permissions' });
+      return null;
+    }
+
+    if (allowedRoles && !allowedRoles.includes(role)) {
+      socket.emit('error', { message: 'Insufficient collaboration permissions' });
+      return null;
+    }
+
+    return roomId;
+  } catch (error) {
+    console.error('Error authorizing collaboration socket event:', error);
+    socket.emit('error', { message: 'Failed to authorize collaboration event' });
     return null;
   }
-
-  return roomId;
 };
 
 export const setupCollaborationEvents = (socket, socketServer = io) => {
@@ -614,22 +648,13 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
       for (const room of socket.rooms) {
         if (room.startsWith('collaboration:')) {
           socket.leave(room);
-          socket.data?.collaborationRoles?.delete(room.slice('collaboration:'.length));
         }
       }
       
       // Join collaboration room
       const sessionId = data.sessionId.toString();
       const roomId = `collaboration:${sessionId}`;
-      const participant = collaboration.participants.find(
-        entry => entry.user.toString() === socket.user.id.toString()
-      );
-      const role = collaboration.creator.toString() === socket.user.id.toString()
-        ? 'owner'
-        : participant.role;
 
-      socket.data.collaborationRoles ??= new Map();
-      socket.data.collaborationRoles.set(sessionId, role);
       await socket.join(roomId);
       
       // Notify others in the session
@@ -660,12 +685,11 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // Leave collaboration session
-  socket.on('collaboration:leave', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId);
+  socket.on('collaboration:leave', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId);
     if (!roomId) return;
 
-    socket.leave(roomId);
-    socket.data.collaborationRoles.delete(data.sessionId.toString());
+    await socket.leave(roomId);
     
     // Notify others
     socket.to(roomId).emit('collaboration:user-left', {
@@ -678,8 +702,10 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // User starts editing
-  socket.on('collaboration:user-editing', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId, ['owner', 'editor']);
+  socket.on('collaboration:user-editing', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId, {
+      allowedRoles: ['owner', 'editor']
+    });
     if (!roomId) return;
 
     socket.to(roomId).emit('collaboration:user-editing', {
@@ -691,8 +717,10 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // User stops editing
-  socket.on('collaboration:user-stopped-editing', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId, ['owner', 'editor']);
+  socket.on('collaboration:user-stopped-editing', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId, {
+      allowedRoles: ['owner', 'editor']
+    });
     if (!roomId) return;
 
     socket.to(roomId).emit('collaboration:user-stopped-editing', {
@@ -703,8 +731,10 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // Cursor position update
-  socket.on('collaboration:cursor-update', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId, ['owner', 'editor']);
+  socket.on('collaboration:cursor-update', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId, {
+      allowedRoles: ['owner', 'editor']
+    });
     if (!roomId) return;
 
     socket.to(roomId).emit('collaboration:cursor-update', {
@@ -717,8 +747,10 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // Content update
-  socket.on('collaboration:content-update', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId, ['owner', 'editor']);
+  socket.on('collaboration:content-update', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId, {
+      allowedRoles: ['owner', 'editor']
+    });
     if (!roomId) return;
 
     socket.to(roomId).emit('collaboration:content-update', {
@@ -731,8 +763,8 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // Comment added
-  socket.on('collaboration:comment-added', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId);
+  socket.on('collaboration:comment-added', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId);
     if (!roomId) return;
 
     socketServer.in(roomId).emit('collaboration:comment-added', {
@@ -742,8 +774,8 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // Comment resolved
-  socket.on('collaboration:comment-resolved', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId);
+  socket.on('collaboration:comment-resolved', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId);
     if (!roomId) return;
 
     socketServer.in(roomId).emit('collaboration:comment-resolved', {
@@ -754,8 +786,10 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // Version saved
-  socket.on('collaboration:version-saved', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId, ['owner', 'editor']);
+  socket.on('collaboration:version-saved', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId, {
+      allowedRoles: ['owner', 'editor']
+    });
     if (!roomId) return;
 
     socketServer.in(roomId).emit('collaboration:version-saved', {
@@ -767,8 +801,10 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // Settings updated
-  socket.on('collaboration:settings-updated', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId, ['owner']);
+  socket.on('collaboration:settings-updated', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId, {
+      creatorOnly: true
+    });
     if (!roomId) return;
 
     socketServer.in(roomId).emit('collaboration:settings-updated', {
@@ -780,8 +816,8 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // User activity tracking
-  socket.on('collaboration:activity', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId);
+  socket.on('collaboration:activity', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId);
     if (!roomId) return;
 
     socket.to(roomId).emit('collaboration:activity', {
@@ -793,8 +829,10 @@ export const setupCollaborationEvents = (socket, socketServer = io) => {
   });
   
   // Session status update
-  socket.on('collaboration:status-update', (data) => {
-    const roomId = getAuthorizedCollaborationRoom(socket, data.sessionId, ['owner']);
+  socket.on('collaboration:status-update', async (data) => {
+    const roomId = await getAuthorizedCollaborationRoom(socket, data.sessionId, {
+      creatorOnly: true
+    });
     if (!roomId) return;
 
     socketServer.in(roomId).emit('collaboration:status-update', {
@@ -816,6 +854,28 @@ export const getIO = () => {
     return null;
   }
   return io;
+};
+
+export const revokeCollaborationSocketAccess = async (
+  userId,
+  sessionId,
+  socketServer = io
+) => {
+  if (!socketServer || !userId || !sessionId) return;
+
+  const roomId = `collaboration:${sessionId.toString()}`;
+  const sessionSockets = await socketServer.in(roomId).fetchSockets();
+
+  await Promise.all(
+    sessionSockets
+      .filter(socket => socket.user?.id?.toString() === userId.toString())
+      .map(async socket => {
+        await socket.leave(roomId);
+        socket.emit('collaboration:access-revoked', {
+          sessionId: sessionId.toString()
+        });
+      })
+  );
 };
 
 /**

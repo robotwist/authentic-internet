@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, jest, test } from '@jest/globals';
 import mongoose from 'mongoose';
 import Collaboration from '../models/Collaboration.js';
-import { setupCollaborationEvents } from '../services/socketService.js';
+import {
+  revokeCollaborationSocketAccess,
+  setupCollaborationEvents
+} from '../services/socketService.js';
 
 class FakeSocketServer {
   constructor() {
@@ -16,6 +19,10 @@ class FakeSocketServer {
     return {
       emit: (event, data) => {
         this.broadcasts.push({ room, event, data });
+      },
+      fetchSockets: async () => {
+        const socketIds = this.sockets.adapter.rooms.get(room) || new Set();
+        return Array.from(socketIds).map(id => this.sockets.sockets.get(id));
       }
     };
   }
@@ -182,5 +189,89 @@ describe('collaboration socket authorization', () => {
         data: { message: 'Insufficient collaboration permissions' }
       }
     ]);
+  });
+
+  test('does not grant creator-only events to a participant with an owner role', async () => {
+    const creatorId = new mongoose.Types.ObjectId();
+    const participantId = new mongoose.Types.ObjectId();
+    const sessionId = new mongoose.Types.ObjectId().toString();
+    mockCollaborationLookup({
+      creator: creatorId,
+      participants: [{ user: participantId, role: 'owner' }]
+    });
+    const server = new FakeSocketServer();
+    const participant = makeSocket(server, participantId, 'participant-owner');
+
+    await participant.trigger('collaboration:join', { sessionId });
+    server.broadcasts = [];
+    await participant.trigger('collaboration:settings-updated', {
+      sessionId,
+      settings: { allowEditing: false }
+    });
+
+    expect(server.broadcasts).toHaveLength(0);
+    expect(participant.emitted).toContainEqual({
+      event: 'error',
+      data: { message: 'Insufficient collaboration permissions' }
+    });
+  });
+
+  test('revalidates membership and evicts revoked participants', async () => {
+    const creatorId = new mongoose.Types.ObjectId();
+    const editorId = new mongoose.Types.ObjectId();
+    const sessionId = new mongoose.Types.ObjectId().toString();
+    const collaboration = {
+      creator: creatorId,
+      participants: [{ user: editorId, role: 'editor' }]
+    };
+    const lookup = jest.spyOn(Collaboration, 'findOne');
+    lookup
+      .mockReturnValueOnce({
+        select: jest.fn().mockResolvedValue(collaboration)
+      })
+      .mockReturnValueOnce({
+        select: jest.fn().mockResolvedValue(null)
+      });
+    const server = new FakeSocketServer();
+    const editor = makeSocket(server, editorId, 'removed-editor');
+
+    await editor.trigger('collaboration:join', { sessionId });
+    server.broadcasts = [];
+    await editor.trigger('collaboration:content-update', {
+      sessionId,
+      field: 'content',
+      value: 'edit after removal'
+    });
+
+    expect(editor.rooms.has(`collaboration:${sessionId}`)).toBe(false);
+    expect(server.broadcasts).toHaveLength(0);
+    expect(editor.emitted).toContainEqual({
+      event: 'error',
+      data: { message: 'Not authorized for this collaboration session' }
+    });
+  });
+
+  test('immediately removes all user sockets when REST access is revoked', async () => {
+    const userId = new mongoose.Types.ObjectId();
+    const sessionId = new mongoose.Types.ObjectId().toString();
+    const roomId = `collaboration:${sessionId}`;
+    const server = new FakeSocketServer();
+    const firstTab = new FakeSocket(server, { id: userId, username: 'member' });
+    const secondTab = new FakeSocket(server, { id: userId, username: 'member' });
+    await firstTab.join(roomId);
+    await secondTab.join(roomId);
+
+    await revokeCollaborationSocketAccess(userId, sessionId, server);
+
+    expect(firstTab.rooms.has(roomId)).toBe(false);
+    expect(secondTab.rooms.has(roomId)).toBe(false);
+    expect(firstTab.emitted).toContainEqual({
+      event: 'collaboration:access-revoked',
+      data: { sessionId }
+    });
+    expect(secondTab.emitted).toContainEqual({
+      event: 'collaboration:access-revoked',
+      data: { sessionId }
+    });
   });
 });
