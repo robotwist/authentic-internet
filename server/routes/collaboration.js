@@ -3,6 +3,7 @@ import authenticateToken from '../middleware/authMiddleware.js';
 import Collaboration from '../models/Collaboration.js';
 import Artifact from '../models/Artifact.js';
 import User from '../models/User.js';
+import { revokeCollaborationSocketAccess } from '../services/socketService.js';
 
 const router = express.Router();
 
@@ -209,6 +210,7 @@ router.post('/sessions/:sessionId/leave', authenticateToken, async (req, res) =>
     );
 
     await collaboration.save();
+    await revokeCollaborationSocketAccess(userId, sessionId);
 
     res.json({
       success: true,

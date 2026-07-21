@@ -3,6 +3,8 @@
  * This service handles Socket.io setup and event handlers
  */
 
+import Collaboration from '../models/Collaboration.js';
+
 // Initialize Socket.io server
 let io;
 let socketIoAvailable = false;
@@ -561,27 +563,130 @@ const setupArtifactEvents = (socket) => {
  * Set up collaboration-related event handlers
  * @param {Object} socket - Socket instance
  */
-const setupCollaborationEvents = (socket) => {
-  if (!socketIoAvailable) return;
+const getAuthorizedCollaborationRoom = async (
+  socket,
+  sessionId,
+  { allowedRoles = null, creatorOnly = false } = {}
+) => {
+  if (!sessionId) {
+    socket.emit('error', { message: 'Collaboration session ID is required' });
+    return null;
+  }
+
+  const normalizedSessionId = sessionId.toString();
+  const roomId = `collaboration:${normalizedSessionId}`;
+
+  if (!socket.rooms.has(roomId)) {
+    socket.emit('error', { message: 'Not authorized for this collaboration session' });
+    return null;
+  }
+
+  try {
+    const collaboration = await Collaboration.findOne({
+      _id: normalizedSessionId,
+      $or: [
+        { creator: socket.user.id },
+        { 'participants.user': socket.user.id }
+      ]
+    }).select('creator participants.user participants.role');
+
+    if (!collaboration) {
+      await socket.leave(roomId);
+      socket.emit('error', { message: 'Not authorized for this collaboration session' });
+      return null;
+    }
+
+    const isCreator = collaboration.creator.toString() === socket.user.id.toString();
+    const participant = collaboration.participants.find(
+      entry => entry.user.toString() === socket.user.id.toString()
+    );
+    const role = isCreator ? 'owner' : participant.role;
+
+    if (creatorOnly && !isCreator) {
+      socket.emit('error', { message: 'Insufficient collaboration permissions' });
+      return null;
+    }
+
+    if (allowedRoles && !allowedRoles.includes(role)) {
+      socket.emit('error', { message: 'Insufficient collaboration permissions' });
+      return null;
+    }
+
+    return roomId;
+  } catch (error) {
+    console.error('Error authorizing collaboration socket event:', error);
+    socket.emit('error', { message: 'Failed to authorize collaboration event' });
+    return null;
+  }
+};
+
+const enqueueCollaborationEvent = (socket, handler) => {
+  const previousEvent = socket.data.collaborationEventQueue || Promise.resolve();
+  const currentEvent = previousEvent
+    .catch(() => {})
+    .then(handler);
+
+  socket.data.collaborationEventQueue = currentEvent;
+  return currentEvent.finally(() => {
+    if (socket.data.collaborationEventQueue === currentEvent) {
+      delete socket.data.collaborationEventQueue;
+    }
+  });
+};
+
+const registerAuthorizedCollaborationEvent = (
+  socket,
+  event,
+  authorization,
+  handler
+) => {
+  socket.on(event, data => enqueueCollaborationEvent(socket, async () => {
+    const roomId = await getAuthorizedCollaborationRoom(
+      socket,
+      data.sessionId,
+      authorization
+    );
+    if (!roomId) return;
+    await handler(roomId, data);
+  }));
+};
+
+export const setupCollaborationEvents = (socket, socketServer = io) => {
+  if (!socketIoAvailable && !socketServer) return;
   
   // Join collaboration session
-  socket.on('collaboration:join', async (data) => {
+  socket.on('collaboration:join', data => enqueueCollaborationEvent(socket, async () => {
     try {
       if (!data.sessionId) {
-        socket.emit('error', { message: 'Session ID is required' });
+        socket.emit('error', { message: 'Collaboration session ID is required' });
         return;
       }
       
+      const collaboration = await Collaboration.findOne({
+        _id: data.sessionId,
+        $or: [
+          { creator: socket.user.id },
+          { 'participants.user': socket.user.id }
+        ]
+      }).select('creator participants.user participants.role');
+
+      if (!collaboration) {
+        socket.emit('error', { message: 'Not authorized for this collaboration session' });
+        return;
+      }
+
       // Leave previous collaboration rooms
-      Object.keys(socket.rooms).forEach(room => {
+      for (const room of socket.rooms) {
         if (room.startsWith('collaboration:')) {
           socket.leave(room);
         }
-      });
+      }
       
       // Join collaboration room
-      const roomId = `collaboration:${data.sessionId}`;
-      socket.join(roomId);
+      const sessionId = data.sessionId.toString();
+      const roomId = `collaboration:${sessionId}`;
+
+      await socket.join(roomId);
       
       // Notify others in the session
       socket.to(roomId).emit('collaboration:user-joined', {
@@ -591,9 +696,9 @@ const setupCollaborationEvents = (socket) => {
       });
       
       // Send list of users in this session
-      const sessionUsers = Array.from(io.sockets.adapter.rooms.get(roomId) || [])
+      const sessionUsers = Array.from(socketServer.sockets.adapter.rooms.get(roomId) || [])
         .map(socketId => {
-          const userSocket = io.sockets.sockets.get(socketId);
+          const userSocket = socketServer.sockets.sockets.get(socketId);
           return {
             id: userSocket.user.id,
             username: userSocket.user.username
@@ -608,17 +713,11 @@ const setupCollaborationEvents = (socket) => {
       console.error('Error joining collaboration session:', error);
       socket.emit('error', { message: 'Failed to join collaboration session' });
     }
-  });
+  }));
   
   // Leave collaboration session
-  socket.on('collaboration:leave', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
-    socket.leave(roomId);
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:leave', {}, async (roomId, data) => {
+    await socket.leave(roomId);
     
     // Notify others
     socket.to(roomId).emit('collaboration:user-left', {
@@ -631,13 +730,9 @@ const setupCollaborationEvents = (socket) => {
   });
   
   // User starts editing
-  socket.on('collaboration:user-editing', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:user-editing', {
+    allowedRoles: ['owner', 'editor']
+  }, (roomId, data) => {
     socket.to(roomId).emit('collaboration:user-editing', {
       userId: socket.user.id,
       username: socket.user.username,
@@ -647,13 +742,9 @@ const setupCollaborationEvents = (socket) => {
   });
   
   // User stops editing
-  socket.on('collaboration:user-stopped-editing', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:user-stopped-editing', {
+    allowedRoles: ['owner', 'editor']
+  }, roomId => {
     socket.to(roomId).emit('collaboration:user-stopped-editing', {
       userId: socket.user.id,
       username: socket.user.username,
@@ -662,13 +753,9 @@ const setupCollaborationEvents = (socket) => {
   });
   
   // Cursor position update
-  socket.on('collaboration:cursor-update', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:cursor-update', {
+    allowedRoles: ['owner', 'editor']
+  }, (roomId, data) => {
     socket.to(roomId).emit('collaboration:cursor-update', {
       userId: socket.user.id,
       username: socket.user.username,
@@ -679,13 +766,9 @@ const setupCollaborationEvents = (socket) => {
   });
   
   // Content update
-  socket.on('collaboration:content-update', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:content-update', {
+    allowedRoles: ['owner', 'editor']
+  }, (roomId, data) => {
     socket.to(roomId).emit('collaboration:content-update', {
       userId: socket.user.id,
       username: socket.user.username,
@@ -696,28 +779,16 @@ const setupCollaborationEvents = (socket) => {
   });
   
   // Comment added
-  socket.on('collaboration:comment-added', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
-    io.in(roomId).emit('collaboration:comment-added', {
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:comment-added', {}, (roomId, data) => {
+    socketServer.in(roomId).emit('collaboration:comment-added', {
       comment: data.comment,
       timestamp: new Date()
     });
   });
   
   // Comment resolved
-  socket.on('collaboration:comment-resolved', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
-    io.in(roomId).emit('collaboration:comment-resolved', {
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:comment-resolved', {}, (roomId, data) => {
+    socketServer.in(roomId).emit('collaboration:comment-resolved', {
       commentId: data.commentId,
       resolvedBy: socket.user.id,
       timestamp: new Date()
@@ -725,14 +796,10 @@ const setupCollaborationEvents = (socket) => {
   });
   
   // Version saved
-  socket.on('collaboration:version-saved', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
-    io.in(roomId).emit('collaboration:version-saved', {
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:version-saved', {
+    allowedRoles: ['owner', 'editor']
+  }, (roomId, data) => {
+    socketServer.in(roomId).emit('collaboration:version-saved', {
       version: data.version,
       savedBy: socket.user.id,
       username: socket.user.username,
@@ -741,14 +808,10 @@ const setupCollaborationEvents = (socket) => {
   });
   
   // Settings updated
-  socket.on('collaboration:settings-updated', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
-    io.in(roomId).emit('collaboration:settings-updated', {
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:settings-updated', {
+    creatorOnly: true
+  }, (roomId, data) => {
+    socketServer.in(roomId).emit('collaboration:settings-updated', {
       settings: data.settings,
       updatedBy: socket.user.id,
       username: socket.user.username,
@@ -757,13 +820,7 @@ const setupCollaborationEvents = (socket) => {
   });
   
   // User activity tracking
-  socket.on('collaboration:activity', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:activity', {}, (roomId, data) => {
     socket.to(roomId).emit('collaboration:activity', {
       userId: socket.user.id,
       username: socket.user.username,
@@ -773,14 +830,10 @@ const setupCollaborationEvents = (socket) => {
   });
   
   // Session status update
-  socket.on('collaboration:status-update', (data) => {
-    if (!data.sessionId) {
-      socket.emit('error', { message: 'Session ID is required' });
-      return;
-    }
-    
-    const roomId = `collaboration:${data.sessionId}`;
-    io.in(roomId).emit('collaboration:status-update', {
+  registerAuthorizedCollaborationEvent(socket, 'collaboration:status-update', {
+    creatorOnly: true
+  }, (roomId, data) => {
+    socketServer.in(roomId).emit('collaboration:status-update', {
       status: data.status,
       updatedBy: socket.user.id,
       username: socket.user.username,
@@ -799,6 +852,28 @@ export const getIO = () => {
     return null;
   }
   return io;
+};
+
+export const revokeCollaborationSocketAccess = async (
+  userId,
+  sessionId,
+  socketServer = io
+) => {
+  if (!socketServer || !userId || !sessionId) return;
+
+  const roomId = `collaboration:${sessionId.toString()}`;
+  const sessionSockets = await socketServer.in(roomId).fetchSockets();
+
+  await Promise.all(
+    sessionSockets
+      .filter(socket => socket.user?.id?.toString() === userId.toString())
+      .map(async socket => {
+        await socket.leave(roomId);
+        socket.emit('collaboration:access-revoked', {
+          sessionId: sessionId.toString()
+        });
+      })
+  );
 };
 
 /**
