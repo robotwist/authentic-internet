@@ -144,9 +144,20 @@ WorldInstanceSchema.methods.isPlayerInWorld = function(userId) {
 };
 
 WorldInstanceSchema.methods.canPlayerJoin = function(userId) {
+  const normalizedUserId = userId.toString();
+  const isCreator = this.creator?.toString() === normalizedUserId;
+  const isModerator = this.moderators.some(
+    moderatorId => moderatorId.toString() === normalizedUserId
+  );
+  const hasRestrictedAccess = isCreator || isModerator;
+
   if (!this.isActive) return false;
-  if (this.requiresInvite && !this.moderators.includes(userId)) return false;
-  if (this.activePlayers.length >= this.maxPlayers) return false;
+  if (!this.isPublic && !hasRestrictedAccess) return false;
+  if (this.requiresInvite && !hasRestrictedAccess) return false;
+  if (
+    !this.isPlayerInWorld(userId) &&
+    this.activePlayers.length >= this.maxPlayers
+  ) return false;
   return true;
 };
 

@@ -210,8 +210,30 @@ const setupMessageEvents = (socket) => {
  * Set up world-related event handlers
  * @param {Object} socket - Socket instance
  */
-const setupWorldEvents = (socket) => {
-  if (!socketIoAvailable) return;
+const getAuthorizedWorldRoom = async (socket, worldId) => {
+  if (!worldId) {
+    socket.emit('error', { message: 'World ID is required' });
+    return null;
+  }
+
+  const { default: WorldInstance } = await import('../models/World.js');
+  const worldInstance = await WorldInstance.findOne({ worldId });
+  const roomId = `world:${worldId}`;
+
+  if (
+    !worldInstance ||
+    !socket.rooms.has(roomId) ||
+    !worldInstance.isPlayerInWorld(socket.user.id)
+  ) {
+    socket.emit('error', { message: 'Not authorized for this world' });
+    return null;
+  }
+
+  return { worldInstance, roomId };
+};
+
+export const setupWorldEvents = (socket, socketServer = io) => {
+  if (!socketIoAvailable && !socketServer) return;
   
   // Join a world
   socket.on('world:join', async (data) => {
@@ -229,12 +251,12 @@ const setupWorldEvents = (socket) => {
       let worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
       if (!worldInstance) {
         // Create default world instance
-        const user = await User.findById(socket.user.id);
         worldInstance = new WorldInstance({
           worldId: data.worldId,
           name: data.worldName || 'Default World',
           description: data.worldDescription || 'A shared world for players to explore',
           creator: socket.user.id,
+          moderators: [socket.user.id],
           maxPlayers: data.maxPlayers || 50
         });
         await worldInstance.save();
@@ -247,7 +269,7 @@ const setupWorldEvents = (socket) => {
       }
       
       // Leave previous world rooms
-      Object.keys(socket.rooms).forEach(room => {
+      Array.from(socket.rooms).forEach(room => {
         if (room.startsWith('world:')) {
           socket.leave(room);
         }
@@ -288,7 +310,7 @@ const setupWorldEvents = (socket) => {
       });
       
       // Send updated player list to all players in world
-      io.in(roomId).emit('world:players-updated', {
+      socketServer.in(roomId).emit('world:players-updated', {
         players: onlinePlayers
       });
       
@@ -301,28 +323,21 @@ const setupWorldEvents = (socket) => {
   // Leave a world
   socket.on('world:leave', async (data) => {
     try {
-      if (!data.worldId) {
-        socket.emit('error', { message: 'World ID is required' });
-        return;
-      }
-      
-      const { default: WorldInstance } = await import('../models/World.js');
-      
-      const roomId = `world:${data.worldId}`;
-      socket.leave(roomId);
-      
+      const authorization = await getAuthorizedWorldRoom(socket, data.worldId);
+      if (!authorization) return;
+
+      const { worldInstance, roomId } = authorization;
+
       // Remove player from world instance
-      const worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
-      if (worldInstance) {
-        worldInstance.removePlayer(socket.user.id);
-        await worldInstance.save();
-        
-        // Send updated player list to remaining players
-        const onlinePlayers = worldInstance.getOnlinePlayers();
-        io.in(roomId).emit('world:players-updated', {
-          players: onlinePlayers
-        });
-      }
+      worldInstance.removePlayer(socket.user.id);
+      await worldInstance.save();
+      socket.leave(roomId);
+
+      // Send updated player list to remaining players
+      const onlinePlayers = worldInstance.getOnlinePlayers();
+      socketServer.in(roomId).emit('world:players-updated', {
+        players: onlinePlayers
+      });
       
       // Notify others
       socket.to(roomId).emit('world:user-left', {
@@ -338,31 +353,29 @@ const setupWorldEvents = (socket) => {
   // Update player position
   socket.on('world:update-position', async (data) => {
     try {
-      if (!data.worldId || !data.position) {
-        socket.emit('error', { message: 'World ID and position are required' });
+      if (!data.position) {
+        socket.emit('error', { message: 'Position is required' });
         return;
       }
+
+      const authorization = await getAuthorizedWorldRoom(socket, data.worldId);
+      if (!authorization) return;
+
+      const { worldInstance, roomId } = authorization;
+      worldInstance.updatePlayerPosition(
+        socket.user.id,
+        data.position,
+        data.facing || 'down'
+      );
+      await worldInstance.save();
       
-      const { default: WorldInstance } = await import('../models/World.js');
-      
-      const worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
-      if (worldInstance && worldInstance.isPlayerInWorld(socket.user.id)) {
-        worldInstance.updatePlayerPosition(
-          socket.user.id,
-          data.position,
-          data.facing || 'down'
-        );
-        await worldInstance.save();
-        
-        // Broadcast position update to other players in world
-        const roomId = `world:${data.worldId}`;
-        socket.to(roomId).emit('world:player-moved', {
-          userId: socket.user.id,
-          username: socket.user.username,
-          position: data.position,
-          facing: data.facing || 'down'
-        });
-      }
+      // Broadcast position update to other players in world
+      socket.to(roomId).emit('world:player-moved', {
+        userId: socket.user.id,
+        username: socket.user.username,
+        position: data.position,
+        facing: data.facing || 'down'
+      });
       
     } catch (error) {
       console.error('Error updating position:', error);
@@ -372,17 +385,20 @@ const setupWorldEvents = (socket) => {
   // World chat message
   socket.on('world:message', async (data) => {
     try {
-      if (!data.worldId || !data.content) {
-        socket.emit('error', { message: 'World ID and content are required' });
+      if (!data.content) {
+        socket.emit('error', { message: 'Message content is required' });
         return;
       }
+
+      const authorization = await getAuthorizedWorldRoom(socket, data.worldId);
+      if (!authorization) return;
+
+      const { worldInstance, roomId } = authorization;
       
-      const { default: WorldInstance } = await import('../models/World.js');
       const { default: ChatMessage } = await import('../models/Chat.js');
       const { default: User } = await import('../models/User.js');
       
-      const worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
-      if (!worldInstance || !worldInstance.settings.allowChat) {
+      if (!worldInstance.settings.allowChat) {
         socket.emit('error', { message: 'Chat not allowed in this world' });
         return;
       }
@@ -416,10 +432,8 @@ const setupWorldEvents = (socket) => {
       });
       await chatMessage.save();
       
-      const roomId = `world:${data.worldId}`;
-      
       // Send to everyone in the world (including sender)
-      io.in(roomId).emit('world:message', {
+      socketServer.in(roomId).emit('world:message', {
         messageId: chatMessage.messageId,
         senderId: socket.user.id,
         senderName: socket.user.username,
@@ -438,21 +452,29 @@ const setupWorldEvents = (socket) => {
   // React to world message
   socket.on('world:react', async (data) => {
     try {
-      if (!data.messageId || !data.emoji) {
-        socket.emit('error', { message: 'Message ID and emoji are required' });
+      if (!data.messageId || !data.emoji || !data.worldId) {
+        socket.emit('error', { message: 'World ID, message ID, and emoji are required' });
         return;
       }
+
+      const authorization = await getAuthorizedWorldRoom(socket, data.worldId);
+      if (!authorization) return;
+
+      const { roomId } = authorization;
       
       const { default: ChatMessage } = await import('../models/Chat.js');
       
-      const message = await ChatMessage.findOne({ messageId: data.messageId });
+      const message = await ChatMessage.findOne({
+        messageId: data.messageId,
+        messageType: 'world',
+        'world.worldId': data.worldId
+      });
       if (message) {
         message.addReaction(socket.user.id, socket.user.username, data.emoji);
         await message.save();
         
         // Broadcast reaction to world
-        const roomId = `world:${data.worldId}`;
-        io.in(roomId).emit('world:reaction', {
+        socketServer.in(roomId).emit('world:reaction', {
           messageId: data.messageId,
           userId: socket.user.id,
           username: socket.user.username,
@@ -473,13 +495,21 @@ const setupWorldEvents = (socket) => {
         socket.emit('error', { message: 'World ID, target user ID, and interaction type are required' });
         return;
       }
+
+      const authorization = await getAuthorizedWorldRoom(socket, data.worldId);
+      if (!authorization) return;
+
+      const { worldInstance, roomId } = authorization;
       
-      const { default: WorldInstance } = await import('../models/World.js');
       const { default: User } = await import('../models/User.js');
       
-      const worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
-      if (!worldInstance) {
-        socket.emit('error', { message: 'World not found' });
+      if (!worldInstance.settings.allowPlayerInteraction) {
+        socket.emit('error', { message: 'Player interactions are disabled in this world' });
+        return;
+      }
+
+      if (!worldInstance.isPlayerInWorld(data.targetUserId)) {
+        socket.emit('error', { message: 'Target player is not in this world' });
         return;
       }
       
@@ -492,7 +522,7 @@ const setupWorldEvents = (socket) => {
       
       // Send interaction to target player
       const targetSocket = activeConnections.get(data.targetUserId);
-      if (targetSocket) {
+      if (targetSocket?.rooms.has(roomId)) {
         targetSocket.emit('world:player-interaction', {
           fromUserId: socket.user.id,
           fromUsername: socket.user.username,
@@ -502,7 +532,6 @@ const setupWorldEvents = (socket) => {
       }
       
       // Broadcast interaction to world
-      const roomId = `world:${data.worldId}`;
       socket.to(roomId).emit('world:player-interaction-broadcast', {
         fromUserId: socket.user.id,
         fromUsername: socket.user.username,
