@@ -1,17 +1,42 @@
 import Artifact from "../models/Artifact.js";
 import User from "../models/User.js";
 
+const resolveUserId = (req) => {
+  const userId = req.user?.userId ?? req.user?.id ?? req.user?._id;
+  return userId?.toString?.() ?? null;
+};
+
+const ARTIFACT_UPDATE_FIELDS = [
+  "name",
+  "description",
+  "content",
+  "riddle",
+  "unlockAnswer",
+  "area",
+  "isExclusive",
+  "location",
+  "type",
+  "media",
+  "tags",
+  "exp",
+  "visibility",
+];
+
+const isArtifactOwner = (artifact, uid) => {
+  if (!artifact || !uid) return false;
+  const ownerId = (artifact.createdBy ?? artifact.creator)?.toString?.();
+  return Boolean(ownerId) && ownerId === uid;
+};
+
 // Create an artifact. First is free; 2nd+ require 1 creation token (earned by completing others' artifacts).
 export const createArtifact = async (req, res) => {
   try {
-    const userId = req.user?.userId ?? req.user?.id ?? req.user?._id;
-    const uid = userId?.toString?.();
+    const uid = resolveUserId(req);
     if (!uid) {
       return res.status(401).json({ message: "Authentication required." });
     }
 
-    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location, type, createdBy } = req.body;
-    const resolvedCreatedBy = createdBy || uid;
+    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location, type } = req.body;
 
     if (!name || !content || !area || !location || location.x === undefined || location.y === undefined) {
       return res.status(400).json({ message: "Name, content, area, and location (x, y) are required." });
@@ -29,7 +54,7 @@ export const createArtifact = async (req, res) => {
       isExclusive,
       location,
       type: type || "artifact",
-      createdBy: resolvedCreatedBy,
+      createdBy: uid,
       id: `artifact-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
     });
 
@@ -37,7 +62,7 @@ export const createArtifact = async (req, res) => {
 
     // Deduct 1 creation token when creating 2nd+ artifact
     if (existingCount >= 1) {
-      await User.findByIdAndUpdate(userId, {
+      await User.findByIdAndUpdate(uid, {
         $inc: { creationTokens: -1 },
       });
     }
@@ -111,13 +136,33 @@ export const getArtifactById = async (req, res) => {
 // Update an artifact
 export const updateArtifact = async (req, res) => {
   try {
+    const uid = resolveUserId(req);
+    if (!uid) {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
     const { id } = req.params;
+    const artifact = await Artifact.findById(id);
+    if (!artifact) return res.status(404).json({ message: "Artifact not found" });
+
+    if (!isArtifactOwner(artifact, uid)) {
+      return res.status(403).json({ message: "Not authorized to update this artifact" });
+    }
+
+    const updates = {};
+    for (const field of ARTIFACT_UPDATE_FIELDS) {
+      if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+        updates[field] = req.body[field];
+      }
+    }
+    updates.updatedAt = new Date();
+
     const updatedArtifact = await Artifact.findByIdAndUpdate(
-      id, 
-      req.body, 
+      id,
+      updates,
       { new: true, runValidators: true }
     ).populate('creator', 'username');
-    
+
     if (!updatedArtifact) return res.status(404).json({ message: "Artifact not found" });
     res.json({ ...updatedArtifact.toObject(), id: updatedArtifact._id });
   } catch (error) {
@@ -152,7 +197,19 @@ export const unlockArtifact = async (req, res) => {
 // Delete an artifact
 export const deleteArtifact = async (req, res) => {
   try {
+    const uid = resolveUserId(req);
+    if (!uid) {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
     const { id } = req.params;
+    const artifact = await Artifact.findById(id);
+    if (!artifact) return res.status(404).json({ message: "Artifact not found" });
+
+    if (!isArtifactOwner(artifact, uid)) {
+      return res.status(403).json({ message: "Not authorized to delete this artifact" });
+    }
+
     const deletedArtifact = await Artifact.findByIdAndDelete(id);
     if (!deletedArtifact) return res.status(404).json({ message: "Artifact not found" });
     res.json({ message: "Artifact deleted successfully", id: deletedArtifact._id });
