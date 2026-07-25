@@ -75,8 +75,8 @@ describe('characterRoutes critical correctness fixes', () => {
     characters.clear();
     users.clear();
 
-    users.set(USER_A, { _id: USER_A, username: 'alice' });
-    users.set(USER_B, { _id: USER_B, username: 'bob' });
+    users.set(USER_A, { _id: USER_A, username: 'alice', accountStatus: 'active' });
+    users.set(USER_B, { _id: USER_B, username: 'bob', accountStatus: 'active' });
 
     characters.set(CHAR_PRIVATE, makeCharacter({
       _id: CHAR_PRIVATE,
