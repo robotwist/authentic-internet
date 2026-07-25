@@ -353,68 +353,6 @@ router.post('/achievements', authenticateToken, async (req, res) => {
   }
 });
 
-// ========================================
-// 🎯 GENERIC PARAMETER ROUTES (Must come AFTER specific routes!)
-// ========================================
-
-// 📌 Get Character by ID (🔐 Requires Authentication)
-router.get("/:id", authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select("-password");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.json(user);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
-
-// 📌 Update Character (🔐 Requires Authentication)
-router.put("/:id", authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // Ensure the user can only update their own character
-    if (req.user.userId !== id) {
-      return res.status(403).json({ message: "You can only update your own character" });
-    }
-    
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
-    // Update allowed fields
-    const { avatar, exp, level, inventory, savedQuotes } = req.body;
-    
-    if (avatar) user.avatar = avatar;
-    if (exp !== undefined) user.experience = exp;
-    if (level !== undefined) user.level = level;
-    if (inventory) user.inventory = inventory;
-    if (savedQuotes) user.savedQuotes = savedQuotes;
-    
-    await user.save();
-    
-    res.json({
-      message: "Character updated successfully",
-      user: {
-        id: user._id,
-        username: user.username,
-        avatar: user.avatar,
-        exp: user.experience,
-        level: user.level,
-        inventory: user.inventory,
-        savedQuotes: user.savedQuotes
-      }
-    });
-  } catch (error) {
-    console.error("Error updating character:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
-
 // Get user's game state
 router.get('/game-state', authenticateToken, async (req, res) => {
   try {
@@ -628,8 +566,8 @@ router.post("/friends/accept", authenticateToken, validate(schemas.friend.accept
     }
     
     // Update the sent request status
-    const sentRequest = fromUser.friendRequests.sent.find(req => 
-      req.userId.toString() === req.user.userId
+    const sentRequest = fromUser.friendRequests.sent.find((friendReq) =>
+      friendReq.userId.toString() === req.user.userId
     );
     if (sentRequest) {
       sentRequest.status = 'accepted';
@@ -680,8 +618,8 @@ router.post("/friends/decline", authenticateToken, validate(schemas.friend.decli
     await user.save();
     
     // Update the sent request status
-    const sentRequest = fromUser.friendRequests.sent.find(req => 
-      req.userId.toString() === req.user.userId
+    const sentRequest = fromUser.friendRequests.sent.find((friendReq) =>
+      friendReq.userId.toString() === req.user.userId
     );
     if (sentRequest) {
       sentRequest.status = 'declined';
@@ -864,8 +802,15 @@ router.put("/challenges", authenticateToken, async (req, res) => {
 // 📌 Claim Challenge Reward (🔐 Requires Authentication)
 router.post("/challenges/claim", authenticateToken, async (req, res) => {
   try {
-    const { challengeId, reward } = req.body;
+    const { challengeId } = req.body;
     const userId = req.user.userId;
+
+    if (!challengeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Challenge ID is required'
+      });
+    }
 
     const user = await User.findById(userId);
     if (!user) {
@@ -875,21 +820,43 @@ router.post("/challenges/claim", authenticateToken, async (req, res) => {
       });
     }
 
-    // Apply rewards
-    if (reward.experience) {
-      user.experience = (user.experience || 0) + reward.experience;
-    }
-    if (reward.coins) {
-      user.coins = (user.coins || 0) + reward.coins;
+    const challenge = user.dailyChallenges?.challenges?.find((c) => c.id === challengeId);
+    if (!challenge) {
+      return res.status(404).json({
+        success: false,
+        message: 'Challenge not found'
+      });
     }
 
-    // Update challenge status
-    if (user.dailyChallenges && user.dailyChallenges.challenges) {
-      const challenge = user.dailyChallenges.challenges.find(c => c.id === challengeId);
-      if (challenge) {
-        challenge.claimed = true;
-      }
+    if (!challenge.completed) {
+      return res.status(400).json({
+        success: false,
+        message: 'Challenge not completed'
+      });
     }
+
+    if (challenge.claimed) {
+      return res.status(400).json({
+        success: false,
+        message: 'Reward already claimed'
+      });
+    }
+
+    // Never trust client-supplied reward amounts — use the persisted challenge reward.
+    const reward = challenge.reward || {};
+    const experienceGain = Number(reward.experience) || 0;
+    const coinGain = Number(reward.coins) || 0;
+
+    if (experienceGain < 0 || coinGain < 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid challenge reward'
+      });
+    }
+
+    user.experience = (user.experience || 0) + experienceGain;
+    user.coins = (user.coins || 0) + coinGain;
+    challenge.claimed = true;
 
     await user.save();
 
@@ -1008,6 +975,73 @@ router.post('/powers/deactivate', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error deactivating power:', error);
     res.status(500).json({ success: false, message: 'Failed to deactivate power' });
+  }
+});
+
+// ========================================
+// 🎯 GENERIC PARAMETER ROUTES (Must come AFTER specific routes!)
+// ========================================
+
+// 📌 Get public character profile by ID (🔐 Requires Authentication)
+router.get("/:id", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select(
+      "username avatar characterSprite characterName level"
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      username: user.username,
+      avatar: user.avatar,
+      characterSprite: user.characterSprite,
+      characterName: user.characterName,
+      level: user.level,
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// 📌 Update own cosmetic profile fields (🔐 Requires Authentication)
+router.put("/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Ensure the user can only update their own character
+    if (req.user.userId !== id) {
+      return res.status(403).json({ message: "You can only update your own character" });
+    }
+    
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // Only cosmetic fields — progression/inventory must use dedicated endpoints.
+    const { avatar, savedQuotes } = req.body;
+    
+    if (avatar !== undefined) user.avatar = avatar;
+    if (savedQuotes !== undefined) user.savedQuotes = savedQuotes;
+    
+    await user.save();
+    
+    res.json({
+      message: "Character updated successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        avatar: user.avatar,
+        exp: user.experience,
+        level: user.level,
+        inventory: user.inventory,
+        savedQuotes: user.savedQuotes
+      }
+    });
+  } catch (error) {
+    console.error("Error updating character:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

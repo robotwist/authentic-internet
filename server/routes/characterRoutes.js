@@ -10,6 +10,7 @@ import { auth as authenticateToken } from "../middleware/auth.js";
 import { validate, schemas } from "../middleware/validation.js";
 import sharp from "sharp";
 import Joi from "joi";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -52,19 +53,19 @@ const upload = multer({
 
 // Character validation schemas
 const characterValidation = {
-  create: {
+  create: Joi.object({
     name: Joi.string().min(1).max(20).required(),
     description: Joi.string().max(200).optional(),
     tags: Joi.array().items(Joi.string().max(20)).max(10).optional(),
     isPublic: Joi.boolean().optional()
-  },
+  }),
   
-  update: {
+  update: Joi.object({
     name: Joi.string().min(1).max(20).optional(),
     description: Joi.string().max(200).optional(),
     tags: Joi.array().items(Joi.string().max(20)).max(10).optional(),
     isPublic: Joi.boolean().optional()
-  }
+  })
 };
 
 // Add character validation to schemas
@@ -292,8 +293,28 @@ router.get("/:id", async (req, res) => {
       .populate('creator', 'username avatar level')
       .populate('likes', 'username avatar');
 
-    if (!character) {
+    if (!character || character.isActive === false) {
       return res.status(404).json({ error: "Character not found" });
+    }
+
+    // Private characters are only visible to their creator.
+    if (!character.isPublic) {
+      const authHeader = req.header("Authorization");
+      const token = authHeader && authHeader.split(" ")[1];
+      if (!token) {
+        return res.status(404).json({ error: "Character not found" });
+      }
+
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const requesterId = decoded.userId || decoded.id;
+        const creatorId = character.creator?._id?.toString?.() || character.creator?.toString?.();
+        if (!requesterId || creatorId !== requesterId.toString()) {
+          return res.status(404).json({ error: "Character not found" });
+        }
+      } catch {
+        return res.status(404).json({ error: "Character not found" });
+      }
     }
 
     // Increment views
@@ -321,14 +342,12 @@ router.put("/:id", authenticateToken, validate(schemas.character.update), async 
       return res.status(403).json({ error: "Not authorized to update this character" });
     }
 
-    // Update fields
-    Object.keys(req.body).forEach(key => {
-      if (key === 'tags') {
-        character[key] = JSON.parse(req.body[key]);
-      } else {
-        character[key] = req.body[key];
-      }
-    });
+    // Only apply validated whitelist fields from middleware.
+    const { name, description, tags, isPublic } = req.body;
+    if (name !== undefined) character.name = name;
+    if (description !== undefined) character.description = description;
+    if (tags !== undefined) character.tags = tags;
+    if (isPublic !== undefined) character.isPublic = isPublic;
 
     await character.save();
     await character.populate('creator', 'username avatar');
