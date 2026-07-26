@@ -89,6 +89,37 @@ export const auth = async (req, res, next) => {
 export const authenticate = auth;
 
 /**
+ * Optional authentication middleware
+ * Attaches user info when a valid token is present; continues anonymously otherwise.
+ */
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token || !process.env.JWT_SECRET) {
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded?.userId) {
+      return next();
+    }
+
+    const user = await User.findById(decoded.userId);
+    if (!user || user.accountStatus !== 'active') {
+      return next();
+    }
+
+    req.user = decoded;
+    req.userId = decoded.userId;
+    req.userRole = decoded.role || 'user';
+    return next();
+  } catch {
+    // Invalid/expired tokens are treated as anonymous for read endpoints.
+    return next();
+  }
+};
+
+/**
  * Role-based access control middleware
  * Checks if user has required role(s)
  * @param {Array|String} roles - Required role(s) for access

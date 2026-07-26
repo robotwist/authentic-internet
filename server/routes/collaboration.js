@@ -6,11 +6,43 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
+const getAuthUserId = (req) => req.user?.userId || req.user?.id || null;
+
+const JOINABLE_ROLES = new Set(['editor', 'viewer', 'commenter']);
+const ARTIFACT_SAVE_FIELDS = [
+  'name',
+  'description',
+  'type',
+  'content',
+  'media',
+  'location',
+  'exp',
+  'gameConfig',
+  'areaName',
+  'visibility'
+];
+
+const pickArtifactSaveData = (artifactData = {}) => {
+  const safeData = {};
+  for (const field of ARTIFACT_SAVE_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(artifactData, field)) {
+      safeData[field] = artifactData[field];
+    }
+  }
+  return safeData;
+};
+
 // Create a new collaboration session
 router.post('/sessions', authenticateToken, async (req, res) => {
   try {
-    const { name, description, artifactType, settings } = req.body;
-    const userId = req.user.id;
+    const { name, description, artifactType, settings, visibility } = req.body;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
 
     const collaboration = new Collaboration({
       name,
@@ -18,6 +50,9 @@ router.post('/sessions', authenticateToken, async (req, res) => {
       artifactType,
       creator: userId,
       participants: [{ user: userId, role: 'owner' }],
+      visibility: ['public', 'private', 'invite-only'].includes(visibility)
+        ? visibility
+        : 'invite-only',
       settings: {
         allowComments: settings?.allowComments ?? true,
         allowEditing: settings?.allowEditing ?? true,
@@ -50,7 +85,13 @@ router.post('/sessions', authenticateToken, async (req, res) => {
 // Get all collaboration sessions for a user
 router.get('/sessions', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
     const { status, type } = req.query;
 
     let query = {
@@ -86,7 +127,13 @@ router.get('/sessions', authenticateToken, async (req, res) => {
 router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
 
     const collaboration = await Collaboration.findOne({
       _id: sessionId,
@@ -124,8 +171,15 @@ router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
 router.post('/sessions/:sessionId/join', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
-    const { role = 'editor' } = req.body;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+    const requestedRole = req.body?.role || 'editor';
+    const role = JOINABLE_ROLES.has(requestedRole) ? requestedRole : 'editor';
 
     const collaboration = await Collaboration.findById(sessionId);
     
@@ -138,13 +192,21 @@ router.post('/sessions/:sessionId/join', authenticateToken, async (req, res) => 
 
     // Check if user is already a participant
     const existingParticipant = collaboration.participants.find(
-      p => p.user.toString() === userId
+      p => p.user.toString() === userId.toString()
     );
 
     if (existingParticipant) {
       return res.status(400).json({
         success: false,
         message: 'Already a participant in this session'
+      });
+    }
+
+    // Private/invite-only sessions require an existing membership (invite).
+    if (collaboration.visibility !== 'public') {
+      return res.status(403).json({
+        success: false,
+        message: 'This collaboration session requires an invitation'
       });
     }
 
@@ -184,7 +246,13 @@ router.post('/sessions/:sessionId/join', authenticateToken, async (req, res) => 
 router.post('/sessions/:sessionId/leave', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
 
     const collaboration = await Collaboration.findById(sessionId);
     
@@ -227,7 +295,13 @@ router.post('/sessions/:sessionId/leave', authenticateToken, async (req, res) =>
 router.put('/sessions/:sessionId/settings', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
     const { settings } = req.body;
 
     const collaboration = await Collaboration.findById(sessionId);
@@ -272,7 +346,13 @@ router.put('/sessions/:sessionId/settings', authenticateToken, async (req, res) 
 router.post('/sessions/:sessionId/comments', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
     const { content, type = 'general' } = req.body;
 
     const collaboration = await Collaboration.findById(sessionId);
@@ -325,7 +405,13 @@ router.post('/sessions/:sessionId/comments', authenticateToken, async (req, res)
 router.post('/sessions/:sessionId/save', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
     const { artifactData, version } = req.body;
 
     const collaboration = await Collaboration.findById(sessionId);
@@ -337,12 +423,14 @@ router.post('/sessions/:sessionId/save', authenticateToken, async (req, res) => 
       });
     }
 
+    const uid = userId.toString();
+
     // Check if user is a participant with edit permissions
     const participant = collaboration.participants.find(
-      p => p.user.toString() === userId
+      p => p.user.toString() === uid
     );
 
-    if (!participant && collaboration.creator.toString() !== userId) {
+    if (!participant && collaboration.creator.toString() !== uid) {
       return res.status(403).json({
         success: false,
         message: 'Must be a participant to save changes'
@@ -353,6 +441,14 @@ router.post('/sessions/:sessionId/save', authenticateToken, async (req, res) => 
       return res.status(403).json({
         success: false,
         message: 'Insufficient permissions to save changes'
+      });
+    }
+
+    const safeArtifactData = pickArtifactSaveData(artifactData);
+    if (!Object.keys(safeArtifactData).length) {
+      return res.status(400).json({
+        success: false,
+        message: 'No valid artifact fields provided'
       });
     }
 
@@ -386,20 +482,20 @@ router.post('/sessions/:sessionId/save', authenticateToken, async (req, res) => 
         timestamp: new Date()
       });
 
-      // Update artifact with new data
-      Object.assign(artifact, artifactData);
+      // Update only whitelisted collaborative fields
+      Object.assign(artifact, safeArtifactData);
       artifact.lastModifiedBy = userId;
       artifact.lastModifiedAt = new Date();
     } else {
       // Create new artifact
       artifact = new Artifact({
-        ...artifactData,
+        ...safeArtifactData,
         createdBy: collaboration.creator,
         collaborators: collaboration.participants.map(p => p.user),
         collaborationSession: sessionId,
         versionHistory: [{
           version: 1,
-          data: artifactData,
+          data: safeArtifactData,
           savedBy: userId,
           timestamp: new Date()
         }]
@@ -432,7 +528,13 @@ router.post('/sessions/:sessionId/save', authenticateToken, async (req, res) => 
 router.post('/sessions/:sessionId/publish', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
 
     const collaboration = await Collaboration.findById(sessionId);
     
@@ -495,7 +597,13 @@ router.post('/sessions/:sessionId/publish', authenticateToken, async (req, res) 
 router.get('/sessions/:sessionId/analytics', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
 
     const collaboration = await Collaboration.findById(sessionId);
     
