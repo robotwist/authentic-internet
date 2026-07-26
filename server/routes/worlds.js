@@ -1,6 +1,6 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { auth } from '../middleware/auth.js';
+import { auth, optionalAuth } from '../middleware/auth.js';
 import WorldInstance from '../models/World.js';
 import ChatMessage from '../models/Chat.js';
 import User from '../models/User.js';
@@ -9,6 +9,67 @@ import jwt from 'jsonwebtoken';
 import { MAPS_STRUCTURE } from '../constants.js';
 
 const router = express.Router();
+
+const getRequestUserId = (req) =>
+  req.userId || req.user?.userId || req.user?.id || null;
+
+const asIdString = (value) => {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (value._id) return value._id.toString();
+  return value.toString();
+};
+
+const isWorldMember = (world, userId) => {
+  if (!userId || !world) return false;
+  const uid = userId.toString();
+
+  if (asIdString(world.creator) === uid) return true;
+
+  if (Array.isArray(world.moderators)) {
+    if (world.moderators.some((mod) => asIdString(mod) === uid)) {
+      return true;
+    }
+  }
+
+  if (Array.isArray(world.activePlayers)) {
+    if (world.activePlayers.some((player) => asIdString(player.userId) === uid)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const isWorldPubliclyReadable = (world) =>
+  Boolean(world?.isPublic) && !world?.requiresInvite;
+
+const denyWorldAccess = (res, authenticated) =>
+  res.status(authenticated ? 403 : 401).json({
+    success: false,
+    message: authenticated
+      ? 'Not authorized to access this world'
+      : 'Authentication required to access this world'
+  });
+
+const assertCanReadWorld = (req, res, world) => {
+  if (isWorldPubliclyReadable(world)) {
+    return true;
+  }
+
+  const userId = getRequestUserId(req);
+  if (!userId) {
+    denyWorldAccess(res, false);
+    return false;
+  }
+
+  if (!isWorldMember(world, userId)) {
+    denyWorldAccess(res, true);
+    return false;
+  }
+
+  return true;
+};
 
 // Validation middleware
 const validateWorld = [
@@ -389,7 +450,7 @@ export const ensureDefaultWorldExists = async () => {
 // Multiplayer-specific routes
 
 // Get world details by worldId
-router.get('/instance/:worldId', async (req, res) => {
+router.get('/instance/:worldId', optionalAuth, async (req, res) => {
   try {
     const { worldId } = req.params;
     
@@ -401,9 +462,14 @@ router.get('/instance/:worldId', async (req, res) => {
       return res.status(404).json({ success: false, message: 'World not found' });
     }
 
-    // Don't send sensitive data to non-moderators
-    const isModerator = req.user && world.moderators.some(mod => 
-      mod._id.toString() === req.user.userId
+    if (!assertCanReadWorld(req, res, world)) {
+      return;
+    }
+
+    const userId = getRequestUserId(req);
+    const isModerator = userId && (
+      asIdString(world.creator) === userId.toString() ||
+      world.moderators.some((mod) => asIdString(mod) === userId.toString())
     );
 
     const worldData = {
@@ -476,10 +542,19 @@ router.post('/instance', auth, async (req, res) => {
 });
 
 // Get world chat history
-router.get('/instance/:worldId/chat', async (req, res) => {
+router.get('/instance/:worldId/chat', optionalAuth, async (req, res) => {
   try {
     const { worldId } = req.params;
     const { limit = 50 } = req.query;
+
+    const world = await WorldInstance.findOne({ worldId });
+    if (!world) {
+      return res.status(404).json({ success: false, message: 'World not found' });
+    }
+
+    if (!assertCanReadWorld(req, res, world)) {
+      return;
+    }
 
     const messages = await ChatMessage.find({
       messageType: 'world',
@@ -501,13 +576,17 @@ router.get('/instance/:worldId/chat', async (req, res) => {
 });
 
 // Get online players in world
-router.get('/instance/:worldId/players', async (req, res) => {
+router.get('/instance/:worldId/players', optionalAuth, async (req, res) => {
   try {
     const { worldId } = req.params;
 
     const world = await WorldInstance.findOne({ worldId });
     if (!world) {
       return res.status(404).json({ success: false, message: 'World not found' });
+    }
+
+    if (!assertCanReadWorld(req, res, world)) {
+      return;
     }
 
     const onlinePlayers = world.getOnlinePlayers();
