@@ -753,7 +753,10 @@ export const requestPasswordReset = async (req, res) => {
  */
 export const resetPassword = async (req, res) => {
   try {
-    const { token, newPassword } = req.body;
+    // Route is POST /password/reset/:token — accept URL token or body token.
+    // Clients/docs may send `password` or `newPassword`.
+    const token = req.params?.token || req.body?.token;
+    const newPassword = req.body?.newPassword || req.body?.password;
     
     if (!token || !newPassword) {
       return res.status(400).json({
@@ -797,6 +800,10 @@ export const resetPassword = async (req, res) => {
     // Clear reset token fields
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
+
+    // Invalidate all existing sessions — a stolen refresh token must not
+    // survive password reset (logout already clears refreshTokens).
+    user.refreshTokens = [];
     
     // Save user with new password
     await user.save();
