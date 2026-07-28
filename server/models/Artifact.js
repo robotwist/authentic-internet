@@ -377,7 +377,7 @@ ArtifactSchema.methods.toUnifiedFormat = function() {
   // Add legacy fields for backward compatibility
   if (this.messageText) unified.messageText = this.messageText;
   if (this.riddle) unified.riddle = this.riddle;
-  if (this.unlockAnswer) unified.unlockAnswer = this.unlockAnswer;
+  // Never expose unlockAnswer via unified public format — verify answers server-side
   if (this.isExclusive !== undefined) unified.isExclusive = this.isExclusive;
   if (this.status) unified.status = this.status;
   if (this.image) unified.image = this.image;

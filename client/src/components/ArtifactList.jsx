@@ -28,15 +28,33 @@ const ArtifactList = () => {
     setPasswordInputs({ ...passwordInputs, [id]: e.target.value });
   };
 
-  const submitPassword = (id, correctPassword) => {
-    if (
-      passwordInputs[id]?.trim().toLowerCase() ===
-      correctPassword?.trim().toLowerCase()
-    ) {
-      setUnlockedArtifacts((prev) => ({ ...prev, [id]: true }));
-      alert("✅ Correct password! Artifact unlocked.");
-    } else {
-      alert("❌ Incorrect password! Try again.");
+  const submitPassword = async (id) => {
+    const answer = passwordInputs[id]?.trim();
+    if (!answer) {
+      alert("Enter a password first.");
+      return;
+    }
+
+    try {
+      const token =
+        localStorage.getItem("token") || localStorage.getItem("authToken");
+      const res = await API.post(
+        `/artifacts/unlock/${id}`,
+        { answer },
+        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+      );
+
+      if (res.data?.success) {
+        setUnlockedArtifacts((prev) => ({ ...prev, [id]: true }));
+        alert("✅ Correct password! Artifact unlocked.");
+      } else {
+        alert("❌ Incorrect password! Try again.");
+      }
+    } catch (error) {
+      alert(
+        error?.response?.data?.message ||
+          "❌ Incorrect password! Try again.",
+      );
     }
   };
 
@@ -77,9 +95,7 @@ const ArtifactList = () => {
                     className="password-input"
                   />
                   <button
-                    onClick={() =>
-                      submitPassword(artifact._id, artifact.unlockAnswer)
-                    }
+                    onClick={() => submitPassword(artifact._id)}
                     className="submit-button"
                   >
                     🔑 Submit
