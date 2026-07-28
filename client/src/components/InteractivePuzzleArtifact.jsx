@@ -291,18 +291,40 @@ const RiddlePuzzle = ({ artifact, onComplete }) => {
   const [answer, setAnswer] = useState("");
   const [attempts, setAttempts] = useState(0);
   const [feedback, setFeedback] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setAttempts((prev) => prev + 1);
+    setSubmitting(true);
 
-    if (
-      answer.toLowerCase().trim() === artifact.unlockAnswer.toLowerCase().trim()
-    ) {
-      setFeedback("Correct! Well done!");
-      setTimeout(() => onComplete(), 1000);
-    } else {
-      setFeedback("Not quite right. Try again!");
+    try {
+      const token =
+        localStorage.getItem("token") || localStorage.getItem("authToken");
+      const artifactId = artifact._id || artifact.id;
+      const response = await fetch(`/api/artifacts/${artifactId}/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          answer: answer.trim(),
+          attempts: attempts + 1,
+        }),
+      });
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setFeedback("Correct! Well done!");
+        setTimeout(() => onComplete(), 1000);
+      } else {
+        setFeedback(data.message || "Not quite right. Try again!");
+      }
+    } catch (err) {
+      setFeedback("Could not verify answer. Try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -318,8 +340,11 @@ const RiddlePuzzle = ({ artifact, onComplete }) => {
           onChange={(e) => setAnswer(e.target.value)}
           placeholder="Enter your answer..."
           autoFocus
+          disabled={submitting}
         />
-        <button type="submit">Submit Answer</button>
+        <button type="submit" disabled={submitting}>
+          Submit Answer
+        </button>
       </form>
       {feedback && <div className="feedback">{feedback}</div>}
       <div className="attempts">Attempts: {attempts}</div>

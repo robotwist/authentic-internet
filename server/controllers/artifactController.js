@@ -1,6 +1,22 @@
 import Artifact from "../models/Artifact.js";
 import User from "../models/User.js";
 
+/** Strip secrets that must never appear in public artifact payloads. */
+export const sanitizeArtifactForClient = (artifact, { includeSecrets = false } = {}) => {
+  if (!artifact) return artifact;
+  const obj = typeof artifact.toObject === 'function' ? artifact.toObject() : { ...artifact };
+  if (!includeSecrets) {
+    delete obj.unlockAnswer;
+  }
+  if (obj.id === undefined && obj._id !== undefined) {
+    obj.id = obj._id;
+  }
+  return obj;
+};
+
+const answersMatch = (provided, expected) =>
+  String(provided ?? '').trim().toLowerCase() === String(expected ?? '').trim().toLowerCase();
+
 // Create an artifact. First is free; 2nd+ require 1 creation token (earned by completing others' artifacts).
 export const createArtifact = async (req, res) => {
   try {
@@ -88,7 +104,8 @@ export const getCreationStatus = async (req, res) => {
 export const getArtifacts = async (req, res) => {
   try {
     const artifacts = await Artifact.find().populate('creator', 'username');
-    res.json(artifacts.map(artifact => ({ ...artifact.toObject(), id: artifact._id })));
+    // Public list never includes unlockAnswer (puzzle secret)
+    res.json(artifacts.map(artifact => sanitizeArtifactForClient(artifact)));
   } catch (error) {
     console.error("Error fetching artifacts:", error);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
@@ -101,7 +118,13 @@ export const getArtifactById = async (req, res) => {
     const { id } = req.params;
     const artifact = await Artifact.findById(id).populate('creator', 'username');
     if (!artifact) return res.status(404).json({ message: "Artifact not found" });
-    res.json({ ...artifact.toObject(), id: artifact._id });
+
+    const requesterId = (req.user?.userId ?? req.user?.id ?? req.user?._id)?.toString?.();
+    const creatorId = (artifact.createdBy ?? artifact.creator)?._id?.toString?.()
+      ?? (artifact.createdBy ?? artifact.creator)?.toString?.();
+    const includeSecrets = Boolean(requesterId && creatorId && requesterId === creatorId);
+
+    res.json(sanitizeArtifactForClient(artifact, { includeSecrets }));
   } catch (error) {
     console.error("Error fetching artifact:", error);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
@@ -126,23 +149,57 @@ export const updateArtifact = async (req, res) => {
   }
 };
 
-// Unlock an artifact (for hidden items)
+// Unlock an artifact (for hidden/locked items). Requires the correct answer when one is configured.
+// Does not permanently mutate global visibility for other players — records per-user unlock only.
 export const unlockArtifact = async (req, res) => {
   try {
     const { id } = req.params;
     const { answer } = req.body;
+    const userId = req.user?.userId ?? req.user?.id ?? req.user?._id;
+    const uid = userId?.toString?.();
+    if (!uid) {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
     const artifact = await Artifact.findById(id);
     
     if (!artifact) return res.status(404).json({ message: "Artifact not found" });
-    
-    // Check if answer is correct if provided
-    if (artifact.unlockAnswer && answer !== artifact.unlockAnswer) {
+
+    if (!artifact.unlockAnswer) {
+      return res.status(400).json({
+        message: "This artifact has no unlock challenge configured.",
+      });
+    }
+
+    if (!answersMatch(answer, artifact.unlockAnswer)) {
       return res.status(400).json({ message: "Incorrect answer" });
     }
 
-    artifact.visibility = "open";
-    await artifact.save();
-    res.json({ success: true, message: "Artifact unlocked!", id: artifact._id });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Track unlock on the user without opening the artifact for everyone
+    if (!user.gameState) user.gameState = {};
+    if (!Array.isArray(user.gameState.unlockedArtifacts)) {
+      user.gameState.unlockedArtifacts = [];
+    }
+    const alreadyUnlocked = user.gameState.unlockedArtifacts.some(
+      (entry) => entry?.toString?.() === id
+    );
+    if (!alreadyUnlocked) {
+      user.gameState.unlockedArtifacts.push(artifact._id);
+      user.markModified('gameState');
+      await user.save();
+    }
+
+    res.json({
+      success: true,
+      message: "Artifact unlocked!",
+      id: artifact._id,
+      unlockedForUser: true,
+    });
   } catch (error) {
     console.error("Error unlocking artifact:", error);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
@@ -225,7 +282,11 @@ export const saveGameProgress = async (req, res) => {
   res.status(501).json({ message: "Not implemented" });
 };
 
-/** Mark artifact complete, update user progress, award +1 creation token when completing another user's artifact (first time only). */
+/**
+ * Mark artifact complete, update user progress.
+ * Creation tokens are only awarded when completing another user's artifact that has an
+ * unlockAnswer AND the client proves knowledge of that answer. Blind POSTs cannot mint tokens.
+ */
 export const completeArtifact = async (req, res) => {
   try {
     const { id } = req.params;
@@ -241,7 +302,17 @@ export const completeArtifact = async (req, res) => {
     }
 
     const creatorId = (artifact.createdBy ?? artifact.creator)?.toString?.();
-    const { score = 0, attempts = 1, timeSpent = 0 } = req.body ?? {};
+    const { score = 0, attempts = 1, timeSpent = 0, answer } = req.body ?? {};
+
+    // Puzzle artifacts require a correct answer before completion / token minting
+    if (artifact.unlockAnswer) {
+      if (!answersMatch(answer, artifact.unlockAnswer)) {
+        return res.status(400).json({
+          success: false,
+          message: "Correct unlock answer required to complete this artifact.",
+        });
+      }
+    }
 
     const user = await User.findById(userId);
     if (!user) {
@@ -256,7 +327,9 @@ export const completeArtifact = async (req, res) => {
     await user.save();
 
     let creationTokenAwarded = false;
-    if (creatorId && creatorId !== uid && !alreadyCompleted) {
+    // Only mint a creation token when the player proved the unlock answer for someone else's artifact
+    const provedUnlock = Boolean(artifact.unlockAnswer) && answersMatch(answer, artifact.unlockAnswer);
+    if (provedUnlock && creatorId && creatorId !== uid && !alreadyCompleted) {
       await User.findByIdAndUpdate(userId, { $inc: { creationTokens: 1 } });
       creationTokenAwarded = true;
     }

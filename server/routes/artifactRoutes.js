@@ -152,7 +152,6 @@ router.get("/", ensureUnifiedResponse, getArtifacts);
 router.get("/creation-status", authenticateToken, getCreationStatus);
 
 /* ────────────────────────────────
-<<<<<<< HEAD
    🔹 GAME ARTIFACT PROGRESS TRACKING
 ──────────────────────────────── */
 
