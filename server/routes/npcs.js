@@ -103,10 +103,11 @@ router.post('/', auth, validateNPC, async (req, res) => {
   }
 });
 
-// Enhanced NPC interaction endpoint
-router.post('/:id/interact', async (req, res) => {
+// Enhanced NPC interaction endpoint (auth required; identity from token only)
+router.post('/:id/interact', auth, async (req, res) => {
   try {
-    const { message, userId, context = {} } = req.body;
+    const { message, prompt, context = {} } = req.body;
+    const userId = req.user.userId;
     const npcId = req.params.id;
 
     const npc = await NPC.findById(npcId);
@@ -134,12 +135,12 @@ router.post('/:id/interact', async (req, res) => {
       }
     }
 
-    // Use the enhanced interaction method
-    const response = await npc.interact(message, userId, currentContext);
+    // Use the enhanced interaction method (never trust body.userId)
+    const response = await npc.interact(message ?? prompt, userId, currentContext);
 
     // Check for available quests
     const availableQuests = npc.quests?.filter(quest => 
-      quest.isActive && !quest.completedBy.includes(userId)
+      quest.isActive && !(quest.completedBy || []).map(String).includes(String(userId))
     ) || [];
 
     // Prepare response with enhanced data
@@ -177,17 +178,25 @@ router.post('/:id/interact', async (req, res) => {
   }
 });
 
-// Get NPC memory for a specific player (requires auth)
+// Get NPC memory for the authenticated player only
 router.get('/:id/memory/:playerId', auth, async (req, res) => {
   try {
     const { id, playerId } = req.params;
+    const requesterId = String(req.user.userId);
+
+    if (String(playerId) !== requesterId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view another player\'s NPC memory'
+      });
+    }
     
     const npc = await NPC.findById(id);
     if (!npc) {
       return res.status(404).json({ success: false, message: 'NPC not found' });
     }
 
-    const playerMemory = npc.getPlayerMemory(playerId);
+    const playerMemory = npc.getPlayerMemory(requesterId);
     
     res.json({ 
       success: true, 
@@ -207,11 +216,17 @@ router.get('/:id/memory/:playerId', auth, async (req, res) => {
   }
 });
 
-// Update NPC quest progress
+// Update NPC quest progress for the authenticated user only.
+// Do NOT mutate shared quest.stages[].completed — those are templates for all players.
 router.post('/:id/quest/:questId/progress', auth, async (req, res) => {
   try {
     const { id, questId } = req.params;
-    const { userId, stageIndex, completed } = req.body;
+    const userId = String(req.user.userId);
+    const { stageIndex, completed } = req.body;
+
+    if (typeof stageIndex !== 'number' || stageIndex < 0) {
+      return res.status(400).json({ success: false, message: 'Valid stageIndex is required' });
+    }
 
     const npc = await NPC.findById(id);
     if (!npc) {
@@ -223,19 +238,46 @@ router.post('/:id/quest/:questId/progress', auth, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Quest not found' });
     }
 
-    // Update quest stage
-    if (quest.stages[stageIndex]) {
-      quest.stages[stageIndex].completed = completed;
+    if (!quest.stages[stageIndex]) {
+      return res.status(400).json({ success: false, message: 'Quest stage not found' });
     }
 
-    // Check if quest is fully completed
-    const allStagesCompleted = quest.stages.every(stage => stage.completed);
-    if (allStagesCompleted && !quest.completedBy.includes(userId)) {
+    // Per-user stage tracking on the NPC document (does not alter the shared template)
+    if (!quest.playerStageProgress) {
+      quest.playerStageProgress = [];
+    }
+    let playerProgress = quest.playerStageProgress.find(
+      (entry) => String(entry.playerId) === userId
+    );
+    if (!playerProgress) {
+      playerProgress = {
+        playerId: userId,
+        completedStages: [],
+      };
+      quest.playerStageProgress.push(playerProgress);
+    }
+
+    if (completed === true && !playerProgress.completedStages.includes(stageIndex)) {
+      playerProgress.completedStages.push(stageIndex);
+    } else if (completed === false) {
+      playerProgress.completedStages = playerProgress.completedStages.filter(
+        (idx) => idx !== stageIndex
+      );
+    }
+
+    const allStagesCompleted =
+      quest.stages.length > 0 &&
+      quest.stages.every((_, idx) => playerProgress.completedStages.includes(idx));
+
+    if (allStagesCompleted && !(quest.completedBy || []).map(String).includes(userId)) {
+      quest.completedBy = quest.completedBy || [];
       quest.completedBy.push(userId);
       
       // Update player memory
       const playerMemory = npc.getPlayerMemory(userId);
-      playerMemory.playerProgress.questsGiven.push(questId);
+      if (!playerMemory.playerProgress.questsGiven.includes(questId)) {
+        playerMemory.playerProgress.questsGiven.push(questId);
+      }
       
       // Improve relationship
       if (playerMemory.relationship === 'stranger') {
@@ -245,11 +287,20 @@ router.post('/:id/quest/:questId/progress', auth, async (req, res) => {
       }
     }
 
+    npc.markModified('quests');
     await npc.save();
 
     res.json({ 
       success: true, 
-      quest: quest,
+      quest: {
+        id: quest.id,
+        title: quest.title,
+        description: quest.description,
+        stages: quest.stages,
+        isActive: quest.isActive,
+        completedBy: quest.completedBy,
+      },
+      completedStages: playerProgress.completedStages,
       questCompleted: allStagesCompleted
     });
 

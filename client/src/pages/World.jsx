@@ -58,10 +58,15 @@ const World = () => {
     if (!selectedNPC || !interactionPrompt) return;
 
     try {
+      const token =
+        localStorage.getItem("token") || localStorage.getItem("authToken");
       const response = await axios.post(
         `/api/npcs/${selectedNPC._id}/interact`,
         {
-          prompt: interactionPrompt,
+          message: interactionPrompt,
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         },
       );
       setInteractionResult(response.data);

@@ -130,7 +130,12 @@ const NPCSchema = new mongoose.Schema({
     }],
     prerequisites: [String],
     isActive: { type: Boolean, default: true },
-    completedBy: [String]
+    completedBy: [String],
+    // Per-player stage completion — never mutate shared stages[].completed for one player
+    playerStageProgress: [{
+      playerId: String,
+      completedStages: [Number]
+    }]
   }],
   
   quoteCache: {

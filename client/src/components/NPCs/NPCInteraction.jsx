@@ -26,8 +26,15 @@ const NPC_API_TIMEOUT_MS = 3500;
 function npcApiFetch(url, options = {}) {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), NPC_API_TIMEOUT_MS);
+  const token =
+    localStorage.getItem("token") || localStorage.getItem("authToken");
+  const headers = {
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
   return fetch(url, {
     ...options,
+    headers,
     signal: controller.signal,
   }).finally(() => window.clearTimeout(timeout));
 }
@@ -168,7 +175,6 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: "",
-          userId: user?._id,
           context: {
             location: context.area || "overworld",
             weather: context.weather || "sunny",
@@ -244,7 +250,6 @@ const NPCInteraction = ({ npc, onClose, context = {}, embedded = false }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: input,
-          userId: user?._id,
           context: {
             location: context.area || "overworld",
             weather: context.weather || "sunny",
