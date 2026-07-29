@@ -149,6 +149,10 @@ QuestSchema.methods.completeStage = async function(questId, stageIndex) {
     throw new Error('Quest or stage not found');
   }
 
+  if (stageIndex !== quest.currentStage) {
+    throw new Error('Stages must be completed in order');
+  }
+
   const stage = quest.stages[stageIndex];
   if (stage.completed) {
     throw new Error('Stage already completed');

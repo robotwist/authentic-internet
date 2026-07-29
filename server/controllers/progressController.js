@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import Artifact from '../models/Artifact.js';
 
-// Experience points constants
+// Experience points constants — server-authoritative award amounts
 const XP_REWARDS = {
   ARTIFACT_PICKUP: 25,
   AREA_DISCOVERY: 50,
@@ -10,23 +10,28 @@ const XP_REWARDS = {
   MESSAGE_DISCOVERY: 15
 };
 
+const ALLOWED_XP_REASONS = new Set(Object.keys(XP_REWARDS));
+
 /**
- * Award experience points to a user
+ * Award experience points to a user.
+ * Amounts are server-defined by reason; clients cannot forge arbitrary XP.
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 export const awardExperience = async (req, res) => {
   try {
     const { userId } = req.user;
-    const { amount, reason, artifactId } = req.body;
-    
-    if (!amount || amount <= 0) {
+    const { reason } = req.body;
+
+    if (!reason || !ALLOWED_XP_REASONS.has(reason)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid experience amount"
+        message: "Invalid or missing experience reason"
       });
     }
-    
+
+    const amount = XP_REWARDS[reason];
+
     // Find user
     const user = await User.findById(userId);
     if (!user) {
@@ -35,40 +40,20 @@ export const awardExperience = async (req, res) => {
         message: "User not found"
       });
     }
-    
+
     // Calculate new experience and determine if level up occurred
     const oldLevel = user.level;
     const oldExperience = user.experience;
-    
-    // Add experience
+
+    // Add experience (level recalculated by User pre-save hook)
     user.experience += amount;
-    
+
     // Save changes
     await user.save();
-    
+
     // Check if user leveled up
     const leveledUp = user.level > oldLevel;
-    
-    // If artifact ID was provided, mark it as collected
-    if (artifactId) {
-      // Check if artifact exists in user's inventory already
-      const hasArtifact = user.inventory.includes(artifactId);
-      
-      if (!hasArtifact) {
-        // Add to inventory
-        user.inventory.push(artifactId);
-        
-        // Update artifact status
-        await Artifact.findByIdAndUpdate(artifactId, {
-          status: "inventory",
-          $push: { viewers: userId } // Track who has viewed this artifact
-        });
-        
-        // Save updated inventory
-        await user.save();
-      }
-    }
-    
+
     // Return updated user data
     res.json({
       success: true,
@@ -77,8 +62,8 @@ export const awardExperience = async (req, res) => {
       oldLevel,
       newLevel: user.level,
       leveledUp,
-      message: leveledUp 
-        ? `Congratulations! You are now level ${user.level}` 
+      message: leveledUp
+        ? `Congratulations! You are now level ${user.level}`
         : `You gained ${amount} experience points`,
       reason
     });
@@ -101,50 +86,61 @@ export const discoverArtifact = async (req, res) => {
   try {
     const { userId } = req.user;
     const { artifactId } = req.params;
-    
+
     // Find user and artifact
     const [user, artifact] = await Promise.all([
       User.findById(userId),
       Artifact.findById(artifactId)
     ]);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found"
       });
     }
-    
+
     if (!artifact) {
       return res.status(404).json({
         success: false,
         message: "Artifact not found"
       });
     }
-    
+
+    if (!user.gameState) {
+      user.gameState = { viewedArtifacts: [] };
+    }
+    if (!Array.isArray(user.gameState.viewedArtifacts)) {
+      user.gameState.viewedArtifacts = [];
+    }
+
     // Check if user already discovered this artifact
     if (!user.gameState.viewedArtifacts.includes(artifactId)) {
       // Add to viewed artifacts
       user.gameState.viewedArtifacts.push(artifactId);
-      
+
       // Award experience if this is the first time viewing
-      user.experience += (artifact.exp || XP_REWARDS.ARTIFACT_PICKUP);
-      
+      const xpGain = Math.min(
+        Math.max(0, Number(artifact.exp) || XP_REWARDS.ARTIFACT_PICKUP),
+        XP_REWARDS.ARTIFACT_PICKUP
+      );
+      user.experience += xpGain;
+
       // Increment artifact views
       artifact.views += 1;
-      
+
       // Save changes
       await Promise.all([user.save(), artifact.save()]);
-      
+
       // Return success with XP gain
       return res.json({
         success: true,
         message: `Discovered artifact: ${artifact.name}`,
-        experienceGained: artifact.exp || XP_REWARDS.ARTIFACT_PICKUP,
+        experienceGained: xpGain,
         artifact
       });
     }
-    
+
     // User already discovered this artifact
     return res.json({
       success: true,
@@ -163,7 +159,9 @@ export const discoverArtifact = async (req, res) => {
 };
 
 /**
- * Save user game state
+ * Save user game state.
+ * Rejects client-authoritative progression fields (XP, level, inventory)
+ * that would allow forging progress or injecting arbitrary artifacts.
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
@@ -171,7 +169,7 @@ export const saveGameState = async (req, res) => {
   try {
     const { userId } = req.user;
     const gameStateData = req.body;
-    
+
     // Validate request body
     if (!gameStateData || typeof gameStateData !== 'object') {
       return res.status(400).json({
@@ -179,7 +177,7 @@ export const saveGameState = async (req, res) => {
         message: "Invalid game state data"
       });
     }
-    
+
     // Find user
     const user = await User.findById(userId);
     if (!user) {
@@ -188,84 +186,87 @@ export const saveGameState = async (req, res) => {
         message: "User not found"
       });
     }
-    
-    // Prepare update data with comprehensive state handling
+
+    // Prepare update data with non-progression state only
     const updateData = {
       lastSaved: new Date(),
       lastActive: new Date()
     };
-    
+
     // Handle character position
     if (gameStateData.characterPosition) {
       updateData.lastPosition = gameStateData.characterPosition;
     }
-    
+
     // Handle current map index
     if (typeof gameStateData.currentMapIndex === 'number') {
       updateData.currentMapIndex = gameStateData.currentMapIndex;
     }
-    
-    // Handle experience and level
-    if (typeof gameStateData.exp === 'number') {
-      updateData.experience = gameStateData.exp;
-      // Calculate level based on experience
-      updateData.level = Math.floor(Math.sqrt(gameStateData.exp / 100)) + 1;
-    }
-    
-    // Handle inventory
-    if (Array.isArray(gameStateData.inventory)) {
-      updateData.inventory = gameStateData.inventory;
-    }
-    
-    // Handle user artifacts
-    if (Array.isArray(gameStateData.userArtifacts)) {
-      updateData.userArtifacts = gameStateData.userArtifacts;
-    }
-    
-    // Handle modified artifacts
-    if (Array.isArray(gameStateData.modifiedArtifacts)) {
-      updateData.modifiedArtifacts = gameStateData.modifiedArtifacts;
-    }
-    
-    // Handle achievements
+
+    // Explicitly ignore client-provided experience, level, inventory,
+    // userArtifacts, and modifiedArtifacts — those are server-authoritative.
+
+    // Handle achievements (append-only merge to avoid wiping server state)
     if (Array.isArray(gameStateData.achievements)) {
-      updateData.achievements = gameStateData.achievements;
+      const existing = Array.isArray(user.achievements) ? user.achievements : [];
+      const merged = [...existing];
+      for (const achievement of gameStateData.achievements) {
+        const key = achievement?.id || achievement?.name || JSON.stringify(achievement);
+        const already = merged.some(
+          (a) => (a?.id || a?.name || JSON.stringify(a)) === key
+        );
+        if (!already) merged.push(achievement);
+      }
+      updateData.achievements = merged;
     }
-    
-    // Handle quests
+
+    // Handle quests (replace only when provided — quest progress is per-user)
     if (Array.isArray(gameStateData.quests)) {
       updateData.quests = gameStateData.quests;
     }
-    
+
     // Handle game state object (for backward compatibility)
     if (gameStateData.gameState && typeof gameStateData.gameState === 'object') {
-      // Initialize gameState if it doesn't exist
       if (!user.gameState) user.gameState = {};
-      
-      // Deep merge new state with existing state
+
+      const incoming = { ...gameStateData.gameState };
+      // Strip progression fields that must not be client-set via this path
+      delete incoming.experience;
+      delete incoming.level;
+      delete incoming.inventory;
+      delete incoming.exp;
+
       updateData.gameState = {
         ...user.gameState,
-        ...gameStateData.gameState,
-        // Merge nested objects if they exist
+        ...incoming,
         gameProgress: {
           ...(user.gameState?.gameProgress || {}),
-          ...(gameStateData.gameState?.gameProgress || {})
+          ...(incoming.gameProgress || {})
         }
       };
+
+      // Preserve viewedArtifacts monotonically (union)
+      const existingViewed = user.gameState?.viewedArtifacts || [];
+      const incomingViewed = Array.isArray(incoming.viewedArtifacts)
+        ? incoming.viewedArtifacts
+        : [];
+      updateData.gameState.viewedArtifacts = [
+        ...new Set([...existingViewed, ...incomingViewed].map(String))
+      ];
     }
-    
+
     // Update user with comprehensive data
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updateData },
       { new: true, runValidators: true }
     );
-    
+
     // Validate the update was successful
     if (!updatedUser) {
       throw new Error('Failed to update user data');
     }
-    
+
     // Return success with comprehensive response
     res.json({
       success: true,
@@ -300,25 +301,25 @@ export const saveGameState = async (req, res) => {
 export const getUserProgress = async (req, res) => {
   try {
     const { userId } = req.user;
-    
+
     // Find user with populated inventory
     const user = await User.findById(userId)
       .populate('inventory')
       .select('experience level lastPosition gameState inventory achievements');
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found"
       });
     }
-    
+
     // Calculate progress to next level
     const expToNextLevel = (user.level * 100);
     const currentLevelExp = ((user.level - 1) * 100);
     const expInCurrentLevel = user.experience - currentLevelExp;
     const progressPercentage = Math.floor((expInCurrentLevel / expToNextLevel) * 100);
-    
+
     // Return user progress data
     res.json({
       success: true,
@@ -342,4 +343,6 @@ export const getUserProgress = async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
-}; 
+};
+
+export { XP_REWARDS };

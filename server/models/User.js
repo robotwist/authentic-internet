@@ -787,33 +787,33 @@ UserSchema.methods.updateActivity = async function() {
 
 // Method to save game progress
 UserSchema.methods.saveGameProgress = async function(progressData) {
-  // Update only the fields that are provided
-  if (progressData.experience) this.experience = progressData.experience;
-  if (progressData.level) this.level = progressData.level;
+  // Experience, level, and inventory are server-authoritative.
+  // Do not accept client-provided values here — use dedicated award /
+  // discovery / experience endpoints so progress cannot be forged.
   if (progressData.position) this.lastPosition = progressData.position;
-  if (progressData.inventory) this.inventory = progressData.inventory;
-  
+
   // For nested fields in gameState, use a more careful approach
   if (progressData.gameState) {
     // Initialize gameState if it doesn't exist
     if (!this.gameState) this.gameState = {};
-    
+
     // Update specific gameState fields
     if (progressData.gameState.currentQuest) this.gameState.currentQuest = progressData.gameState.currentQuest;
     if (progressData.gameState.completedQuests) this.gameState.completedQuests = progressData.gameState.completedQuests;
-    
+
     // Text adventure specific progress
     if (progressData.gameState.textAdventureProgress) {
       if (!this.gameState.textAdventureProgress) this.gameState.textAdventureProgress = {};
-      
+
       const taProgress = progressData.gameState.textAdventureProgress;
       if (taProgress.currentRoom) this.gameState.textAdventureProgress.currentRoom = taProgress.currentRoom;
+      // Do not accept client text-adventure inventory as authority over user.inventory
       if (taProgress.inventory) this.gameState.textAdventureProgress.inventory = taProgress.inventory;
       if (taProgress.completedInteractions) this.gameState.textAdventureProgress.completedInteractions = taProgress.completedInteractions;
       if (taProgress.knownPasswords) this.gameState.textAdventureProgress.knownPasswords = taProgress.knownPasswords;
     }
   }
-  
+
   return this.save();
 };
 
