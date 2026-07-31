@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import auth from '../middleware/authMiddleware.js';
 import Artifact from '../models/Artifact.js';
 import User from '../models/User.js';
@@ -12,9 +13,15 @@ const router = express.Router();
 
 // User behavior tracking
 const userBehaviorStore = new Map();
+const MAX_TRACKED_INTERACTIONS = 500;
+
+// JWT payloads use `userId`; keep `id` as a legacy fallback.
+const resolveUserId = (req) => req.user?.userId || req.user?.id;
 
 // Track user interaction
 const trackUserInteraction = (userId, interaction) => {
+  if (!userId) return;
+
   if (!userBehaviorStore.has(userId)) {
     userBehaviorStore.set(userId, {
       interactions: [],
@@ -28,9 +35,12 @@ const trackUserInteraction = (userId, interaction) => {
     ...interaction,
     timestamp: Date.now()
   });
+  if (userData.interactions.length > MAX_TRACKED_INTERACTIONS) {
+    userData.interactions = userData.interactions.slice(-MAX_TRACKED_INTERACTIONS);
+  }
 
-  // Update preferences based on interaction
-  updateUserPreferences(userId, interaction);
+  // Update preferences based on interaction (never leave an unhandled rejection)
+  void updateUserPreferences(userId, interaction);
   
   userBehaviorStore.set(userId, userData);
 };
@@ -42,14 +52,18 @@ const isNegativeSignal = (interaction) =>
   interaction.feedback === 'negative' && interaction.type !== 'complete';
 
 // Update user preferences based on interactions
-const updateUserPreferences = (userId, interaction) => {
+const updateUserPreferences = async (userId, interaction) => {
   const userData = userBehaviorStore.get(userId);
   if (!userData) return;
 
   const { artifactId, type, feedback } = interaction;
-  
-  // Get artifact data
-  Artifact.findById(artifactId).then(artifact => {
+  if (!artifactId || !mongoose.isValidObjectId(artifactId)) {
+    return;
+  }
+
+  try {
+    // Get artifact data
+    const artifact = await Artifact.findById(artifactId);
     if (!artifact) return;
 
     const preferences = userData.preferences;
@@ -101,7 +115,10 @@ const updateUserPreferences = (userId, interaction) => {
     userData.preferences = preferences;
     userData.lastUpdated = Date.now();
     userBehaviorStore.set(userId, userData);
-  });
+  } catch (error) {
+    // Preference enrichment must never crash the process via unhandledRejection.
+    console.error('Failed to update recommendation preferences:', error);
+  }
 };
 
 // Get set of completed artifact IDs for a user
@@ -528,7 +545,13 @@ const hybridFiltering = async (userId, artifacts) => {
 router.get('/', auth, async (req, res) => {
   try {
     const { algorithm = 'hybrid', limit = 12, diversity = 0.5, novelty = 0.3 } = req.query;
-    const userId = req.user.id;
+    const userId = resolveUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
 
     // Get all artifacts
     const artifacts = await Artifact.find({ visible: true }).populate('createdBy', 'username');
@@ -589,13 +612,26 @@ router.get('/', auth, async (req, res) => {
 router.post('/interaction', auth, async (req, res) => {
   try {
     const { artifactId, type, feedback, algorithm } = req.body;
-    const userId = req.user.id;
+    const userId = resolveUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
 
     // Validate input
     if (!artifactId || !type) {
       return res.status(400).json({
         success: false,
         message: 'artifactId and type are required'
+      });
+    }
+
+    if (!mongoose.isValidObjectId(artifactId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'artifactId must be a valid ObjectId'
       });
     }
 
@@ -625,7 +661,13 @@ router.post('/interaction', auth, async (req, res) => {
 // Get user profile and preferences
 router.get('/profile', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
     const userData = userBehaviorStore.get(userId);
 
     if (!userData) {
@@ -672,7 +714,13 @@ router.get('/profile', auth, async (req, res) => {
 // Get recommendation insights
 router.get('/insights', auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
     const userData = userBehaviorStore.get(userId);
 
     if (!userData) {
