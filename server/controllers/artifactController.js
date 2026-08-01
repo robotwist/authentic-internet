@@ -166,11 +166,20 @@ export const deleteArtifact = async (req, res) => {
 export const addComment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { content } = req.body;
-    const userId = req.user._id;
+    // Client (ArtifactsPage) sends `text`; accept `content` as a legacy alias.
+    const text = String(req.body?.text ?? req.body?.content ?? "").trim();
+    const userId = req.user?.userId ?? req.user?.id ?? req.user?._id;
 
-    if (!content || !content.trim()) {
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    if (!text) {
       return res.status(400).json({ message: "Comment content is required" });
+    }
+
+    if (text.length > 500) {
+      return res.status(400).json({ message: "Comment cannot exceed 500 characters" });
     }
 
     const artifact = await Artifact.findById(id);
@@ -178,21 +187,21 @@ export const addComment = async (req, res) => {
       return res.status(404).json({ message: "Artifact not found" });
     }
 
-    const newComment = {
-      user: userId,
-      content: content.trim(),
-      createdAt: new Date()
-    };
-
     artifact.comments = artifact.comments || [];
-    artifact.comments.push(newComment);
+    artifact.comments.push({
+      user: userId,
+      text,
+      createdAt: new Date()
+    });
 
     await artifact.save();
     await artifact.populate('comments.user', 'username');
 
+    const savedComment = artifact.comments[artifact.comments.length - 1];
+
     res.status(201).json({
       message: "Comment added successfully",
-      comment: newComment
+      comment: savedComment
     });
   } catch (error) {
     console.error("Error adding comment:", error);

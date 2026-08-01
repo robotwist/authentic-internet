@@ -1,25 +1,59 @@
 import express from "express";
 import Message from "../models/Message.js";
 import Artifact from "../models/Artifact.js";
+import User from "../models/User.js";
 import authenticateToken from "../middleware/authMiddleware.js";
 import { sendMessage, fetchMessage } from "../controllers/messageController.js";
 
 const router = express.Router();
 
+const idsMatch = (a, b) => String(a) === String(b);
+
 // 📌 1️⃣ CREATE A MESSAGE (Tied to an Artifact)
 router.post("/", authenticateToken, async (req, res) => {
   try {
     const { recipient, content, artifactId } = req.body;
+    const senderId = req.user?.userId ?? req.user?.id;
+
+    if (!senderId) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
 
     if (!recipient || !content) {
       return res.status(400).json({ error: "Recipient and message content are required." });
     }
 
+    const recipientUser = await User.findById(recipient).select(
+      "preferences.privacy.allowMessages friends blockedUsers"
+    );
+    if (!recipientUser) {
+      return res.status(404).json({ error: "Recipient not found." });
+    }
+
+    if (recipientUser.blockedUsers?.some((id) => idsMatch(id, senderId))) {
+      return res.status(403).json({ error: "You cannot message this user." });
+    }
+
+    // Default privacy is friends-only; enforce it so strangers cannot bypass DMs.
+    const allowMessages =
+      recipientUser.preferences?.privacy?.allowMessages || "friends";
+
+    if (allowMessages === "none") {
+      return res.status(403).json({ error: "This user is not accepting messages." });
+    }
+
+    if (allowMessages === "friends") {
+      const isFriend = recipientUser.friends?.some((id) => idsMatch(id, senderId));
+      if (!isFriend) {
+        return res.status(403).json({ error: "Only friends can message this user." });
+      }
+    }
+
     const newMessage = new Message({
-      sender: req.user.userId,
+      sender: senderId,
       recipient,
       content,
-      artifact: artifactId || null,
+      ...(artifactId ? { artifactId } : {}),
     });
 
     await newMessage.save();
@@ -89,13 +123,18 @@ router.delete("/:id", authenticateToken, async (req, res) => {
 // 📌 5️⃣ FETCH A MESSAGE ATTACHED TO AN ARTIFACT
 router.get("/artifact/:artifactId", authenticateToken, async (req, res) => {
   try {
-    const artifact = await Artifact.findById(req.params.artifactId).populate("message");
-
+    const artifact = await Artifact.findById(req.params.artifactId);
     if (!artifact) {
       return res.status(404).json({ error: "Artifact not found." });
     }
 
-    res.json({ message: artifact.message || "No message attached to this artifact." });
+    // Messages store `artifactId` (Message schema); Artifact has no `message` path.
+    const message = await Message.findOne({ artifactId: req.params.artifactId })
+      .sort({ createdAt: -1 })
+      .populate("sender", "username")
+      .populate("recipient", "username");
+
+    res.json({ message: message || "No message attached to this artifact." });
   } catch (error) {
     console.error("Error fetching artifact message:", error);
     res.status(500).json({ error: "Failed to fetch artifact message." });
