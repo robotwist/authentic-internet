@@ -1,9 +1,24 @@
 import { useCallback } from "react";
 import { TILE_SIZE, MAPS, getMapIndexByKey } from "../components/Constants";
+import { resolveYosemiteReturnTransition } from "../utils/yosemiteReturnPortal";
 
 const YOSEMITE_DEMO_ENTRY_POSITION = {
   x: 12 * TILE_SIZE,
   y: 42 * TILE_SIZE,
+};
+
+const announceWorld = (message) => {
+  const portalAnnouncement = document.createElement("div");
+  portalAnnouncement.className = "world-announcement";
+  portalAnnouncement.innerHTML = `<h2>${message}</h2>`;
+  document.body.appendChild(portalAnnouncement);
+
+  setTimeout(() => {
+    portalAnnouncement.classList.add("fade-out");
+    setTimeout(() => {
+      portalAnnouncement.remove();
+    }, 1000);
+  }, 3000);
 };
 
 export const usePortalCollisions = ({
@@ -248,46 +263,26 @@ export const usePortalCollisions = ({
         }
       }
 
-      // For Yosemite map, handle type 5 portal specially to return to Overworld 3
+      // Yosemite tile 5 returns to Overworld 3. Auto-transition like other maps —
+      // do not depend on NotificationSystem context (GameWorld is outside the provider).
       else if (currentMapName === "Yosemite") {
-        const conditionFn = () =>
-          MAPS[currentMapIndex]?.data?.[row]?.[col] === 5 &&
-          currentMapName === "Yosemite";
+        const transition = resolveYosemiteReturnTransition({
+          currentMapName,
+          tileType: 5,
+          tileSize: TILE_SIZE,
+          getMapIndexByKey,
+        });
 
-        const actionFn = () => {
-          // Find Overworld 3 map index
-          const destinationIndex = getMapIndexByKey("Overworld 3");
-          if (destinationIndex !== -1) {
-            // Change map to Overworld 3
-            setCurrentMapIndex(destinationIndex);
-            // Set character position near the portal to Yosemite
-            setCharacterPosition({ x: 8, y: 2 });
-
-            // Announce the world name
-            const portalAnnouncement = document.createElement("div");
-            portalAnnouncement.className = "world-announcement";
-            portalAnnouncement.innerHTML =
-              "<h2>Welcome back to Overworld 3</h2>";
-            document.body.appendChild(portalAnnouncement);
-
-            // Remove the announcement after a few seconds
-            setTimeout(() => {
-              portalAnnouncement.classList.add("fade-out");
-              setTimeout(() => {
-                document.body.removeChild(portalAnnouncement);
-              }, 1000);
-            }, 3000);
-          } else {
-            console.error("Destination map Overworld 3 not found");
+        if (transition) {
+          setCurrentMapIndex(transition.destinationIndex);
+          setCharacterPosition(transition.spawnPosition);
+          if (typeof adjustViewport === "function") {
+            adjustViewport(transition.spawnPosition);
           }
-        };
-
-        createInteractiveNotification(
-          "Return to Overworld 3",
-          "Press SPACE to return to Overworld 3",
-          conditionFn,
-          actionFn,
-        );
+          announceWorld("Welcome back to Overworld 3");
+        } else {
+          console.error("Destination map Overworld 3 not found");
+        }
       }
     }
 

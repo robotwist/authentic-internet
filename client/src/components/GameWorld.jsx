@@ -50,8 +50,8 @@ import TextAdventure from "./TextAdventure";
 import SoundManager from "./utils/SoundManager";
 import ArtifactDiscovery from "./ArtifactDiscovery";
 import NotificationSystem from "./systems/NotificationSystem";
-import { useNotification } from "./systems/useNotification";
 // XPNotification and AchievementNotification are now handled by NotificationSystem
+import { resolveYosemiteReturnTransition } from "../utils/yosemiteReturnPortal";
 import Level3Terminal from "./Level3Terminal";
 import Level4Shooter from "./Level4Shooter";
 import HemingwayChallenge from "./HemingwayChallenge";
@@ -404,14 +404,6 @@ const GameWorld = React.memo(() => {
     checkCollectionAchievements,
   } = useAchievements();
   const { updateGameProgress } = useGameStateContext();
-  const {
-    addXPNotification,
-    addAchievementNotification,
-    showPortalNotification,
-    hidePortalNotification,
-    createInteractiveNotification,
-    setPortalNotificationActive,
-  } = useNotification();
 
   // WebSocket connection for multiplayer
   const { socket, isConnected, sendMessage } = useWebSocket();
@@ -428,6 +420,28 @@ const GameWorld = React.memo(() => {
   const prevMapNameRef = useRef(null);
   const prevSpecialWorldRef = useRef(null);
   const hasRestoredSessionRef = useRef(false);
+  /** NotificationSystem mounts as a child; parent call sites use this ref bridge. */
+  const notificationApiRef = useRef(null);
+  const artifactGameLaunchActiveRef = useRef(false);
+
+  const addXPNotification = useCallback((...args) => {
+    notificationApiRef.current?.addXPNotification?.(...args);
+  }, []);
+  const addAchievementNotification = useCallback((...args) => {
+    notificationApiRef.current?.addAchievementNotification?.(...args);
+  }, []);
+  const showPortalNotification = useCallback((...args) => {
+    notificationApiRef.current?.showPortalNotification?.(...args);
+  }, []);
+  const hidePortalNotification = useCallback((...args) => {
+    notificationApiRef.current?.hidePortalNotification?.(...args);
+  }, []);
+  const createInteractiveNotification = useCallback((...args) => {
+    notificationApiRef.current?.createInteractiveNotification?.(...args);
+  }, []);
+  const setPortalNotificationActive = useCallback((...args) => {
+    notificationApiRef.current?.setPortalNotificationActive?.(...args);
+  }, []);
 
   // portalNotificationActive is now handled by NotificationSystem
 
@@ -1529,6 +1543,23 @@ const GameWorld = React.memo(() => {
         return;
       }
 
+      // Yosemite return portal (tile 5) → Overworld 3
+      if (currentMapName === "Yosemite" && tileType === 5) {
+        const transition = resolveYosemiteReturnTransition({
+          currentMapName,
+          tileType,
+          tileSize: TILE_SIZE,
+          getMapIndexByKey,
+        });
+        if (transition) {
+          handlePortalTransition(
+            transition.destinationName,
+            transition.spawnPosition,
+          );
+        }
+        return;
+      }
+
       // Handle special portals in Yosemite (types 6-8)
       if (currentMapName === "Yosemite" && tileType >= 6 && tileType <= 8) {
         const specialPortal = PORTAL_CONFIG.special[tileType];
@@ -1687,6 +1718,20 @@ const GameWorld = React.memo(() => {
       // Check special portals in Yosemite
       if (currentMapName === "Yosemite") {
         const currentTileType = currentMapData?.[playerTileY]?.[playerTileX];
+        const returnTransition = resolveYosemiteReturnTransition({
+          currentMapName,
+          tileType: currentTileType,
+          tileSize: TILE_SIZE,
+          getMapIndexByKey,
+        });
+        if (returnTransition) {
+          handlePortalTransition(
+            returnTransition.destinationName,
+            returnTransition.spawnPosition,
+          );
+          return;
+        }
+
         const specialPortal =
           typeof currentTileType === "number"
             ? PORTAL_CONFIG.special[currentTileType]
@@ -2909,7 +2954,8 @@ const GameWorld = React.memo(() => {
         // If within interaction range (approximately 1.5 tiles)
         if (distance <= TILE_SIZE * 1.5) {
           // Show interaction notification
-          if (!portalNotificationActive) {
+          if (!artifactGameLaunchActiveRef.current) {
+            artifactGameLaunchActiveRef.current = true;
             showPortalNotification(
               artifact.name,
               `When ready, press SPACE to enter ${artifact.name}`,
@@ -2928,6 +2974,7 @@ const GameWorld = React.memo(() => {
                 // Hide notification
                 hidePortalNotification();
                 setPortalNotificationActive(false);
+                artifactGameLaunchActiveRef.current = false;
 
                 // Set current game artifact and show launcher
                 setCurrentGameArtifact(artifact);
@@ -2950,6 +2997,7 @@ const GameWorld = React.memo(() => {
             return () => {
               window.removeEventListener("keydown", handleGameLaunch);
               setPortalNotificationActive(false);
+              artifactGameLaunchActiveRef.current = false;
             };
           }
 
@@ -4182,7 +4230,10 @@ const GameWorld = React.memo(() => {
             )}
 
             {/* === SYSTEMS === */}
-            <NotificationSystem soundManager={gameState.soundManager} />
+            <NotificationSystem
+              soundManager={gameState.soundManager}
+              apiRef={notificationApiRef}
+            />
           </div>
 
           <GameDock
