@@ -1,11 +1,11 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import XPNotification from '../XPNotification';
 import AchievementNotification from '../AchievementNotification';
 import { NotificationProvider } from './useNotification.jsx';
 import { isTextEntryFocused } from '../../utils/textFieldFocus';
 
-const NotificationSystem = ({ soundManager }) => {
+const NotificationSystem = ({ soundManager, apiRef = null }) => {
   // Notifications state
   const [notifications, setNotifications] = useState({
     notification: null,
@@ -156,6 +156,19 @@ const NotificationSystem = ({ soundManager }) => {
     createInteractiveNotification,
     setPortalNotificationActive,
   };
+
+  // GameWorld renders above this provider, so parent hooks cannot read context.
+  // Publish the live API through an optional ref for parent call sites.
+  if (apiRef) {
+    apiRef.current = notificationAPI;
+  }
+
+  useEffect(() => {
+    if (!apiRef) return undefined;
+    return () => {
+      apiRef.current = null;
+    };
+  }, [apiRef]);
 
   return (
     <NotificationProvider notificationAPI={notificationAPI}>
