@@ -10,6 +10,7 @@ import { auth as authenticateToken } from "../middleware/auth.js";
 import { validate, schemas } from "../middleware/validation.js";
 import sharp from "sharp";
 import Joi from "joi";
+import { normalizeCharacterCanvasSize } from "../utils/characterCanvasSize.js";
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -86,8 +87,11 @@ router.post("/create", authenticateToken, upload.single('characterImage'), async
       return res.status(400).json({ error: "Character image is required" });
     }
 
+    // Clamp canvasSize — unbounded sharp.resize() can OOM the process
+    const safeCanvasSize = normalizeCharacterCanvasSize(canvasSize);
+
     // Process and optimize the image
-    const processedImagePath = await processCharacterImage(req.file.path, canvasSize || 32);
+    const processedImagePath = await processCharacterImage(req.file.path, safeCanvasSize);
 
     // Create character
     const character = new Character({
@@ -98,7 +102,7 @@ router.post("/create", authenticateToken, upload.single('characterImage'), async
       creator: req.user.userId,
       imageUrl: '/uploads/characters/' + path.basename(processedImagePath),
       pixelData: pixelData ? (typeof pixelData === 'string' ? JSON.parse(pixelData) : pixelData) : {},
-      canvasSize: parseInt(canvasSize, 10) || 32
+      canvasSize: safeCanvasSize
     });
 
     await character.save();
@@ -419,10 +423,11 @@ router.post("/:id/download", authenticateToken, async (req, res) => {
 
 // Helper function to process character images
 async function processCharacterImage(imagePath, size) {
+  const safeSize = normalizeCharacterCanvasSize(size);
   const outputPath = imagePath.replace(/\.[^/.]+$/, '_processed.png');
   
   await sharp(imagePath)
-    .resize(size, size, {
+    .resize(safeSize, safeSize, {
       kernel: sharp.kernel.nearest,
       fit: 'fill'
     })
