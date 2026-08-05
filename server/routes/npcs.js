@@ -29,10 +29,41 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Static-prefix list routes must be registered before '/:id' or Express treats
+// "world" / "area" as NPC ids and never reaches these handlers.
+router.get('/world/:worldId', async (req, res) => {
+  try {
+    const npcs = await NPC.find({ world: req.params.worldId })
+      .select('-memory.conversationHistory -quoteCache -apiConfig.apiKey');
+    res.json(npcs);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+router.get('/area/:area', async (req, res) => {
+  try {
+    const { area } = req.params;
+    const npcs = await NPC.find({ area }).select('-memory.conversationHistory -quoteCache');
+
+    res.json({
+      success: true,
+      npcs,
+      area
+    });
+  } catch (error) {
+    console.error('Error fetching NPCs by area:', error);
+    res.status(500).json({ success: false, message: 'Error fetching NPCs by area' });
+  }
+});
+
 // Get NPC by ID
+// Public detail responses must omit per-player memory (playerIds, prompt topics,
+// personalDetails) — the list/area endpoints already strip conversationHistory.
 router.get('/:id', async (req, res) => {
   try {
-    const npc = await NPC.findById(req.params.id);
+    const npc = await NPC.findById(req.params.id)
+      .select('-memory.conversationHistory -quoteCache -apiConfig.apiKey');
     if (!npc) {
       return res.status(404).json({ success: false, message: 'NPC not found' });
     }
@@ -40,17 +71,6 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error fetching NPC:', error);
     res.status(500).json({ success: false, message: 'Error fetching NPC' });
-  }
-});
-
-// Get all NPCs in a world
-router.get('/world/:worldId', async (req, res) => {
-  try {
-    const npcs = await NPC.find({ world: req.params.worldId })
-      .select('-apiConfig.apiKey');
-    res.json(npcs);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
@@ -280,24 +300,6 @@ router.get('/:id/quotes', async (req, res) => {
   } catch (error) {
     console.error('Error fetching NPC quotes:', error);
     res.status(500).json({ success: false, message: 'Error fetching quotes' });
-  }
-});
-
-// Get NPCs by area/location
-router.get('/area/:area', async (req, res) => {
-  try {
-    const { area } = req.params;
-    const npcs = await NPC.find({ area }).select('-memory.conversationHistory -quoteCache');
-    
-    res.json({ 
-      success: true, 
-      npcs,
-      area
-    });
-
-  } catch (error) {
-    console.error('Error fetching NPCs by area:', error);
-    res.status(500).json({ success: false, message: 'Error fetching NPCs by area' });
   }
 });
 
