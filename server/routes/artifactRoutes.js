@@ -7,6 +7,7 @@ import {
   ensureUnifiedResponse
 } from "../middleware/artifactValidation.js";
 import { requireCreationToken } from "../middleware/requireCreationToken.js";
+import { cleanupOrphanUploads } from "../middleware/cleanupOrphanUploads.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -134,6 +135,7 @@ const uploadFields = upload.fields([
 router.post("/",
   authenticateToken,
   uploadFields,
+  cleanupOrphanUploads,
   convertLegacyArtifact,
   validateUnifiedArtifact,
   requireCreationToken,
@@ -189,6 +191,7 @@ router.get("/:id", ensureUnifiedResponse, getArtifactById);
 router.put("/:id",
   authenticateToken,
   uploadFields,
+  cleanupOrphanUploads,
   convertLegacyArtifact,
   validateArtifactUpdate,
   ensureUnifiedResponse,
