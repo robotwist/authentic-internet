@@ -1,5 +1,6 @@
 import Artifact from "../models/Artifact.js";
 import User from "../models/User.js";
+import { applyArtifactUploads } from "../utils/cleanupUploads.js";
 
 // Create an artifact. First is free; 2nd+ require 1 creation token (earned by completing others' artifacts).
 export const createArtifact = async (req, res) => {
@@ -19,6 +20,9 @@ export const createArtifact = async (req, res) => {
 
     const existingCount = await Artifact.countDocuments({ createdBy: uid });
 
+    const uploadFields = {};
+    applyArtifactUploads(req, uploadFields);
+
     const newArtifact = new Artifact({
       name,
       description: description ?? "",
@@ -31,9 +35,12 @@ export const createArtifact = async (req, res) => {
       type: type || "artifact",
       createdBy: resolvedCreatedBy,
       id: `artifact-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+      ...uploadFields,
     });
 
     await newArtifact.save();
+    // Keep multer files only after durable persistence succeeds.
+    req.uploadsPersisted = true;
 
     // Deduct 1 creation token when creating 2nd+ artifact
     if (existingCount >= 1) {
@@ -112,13 +119,17 @@ export const getArtifactById = async (req, res) => {
 export const updateArtifact = async (req, res) => {
   try {
     const { id } = req.params;
+    const updatePayload = { ...req.body };
+    applyArtifactUploads(req, updatePayload);
+
     const updatedArtifact = await Artifact.findByIdAndUpdate(
       id, 
-      req.body, 
+      updatePayload, 
       { new: true, runValidators: true }
     ).populate('creator', 'username');
     
     if (!updatedArtifact) return res.status(404).json({ message: "Artifact not found" });
+    req.uploadsPersisted = true;
     res.json({ ...updatedArtifact.toObject(), id: updatedArtifact._id });
   } catch (error) {
     console.error("Error updating artifact:", error);
