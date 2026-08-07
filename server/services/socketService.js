@@ -3,6 +3,14 @@
  * This service handles Socket.io setup and event handlers
  */
 
+import {
+  canAutoCreateWorldInstance,
+  clampMaxPlayers,
+  isValidWorldId,
+  registerActiveConnection,
+  unregisterActiveConnection,
+} from '../utils/socketConnectionHelpers.js';
+
 // Initialize Socket.io server
 let io;
 let socketIoAvailable = false;
@@ -68,8 +76,8 @@ export const initSocketService = async (server) => {
     io.on('connection', (socket) => {
       console.log(`User connected: ${socket.user.username} (${socket.id})`);
       
-      // Store connection
-      activeConnections.set(socket.user.id.toString(), socket);
+      // Store latest connection for this user (safe unregister preserves other tabs)
+      registerActiveConnection(activeConnections, socket.user.id, socket);
       
       // Notify everyone about online users
       broadcastOnlineUsers();
@@ -92,7 +100,7 @@ export const initSocketService = async (server) => {
       // Disconnect event
       socket.on('disconnect', () => {
         console.log(`User disconnected: ${socket.user.username}`);
-        activeConnections.delete(socket.user.id.toString());
+        unregisterActiveConnection(activeConnections, socket.user.id, socket);
         broadcastOnlineUsers();
       });
     });
@@ -216,26 +224,31 @@ const setupWorldEvents = (socket) => {
   // Join a world
   socket.on('world:join', async (data) => {
     try {
-      if (!data.worldId) {
-        socket.emit('error', { message: 'World ID is required' });
+      if (!data?.worldId || !isValidWorldId(data.worldId)) {
+        socket.emit('error', { message: 'Valid world ID is required' });
         return;
       }
+
+      const worldId = data.worldId.trim();
       
       // Import required models
       const { default: WorldInstance } = await import('../models/World.js');
       const { default: User } = await import('../models/User.js');
       
-      // Get or create world instance
-      let worldInstance = await WorldInstance.findOne({ worldId: data.worldId });
+      // Join existing worlds; only auto-create built-in game maps (blocks WS DB DoS)
+      let worldInstance = await WorldInstance.findOne({ worldId });
       if (!worldInstance) {
-        // Create default world instance
-        const user = await User.findById(socket.user.id);
+        if (!canAutoCreateWorldInstance(worldId)) {
+          socket.emit('error', { message: 'World not found' });
+          return;
+        }
+
         worldInstance = new WorldInstance({
-          worldId: data.worldId,
-          name: data.worldName || 'Default World',
+          worldId,
+          name: data.worldName || worldId,
           description: data.worldDescription || 'A shared world for players to explore',
           creator: socket.user.id,
-          maxPlayers: data.maxPlayers || 50
+          maxPlayers: clampMaxPlayers(data.maxPlayers)
         });
         await worldInstance.save();
       }
@@ -254,11 +267,15 @@ const setupWorldEvents = (socket) => {
       });
       
       // Join new world room
-      const roomId = `world:${data.worldId}`;
+      const roomId = `world:${worldId}`;
       socket.join(roomId);
       
       // Add player to world instance
       const user = await User.findById(socket.user.id);
+      if (!user) {
+        socket.emit('error', { message: 'User not found' });
+        return;
+      }
       worldInstance.addPlayer(
         socket.user.id,
         socket.user.username,
@@ -280,7 +297,7 @@ const setupWorldEvents = (socket) => {
       const recentMessages = worldInstance.getRecentChatMessages(50);
       
       socket.emit('world:joined', {
-        worldId: data.worldId,
+        worldId,
         worldName: worldInstance.name,
         players: onlinePlayers,
         messages: recentMessages,
