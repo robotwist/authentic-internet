@@ -13,10 +13,11 @@ import {
   PLAYER_POWERS,
   UNLOCKABLE_AREAS,
 } from "./GameConstants";
-import { updateUserProgress, awardPlayerPowers, unlockAreas } from "../api/api";
 import { trackArtifactCompletion } from "../api/recommendations";
 import PowerUnlockNotification from "./PowerUnlockNotification";
 import "./ArtifactGameLauncher.css";
+
+const getAccessToken = () => localStorage.getItem("token");
 
 /**
  * Universal Game Launcher for Artifact Games
@@ -30,7 +31,10 @@ const ArtifactGameLauncher = ({
   onProgressUpdate,
 }) => {
   const { user, updateUser } = useContext(AuthContext);
-  const { addExperiencePoints } = useContext(GameStateContext);
+  const gameStateContext = useContext(GameStateContext);
+  const addExperiencePoints =
+    gameStateContext?.addExperiencePoints ||
+    gameStateContext?.updateExperience;
 
   // Game state management
   const [gameState, setGameState] = useState("loading"); // loading, playing, paused, completed, failed
@@ -98,9 +102,12 @@ const ArtifactGameLauncher = ({
 
   const loadGameProgress = async () => {
     try {
+      const token = getAccessToken();
+      if (!token) return null;
+
       const response = await fetch(`/api/artifacts/${artifact.id}/progress`, {
         headers: {
-          Authorization: `Bearer ${user?.token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -120,10 +127,16 @@ const ArtifactGameLauncher = ({
     if (!gameProgress || !user) return;
 
     try {
+      const token = getAccessToken();
+      if (!token) {
+        console.warn("No auth token; artifact game progress saved only in memory");
+        return;
+      }
+
       await fetch(`/api/artifacts/${artifact.id}/progress`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -164,11 +177,8 @@ const ArtifactGameLauncher = ({
           addExperiencePoints(totalXP, `Completed ${artifact.name}`);
         }
 
-        // Award powers and unlock areas
+        // Award powers and unlock areas (server /complete is the durable write)
         await awardCompletionRewards(finalData);
-
-        // Update artifact completion stats
-        await updateArtifactStats(finalData);
 
         // Feed completion into recommendation engine (completion-history signal)
         try {

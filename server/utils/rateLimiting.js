@@ -1,4 +1,5 @@
 import rateLimit from 'express-rate-limit';
+import { evaluatePasswordResetAttempt } from './passwordResetRateLimit.js';
 
 /**
  * Rate limiting configuration for different parts of the API
@@ -196,28 +197,21 @@ export const authLimiter = (req, res, next) => {
  */
 export const passwordResetLimiter = (req, res, next) => {
   const ip = req.ip || req.connection.remoteAddress;
-  
-  // More strict rate limiting for password reset
-  const record = failedAttempts.get(`reset_${ip}`) || {
-    count: 0,
-    firstAttempt: Date.now(),
-    lastAttempt: Date.now()
-  };
-  
-  // Only allow 3 password reset requests per hour
-  if (record.count >= 3 && (Date.now() - record.firstAttempt) < ATTEMPT_RESET_DURATION) {
+  const key = `reset_${ip}`;
+  const { allowed, record, retryAfterSeconds } = evaluatePasswordResetAttempt(
+    failedAttempts.get(key),
+    Date.now()
+  );
+
+  if (!allowed) {
     return res.status(429).json({
       message: "Too many password reset requests. Please try again later.",
       error: "RATE_LIMITED",
-      retryAfter: Math.ceil((record.firstAttempt + ATTEMPT_RESET_DURATION - Date.now()) / 1000)
+      retryAfter: retryAfterSeconds
     });
   }
-  
-  // Update the counter
-  record.count += 1;
-  record.lastAttempt = Date.now();
-  failedAttempts.set(`reset_${ip}`, record);
-  
+
+  failedAttempts.set(key, record);
   next();
 };
 
