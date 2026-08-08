@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { resolveSmtpPassword } from '../utils/smtpAuth.js';
 
 // Create a transporter object using SMTP transport
 let transporter;
@@ -12,7 +13,8 @@ const initializeTransporter = () => {
       secure: process.env.EMAIL_SECURE === 'true',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
+        // render.yaml / docs use EMAIL_PASS; EMAIL_PASSWORD kept as fallback
+        pass: resolveSmtpPassword()
       }
     });
   } else {
