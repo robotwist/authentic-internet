@@ -14,6 +14,10 @@ import {
   logPersistentError,
 } from "../api/api";
 import API from "../api/api";
+import {
+  userForLocalStorage,
+  hasLegacyHeavyUserFields,
+} from "../utils/authStorage";
 
 // Constants
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes before expiry
@@ -130,13 +134,6 @@ const clearStoredAuthData = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
-};
-
-/** Keep large blobs (characterSprite) out of localStorage — they block the main thread on parse. */
-const userForLocalStorage = (user) => {
-  if (!user || typeof user !== "object") return user;
-  const { characterSprite: _sprite, ...rest } = user;
-  return rest;
 };
 
 const storeAuthData = (data) => {
@@ -388,9 +385,13 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Invalid response from server. Please try again.");
       }
 
-      // Store token in localStorage (access token only)
+      // Store token in localStorage (access token only).
+      // Sanitize user the same way as AUTH_SUCCESS — never persist sprites / hydrated collections.
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(userForLocalStorage(data.user)),
+      );
 
       // Set up axios interceptors for Authorization headers
       setupAxiosInterceptors(data.token);
@@ -513,10 +514,15 @@ export const AuthProvider = ({ children }) => {
 
   // Update user data
   const updateUser = (updatedUser) => {
-    localStorage.setItem(
-      "user",
-      JSON.stringify(userForLocalStorage(updatedUser)),
-    );
+    try {
+      localStorage.setItem(
+        "user",
+        JSON.stringify(userForLocalStorage(updatedUser)),
+      );
+    } catch (storageError) {
+      // Quota / private-mode failures must not block in-memory profile updates
+      console.error("Failed to persist user to localStorage:", storageError);
+    }
     dispatch({ type: AUTH_ACTIONS.SET_USER, payload: updatedUser });
   };
 
@@ -548,6 +554,18 @@ export const AuthProvider = ({ children }) => {
             payload: { user: null, isAuthenticated: false },
           });
           return;
+        }
+
+        // Migrate legacy localStorage users that still contain heavy fields
+        // (sprite blobs, populated inventory/messages from older clients).
+        if (hasLegacyHeavyUserFields(parsedUser)) {
+          const sanitized = userForLocalStorage(parsedUser);
+          try {
+            localStorage.setItem("user", JSON.stringify(sanitized));
+          } catch (migrationError) {
+            console.error("Failed to migrate legacy auth user:", migrationError);
+          }
+          parsedUser = sanitized;
         }
 
         const timeUntilExpiry = calculateTimeUntilExpiry(storedToken);

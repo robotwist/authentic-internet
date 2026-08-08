@@ -223,7 +223,15 @@ const Login = () => {
       }
 
       if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
+        // Keep heavy fields (sprite / hydrated inventory) out of localStorage
+        const {
+          characterSprite: _sprite,
+          inventory: _inventory,
+          messages: _messages,
+          friends: _friends,
+          ...safeUser
+        } = data.user;
+        localStorage.setItem("user", JSON.stringify(safeUser));
       }
 
       // Set isAuthenticated flag for immediate UI update
