@@ -7,6 +7,7 @@ import User from '../models/User.js';
 import NPC from '../models/NPC.js';
 import jwt from 'jsonwebtoken';
 import { MAPS_STRUCTURE } from '../constants.js';
+import { clampChatHistoryLimit } from '../utils/chatHistoryLimit.js';
 
 const router = express.Router();
 
@@ -480,6 +481,8 @@ router.get('/instance/:worldId/chat', async (req, res) => {
   try {
     const { worldId } = req.params;
     const { limit = 50 } = req.query;
+    // MongoDB treats limit(0) as unbounded; clamp to a sane page size.
+    const safeLimit = clampChatHistoryLimit(limit);
 
     const messages = await ChatMessage.find({
       messageType: 'world',
@@ -488,7 +491,7 @@ router.get('/instance/:worldId/chat', async (req, res) => {
     })
     .populate('sender.userId', 'username avatar level')
     .sort({ createdAt: -1 })
-    .limit(parseInt(limit));
+    .limit(safeLimit);
 
     res.json({
       success: true,

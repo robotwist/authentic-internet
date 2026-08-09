@@ -1,5 +1,9 @@
 import Artifact from "../models/Artifact.js";
 import User from "../models/User.js";
+import {
+  refundCreationToken,
+  reserveCreationToken,
+} from "../utils/creationTokenSpend.js";
 
 // Create an artifact. First is free; 2nd+ require 1 creation token (earned by completing others' artifacts).
 export const createArtifact = async (req, res) => {
@@ -18,6 +22,24 @@ export const createArtifact = async (req, res) => {
     }
 
     const existingCount = await Artifact.countDocuments({ createdBy: uid });
+    const requiresToken = existingCount >= 1;
+    let tokenReserved = false;
+
+    // Atomically reserve a token before persist so parallel creates cannot
+    // all pass the middleware pre-check and drive creationTokens negative.
+    if (requiresToken) {
+      const spent = await reserveCreationToken(User, userId);
+      if (!spent) {
+        return res.status(403).json({
+          success: false,
+          code: "CREATION_TOKEN_REQUIRED",
+          message:
+            "You need a creation token to create another artifact. Complete an artifact you didn't create to earn one.",
+          artifactsCreated: existingCount,
+        });
+      }
+      tokenReserved = true;
+    }
 
     const newArtifact = new Artifact({
       name,
@@ -33,13 +55,31 @@ export const createArtifact = async (req, res) => {
       id: `artifact-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
     });
 
-    await newArtifact.save();
+    try {
+      await newArtifact.save();
+    } catch (saveError) {
+      if (tokenReserved) {
+        await refundCreationToken(User, userId);
+      }
+      throw saveError;
+    }
 
-    // Deduct 1 creation token when creating 2nd+ artifact
-    if (existingCount >= 1) {
-      await User.findByIdAndUpdate(userId, {
-        $inc: { creationTokens: -1 },
-      });
+    // Lost the "first free" race against a parallel create: charge a token or roll back.
+    if (!requiresToken) {
+      const countAfter = await Artifact.countDocuments({ createdBy: uid });
+      if (countAfter > 1) {
+        const spent = await reserveCreationToken(User, userId);
+        if (!spent) {
+          await Artifact.findByIdAndDelete(newArtifact._id);
+          return res.status(403).json({
+            success: false,
+            code: "CREATION_TOKEN_REQUIRED",
+            message:
+              "You need a creation token to create another artifact. Complete an artifact you didn't create to earn one.",
+            artifactsCreated: countAfter - 1,
+          });
+        }
+      }
     }
 
     res.status(201).json({ ...newArtifact.toObject(), id: newArtifact._id });

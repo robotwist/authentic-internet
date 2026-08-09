@@ -4,6 +4,7 @@ import "./TextAdventure.css";
 import SoundManager from "./utils/SoundManager";
 import { useAuth } from "../context/AuthContext";
 import { useGameState } from "../context/GameStateContext";
+import { getStableGameWorld } from "./textAdventureState";
 
 const TextAdventure = ({ onComplete, onExit, username = "traveler" }) => {
   const [currentRoom, setCurrentRoom] = useState("start");
@@ -26,9 +27,13 @@ const TextAdventure = ({ onComplete, onExit, username = "traveler" }) => {
 
   // Add a stateSaved flag to track if initial progress was loaded
   const [progressLoaded, setProgressLoaded] = useState(false);
+  const didLoadProgressRef = useRef(false);
 
-  // Game world definition
-  const GAME_WORLD = {
+  // Mutable puzzle state must survive re-renders. Defining GAME_WORLD in the
+  // render body previously wiped completedInteractions / playerKnowledge /
+  // revealedExits after every command that called setState.
+  const gameWorldRef = useRef(null);
+  const GAME_WORLD = getStableGameWorld(gameWorldRef, () => ({
     start: {
       description: `Welcome, ${username}, to the Text Adventure. You find yourself in a dimly lit room with stone walls. A single torch provides flickering illumination. There's a wooden door to the north and a small chest in the corner.`,
       exits: {
@@ -243,7 +248,7 @@ const TextAdventure = ({ onComplete, onExit, username = "traveler" }) => {
         },
       },
     },
-  };
+  }));
 
   // Initialize the game
   useEffect(() => {
@@ -320,25 +325,27 @@ const TextAdventure = ({ onComplete, onExit, username = "traveler" }) => {
     return () => clearInterval(typingInterval);
   }, [isTyping, currentRoom]);
 
-  // Load saved game progress when component mounts
+  // Load saved game progress once auth + GameState hydrate are available.
+  // Always arm autosave afterward so first-time sessions are not silently lost.
   useEffect(() => {
-    const loadGameProgress = async () => {
-      if (!isAuthenticated) return;
+    if (!isAuthenticated || didLoadProgressRef.current) return;
+
+    let cancelled = false;
+
+    const applyLoadedProgress = () => {
+      if (cancelled || didLoadProgressRef.current) return;
 
       try {
         console.log("Loading saved game progress...");
 
-        // Check if there's text adventure progress in the GameState context
         if (gameProgress?.textAdventureProgress) {
           const taProgress = gameProgress.textAdventureProgress;
 
-          // Load room
           if (taProgress.currentRoom) {
             setCurrentRoom(taProgress.currentRoom);
             console.log(`Loaded saved room: ${taProgress.currentRoom}`);
           }
 
-          // Load inventory
           if (taProgress.inventory && taProgress.inventory.length > 0) {
             setInventory(taProgress.inventory);
             console.log(
@@ -346,12 +353,10 @@ const TextAdventure = ({ onComplete, onExit, username = "traveler" }) => {
             );
           }
 
-          // Apply interactions and knowledge
           if (
             taProgress.completedInteractions &&
             taProgress.completedInteractions.length > 0
           ) {
-            // Add completed interactions to each room's state
             taProgress.completedInteractions.forEach((interaction) => {
               const [roomId, interactionId] = interaction.split("::");
               if (roomId && interactionId && GAME_WORLD[roomId]) {
@@ -366,7 +371,6 @@ const TextAdventure = ({ onComplete, onExit, username = "traveler" }) => {
             );
           }
 
-          // Load passwords/knowledge
           if (
             taProgress.knownPasswords &&
             taProgress.knownPasswords.length > 0
@@ -385,17 +389,18 @@ const TextAdventure = ({ onComplete, onExit, username = "traveler" }) => {
             );
           }
 
-          // Add welcome back message
           addToHistory(
             "system",
             `Welcome back, ${username}! Your adventure continues...`,
           );
 
-          // Update history with current room description after loading
-          addToHistory("room", GAME_WORLD[taProgress.currentRoom].description);
-          displayRoomDescription(taProgress.currentRoom);
-
-          setProgressLoaded(true);
+          if (taProgress.currentRoom && GAME_WORLD[taProgress.currentRoom]) {
+            addToHistory(
+              "room",
+              GAME_WORLD[taProgress.currentRoom].description,
+            );
+            displayRoomDescription(taProgress.currentRoom);
+          }
         } else {
           console.log(
             "No saved text adventure progress found, starting new game",
@@ -403,11 +408,24 @@ const TextAdventure = ({ onComplete, onExit, username = "traveler" }) => {
         }
       } catch (error) {
         console.error("Error loading game progress:", error);
-        // Continue with new game if loading fails
+      } finally {
+        didLoadProgressRef.current = true;
+        setProgressLoaded(true);
       }
     };
 
-    loadGameProgress();
+    if (gameProgress?.textAdventureProgress) {
+      applyLoadedProgress();
+      return undefined;
+    }
+
+    // Allow GameStateProvider's localStorage hydrate to land before treating
+    // an empty gameProgress as a brand-new adventure.
+    const timer = setTimeout(applyLoadedProgress, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [isAuthenticated, username, gameProgress]);
 
   // Save game progress when state changes
