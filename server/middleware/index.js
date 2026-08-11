@@ -9,7 +9,7 @@ import { csrfProtection, handleCsrfError, provideCsrfToken } from "./csrf.js";
 import { configureCorsOptions, configureSessionOptions } from "../config/app-config.js";
 import { configureSecurityHeaders, enforceHttps } from "../utils/security.js";
 import { apiLimiter, healthCheckLimiter } from "../utils/rateLimiting.js";
-import { xssProtection } from "./validation.js";
+import { xssProtection } from "./xssProtection.js";
 
 /**
  * Apply all middleware to Express app

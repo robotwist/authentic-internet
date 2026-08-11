@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { xssProtection } from "../../server/middleware/validation.js";
+import { xssProtection } from "../../server/middleware/xssProtection.js";
 
 function runMiddleware(body) {
   const req = { body };
