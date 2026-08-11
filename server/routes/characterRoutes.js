@@ -10,6 +10,7 @@ import { auth as authenticateToken } from "../middleware/auth.js";
 import { validate, schemas } from "../middleware/validation.js";
 import sharp from "sharp";
 import Joi from "joi";
+import { clampPaginationLimit } from "../utils/paginationLimit.js";
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -196,10 +197,12 @@ router.post("/import-piskel", authenticateToken, upload.single('piskelFile'), as
 router.get("/my-characters", authenticateToken, async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
-    
+    const safeLimit = clampPaginationLimit(limit);
+    const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
+
     const characters = await Character.getUserCharacters(req.user.userId, {
-      page: parseInt(page),
-      limit: parseInt(limit)
+      page: pageNum,
+      limit: safeLimit
     });
 
     const total = await Character.countDocuments({ 
@@ -210,10 +213,10 @@ router.get("/my-characters", authenticateToken, async (req, res) => {
     res.json({
       characters,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: pageNum,
+        limit: safeLimit,
         total,
-        pages: Math.ceil(total / parseInt(limit))
+        pages: Math.ceil(total / safeLimit)
       }
     });
   } catch (error) {
@@ -237,10 +240,13 @@ router.get("/public", async (req, res) => {
     } = req.query;
 
     const tagArray = tags ? tags.split(',') : [];
+    // MongoDB treats limit(0) as unbounded; clamp page size.
+    const safeLimit = clampPaginationLimit(limit);
+    const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
 
     const characters = await Character.getPublicCharacters({
-      page: parseInt(page),
-      limit: parseInt(limit),
+      page: pageNum,
+      limit: safeLimit,
       sort,
       order,
       tags: tagArray,
@@ -255,10 +261,10 @@ router.get("/public", async (req, res) => {
     res.json({
       characters,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: pageNum,
+        limit: safeLimit,
         total,
-        pages: Math.ceil(total / parseInt(limit))
+        pages: Math.ceil(total / safeLimit)
       }
     });
   } catch (error) {
