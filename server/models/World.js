@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { canPlayerJoinWorld } from "../utils/worldJoinAccess.js";
 
 // Player position in world
 const PlayerPositionSchema = new mongoose.Schema({
@@ -144,10 +145,9 @@ WorldInstanceSchema.methods.isPlayerInWorld = function(userId) {
 };
 
 WorldInstanceSchema.methods.canPlayerJoin = function(userId) {
-  if (!this.isActive) return false;
-  if (this.requiresInvite && !this.moderators.includes(userId)) return false;
-  if (this.activePlayers.length >= this.maxPlayers) return false;
-  return true;
+  // Delegate to shared helper so ObjectId vs string identity is compared safely
+  // and invite-only worlds allow the creator (not only moderators.includes).
+  return canPlayerJoinWorld(this, userId);
 };
 
 const WorldInstance = mongoose.model('WorldInstance', WorldInstanceSchema);
