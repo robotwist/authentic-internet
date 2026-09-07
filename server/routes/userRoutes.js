@@ -7,6 +7,10 @@ import path from "path";
 import fs from "fs";
 import { gameStateReadLimiter, gameStateWriteLimiter } from "../utils/rateLimiting.js";
 import { validate, schemas } from "../middleware/validation.js";
+import {
+  isAllowedAvatarAssignment,
+  resolveSafeAvatarFilePath,
+} from "../utils/safeAvatarPath.js";
 
 const router = express.Router();
 
@@ -57,12 +61,10 @@ router.post("/me/avatar", authenticateToken, upload.single('avatar'), async (req
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Delete old avatar if it's a custom one (not the default)
-    if (user.avatar && user.avatar.startsWith('/uploads/avatars/')) {
-      const oldAvatarPath = path.join(process.cwd(), 'public', user.avatar);
-      if (fs.existsSync(oldAvatarPath)) {
-        fs.unlinkSync(oldAvatarPath);
-      }
+    // Delete previous upload only when it resolves inside public/uploads/avatars.
+    const oldAvatarPath = resolveSafeAvatarFilePath(user.avatar);
+    if (oldAvatarPath && fs.existsSync(oldAvatarPath)) {
+      fs.unlinkSync(oldAvatarPath);
     }
 
     // Update user avatar with new file path
@@ -389,7 +391,12 @@ router.put("/:id", authenticateToken, async (req, res) => {
     // Update allowed fields
     const { avatar, exp, level, inventory, savedQuotes } = req.body;
     
-    if (avatar) user.avatar = avatar;
+    if (avatar) {
+      if (!isAllowedAvatarAssignment(avatar)) {
+        return res.status(400).json({ message: "Invalid avatar" });
+      }
+      user.avatar = avatar;
+    }
     if (exp !== undefined) user.experience = exp;
     if (level !== undefined) user.level = level;
     if (inventory) user.inventory = inventory;
