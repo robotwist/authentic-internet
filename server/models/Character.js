@@ -1,4 +1,8 @@
 import mongoose from 'mongoose';
+import {
+  clampTrendingLimit,
+  publicCreatorLookup,
+} from '../utils/trendingCharacters.js';
 
 const CharacterSchema = new mongoose.Schema({
   name: {
@@ -184,18 +188,9 @@ CharacterSchema.statics.getTrendingCharacters = function(limit = 10) {
       }
     }},
     { $sort: { popularityScore: -1 } },
-    { $limit: limit },
-    { $lookup: {
-      from: 'users',
-      localField: 'creator',
-      foreignField: '_id',
-      as: 'creator'
-    }},
+    { $limit: clampTrendingLimit(limit) },
+    { $lookup: publicCreatorLookup() },
     { $unwind: '$creator' },
-    { $project: {
-      'creator.password': 0,
-      'creator.email': 0
-    }}
   ]);
 };
 
