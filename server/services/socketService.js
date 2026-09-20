@@ -3,6 +3,8 @@
  * This service handles Socket.io setup and event handlers
  */
 
+import { verifyAccessToken } from '../utils/verifyAccessToken.js';
+
 // Initialize Socket.io server
 let io;
 let socketIoAvailable = false;
@@ -39,10 +41,9 @@ export const initSocketService = async (server) => {
           return next(new Error('Authentication error: Token required'));
         }
         
-        // Verify token
-        const jwt = await import('jsonwebtoken');
+        // Verify token (jsonwebtoken CJS default — named ESM verify is undefined)
+        const decoded = verifyAccessToken(token);
         const { default: User } = await import('../models/User.js');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
         // Find user
         const user = await User.findById(decoded.userId);
