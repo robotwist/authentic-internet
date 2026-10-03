@@ -148,11 +148,6 @@ const Dungeon = ({
     }
   }, [currentRoom, defeatedRooms]);
 
-  // Check for door interaction when player moves
-  useEffect(() => {
-    checkDoorInteraction(playerPosition.x, playerPosition.y);
-  }, [playerPosition, checkDoorInteraction]);
-
   // Get enemy health based on type
   const getEnemyHealth = (type) => {
     const healthMap = {
@@ -369,6 +364,12 @@ const Dungeon = ({
     },
     [dungeonData, onPlayerMove, onExit],
   );
+
+  // Door checks must run after checkDoorInteraction is initialized.
+  // Reading that binding earlier in the component throws on every dungeon render.
+  useEffect(() => {
+    checkDoorInteraction(playerPosition.x, playerPosition.y);
+  }, [playerPosition, checkDoorInteraction]);
 
   // Render dungeon tiles
   const renderRoom = () => {
