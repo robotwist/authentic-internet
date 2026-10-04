@@ -18,6 +18,24 @@ import Boss from "../Combat/Boss";
 
 const TILE_SIZE = 64; // Same as overworld
 
+/**
+ * Enemy expects pixel `position` and `health`. Room data stores tile coordinates
+ * and Dungeon used to pass `initialPosition` / `initialHealth`, which Enemy
+ * ignores — the next render then throws on `position.x` and the game error
+ * boundary replaces the playfield.
+ */
+export function propsForDungeonEnemy(enemy) {
+  const tile = enemy?.position || { x: 0, y: 0 };
+  return {
+    type: enemy?.type,
+    position: {
+      x: tile.x * TILE_SIZE,
+      y: tile.y * TILE_SIZE,
+    },
+    health: enemy?.health,
+  };
+}
+
 function hydrateProgressSets(progress) {
   if (!progress) {
     return {
@@ -454,16 +472,9 @@ const Dungeon = ({
     return roomEnemies.map((enemy) => (
       <Enemy
         key={enemy.id}
-        id={enemy.id}
-        type={enemy.type}
-        initialPosition={enemy.position}
-        initialHealth={enemy.health}
+        {...propsForDungeonEnemy(enemy)}
         playerPosition={playerPosition}
         onDefeat={(drops) => handleEnemyDefeat(enemy.id, drops)}
-        mapBounds={{
-          width: currentRoom.width * TILE_SIZE,
-          height: currentRoom.height * TILE_SIZE,
-        }}
       />
     ));
   };
