@@ -67,6 +67,14 @@ import {
 } from "./Dungeons/dungeonRegistry";
 import { getLevelWinConfig } from "../constants/LevelWinConditions";
 import { maybeAwardFunnyXp } from "../utils/funnyXp";
+import {
+  consumedKeyAfterDismiss,
+  dungeonStepKey,
+  isYosemiteSigilTile,
+  resolveStepTrigger,
+  stepKeyFromPixel,
+  yosemiteSigilStepKey,
+} from "../utils/stepTriggerGuard";
 import HamletFinale from "./MiniGames/HamletFinale";
 import QuestCompletionCelebration from "./QuestCompletionCelebration";
 import { useAuth } from "../context/AuthContext";
@@ -1091,6 +1099,10 @@ const GameWorld = React.memo(() => {
     updateUIState({ inDungeon: false });
 
     if (entry && typeof entry.mapIndex === "number") {
+      dungeonStepTileKeyRef.current = consumedKeyAfterDismiss(
+        dungeonStepTileKeyRef.current,
+        stepKeyFromPixel(entry.mapIndex, entry.x, entry.y, TILE_SIZE),
+      );
       setCurrentMapIndex(entry.mapIndex);
       setCharacterPosition({ x: entry.x, y: entry.y });
       if (adjustViewport) {
@@ -2761,13 +2773,9 @@ const GameWorld = React.memo(() => {
     checkPortalCollisions();
   }, [checkPortalCollisions]);
 
-  useEffect(() => {
-    if (!uiState.inDungeon) {
-      dungeonStepTileKeyRef.current = "";
-    }
-  }, [uiState.inDungeon]);
-
-  // Step onto dungeon tile (type 9): dispatch portalCollision so auto-entry matches SPACE
+  // Step onto dungeon tile (type 9): dispatch portalCollision so auto-entry matches SPACE.
+  // Do not clear the guard merely because inDungeon flipped false — exit puts the
+  // player back on this tile, and an empty guard immediately re-enters.
   useEffect(() => {
     if (
       uiState.inDungeon ||
@@ -2784,13 +2792,14 @@ const GameWorld = React.memo(() => {
     const row = mapData[tileY];
     if (!row || tileX < 0 || tileX >= row.length) return;
     const tileType = row[tileX];
-    if (tileType !== 9) {
-      dungeonStepTileKeyRef.current = "";
-      return;
-    }
-    const stepKey = `${currentMapIndex}:${tileX}:${tileY}`;
-    if (dungeonStepTileKeyRef.current === stepKey) return;
-    dungeonStepTileKeyRef.current = stepKey;
+    const stepKey = dungeonStepKey(currentMapIndex, tileX, tileY);
+    const decision = resolveStepTrigger(
+      dungeonStepTileKeyRef.current,
+      stepKey,
+      { onTriggerTile: tileType === 9 },
+    );
+    dungeonStepTileKeyRef.current = decision.consumedKey;
+    if (!decision.fire) return;
     window.dispatchEvent(
       new CustomEvent("portalCollision", {
         detail: { tileX, tileY, tileType },
@@ -2828,13 +2837,19 @@ const GameWorld = React.memo(() => {
     const row = mapData[tileY];
     if (!row || tileX < 0 || tileX >= row.length) return;
     const tileType = row[tileX];
-    if (tileType < 6 || tileType > 8) {
-      yosemiteMiniGameStepKeyRef.current = "";
-      return;
-    }
-    const stepKey = `${currentMapIndex}:${tileX}:${tileY}:${tileType}`;
-    if (yosemiteMiniGameStepKeyRef.current === stepKey) return;
-    yosemiteMiniGameStepKeyRef.current = stepKey;
+    const stepKey = yosemiteSigilStepKey(
+      currentMapIndex,
+      tileX,
+      tileY,
+      tileType,
+    );
+    const decision = resolveStepTrigger(
+      yosemiteMiniGameStepKeyRef.current,
+      stepKey,
+      { onTriggerTile: isYosemiteSigilTile(tileType) },
+    );
+    yosemiteMiniGameStepKeyRef.current = decision.consumedKey;
+    if (!decision.fire) return;
     window.dispatchEvent(
       new CustomEvent("portalCollision", {
         detail: { tileX, tileY, tileType },
@@ -2850,11 +2865,22 @@ const GameWorld = React.memo(() => {
     currentSpecialWorld,
   ]);
 
-  // After closing a mini-game: allow stepping on the same sigil again + resume Yosemite music
+  // After closing a mini-game, keep the sigil guard while the player is still
+  // standing on it. Walking off clears the guard so a later visit can enter.
   useEffect(() => {
     const was = prevSpecialWorldRef.current;
     if (was && !currentSpecialWorld) {
-      yosemiteMiniGameStepKeyRef.current = "";
+      const mapData = MAPS[currentMapIndex]?.data;
+      const tileX = Math.floor((characterPosition?.x ?? 0) / TILE_SIZE);
+      const tileY = Math.floor((characterPosition?.y ?? 0) / TILE_SIZE);
+      const tileType = mapData?.[tileY]?.[tileX];
+      const occupying = isYosemiteSigilTile(tileType)
+        ? yosemiteSigilStepKey(currentMapIndex, tileX, tileY, tileType)
+        : "";
+      yosemiteMiniGameStepKeyRef.current = consumedKeyAfterDismiss(
+        yosemiteMiniGameStepKeyRef.current,
+        occupying,
+      );
       const name = MAPS[currentMapIndex]?.name;
       if (
         name === "Yosemite" &&
@@ -2872,6 +2898,8 @@ const GameWorld = React.memo(() => {
   }, [
     currentSpecialWorld,
     currentMapIndex,
+    characterPosition?.x,
+    characterPosition?.y,
     gameState.soundManager,
     uiState.inDungeon,
   ]);
