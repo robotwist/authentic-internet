@@ -10,8 +10,10 @@ export const createArtifact = async (req, res) => {
       return res.status(401).json({ message: "Authentication required." });
     }
 
-    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location, type, createdBy } = req.body;
-    const resolvedCreatedBy = createdBy || uid;
+    const { name, description, content, riddle, unlockAnswer, area, isExclusive, location, type } = req.body;
+    // Authorship is the caller. Body `createdBy` / `creator` would keep the
+    // attacker's creation-token count at zero and attribute the artifact to someone else.
+    const resolvedCreatedBy = uid;
 
     if (!name || !content || !area || !location || location.x === undefined || location.y === undefined) {
       return res.status(400).json({ message: "Name, content, area, and location (x, y) are required." });

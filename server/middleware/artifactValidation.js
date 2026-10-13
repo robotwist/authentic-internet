@@ -145,9 +145,16 @@ export const validateUnifiedArtifact = (req, res, next) => {
       });
     }
 
-    // Add creator information if not present
-    if (!artifactData.createdBy && req.user) {
-      artifactData.createdBy = req.user.userId || req.user.id;
+    // Always bind authorship to the authenticated user. A client-supplied
+    // createdBy/creator must not survive into the handler.
+    const authenticatedCreator = req.user?.userId || req.user?.id || req.user?._id;
+    if (authenticatedCreator != null && authenticatedCreator !== "") {
+      artifactData.createdBy =
+        typeof authenticatedCreator.toString === "function"
+          ? authenticatedCreator.toString()
+          : String(authenticatedCreator);
+    } else {
+      delete artifactData.createdBy;
     }
 
     // Set timestamps
@@ -296,10 +303,8 @@ export const convertLegacyArtifact = (req, res, next) => {
       delete artifactData.y;
     }
 
-    // Convert legacy creator field
-    if (artifactData.creator && !artifactData.createdBy) {
-      artifactData.createdBy = artifactData.creator;
-    }
+    // Legacy clients send `creator`, but that value is not trusted.
+    // validateUnifiedArtifact overwrites createdBy from the authenticated user.
 
     // Set default type if not provided
     if (!artifactData.type) {
