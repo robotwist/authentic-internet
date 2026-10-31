@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import VictoryScreen from "./VictoryScreen";
 import ErrorBoundary from "./ErrorBoundary";
+import { createFreshFrameLoop } from "./level4GameLoop";
 import "./Level4Shooter.css";
 
 const Level4Shooter = ({ onComplete, onExit, character }) => {
@@ -110,7 +111,13 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
 
   // Refs for animation frame and game loop
   const canvasRef = useRef(null);
-  const gameLoopRef = useRef(null);
+  const frameLoopRef = useRef(null);
+  if (frameLoopRef.current == null) {
+    frameLoopRef.current = createFreshFrameLoop(
+      (callback) => requestAnimationFrame(callback),
+      (id) => cancelAnimationFrame(id),
+    );
+  }
   const lastFrameTimeRef = useRef(0);
   const keysPressed = useRef({});
 
@@ -166,31 +173,6 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
     } catch (error) {
       console.error("Error initializing canvas:", error);
       return null;
-    }
-  };
-
-  // Main game loop with performance timing
-  const gameLoop = (timestamp) => {
-    try {
-      // Calculate delta time for smooth animation at any frame rate
-      const deltaTime = timestamp - lastFrameTimeRef.current;
-      const delta = Math.min(deltaTime / 16.67, 2); // Normalize to ~60 FPS (16.67ms per frame), cap at 2x
-      lastFrameTimeRef.current = timestamp;
-
-      if (isGameActive && !gameOver) {
-        // Update game state
-        updateGameState(delta);
-      }
-
-      // Render the game (always render even if game is not active to show current state)
-      renderGame();
-
-      // Continue the game loop
-      gameLoopRef.current = requestAnimationFrame(gameLoop);
-    } catch (error) {
-      console.error("Error in game loop:", error);
-      // Try to recover
-      gameLoopRef.current = requestAnimationFrame(gameLoop);
     }
   };
 
@@ -349,11 +331,7 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
 
-      // Cancel animation frame
-      if (gameLoopRef.current) {
-        cancelAnimationFrame(gameLoopRef.current);
-        gameLoopRef.current = null;
-      }
+      frameLoopRef.current?.stop();
 
       // Clear backup interval
       if (backupInterval) {
@@ -417,12 +395,8 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
     gameTimeoutsRef.current.push(introTimeout);
 
     // Start the game loop
-    if (gameLoopRef.current) {
-      cancelAnimationFrame(gameLoopRef.current);
-    }
-
     lastFrameTimeRef.current = performance.now();
-    gameLoopRef.current = requestAnimationFrame(gameLoop);
+    frameLoopRef.current.start();
 
     // Play background music for current level
     playSound(`${currentLevel}-music`);
@@ -989,11 +963,7 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
     setIsGameActive(false);
     playSound("victory");
 
-    // Stop the game loop
-    if (gameLoopRef.current) {
-      cancelAnimationFrame(gameLoopRef.current);
-      gameLoopRef.current = null;
-    }
+    frameLoopRef.current?.stop();
 
     // Clear any remaining timeouts
     gameTimeoutsRef.current.forEach(clearTimeout);
@@ -1703,6 +1673,24 @@ const Level4Shooter = ({ onComplete, onExit, character }) => {
     setTimeout(() => {
       setShowQuote(false);
     }, 5000);
+  };
+
+  // Publish the latest physics/render step. The animation callback started on
+  // mount keeps calling this ref, so movement is not stuck on the first render
+  // (when isGameActive was still false).
+  frameLoopRef.current.stepRef.current = (timestamp) => {
+    const deltaTime = timestamp - lastFrameTimeRef.current;
+    const delta = Math.min(
+      (Number.isFinite(deltaTime) ? deltaTime : 16.67) / 16.67,
+      2,
+    );
+    lastFrameTimeRef.current = timestamp;
+
+    if (isGameActive && !gameOver) {
+      updateGameState(delta);
+    }
+
+    renderGame();
   };
 
   // Component render
