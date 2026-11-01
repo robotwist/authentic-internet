@@ -14,7 +14,7 @@ export const TILE_TYPES = {
   6: "terminal-portal",
   7: "shooter-portal",
   8: "text-portal",
-  9: "water",
+  9: "dungeon-portal",
   10: "bridge",
   11: "tall-grass",
   12: "flower",
@@ -116,6 +116,7 @@ export const isWalkable = (x, y, mapData) => {
     case 6: // Terminal portal
     case 7: // Shooter portal
     case 8: // Text portal
+    case 9: // Dungeon entrance (only map use of this id; rendered as a portal)
     case 10: // Bridge
     case 11: // Tall grass (walkable but slows movement)
     case 12: // Flower
@@ -126,7 +127,6 @@ export const isWalkable = (x, y, mapData) => {
     case 1: // Wall
     case 2: // Tree
     case 4: // Dungeon wall
-    case 9: // Water (not walkable without bridge)
     case 13: // Rock
     case 15: // Snow (could be walkable with slow movement)
     case 16: // Ice (walkable but slippery)
