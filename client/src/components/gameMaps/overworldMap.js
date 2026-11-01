@@ -1,4 +1,4 @@
-import { NPC_TYPES } from "../GameConstants";
+import { NPC_TYPES } from "../GameConstants.js";
 import { doubleMapSize } from "./doubleMapSize.js";
 
 export default {

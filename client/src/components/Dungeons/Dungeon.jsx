@@ -15,6 +15,7 @@ import {
 } from "./DungeonData";
 import Enemy from "../Combat/Enemy";
 import Boss from "../Combat/Boss";
+import { propsForDungeonEnemy } from "./dungeonEnemyProps.js";
 
 const TILE_SIZE = 64; // Same as overworld
 
@@ -454,16 +455,9 @@ const Dungeon = ({
     return roomEnemies.map((enemy) => (
       <Enemy
         key={enemy.id}
-        id={enemy.id}
-        type={enemy.type}
-        initialPosition={enemy.position}
-        initialHealth={enemy.health}
+        {...propsForDungeonEnemy(enemy)}
         playerPosition={playerPosition}
         onDefeat={(drops) => handleEnemyDefeat(enemy.id, drops)}
-        mapBounds={{
-          width: currentRoom.width * TILE_SIZE,
-          height: currentRoom.height * TILE_SIZE,
-        }}
       />
     ));
   };
